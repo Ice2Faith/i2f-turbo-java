@@ -107,7 +107,7 @@ public class SwlTransfer extends SwlExchanger {
     }
 
     public String acceptOtherPublicKeyWithId(String certId, String otherPublicKey) {
-        ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorSupplier.get();
+        ISwlAsymmetricEncryptor asymmetricEncryptor = requireAsymmetricEncryptor();
         AsymKeyPair selfKeyPair = asymmetricEncryptor.generateKeyPair();
         return acceptOtherPublicKeyRaw(certId, selfKeyPair, otherPublicKey);
     }

@@ -3,6 +3,8 @@ import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmet
 import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
 import SwlExchanger from "../core/core/exchanger/SwlExchanger";
+import SwlSha256MessageDigesterSupplier
+    from "@/i2f-turbo-web/i2f-swl/core/impl/supplier/SwlSha256MessageDigesterSupplier";
 
 /**
  * @return TestSwlExchanger
@@ -23,13 +25,13 @@ TestSwlExchanger.testCert = function () {
     let clientTransfer = new SwlExchanger();
     clientTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     clientTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    clientTransfer.messageDigester = (new SwlSha256MessageDigester());
+    clientTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     clientTransfer.obfuscator = (new SwlBase64Obfuscator());
 
     let serverTransfer = new SwlExchanger();
     serverTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     serverTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    serverTransfer.messageDigester = (new SwlSha256MessageDigester());
+    serverTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     serverTransfer.obfuscator = (new SwlBase64Obfuscator());
 
     let certPair = clientTransfer.generateCertPair("test");
@@ -62,13 +64,13 @@ TestSwlExchanger.testRaw=function(){
     let clientTransfer = new SwlExchanger();
     clientTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     clientTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    clientTransfer.messageDigester = (new SwlSha256MessageDigester());
+    clientTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     clientTransfer.obfuscator = (new SwlBase64Obfuscator());
 
     let serverTransfer = new SwlExchanger();
     serverTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     serverTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    serverTransfer.messageDigester = (new SwlSha256MessageDigester());
+    serverTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     serverTransfer.obfuscator = (new SwlBase64Obfuscator());
 
 

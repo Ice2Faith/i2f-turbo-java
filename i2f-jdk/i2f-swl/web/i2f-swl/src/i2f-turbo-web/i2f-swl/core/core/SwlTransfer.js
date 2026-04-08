@@ -201,7 +201,7 @@ SwlTransfer.prototype.acceptOtherPublicKey = function (otherPublicKey) {
  * @return {String}
  */
 SwlTransfer.prototype.acceptOtherPublicKeyWithId=function(certId, otherPublicKey) {
-    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    let asymmetricEncryptor = this.requireAsymmetricEncryptor();
     let selfKeyPair = asymmetricEncryptor.generateKeyPair();
     return this.acceptOtherPublicKeyRaw(certId, selfKeyPair, otherPublicKey);
 }

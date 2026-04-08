@@ -14,7 +14,7 @@ import i2f.swl.std.ISwlMessageDigester;
  * @desc
  */
 public class SwlBcSm3MessageDigester implements ISwlMessageDigester {
-    private IMessageDigester digester = BcMessageDigester.SM3;
+    private IMessageDigester digester = BcMessageDigester.SM3.get();
 
     @Override
     public String digest(String data) {

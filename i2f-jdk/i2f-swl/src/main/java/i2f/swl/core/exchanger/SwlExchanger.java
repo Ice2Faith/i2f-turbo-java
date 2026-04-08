@@ -13,9 +13,9 @@ import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlHeader;
 import i2f.swl.exception.SwlException;
 import i2f.swl.impl.SwlBase64Obfuscator;
-import i2f.swl.impl.SwlSha256MessageDigester;
 import i2f.swl.impl.supplier.SwlAesSymmetricEncryptorSupplier;
 import i2f.swl.impl.supplier.SwlRsaAsymmetricEncryptorSupplier;
+import i2f.swl.impl.supplier.SwlSha256MessageDigesterSupplier;
 import i2f.swl.std.ISwlAsymmetricEncryptor;
 import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
@@ -49,7 +49,8 @@ public class SwlExchanger {
     protected Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
     @Setter(AccessLevel.NONE)
     protected Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier();
-    protected ISwlMessageDigester messageDigester = new SwlSha256MessageDigester();
+    @Setter(AccessLevel.NONE)
+    protected Supplier<ISwlMessageDigester> messageDigesterSupplier = new SwlSha256MessageDigesterSupplier();
     protected ISwlObfuscator obfuscator = new SwlBase64Obfuscator();
 
     protected SwlNonceManager nonceManager = new SwlEmptyNonceManager();
@@ -62,6 +63,9 @@ public class SwlExchanger {
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     protected transient ObjectPool<ISwlSymmetricEncryptor> symmetricEncryptorObjectPool = new ObjectPool<>(symmetricEncryptorSupplier);
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
+    protected transient ObjectPool<ISwlMessageDigester> messageDigesterObjectPool = new ObjectPool<>(messageDigesterSupplier);
 
     public void setAsymmetricEncryptorSupplier(Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier) {
         this.asymmetricEncryptorSupplier = asymmetricEncryptorSupplier;
@@ -71,6 +75,11 @@ public class SwlExchanger {
     public void setSymmetricEncryptorSupplier(Supplier<ISwlSymmetricEncryptor> symmetricEncryptorSupplier) {
         this.symmetricEncryptorSupplier = symmetricEncryptorSupplier;
         symmetricEncryptorObjectPool.setSupplier(this.symmetricEncryptorSupplier);
+    }
+
+    public void setMessageDigesterSupplier(Supplier<ISwlMessageDigester> messageDigesterSupplier) {
+        this.messageDigesterSupplier = messageDigesterSupplier;
+        messageDigesterObjectPool.setSupplier(this.messageDigesterSupplier);
     }
 
     public ISwlAsymmetricEncryptor requireAsymmetricEncryptor() {
@@ -89,32 +98,40 @@ public class SwlExchanger {
         symmetricEncryptorObjectPool.release(encryptor);
     }
 
+    public ISwlMessageDigester requireMessageDigester() {
+        return messageDigesterObjectPool.require();
+    }
+
+    public void releaseMessageDigester(ISwlMessageDigester digester) {
+        messageDigesterObjectPool.release(digester);
+    }
+
     public AsymKeyPair generateKeyPair() {
-        ISwlAsymmetricEncryptor encryptor = asymmetricEncryptorObjectPool.require();
+        ISwlAsymmetricEncryptor encryptor = requireAsymmetricEncryptor();
         try {
             return encryptor.generateKeyPair();
         } finally {
-            asymmetricEncryptorObjectPool.release(encryptor);
+            releaseAsymmetricEncryptor(encryptor);
         }
     }
 
     public String generateKey() {
-        ISwlSymmetricEncryptor encryptor = symmetricEncryptorObjectPool.require();
+        ISwlSymmetricEncryptor encryptor = requireSymmetricEncryptor();
         try {
             return encryptor.generateKey();
         } finally {
-            symmetricEncryptorObjectPool.release(encryptor);
+            releaseSymmetricEncryptor(encryptor);
         }
     }
 
     public SwlCertPair generateCertPair(String certId) {
-        ISwlAsymmetricEncryptor encryptor = asymmetricEncryptorObjectPool.require();
+        ISwlAsymmetricEncryptor encryptor = requireAsymmetricEncryptor();
         try {
             AsymKeyPair serverKeyPair = encryptor.generateKeyPair();
             AsymKeyPair clientKeyPair = encryptor.generateKeyPair();
             return SwlCertUtil.make(certId, serverKeyPair, clientKeyPair);
         } finally {
-            asymmetricEncryptorObjectPool.release(encryptor);
+            releaseAsymmetricEncryptor(encryptor);
         }
     }
 
@@ -189,11 +206,11 @@ public class SwlExchanger {
         ret.getHeader().setNonce(nonce);
         ret.getContext().setNonce(nonce);
 
-        ISwlSymmetricEncryptor symmetricEncryptor = symmetricEncryptorObjectPool.require();
+        ISwlSymmetricEncryptor symmetricEncryptor = requireSymmetricEncryptor();
         String key = symmetricEncryptor.generateKey();
         ret.getContext().setKey(key);
 
-        ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorObjectPool.require();
+        ISwlAsymmetricEncryptor asymmetricEncryptor = requireAsymmetricEncryptor();
         asymmetricEncryptor.setPublicKey(remotePublicKey);
         String randomKey = asymmetricEncryptor.encrypt(key);
         ret.getHeader().setRandomKey(randomKey);
@@ -220,14 +237,18 @@ public class SwlExchanger {
             }
         }
 
-        symmetricEncryptorObjectPool.release(symmetricEncryptor);
+        releaseSymmetricEncryptor(symmetricEncryptor);
 
         String data = builder.toString();
         ret.getContext().setData(data);
 
+        ISwlMessageDigester messageDigester = requireMessageDigester();
+
         String sign = messageDigester.digest(data + randomKey + timestamp + nonce + certId);
         ret.getHeader().setSign(sign);
         ret.getContext().setSign(sign);
+
+        releaseMessageDigester(messageDigester);
 
         String digital = "none";
         if (enableDigital) {
@@ -237,7 +258,7 @@ public class SwlExchanger {
         ret.getHeader().setDigital(digital);
         ret.getContext().setDigital(digital);
 
-        asymmetricEncryptorObjectPool.release(asymmetricEncryptor);
+        releaseAsymmetricEncryptor(asymmetricEncryptor);
 
         encode(ret.getHeader());
 
@@ -366,8 +387,13 @@ public class SwlExchanger {
         }
 
 
+        ISwlMessageDigester messageDigester = requireMessageDigester();
+
         boolean signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
         ret.getContext().setSignOk(signOk);
+
+        releaseMessageDigester(messageDigester);
+
         if (!signOk) {
             throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
         }
@@ -383,7 +409,7 @@ public class SwlExchanger {
             throw new SwlException(SwlCode.CLIENT_ASYM_KEY_NOT_FOUND_EXCEPTION.code(), "remote key not found!");
         }
 
-        ISwlAsymmetricEncryptor asymmetricEncryptor = asymmetricEncryptorObjectPool.require();
+        ISwlAsymmetricEncryptor asymmetricEncryptor = requireAsymmetricEncryptor();
         asymmetricEncryptor.setPublicKey(remotePublicKey);
 
         if (enableDigital) {
@@ -406,9 +432,9 @@ public class SwlExchanger {
             throw new SwlException(SwlCode.RANDOM_KEY_INVALID_EXCEPTION.code(), "random key is invalid!");
         }
 
-        asymmetricEncryptorObjectPool.release(asymmetricEncryptor);
+        releaseAsymmetricEncryptor(asymmetricEncryptor);
 
-        ISwlSymmetricEncryptor symmetricEncryptor = symmetricEncryptorObjectPool.require();
+        ISwlSymmetricEncryptor symmetricEncryptor = requireSymmetricEncryptor();
         symmetricEncryptor.setKey(key);
 
         if (parts != null) {
@@ -421,7 +447,7 @@ public class SwlExchanger {
             }
         }
 
-        symmetricEncryptorObjectPool.release(symmetricEncryptor);
+        releaseSymmetricEncryptor(symmetricEncryptor);
 
         return ret;
     }

@@ -14,7 +14,7 @@ import i2f.swl.std.ISwlMessageDigester;
  * @desc
  */
 public class SwlBcSha512MessageDigester implements ISwlMessageDigester {
-    private IMessageDigester digester = BcMessageDigester.SHA512;
+    private IMessageDigester digester = BcMessageDigester.SHA512.get();
 
     @Override
     public String digest(String data) {
