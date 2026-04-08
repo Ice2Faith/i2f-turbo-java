@@ -103,7 +103,10 @@ SessionStorageExpireCache.prototype.clearExpireKeys = function () {
     for (let i = 0; i < len; i++) {
       let key = sessionStorage.key(i);
       if (key) {
-        this.getData(key);
+        try {
+          this.getData(key);
+        }catch (e) {
+        }
       }
     }
   }, 30);
