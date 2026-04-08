@@ -263,6 +263,15 @@ SwlWebFilter.getFullURL=function(res){
  * @return {SwlWebCtrl}
  */
 SwlWebFilter.parseCtrl = function (res, config) {
+    let path = SwlWebFilter.getTrimContextPathRequestUri(res);
+
+    let urlPatterns = config.urlPatterns;
+    if (urlPatterns && urlPatterns.length>0) {
+        if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+            return new SwlWebCtrl(false, false);
+        }
+    }
+
     let defaultCtrl = config.defaultCtrl;
 
     let contentType = SwlWebFilter.getRequestContentType(res)
@@ -275,8 +284,6 @@ SwlWebFilter.parseCtrl = function (res, config) {
         return new SwlWebCtrl(defaultCtrl.enableIn, false);
     }
 
-
-    let path = SwlWebFilter.getTrimContextPathRequestUri(res);
 
     let enableIn = null;
     let enableOut = null;

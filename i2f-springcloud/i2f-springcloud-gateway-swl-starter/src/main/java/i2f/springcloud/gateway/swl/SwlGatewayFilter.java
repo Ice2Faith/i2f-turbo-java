@@ -526,13 +526,6 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
     public static SwlWebCtrl parseCtrl(ServerHttpRequest request, SwlWebConfig config) {
-        SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
-
-        MediaType contentType = request.getHeaders().getContentType();
-        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-            return new SwlWebCtrl(false, defaultCtrl.isOut());
-        }
-
         String path = getTrimContextPathRequestUri(request);
 
         List<String> urlPatterns = config.getUrlPatterns();
@@ -540,6 +533,13 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
                 return new SwlWebCtrl(false, false);
             }
+        }
+
+        SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
+
+        MediaType contentType = request.getHeaders().getContentType();
+        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
+            return new SwlWebCtrl(false, defaultCtrl.isOut());
         }
 
         Boolean in = null;

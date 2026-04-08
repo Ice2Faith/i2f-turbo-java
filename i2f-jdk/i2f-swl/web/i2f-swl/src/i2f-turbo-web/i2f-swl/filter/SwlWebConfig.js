@@ -41,6 +41,11 @@ function SwlWebConfig() {
      *
      * @type {string[]}
      */
+    this.urlPatterns = null;
+    /**
+     *
+     * @type {string[]}
+     */
     this.whiteListIn = ['/**/swl/**'];
     /**
      *

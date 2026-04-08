@@ -56,6 +56,15 @@ public class SwlSpringWebFilter extends SwlWebFilter {
     }
 
     public static SwlWebCtrl parseCtrl(HttpServletRequest request, Method method, SwlWebConfig config) {
+        String path = getTrimContextPathRequestUri(request);
+
+        List<String> urlPatterns = config.getUrlPatterns();
+        if (urlPatterns != null && !urlPatterns.isEmpty()) {
+            if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+                return new SwlWebCtrl(false, false);
+            }
+        }
+
         SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
 
         if (method != null) {
@@ -67,15 +76,6 @@ public class SwlSpringWebFilter extends SwlWebFilter {
 
         if (request instanceof MultipartHttpServletRequest) {
             return new SwlWebCtrl(false, defaultCtrl.isOut());
-        }
-
-        String path = getTrimContextPathRequestUri(request);
-
-        List<String> urlPatterns = config.getUrlPatterns();
-        if (urlPatterns != null && !urlPatterns.isEmpty()) {
-            if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
-                return new SwlWebCtrl(false, false);
-            }
         }
 
         Boolean in = null;
