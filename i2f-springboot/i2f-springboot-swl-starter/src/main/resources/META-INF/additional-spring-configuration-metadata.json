@@ -231,7 +231,7 @@
         {
           "name": "class-reference",
           "parameters": {
-            "target": "i2f.swl.std.ISwlMessageDigester"
+            "target": "i2f.swl.std.supplier.ISwlMessageDigesterSupplier"
           }
         }
       ]

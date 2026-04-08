@@ -10,6 +10,7 @@ import i2f.swl.exception.SwlException;
 import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
+import i2f.swl.std.supplier.ISwlMessageDigesterSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -104,9 +105,9 @@ public class SwlSpringAutoConfiguration {
         }
 
         try {
-            Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();
-            ISwlMessageDigester digester = getBeanByTypeOrNewInstance(clazz);
-            ret.setMessageDigester(digester);
+            Class<? extends ISwlMessageDigesterSupplier> clazz = webProperties.getDigestAlgoClass();
+            ISwlMessageDigesterSupplier digester = getBeanByTypeOrNewInstance(clazz);
+            ret.setMessageDigesterSupplier(digester);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }

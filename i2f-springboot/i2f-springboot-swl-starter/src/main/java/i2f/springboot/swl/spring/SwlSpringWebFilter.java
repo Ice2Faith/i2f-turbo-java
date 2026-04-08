@@ -71,8 +71,16 @@ public class SwlSpringWebFilter extends SwlWebFilter {
 
         String path = getTrimContextPathRequestUri(request);
 
+        List<String> urlPatterns = config.getUrlPatterns();
+        if (urlPatterns != null && !urlPatterns.isEmpty()) {
+            if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+                return new SwlWebCtrl(false, false);
+            }
+        }
+
         Boolean in = null;
         Boolean out = null;
+
         List<String> whiteListIn = config.getWhiteListIn();
         if (whiteListIn != null) {
             if (MatcherUtil.antUrlMatchedAny(path, whiteListIn)) {

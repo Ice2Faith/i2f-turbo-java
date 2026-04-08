@@ -46,6 +46,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -533,6 +534,13 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         }
 
         String path = getTrimContextPathRequestUri(request);
+
+        List<String> urlPatterns = config.getUrlPatterns();
+        if (urlPatterns != null && !urlPatterns.isEmpty()) {
+            if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+                return new SwlWebCtrl(false, false);
+            }
+        }
 
         Boolean in = null;
         Boolean out = null;
