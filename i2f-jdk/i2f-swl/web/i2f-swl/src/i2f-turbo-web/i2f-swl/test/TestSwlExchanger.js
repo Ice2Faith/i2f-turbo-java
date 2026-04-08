@@ -1,10 +1,9 @@
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
+import SwlSha256MessageDigesterSupplier from "../core/impl/supplier/SwlSha256MessageDigesterSupplier";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
 import SwlExchanger from "../core/core/exchanger/SwlExchanger";
-import SwlSha256MessageDigesterSupplier
-    from "@/i2f-turbo-web/i2f-swl/core/impl/supplier/SwlSha256MessageDigesterSupplier";
+
 
 /**
  * @return TestSwlExchanger
