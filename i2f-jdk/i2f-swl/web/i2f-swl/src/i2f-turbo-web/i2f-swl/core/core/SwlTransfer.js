@@ -1,10 +1,5 @@
-import SwlRsaAsymmetricEncryptorSupplier from "../impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
-import SwlAesSymmetricEncryptorSupplier from "../impl/supplier/SwlAesSymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../impl/SwlSha256MessageDigester";
-import SwlBase64Obfuscator from "../impl/SwlBase64Obfuscator";
 import MemMapExpireCache from "../../../i2f-core/cache/impl/MemMapExpireCache";
 import SwlTransferConfig from "./SwlTransferConfig";
-import Random from "../../../i2f-core/util/Random";
 import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 import SwlExchanger from "./exchanger/SwlExchanger";
 import SwlException from "../exception/SwlException";
@@ -22,26 +17,6 @@ function SwlTransfer() {
     SwlExchanger.call(this)
     /**
      *
-     * @type {ISwlAsymmetricEncryptorSupplier}
-     */
-    this.asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier()
-    /**
-     *
-     * @type {ISwlSymmetricEncryptorSupplier}
-     */
-    this.symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier()
-    /**
-     *
-     * @type {ISwlMessageDigester}
-     */
-    this.messageDigester = new SwlSha256MessageDigester()
-    /**
-     *
-     * @type {ISwlObfuscator}
-     */
-    this.obfuscator = new SwlBase64Obfuscator()
-    /**
-     *
      * @type {IExpireCache}
      */
     this.cache = new MemMapExpireCache();
@@ -50,11 +25,7 @@ function SwlTransfer() {
      * @type {SwlTransferConfig}
      */
     this.config = new SwlTransferConfig()
-    /**
-     *
-     * @type Random
-     */
-    this.random = new Random()
+
 
 }
 

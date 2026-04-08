@@ -25,7 +25,7 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
 
     this.transfer.asymmetricEncryptorSupplier=config.asymAlgoSupplier
     this.transfer.symmetricEncryptorSupplier=config.symmAlgoSupplier
-    this.transfer.messageDigester=config.digestAlgoSupplier
+    this.transfer.messageDigesterSupplier=config.digestAlgoSupplier
     this.transfer.obfuscator=config.obfuscateAlgoSupplier
 
 }

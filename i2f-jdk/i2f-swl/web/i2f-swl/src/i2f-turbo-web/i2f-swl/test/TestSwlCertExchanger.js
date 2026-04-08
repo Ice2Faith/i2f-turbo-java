@@ -1,7 +1,6 @@
-import SwlTransfer from "../core/core/SwlTransfer";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
+import SwlSha256MessageDigesterSupplier from "../core/impl/supplier/SwlSha256MessageDigesterSupplier";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
 import SwlCertExchanger from "../core/cert/SwlCertExchanger";
 import SwlMemCertManager from "../core/cert/impl/SwlMemCertManager";
@@ -23,14 +22,14 @@ TestSwlCertExchanger.testCert = function () {
     let clientTransfer = new SwlCertExchanger();
     clientTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     clientTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    clientTransfer.messageDigester = (new SwlSha256MessageDigester());
+    clientTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     clientTransfer.obfuscator = (new SwlBase64Obfuscator());
     clientTransfer.certManager=(new SwlMemCertManager())
 
     let serverTransfer = new SwlCertExchanger();
     serverTransfer.asymmetricEncryptorSupplier = (new SwlRsaAsymmetricEncryptorSupplier());
     serverTransfer.symmetricEncryptorSupplier = (new SwlAesSymmetricEncryptorSupplier());
-    serverTransfer.messageDigester = (new SwlSha256MessageDigester());
+    serverTransfer.messageDigesterSupplier = (new SwlSha256MessageDigesterSupplier());
     serverTransfer.obfuscator = (new SwlBase64Obfuscator());
     serverTransfer.certManager=(new SwlMemCertManager())
 
