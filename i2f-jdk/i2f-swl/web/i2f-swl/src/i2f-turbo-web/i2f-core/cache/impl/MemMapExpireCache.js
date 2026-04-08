@@ -66,7 +66,10 @@ MemMapExpireCache.prototype.clearExpireKeys = function () {
   setTimeout(() => {
     Object.keys(this._map).forEach(key => {
       if (key) {
-        this.getData(key);
+        try {
+          this.getData(key);
+        }catch (e) {
+        }
       }
     });
   }, 30);
