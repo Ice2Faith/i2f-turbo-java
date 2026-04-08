@@ -3,22 +3,22 @@ import SystemClock from '../../clock/SystemClock';
 import ExpireData from './ExpireData';
 
 /**
- * @retunrn {LocalStorageExpireCache}
+ * @retunrn {SessionStorageExpireCache}
  * @implements {IExpireCache}
  * @constructor
  */
-function LocalStorageExpireCache() {}
+function SessionStorageExpireCache() {}
 
 // 继承
-LocalStorageExpireCache.prototype = Object.create(IExpireCache.prototype);
-LocalStorageExpireCache.prototype.constructor = LocalStorageExpireCache;
+SessionStorageExpireCache.prototype = Object.create(IExpireCache.prototype);
+SessionStorageExpireCache.prototype.constructor = SessionStorageExpireCache;
 
 /**
  *
  * @param data {ExpireData}
  * @return {String}
  */
-LocalStorageExpireCache.prototype.serialize = function (data) {
+SessionStorageExpireCache.prototype.serialize = function (data) {
   if (!data) {
     return JSON.stringify(null);
   }
@@ -33,7 +33,7 @@ LocalStorageExpireCache.prototype.serialize = function (data) {
  * @param data {String}
  * @return {ExpireData}
  */
-LocalStorageExpireCache.prototype.deserialize = function (data) {
+SessionStorageExpireCache.prototype.deserialize = function (data) {
   if (!data) {
     return null;
   }
@@ -50,19 +50,19 @@ LocalStorageExpireCache.prototype.deserialize = function (data) {
  * @param key {String}
  * @return {ExpireData}
  */
-LocalStorageExpireCache.prototype.getData = function (key) {
-  let json = localStorage.getItem(key);
+SessionStorageExpireCache.prototype.getData = function (key) {
+  let json = sessionStorage.getItem(key);
   if (!json) {
     return null;
   }
   let data = this.deserialize(json);
   if (!data) {
-    localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
     return null;
   }
   if (data.expireTs >= 0) {
     if (SystemClock.currentTimeSeconds() > data.expireTs) {
-      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
       return null;
     }
   }
@@ -74,7 +74,7 @@ LocalStorageExpireCache.prototype.getData = function (key) {
  * @param key {String}
  * @return {Object}
  */
-LocalStorageExpireCache.prototype.get = function (key) {
+SessionStorageExpireCache.prototype.get = function (key) {
   this.clearExpireKeys();
   let data = this.getData(key);
   if (!data) {
@@ -88,20 +88,20 @@ LocalStorageExpireCache.prototype.get = function (key) {
  * @param value {Object}
  * @return {void}
  */
-LocalStorageExpireCache.prototype.set = function (key, value) {
+SessionStorageExpireCache.prototype.set = function (key, value) {
   this.clearExpireKeys();
   let str = this.serialize(new ExpireData(value));
-  localStorage.setItem(key, str);
+  sessionStorage.setItem(key, str);
 };
 
-LocalStorageExpireCache.prototype.clearExpireKeys = function () {
+SessionStorageExpireCache.prototype.clearExpireKeys = function () {
   if (Math.random() < 0.88) {
     return;
   }
   setTimeout(() => {
-    let len = localStorage.length;
+    let len = sessionStorage.length;
     for (let i = 0; i < len; i++) {
-      let key = localStorage.key(i);
+      let key = sessionStorage.key(i);
       if (key) {
         this.getData(key);
       }
@@ -114,7 +114,7 @@ LocalStorageExpireCache.prototype.clearExpireKeys = function () {
  * @param key {String}
  * @return {boolean}
  */
-LocalStorageExpireCache.prototype.exists = function (key) {
+SessionStorageExpireCache.prototype.exists = function (key) {
   return !!this.getData(key);
 };
 
@@ -122,8 +122,8 @@ LocalStorageExpireCache.prototype.exists = function (key) {
  * @param key {String}
  * @return {void}
  */
-LocalStorageExpireCache.prototype.remove = function (key) {
-  localStorage.removeItem(key);
+SessionStorageExpireCache.prototype.remove = function (key) {
+  sessionStorage.removeItem(key);
 };
 
 /**
@@ -133,12 +133,12 @@ LocalStorageExpireCache.prototype.remove = function (key) {
  * @param timeSeconds {int}
  * @return {void}
  */
-LocalStorageExpireCache.prototype.setWith = function (key, value, timeSeconds) {
+SessionStorageExpireCache.prototype.setWith = function (key, value, timeSeconds) {
   this.clearExpireKeys();
   let str = this.serialize(
     new ExpireData(value, SystemClock.currentTimeSeconds() + timeSeconds)
   );
-  localStorage.setItem(key, str);
+  sessionStorage.setItem(key, str);
 };
 
 /**
@@ -147,13 +147,13 @@ LocalStorageExpireCache.prototype.setWith = function (key, value, timeSeconds) {
  * @param timeSeconds {int}
  * @return {void}
  */
-LocalStorageExpireCache.prototype.expire = function (key, timeSeconds) {
+SessionStorageExpireCache.prototype.expire = function (key, timeSeconds) {
   this.clearExpireKeys();
   let data = this.getData(key);
   if (data) {
     data.expireTs = SystemClock.currentTimeSeconds() + timeSeconds;
     let str = this.serialize(data);
-    localStorage.setItem(key, str);
+    sessionStorage.setItem(key, str);
   }
 };
 
@@ -162,7 +162,7 @@ LocalStorageExpireCache.prototype.expire = function (key, timeSeconds) {
  * @param key {String}
  * @return {int|null} timeSeconds
  */
-LocalStorageExpireCache.prototype.getExpire = function (key) {
+SessionStorageExpireCache.prototype.getExpire = function (key) {
   let data = this.getData(key);
   if (!data) {
     return null;
@@ -173,4 +173,4 @@ LocalStorageExpireCache.prototype.getExpire = function (key) {
   return data.expireTs - SystemClock.currentTimeSeconds();
 };
 
-export default LocalStorageExpireCache;
+export default SessionStorageExpireCache;
