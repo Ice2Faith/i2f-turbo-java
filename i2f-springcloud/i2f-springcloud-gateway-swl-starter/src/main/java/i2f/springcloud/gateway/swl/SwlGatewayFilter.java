@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
  * @date 2024/7/12 15:06
  * @desc
  */
+@ConditionalOnExpression("${i2f.swl.filter.enable:true}")
 @AutoConfigureAfter(SwlGatewayAutoConfiguration.class)
 @Slf4j
 @Data

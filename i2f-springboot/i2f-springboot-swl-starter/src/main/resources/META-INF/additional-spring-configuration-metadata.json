@@ -35,6 +35,20 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.swl.web.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable swl web.",
+      "sourceType": "i2f.springboot.swl.spring.SwlWebConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.filter.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable filter.",
+      "sourceType": "i2f.springboot.swl.spring.SwlSpringWebFilter",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.swl.aop.enable",
       "type": "java.lang.Boolean",
       "description": "enable aop.",

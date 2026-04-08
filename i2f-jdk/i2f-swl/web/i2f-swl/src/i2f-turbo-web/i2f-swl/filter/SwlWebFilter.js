@@ -37,6 +37,9 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.requestFilter = function (res) {
+    if(this.config.enable==false){
+        return res;
+    }
     let certId=this.transfer.getOtherCertIdDefault();
     res.headers[this.config.certIdName]=certId
     let ctrl = SwlWebFilter.parseCtrl(res,this.config);
@@ -104,6 +107,9 @@ SwlWebFilter.prototype.requestFilter = function (res) {
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.responseFilter = function (res) {
+    if(this.config.enable==false){
+        return res;
+    }
     if(!res){
         return res
     }

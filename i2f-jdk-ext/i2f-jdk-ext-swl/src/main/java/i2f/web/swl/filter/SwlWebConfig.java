@@ -13,6 +13,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class SwlWebConfig {
+    protected boolean enable=true;
     protected SwlWebCtrl defaultCtrl = new SwlWebCtrl(true, true);
     protected String headerName = "swlh";
     protected String certIdName = "swlci";

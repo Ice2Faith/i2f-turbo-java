@@ -38,6 +38,7 @@ public class SwlSpringController {
     @Autowired
     private IJsonSerializer jsonSerializer;
 
+    @ConditionalOnExpression("${i2f.swl.web.enable:true}")
     @SecureParams(in = false, out = false)
     @PostMapping("swapKey")
     public SwlDto swapKey(@RequestBody SwlDto dto) throws Exception {

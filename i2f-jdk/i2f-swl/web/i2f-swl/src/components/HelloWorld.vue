@@ -62,6 +62,9 @@ export default {
       console.log(rate)
     },
     testSwapKey(){
+      if(this.$axios.$filter.config.enable==false){
+        return;
+      }
       debugger
       let clientTransfer=this.$axios.$filter.transfer
       let swapKeyPair = clientTransfer.getSelfSwapKey();

@@ -2,6 +2,7 @@ import axios from 'axios'
 import SwlWebFilter from "../filter/SwlWebFilter";
 import SwlTransfer from "../core/core/SwlTransfer";
 import LocalStorageExpireCache from "../../i2f-core/cache/impl/LocalStorageExpireCache";
+import SwlWebConfig from "@/i2f-turbo-web/i2f-swl/filter/SwlWebConfig";
 
 axios.defaults.headers['Content-Type'] = 'application/json;charset=utf-8'
 
@@ -14,7 +15,9 @@ const SwlAxios = axios.create({
 
 const swlTransfer = new SwlTransfer()
 swlTransfer.cache = new LocalStorageExpireCache()
-const swlFilter = new SwlWebFilter(swlTransfer)
+const config = new SwlWebConfig();
+config.enable=true;
+const swlFilter = new SwlWebFilter(swlTransfer,config)
 SwlAxios.$filter=swlFilter
 
 // request拦截器

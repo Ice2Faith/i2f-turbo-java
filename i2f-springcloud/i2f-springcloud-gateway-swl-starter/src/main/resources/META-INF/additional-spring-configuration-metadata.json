@@ -25,6 +25,27 @@
       "defaultValue": true
     },
     {
+      "name": "i2f.swl.web.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable swl web.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.filter.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable filter.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlGatewayFilter",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.swl.api.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable api.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlGatewayApiFilter",
+      "defaultValue": true
+    },
+    {
       "name": "i2f.swl.missing.enable",
       "type": "java.lang.Boolean",
       "description": "enable missing bean configuration.",

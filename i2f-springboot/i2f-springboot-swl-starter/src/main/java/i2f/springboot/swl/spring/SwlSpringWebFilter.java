@@ -13,6 +13,7 @@ import i2f.web.swl.filter.SwlWebFilter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
@@ -26,6 +27,7 @@ import java.util.List;
  * @date 2024/7/10 17:11
  * @desc
  */
+@ConditionalOnExpression("${i2f.swl.filter.enable:true}")
 @Slf4j
 @Data
 @NoArgsConstructor

@@ -10,6 +10,10 @@ import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmet
  */
 function SwlWebConfig() {
     /**
+     * @type {boolean}
+     */
+    this.enable=true;
+    /**
      * @type {SwlWebCtrl}
      */
     this.defaultCtrl = new SwlWebCtrl(true, true);

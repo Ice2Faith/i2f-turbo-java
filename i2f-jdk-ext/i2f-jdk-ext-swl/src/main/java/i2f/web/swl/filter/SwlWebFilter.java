@@ -43,6 +43,12 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        // 没有开启总开关，直接跳过处理
+        if(!config.isEnable()){
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 跳过非常规请求
         String method = request.getMethod();
         if ("OPTIONS".equalsIgnoreCase(method)) {
