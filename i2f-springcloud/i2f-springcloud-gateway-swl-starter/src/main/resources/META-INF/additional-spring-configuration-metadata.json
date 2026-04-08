@@ -143,6 +143,30 @@
       "defaultValue": false
     },
     {
+      "name": "i2f.swl.web.url-patterns",
+      "type": "java.util.List",
+      "description": "swl url path ant patterns.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties"
+    },
+    {
+      "name": "i2f.swl.web.white-list-in",
+      "type": "java.util.List",
+      "description": "swl white list input.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties"
+    },
+    {
+      "name": "i2f.swl.web.white-list-out",
+      "type": "java.util.List",
+      "description": "swl white list output.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties"
+    },
+    {
+      "name": "i2f.swl.web.attached-header-names",
+      "type": "java.util.List",
+      "description": "swl sign attached header names.",
+      "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties"
+    },
+    {
       "name": "i2f.swl.web.asym-algo-class",
       "type": "java.lang.Class",
       "description": "asym algo class.",
@@ -161,7 +185,7 @@
       "type": "java.lang.Class",
       "description": "digest algo class.",
       "sourceType": "i2f.springcloud.gateway.swl.SwlWebConfigProperties",
-      "defaultValue": "i2f.swl.impl.SwlSha256MessageDigester"
+      "defaultValue": "i2f.swl.impl.supplier.SwlSha256MessageDigesterSupplier"
     },
     {
       "name": "i2f.swl.web.obfuscate-algo-class",
