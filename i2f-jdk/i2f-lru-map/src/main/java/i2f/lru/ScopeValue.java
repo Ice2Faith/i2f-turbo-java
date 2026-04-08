@@ -20,7 +20,7 @@ public final class ScopeValue<T> implements AutoCloseable {
         this.cleaner = cleaner;
     }
 
-    public static <T> ScopeValue<T> of(Supplier<T> supplier, ExConsumer<T> cleaner) {
+    public static <T> ScopeValue<T> ofSupplier(Supplier<T> supplier, ExConsumer<T> cleaner) {
         return new ScopeValue<>(supplier.get(), cleaner);
     }
 

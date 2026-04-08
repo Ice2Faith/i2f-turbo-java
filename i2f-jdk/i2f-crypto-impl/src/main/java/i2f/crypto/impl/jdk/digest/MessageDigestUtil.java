@@ -15,59 +15,59 @@ import java.io.InputStream;
 public class MessageDigestUtil {
 
     public static String md2(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD2.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD2.get().digest(data));
     }
 
     public static String md2(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD2.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD2.get().digest(is));
     }
 
     public static String md5(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD5.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD5.get().digest(data));
     }
 
     public static String md5(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD5.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.MD5.get().digest(is));
     }
 
     public static String sha1(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_1.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_1.get().digest(data));
     }
 
     public static String sha1(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_1.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_1.get().digest(is));
     }
 
     public static String sha224(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_224.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_224.get().digest(data));
     }
 
     public static String sha224(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_224.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_224.get().digest(is));
     }
 
     public static String sha256(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_256.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_256.get().digest(data));
     }
 
     public static String sha256(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_256.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_256.get().digest(is));
     }
 
     public static String sha384(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_384.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_384.get().digest(data));
     }
 
     public static String sha384(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_384.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_384.get().digest(is));
     }
 
     public static String sha512(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_512.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_512.get().digest(data));
     }
 
     public static String sha512(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_512.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(MessageDigester.SHA_512.get().digest(is));
     }
 
 
@@ -128,14 +128,14 @@ public class MessageDigestUtil {
     }
 
     public static String adler32(byte[] data) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.ADLER32.digest(data));
+        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.ADLER32.get().digest(data));
     }
 
     public static String crc32(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.CRC32.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.CRC32.get().digest(is));
     }
 
     public static String hashcode(InputStream is) throws Exception {
-        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.HASHCODE.digest(is));
+        return HexStringByteCodec.INSTANCE.encode(ChecksumMessageDigester.HASHCODE.get().digest(is));
     }
 }

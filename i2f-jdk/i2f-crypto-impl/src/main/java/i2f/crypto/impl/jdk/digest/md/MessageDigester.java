@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -17,14 +18,15 @@ import java.util.Objects;
  */
 public class MessageDigester implements IMessageDigester {
 
-    public static final MessageDigester MD2 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.MD2.text(), null));
-    public static final MessageDigester MD5 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.MD5.text(), null));
+    public static final Supplier<MessageDigester> MD2 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.MD2.text(), null));
+    public static final Supplier<MessageDigester> MD5 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.MD5.text(), null));
 
-    public static final MessageDigester SHA_1 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_1.text(), null));
-    public static final MessageDigester SHA_224 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_224.text(), null));
-    public static final MessageDigester SHA_256 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_256.text(), null));
-    public static final MessageDigester SHA_384 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_384.text(), null));
-    public static final MessageDigester SHA_512 = new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_512.text(), null));
+    public static final Supplier<MessageDigester> SHA_1 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_1.text(), null));
+    public static final Supplier<MessageDigester> SHA_224 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_224.text(), null));
+    public static final Supplier<MessageDigester> SHA_256 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_256.text(), null));
+    public static final Supplier<MessageDigester> SHA_384 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_384.text(), null));
+    public static final Supplier<MessageDigester> SHA_512 = ()->new MessageDigester(messageDigestOf(MessageDigestAlgorithm.SHA_512.text(), null));
+
 
     protected MessageDigest provider;
 
