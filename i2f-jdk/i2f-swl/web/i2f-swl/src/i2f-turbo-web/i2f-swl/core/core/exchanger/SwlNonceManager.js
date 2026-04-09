@@ -15,7 +15,7 @@ SwlNonceManager.prototype.contains = function (nonce) {
 
 }
 /**
- * @param nonce {SwlCert}
+ * @param nonce {String}
  * @param timeoutSeconds {long}
  * @return {void}
  */

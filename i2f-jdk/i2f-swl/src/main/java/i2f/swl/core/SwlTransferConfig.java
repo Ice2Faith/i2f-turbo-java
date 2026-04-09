@@ -1,6 +1,7 @@
 package i2f.swl.core;
 
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
+import i2f.swl.core.exchanger.SwlExchangerConfig;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Data
 @NoArgsConstructor
-public class SwlTransferConfig {
+public class SwlTransferConfig extends SwlExchangerConfig {
     /**
      * 默认RSA交换秘钥
      */
@@ -32,9 +33,6 @@ public class SwlTransferConfig {
     public static final String DEFAULT_SWAP_PRIVATE_KEY = DEFAULT_SWAP_RSA_PRIVATE_KEY;
 
     private String cacheKeyPrefix;
-
-    private long timestampExpireWindowSeconds = TimeUnit.MINUTES.toSeconds(30);
-    private long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
     private long certExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
 

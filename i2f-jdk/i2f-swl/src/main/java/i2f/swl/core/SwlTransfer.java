@@ -32,11 +32,28 @@ public class SwlTransfer extends SwlExchanger {
     public static final String OTHER_KEY_PUBLIC_DEFAULT = "swl:key:other:default";
 
     private IExpireCache<String, String> cache = new ObjectExpireCacheWrapper<>(new MapCache<>(new ConcurrentHashMap<>()));
-    private SwlTransferConfig config = new SwlTransferConfig();
+    private String cacheKeyPrefix;
 
+    private long certExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
+
+    private AsymKeyPair swapKeyPair=new AsymKeyPair(null,SwlTransferConfig.DEFAULT_SWAP_PRIVATE_KEY);
+
+    public SwlTransfer(SwlTransferConfig config) {
+        super(config);
+    }
+
+    public void applyConfig(SwlTransferConfig config){
+        if(config==null){
+            return;
+        }
+        super.applyConfig(config);
+        this.cacheKeyPrefix=config.getCacheKeyPrefix();
+        this.certExpireSeconds=config.getCertExpireSeconds();
+        this.swapKeyPair=config.getSwapKeyPair();
+    }
 
     public String cacheKey(String key) {
-        String cacheKeyPrefix = config.getCacheKeyPrefix();
+        String cacheKeyPrefix = this.cacheKeyPrefix;
         if (cacheKeyPrefix == null || cacheKeyPrefix.isEmpty()) {
             return key;
         }
@@ -82,7 +99,7 @@ public class SwlTransfer extends SwlExchanger {
         SwlCert cert = new SwlCert(certId, selfKeyPair.getPublicKey(), selfKeyPair.getPrivateKey(), otherPublicKey);
         String text = SwlCertUtil.serialize(cert);
         String key = certKey(certId);
-        cache.set(cacheKey(key), text, config.getCertExpireSeconds(), TimeUnit.SECONDS);
+        cache.set(cacheKey(key), text, this.certExpireSeconds, TimeUnit.SECONDS);
         cache.set(cacheKey(OTHER_KEY_PUBLIC_DEFAULT),certId);
     }
 
@@ -98,7 +115,7 @@ public class SwlTransfer extends SwlExchanger {
 
     public void resetCertExpire(String certId) {
         String key = certKey(certId);
-        cache.expire(cacheKey(key), config.getCertExpireSeconds(), TimeUnit.SECONDS);
+        cache.expire(cacheKey(key), this.certExpireSeconds, TimeUnit.SECONDS);
     }
 
     public String acceptOtherPublicKey(String otherPublicKey) {
@@ -118,7 +135,7 @@ public class SwlTransfer extends SwlExchanger {
     }
 
     public AsymKeyPair getSelfSwapKey() {
-        AsymKeyPair swapKeyPair = config.getSwapKeyPair();
+        AsymKeyPair swapKeyPair = this.swapKeyPair;
         return swapKeyPair;
     }
 

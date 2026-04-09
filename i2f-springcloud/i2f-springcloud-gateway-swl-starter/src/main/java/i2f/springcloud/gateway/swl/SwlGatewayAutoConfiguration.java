@@ -5,8 +5,8 @@ import i2f.reflect.ReflectResolver;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
+import i2f.swl.core.exchanger.impl.SwlExpireCacheNonceManager;
 import i2f.swl.exception.SwlException;
-import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
 import i2f.swl.std.supplier.ISwlMessageDigesterSupplier;
@@ -116,7 +116,7 @@ public class SwlGatewayAutoConfiguration {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
-        ret.setCache(new IExpireCache<String, String>() {
+        IExpireCache<String, String> cache = new IExpireCache<String, String>() {
             @Override
             public void set(String key, String value, long time, TimeUnit timeUnit) {
                 expireCache.set(key, value, time, timeUnit);
@@ -151,10 +151,15 @@ public class SwlGatewayAutoConfiguration {
             public void remove(String key) {
                 expireCache.remove(key);
             }
-        });
+        };
+        ret.setCache(cache);
 
-        ret.setConfig(transferProperties);
+        ret.applyConfig(transferProperties);
 
+        SwlExpireCacheNonceManager nonceManager = new SwlExpireCacheNonceManager();
+        nonceManager.setCache(cache);
+        nonceManager.setCacheKeyPrefix(transferProperties.getCacheKeyPrefix());
+        ret.setNonceManager(nonceManager);
 
         return ret;
     }

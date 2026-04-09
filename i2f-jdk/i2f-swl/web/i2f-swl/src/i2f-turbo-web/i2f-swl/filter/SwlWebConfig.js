@@ -36,11 +36,19 @@ function SwlWebConfig() {
     /**
      * @type {String}
      */
+    this.urlPathName = "swlu";
+    /**
+     * @type {String}
+     */
     this.responseCharset = "UTF-8";
     /**
      * @type {boolean}
      */
     this.filterResponseException = false;
+    /**
+     * @type {boolean}
+     */
+    this.enableUrlPathCheck=true;
     /**
      *
      * @type {string[]}

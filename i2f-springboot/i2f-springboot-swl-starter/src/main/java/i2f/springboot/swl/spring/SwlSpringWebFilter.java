@@ -4,7 +4,7 @@ import i2f.reflect.ReflectResolver;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.spring.matcher.MatcherUtil;
 import i2f.spring.web.mapping.MappingUtil;
-import i2f.swl.annotation.SecureParams;
+import i2f.swl.annotation.SwlCtrl;
 import i2f.swl.core.SwlTransfer;
 import i2f.web.swl.filter.SwlWebConfig;
 import i2f.web.swl.filter.SwlWebConsts;
@@ -70,7 +70,7 @@ public class SwlSpringWebFilter extends SwlWebFilter {
         SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
 
         if (method != null) {
-            SecureParams ann = ReflectResolver.getMemberAnnotation(method, SecureParams.class);
+            SwlCtrl ann = ReflectResolver.getMemberAnnotation(method, SwlCtrl.class);
             if (ann != null) {
                 return new SwlWebCtrl(ann.in(), ann.out());
             }
@@ -101,32 +101,4 @@ public class SwlSpringWebFilter extends SwlWebFilter {
     }
 
 
-    public static String getTrimContextPathRequestUri(HttpServletRequest request) {
-        String requestUrl = request.getRequestURI();
-        String contextPath = request.getContextPath();
-        if (StringUtils.isEmpty(contextPath)) {
-            contextPath = "/";
-        }
-        if (!contextPath.startsWith("/")) {
-            contextPath = "/" + contextPath;
-        }
-        if (!contextPath.endsWith("/")) {
-            contextPath = contextPath + "/";
-        }
-        if (!requestUrl.startsWith("/")) {
-            requestUrl = "/" + requestUrl;
-        }
-        if (requestUrl.startsWith(contextPath)) {
-            requestUrl = requestUrl.substring(contextPath.length());
-        } else {
-            String tmp = requestUrl + "/";
-            if (contextPath.equals(tmp)) {
-                requestUrl = "/";
-            }
-        }
-        if (!requestUrl.startsWith("/")) {
-            requestUrl = "/" + requestUrl;
-        }
-        return requestUrl;
-    }
 }

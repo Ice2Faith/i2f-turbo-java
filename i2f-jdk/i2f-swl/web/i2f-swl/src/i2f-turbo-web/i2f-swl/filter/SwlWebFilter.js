@@ -52,7 +52,8 @@ SwlWebFilter.prototype.requestFilter = function (res) {
         body=JSON.stringify(res.data)
         swlSendContext.data=body
     }
-    let url=res.url
+
+    let url=res.url;
     if(url){
         let idx=url.indexOf('?');
         if(idx>=0){
@@ -77,6 +78,15 @@ SwlWebFilter.prototype.requestFilter = function (res) {
     }
 
     let attachedHeaders = []
+    if(this.config.enableUrlPathCheck) {
+        let fullUrl = SwlWebFilter.getFullURL(res);
+        let fullPath = fullUrl.pathname;
+        // 添加固定的URL path
+        let swlu = Base64Util.encrypt(fullPath)
+        attachedHeaders.push(swlu);
+        res.headers[this.config.urlPathName] = swlu
+    }
+
     if (this.config.attachedHeaderNames) {
         for (let i = 0; i < this.config.attachedHeaderNames.length; i++) {
             let headerName = this.config.attachedHeaderNames[i]
@@ -88,7 +98,7 @@ SwlWebFilter.prototype.requestFilter = function (res) {
     swlSendContext.swlSendData=swlSendData
     let swlh=Base64Util.encrypt(qs.stringify(swlSendData.header))
     swlh=this.transfer.obfuscateEncode(swlh)
-    res.data=swlSendData.parts[0]
+    res.data='$.'+swlSendData.parts[0]
     let swlp=swlSendData.parts[1]
     if(swlp){
         res.params={}
@@ -132,6 +142,9 @@ SwlWebFilter.prototype.responseFilter = function (res) {
         return res
     }
     let body=res.data
+    if(body!=null && body.startsWith('$.')){
+        body=body.substring(2);
+    }
     swlh=this.transfer.obfuscateDecode(swlh)
     swlh=Base64Util.decrypt(swlh)
     swlReceiveContext.body=body

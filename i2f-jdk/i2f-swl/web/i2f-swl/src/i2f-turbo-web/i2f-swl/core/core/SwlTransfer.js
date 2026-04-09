@@ -21,17 +21,38 @@ function SwlTransfer() {
      */
     this.cache = new MemMapExpireCache();
     /**
-     *
-     * @type {SwlTransferConfig}
+     * @type {String}
      */
-    this.config = new SwlTransferConfig()
-
+    this.cacheKeyPrefix = null;
+    /**
+     * default 30 minute
+     * @type {int}
+     */
+    this.certExpireSeconds = 1800;
+    /**
+     * @type {AsymKeyPair}
+     */
+    this.swapKeyPair = new AsymKeyPair(SwlTransferConfig.DEFAULT_SWAP_PUBLIC_KEY(),null);
 
 }
 
 // 继承
 SwlTransfer.prototype = Object.create(SwlExchanger.prototype)
 SwlTransfer.prototype.constructor = SwlTransfer
+
+/**
+ *
+ * @param config {SwlTransferConfig}
+ */
+SwlTransfer.prototype.applyConfig=function( config){
+    if(!config){
+        return
+    }
+    SwlExchanger.prototype.applyConfig.call(this,config);
+    this.cacheKeyPrefix=config.cacheKeyPrefix;
+    this.certExpireSeconds=config.certExpireSeconds;
+    this.swapKeyPair=config.swapKeyPair;
+}
 
 SwlTransfer.CERT_PREFIX_KEY = function () {
     return "swl:key:cert:"
@@ -47,7 +68,7 @@ SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT = function () {
  * @return {String}
  */
 SwlTransfer.prototype.cacheKey = function (key) {
-    let cacheKeyPrefix = this.config.cacheKeyPrefix;
+    let cacheKeyPrefix = this.cacheKeyPrefix;
     if (!cacheKeyPrefix || cacheKeyPrefix === "") {
         return key;
     }
@@ -125,7 +146,7 @@ SwlTransfer.prototype.buildCert=function(certId, selfKeyPair, otherPublicKey) {
     let cert = new SwlCert(certId, selfKeyPair.getPublicKey(), selfKeyPair.getPrivateKey(), otherPublicKey);
     let text = SwlCertUtil.serialize(cert);
     let key = this.certKey(certId);
-    this.cache.setWith(this.cacheKey(key), text, this.config.certExpireSeconds);
+    this.cache.setWith(this.cacheKey(key), text, this.certExpireSeconds);
     this.cache.set(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()),certId);
 }
 
@@ -151,7 +172,7 @@ SwlTransfer.prototype.removeCert=function(certId) {
  */
 SwlTransfer.prototype.resetCertExpire=function(certId) {
     let key = this.certKey(certId);
-    this.cache.expire(this.cacheKey(key), this.config.certExpireSeconds);
+    this.cache.expire(this.cacheKey(key), this.certExpireSeconds);
 }
 
 
@@ -194,7 +215,7 @@ SwlTransfer.prototype.acceptOtherPublicKeyRaw=function(certId, selfKeyPair, othe
  * @return {AsymKeyPair}
  */
 SwlTransfer.prototype.getSelfSwapKey = function () {
-    let swapKeyPair = this.config.swapKeyPair;
+    let swapKeyPair = this.swapKeyPair;
     return swapKeyPair;
 }
 

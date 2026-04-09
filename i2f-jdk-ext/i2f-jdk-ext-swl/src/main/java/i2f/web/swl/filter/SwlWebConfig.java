@@ -18,9 +18,12 @@ public class SwlWebConfig {
     protected String headerName = "swlh";
     protected String certIdName = "swlci";
     protected String realContentTypeHeaderName = "swlct";
+    protected String urlPathName="swlu";
     protected String parameterName = "swlp";
     protected String responseCharset = "UTF-8";
     protected boolean filterResponseException = false;
+    protected boolean enableUrlPathCheck=true;
+    protected int maxStripUrlPathCount =2;
     protected List<String> urlPatterns;
     protected List<String> whiteListIn;
     protected List<String> whiteListOut;

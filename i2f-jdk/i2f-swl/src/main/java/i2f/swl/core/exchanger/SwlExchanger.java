@@ -43,7 +43,13 @@ public class SwlExchanger {
     protected boolean enableNonce = false;
     protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
+    protected boolean enableEncrypt=true;
+
     protected boolean enableDigital = true;
+
+    public SwlExchanger(SwlExchangerConfig config){
+        applyConfig(config);
+    }
 
     @Setter(AccessLevel.NONE)
     protected Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier();
@@ -66,6 +72,18 @@ public class SwlExchanger {
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     protected transient ObjectPool<ISwlMessageDigester> messageDigesterObjectPool = new ObjectPool<>(messageDigesterSupplier);
+
+    public void applyConfig(SwlExchangerConfig config){
+        if(config==null){
+            return;
+        }
+        this.enableTimestamp=config.isEnableTimestamp();
+        this.timestampExpireWindowSeconds=config.getTimestampExpireWindowSeconds();
+        this.enableNonce=config.isEnableNonce();
+        this.nonceTimeoutSeconds=config.getNonceTimeoutSeconds();
+        this.enableEncrypt=config.isEnableEncrypt();
+        this.enableDigital=config.isEnableDigital();
+    }
 
     public void setAsymmetricEncryptorSupplier(Supplier<ISwlAsymmetricEncryptor> asymmetricEncryptorSupplier) {
         this.asymmetricEncryptorSupplier = asymmetricEncryptorSupplier;
@@ -221,7 +239,11 @@ public class SwlExchanger {
         for (String part : parts) {
             String data = null;
             if (part != null) {
-                data = symmetricEncryptor.encrypt(part);
+                if(enableEncrypt) {
+                    data = symmetricEncryptor.encrypt(part);
+                }else{
+                    data=part;
+                }
             }
             if (data != null) {
                 builder.append(data);
@@ -254,6 +276,8 @@ public class SwlExchanger {
         if (enableDigital) {
             asymmetricEncryptor.setPrivateKey(selfPrivateKey);
             digital = asymmetricEncryptor.sign(sign);
+        }else{
+            digital = messageDigester.digest(sign);
         }
         ret.getHeader().setDigital(digital);
         ret.getContext().setDigital(digital);
@@ -392,7 +416,6 @@ public class SwlExchanger {
         boolean signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
         ret.getContext().setSignOk(signOk);
 
-        releaseMessageDigester(messageDigester);
 
         if (!signOk) {
             throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "verify sign failure!");
@@ -418,7 +441,15 @@ public class SwlExchanger {
             if (!digitalOk) {
                 throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
             }
+        }else{
+            boolean digitalOk = messageDigester.verify(digital, sign);
+            ret.getContext().setDigitalOk(digitalOk);
+            if (!digitalOk) {
+                throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION.code(), "verify digital failure!");
+            }
         }
+
+        releaseMessageDigester(messageDigester);
 
         ret.getContext().setSelfPrivateKey(selfPrivateKey);
         if (selfPrivateKey == null || selfPrivateKey.isEmpty()) {
@@ -441,7 +472,11 @@ public class SwlExchanger {
             for (String part : parts) {
                 String item = null;
                 if (part != null) {
-                    item = symmetricEncryptor.decrypt(part);
+                    if(enableEncrypt) {
+                        item = symmetricEncryptor.decrypt(part);
+                    }else{
+                        item=part;
+                    }
                 }
                 ret.getParts().add(item);
             }

@@ -14,7 +14,7 @@ import java.lang.annotation.Target;
         ElementType.TYPE
 })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SecureParams {
+public @interface SwlCtrl {
     boolean in() default true;
 
     boolean out() default true;

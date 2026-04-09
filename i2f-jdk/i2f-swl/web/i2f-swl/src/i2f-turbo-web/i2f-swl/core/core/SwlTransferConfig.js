@@ -1,3 +1,4 @@
+import SwlExchangerConfig from "./exchanger/SwlExchangerConfig";
 import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 
 /**
@@ -5,20 +6,11 @@ import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
  * @constructor
  */
 function SwlTransferConfig() {
+    SwlExchangerConfig.call(this);
     /**
      * @type {String}
      */
     this.cacheKeyPrefix = null;
-    /**
-     * default 30 seconds
-     * @type {int}
-     */
-    this.timestampExpireWindowSeconds = 30;
-    /**
-     * default 30 minutes
-     * @type {int}
-     */
-    this.nonceTimeoutSeconds = 1800;
     /**
      * default 30 minute
      * @type {int}
@@ -29,6 +21,10 @@ function SwlTransferConfig() {
      */
     this.swapKeyPair = new AsymKeyPair(SwlTransferConfig.DEFAULT_SWAP_PUBLIC_KEY(),null);
 }
+
+// 继承
+SwlTransferConfig.prototype = Object.create(SwlExchangerConfig.prototype)
+SwlTransferConfig.prototype.constructor = SwlTransferConfig
 
 /**
  * 默认RSA交换公钥
