@@ -167,8 +167,14 @@ public class SwlGatewayAutoConfiguration {
     @ConditionalOnExpression("${i2f.gateway.swl.api-route.enable:true}")
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
+        String apiKeyPath= webProperties.getApiSwapKeyPath();
+        if(apiKeyPath==null || apiKeyPath.isEmpty()){
+            apiKeyPath=SwlGatewayApiFilter.KEY_SWAP_PATH;
+        }
+
+        String pathPattern=apiKeyPath;
         return builder.routes()
-                .route("swl_api_route", r -> r.path(SwlGatewayApiFilter.KEY_SWAP_PATH)
+                .route("swl_api_route", r -> r.path(pathPattern)
                         .uri("http://localhost:80"))
                 .build();
     }

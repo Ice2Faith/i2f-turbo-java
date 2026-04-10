@@ -22,6 +22,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.swl.web")
 public class SwlWebConfigProperties extends SwlWebConfig {
+    protected String apiSwapKeyPath =SwlGatewayApiFilter.KEY_SWAP_PATH;
     protected Class<? extends ISwlAsymmetricEncryptorSupplier> asymAlgoClass = SwlRsaAsymmetricEncryptorSupplier.class;
     protected Class<? extends ISwlSymmetricEncryptorSupplier> symmAlgoClass = SwlAesSymmetricEncryptorSupplier.class;
     protected Class<? extends ISwlMessageDigesterSupplier> digestAlgoClass = SwlSha256MessageDigesterSupplier.class;

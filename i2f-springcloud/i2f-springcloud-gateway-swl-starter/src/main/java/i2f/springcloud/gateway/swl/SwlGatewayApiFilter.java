@@ -8,7 +8,6 @@ import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlDto;
 import i2f.swl.exception.SwlException;
-import i2f.web.swl.filter.SwlWebConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,7 +50,7 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
     protected SwlTransfer transfer;
 
     @Autowired
-    protected SwlWebConfig config;
+    protected SwlWebConfigProperties config;
 
     @Autowired
     protected IJsonSerializer jsonSerializer;
@@ -71,7 +70,12 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        if (KEY_SWAP_PATH.equals(path)) {
+        String apiKeyPath= config.getApiSwapKeyPath();
+        if(apiKeyPath==null || apiKeyPath.isEmpty()){
+            apiKeyPath=KEY_SWAP_PATH;
+        }
+
+        if (apiKeyPath.equals(path)) {
             // 获取请求体
             return request.getBody()
                     .defaultIfEmpty(new DefaultDataBufferFactory().allocateBuffer(0))
