@@ -98,6 +98,17 @@ public class SwlSpringWebFilter extends SwlWebFilter {
             in=false;
         }
 
+        // 跳过multipart请求
+        String contentType = request.getContentType();
+        if (contentType == null) {
+            contentType = "";
+        }
+        contentType = contentType.toLowerCase();
+
+        if (contentType.contains("multipart/form-data")) {
+            in=false;
+        }
+
         return new SwlWebCtrl(in == null ? defaultCtrl.isIn() : in,
                 out == null ? defaultCtrl.isOut() : out);
     }
