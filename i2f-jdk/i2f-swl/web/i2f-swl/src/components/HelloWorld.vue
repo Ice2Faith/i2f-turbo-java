@@ -48,17 +48,17 @@ export default {
     testMatcher(){
       let matcher=new AntMatcher()
       debugger
-      let rate=matcher.match('/user/rel/role/list','/user/**')
+      let rate=matcher.matches('/user/rel/role/list','/user/**')
       console.log(rate)
-      rate=matcher.match('/user/rel/role/list','/**')
+      rate=matcher.matches('/user/rel/role/list','/**')
       console.log(rate)
-      rate=matcher.match('/user/rel/role/list','/user/rel/role/*')
+      rate=matcher.matches('/user/rel/role/list','/user/rel/role/*')
       console.log(rate)
-      rate=matcher.match('/user/rel/role/list','/user/rel/*/list')
+      rate=matcher.matches('/user/rel/role/list','/user/rel/*/list')
       console.log(rate)
-      rate=matcher.match('/user/rel/role/list','/user/**/list')
+      rate=matcher.matches('/user/rel/role/list','/user/**/list')
       console.log(rate)
-      rate=matcher.match('/user/rel/role/list','/u*/**/l*t')
+      rate=matcher.matches('/user/rel/role/list','/u*/**/l*t')
       console.log(rate)
     },
     testSwapKey(){

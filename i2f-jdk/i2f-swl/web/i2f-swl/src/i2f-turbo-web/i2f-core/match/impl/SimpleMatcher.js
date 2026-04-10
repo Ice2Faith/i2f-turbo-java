@@ -1,4 +1,4 @@
-import IMatcher from "../IMatcher";
+import IPriorMatcher from "../IPriorMatcher";
 
 /**
  * 通配符ant模式匹配类，处理*，?，**的通配符
@@ -11,17 +11,16 @@ import IMatcher from "../IMatcher";
  *  ? --> \?
  *  当\之后不是关键的*和?时，\的含义保持，不需要转义
  *  因此\\就是\\，而不是\
- * @param sep {string}
  * @constructor
- * @implements {IMatcher}
+ * @extends {IPriorMatcher}
  * @return SimpleMatcher
  */
 function SimpleMatcher(){
-
+    IPriorMatcher.call(this)
 }
 
 // 继承
-SimpleMatcher.prototype = Object.create(IMatcher.prototype)
+SimpleMatcher.prototype = Object.create(IPriorMatcher.prototype)
 SimpleMatcher.prototype.constructor = SimpleMatcher
 
 /**
@@ -32,30 +31,30 @@ SimpleMatcher.prototype.constructor = SimpleMatcher
  * 这个返回值在某些情况下很有用，比如多个匹配规则同时适用一个目标时，优选某个规则的情况
  *
  * @param str {String}
- * @param patten {String}
- * @return
+ * @param pattern {String}
+ * @return {double}
  */
-SimpleMatcher.prototype.match=function( str, patten) {
+SimpleMatcher.prototype.matchRate=function(str, pattern) {
     let sidx = 0;
     let pidx = 0;
-    let plen = patten.length;
+    let plen = pattern.length;
     let slen = str.length;
     let mlen = 0;
     while (pidx < plen && sidx < slen) {
-        let pch = patten.charAt(pidx);
+        let pch = pattern.charAt(pidx);
         if (pch == '\\') {
             if ((pidx + 1) < plen) {
-                let npch = patten.charAt(pidx + 1);
+                let npch = pattern.charAt(pidx + 1);
                 if (npch == '*' || npch == '?') {
                     if (npch != str.charAt(sidx)) {
-                        return IMatcher.MATCH_FAILURE_VALUE();
+                        return IPriorMatcher.MATCH_FAILURE_VALUE();
                     } else {
                         sidx++;
                         pidx += 2;
                     }
                 } else {
                     if (npch != str.charAt(sidx)) {
-                        return IMatcher.MATCH_FAILURE_VALUE();
+                        return IPriorMatcher.MATCH_FAILURE_VALUE();
                     } else {
                         sidx++;
                         pidx++;
@@ -67,10 +66,10 @@ SimpleMatcher.prototype.match=function( str, patten) {
         } else if (pch == '*') {
             if ((pidx + 1) < plen) {
                 let edx = pidx + 1;
-                while (edx < plen && patten.charAt(edx) != '*' && patten.charAt(edx) != '?') {
+                while (edx < plen && pattern.charAt(edx) != '*' && pattern.charAt(edx) != '?') {
                     edx++;
                 }
-                let wstr = patten.substring(pidx + 1, edx);
+                let wstr = pattern.substring(pidx + 1, edx);
                 let swfch = wstr.charAt(0);
                 while (sidx < slen) {
                     let sch = str.charAt(sidx);
@@ -82,7 +81,7 @@ SimpleMatcher.prototype.match=function( str, patten) {
                     }
                     sidx++;
                     if (sidx == slen) {
-                        return IMatcher.MATCH_FAILURE_VALUE();
+                        return IPriorMatcher.MATCH_FAILURE_VALUE();
                     }
                 }
                 pidx++;
@@ -94,7 +93,7 @@ SimpleMatcher.prototype.match=function( str, patten) {
             sidx++;
         } else {
             if (pch != str.charAt(sidx)) {
-                return IMatcher.MATCH_FAILURE_VALUE();
+                return IPriorMatcher.MATCH_FAILURE_VALUE();
             }
             pidx++;
             sidx++;
