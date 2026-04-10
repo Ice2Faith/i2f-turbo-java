@@ -1,5 +1,6 @@
 package i2f.ai.std.model.message.tool;
 
+import i2f.ai.std.tool.ToolBaseCallRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +11,6 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ToolCallRequest {
-    protected String id;
-    protected String name;
-    protected String arguments;
+public class ToolCallRequest extends ToolBaseCallRequest {
     protected transient Object rawRequest;
 }

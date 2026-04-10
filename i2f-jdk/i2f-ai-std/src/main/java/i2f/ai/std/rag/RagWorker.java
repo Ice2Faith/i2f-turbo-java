@@ -1,11 +1,14 @@
 package i2f.ai.std.rag;
 
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
+import i2f.ai.std.rag.rerank.RagRerankModel;
+import i2f.ai.std.rag.rerank.data.RagRerankDocument;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -17,6 +20,7 @@ import java.util.List;
 public class RagWorker {
     protected RagEmbeddingModel model;
     protected RagEmbeddingStore store;
+    protected RagRerankModel rerankModel;
 
     public RagWorker(RagEmbeddingModel model, RagEmbeddingStore store) {
         this.model = model;
@@ -50,6 +54,13 @@ public class RagWorker {
     public List<RagEmbedding> similar(String content, int topN) {
         RagEmbedding embedding = model.embed(content);
         return store.similar(embedding, topN);
+    }
+
+    public List<RagRerankDocument> rerank(String question,List<RagEmbedding> embeddings,int topN){
+        return rerankModel.rerank(question,embeddings.stream()
+                .map(RagEmbedding::getContent)
+                .collect(Collectors.toList()),
+                topN);
     }
 
     public void loadDefaultDocuments() throws IOException {

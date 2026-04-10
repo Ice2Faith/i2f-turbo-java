@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Method;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -15,12 +13,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
-public class ToolRawDefinition {
-    protected Map<String, Object> jsonSchema;
-    protected String name;
-    protected String description;
-    protected Map<String, Object> parametersJsonSchema;
-    protected List<String> parameterNames;
+public class ToolRawDefinition extends ToolBaseDefinition {
     protected transient Method bindMethod;
     protected transient Class<?> bindClass;
     protected transient Object bindTarget;
