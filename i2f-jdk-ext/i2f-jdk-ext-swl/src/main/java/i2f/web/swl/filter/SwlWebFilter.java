@@ -102,47 +102,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
         String swlu = null;
-        if(config.isEnableUrlPathCheck()) {
-            swlu = request.getHeader(config.getUrlPathName());
-            if (swlu == null || swlu.isEmpty()) {
-                swlu = request.getParameter(config.getUrlPathName());
-            }
 
-            String contextPath = getTrimContextPathRequestUri(request);
-            if (contextPath.endsWith("/")) {
-                contextPath = contextPath.substring(0, contextPath.length() - 1);
-            }
-            if (!contextPath.startsWith("/")) {
-                contextPath = "/" + contextPath;
-            }
-            String originUrlPath = new String(Base64StringByteCodec.INSTANCE.decode(swlu), StandardCharsets.UTF_8);
-            if (originUrlPath.endsWith("/")) {
-                originUrlPath = originUrlPath.substring(0, originUrlPath.length() - 1);
-            }
-            if (!originUrlPath.startsWith("/")) {
-                originUrlPath = "/" + originUrlPath;
-            }
-            boolean isMatchedUrl = originUrlPath.equals(contextPath);
-            if (!isMatchedUrl) {
-                for (int i = 0; i < config.getMaxStripUrlPathCount(); i++) {
-                    if (contextPath.isEmpty()) {
-                        break;
-                    }
-                    if (originUrlPath.endsWith(contextPath)) {
-                        isMatchedUrl = true;
-                        break;
-                    }
-                    int idx = contextPath.indexOf("/", 1);
-                    if (idx < 0) {
-                        break;
-                    }
-                    contextPath = contextPath.substring(idx);
-                }
-            }
-            if (!isMatchedUrl) {
-                throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "request url has been changed!");
-            }
-        }
 
 
         // 获取客户端IP，用以客户端隔离
@@ -161,6 +121,48 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 如果输入需要解密，则进行输入解密
         if (ctrl.isIn() && !Boolean.TRUE.equals(decrypted)) {
             try {
+                if(config.isEnableUrlPathCheck()) {
+                    swlu = request.getHeader(config.getUrlPathName());
+                    if (swlu == null || swlu.isEmpty()) {
+                        swlu = request.getParameter(config.getUrlPathName());
+                    }
+
+                    String contextPath = getTrimContextPathRequestUri(request);
+                    if (contextPath.endsWith("/")) {
+                        contextPath = contextPath.substring(0, contextPath.length() - 1);
+                    }
+                    if (!contextPath.startsWith("/")) {
+                        contextPath = "/" + contextPath;
+                    }
+                    String originUrlPath = new String(Base64StringByteCodec.INSTANCE.decode(swlu), StandardCharsets.UTF_8);
+                    if (originUrlPath.endsWith("/")) {
+                        originUrlPath = originUrlPath.substring(0, originUrlPath.length() - 1);
+                    }
+                    if (!originUrlPath.startsWith("/")) {
+                        originUrlPath = "/" + originUrlPath;
+                    }
+                    boolean isMatchedUrl = originUrlPath.equals(contextPath);
+                    if (!isMatchedUrl) {
+                        for (int i = 0; i < config.getMaxStripUrlPathCount(); i++) {
+                            if (contextPath.isEmpty()) {
+                                break;
+                            }
+                            if (originUrlPath.endsWith(contextPath)) {
+                                isMatchedUrl = true;
+                                break;
+                            }
+                            int idx = contextPath.indexOf("/", 1);
+                            if (idx < 0) {
+                                break;
+                            }
+                            contextPath = contextPath.substring(idx);
+                        }
+                    }
+                    if (!isMatchedUrl) {
+                        throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "request url has been changed!");
+                    }
+                }
+
                 HttpServletRequestProxyWrapper wrapper = new HttpServletRequestProxyWrapper(request);
                 nextRequest = wrapper;
                 // 获取加密后的请求参数

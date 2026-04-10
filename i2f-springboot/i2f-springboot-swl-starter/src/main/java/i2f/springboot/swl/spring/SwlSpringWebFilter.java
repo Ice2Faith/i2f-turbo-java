@@ -76,9 +76,7 @@ public class SwlSpringWebFilter extends SwlWebFilter {
             }
         }
 
-        if (request instanceof MultipartHttpServletRequest) {
-            return new SwlWebCtrl(false, defaultCtrl.isOut());
-        }
+
 
         Boolean in = null;
         Boolean out = null;
@@ -94,6 +92,10 @@ public class SwlSpringWebFilter extends SwlWebFilter {
             if (MatcherUtil.antUrlMatchedAny(path, whiteListOut)) {
                 out = false;
             }
+        }
+
+        if (request instanceof MultipartHttpServletRequest) {
+            in=false;
         }
 
         return new SwlWebCtrl(in == null ? defaultCtrl.isIn() : in,
