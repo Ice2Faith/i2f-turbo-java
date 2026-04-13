@@ -1,0 +1,6 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.xproc4j.SpringContextJdbcProcedureExecutorAutoConfiguration,\
+  i2f.springboot.xproc4j.proxy.SpringJdbcProcedureProxyMapperAutoConfiguration,\
+  i2f.springboot.xproc4j.ext.SpringExtensionJdbcProcedureAutoConfiguration,\
+  i2f.springboot.xproc4j.ai.dashscope.DashScopeAiAutoConfiguration,\
+  i2f.springboot.xproc4j.ai.openai.OpenAiAiAutoConfiguration

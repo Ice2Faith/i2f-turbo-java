@@ -43,11 +43,12 @@
         <module>i2f-springboot-websocket-starter</module>
         <module>i2f-springboot-xxl-job-starter</module>
         <module>i2f-springboot-zookeeper-starter</module>
+        <module>i2f-springboot-auth-starter</module>
+        <module>i2f-springboot-xproc4j-starter</module>
 
         <module>test-springboot</module>
         <module>test-swl-starter</module>
         <module>test-xxl-job</module>
-        <module>i2f-springboot-auth-starter</module>
     </modules>
 
 
