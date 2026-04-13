@@ -37,11 +37,15 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.requestFilter = function (res) {
+    // 始终发送可能存在的 certId, 因为存在请求不加密，但是响应加密的情况
+    let certId=this.transfer.getOtherCertIdDefault();
+    if(certId){
+        res.headers[this.config.certIdName]=certId
+    }
+
     if(this.config.enable==false){
         return res;
     }
-    let certId=this.transfer.getOtherCertIdDefault();
-    res.headers[this.config.certIdName]=certId
     let ctrl = SwlWebFilter.parseCtrl(res,this.config);
     if(!ctrl.enableOut){
         return res
