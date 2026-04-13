@@ -122,6 +122,32 @@ public void updateProfile(Long userId) {
 }
 ```
 
+### 开发体验
+
+- 安装 IDEA 插件
+
+```shell
+SpEL Assistant
+或者
+SpEL Extension
+```
+
+- 将一下内容写入到 `resources/spel-extension.json` 文件中
+- 只要在项目的classpath能扫描到就行，不管在哪个子模块里面，被引用进入即可
+
+```json
+{
+  "com.rwd.common.security.permission.std.annotations.CheckPermissions@value": {
+    "fields": {
+      "auth": "i2f.springboot.auth.permission.helper.RbacCheckPermissionHelper",
+      "user": "i2f.springboot.auth.permission.IRabcLoginUser",
+      "jp": "org.aspectj.lang.JoinPoint",
+      "args": "java.lang.Object[]"
+    }
+  }
+}
+```
+
 ## 模块架构
 
 ### 主要组件
@@ -143,7 +169,7 @@ public void updateProfile(Long userId) {
 
 | 变量名    | 类型                          | 说明                                                        |
 |--------|-----------------------------|-----------------------------------------------------------|
-| `user` | `IRabcLoginUser`            | 当前登录用户对象，根据具体的 CheckPermissionContextProvider 判断实际类型      |
+| `user` | `LoginUser`                 | 当前登录用户对象，根据具体的 CheckPermissionContextProvider 判断实际类型      |
 | `auth` | `RbacCheckPermissionHelper` | RBAC 权限检查辅助工具，根据具体的 CheckPermissionContextProvider 判断实际类型 |
 | `jp`   | `JoinPoint`                 | AspectJ 连接点对象                                             |
 | `args` | `Object[]`                  | 方法参数数组                                                    |
