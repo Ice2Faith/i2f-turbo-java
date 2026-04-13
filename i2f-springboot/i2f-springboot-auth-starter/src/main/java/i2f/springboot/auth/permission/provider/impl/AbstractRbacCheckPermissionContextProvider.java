@@ -16,6 +16,7 @@ import java.util.Map;
 public abstract class AbstractRbacCheckPermissionContextProvider implements CheckPermissionContextProvider {
     public static final String CONTEXT_JP = "jp";
     public static final String CONTEXT_ARGS = "args";
+    public static final String CONTEXT_ARGS_PREFIX="p";
     public static final String CONTEXT_USER = "user";
     public static final String CONTEXT_AUTH = "auth";
 
@@ -27,6 +28,9 @@ public abstract class AbstractRbacCheckPermissionContextProvider implements Chec
         ret.put(CONTEXT_USER, user);
         ret.put(CONTEXT_AUTH, getRbacAuthHelper(joinPoint, user));
         ret.put(CONTEXT_ARGS, joinPoint.getArgs());
+        for (int i = 0; i < joinPoint.getArgs().length; i++) {
+            ret.put(CONTEXT_ARGS_PREFIX+i,joinPoint.getArgs()[i]);
+        }
 
         return ret;
     }

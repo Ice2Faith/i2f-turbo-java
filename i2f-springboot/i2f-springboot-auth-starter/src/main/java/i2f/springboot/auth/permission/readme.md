@@ -138,6 +138,10 @@ SpEL Extension
 ```json
 {
   "com.rwd.common.security.permission.std.annotations.CheckPermissions@value": {
+    "method": {
+      "parameters": true,
+      "parametersPrefix": ["p"]
+    },
     "fields": {
       "auth": "i2f.springboot.auth.permission.helper.RbacCheckPermissionHelper",
       "user": "i2f.springboot.auth.permission.IRabcLoginUser",
