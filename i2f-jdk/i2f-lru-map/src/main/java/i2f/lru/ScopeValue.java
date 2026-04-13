@@ -24,6 +24,10 @@ public final class ScopeValue<T> implements AutoCloseable {
         return new ScopeValue<>(supplier.get(), cleaner);
     }
 
+    public static <T extends AutoCloseable> ScopeValue<T> ofSupplier(Supplier<T> supplier) {
+        return new ScopeValue<>(supplier.get(), AutoCloseable::close);
+    }
+
     public static <T> ScopeValue<T> of(T resource, ExConsumer<T> cleaner) {
         return new ScopeValue<>(resource, cleaner);
     }
@@ -41,6 +45,10 @@ public final class ScopeValue<T> implements AutoCloseable {
         return of(lock, Lock::unlock);
     }
 
+    public UncheckedScopeValue<T> unchecked(){
+        return UncheckedScopeValue.of(this.resource, cleaner::accept);
+    }
+
     @FunctionalInterface
     public static interface ExConsumer<T> {
         void accept(T value) throws Exception;
@@ -48,6 +56,10 @@ public final class ScopeValue<T> implements AutoCloseable {
 
     public T get() {
         return this.resource;
+    }
+
+    public ExConsumer<T> cleaner(){
+        return this.cleaner;
     }
 
     @Override
