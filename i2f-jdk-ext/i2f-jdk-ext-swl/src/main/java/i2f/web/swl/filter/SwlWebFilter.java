@@ -105,6 +105,9 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
         String certId = request.getHeader(config.getCertIdName());
+        if (certId == null || certId.isEmpty()) {
+            certId = request.getParameter(config.getCertIdName());
+        }
 
         // 判断是否已经被解密过
         Object decrypted = request.getAttribute(SwlWebConsts.SWL_REQUEST_DECRYPT_ATTR_KEY);

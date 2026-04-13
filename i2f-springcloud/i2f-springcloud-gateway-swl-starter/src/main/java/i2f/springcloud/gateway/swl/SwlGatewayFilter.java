@@ -135,6 +135,17 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         // 用于响应时使用，以配对请求
         AtomicReference<String> certId = new AtomicReference<>(null);
 
+        // 先从请求头中获取证书ID，因为可能请求不需要加密，这个时候没有swlh头，这个头就解析不出swlci证书ID
+        // 因此，先在这里通过请求头获取，如果有swlh头，再进行覆盖即可
+        certId.set(request.getHeaders().getFirst(config.getCertIdName()));
+        if (certId.get() == null || certId.get().isEmpty()) {
+            certId.set(request.getQueryParams().getFirst(config.getCertIdName()));
+        }
+
+        if(certId.get()!=null && !certId.get().isEmpty()){
+            transfer.resetCertExpire(certId.get());
+        }
+
         ServerHttpResponse nextResponse = getNextResponse(response, ctrl, certId);
 
         if (ctrl.isIn()) {
