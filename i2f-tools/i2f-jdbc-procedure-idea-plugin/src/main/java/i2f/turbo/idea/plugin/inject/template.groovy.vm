@@ -1,0 +1,20 @@
+class Worker {
+    com.security.permission.RbacCheckPermissionHelper auth;
+    com.api.model.LoginUser user;
+    org.aspectj.lang.JoinPoint jp;
+    java.lang.Object[] args;
+    // 动态注入方法参数，考虑到参数命名擦除，因此直接使用 'p'+index 构成参数名
+    #foreach( ${item} in ${method.parameters})
+        ${item.fullType} p${item.index};
+    #end
+
+    def run(){
+        // 这里往上的部分作为 prefixTemplate
+        // ----------------------------------------------------
+
+        // 中间的部分就是表达式部分，这样之前和之后的完整构成了一个完整的代码，就能够进行自动补全了
+
+        // ----------------------------------------------------
+        // 这里往下的部分作为 suffixTemplate
+    }
+}
