@@ -27,7 +27,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.info.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.info.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -50,7 +50,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.warn.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.warn.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -73,7 +73,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.error.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.error.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -81,10 +81,47 @@
         </rollingPolicy>
     </appender>
 
+    <!-- 1. JSON 格式日志的 Appender -->
+    <!-- 需要添加此依赖 -->
+    <!--
+    <dependency>
+        <groupId>net.logstash.logback</groupId>
+        <artifactId>logstash-logback-encoder</artifactId>
+        <version>7.4</version>
+    </dependency>
+    -->
+    <!--<appender name="jsonFileInfo" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        &lt;!&ndash;过滤&ndash;&gt;
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        &lt;!&ndash; 使用 CompositeJsonEncoder 进行高度定制 &ndash;&gt;
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <pattern>
+                    <pattern>
+                        ${JSON_LOG_PATTERN}
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+        &lt;!&ndash;滚动策略&ndash;&gt;
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            &lt;!&ndash;路径&ndash;&gt;
+            <fileNamePattern>${log.dir.name}/json-${log.app.name}.info.%d.%i.jsonl</fileNamePattern>
+            <maxHistory>${log.max.count}</maxHistory>
+            <maxFileSize>${log.max.size}</maxFileSize>
+            <totalSizeCap>${log.total.size}</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+    </appender>-->
+
     <root level="info">
         <appender-ref ref="stdout"/>
         <appender-ref ref="fileInfo"/>
         <appender-ref ref="fileWarn"/>
         <appender-ref ref="fileError"/>
+        <!--<appender-ref ref="jsonFileInfo"/>-->
     </root>
 </included>

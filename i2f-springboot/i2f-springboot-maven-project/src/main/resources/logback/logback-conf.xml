@@ -13,5 +13,27 @@
     <property name="LOG_PATTERN"
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level] [%-40.40logger{40}:%-4.5line] [%-24.24thread] [%.48X{traceId}] [%.64X{traceSource}] - %msg%n"/>
 
+    <!-- JSON日志格式 -->
+    <property name="JSON_LOG_PATTERN"
+              value='{
+                        "timestamp": "%d{yyyy/MM/dd HH:mm:ss.SSS}",
+                        "datetime": "%d{yyyyMMddHHmmssSSS}",
+                        "date": "%d{yyyyMMdd}",
+                        "time": "%d{HHmmssSSS}",
+                        "logLevel": "%level",
+                        "logger": "%logger",
+                        "thread":"%thread",
+                        "location":"%class.%method",
+                        "appName":"${log.app.name}",
+                        "appProfile":"${spring.app.profile}",
+                        "traceId":"%X{traceId}",
+                        "traceSource":"%X{traceSource}",
+                        "traceApp":"%X{traceApp}",
+                        "traceUrl":"%X{traceUrl}",
+                        "traceIp":"%X{traceIp}",
+                        "message": "%msg",
+                        "exception": "%exception"
+                    }'/>
+
 
 </included>
