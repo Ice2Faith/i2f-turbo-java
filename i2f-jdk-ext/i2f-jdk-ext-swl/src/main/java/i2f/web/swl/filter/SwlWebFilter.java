@@ -3,9 +3,12 @@ package i2f.web.swl.filter;
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlHeader;
+import i2f.swl.exception.SwlException;
+import i2f.text.StringUtils;
 import i2f.url.FormUrlEncodedEncoder;
 import i2f.web.filter.OncePerHttpServletFilter;
 import i2f.web.servlet.ServletContextUtil;
@@ -20,6 +23,8 @@ import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
@@ -43,6 +48,12 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
+        // 没有开启总开关，直接跳过处理
+        if(!config.isEnable()){
+            chain.doFilter(request, response);
+            return;
+        }
+
         // 跳过非常规请求
         String method = request.getMethod();
         if ("OPTIONS".equalsIgnoreCase(method)) {
@@ -58,16 +69,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 获取控制信息，可子类重写实现白名单等功能
         SwlWebCtrl ctrl = parseCtrl(request, response);
 
-        // 跳过multipart请求
-        String contentType = request.getContentType();
-        if (contentType == null) {
-            contentType = "";
-        }
-        contentType = contentType.toLowerCase();
 
-        if (contentType.contains("multipart/form-data")) {
-            ctrl.setIn(false);
-        }
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
         String swlh = request.getHeader(config.getHeaderName());
@@ -89,6 +91,11 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         HttpServletRequest nextRequest = request;
         HttpServletResponse nextResponse = response;
 
+        // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
+        String swlu = null;
+
+
+
         // 获取客户端IP，用以客户端隔离
         String clientIp = ServletContextUtil.getIp(request);
         if (clientIp != null) {
@@ -98,6 +105,9 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 获取原始请求的非对称秘钥签名
         // 用于响应时使用，以配对请求
         String certId = request.getHeader(config.getCertIdName());
+        if (certId == null || certId.isEmpty()) {
+            certId = request.getParameter(config.getCertIdName());
+        }
 
         // 判断是否已经被解密过
         Object decrypted = request.getAttribute(SwlWebConsts.SWL_REQUEST_DECRYPT_ATTR_KEY);
@@ -105,6 +115,48 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 如果输入需要解密，则进行输入解密
         if (ctrl.isIn() && !Boolean.TRUE.equals(decrypted)) {
             try {
+                if(config.isEnableUrlPathCheck()) {
+                    swlu = request.getHeader(config.getUrlPathName());
+                    if (swlu == null || swlu.isEmpty()) {
+                        swlu = request.getParameter(config.getUrlPathName());
+                    }
+
+                    String contextPath = getTrimContextPathRequestUri(request);
+                    if (contextPath.endsWith("/")) {
+                        contextPath = contextPath.substring(0, contextPath.length() - 1);
+                    }
+                    if (!contextPath.startsWith("/")) {
+                        contextPath = "/" + contextPath;
+                    }
+                    String originUrlPath = new String(Base64StringByteCodec.INSTANCE.decode(swlu), StandardCharsets.UTF_8);
+                    if (originUrlPath.endsWith("/")) {
+                        originUrlPath = originUrlPath.substring(0, originUrlPath.length() - 1);
+                    }
+                    if (!originUrlPath.startsWith("/")) {
+                        originUrlPath = "/" + originUrlPath;
+                    }
+                    boolean isMatchedUrl = originUrlPath.equals(contextPath);
+                    if (!isMatchedUrl) {
+                        for (int i = 0; i < config.getMaxStripUrlPathCount(); i++) {
+                            if (contextPath.isEmpty()) {
+                                break;
+                            }
+                            if (originUrlPath.endsWith(contextPath)) {
+                                isMatchedUrl = true;
+                                break;
+                            }
+                            int idx = contextPath.indexOf("/", 1);
+                            if (idx < 0) {
+                                break;
+                            }
+                            contextPath = contextPath.substring(idx);
+                        }
+                    }
+                    if (!isMatchedUrl) {
+                        throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "request url has been changed!");
+                    }
+                }
+
                 HttpServletRequestProxyWrapper wrapper = new HttpServletRequestProxyWrapper(request);
                 nextRequest = wrapper;
                 // 获取加密后的请求参数
@@ -123,12 +175,18 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 // 需要进行反序列化字符串
                 if (srcText != null) {
                     srcText = srcText.trim();
+                    if(srcText.startsWith("$.")){
+                        srcText=srcText.substring(2);
+                    }
                     if (srcText.startsWith("\"")) {
                         srcText = (String) jsonSerializer.deserialize(srcText, String.class);
                     }
                 }
 
                 List<String> attachedHeaders = new ArrayList<>();
+                if(config.isEnableUrlPathCheck()) {
+                    attachedHeaders.add(swlu);
+                }
                 if (this.config.getAttachedHeaderNames() != null) {
                     for (String headerName : this.config.getAttachedHeaderNames()) {
                         String header = request.getHeader(headerName);
@@ -160,6 +218,11 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 // 获取解密后的数据
                 srcText = receiveData.getParts().get(0);
                 swlp = receiveData.getParts().get(1);
+                if(swlp!=null) {
+                    if (!transfer.isEnableEncrypt()) {
+                        swlp = URLDecoder.decode(swlp, "UTF-8");
+                    }
+                }
 
                 // 重新设置请求参数
                 String replaceQueryString = null;
@@ -305,6 +368,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         response.setHeader(config.getCertIdName(), responseData.getContext().getCertId());
 
         responseText = responseData.getParts().get(0);
+        responseText="$."+responseBody;
         responseBody = responseText.getBytes("UTF-8");
 
         String responseContentType = responseWrapper.getContentType();
@@ -377,8 +441,49 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
 
     public SwlWebCtrl parseCtrl(HttpServletRequest request, HttpServletResponse response) {
-        return config.getDefaultCtrl();
+        SwlWebCtrl ret=new SwlWebCtrl(config.getDefaultCtrl().isIn(),
+                config.getDefaultCtrl().isOut());
+        // 跳过multipart请求
+        String contentType = request.getContentType();
+        if (contentType == null) {
+            contentType = "";
+        }
+        contentType = contentType.toLowerCase();
+
+        if (contentType.contains("multipart/form-data")) {
+            ret.setIn(false);
+        }
+
+        return ret;
     }
 
 
+    public static String getTrimContextPathRequestUri(HttpServletRequest request) {
+        String requestUrl = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        if (StringUtils.isEmpty(contextPath)) {
+            contextPath = "/";
+        }
+        if (!contextPath.startsWith("/")) {
+            contextPath = "/" + contextPath;
+        }
+        if (!contextPath.endsWith("/")) {
+            contextPath = contextPath + "/";
+        }
+        if (!requestUrl.startsWith("/")) {
+            requestUrl = "/" + requestUrl;
+        }
+        if (requestUrl.startsWith(contextPath)) {
+            requestUrl = requestUrl.substring(contextPath.length());
+        } else {
+            String tmp = requestUrl + "/";
+            if (contextPath.equals(tmp)) {
+                requestUrl = "/";
+            }
+        }
+        if (!requestUrl.startsWith("/")) {
+            requestUrl = "/" + requestUrl;
+        }
+        return requestUrl;
+    }
 }

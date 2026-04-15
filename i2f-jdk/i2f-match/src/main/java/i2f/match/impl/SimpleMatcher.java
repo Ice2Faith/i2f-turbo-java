@@ -24,21 +24,21 @@ public class SimpleMatcher implements IPriorMatcher {
      * 这个返回值在某些情况下很有用，比如多个匹配规则同时适用一个目标时，优选某个规则的情况
      *
      * @param str
-     * @param patten
+     * @param pattern
      * @return
      */
     @Override
-    public double matchRate(String str, String patten) {
+    public double matchRate(String str, String pattern) {
         int sidx = 0;
         int pidx = 0;
-        int plen = patten.length();
+        int plen = pattern.length();
         int slen = str.length();
         int mlen = 0;
         while (pidx < plen && sidx < slen) {
-            char pch = patten.charAt(pidx);
+            char pch = pattern.charAt(pidx);
             if (pch == '\\') {
                 if ((pidx + 1) < plen) {
-                    char npch = patten.charAt(pidx + 1);
+                    char npch = pattern.charAt(pidx + 1);
                     if (npch == '*' || npch == '?') {
                         if (npch != str.charAt(sidx)) {
                             return MATCH_FAILURE_VALUE;
@@ -60,10 +60,10 @@ public class SimpleMatcher implements IPriorMatcher {
             } else if (pch == '*') {
                 if ((pidx + 1) < plen) {
                     int edx = pidx + 1;
-                    while (edx < plen && patten.charAt(edx) != '*' && patten.charAt(edx) != '?') {
+                    while (edx < plen && pattern.charAt(edx) != '*' && pattern.charAt(edx) != '?') {
                         edx++;
                     }
-                    String wstr = patten.substring(pidx + 1, edx);
+                    String wstr = pattern.substring(pidx + 1, edx);
                     char swfch = wstr.charAt(0);
                     while (sidx < slen) {
                         char sch = str.charAt(sidx);

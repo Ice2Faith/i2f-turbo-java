@@ -28,7 +28,7 @@ public class LangPrintfNode extends AbstractExecutorNode {
         String tag = (String) executor.attrValue(AttrConsts.TAG, FeatureConsts.STRING, node, context);
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         if (value != null) {
-            Object obj = executor.attrValue(AttrConsts.VALUE, FeatureConsts.VISIT, node, context);
+            Object obj = executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
             if (obj != null) {
                 value = String.valueOf(obj);
             }

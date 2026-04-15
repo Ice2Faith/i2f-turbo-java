@@ -65,13 +65,13 @@ public class Langchain4j8ToolHelper {
     public static Langchain4j8ToolDefinition fromRaw(ToolRawDefinition definition) {
         Langchain4j8ToolDefinition ret = new Langchain4j8ToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
+        Map<String, Object> functionSchema = definition.getJsonSchema();
 
         Map<String, Map<String, Object>> parametersSchema = (Map<String, Map<String, Object>>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
         ToolSpecification function = ToolSpecification.builder()
-                .name(definition.getFunctionName())
-                .description(definition.getFunctionDescription())
+                .name(definition.getName())
+                .description(definition.getDescription())
                 .parameters(ToolParameters.builder()
                         .properties(parametersSchema)
                         .build())

@@ -1,12 +1,12 @@
 package i2f.springcloud.gateway.swl;
 
 import i2f.swl.impl.SwlBase64Obfuscator;
-import i2f.swl.impl.SwlSha256MessageDigester;
 import i2f.swl.impl.supplier.SwlAesSymmetricEncryptorSupplier;
 import i2f.swl.impl.supplier.SwlRsaAsymmetricEncryptorSupplier;
-import i2f.swl.std.ISwlMessageDigester;
+import i2f.swl.impl.supplier.SwlSha256MessageDigesterSupplier;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
+import i2f.swl.std.supplier.ISwlMessageDigesterSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import i2f.web.swl.filter.SwlWebConfig;
 import lombok.Data;
@@ -22,8 +22,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.swl.web")
 public class SwlWebConfigProperties extends SwlWebConfig {
+    protected String apiSwapKeyPath =SwlGatewayApiFilter.KEY_SWAP_PATH;
     protected Class<? extends ISwlAsymmetricEncryptorSupplier> asymAlgoClass = SwlRsaAsymmetricEncryptorSupplier.class;
     protected Class<? extends ISwlSymmetricEncryptorSupplier> symmAlgoClass = SwlAesSymmetricEncryptorSupplier.class;
-    protected Class<? extends ISwlMessageDigester> digestAlgoClass = SwlSha256MessageDigester.class;
+    protected Class<? extends ISwlMessageDigesterSupplier> digestAlgoClass = SwlSha256MessageDigesterSupplier.class;
     protected Class<? extends ISwlObfuscator> obfuscateAlgoClass = SwlBase64Obfuscator.class;
 }

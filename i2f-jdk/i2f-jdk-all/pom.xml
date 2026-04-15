@@ -539,6 +539,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-trace-mdc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-translate</artifactId>
         </dependency>
         <dependency>

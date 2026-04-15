@@ -1,6 +1,6 @@
 import SwlWebCtrl from "./SwlWebCtrl";
 import SwlRsaAsymmetricEncryptorSupplier from "../core/impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../core/impl/SwlSha256MessageDigester";
+import SwlSha256MessageDigesterSupplier from "../core/impl/supplier/SwlSha256MessageDigesterSupplier";
 import SwlBase64Obfuscator from "../core/impl/SwlBase64Obfuscator";
 import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmetricEncryptorSupplier";
 
@@ -9,6 +9,10 @@ import SwlAesSymmetricEncryptorSupplier from "../core/impl/supplier/SwlAesSymmet
  * @constructor
  */
 function SwlWebConfig() {
+    /**
+     * @type {boolean}
+     */
+    this.enable=true;
     /**
      * @type {SwlWebCtrl}
      */
@@ -32,11 +36,24 @@ function SwlWebConfig() {
     /**
      * @type {String}
      */
+    this.urlPathName = "swlu";
+    /**
+     * @type {String}
+     */
     this.responseCharset = "UTF-8";
     /**
      * @type {boolean}
      */
     this.filterResponseException = false;
+    /**
+     * @type {boolean}
+     */
+    this.enableUrlPathCheck=true;
+    /**
+     *
+     * @type {string[]}
+     */
+    this.urlPatterns = null;
     /**
      *
      * @type {string[]}
@@ -64,9 +81,9 @@ function SwlWebConfig() {
     this.symmAlgoSupplier = new SwlAesSymmetricEncryptorSupplier();
     /**
      *
-     * @type {ISwlMessageDigester}
+     * @type {ISwlMessageDigesterSupplier}
      */
-    this.digestAlgoSupplier = new SwlSha256MessageDigester();
+    this.digestAlgoSupplier = new SwlSha256MessageDigesterSupplier();
     /**
      *
      * @type {ISwlObfuscator}

@@ -5,10 +5,11 @@ import i2f.reflect.ReflectResolver;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
+import i2f.swl.core.exchanger.impl.SwlExpireCacheNonceManager;
 import i2f.swl.exception.SwlException;
-import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
+import i2f.swl.std.supplier.ISwlMessageDigesterSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -100,9 +101,9 @@ public class SwlGatewayAutoConfiguration {
         }
 
         try {
-            Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();
-            ISwlMessageDigester digester = getBeanByTypeOrNewInstance(clazz);
-            ret.setMessageDigester(digester);
+            Class<? extends ISwlMessageDigesterSupplier> clazz = webProperties.getDigestAlgoClass();
+            ISwlMessageDigesterSupplier digester = getBeanByTypeOrNewInstance(clazz);
+            ret.setMessageDigesterSupplier(digester);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
@@ -115,7 +116,7 @@ public class SwlGatewayAutoConfiguration {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
-        ret.setCache(new IExpireCache<String, String>() {
+        IExpireCache<String, String> cache = new IExpireCache<String, String>() {
             @Override
             public void set(String key, String value, long time, TimeUnit timeUnit) {
                 expireCache.set(key, value, time, timeUnit);
@@ -150,10 +151,15 @@ public class SwlGatewayAutoConfiguration {
             public void remove(String key) {
                 expireCache.remove(key);
             }
-        });
+        };
+        ret.setCache(cache);
 
-        ret.setConfig(transferProperties);
+        ret.applyConfig(transferProperties);
 
+        SwlExpireCacheNonceManager nonceManager = new SwlExpireCacheNonceManager();
+        nonceManager.setCache(cache);
+        nonceManager.setCacheKeyPrefix(transferProperties.getCacheKeyPrefix());
+        ret.setNonceManager(nonceManager);
 
         return ret;
     }
@@ -161,8 +167,14 @@ public class SwlGatewayAutoConfiguration {
     @ConditionalOnExpression("${i2f.gateway.swl.api-route.enable:true}")
     @Bean
     public RouteLocator routes(RouteLocatorBuilder builder) {
+        String apiKeyPath= webProperties.getApiSwapKeyPath();
+        if(apiKeyPath==null || apiKeyPath.isEmpty()){
+            apiKeyPath=SwlGatewayApiFilter.KEY_SWAP_PATH;
+        }
+
+        String pathPattern=apiKeyPath;
         return builder.routes()
-                .route("swl_api_route", r -> r.path(SwlGatewayApiFilter.KEY_SWAP_PATH)
+                .route("swl_api_route", r -> r.path(pathPattern)
                         .uri("http://localhost:80"))
                 .build();
     }

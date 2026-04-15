@@ -69,15 +69,15 @@ public class DashScopeToolHelper {
     public static DashScopeToolDefinition fromRaw(ToolRawDefinition definition) {
         DashScopeToolDefinition ret = new DashScopeToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
+        Map<String, Object> functionSchema = definition.getJsonSchema();
 
         Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
         String json = JsonUtils.toJson(parametersSchema);
         JsonObject jsonObject = JsonUtils.parseString(json).getAsJsonObject();
         ToolFunction function = ToolFunction.builder().function(
                 FunctionDefinition.builder()
-                        .name(definition.getFunctionName())
-                        .description(definition.getFunctionDescription())
+                        .name(definition.getName())
+                        .description(definition.getDescription())
                         .parameters(jsonObject)
                         .build()
         ).build();

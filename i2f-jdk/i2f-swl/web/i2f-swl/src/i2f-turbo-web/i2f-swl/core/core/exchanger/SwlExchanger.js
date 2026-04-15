@@ -1,6 +1,7 @@
+import SwlExchangerConfig from "./SwlExchangerConfig";
 import SwlRsaAsymmetricEncryptorSupplier from "../../impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
 import SwlAesSymmetricEncryptorSupplier from "../../impl/supplier/SwlAesSymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../../impl/SwlSha256MessageDigester";
+import SwlSha256MessageDigesterSupplier from "../../impl/supplier/SwlSha256MessageDigesterSupplier";
 import SwlBase64Obfuscator from "../../impl/SwlBase64Obfuscator";
 import SwlEmptyNonceManager from "./impl/SwlEmptyNonceManager";
 import SwlCertUtil from "../../cert/SwlCertUtil";
@@ -12,6 +13,7 @@ import Random from "../../../../i2f-core/util/Random";
 import SwlException from "../../exception/SwlException";
 import SwlCode from "../../consts/SwlCode";
 
+
 /**
  * @return {SwlExchanger}
  * @constructor
@@ -21,27 +23,34 @@ function SwlExchanger() {
      *
      * @type {boolean}
      */
-    this.enableTimestamp=true
+    this.enableTimestamp = true;
     /**
      *
-     * @type {long} seconds
+     * @type {long}
      */
-    this.timestampExpireWindowSeconds = 30
-    /**
-     *
-     * @type {boolean}
-     */
-    this.enableNonce=true
-    /**
-     *
-     * @type {long} seconds
-     */
-    this.nonceTimeoutSeconds=30*60
+    this.timestampExpireWindowSeconds = 30;
+
     /**
      *
      * @type {boolean}
      */
-    this.enableDigital=true
+    this.enableNonce = false;
+    /**
+     *
+     * @type {long}
+     */
+    this.nonceTimeoutSeconds = 180;
+
+    /**
+     *
+     * @type {boolean}
+     */
+    this.enableEncrypt=true;
+    /**
+     *
+     * @type {boolean}
+     */
+    this.enableDigital = true;
     /**
      *
      * @type {ISwlAsymmetricEncryptorSupplier}
@@ -54,9 +63,9 @@ function SwlExchanger() {
     this.symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier()
     /**
      *
-     * @type {ISwlMessageDigester}
+     * @type {ISwlMessageDigesterSupplier}
      */
-    this.messageDigester = new SwlSha256MessageDigester()
+    this.messageDigesterSupplier = new SwlSha256MessageDigesterSupplier()
     /**
      *
      * @type {ISwlObfuscator}
@@ -78,19 +87,96 @@ function SwlExchanger() {
 }
 
 /**
+ *
+ * @param config {SwlExchangerConfig}
+ * @return {void}
+ */
+SwlExchanger.prototype.applyConfig=function(config){
+    if(!config){
+        return;
+    }
+    this.enableTimestamp=config.enableTimestamp;
+    this.timestampExpireWindowSeconds=config.timestampExpireWindowSeconds;
+    this.enableNonce=config.enableNonce;
+    this.nonceTimeoutSeconds=config.nonceTimeoutSeconds;
+    this.enableEncrypt=config.enableEncrypt;
+    this.enableDigital=config.enableDigital;
+}
+
+
+/**
+ *
+ * @return {ISwlAsymmetricEncryptor}
+ */
+SwlExchanger.prototype.requireAsymmetricEncryptor=function() {
+    return this.asymmetricEncryptorSupplier.get();
+}
+
+/**
+ *
+ * @param encryptor {ISwlAsymmetricEncryptor}
+ */
+SwlExchanger.prototype.releaseAsymmetricEncryptor=function( encryptor) {
+
+}
+
+/**
+ *
+ * @return {ISwlSymmetricEncryptor}
+ */
+SwlExchanger.prototype.requireSymmetricEncryptor=function() {
+    return this.symmetricEncryptorSupplier.get();
+}
+
+/**
+ *
+ * @param encryptor {ISwlSymmetricEncryptor}
+ * @return {void}
+ */
+SwlExchanger.prototype.releaseSymmetricEncryptor=function(encryptor ) {
+
+}
+
+/**
+ *
+ * @return {ISwlMessageDigester}
+ */
+SwlExchanger.prototype.requireMessageDigester=function() {
+    return this.messageDigesterSupplier.get();
+}
+
+/**
+ *
+ * @param digester {ISwlMessageDigester}
+ * return {void}
+ */
+SwlExchanger.prototype.releaseMessageDigester=function(digester) {
+
+}
+
+
+/**
  * @return {AsymKeyPair}
  */
 SwlExchanger.prototype.generateKeyPair = function () {
-    let encryptor = this.asymmetricEncryptorSupplier.get();
-    return encryptor.generateKeyPair()
+    let encryptor = this.requireAsymmetricEncryptor();
+    try {
+        return encryptor.generateKeyPair();
+    }finally {
+        this.releaseAsymmetricEncryptor(encryptor)
+    }
 }
 
 /**
  * @return {String}
  */
 SwlExchanger.prototype.generateKey = function () {
-    let encryptor = this.symmetricEncryptorSupplier.get();
-    return encryptor.generateKey()
+    let encryptor = this.requireSymmetricEncryptor();
+    try {
+        return encryptor.generateKey();
+    }finally {
+        this.releaseSymmetricEncryptor(encryptor)
+    }
 }
 
 /**
@@ -98,10 +184,14 @@ SwlExchanger.prototype.generateKey = function () {
  * @return {SwlCertPair}
  */
 SwlExchanger.prototype.generateCertPair = function (certId) {
-    let encryptor = this.asymmetricEncryptorSupplier.get();
-    let serverKeyPair = encryptor.generateKeyPair();
-    let clientKeyPair = encryptor.generateKeyPair();
-    return SwlCertUtil.make(certId, serverKeyPair, clientKeyPair);
+    let encryptor = this.requireAsymmetricEncryptor();
+    try {
+        let serverKeyPair = encryptor.generateKeyPair();
+        let clientKeyPair = encryptor.generateKeyPair();
+        return SwlCertUtil.make(certId, serverKeyPair, clientKeyPair);
+    }finally {
+        this.releaseAsymmetricEncryptor(encryptor);
+    }
 }
 
 /**
@@ -180,11 +270,11 @@ SwlExchanger.prototype.sendByRaw=function(certId,
     ret.header.nonce=nonce;
     ret.context.nonce=nonce;
 
-    let symmetricEncryptor = this.symmetricEncryptorSupplier.get();
+    let symmetricEncryptor = this.requireSymmetricEncryptor();
     let key = symmetricEncryptor.generateKey();
     ret.context.key=key;
 
-    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    let asymmetricEncryptor = this.requireAsymmetricEncryptor();
     asymmetricEncryptor.setPublicKey(remotePublicKey);
     let randomKey = asymmetricEncryptor.encrypt(key);
     ret.header.randomKey=randomKey;
@@ -196,7 +286,11 @@ SwlExchanger.prototype.sendByRaw=function(certId,
         let part=parts[i]
         let data = null;
         if (part) {
-            data = symmetricEncryptor.encrypt(part);
+            if(this.enableEncrypt) {
+                data = symmetricEncryptor.encrypt(part);
+            }else{
+                data=part;
+            }
         }
         if (data) {
             builder+=data;
@@ -213,22 +307,30 @@ SwlExchanger.prototype.sendByRaw=function(certId,
         }
     }
 
+    this.releaseSymmetricEncryptor(symmetricEncryptor);
+
     let data = builder;
     ret.context.data=data;
 
-    let sign = this.messageDigester.digest(data + randomKey + timestamp + nonce + certId);
+    let messageDigester = this.requireMessageDigester();
+
+    let sign = messageDigester.digest(data + randomKey + timestamp + nonce + certId);
     ret.header.sign=sign;
     ret.context.sign=sign;
 
+    this.releaseMessageDigester(messageDigester);
 
     let digital="none";
     if(this.enableDigital) {
         asymmetricEncryptor.setPrivateKey(selfPrivateKey);
         digital = asymmetricEncryptor.sign(sign);
+    }else{
+        digital = messageDigester.digest(sign);
     }
     ret.header.digital=digital;
     ret.context.digital=digital;
 
+    this.releaseAsymmetricEncryptor(asymmetricEncryptor);
 
     this.encode(ret.header);
 
@@ -379,7 +481,9 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         throw new SwlException(SwlCode.CERT_ID_MISSING_EXCEPTION(), "certId cannot be empty!");
     }
 
-    let signOk = this.messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
+    let messageDigester = this.requireMessageDigester();
+
+    let signOk = messageDigester.verify(sign, data + randomKey + timestamp + nonce + certId);
     ret.context.signOk=signOk;
     if (!signOk) {
         throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION(), "verify sign failure!");
@@ -396,7 +500,7 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         throw new SwlException(SwlCode.CLIENT_ASYM_KEY_NOT_FOUND_EXCEPTION(), "remote key not found!");
     }
 
-    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    let asymmetricEncryptor = this.requireAsymmetricEncryptor();
     asymmetricEncryptor.setPublicKey(remotePublicKey);
 
     if(this.enableDigital) {
@@ -405,7 +509,15 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         if (!digitalOk) {
             throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION(), "verify digital failure!");
         }
+    }else{
+        let digitalOk =  messageDigester.verify(digital, sign);
+        ret.context.digitalOk = digitalOk;
+        if (!digitalOk) {
+            throw new SwlException(SwlCode.DIGITAL_VERIFY_FAILURE_EXCEPTION(), "verify digital failure!");
+        }
     }
+
+    this.releaseMessageDigester(messageDigester);
 
     ret.context.selfPrivateKey=selfPrivateKey;
     if (!selfPrivateKey || selfPrivateKey=='') {
@@ -419,8 +531,9 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
         throw new SwlException(SwlCode.RANDOM_KEY_INVALID_EXCEPTION(), "random key is invalid!");
     }
 
+    this.releaseAsymmetricEncryptor(asymmetricEncryptor);
 
-    let symmetricEncryptor = this.symmetricEncryptorSupplier.get();
+    let symmetricEncryptor = this.requireSymmetricEncryptor();
     symmetricEncryptor.setKey(key);
 
     if (parts != null) {
@@ -428,11 +541,17 @@ SwlExchanger.prototype.receiveByRaw=function(clientId,
             let part=parts[i]
             let item = null;
             if (part) {
-                item = symmetricEncryptor.decrypt(part);
+                if(this.enableEncrypt) {
+                    item = symmetricEncryptor.decrypt(part);
+                }else{
+                    item=part;
+                }
             }
             ret.parts.push(item);
         }
     }
+
+    this.releaseSymmetricEncryptor(symmetricEncryptor);
 
     return ret;
 }

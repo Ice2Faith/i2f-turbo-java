@@ -29,13 +29,13 @@ public class TestSwlTransfer {
         SwlTransfer clientTransfer = new SwlTransfer();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        clientTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         SwlTransfer serverTransfer = new SwlTransfer();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        serverTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         serverTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         // *********************硬编码的交换秘钥**********************************
@@ -100,13 +100,13 @@ public class TestSwlTransfer {
         SwlTransfer clientTransfer = new SwlTransfer();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        clientTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         SwlTransfer serverTransfer = new SwlTransfer();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        serverTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         serverTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         AsymKeyPair serverKeyPair = serverTransfer.generateKeyPair();

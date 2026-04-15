@@ -29,6 +29,13 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-context-impl</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-io-stream</artifactId>
         </dependency>
 
@@ -49,7 +56,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-proxy-std</artifactId>
+            <artifactId>i2f-proxy</artifactId>
         </dependency>
     </dependencies>
 

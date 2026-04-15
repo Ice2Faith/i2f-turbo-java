@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  i2f.springcloud.config.client.ConfigClientAutoConfiguration
+  i2f.springcloud.config.client.ConfigClientAutoConfiguration,\
+  i2f.springcloud.config.client.EnvironmentPullBaseWithVersionCompareIntervalRefresher

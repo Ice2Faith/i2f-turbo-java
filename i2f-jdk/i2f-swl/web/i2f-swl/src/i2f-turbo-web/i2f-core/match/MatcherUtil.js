@@ -16,7 +16,7 @@ const MatcherUtil = {
      * @return {boolean}
      */
     antUrlMatched(str, patten) {
-        return this.antUrlMatcher.isMatch(str, patten);
+        return this.antUrlMatcher.matches(str, patten);
     },
     /**
      *
@@ -25,7 +25,7 @@ const MatcherUtil = {
      * @return {boolean}
      */
     antPkgMatched(str, patten) {
-        return this.antPkgMatcher.isMatch(str, patten);
+        return this.antPkgMatcher.matches(str, patten);
     },
     /**
      *
@@ -57,7 +57,7 @@ const MatcherUtil = {
             if (!patten) {
                 continue;
             }
-            if (antPkgMatched(str, patten)) {
+            if (this.antPkgMatched(str, patten)) {
                 return true;
             }
         }

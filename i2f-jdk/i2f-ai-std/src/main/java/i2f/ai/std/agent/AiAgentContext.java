@@ -6,13 +6,12 @@ import i2f.proxy.std.IProxyInvocationHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -31,6 +30,11 @@ public class AiAgentContext {
     protected boolean enableRag = true;
     protected int ragTopCount = 5;
     protected boolean enableRagAct = true;
+    protected boolean enableStructOutput = false;
+    protected Class<?> outputType = null;
+
+    protected List<Predicate<Set<String>>> toolTagsFilterChain = new ArrayList<>();
+    protected List<Predicate<Set<String>>> skillTagsFilterChain = new ArrayList<>();
 
     protected Map<String, SkillDefinition> skillsMap = new HashMap<>(DEFAULT_SKILLS_MAP);
 
@@ -49,6 +53,21 @@ public class AiAgentContext {
     protected IProxyInvocationHandler toolInterceptor;
 
     protected final ConcurrentHashMap<String, Object> sharedContext = new ConcurrentHashMap<>();
+
+    public static boolean hasAnyTagsFilter(Collection<String> tags, Collection<String> requiredTags) {
+        if (requiredTags == null || requiredTags.isEmpty()) {
+            return true;
+        }
+        if (tags == null || tags.isEmpty()) {
+            return true;
+        }
+        for (String requiredTag : requiredTags) {
+            if (tags.contains(requiredTag)) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public AiAgentContext enableSkills(boolean enableSkills) {
         this.enableSkills = enableSkills;
@@ -70,10 +89,51 @@ public class AiAgentContext {
         return this;
     }
 
+    public AiAgentContext enableStructOutput(boolean enableStructOutput) {
+        this.enableStructOutput = enableStructOutput;
+        return this;
+    }
+
+    public AiAgentContext outputType(Class<?> outputType) {
+        this.outputType = outputType;
+        return this;
+    }
+
+    public AiAgentContext toolTagsFilterChain(List<Predicate<Set<String>>> tagsFilterChain) {
+        this.toolTagsFilterChain = tagsFilterChain;
+        return this;
+    }
+
+    public AiAgentContext addToolTagsFilter(Predicate<Set<String>> tagsFilter) {
+        if (this.toolTagsFilterChain == null) {
+            this.toolTagsFilterChain = new ArrayList<>();
+        }
+        if (tagsFilter != null) {
+            this.toolTagsFilterChain.add(tagsFilter);
+        }
+        return this;
+    }
+
+    public AiAgentContext skillTagsFilterChain(List<Predicate<Set<String>>> tagsFilterChain) {
+        this.skillTagsFilterChain = tagsFilterChain;
+        return this;
+    }
+
+    public AiAgentContext addSkillTagsFilter(Predicate<Set<String>> tagsFilter) {
+        if (this.skillTagsFilterChain == null) {
+            this.skillTagsFilterChain = new ArrayList<>();
+        }
+        if (tagsFilter != null) {
+            this.skillTagsFilterChain.add(tagsFilter);
+        }
+        return this;
+    }
+
     public AiAgentContext skillsMap(Map<String, SkillDefinition> skillsMap) {
         this.skillsMap = skillsMap;
         return this;
     }
+
 
     public AiAgentContext skill(SkillDefinition definition) {
         if (skillsMap == null) {

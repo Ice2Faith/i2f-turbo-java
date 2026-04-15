@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>i2f-springboot-activity-starter</module>
+        <module>i2f-springboot-ai-starter</module>
         <module>i2f-springboot-dubbo-starter</module>
         <module>i2f-springboot-dynamic-datasource-starter</module>
         <module>i2f-springboot-encrypt-property-starter</module>
@@ -43,6 +44,8 @@
         <module>i2f-springboot-websocket-starter</module>
         <module>i2f-springboot-xxl-job-starter</module>
         <module>i2f-springboot-zookeeper-starter</module>
+        <module>i2f-springboot-auth-starter</module>
+        <module>i2f-springboot-xproc4j-starter</module>
 
         <module>test-springboot</module>
         <module>test-swl-starter</module>

@@ -2,7 +2,7 @@ package i2f.spring.swl.advice;
 
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.swl.annotation.SecureParams;
+import i2f.swl.annotation.SwlCtrl;
 import i2f.swl.cert.SwlCertManager;
 import i2f.swl.cert.data.SwlCert;
 import i2f.swl.cert.impl.SwlResourceCertManager;
@@ -44,7 +44,7 @@ public class SwlEncryptionResponseBodyAdvice implements ResponseBodyAdvice<Objec
         if (method == null) {
             return false;
         }
-        SecureParams ann = method.getAnnotation(SecureParams.class);
+        SwlCtrl ann = method.getAnnotation(SwlCtrl.class);
         if (ann == null || !ann.out()) {
             return false;
         }

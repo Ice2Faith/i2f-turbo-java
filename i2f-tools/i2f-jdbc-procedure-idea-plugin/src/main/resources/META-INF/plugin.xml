@@ -137,6 +137,12 @@
         <codeInsight.lineMarkerProvider
                 language="TinyScript"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
+
+        <!-- 注册语言注入器 -->
+        <multiHostInjector
+                order="first"
+                implementation="i2f.turbo.idea.plugin.inject.ProjectLanguageTemplateMultiHostInjector"/>
+
     </extensions>
 
 

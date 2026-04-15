@@ -7,10 +7,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -61,7 +58,7 @@ public class AiRequest {
         if (toolMap == null) {
             toolMap = new LinkedHashMap<>();
         }
-        toolMap.put(definition.getFunctionName(), definition);
+        toolMap.put(definition.getName(), definition);
         return this;
     }
 
@@ -73,13 +70,14 @@ public class AiRequest {
         return this;
     }
 
-    public AiRequest tools(List<ToolRawDefinition> list) {
+    public AiRequest tools(Collection<ToolRawDefinition> list) {
         if (toolMap == null) {
             toolMap = new LinkedHashMap<>();
         }
         for (ToolRawDefinition definition : list) {
-            toolMap.put(definition.getFunctionName(), definition);
+            toolMap.put(definition.getName(), definition);
         }
         return this;
     }
+
 }

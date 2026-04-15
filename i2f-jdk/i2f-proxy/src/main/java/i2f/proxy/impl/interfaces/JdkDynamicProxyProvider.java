@@ -11,6 +11,7 @@ import i2f.proxy.std.IProxyProvider;
  * @desc
  */
 public class JdkDynamicProxyProvider implements IProxyProvider {
+    public static final JdkDynamicProxyProvider INSTANCE = new JdkDynamicProxyProvider();
     @Override
     public <T> T proxy(Object obj, IProxyInvocationHandler handler) {
         return JdkProxyUtil.proxy((Class<T>) obj, handler);

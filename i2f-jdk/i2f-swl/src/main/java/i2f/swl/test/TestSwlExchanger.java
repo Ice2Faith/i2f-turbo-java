@@ -28,13 +28,13 @@ public class TestSwlExchanger {
         SwlExchanger clientTransfer = new SwlExchanger();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        clientTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         SwlExchanger serverTransfer = new SwlExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        serverTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         serverTransfer.setObfuscator(new SwlBase64Obfuscator());
 
 
@@ -71,13 +71,13 @@ public class TestSwlExchanger {
 
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        clientTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        clientTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
 
         SwlExchanger serverTransfer = new SwlExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        serverTransfer.setMessageDigester(new SwlSha256MessageDigester());
+        serverTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
         serverTransfer.setObfuscator(new SwlBase64Obfuscator());
 
 

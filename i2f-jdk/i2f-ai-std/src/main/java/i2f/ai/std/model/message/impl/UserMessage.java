@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class UserMessage implements AiMessage {
     protected String text;
-    protected Object rawMessage;
+    protected transient Object rawMessage;
 
     public UserMessage(String text) {
         this.text = text;

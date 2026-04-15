@@ -17,6 +17,7 @@ public interface AttrConsts {
     String AWAIT = "await";
     String DELAY = "delay";
     String TIME_UNIT = "time-unit";
+    String MAX_DELAY = "max-delay";
 
     String TEST = "test";
 
@@ -28,6 +29,7 @@ public interface AttrConsts {
     String BEGIN = "begin";
     String END = "end";
     String INCR = "incr";
+    String ENCLOSE = "enclose";
 
     String METHOD = "method";
     String TARGET = "target";

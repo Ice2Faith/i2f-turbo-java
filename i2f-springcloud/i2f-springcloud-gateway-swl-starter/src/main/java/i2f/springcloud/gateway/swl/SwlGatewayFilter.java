@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -38,10 +39,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -52,6 +50,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2024/7/12 15:06
  * @desc
  */
+@ConditionalOnExpression("${i2f.swl.filter.enable:true}")
 @AutoConfigureAfter(SwlGatewayAutoConfiguration.class)
 @Slf4j
 @Data
@@ -69,6 +68,10 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // 没有开启总开关，直接跳过处理
+        if (!config.isEnable()) {
+            return chain.filter(exchange);
+        }
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
@@ -119,6 +122,8 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
+        AtomicReference<String> swlu = new AtomicReference<>(null);
+
 
         // 获取客户端IP，用以客户端隔离
         AtomicReference<String> clientIp = new AtomicReference<>(getIp(request));
@@ -130,9 +135,62 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
         // 用于响应时使用，以配对请求
         AtomicReference<String> certId = new AtomicReference<>(null);
 
+        // 先从请求头中获取证书ID，因为可能请求不需要加密，这个时候没有swlh头，这个头就解析不出swlci证书ID
+        // 因此，先在这里通过请求头获取，如果有swlh头，再进行覆盖即可
+        certId.set(request.getHeaders().getFirst(config.getCertIdName()));
+        if (certId.get() == null || certId.get().isEmpty()) {
+            certId.set(request.getQueryParams().getFirst(config.getCertIdName()));
+        }
+
+        if(certId.get()!=null && !certId.get().isEmpty()){
+            transfer.resetCertExpire(certId.get());
+        }
+
         ServerHttpResponse nextResponse = getNextResponse(response, ctrl, certId);
 
         if (ctrl.isIn()) {
+
+            if (config.isEnableUrlPathCheck()) {
+                swlu.set(request.getHeaders().getFirst(config.getUrlPathName()));
+                if (swlu.get() == null || swlu.get().isEmpty()) {
+                    swlu.set(request.getQueryParams().getFirst(config.getUrlPathName()));
+                }
+
+                String contextPath = getTrimContextPathRequestUri(request);
+                if (contextPath.endsWith("/")) {
+                    contextPath = contextPath.substring(0, contextPath.length() - 1);
+                }
+                if (!contextPath.startsWith("/")) {
+                    contextPath = "/" + contextPath;
+                }
+                String originUrlPath = new String(Base64StringByteCodec.INSTANCE.decode(swlu.get()), StandardCharsets.UTF_8);
+                if (originUrlPath.endsWith("/")) {
+                    originUrlPath = originUrlPath.substring(0, originUrlPath.length() - 1);
+                }
+                if (!originUrlPath.startsWith("/")) {
+                    originUrlPath = "/" + originUrlPath;
+                }
+                boolean isMatchedUrl = originUrlPath.equals(contextPath);
+                if (!isMatchedUrl) {
+                    for (int i = 0; i < config.getMaxStripUrlPathCount(); i++) {
+                        if (contextPath.isEmpty()) {
+                            break;
+                        }
+                        if (originUrlPath.endsWith(contextPath)) {
+                            isMatchedUrl = true;
+                            break;
+                        }
+                        int idx = contextPath.indexOf("/", 1);
+                        if (idx < 0) {
+                            break;
+                        }
+                        contextPath = contextPath.substring(idx);
+                    }
+                }
+                if (!isMatchedUrl) {
+                    throw new SwlException(SwlCode.SIGN_VERIFY_FAILURE_EXCEPTION.code(), "request url has been changed!");
+                }
+            }
 
             // 获取请求体
             return request.getBody()
@@ -177,12 +235,18 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         // 需要进行反序列化字符串
                         if (srcText != null) {
                             srcText = srcText.trim();
+                            if (srcText.startsWith("$.")) {
+                                srcText = srcText.substring(2);
+                            }
                             if (srcText.startsWith("\"")) {
                                 srcText = (String) jsonSerializer.deserialize(srcText, String.class);
                             }
                         }
 
                         List<String> attachedHeaders = new ArrayList<>();
+                        if (config.isEnableUrlPathCheck()) {
+                            attachedHeaders.add(swlu.get());
+                        }
                         if (this.config.getAttachedHeaderNames() != null) {
                             for (String headerName : this.config.getAttachedHeaderNames()) {
                                 String header = request.getHeaders().getFirst(headerName);
@@ -209,6 +273,15 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         // 获取解密后的数据
                         srcText = receiveData.getParts().get(0);
                         swlp = receiveData.getParts().get(1);
+                        if (swlp != null) {
+                            if (!transfer.isEnableEncrypt()) {
+                                try {
+                                    swlp = URLDecoder.decode(swlp, "UTF-8");
+                                } catch (UnsupportedEncodingException e) {
+                                    throw new RuntimeException(e.getMessage(), e);
+                                }
+                            }
+                        }
 
                         // 重新设置请求参数
                         String replaceQueryString = null;
@@ -403,6 +476,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                     delegateResponse.getHeaders().set(config.getCertIdName(), responseData.getContext().getCertId());
 
                     responseText = responseData.getParts().get(0);
+                    responseText = "$." + responseText;
                     try {
                         responseBody = responseText.getBytes(StandardCharsets.UTF_8.name());
                     } catch (UnsupportedEncodingException e) {
@@ -525,14 +599,16 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
 
 
     public static SwlWebCtrl parseCtrl(ServerHttpRequest request, SwlWebConfig config) {
-        SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
+        String path = getTrimContextPathRequestUri(request);
 
-        MediaType contentType = request.getHeaders().getContentType();
-        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
-            return new SwlWebCtrl(false, defaultCtrl.isOut());
+        List<String> urlPatterns = config.getUrlPatterns();
+        if (urlPatterns != null && !urlPatterns.isEmpty()) {
+            if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+                return new SwlWebCtrl(false, false);
+            }
         }
 
-        String path = getTrimContextPathRequestUri(request);
+        SwlWebCtrl defaultCtrl = config.getDefaultCtrl();
 
         Boolean in = null;
         Boolean out = null;
@@ -542,11 +618,17 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                 in = false;
             }
         }
+
         List<String> whiteListOut = config.getWhiteListOut();
         if (whiteListOut != null) {
             if (MatcherUtil.antUrlMatchedAny(path, whiteListOut)) {
                 out = false;
             }
+        }
+
+        MediaType contentType = request.getHeaders().getContentType();
+        if (MediaType.MULTIPART_FORM_DATA.isCompatibleWith(contentType)) {
+            in = false;
         }
 
         return new SwlWebCtrl(in == null ? defaultCtrl.isIn() : in,

@@ -42,6 +42,8 @@ public class LangRetryNode extends AbstractExecutorNode {
         Long delay = executor.convertAs(executor.attrValue(AttrConsts.DELAY, FeatureConsts.LONG, node, context), Long.class);
         String unit = executor.convertAs(executor.attrValue(AttrConsts.TIME_UNIT, FeatureConsts.STRING, node, context), String.class);
         Double incr = executor.convertAs(executor.attrValue(AttrConsts.INCR, FeatureConsts.DOUBLE, node, context), Double.class);
+        Long maxDelay = executor.convertAs(executor.attrValue(AttrConsts.MAX_DELAY, FeatureConsts.LONG, node, context), Long.class);
+
         if (count == null) {
             count = 1;
         }
@@ -79,25 +81,28 @@ public class LangRetryNode extends AbstractExecutorNode {
                 break;
             }
             tryCount++;
-            ex=null;
+            ex = null;
             try {
                 executor.execAsProcedure(node, context, false, false);
                 break;
             } catch (Throwable e) {
-                if(e instanceof ControlSignalException){
-                    if(e instanceof ContinueSignalException){
+                if (e instanceof ControlSignalException) {
+                    if (e instanceof ContinueSignalException) {
                         try {
                             Thread.sleep((long) sleepTime);
                         } catch (InterruptedException ie) {
 
                         }
                         sleepTime = sleepTime * incr;
+                        if (maxDelay != null && maxDelay > 0) {
+                            sleepTime = Math.min(sleepTime, maxDelay);
+                        }
                         continue;
                     }
-                    if(e instanceof BreakSignalException){
+                    if (e instanceof BreakSignalException) {
                         break;
                     }
-                    if(e instanceof ReturnSignalException){
+                    if (e instanceof ReturnSignalException) {
                         throw e;
                     }
                 }
@@ -113,6 +118,9 @@ public class LangRetryNode extends AbstractExecutorNode {
 
             }
             sleepTime = sleepTime * incr;
+            if (maxDelay != null && maxDelay > 0) {
+                sleepTime = Math.min(sleepTime, maxDelay);
+            }
         }
 
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
@@ -122,8 +130,8 @@ public class LangRetryNode extends AbstractExecutorNode {
         }
 
         if (ex != null) {
-            if(ex instanceof SignalException){
-                throw (SignalException)ex;
+            if (ex instanceof SignalException) {
+                throw (SignalException) ex;
             }
             throw new ThrowSignalException(ex);
         }

@@ -6,10 +6,11 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.spring.web.mapping.MappingUtil;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
+import i2f.swl.core.exchanger.impl.SwlExpireCacheNonceManager;
 import i2f.swl.exception.SwlException;
-import i2f.swl.std.ISwlMessageDigester;
 import i2f.swl.std.ISwlObfuscator;
 import i2f.swl.std.supplier.ISwlAsymmetricEncryptorSupplier;
+import i2f.swl.std.supplier.ISwlMessageDigesterSupplier;
 import i2f.swl.std.supplier.ISwlSymmetricEncryptorSupplier;
 import jakarta.servlet.DispatcherType;
 import lombok.Data;
@@ -58,10 +59,10 @@ public class SwlSpringAutoConfiguration {
     private BeanFactory beanFactory;
 
     @Value("${i2f.swl.filter.order:-10}")
-    private int filterOrder=-10;
+    private int filterOrder = -10;
 
     @Value("${i2f.swl.filter.url-pattern:/*}")
-    private String filterUrlPattern="/*";
+    private String filterUrlPattern = "/*";
 
     public <T> T getBeanByTypeOrNewInstance(Class<T> clazz) {
         try {
@@ -104,9 +105,9 @@ public class SwlSpringAutoConfiguration {
         }
 
         try {
-            Class<? extends ISwlMessageDigester> clazz = webProperties.getDigestAlgoClass();
-            ISwlMessageDigester digester = getBeanByTypeOrNewInstance(clazz);
-            ret.setMessageDigester(digester);
+            Class<? extends ISwlMessageDigesterSupplier> clazz = webProperties.getDigestAlgoClass();
+            ISwlMessageDigesterSupplier digester = getBeanByTypeOrNewInstance(clazz);
+            ret.setMessageDigesterSupplier(digester);
         } catch (Exception e) {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
@@ -119,7 +120,7 @@ public class SwlSpringAutoConfiguration {
             throw new SwlException(SwlCode.SYMMETRIC_EXCEPTION.code(), e.getMessage(), e);
         }
 
-        ret.setCache(new IExpireCache<String, String>() {
+        IExpireCache<String, String> cache = new IExpireCache<String, String>() {
             @Override
             public void set(String key, String value, long time, TimeUnit timeUnit) {
                 expireCache.set(key, value, time, timeUnit);
@@ -154,10 +155,15 @@ public class SwlSpringAutoConfiguration {
             public void remove(String key) {
                 expireCache.remove(key);
             }
-        });
+        };
+        ret.setCache(cache);
 
-        ret.setConfig(transferProperties);
+        ret.applyConfig(transferProperties);
 
+        SwlExpireCacheNonceManager nonceManager = new SwlExpireCacheNonceManager();
+        nonceManager.setCache(cache);
+        nonceManager.setCacheKeyPrefix(transferProperties.getCacheKeyPrefix());
+        ret.setNonceManager(nonceManager);
 
         return ret;
     }

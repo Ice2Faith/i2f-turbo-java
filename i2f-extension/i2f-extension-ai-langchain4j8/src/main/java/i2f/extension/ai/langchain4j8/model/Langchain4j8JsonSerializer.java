@@ -3,6 +3,7 @@ package i2f.extension.ai.langchain4j8.model;
 import com.google.gson.Gson;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.typeof.token.TypeToken;
+import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -12,10 +13,15 @@ import java.util.Map;
  * @date 2026/3/27 14:05
  * @desc
  */
+@NoArgsConstructor
 public class Langchain4j8JsonSerializer implements IJsonSerializer {
     public static final Langchain4j8JsonSerializer INSTANCE = new Langchain4j8JsonSerializer();
 
     protected Gson gson = new Gson();
+
+    public Langchain4j8JsonSerializer(Gson gson) {
+        this.gson = gson;
+    }
 
     @Override
     public Map<String, Object> deserializeAsMap(String enc) {

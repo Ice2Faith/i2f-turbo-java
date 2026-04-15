@@ -1,7 +1,7 @@
 /**
  * RSA工具
  */
-import JSEncrypt from '../static/jsencrypt'
+//import JSEncrypt from '../static/jsencrypt'
 import jsrsasign from 'jsrsasign'
 import AsymKeyPair from './AsymKeyPair'
 

@@ -25,7 +25,7 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
 
     this.transfer.asymmetricEncryptorSupplier=config.asymAlgoSupplier
     this.transfer.symmetricEncryptorSupplier=config.symmAlgoSupplier
-    this.transfer.messageDigester=config.digestAlgoSupplier
+    this.transfer.messageDigesterSupplier=config.digestAlgoSupplier
     this.transfer.obfuscator=config.obfuscateAlgoSupplier
 
 }
@@ -37,8 +37,15 @@ function SwlWebFilter(transfer = new SwlTransfer(), config = new SwlWebConfig())
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.requestFilter = function (res) {
+    // 始终发送可能存在的 certId, 因为存在请求不加密，但是响应加密的情况
     let certId=this.transfer.getOtherCertIdDefault();
-    res.headers[this.config.certIdName]=certId
+    if(certId){
+        res.headers[this.config.certIdName]=certId
+    }
+
+    if(this.config.enable==false){
+        return res;
+    }
     let ctrl = SwlWebFilter.parseCtrl(res,this.config);
     if(!ctrl.enableOut){
         return res
@@ -49,7 +56,8 @@ SwlWebFilter.prototype.requestFilter = function (res) {
         body=JSON.stringify(res.data)
         swlSendContext.data=body
     }
-    let url=res.url
+
+    let url=res.url;
     if(url){
         let idx=url.indexOf('?');
         if(idx>=0){
@@ -74,6 +82,15 @@ SwlWebFilter.prototype.requestFilter = function (res) {
     }
 
     let attachedHeaders = []
+    if(this.config.enableUrlPathCheck) {
+        let fullUrl = SwlWebFilter.getFullURL(res);
+        let fullPath = fullUrl.pathname;
+        // 添加固定的URL path
+        let swlu = Base64Util.encrypt(fullPath)
+        attachedHeaders.push(swlu);
+        res.headers[this.config.urlPathName] = swlu
+    }
+
     if (this.config.attachedHeaderNames) {
         for (let i = 0; i < this.config.attachedHeaderNames.length; i++) {
             let headerName = this.config.attachedHeaderNames[i]
@@ -85,7 +102,7 @@ SwlWebFilter.prototype.requestFilter = function (res) {
     swlSendContext.swlSendData=swlSendData
     let swlh=Base64Util.encrypt(qs.stringify(swlSendData.header))
     swlh=this.transfer.obfuscateEncode(swlh)
-    res.data=swlSendData.parts[0]
+    res.data='$.'+swlSendData.parts[0]
     let swlp=swlSendData.parts[1]
     if(swlp){
         res.params={}
@@ -104,6 +121,9 @@ SwlWebFilter.prototype.requestFilter = function (res) {
  * @return {SwlWebRes}
  */
 SwlWebFilter.prototype.responseFilter = function (res) {
+    if(this.config.enable==false){
+        return res;
+    }
     if(!res){
         return res
     }
@@ -126,6 +146,9 @@ SwlWebFilter.prototype.responseFilter = function (res) {
         return res
     }
     let body=res.data
+    if(body!=null && body.startsWith('$.')){
+        body=body.substring(2);
+    }
     swlh=this.transfer.obfuscateDecode(swlh)
     swlh=Base64Util.decrypt(swlh)
     swlReceiveContext.body=body
@@ -263,6 +286,15 @@ SwlWebFilter.getFullURL=function(res){
  * @return {SwlWebCtrl}
  */
 SwlWebFilter.parseCtrl = function (res, config) {
+    let path = SwlWebFilter.getTrimContextPathRequestUri(res);
+
+    let urlPatterns = config.urlPatterns;
+    if (urlPatterns && urlPatterns.length>0) {
+        if (!MatcherUtil.antUrlMatchedAny(path, urlPatterns)) {
+            return new SwlWebCtrl(false, false);
+        }
+    }
+
     let defaultCtrl = config.defaultCtrl;
 
     let contentType = SwlWebFilter.getRequestContentType(res)
@@ -275,8 +307,6 @@ SwlWebFilter.parseCtrl = function (res, config) {
         return new SwlWebCtrl(defaultCtrl.enableIn, false);
     }
 
-
-    let path = SwlWebFilter.getTrimContextPathRequestUri(res);
 
     let enableIn = null;
     let enableOut = null;

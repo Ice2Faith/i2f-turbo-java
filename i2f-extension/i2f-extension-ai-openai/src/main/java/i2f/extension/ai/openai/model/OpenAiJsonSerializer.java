@@ -3,6 +3,7 @@ package i2f.extension.ai.openai.model;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
@@ -11,9 +12,14 @@ import java.util.Map;
  * @date 2026/3/27 14:27
  * @desc
  */
+@NoArgsConstructor
 public class OpenAiJsonSerializer implements IJsonSerializer {
     public static final OpenAiJsonSerializer INSTANCE = new OpenAiJsonSerializer();
     private ObjectMapper objectMapper = new ObjectMapper();
+
+    public OpenAiJsonSerializer(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     @Override
     public Map<String, Object> deserializeAsMap(String enc) {

@@ -1,0 +1,34 @@
+{
+  "method": {
+    "name": "test",
+    "parameters": [
+      {
+        "index": 0,
+        "name": "user",
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      }
+    ],
+    "return": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    },
+    "declareClass": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    }
+  },
+  "field": {
+    "name": "user",
+    "fullType": "com.system.user.UserVo",
+    "simpleType": "UserVo",
+    "declareClass": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    }
+  },
+  "class": {
+    "fullType": "com.system.user.UserVo",
+    "simpleType": "UserVo"
+  }
+}

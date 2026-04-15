@@ -17,6 +17,8 @@ repositories {
 
 dependencies {
     implementation("org.antlr:antlr4-runtime:4.13.2")
+    implementation("org.apache.velocity:velocity:1.7")
+    implementation("com.google.code.gson:gson:2.8.6")
 }
 
 tasks.withType<JavaCompile> {

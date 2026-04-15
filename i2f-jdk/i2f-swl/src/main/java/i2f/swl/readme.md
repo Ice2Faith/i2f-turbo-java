@@ -19,12 +19,9 @@
 
 ## 数据载荷清单
 
-- clientAsymSign
-    - 客户端的公钥签名，用于确定与客户端配对的公钥
-    - 作用是用来查找请求对应的客户端公钥
-- serverAsymSign
-    - 服务端的公钥签名，用于确定请求发出时使用的服务端公钥
-    - 作用是用于确定使用了哪个服务端公钥
+- certId
+    - 握手成功后的证书ID，用于进行证书管理
+    - 作用是用来查找请求对应的证书的公私钥
 - randomKey
     - 对称加密的秘钥，用于进行对称加密算法进行加解密
     - randomKey=asym.encrypt(key,asymPublicKey)
@@ -42,52 +39,54 @@
     - 传输数据的数字签名，用于保存数字签名，防止数据伪造
     - digital=asym.sign(sign,asymPrivateKey)
     - 是数据签名sign经过发送方的私钥asymPrivateKey进行非对称签名asym.sign之后的值
+- timestamp
+  - 时间戳，用于保存发起方的时间戳，用于确定请求的时效性
+  - 确定接受时间在[timestamp-window,timestamp+window]范围内，确定请求的实时性
 - nonce
     - 一次性请求，用于确定数据请求的一次性，防止重复请求
-    - nonce=timestamp+seq
-    - 是由timestamp时间戳与seq请求唯一标识符组合而成
-    - 确定接受时间在[timestamp-window,timestamp+window]范围内，确定请求的实时性
-    - 同时，在规定的timeout时间范围内seq是唯一值，确定在timeout时间范围内不会重复请求
-    - 当timeout<=2*window时，则同时保证了实时性和防重复性
+  - nonce 一般是一个大随机数或者 uuid
+  - 同时，在规定的timeout时间范围内nonce是唯一值，确定在timeout时间范围内不会重复请求
+  - nonce 可以设计于基于 TTL 周期的存储中实现
 
 ## 运行原理
 
-- 双方生成各自非对称密钥对
-    - 服务端可在项目启动时初始化自身密钥对 serverPublicKey,serverPrivateKey
-    - 客户端可在页面初始化时初始化自身密钥对 clientPublicKey,clientPrivateKey
-- 交换双方公钥
-    - 客户端携带自身公钥 clientPublicKey 请求服务端
-    - 服务端计算客户端公钥签名 clientAsymSign=digest.sign(clientPublicKey)
-    - 服务端以键值对方式保存这个客户端公钥，key=clientAsymSign,value=clientPublicKey
-    - 服务端相应客户端自身公钥 serverPublicKey
-    - 客户端保存服务端公钥 serverPublicKey
-- 客户端发起请求
-    - 读取自身密钥对 clientPublicKey,clientPrivateKey
-    - 计算自身公钥签名 clientAsymSign=digest.sign(clientPublicKey)
-    - 读取服务端公钥 serverPublicKey
-    - 计算服务端公钥签名 serverAsymSign=digest.sign(serverPublicKey)
+### 初始化
+
+- 系统初始化配置
+    - 系统使用生成一对非对称秘钥，作为交换密钥对 swapKeyPair
+    - 交换秘钥的私钥 swapPrivateKey 保存在服务端配置文件中
+    - 交换秘钥的公钥 swapPublicKey 保存在客户端的JS文件中
+
+### 交换回话公钥
+
+- 交换会话公钥-客户端发起
+    - 客户端生成自己的密钥对 clientKeyPair
+    - 客户端使用交换公钥 swapPublicKey
+  - 客户端生成一个随机的请求数据体 body=uuid()
+  - 设置证书ID为 certId 为 swap，临时使用，名称不重要
     - 得到当前时间戳 timestamp
-    - 生成随机数作为 seq=rand()%1000
-    - 拼接得到一次性请求 nonce=timestamp + '-' + seq
+  - 拼接得到一次性请求 nonce=uuid()
     - 生成随机对称加密秘钥 key=randKey()
-    - 使用服务端公钥加密随机秘钥 randomKey=asym.encrypt(key,serverPublicKey)
+  - 使用交换公钥加密随机秘钥 randomKey=asym.encrypt(key,swapPublicKey)
     - 得到数据体 body
     - 加密数据 data=symm.encrypt(key,body)
-    - 计算数据签名 sign=digest.sign(data+randomKey+nonce+clientAsymSign+serverAsymSign)
+  - 计算数据签名 sign=digest.sign(data+randomKey+timestamp+nonce+certId+clientPublicKey)
     - 使用自身私钥计算数字签名 digital=asym.sign(sign,clientPrivateKey)
     - 发送请求
-        - clientAsymSign
-        - serverAsymSign
+      - certId
+      - timestamp
         - nonce
         - randomKey
         - data
         - sign
         - digital
-- 服务端接受请求
+      - clientPublicKey
+- 交换会话公钥-服务端接受
+  - 从请求中，得到客户端公钥 clientPublicKey
     - 得到当前时间戳 current_timestamp
-    - 得到一次性请求 nonce
-    - 从一次性请求中分割出时间戳和随机数 [timestamp,seq]=nonce.split('-')
-    - 得到配置的时间窗口大小 window
+  - 从请求中，得到一次性请求 nonce
+  - 从请求中，得到请求时间戳 timestamp
+  - 从配置中，得到配置的时间窗口大小 window
     - 如果当前时间戳不在前后window范围，则违反实时性要求，响应客户端失败
         - 如果 abs(current_timestamp-timestamp)>window
         - 响应失败，原因为：违反实时性约束
@@ -100,45 +99,201 @@
     - 如果随机数还存在随机数池中，没有过期，则违反一次性要求，响应客户端失败
         - 如果 noncePool.contains(nonceKey)
         - 响应失败，原因为：违反一次性约束
-    - 得到数据签名 sign
-    - 得到数据体 data
-    - 得到随机对称秘钥 randomKey
-    - 读取客户端公钥签名 clientAsymSign
-    - 读取自身公钥签名 serverAsymSign
-    - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+nonce+clientAsymSign+serverAsymSign)
+      - 不在随机数池中，则根据 nonceKey 添加 nonce 到随机数池，并设置TTL过期时间
+  - 从请求中，得到数据签名 sign
+  - 从请求中，得到数据体 data
+  - 从请求中，得到随机对称秘钥 randomKey
+  - 从请求中，得到证书ID certId
+  - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+timestamp+nonce+certId+clientPublicKey)
+  - 如果收到的数据签名与计算的数据签名不一致，则违反数据完整性要求，响应客户端失败
+    - 如果 calc_sign != sign
+    - 响应失败，原因为：违反数据完整性约束
+  - 从请求中，得到数字签名 digital
+  - 使用客户端公钥 clientPublicKey 验证数字签名 digital 有效性
+  - 如果数字签名无效，则违反防篡改要求，响应客户端失败
+    - 如果 asym.verify(digital,sign) != true
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用交换私钥 swapPrivateKey 解密随机秘钥 randomKey 得到原始对称秘钥 key=asym.decrypt(randomKey,swapPrivateKey)
+  - 如果解密对称秘钥失败，则违反数据完整性要求，响应客户端失败
+    - 如果 key == null
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用对称秘钥 key 解密数据体 data 得到原始数据体 body=symm.decrypt(key,data)
+  - 至此，完成了客户端身份确认
+- 交换会话公钥-服务端响应
+  - 服务端生成一对非对称密钥对 serverKeyPair
+  - 服务端将 serverPrivateKey+clientPublicKey 构成证书 serverCert
+  - 服务端生成会话证书ID certId=uuid()
+  - 服务端使用certId为键保存 serverCert，并设置TTL过期时间
+  - 得到当前时间戳 timestamp
+  - 拼接得到一次性请求 nonce=uuid()
+  - 生成随机对称加密秘钥 key=randKey()
+  - 使用交换公钥加密随机秘钥 randomKey=asym.encrypt(key,clientPublicKey)
+  - 将服务端公钥作为数据体 body=serverPublicKey
+  - 加密数据 data=symm.encrypt(key,body)
+  - 计算数据签名 sign=digest.sign(data+randomKey+timestamp+nonce+certId)
+  - 使用交换私钥计算数字签名 digital=asym.sign(sign,swapPrivateKey)
+  - 发送请求
+    - certId
+    - timestamp
+    - nonce
+    - randomKey
+    - data
+    - sign
+    - digital
+- 交换会话公钥-客户端接受
+  - 得到当前时间戳 current_timestamp
+  - 从请求中，得到一次性请求 nonce
+  - 从请求中，得到请求时间戳 timestamp
+  - 从配置中，得到配置的时间窗口大小 window
+  - 如果当前时间戳不在前后window范围，则违反实时性要求，响应客户端失败
+    - 如果 abs(current_timestamp-timestamp)>window
+    - 响应失败，原因为：违反实时性约束
+  - 得到请求的服务端地址 clientIp，这里一般固定为 server 即可
+  - 拼接随机数池的键值 nonceKey=clientIp+'-'+nonce
+    - 这一步是为了防止客户端之间互相影响
+    - 因此采用clientIp进行隔离
+    - 如果能够保存nonce本身就是短期内唯一的
+    - 不会与其他客户端冲突，则可以不用使用clientIp隔离
+  - 如果随机数还存在随机数池中，没有过期，则违反一次性要求，响应客户端失败
+    - 如果 noncePool.contains(nonceKey)
+    - 响应失败，原因为：违反一次性约束
+    - 不在随机数池中，则根据 nonceKey 添加 nonce 到随机数池，并设置TTL过期时间
+  - 从请求中，得到数据签名 sign
+  - 从请求中，得到数据体 data
+  - 从请求中，得到随机对称秘钥 randomKey
+  - 从请求中，得到证书ID certId
+  - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+timestamp+nonce+certId)
     - 如果收到的数据签名与计算的数据签名不一致，则违反数据完整性要求，响应客户端失败
         - 如果 calc_sign != sign
         - 响应失败，原因为：违反数据完整性约束
-    - 得到数字签名 digital
-    - 根据客户端公钥签名获取对应的客户端公钥 clientPublicKey
-    - 使用客户端公钥验证数字签名有效性
+  - 从请求中，得到数字签名 digital
+  - 使用交换公钥 swapPublicKey 验证数字签名 digital 有效性
     - 如果数字签名无效，则违反防篡改要求，响应客户端失败
         - 如果 asym.verify(digital,sign) != true
         - 响应失败，原因为：违反数据防篡改约束
-    - 根据自身公钥签名获取对应的自身密钥对 serverPublicKey,serverPrivateKey
-    - 使用自身私钥解密随机秘钥得到原始对称秘钥 key=asym.decrypt(randomKey,serverPrivateKey)
+  - 使用客户端私钥 clientPrivateKey 解密随机秘钥 randomKey 得到原始对称秘钥 key=asym.decrypt(randomKey,clientPrivateKey)
     - 如果解密对称秘钥失败，则违反数据完整性要求，响应客户端失败
         - 如果 key == null
         - 响应失败，原因为：违反数据防篡改约束
-    - 使用对称秘钥解密数据体得到原始数据体 body=symm.decrypt(key,data)
-- 服务端响应数据
-    - 和客户端发起请求基本一致
-    - 除了获取客户端公钥，需要根据请求来的 clientAsymSign 进行获取
-    - 其他流程一致
+  - 使用对称秘钥 key 解密数据体 data 得到原始数据体 body=symm.decrypt(key,data)
+  - 这里得到的 body 就是好服务端公钥 serverPublicKey=body
+  - 至此，完成了服务端身份确认
+  - 客户端将 clientPrivateKey+serverPublicKey 构成证书 clientCert
+  - 客户端使用certId为键保存 clientCert，并设置TTL过期时间，可以按照API地址保存 certId
+  - 至此，完整了交换回话公钥，后续双方使用 certId 在加密通道内进行会话
 
-## 其他可考虑的点
+### 业务请求
 
-- 服务端
-    - 定时刷新自身的非对称密钥对，防止暴力破解
-    - 同时，维护几个历史密钥对，避免客户端还没来得及更新最新的服务端公钥
-    - 响应失败时，根据情况自动在请求头中附加最新的服务端公钥进行响应
-    - 实现客户端自动识别更新公钥
-    - 针对客户端的秘钥数据进行限制
-    - 比如，同一个IP的客户端始终只接受一个最新秘钥，不保留历史秘钥
-- 客户端
-    - 定时刷新自身的非对称密钥对，防止暴力破解
-    - 可以在每次进入系统时重新初始化一个新的秘钥对
-    - 也可以借助cookie定时自动过期的特性来做
-    - 或者使用localStorage等存储加上自身判定策略来实现
-    - 也需要考虑保留历史密钥对的情况
-    - 防止客户端刷新之后，部分响应数据解密失败
+- 客户端请求
+  - 获取对应的服务端的 certId 和对应的 clientCert(clientPrivateKey+serverPublicKey)
+  - 得到当前时间戳 timestamp
+  - 拼接得到一次性请求 nonce=uuid()
+  - 生成随机对称加密秘钥 key=randKey()
+  - 使用服务端公钥加密随机秘钥 randomKey=asym.encrypt(key,serverPublicKey)
+  - 得到请求数据体 body
+  - 加密数据 data=symm.encrypt(key,body)
+  - 计算数据签名 sign=digest.sign(data+randomKey+timestamp+nonce+certId)
+  - 使用客户端私钥计算数字签名 digital=asym.sign(sign,clientPrivateKey)
+  - 发送请求
+    - certId
+    - timestamp
+    - nonce
+    - randomKey
+    - data
+    - sign
+    - digital
+- 服务端接受
+  - 得到当前时间戳 current_timestamp
+  - 从请求中，得到一次性请求 nonce
+  - 从请求中，得到请求时间戳 timestamp
+  - 从配置中，得到配置的时间窗口大小 window
+  - 如果当前时间戳不在前后window范围，则违反实时性要求，响应客户端失败
+    - 如果 abs(current_timestamp-timestamp)>window
+    - 响应失败，原因为：违反实时性约束
+  - 得到请求的服务端地址 clientIp，这里一般固定为 server 即可
+  - 拼接随机数池的键值 nonceKey=clientIp+'-'+nonce
+    - 这一步是为了防止客户端之间互相影响
+    - 因此采用clientIp进行隔离
+    - 如果能够保存nonce本身就是短期内唯一的
+    - 不会与其他客户端冲突，则可以不用使用clientIp隔离
+  - 如果随机数还存在随机数池中，没有过期，则违反一次性要求，响应客户端失败
+    - 如果 noncePool.contains(nonceKey)
+    - 响应失败，原因为：违反一次性约束
+    - 不在随机数池中，则根据 nonceKey 添加 nonce 到随机数池，并设置TTL过期时间
+  - 从请求中，得到数据签名 sign
+  - 从请求中，得到数据体 data
+  - 从请求中，得到随机对称秘钥 randomKey
+  - 从请求中，得到证书ID certId，并重置证书的TTL过期时间
+  - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+timestamp+nonce+certId)
+  - 如果收到的数据签名与计算的数据签名不一致，则违反数据完整性要求，响应客户端失败
+    - 如果 calc_sign != sign
+    - 响应失败，原因为：违反数据完整性约束
+  - 根据 certId 获取对应的 serverCert(serverPrivateKey+clientPublicKey)
+  - 从请求中，得到数字签名 digital
+  - 使用客户端公钥 clientPublicKey 验证数字签名 digital 有效性
+  - 如果数字签名无效，则违反防篡改要求，响应客户端失败
+    - 如果 asym.verify(digital,sign) != true
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用服务端私钥 serverPrivateKey 解密随机秘钥 randomKey 得到原始对称秘钥 key=asym.decrypt(randomKey,serverPrivateKey)
+  - 如果解密对称秘钥失败，则违反数据完整性要求，响应客户端失败
+    - 如果 key == null
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用对称秘钥 key 解密数据体 data 得到原始数据体 body=symm.decrypt(key,data)
+  - 这里得到的 body 就是解密后的请求体
+- 服务端响应
+  - 根据请求时的 certId 得到 serverCert(serverPrivateKey+clientPublicKey)
+  - 得到当前时间戳 timestamp
+  - 拼接得到一次性请求 nonce=uuid()
+  - 生成随机对称加密秘钥 key=randKey()
+  - 使用客户端公钥加密随机秘钥 randomKey=asym.encrypt(key,clientPublicKey)
+  - 得到请求数据体 body
+  - 加密数据 data=symm.encrypt(key,body)
+  - 计算数据签名 sign=digest.sign(data+randomKey+timestamp+nonce+certId)
+  - 使用服务端私钥计算数字签名 digital=asym.sign(sign,serverPrivateKey)
+  - 发送请求
+    - certId
+    - timestamp
+    - nonce
+    - randomKey
+    - data
+    - sign
+    - digital
+- 客户端接受
+  - 得到当前时间戳 current_timestamp
+  - 从请求中，得到一次性请求 nonce
+  - 从请求中，得到请求时间戳 timestamp
+  - 从配置中，得到配置的时间窗口大小 window
+  - 如果当前时间戳不在前后window范围，则违反实时性要求，响应客户端失败
+    - 如果 abs(current_timestamp-timestamp)>window
+    - 响应失败，原因为：违反实时性约束
+  - 得到请求的服务端地址 clientIp，这里一般固定为 server 即可
+  - 拼接随机数池的键值 nonceKey=clientIp+'-'+nonce
+    - 这一步是为了防止客户端之间互相影响
+    - 因此采用clientIp进行隔离
+    - 如果能够保存nonce本身就是短期内唯一的
+    - 不会与其他客户端冲突，则可以不用使用clientIp隔离
+  - 如果随机数还存在随机数池中，没有过期，则违反一次性要求，响应客户端失败
+    - 如果 noncePool.contains(nonceKey)
+    - 响应失败，原因为：违反一次性约束
+    - 不在随机数池中，则根据 nonceKey 添加 nonce 到随机数池，并设置TTL过期时间
+  - 从请求中，得到数据签名 sign
+  - 从请求中，得到数据体 data
+  - 从请求中，得到随机对称秘钥 randomKey
+  - 从请求中，得到证书ID certId，并重置证书的TTL过期时间
+  - 重新计算收到数据的签名 calc_sign=digest.sign(data+randomKey+timestamp+nonce+certId)
+  - 如果收到的数据签名与计算的数据签名不一致，则违反数据完整性要求，响应客户端失败
+    - 如果 calc_sign != sign
+    - 响应失败，原因为：违反数据完整性约束
+  - 根据 certId 获取对应的 clientCert(clientPrivateKey+serverPublicKey)
+  - 从请求中，得到数字签名 digital
+  - 使用服务端公钥 serverPublicKey 验证数字签名 digital 有效性
+  - 如果数字签名无效，则违反防篡改要求，响应客户端失败
+    - 如果 asym.verify(digital,sign) != true
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用客户端私钥 clientPrivateKey 解密随机秘钥 randomKey 得到原始对称秘钥 key=asym.decrypt(randomKey,clientPrivateKey)
+  - 如果解密对称秘钥失败，则违反数据完整性要求，响应客户端失败
+    - 如果 key == null
+    - 响应失败，原因为：违反数据防篡改约束
+  - 使用对称秘钥 key 解密数据体 data 得到原始数据体 body=symm.decrypt(key,data)
+  - 这里得到的 body 就是解密后的响应体
+

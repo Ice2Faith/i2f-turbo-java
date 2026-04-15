@@ -1,6 +1,6 @@
-import IExpireCache from "../IExpireCache";
-import SystemClock from "../../clock/SystemClock";
-import ExpireData from "./ExpireData";
+import IExpireCache from '../IExpireCache';
+import SystemClock from '../../clock/SystemClock';
+import ExpireData from './ExpireData';
 
 /**
  * @retunrn {MemMapExpireCache}
@@ -8,12 +8,12 @@ import ExpireData from "./ExpireData";
  * @constructor
  */
 function MemMapExpireCache() {
-    this._map = new Map()
+  this._map = new Map();
 }
 
 // 继承
-MemMapExpireCache.prototype = Object.create(IExpireCache.prototype)
-MemMapExpireCache.prototype.constructor = MemMapExpireCache
+MemMapExpireCache.prototype = Object.create(IExpireCache.prototype);
+MemMapExpireCache.prototype.constructor = MemMapExpireCache;
 
 /**
  *
@@ -21,18 +21,18 @@ MemMapExpireCache.prototype.constructor = MemMapExpireCache
  * @return {ExpireData}
  */
 MemMapExpireCache.prototype.getData = function (key) {
-    let data = this._map.get(key)
-    if (!data) {
-        return null
+  let data = this._map.get(key);
+  if (!data) {
+    return null;
+  }
+  if (data.expireTs >= 0) {
+    if (SystemClock.currentTimeSeconds() > data.expireTs) {
+      this._map.delete(key);
+      return null;
     }
-    if (data.expireTs >= 0) {
-        if (SystemClock.currentTimeSeconds() > data.expireTs) {
-            this._map.delete(key)
-            return null
-        }
-    }
-    return data
-}
+  }
+  return data;
+};
 
 /**
  *
@@ -40,12 +40,13 @@ MemMapExpireCache.prototype.getData = function (key) {
  * @return {Object}
  */
 MemMapExpireCache.prototype.get = function (key) {
-    let data = this.getData(key);
-    if (!data) {
-        return null
-    }
-    return data.data
-}
+  this.clearExpireKeys();
+  let data = this.getData(key);
+  if (!data) {
+    return null;
+  }
+  return data.data;
+};
 /**
  *
  * @param key {String}
@@ -53,9 +54,26 @@ MemMapExpireCache.prototype.get = function (key) {
  * @return {void}
  */
 MemMapExpireCache.prototype.set = function (key, value) {
-    let str = new ExpireData(value)
-    this._map.set(key, str)
-}
+  this.clearExpireKeys();
+  let str = new ExpireData(value);
+  this._map.set(key, str);
+};
+
+MemMapExpireCache.prototype.clearExpireKeys = function () {
+  if (Math.random() < 0.88) {
+    return;
+  }
+  setTimeout(() => {
+    Object.keys(this._map).forEach(key => {
+      if (key) {
+        try {
+          this.getData(key);
+        }catch (e) {
+        }
+      }
+    });
+  }, 30);
+};
 
 /**
  *
@@ -63,17 +81,16 @@ MemMapExpireCache.prototype.set = function (key, value) {
  * @return {boolean}
  */
 MemMapExpireCache.prototype.exists = function (key) {
-    return !!this.getData(key)
-}
+  return !!this.getData(key);
+};
 
 /**
  * @param key {String}
  * @return {void}
  */
 MemMapExpireCache.prototype.remove = function (key) {
-    this._map.delete(key)
-}
-
+  this._map.delete(key);
+};
 
 /**
  *
@@ -83,9 +100,13 @@ MemMapExpireCache.prototype.remove = function (key) {
  * @return {void}
  */
 MemMapExpireCache.prototype.setWith = function (key, value, timeSeconds) {
-    let str = new ExpireData(value, SystemClock.currentTimeSeconds() + timeSeconds)
-    this._map.set(key, str)
-}
+  this.clearExpireKeys();
+  let str = new ExpireData(
+    value,
+    SystemClock.currentTimeSeconds() + timeSeconds
+  );
+  this._map.set(key, str);
+};
 
 /**
  *
@@ -94,13 +115,14 @@ MemMapExpireCache.prototype.setWith = function (key, value, timeSeconds) {
  * @return {void}
  */
 MemMapExpireCache.prototype.expire = function (key, timeSeconds) {
-    let data = this.getData(key)
-    if (data) {
-        data.expireTs = SystemClock.currentTimeSeconds() + timeSeconds
-        let str = data
-        this._map.set(key, str)
-    }
-}
+  this.clearExpireKeys();
+  let data = this.getData(key);
+  if (data) {
+    data.expireTs = SystemClock.currentTimeSeconds() + timeSeconds;
+    let str = data;
+    this._map.set(key, str);
+  }
+};
 
 /**
  *
@@ -108,14 +130,14 @@ MemMapExpireCache.prototype.expire = function (key, timeSeconds) {
  * @return {int|null} timeSeconds
  */
 MemMapExpireCache.prototype.getExpire = function (key) {
-    let data = this.getData(key)
-    if (!data) {
-        return null
-    }
-    if (data.expireTs < 0) {
-        return -1
-    }
-    return data.expireTs - SystemClock.currentTimeSeconds()
-}
+  let data = this.getData(key);
+  if (!data) {
+    return null;
+  }
+  if (data.expireTs < 0) {
+    return -1;
+  }
+  return data.expireTs - SystemClock.currentTimeSeconds();
+};
 
-export default MemMapExpireCache
+export default MemMapExpireCache;

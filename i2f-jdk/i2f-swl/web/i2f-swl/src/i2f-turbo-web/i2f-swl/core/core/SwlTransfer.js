@@ -1,10 +1,5 @@
-import SwlRsaAsymmetricEncryptorSupplier from "../impl/supplier/SwlRsaAsymmetricEncryptorSupplier";
-import SwlAesSymmetricEncryptorSupplier from "../impl/supplier/SwlAesSymmetricEncryptorSupplier";
-import SwlSha256MessageDigester from "../impl/SwlSha256MessageDigester";
-import SwlBase64Obfuscator from "../impl/SwlBase64Obfuscator";
 import MemMapExpireCache from "../../../i2f-core/cache/impl/MemMapExpireCache";
 import SwlTransferConfig from "./SwlTransferConfig";
-import Random from "../../../i2f-core/util/Random";
 import AsymKeyPair from "../../../i2f-core/crypto/asymmetric/AsymKeyPair";
 import SwlExchanger from "./exchanger/SwlExchanger";
 import SwlException from "../exception/SwlException";
@@ -22,45 +17,42 @@ function SwlTransfer() {
     SwlExchanger.call(this)
     /**
      *
-     * @type {ISwlAsymmetricEncryptorSupplier}
-     */
-    this.asymmetricEncryptorSupplier = new SwlRsaAsymmetricEncryptorSupplier()
-    /**
-     *
-     * @type {ISwlSymmetricEncryptorSupplier}
-     */
-    this.symmetricEncryptorSupplier = new SwlAesSymmetricEncryptorSupplier()
-    /**
-     *
-     * @type {ISwlMessageDigester}
-     */
-    this.messageDigester = new SwlSha256MessageDigester()
-    /**
-     *
-     * @type {ISwlObfuscator}
-     */
-    this.obfuscator = new SwlBase64Obfuscator()
-    /**
-     *
      * @type {IExpireCache}
      */
     this.cache = new MemMapExpireCache();
     /**
-     *
-     * @type {SwlTransferConfig}
+     * @type {String}
      */
-    this.config = new SwlTransferConfig()
+    this.cacheKeyPrefix = null;
     /**
-     *
-     * @type Random
+     * default 30 minute
+     * @type {int}
      */
-    this.random = new Random()
+    this.certExpireSeconds = 1800;
+    /**
+     * @type {AsymKeyPair}
+     */
+    this.swapKeyPair = new AsymKeyPair(SwlTransferConfig.DEFAULT_SWAP_PUBLIC_KEY(),null);
 
 }
 
 // 继承
 SwlTransfer.prototype = Object.create(SwlExchanger.prototype)
 SwlTransfer.prototype.constructor = SwlTransfer
+
+/**
+ *
+ * @param config {SwlTransferConfig}
+ */
+SwlTransfer.prototype.applyConfig=function( config){
+    if(!config){
+        return
+    }
+    SwlExchanger.prototype.applyConfig.call(this,config);
+    this.cacheKeyPrefix=config.cacheKeyPrefix;
+    this.certExpireSeconds=config.certExpireSeconds;
+    this.swapKeyPair=config.swapKeyPair;
+}
 
 SwlTransfer.CERT_PREFIX_KEY = function () {
     return "swl:key:cert:"
@@ -76,7 +68,7 @@ SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT = function () {
  * @return {String}
  */
 SwlTransfer.prototype.cacheKey = function (key) {
-    let cacheKeyPrefix = this.config.cacheKeyPrefix;
+    let cacheKeyPrefix = this.cacheKeyPrefix;
     if (!cacheKeyPrefix || cacheKeyPrefix === "") {
         return key;
     }
@@ -154,7 +146,7 @@ SwlTransfer.prototype.buildCert=function(certId, selfKeyPair, otherPublicKey) {
     let cert = new SwlCert(certId, selfKeyPair.getPublicKey(), selfKeyPair.getPrivateKey(), otherPublicKey);
     let text = SwlCertUtil.serialize(cert);
     let key = this.certKey(certId);
-    this.cache.setWith(this.cacheKey(key), text, this.config.certExpireSeconds);
+    this.cache.setWith(this.cacheKey(key), text, this.certExpireSeconds);
     this.cache.set(this.cacheKey(SwlTransfer.OTHER_KEY_PUBLIC_DEFAULT()),certId);
 }
 
@@ -180,7 +172,7 @@ SwlTransfer.prototype.removeCert=function(certId) {
  */
 SwlTransfer.prototype.resetCertExpire=function(certId) {
     let key = this.certKey(certId);
-    this.cache.expire(this.cacheKey(key), this.config.certExpireSeconds);
+    this.cache.expire(this.cacheKey(key), this.certExpireSeconds);
 }
 
 
@@ -201,7 +193,7 @@ SwlTransfer.prototype.acceptOtherPublicKey = function (otherPublicKey) {
  * @return {String}
  */
 SwlTransfer.prototype.acceptOtherPublicKeyWithId=function(certId, otherPublicKey) {
-    let asymmetricEncryptor = this.asymmetricEncryptorSupplier.get();
+    let asymmetricEncryptor = this.requireAsymmetricEncryptor();
     let selfKeyPair = asymmetricEncryptor.generateKeyPair();
     return this.acceptOtherPublicKeyRaw(certId, selfKeyPair, otherPublicKey);
 }
@@ -223,7 +215,7 @@ SwlTransfer.prototype.acceptOtherPublicKeyRaw=function(certId, selfKeyPair, othe
  * @return {AsymKeyPair}
  */
 SwlTransfer.prototype.getSelfSwapKey = function () {
-    let swapKeyPair = this.config.swapKeyPair;
+    let swapKeyPair = this.swapKeyPair;
     return swapKeyPair;
 }
 

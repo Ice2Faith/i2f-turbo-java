@@ -4,7 +4,7 @@ package i2f.springboot.swl.spring;
 import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.swl.annotation.SecureParams;
+import i2f.swl.annotation.SwlCtrl;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
 import i2f.swl.data.SwlDto;
@@ -38,7 +38,8 @@ public class SwlSpringController {
     @Autowired
     private IJsonSerializer jsonSerializer;
 
-    @SecureParams(in = false, out = false)
+    @ConditionalOnExpression("${i2f.swl.web.enable:true}")
+    @SwlCtrl(in = false, out = false)
     @PostMapping("swapKey")
     public SwlDto swapKey(@RequestBody SwlDto dto) throws Exception {
         String reqPayload = dto.getPayload();

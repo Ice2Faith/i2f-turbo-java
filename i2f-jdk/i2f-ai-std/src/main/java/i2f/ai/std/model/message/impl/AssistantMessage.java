@@ -18,7 +18,7 @@ public class AssistantMessage implements AiMessage {
     protected String text;
     protected FinishReason finishReason;
     protected List<ToolCallRequest> toolCallRequestList;
-    protected Object rawMessage;
+    protected transient Object rawMessage;
 
     public static enum FinishReason {
         STOP, TOOL_CALL

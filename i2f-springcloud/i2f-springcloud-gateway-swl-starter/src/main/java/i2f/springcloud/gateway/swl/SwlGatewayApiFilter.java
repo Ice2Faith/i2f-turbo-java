@@ -1,12 +1,13 @@
 package i2f.springcloud.gateway.swl;
 
+import i2f.codec.bytes.base64.Base64StringByteCodec;
 import i2f.crypto.std.encrypt.asymmetric.key.AsymKeyPair;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.swl.consts.SwlCode;
 import i2f.swl.core.SwlTransfer;
 import i2f.swl.data.SwlData;
+import i2f.swl.data.SwlDto;
 import i2f.swl.exception.SwlException;
-import i2f.web.swl.filter.SwlWebConfig;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +50,16 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
     protected SwlTransfer transfer;
 
     @Autowired
-    protected SwlWebConfig config;
+    protected SwlWebConfigProperties config;
 
     @Autowired
     protected IJsonSerializer jsonSerializer;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if(!config.isEnable()){
+            return chain.filter(exchange);
+        }
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
@@ -66,7 +70,12 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        if (KEY_SWAP_PATH.equals(path)) {
+        String apiKeyPath= config.getApiSwapKeyPath();
+        if(apiKeyPath==null || apiKeyPath.isEmpty()){
+            apiKeyPath=KEY_SWAP_PATH;
+        }
+
+        if (apiKeyPath.equals(path)) {
             // 获取请求体
             return request.getBody()
                     .defaultIfEmpty(new DefaultDataBufferFactory().allocateBuffer(0))
@@ -89,34 +98,45 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
                         }
 
                         String reqJson = new String(dataBytes, charset);
-                        SwlData req = null;
+                        SwlData reqHandleShake = null;
                         try {
-                            req = (SwlData) jsonSerializer.deserialize(reqJson, SwlData.class);
+                            SwlDto dto = (SwlDto) jsonSerializer.deserialize(reqJson, SwlDto.class);
+                            String reqPayload = dto.getPayload();
+                            reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload),"UTF-8");
+                            reqHandleShake = (SwlData)jsonSerializer.deserialize(reqJson, SwlData.class);
                         } catch (Exception e) {
                         }
 
-                        String clientPublicKey = req.getAttaches().get(0);
-
                         AsymKeyPair swapKeyPair = transfer.getSelfSwapKey();
 
-                        transfer.receiveByRaw("swap", req,
+                        // ************************服务端接收握手并响应*******************************
+                        String obfuscateClientPublicKey = reqHandleShake.getAttaches().get(0);
+                        String clientPublicKey = transfer.obfuscateDecode(obfuscateClientPublicKey);
+
+                        SwlData recvReqHandleShake = transfer.receiveByRaw("swap", reqHandleShake,
                                 clientPublicKey,
                                 swapKeyPair.getPrivateKey());
 
-                        String certId = transfer.acceptOtherSwapKey(clientPublicKey);
-                        String selfPublicKey = transfer.getSelfPublicKey(certId);
+                        String serverCertId = transfer.acceptOtherSwapKey(obfuscateClientPublicKey);
+                        String selfPublicKey = transfer.getSelfPublicKey(serverCertId);
 
-                        SwlData resp = transfer.sendByRaw(certId,
+                        SwlData respHandleShake = transfer.sendByRaw(serverCertId,
                                 clientPublicKey,
                                 swapKeyPair.getPrivateKey(),
                                 new ArrayList<>(Collections.singletonList(selfPublicKey))
                         );
-                        resp.setContext(null);
+                        respHandleShake.setContext(null);
 
-                        String respJson = jsonSerializer.serialize(resp);
 
                         byte[] bytes = null;
                         try {
+                            SwlDto ret=new SwlDto();
+                            String retJson=jsonSerializer.serialize(respHandleShake);
+                            String retPayload=Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
+                            ret.setPayload(retPayload);
+
+                            String respJson = jsonSerializer.serialize(ret);
+
                             bytes = respJson.getBytes("UTF-8");
                         } catch (UnsupportedEncodingException e) {
                             throw new SwlException(SwlCode.INTERNAL_EXCEPTION.code(), e.getMessage(), e);

@@ -17,6 +17,7 @@ public @interface Tool {
 
     String value() default "";
 
-
     String description();
+
+    String[] tags() default {};
 }

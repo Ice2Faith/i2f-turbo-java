@@ -15,35 +15,19 @@
     <!-- 日志的存放路径 -->
     <property scope="local" name="log.dir.name" value="${logback.app.log.dir.name:-logs}"/>
 
-    <!-- 载入默认配置 -->
-    <include resource="logback/logback-conf.xml"/>
-
-
     <!-- 日志的服务名称 -->
     <!-- 支持手动指定启动参数 logback.app.name ，不指定则用 spring.app.name ， 都没有，用 noappname  -->
     <property scope="local" name="log.app.name" value="${logback.app.name:-${spring.app.name:-noappname}}"/>
 
     <!-- 使用手动指定的启动参数指定配置 logback.app.env -->
     <!-- 支持手动指定启动参数 logback.app.env ，不指定则用 spring.app.profile ， 都没有，用 test  -->
+    <property scope="local" name="log.app.env" value="${logback.app.env:-${spring.app.profile:-test}}"/>
 
-    <include resource="logback/logback-${logback.app.env:-${spring.app.profile:-test}}.xml"/>
+    <!-- 载入公共配置 -->
+    <include resource="logback/logback-conf.xml"/>
+
+    <!-- 载入环境配置 -->
+    <include resource="logback/logback-${log.app.env}.xml"/>
 
 
-    <!-- 自动根据springboot的 spring.profiles.active 值配对日志 -->
-    <!-- 此方式较不太灵活 -->
-    <!--    <springProfile name="default">-->
-    <!--        <include resource="logback/logback-default.xml"/>-->
-    <!--    </springProfile>-->
-
-    <!--    <springProfile name="dev">-->
-    <!--        <include resource="logback/logback-dev.xml"/>-->
-    <!--    </springProfile>-->
-
-    <!--    <springProfile name="test">-->
-    <!--        <include resource="logback/logback-test.xml"/>-->
-    <!--    </springProfile>-->
-
-    <!--    <springProfile name="prod">-->
-    <!--        <include resource="logback/logback-prod.xml"/>-->
-    <!--    </springProfile>-->
 </configuration>

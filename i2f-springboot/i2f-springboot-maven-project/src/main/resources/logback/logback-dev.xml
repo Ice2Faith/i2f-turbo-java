@@ -27,7 +27,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.all.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.all.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -50,7 +50,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.info.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.info.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -73,7 +73,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.warn.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.warn.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>
@@ -96,7 +96,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>${log.dir.name}/${log.app.name}.error.%d.%i.log</fileNamePattern>
+            <fileNamePattern>${log.dir.name}/text-${log.app.name}.error.%d.%i.log</fileNamePattern>
             <maxHistory>${log.max.count}</maxHistory>
             <maxFileSize>${log.max.size}</maxFileSize>
             <totalSizeCap>${log.total.size}</totalSizeCap>

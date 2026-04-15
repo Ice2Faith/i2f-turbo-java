@@ -3786,6 +3786,15 @@ public class PreparedParamsEventListener implements XProc4jEventListener {
   - 虽然，插件能够提供一部分能力，但是目前的插件并不能做到完全覆盖的场景
   - 只针对大多数的情况予以支持
   - 提供尽可能完善的语法高亮和补全能力
+- 插件的功能
+  - 目前提供的功能如下
+  - SQL高亮，根据IDEA数据源自动补全
+  - TinyScript语法高亮
+  - 上下文参数自动提示
+  - 跳转到过程定义
+  - 右键菜单跳转到内建函数定义
+  - 创建XML模板文件
+  - 其他功能敬请期待
 - 插件的安装
 - 插件以jar包的形式提供
 
@@ -3847,7 +3856,7 @@ test.xml
 - 首先，在Java代码中调用此过程
 
 ```java
-import com.newland.bi3.springboot.jdbc.bql.procedure.JdbcProcedureHelper;
+import ....springboot.jdbc.bql.procedure.JdbcProcedureHelper;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -4012,3 +4021,9 @@ xproc4j:
 - 这部分，请参考TestProcedureExecutor类以及所在包的测试代码
 - 结合SpringContextJdbcProcedureExecutorAutoConfiguration配置
 - 即可能够进行直接使用
+
+---
+
+**文档版本：** 1.0  
+**最后更新：** 2026-04-02  
+**维护者：** Ice2Faith

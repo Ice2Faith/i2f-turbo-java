@@ -24,7 +24,6 @@ import java.util.Map;
  */
 public class LangListenerNode extends AbstractExecutorNode {
     public static final String TAG_NAME = TagConsts.LANG_LISTENER;
-
     @Override
     public String tag() {
         return TAG_NAME;
@@ -35,6 +34,7 @@ public class LangListenerNode extends AbstractExecutorNode {
         String name = executor.convertAs(executor.attrValue(AttrConsts.NAME, FeatureConsts.STRING, node, context), String.class);
         String type = executor.convertAs(executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context), String.class);
         String target = executor.convertAs(executor.attrValue(AttrConsts.TARGET, FeatureConsts.STRING, node, context), String.class);
+        boolean paramsShare = executor.toBoolean(executor.attrValue(AttrConsts.PARAMS_SHARE, FeatureConsts.BOOLEAN, node, context));
 
         if (type == null || type.isEmpty()) {
             type = XProc4jEvent.class.getName();
@@ -64,9 +64,19 @@ public class LangListenerNode extends AbstractExecutorNode {
                         ExecutorContextEvent evt = (ExecutorContextEvent) event;
                         JdbcProcedureExecutor evtExecutor = evt.getExecutor();
                         Map<String, Object> evtContext = evt.getContext();
-                        Map<String, Object> callParams = evtExecutor.cloneParams(evtContext);
-                        evtExecutor.visitSet(callParams, targetName, evt);
-                        evtExecutor.execAsProcedure(node, callParams);
+                        Map<String, Object> callParams = evtContext;
+                        if (!paramsShare) {
+                            callParams = evtExecutor.cloneParams(evtContext);
+                        }
+                        Object bakEvt = evtExecutor.visit(targetName, callParams);
+                        try {
+                            evtExecutor.visitSet(callParams, targetName, evt);
+                            evtExecutor.execAsProcedure(node, callParams);
+                        } finally {
+                            if (paramsShare) {
+                                evtExecutor.visitSet(callParams, targetName, bakEvt);
+                            }
+                        }
                     } else {
                         Map<String, Object> callParams = executor.createParams();
                         executor.visitSet(callParams, targetName, event);

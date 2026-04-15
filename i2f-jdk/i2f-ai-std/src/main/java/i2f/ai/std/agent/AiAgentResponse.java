@@ -20,10 +20,10 @@ public class AiAgentResponse {
     protected Map<String, ToolRawDefinition> toolMap;
     protected AiAgentContext context;
 
-    public AiMessage last(){
-        if(messageList==null || messageList.isEmpty()){
+    public AiMessage last() {
+        if (messageList == null || messageList.isEmpty()) {
             return null;
         }
-        return messageList.get(messageList.size()-1);
+        return messageList.get(messageList.size() - 1);
     }
 }
