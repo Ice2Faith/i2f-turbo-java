@@ -2,7 +2,8 @@ package i2f.log.std.test;
 
 import i2f.log.std.ILogger;
 import i2f.log.std.LoggerFactory;
-import i2f.log.std.mdc.LogMdcHolder;
+import i2f.trace.mdc.MdcHolder;
+import i2f.trace.mdc.MdcTraces;
 
 /**
  * @author Ice2Faith
@@ -14,7 +15,7 @@ public class TestLogger {
 
     public static void main(String[] args) {
         logger.info("Hello World");
-        LogMdcHolder.getOrNewTraceId();
+        MdcHolder.put(MdcTraces.TRACE_ID,MdcTraces.genTraceId());
         for (int i = 0; i < 10; i++) {
             logger.infoArgs("number:", i);
         }

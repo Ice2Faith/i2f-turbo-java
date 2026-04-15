@@ -160,6 +160,7 @@
         <module>i2f-xml</module>
 
         <module>test-features</module>
+        <module>i2f-trace-mdc</module>
     </modules>
 
 

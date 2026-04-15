@@ -39,6 +39,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-trace</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-trace-mdc</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

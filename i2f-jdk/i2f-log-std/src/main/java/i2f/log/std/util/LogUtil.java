@@ -4,9 +4,10 @@ import i2f.clock.SystemClock;
 import i2f.log.std.ILogger;
 import i2f.log.std.data.LogData;
 import i2f.log.std.enums.LogLevel;
-import i2f.log.std.mdc.LogMdcHolder;
 import i2f.lru.LruMap;
 import i2f.trace.ThreadTrace;
+import i2f.trace.mdc.MdcHolder;
+import i2f.trace.mdc.MdcTraces;
 
 import java.lang.reflect.Array;
 import java.util.Date;
@@ -94,7 +95,7 @@ public class LogUtil {
             data.setFileName(elem.getFileName());
             data.setLineNumber(elem.getLineNumber());
         }
-        data.setTraceId(LogMdcHolder.getTraceId());
+        data.setTraceId(MdcHolder.get(MdcTraces.TRACE_ID));
         return data;
     }
 

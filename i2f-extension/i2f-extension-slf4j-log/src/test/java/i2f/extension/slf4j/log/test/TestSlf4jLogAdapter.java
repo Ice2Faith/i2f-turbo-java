@@ -3,7 +3,8 @@ package i2f.extension.slf4j.log.test;
 import i2f.log.decide.impl.DefaultClassNamePattenLogDecider;
 import i2f.log.holder.LogHolder;
 import i2f.log.std.enums.LogLevel;
-import i2f.log.std.mdc.LogMdcHolder;
+import i2f.trace.mdc.MdcHolder;
+import i2f.trace.mdc.MdcTraces;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,12 +20,12 @@ public class TestSlf4jLogAdapter {
         DefaultClassNamePattenLogDecider defaultDecider = (DefaultClassNamePattenLogDecider) LogHolder.DEFAULT_DECIDER;
         defaultDecider.setRootLevel(LogLevel.ALL);
 
-        LogMdcHolder.getOrNewTraceId();
+        MdcHolder.put(MdcTraces.TRACE_ID,MdcTraces.genTraceId());
 
         Logger logger = LoggerFactory.getLogger(TestSlf4jLogAdapter.class);
         logger.info("adapter");
 
-        LogMdcHolder.removeTraceId();
+        MdcHolder.remove(MdcTraces.TRACE_ID);
 
         log.error("lombok");
 
