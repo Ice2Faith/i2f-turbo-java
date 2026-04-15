@@ -4,6 +4,9 @@ i2f.springboot.trace.mdc.feign.MdcFeignInterceptor
 i2f.springboot.trace.mdc.gateway.MdcGatewayFilter
 i2f.springboot.trace.mdc.httpclient.MdcHttpClientInterceptor
 i2f.springboot.trace.mdc.httpclient.MdcRestTemplateInterceptorProcessor
+i2f.springboot.trace.mdc.httpclient.MdcExchangeFilterFunction
+i2f.springboot.trace.mdc.httpclient.MdcRestClientConfiguration
+i2f.springboot.trace.mdc.httpclient.MdcWebClientConfiguration
 i2f.springboot.trace.mdc.powerjob.MdcPowerJobAspect
 i2f.springboot.trace.mdc.scheduling.MdcSpringSchedulingAspect
 i2f.springboot.trace.mdc.springmvc.MdcWebFilter
