@@ -1,4 +1,6 @@
+// 配置类型为 annotation
 {
+  // 如果是函数上的注解，有此节点
   "method": {
     "name": "test",
     "parameters": [
@@ -18,6 +20,7 @@
       "simpleType": "UserVo"
     }
   },
+  // 如果是字段上的注解，有此节点
   "field": {
     "name": "user",
     "fullType": "com.system.user.UserVo",
@@ -27,6 +30,7 @@
       "simpleType": "UserVo"
     }
   },
+  // 如果是类上的注解，有此节点
   "class": {
     "fullType": "com.system.user.UserVo",
     "simpleType": "UserVo"

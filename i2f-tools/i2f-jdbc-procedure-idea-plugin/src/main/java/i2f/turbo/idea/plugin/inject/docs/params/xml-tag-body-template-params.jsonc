@@ -1,0 +1,54 @@
+// 配置类型为 xml-tag-body
+{
+  // 基础节点，属性所在的XML节点信息
+  "tag": {
+    "name": "select",
+    "attributes": [
+      {
+        "name": "id",
+        "value": "selectById"
+      }
+    ]
+  },
+  // 当有配置 contextTreeTagNames 时有此节点
+  "contextTreeTags": {
+    // 下面每一个节点都是 contextTreeTagNames 中匹配的一个标签名
+    "mapper": {
+      "name": "mapper",
+      "attributes": [
+        {
+          "name": "namespace",
+          "value": "com.test.TestMapper"
+        }
+      ]
+    }
+  },
+  // 当有配置 contextJava 时有此节点
+  "contextJava": {
+    // 当有配置 javaClass 时切能够找到匹配信息时，有此节点
+    "javaClass": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    },
+    // 当有配置 javaMethod 时切能够找到匹配信息时，有此节点
+    "javaMethod": {
+      "name": "test",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "user",
+          "fullType": "com.system.user.UserVo",
+          "simpleType": "UserVo"
+        }
+      ],
+      "return": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      },
+      "declareClass": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      }
+    }
+  }
+}
