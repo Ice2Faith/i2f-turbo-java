@@ -1,9 +1,11 @@
 package i2f.extension.groovy;
 
+import i2f.extension.groovy.delegating.GroovyInvocationInterceptor;
+import i2f.extension.groovy.delegating.GroovyScriptDelegatingMetaClass;
+import i2f.lru.LruMap;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import i2f.lru.LruMap;
 import org.codehaus.groovy.runtime.InvokerHelper;
 
 import java.security.MessageDigest;
@@ -18,6 +20,16 @@ import java.util.UUID;
  * @desc
  */
 public class GroovyScript {
+    public static Object evalScript(String script, Map<String, Object> params, GroovyInvocationInterceptor interceptor) {
+        Binding binding = new Binding(params == null ? new HashMap<>() : params);
+        GroovyShell shell = new GroovyShell(binding);
+        Script parse = shell.parse(script);
+        if (interceptor != null) {
+            parse.setMetaClass(new GroovyScriptDelegatingMetaClass(parse.getMetaClass(), interceptor));
+        }
+        return parse.run();
+    }
+
     public static Object evalScript(String script, Map<String, Object> params) {
         Binding binding = new Binding(params == null ? new HashMap<>() : params);
         GroovyShell shell = new GroovyShell(binding);
@@ -32,6 +44,16 @@ public class GroovyScript {
         Class clazz = parseAsClass(script);
         Script run = InvokerHelper.createScript(clazz, binding);
         return run.run();
+    }
+
+    public static Object eval(String script, Map<String, Object> params, GroovyInvocationInterceptor interceptor) {
+        Binding binding = new Binding(params == null ? new HashMap<>() : params);
+        Class clazz = parseAsClass(script);
+        Script parse = InvokerHelper.createScript(clazz, binding);
+        if (interceptor != null) {
+            parse.setMetaClass(new GroovyScriptDelegatingMetaClass(parse.getMetaClass(), interceptor));
+        }
+        return parse.run();
     }
 
     public static Class parseAsClass(String script) {
