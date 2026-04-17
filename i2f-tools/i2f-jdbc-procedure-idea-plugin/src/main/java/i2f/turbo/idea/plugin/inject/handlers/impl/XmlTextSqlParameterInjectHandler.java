@@ -2,30 +2,28 @@ package i2f.turbo.idea.plugin.inject.handlers.impl;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
-import com.intellij.psi.xml.XmlText;
+import com.intellij.sql.psi.SqlParameter;
 import i2f.match.impl.SimpleMatcher;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
-import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
 import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJava;
 import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJavaXmlAttr;
 import i2f.turbo.idea.plugin.inject.data.point.XmlTagBodyInjectPoint;
+import i2f.turbo.idea.plugin.inject.data.point.XmlTextSqlParameterInjectPoint;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
 import i2f.turbo.idea.plugin.inject.metadata.XmlMetadataResolver;
 import i2f.turbo.idea.plugin.inject.utils.StringUtils;
 import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
-import org.jetbrains.annotations.NotNull;
+import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,31 +33,32 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
- * @date 2026/4/16 11:40
+ * @date 2026/4/17 14:14
  * @desc
  */
-public class XmlTagBodyInjectHandler extends IProjectInjectHandler<XmlText> {
+public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlParameter> {
     @Override
-    public Class<XmlText> supportType() {
-        return XmlText.class;
+    public Class<SqlParameter> supportType() {
+        return SqlParameter.class;
     }
 
     @Override
-    protected void doInjectInner(MultiHostRegistrar registrar, XmlText tagText) {
-        XmlTag tag = tagText.getParentTag();
+    protected void doInjectInner(MultiHostRegistrar registrar, SqlParameter sqlParameter) {
+
+        XmlTag tag = CompletionHelper.getParentElement(sqlParameter, XmlTag.class);
         if(tag==null){
             return;
         }
-        List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(tag.getProject(), LanguageInjectItem.TYPE_XML_TAG_BODY);
+
+        List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(tag.getProject(), LanguageInjectItem.TYPE_TEXT_SQL_PARAMETER);
 
         if (configList == null || configList.isEmpty()) {
             return;
         }
 
-
         for (LanguageInjectItem item : configList) {
-            List<XmlTagBodyInjectPoint> points = item.getPointsOnType(XmlTagBodyInjectPoint.class);
-            for (XmlTagBodyInjectPoint point : points) {
+            List<XmlTextSqlParameterInjectPoint> points = item.getPointsOnType(XmlTextSqlParameterInjectPoint.class);
+            for (XmlTextSqlParameterInjectPoint point : points) {
                 String fileNamePattern = point.getFileName();
                 if (!StringUtils.isEmpty(fileNamePattern)) {
                     XmlFile xmlFile = (XmlFile) tag.getContainingFile();
@@ -113,7 +112,7 @@ public class XmlTagBodyInjectHandler extends IProjectInjectHandler<XmlText> {
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item, context, tag.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item,context,sqlParameter.getProject());
 
                 context.put("tag", XmlMetadataResolver.getTagMetadata(tag));
 
@@ -168,41 +167,28 @@ public class XmlTagBodyInjectHandler extends IProjectInjectHandler<XmlText> {
                     suffix = "";
                 }
 
-                //tagChildrenApplyInject(registrar, tag, targetLang, prefix, suffix);
+                String text = sqlParameter.getText();
+                int beginIndex=0;
+                int endIndex=sqlParameter.getTextRange().getLength();
+                int idx=text.indexOf("{");
+                if(idx>=0){
+                    beginIndex=idx+1;
+                }
+                idx=text.lastIndexOf("}");
+                if(idx>=0){
+                    endIndex=endIndex-(text.substring(idx).length());
+                }
                 registrar.startInjecting(targetLang)
                         .addPlace(prefix,
                                 suffix,
-                                (PsiLanguageInjectionHost) tagText,
-                                new TextRange(0, tagText.getTextRange().getLength()))
+                                (PsiLanguageInjectionHost) sqlParameter,
+                                new TextRange(beginIndex,endIndex))
                         .doneInjecting();
                 return;
             }
         }
-    }
 
 
-    public static void tagChildrenApplyInject(MultiHostRegistrar registrar, XmlTag tag, Language targetLang, String prefix, String suffix) {
-        if (tag == null) {
-            return;
-        }
-        @NotNull PsiElement[] children = tag.getChildren();
-        if (children == null || children.length == 0) {
-            return;
-        }
-        for (@NotNull PsiElement item : children) {
-            if (item instanceof XmlTag) {
-                XmlTag xmlTag = (XmlTag) item;
-                tagChildrenApplyInject(registrar, xmlTag, targetLang, prefix, suffix);
-            } else if (item instanceof XmlText) {
-                XmlText xmlText = (XmlText) item;
-                registrar.startInjecting(targetLang)
-                        .addPlace(prefix,
-                                suffix,
-                                (PsiLanguageInjectionHost) xmlText,
-                                new TextRange(0, xmlText.getTextRange().getLength()))
-                        .doneInjecting();
-            }
-        }
     }
 
 }

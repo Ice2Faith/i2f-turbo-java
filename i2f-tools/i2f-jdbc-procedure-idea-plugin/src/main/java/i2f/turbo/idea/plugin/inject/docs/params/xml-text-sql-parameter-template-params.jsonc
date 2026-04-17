@@ -1,4 +1,4 @@
-// 配置类型为 xml-tag-body
+// 配置类型为 xml-text-sql-parameter
 {
   // 基础节点，属性所在的XML节点信息
   "tag": {

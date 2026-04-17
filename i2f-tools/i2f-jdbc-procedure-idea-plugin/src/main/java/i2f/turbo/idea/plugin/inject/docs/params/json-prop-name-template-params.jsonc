@@ -1,0 +1,46 @@
+// 配置类型为 json-prop-name
+{
+  // 基础节点，属性所在的JSON节点信息
+  "prop": {
+    "name": "select",
+    "parentType": "object",
+    "parentName": ""
+  },
+  // 当有配置 contextTreeTagNames 时有此节点
+  "contextPropNames": {
+    // 下面每一个节点都是 contextPropNames 中匹配的一个节点名
+    "mapper": {
+      "name": "select",
+      "parentType": "object",
+      "parentName": ""
+    }
+  },
+  // 当有配置 javaMetadata 时有此节点
+  "javaMetadata": {
+    // 当有配置 javaClass 时切能够找到匹配信息时，有此节点
+    "javaClass": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    },
+    // 当有配置 javaMethod 时切能够找到匹配信息时，有此节点
+    "javaMethod": {
+      "name": "test",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "user",
+          "fullType": "com.system.user.UserVo",
+          "simpleType": "UserVo"
+        }
+      ],
+      "return": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      },
+      "declareClass": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      }
+    }
+  }
+}

@@ -10,9 +10,11 @@ import java.util.List;
 public class JsonPropNameInjectPoint {
     protected String fileName;
     protected String parentName;
+    protected String parentType;
     protected List<String> treePropNameList;
     protected boolean treePropNameStrict;
-    protected List<String> contextPropNameNames;
+    protected List<String> contextPropNames;
+
 
     public String getFileName() {
         return fileName;
@@ -29,6 +31,15 @@ public class JsonPropNameInjectPoint {
 
     public JsonPropNameInjectPoint parentName(String parentName) {
         this.parentName = parentName;
+        return this;
+    }
+
+    public String getParentType() {
+        return parentType;
+    }
+
+    public JsonPropNameInjectPoint parentType(String parentType) {
+        this.parentType = parentType;
         return this;
     }
 
@@ -50,12 +61,12 @@ public class JsonPropNameInjectPoint {
         return this;
     }
 
-    public List<String> getContextPropNameNames() {
-        return contextPropNameNames;
+    public List<String> getContextPropNames() {
+        return contextPropNames;
     }
 
-    public JsonPropNameInjectPoint contextPropNameNames(List<String> contextPropNameNames) {
-        this.contextPropNameNames = contextPropNameNames;
+    public JsonPropNameInjectPoint contextPropNames(List<String> contextPropNames) {
+        this.contextPropNames = contextPropNames;
         return this;
     }
 }

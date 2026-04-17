@@ -50,5 +50,33 @@
         "simpleType": "UserVo"
       }
     }
+  },
+  // 当有配置 javaMetadata 时有此节点
+  "javaMetadata": {
+    // 当有配置 javaClass 时切能够找到匹配信息时，有此节点
+    "javaClass": {
+      "fullType": "com.system.user.UserVo",
+      "simpleType": "UserVo"
+    },
+    // 当有配置 javaMethod 时切能够找到匹配信息时，有此节点
+    "javaMethod": {
+      "name": "test",
+      "parameters": [
+        {
+          "index": 0,
+          "name": "user",
+          "fullType": "com.system.user.UserVo",
+          "simpleType": "UserVo"
+        }
+      ],
+      "return": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      },
+      "declareClass": {
+        "fullType": "com.system.user.UserVo",
+        "simpleType": "UserVo"
+      }
+    }
   }
 }

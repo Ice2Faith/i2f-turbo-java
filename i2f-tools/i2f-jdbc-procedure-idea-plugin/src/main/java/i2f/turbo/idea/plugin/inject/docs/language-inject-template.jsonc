@@ -11,6 +11,11 @@
         "prop": "value"
       }
     ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
     // 注入类型
     "inject": {
       // 注入的语言，IDEA中有的都可以
@@ -58,6 +63,11 @@
         }
       }
     ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
     "inject": {
       "language": "Java",
       "prefixTemplate": "import ",
@@ -100,8 +110,47 @@
         }
       }
     ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
     "inject": {
       "language": "SQL",
+      "prefixTemplate": "",
+      "suffixTemplate": ""
+    }
+  },
+  {
+    // XML 节点中的 SQL 变量 ${}/#{}
+    "type": "xml-text-sql-parameter",
+    "points": [
+      {
+        // 哪些上级树节点需要注入为渲染上下文，支持通配符匹配
+        "contextTreeTagNames": [
+          "select",
+          "update"
+        ],
+        // XML标签可能关联的Java类或方法定义
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "select",
+            "attrName": "namespace"
+          }
+        }
+      }
+    ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
+    "inject": {
+      "language": "Groovy",
       "prefixTemplate": "",
       "suffixTemplate": ""
     }
@@ -125,13 +174,17 @@
         // 是否启用严格匹配，不严格就允许中间插入其他标签
         "treePropNameStrict": false,
         // 哪些上级树节点需要注入为渲染上下文，支持通配符匹配
-        "contextPropNameNames": [
+        "contextPropNames": [
           "select",
           "update"
         ]
-
       }
     ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
     "inject": {
       "language": "SQL",
       "prefixTemplate": "",
@@ -147,6 +200,8 @@
         "fileName": "",
         // 父节点名称，支持通配符匹配
         "parentName": "",
+        // 父节点类型，object/array
+        "parentType": "object",
         // 属性所在标签的所有上级树中的标签按顺序满足，支持通配符匹配
         "treePropNameList": [
           "select",
@@ -162,12 +217,37 @@
 
       }
     ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
     "inject": {
       "language": "SQL",
       "prefixTemplate": "",
       "suffixTemplate": ""
     }
+  },
+  {
+    // Properties 文件的属性值
+    "type": "properties-value",
+    "points": [
+      {
+        // 正则匹配的文件名，支持通配符匹配
+        "fileName": "",
+        // 节点名称，支持通配符匹配
+        "propName": ""
+      }
+    ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
+    "inject": {
+      "language": "Groovy",
+      "prefixTemplate": "",
+      "suffixTemplate": ""
+    }
   }
-  // YAML文件，和json一样
-  // properties 文件，名字和值两部分
 ]

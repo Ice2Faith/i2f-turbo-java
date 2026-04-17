@@ -29,6 +29,30 @@ XML文件中的标签内部内容
 
 - Velocity 可用参数：[xml-tag-body-template-params.jsonc](./docs/params/xml-tag-body-template-params.jsonc)
 
+### xml-text-sql-parameter
+
+XML文件中的标签内部的SQL语句
+
+- Velocity 可用参数：[xml-text-sql-parameter-template-params.jsonc](./docs/params/xml-text-sql-parameter-template-params.jsonc)
+
+### json-prop-value
+
+JSON文件中的属性值
+
+- Velocity 可用参数：[json-prop-value-template-params.jsonc](./docs/params/json-prop-value-template-params.jsonc)
+
+### json-prop-name
+
+JSON文件中的属性名
+
+- Velocity 可用参数：[json-prop-name-template-params.jsonc](./docs/params/json-prop-name-template-params.jsonc)
+
+### properties-value
+
+Properties中的属性值
+
+- Velocity 可用参数：[properties-value-template-params.jsonc](./docs/params/properties-value-template-params.jsonc)
+
 
 ## 使用案例
 

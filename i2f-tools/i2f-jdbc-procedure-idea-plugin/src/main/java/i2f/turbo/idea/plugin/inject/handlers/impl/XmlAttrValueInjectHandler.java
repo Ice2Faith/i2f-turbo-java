@@ -18,11 +18,14 @@ import com.intellij.psi.xml.XmlTag;
 import i2f.match.impl.SimpleMatcher;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
+import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
 import i2f.turbo.idea.plugin.inject.data.point.XmlAttrValueInjectPoint;
 import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJava;
 import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJavaXmlAttr;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
+import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
+import i2f.turbo.idea.plugin.inject.metadata.XmlMetadataResolver;
 import i2f.turbo.idea.plugin.inject.utils.StringUtils;
 import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
 import org.jetbrains.annotations.NotNull;
@@ -121,7 +124,9 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                context.put("tag", getTagMetadata(tag));
+                JavaMetadataResolver.fillJavaMetadata(item,context,tag.getProject());
+
+                context.put("tag", XmlMetadataResolver.getTagMetadata(tag));
 
                 List<String> contextTreeTagNames = point.getContextTreeTagNames();
                 if (contextTreeTagNames != null && !contextTreeTagNames.isEmpty()) {
@@ -140,7 +145,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                     matchJavaClass(tag, javaClass, classRef);
 
                     if (classRef.get() != null) {
-                        Map<String, Object> metadata = AnnotationInjectHandler.getClassMetadata(classRef.get());
+                        Map<String, Object> metadata = JavaMetadataResolver.getClassMetadata(classRef.get());
                         contextJavaMap.put("javaClass", metadata);
                     }
 
@@ -149,7 +154,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                     matchJavaMethod(tag, javaMethod, methodRef, classRef.get());
 
                     if (methodRef.get() != null) {
-                        Map<String, Object> metadata = AnnotationInjectHandler.getMethodMetadata(methodRef.get());
+                        Map<String, Object> metadata = JavaMetadataResolver.getMethodMetadata(methodRef.get());
                         contextJavaMap.put("javaMethod", metadata);
                     }
                 }
@@ -157,7 +162,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
 
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {
-                    Thread.currentThread().setContextClassLoader(AnnotationInjectHandler.class.getClassLoader());
+                    Thread.currentThread().setContextClassLoader(JavaMetadataResolver.class.getClassLoader());
                     if (!StringUtils.isEmpty(prefix)) {
                         prefix = VelocityGenerator.render(prefix, context);
                     }
@@ -213,7 +218,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                             if (idx >= 0) {
                                 String className = value.substring(0, idx);
                                 methodName = value.substring(idx + 1);
-                                psiClass = findClassByName(tag.getProject(), className);
+                                psiClass = JavaMetadataResolver.findClassByName(tag.getProject(), className);
                             }
                             if (psiClass != null) {
                                 PsiMethod[] allMethods = psiClass.getAllMethods();
@@ -256,7 +261,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                     if (SimpleMatcher.INSTANCE.matches(attrName, attrNamePattern)) {
                         String value = attribute.getValue();
                         if (!StringUtils.isEmpty(value)) {
-                            PsiClass clazz = findClassByName(tag.getProject(), value);
+                            PsiClass clazz = JavaMetadataResolver.findClassByName(tag.getProject(), value);
                             if (clazz != null) {
                                 classRef.set(clazz);
                                 return;
@@ -269,22 +274,6 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
         matchJavaClass(tag.getParentTag(), relation, classRef);
     }
 
-    public static PsiClass findClassByName(Project project, String className) {
-        if (StringUtils.isEmpty(className)) {
-            return null;
-        }
-        GlobalSearchScope searchScope = GlobalSearchScope.projectScope(project);
-        JavaPsiFacade instance = JavaPsiFacade.getInstance(project);
-        PsiClass clazz = instance.findClass(className, searchScope);
-        if (clazz == null) {
-            PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
-            @NotNull PsiClass[] arr = shortNamesCache.getClassesByName(className, searchScope);
-            if (arr != null && arr.length > 0) {
-                clazz = arr[0];
-            }
-        }
-        return clazz;
-    }
 
     public static void collectTreeTagContext(XmlTag tag, List<String> tagNameList, Map<String, Object> context) {
         if (tag == null) {
@@ -294,7 +283,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
         if (!context.containsKey(name)) {
             for (String namePattern : tagNameList) {
                 if (SimpleMatcher.INSTANCE.matches(name, namePattern)) {
-                    Map<String, Object> metadata = getTagMetadata(tag);
+                    Map<String, Object> metadata = XmlMetadataResolver.getTagMetadata(tag);
                     context.put(name, metadata);
                     break;
                 }
@@ -304,22 +293,6 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
         collectTreeTagContext(tag.getParentTag(), tagNameList, context);
     }
 
-    public static Map<String, Object> getTagMetadata(XmlTag tag) {
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("name", tag.getName());
-        List<Map<String, Object>> attributes = new ArrayList<>();
-        ret.put("attributes", attributes);
-        XmlAttribute[] arr = tag.getAttributes();
-        if (arr != null && arr.length > 0) {
-            for (XmlAttribute item : arr) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("name", item.getName());
-                map.put("value", item.getValue());
-                attributes.add(map);
-            }
-        }
-        return ret;
-    }
 
     public static void validTreeTagNameList(XmlTag tag, List<String> tagNameList, int currIndex, boolean strict, AtomicBoolean matched) {
         if (tag == null) {

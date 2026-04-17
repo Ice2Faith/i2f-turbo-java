@@ -4,10 +4,8 @@ import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.*;
-import i2f.turbo.idea.plugin.inject.handlers.impl.AnnotationInjectHandler;
+import i2f.turbo.idea.plugin.inject.handlers.impl.*;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
-import i2f.turbo.idea.plugin.inject.handlers.impl.XmlAttrValueInjectHandler;
-import i2f.turbo.idea.plugin.inject.handlers.impl.XmlTagBodyInjectHandler;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -22,8 +20,12 @@ public class ProjectLanguageTemplateMultiHostInjector implements MultiHostInject
 
     protected final List<IProjectInjectHandler<?>> handlers=Arrays.asList(
             new AnnotationInjectHandler(),
+            new JsonPropNameInjectHandler(),
+            new JsonPropValueInjectHandler(),
+            new PropertiesValueInjectHandler(),
             new XmlAttrValueInjectHandler(),
-            new XmlTagBodyInjectHandler()
+            new XmlTagBodyInjectHandler(),
+            new XmlTextSqlParameterInjectHandler()
     );
 
     @Override

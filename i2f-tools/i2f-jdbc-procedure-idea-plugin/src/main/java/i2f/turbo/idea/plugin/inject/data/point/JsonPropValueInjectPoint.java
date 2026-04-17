@@ -1,5 +1,7 @@
 package i2f.turbo.idea.plugin.inject.data.point;
 
+import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
+
 import java.util.List;
 
 /**
@@ -13,7 +15,8 @@ public class JsonPropValueInjectPoint {
     protected String parentType;
     protected List<String> treePropNameList;
     protected boolean treePropNameStrict;
-    protected List<String> contextPropNameNames;
+    protected List<String> contextPropNames;
+
 
     public String getFileName() {
         return fileName;
@@ -60,12 +63,13 @@ public class JsonPropValueInjectPoint {
         return this;
     }
 
-    public List<String> getContextPropNameNames() {
-        return contextPropNameNames;
+    public List<String> getContextPropNames() {
+        return contextPropNames;
     }
 
-    public JsonPropValueInjectPoint contextPropNameNames(List<String> contextPropNameNames) {
-        this.contextPropNameNames = contextPropNameNames;
+    public JsonPropValueInjectPoint contextPropNames(List<String> contextPropNames) {
+        this.contextPropNames = contextPropNames;
         return this;
     }
+
 }

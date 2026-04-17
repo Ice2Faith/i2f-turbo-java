@@ -1,0 +1,40 @@
+[
+  {
+    "type": "json-prop-value",
+    "points": [
+      {
+        "fileName": "*language-inject-template.json*",
+        "propName": "className",
+        "parentType": "object",
+        "treePropNameList": [
+          "javaMetadata"
+        ],
+        "treePropNameStrict": true,
+        "contextPropNames": [
+
+        ]
+      },
+      {
+        "fileName": "*language-inject-template.json*",
+        "propName": "type",
+        "parentType": "object",
+        "treePropNameList": [
+          "points"
+        ],
+        "treePropNameStrict": true,
+        "contextPropNames": [
+
+        ]
+      }
+    ],
+    "javaMetadata": {
+      "className": "",
+      "methodName": ""
+    },
+    "inject": {
+      "language": "Java",
+      "prefixTemplate": "public static ",
+      "suffixTemplate": " func(){}"
+    }
+  }
+]
