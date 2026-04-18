@@ -2,7 +2,6 @@ package i2f.turbo.idea.plugin.inject.handlers.impl;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
-import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -31,7 +30,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @desc
  */
 public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar> {
-    protected static Logger log = Logger.getInstance(YamlPropValueInjectHandler.class);
 
     @Override
     public Class<YAMLScalar> supportType() {
@@ -41,7 +39,6 @@ public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar
     @Override
     protected void doInjectInner(MultiHostRegistrar registrar, YAMLScalar yamlScalar) {
         PsiElement parent = yamlScalar.getParent();
-        log.warn("yaml-prop-value: parent " + (parent == null ? null : parent.getText()));
         if (!(parent instanceof YAMLKeyValue)) {
             return;
         }
@@ -49,13 +46,11 @@ public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar
 
         YAMLValue value = yamlKeyValue.getValue();
 
-        log.warn("yaml-prop-value: value " + (value == null ? null : value.getText()));
         if (value != yamlScalar) {
             return;
         }
 
         List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(yamlScalar.getProject(), LanguageInjectItem.TYPE_YAML_PROP_VALUE);
-        log.warn("yaml-prop-value: configList " + (configList == null ? null : configList.size()));
         if (configList == null || configList.isEmpty()) {
             return;
         }
@@ -68,7 +63,6 @@ public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar
                     PsiFile psiFile = yamlScalar.getContainingFile();
                     VirtualFile virtualFile = psiFile.getVirtualFile();
                     String fileName = virtualFile.getName();
-                    log.warn("yaml-prop-value: fileName " + (fileName));
                     if (!SimpleMatcher.INSTANCE.matches(fileName, fileNamePattern)) {
                         continue;
                     }
@@ -77,7 +71,6 @@ public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar
                 String propNamePattern = point.getPropName();
                 if (!StringUtils.isEmpty(propNamePattern)) {
                     String propName = yamlKeyValue.getKeyText();
-                    log.warn("yaml-prop-value: propName " + (propName));
                     if (!SimpleMatcher.INSTANCE.matches(propName, propNamePattern)) {
                         continue;
                     }
@@ -152,7 +145,6 @@ public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar
                     suffix = "";
                 }
 
-                log.warn("yaml-prop-value: prefix " + (prefix));
                 int offsetIndex = 0;
                 int endIndex = yamlScalar.getTextRange().getLength();
                 if (yamlScalar instanceof YAMLQuotedText) {
