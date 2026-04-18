@@ -37,13 +37,15 @@ intellij {
 //    localPath.set("C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1")
     localPath.set("D:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.2.1")
 
-    plugins.set(listOf(/* Plugin Dependencies */
+    plugins.set(listOf(
+        /* Plugin Dependencies */
         "com.intellij.java",
         "com.intellij.database",
         "org.intellij.intelliLang",
 //        "com.intellij.modules.xml",
-        "com.intellij.velocity"
-        )
+        "com.intellij.velocity",
+        "org.jetbrains.plugins.yaml",
+    )
     )
 
 }

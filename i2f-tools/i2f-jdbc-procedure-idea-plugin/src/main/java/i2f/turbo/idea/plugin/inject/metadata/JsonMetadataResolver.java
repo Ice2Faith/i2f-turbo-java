@@ -28,6 +28,9 @@ public class JsonMetadataResolver {
         PsiElement parentElem=jsonProperty.getParent();
         while(!(parentElem instanceof JsonProperty)){
             parentElem=parentElem.getParent();
+            if (parentElem == null) {
+                break;
+            }
         }
         String parentName=null;
         if(parentElem instanceof JsonProperty){

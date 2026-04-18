@@ -3,12 +3,14 @@ package i2f.turbo.idea.plugin.inject;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.psi.*;
-import i2f.turbo.idea.plugin.inject.handlers.impl.*;
+import com.intellij.psi.PsiElement;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
+import i2f.turbo.idea.plugin.inject.handlers.impl.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -25,7 +27,8 @@ public class ProjectLanguageTemplateMultiHostInjector implements MultiHostInject
             new PropertiesValueInjectHandler(),
             new XmlAttrValueInjectHandler(),
             new XmlTagBodyInjectHandler(),
-            new XmlTextSqlParameterInjectHandler()
+            new XmlTextSqlParameterInjectHandler(),
+            new YamlPropValueInjectHandler()
     );
 
     @Override

@@ -2,7 +2,6 @@ package i2f.turbo.idea.plugin.inject.data;
 
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +18,7 @@ public class LanguageInjectItem {
     public static final String TYPE_JSON_PROP_VALUE="json-prop-value";
     public static final String TYPE_JSON_PROP_NAME="json-prop-name";
     public static final String TYPE_PROPERTIES_VALUE="properties-value";
+    public static final String TYPE_YAML_PROP_VALUE = "yaml-prop-value";
 
     protected String type;
     protected List<Map<String,Object>> points;

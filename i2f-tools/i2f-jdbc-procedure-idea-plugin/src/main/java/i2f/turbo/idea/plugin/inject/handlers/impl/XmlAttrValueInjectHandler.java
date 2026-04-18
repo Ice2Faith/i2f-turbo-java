@@ -2,15 +2,11 @@ package i2f.turbo.idea.plugin.inject.handlers.impl;
 
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.JavaPsiFacade;
 import com.intellij.psi.PsiClass;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiMethod;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlFile;
@@ -18,7 +14,6 @@ import com.intellij.psi.xml.XmlTag;
 import i2f.match.impl.SimpleMatcher;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
-import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
 import i2f.turbo.idea.plugin.inject.data.point.XmlAttrValueInjectPoint;
 import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJava;
@@ -28,9 +23,7 @@ import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
 import i2f.turbo.idea.plugin.inject.metadata.XmlMetadataResolver;
 import i2f.turbo.idea.plugin.inject.utils.StringUtils;
 import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -313,6 +306,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                 return;
             }
             validTreeTagNameList(tag.getParentTag(), tagNameList, currIndex, strict, matched);
+            return;
         }
         validTreeTagNameList(tag.getParentTag(), tagNameList, currIndex + 1, strict, matched);
     }

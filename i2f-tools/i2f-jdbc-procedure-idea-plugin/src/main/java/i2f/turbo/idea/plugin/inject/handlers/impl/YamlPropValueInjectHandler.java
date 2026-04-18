@@ -1,11 +1,8 @@
 package i2f.turbo.idea.plugin.inject.handlers.impl;
 
-import com.intellij.json.psi.JsonArray;
-import com.intellij.json.psi.JsonObject;
-import com.intellij.json.psi.JsonProperty;
-import com.intellij.json.psi.JsonStringLiteral;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostRegistrar;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
@@ -15,13 +12,13 @@ import i2f.match.impl.SimpleMatcher;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
-import i2f.turbo.idea.plugin.inject.data.point.JsonPropValueInjectPoint;
+import i2f.turbo.idea.plugin.inject.data.point.YamlPropValueInjectPoint;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
-import i2f.turbo.idea.plugin.inject.metadata.JsonMetadataResolver;
+import i2f.turbo.idea.plugin.inject.metadata.YamlMetadataResolver;
 import i2f.turbo.idea.plugin.inject.utils.StringUtils;
 import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.yaml.psi.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,58 +27,48 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
- * @date 2026/4/16 11:40
+ * @date 2026/4/18 16:42
  * @desc
  */
-public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonStringLiteral> {
+public class YamlPropValueInjectHandler extends IProjectInjectHandler<YAMLScalar> {
+    protected static Logger log = Logger.getInstance(YamlPropValueInjectHandler.class);
 
     @Override
-    public Class<JsonStringLiteral> supportType() {
-        return JsonStringLiteral.class;
+    public Class<YAMLScalar> supportType() {
+        return YAMLScalar.class;
     }
 
     @Override
-    protected void doInjectInner(MultiHostRegistrar registrar, JsonStringLiteral jsonStringLiteral) {
-        PsiElement parent = jsonStringLiteral.getParent();
-        if (!(parent instanceof JsonProperty)) {
+    protected void doInjectInner(MultiHostRegistrar registrar, YAMLScalar yamlScalar) {
+        PsiElement parent = yamlScalar.getParent();
+        log.warn("yaml-prop-value: parent " + (parent == null ? null : parent.getText()));
+        if (!(parent instanceof YAMLKeyValue)) {
             return;
         }
-        JsonProperty jsonProperty = (JsonProperty) parent;
-        JsonStringLiteral propNameLiteral = null;
-        JsonStringLiteral propValueLiteral = null;
-        int index = 0;
-        @NotNull PsiElement[] children = jsonProperty.getChildren();
-        for (@NotNull PsiElement item : children) {
-            if (item instanceof JsonStringLiteral) {
-                index++;
-                if (index == 1) {
-                    propNameLiteral = (JsonStringLiteral) item;
-                }
-                if (index == 2) {
-                    propValueLiteral = (JsonStringLiteral) item;
-                }
-            }
-        }
+        YAMLKeyValue yamlKeyValue = (YAMLKeyValue) parent;
 
-        if (propValueLiteral != jsonStringLiteral) {
+        YAMLValue value = yamlKeyValue.getValue();
+
+        log.warn("yaml-prop-value: value " + (value == null ? null : value.getText()));
+        if (value != yamlScalar) {
             return;
         }
 
-
-        List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(jsonStringLiteral.getProject(), LanguageInjectItem.TYPE_JSON_PROP_VALUE);
-
+        List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(yamlScalar.getProject(), LanguageInjectItem.TYPE_YAML_PROP_VALUE);
+        log.warn("yaml-prop-value: configList " + (configList == null ? null : configList.size()));
         if (configList == null || configList.isEmpty()) {
             return;
         }
 
         for (LanguageInjectItem item : configList) {
-            List<JsonPropValueInjectPoint> points = item.getPointsOnType(JsonPropValueInjectPoint.class);
-            for (JsonPropValueInjectPoint point : points) {
+            List<YamlPropValueInjectPoint> points = item.getPointsOnType(YamlPropValueInjectPoint.class);
+            for (YamlPropValueInjectPoint point : points) {
                 String fileNamePattern = point.getFileName();
                 if (!StringUtils.isEmpty(fileNamePattern)) {
-                    PsiFile psiFile = jsonStringLiteral.getContainingFile();
+                    PsiFile psiFile = yamlScalar.getContainingFile();
                     VirtualFile virtualFile = psiFile.getVirtualFile();
                     String fileName = virtualFile.getName();
+                    log.warn("yaml-prop-value: fileName " + (fileName));
                     if (!SimpleMatcher.INSTANCE.matches(fileName, fileNamePattern)) {
                         continue;
                     }
@@ -89,10 +76,8 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
 
                 String propNamePattern = point.getPropName();
                 if (!StringUtils.isEmpty(propNamePattern)) {
-                    if (propNameLiteral == null) {
-                        continue;
-                    }
-                    String propName = propNameLiteral.getValue();
+                    String propName = yamlKeyValue.getKeyText();
+                    log.warn("yaml-prop-value: propName " + (propName));
                     if (!SimpleMatcher.INSTANCE.matches(propName, propNamePattern)) {
                         continue;
                     }
@@ -101,10 +86,10 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
                 String parentTypePattern = point.getParentType();
                 if (!StringUtils.isEmpty(parentTypePattern)) {
                     String parentType = null;
-                    PsiElement jsonParent = jsonProperty.getParent();
-                    if (jsonParent instanceof JsonObject) {
+                    PsiElement yamlParent = yamlKeyValue.getParent();
+                    if (yamlParent instanceof YAMLMapping) {
                         parentType = "object";
-                    } else if (jsonParent instanceof JsonArray) {
+                    } else if (yamlParent instanceof YAMLSequence) {
                         parentType = "array";
                     }
                     if (parentType == null) {
@@ -119,7 +104,7 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
                 boolean strict = point.isTreePropNameStrict();
                 if (treePropNameList != null && !treePropNameList.isEmpty()) {
                     AtomicBoolean matched = new AtomicBoolean(true);
-                    validTreePropNameList(jsonProperty.getParent(), treePropNameList, 0, strict, matched);
+                    validTreePropNameList(yamlKeyValue.getParent(), treePropNameList, 0, strict, matched);
                     if (!matched.get()) {
                         continue;
                     }
@@ -137,14 +122,14 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item, context, jsonProperty.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item, context, yamlKeyValue.getProject());
 
-                context.put("prop", JsonMetadataResolver.getPropertyMetadata(jsonProperty));
+                context.put("prop", YamlMetadataResolver.getPropertyMetadata(yamlKeyValue));
 
                 List<String> contextPropNames = point.getContextPropNames();
                 if (contextPropNames != null && !contextPropNames.isEmpty()) {
                     Map<String, Object> contextPropNamesMap = new HashMap<>();
-                    collectTreePropContext(jsonProperty.getParent(), contextPropNames, contextPropNamesMap);
+                    collectTreePropContext(yamlKeyValue.getParent(), contextPropNames, contextPropNamesMap);
                     context.put("contextPropNames", contextPropNamesMap);
                 }
 
@@ -167,17 +152,23 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
                     suffix = "";
                 }
 
+                log.warn("yaml-prop-value: prefix " + (prefix));
+                int offsetIndex = 0;
+                int endIndex = yamlScalar.getTextRange().getLength();
+                if (yamlScalar instanceof YAMLQuotedText) {
+                    offsetIndex = 1;
+                    endIndex = endIndex - 1;
+                }
 
                 registrar.startInjecting(targetLang)
                         .addPlace(prefix,
                                 suffix,
-                                (PsiLanguageInjectionHost) jsonStringLiteral,
-                                new TextRange(1, jsonStringLiteral.getTextRange().getLength() - 1))
+                                (PsiLanguageInjectionHost) yamlScalar,
+                                new TextRange(offsetIndex, endIndex))
                         .doneInjecting();
                 return;
             }
         }
-
     }
 
 
@@ -191,10 +182,10 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
             }
             return;
         }
-        if (elem instanceof JsonProperty) {
-            JsonProperty jsonProperty = (JsonProperty) elem;
+        if (elem instanceof YAMLKeyValue) {
+            YAMLKeyValue yamlKeyValue = (YAMLKeyValue) elem;
             String currentPattern = propNameList.get(currIndex);
-            String name = jsonProperty.getName();
+            String name = yamlKeyValue.getKeyText();
             boolean ok = SimpleMatcher.INSTANCE.matches(name, currentPattern);
             if (!ok) {
                 if (strict) {
@@ -215,13 +206,13 @@ public class JsonPropValueInjectHandler extends IProjectInjectHandler<JsonString
         if (elem == null) {
             return;
         }
-        if (elem instanceof JsonProperty) {
-            JsonProperty jsonProperty = (JsonProperty) elem;
-            String name = jsonProperty.getName();
+        if (elem instanceof YAMLKeyValue) {
+            YAMLKeyValue yamlKeyValue = (YAMLKeyValue) elem;
+            String name = yamlKeyValue.getName();
             if (!context.containsKey(name)) {
                 for (String namePattern : tagNameList) {
                     if (SimpleMatcher.INSTANCE.matches(name, namePattern)) {
-                        Map<String, Object> metadata = JsonMetadataResolver.getPropertyMetadata(jsonProperty);
+                        Map<String, Object> metadata = YamlMetadataResolver.getPropertyMetadata(yamlKeyValue);
                         context.put(name, metadata);
                         break;
                     }

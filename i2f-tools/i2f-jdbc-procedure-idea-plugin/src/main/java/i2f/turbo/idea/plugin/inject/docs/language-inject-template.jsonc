@@ -249,5 +249,41 @@
       "prefixTemplate": "",
       "suffixTemplate": ""
     }
+  },
+  {
+    // YAML 属性的值
+    "type": "yaml-prop-value",
+    "points": [
+      {
+        // 正则匹配的文件名，支持通配符匹配
+        "fileName": "",
+        // 属性的名，支持通配符匹配
+        "propName": "namespace",
+        // 父节点类型，object/array
+        "parentType": "object",
+        // 属性所在标签的所有上级树中的标签按顺序满足，支持通配符匹配
+        "treePropNameList": [
+          "select",
+          "mapper"
+        ],
+        // 是否启用严格匹配，不严格就允许中间插入其他标签
+        "treePropNameStrict": false,
+        // 哪些上级树节点需要注入为渲染上下文，支持通配符匹配
+        "contextPropNames": [
+          "select",
+          "update"
+        ]
+      }
+    ],
+    // 允许关联的Java元数据
+    "javaMetadata": {
+      "className": "com.test.TestClass",
+      "methodName": "hello"
+    },
+    "inject": {
+      "language": "SQL",
+      "prefixTemplate": "",
+      "suffixTemplate": ""
+    }
   }
 ]
