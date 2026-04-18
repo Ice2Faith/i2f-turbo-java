@@ -158,7 +158,17 @@ public class RedisOpsController implements IOpsProvider {
             }, true);
             RedisOperateDto resp = new RedisOperateDto();
             resp.setKey(key);
-            resp.setValue(rawValue == null ? null : new String(rawValue, StandardCharsets.UTF_8));
+            try {
+                resp.setValue(rawValue == null ? null : new String(rawValue, StandardCharsets.UTF_8));
+            } catch (Throwable e) {
+                StringBuilder builder=new StringBuilder();
+                builder.append("value cannot be deserialize!").append("\n");
+                for (int i = 0; i < rawValue.length; i++) {
+                    byte bt=rawValue[i];
+                    builder.append(String.format("\\x%02x",(bt&0x0ff)));
+                }
+                resp.setValue(builder.toString());
+            }
             resp.setTtl(ttl);
             return transfer.success(resp);
         } catch (Throwable e) {

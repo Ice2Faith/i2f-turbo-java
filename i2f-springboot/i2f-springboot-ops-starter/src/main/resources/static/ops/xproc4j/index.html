@@ -238,7 +238,7 @@
                             </span>
                         <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
                     </el-popover>
-                    <el-select  clearable filterable v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
+                    <el-select  clearable filterable allow-create v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
                         <el-option
                                 v-for="item in metas.hostIdList"
                                 :key="item"
