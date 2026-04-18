@@ -35,6 +35,7 @@
     <depends>com.intellij.database</depends>
     <depends>com.intellij.modules.xml</depends>
     <depends>com.intellij.velocity</depends>
+    <depends>org.jetbrains.plugins.yaml</depends>
 
     <!-- Extension points defined by the plugin.
          Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->

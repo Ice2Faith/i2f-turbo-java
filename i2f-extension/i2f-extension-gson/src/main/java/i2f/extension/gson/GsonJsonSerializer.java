@@ -65,6 +65,7 @@ public class GsonJsonSerializer implements IJsonSerializer {
 
     @Override
     public Map<String, Object> deserializeAsMap(String text) {
-        return deserialize(text,new TypeToken<Map<String,Object>>(){});
+        return deserialize(text, new TypeToken<Map<String, Object>>() {
+        });
     }
 }

@@ -15,7 +15,7 @@ public class TestLogger {
 
     public static void main(String[] args) {
         logger.info("Hello World");
-        MdcHolder.put(MdcTraces.TRACE_ID,MdcTraces.genTraceId());
+        MdcHolder.put(MdcTraces.TRACE_ID, MdcTraces.genTraceId());
         for (int i = 0; i < 10; i++) {
             logger.infoArgs("number:", i);
         }

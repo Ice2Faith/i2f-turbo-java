@@ -160,7 +160,7 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
         return table;
     }
 
-    public ResultSet getTables(DatabaseMetaData metaData, String database,String tablePattern) throws SQLException {
+    public ResultSet getTables(DatabaseMetaData metaData, String database, String tablePattern) throws SQLException {
         return metaData.getTables(null, database, tablePattern, null);
     }
 
@@ -173,9 +173,9 @@ public abstract class BaseDatabaseMetadataProvider implements DatabaseMetadataPr
     }
 
     @Override
-    public List<TableMeta> getTables(Connection conn, String database,String tablePattern) throws SQLException {
+    public List<TableMeta> getTables(Connection conn, String database, String tablePattern) throws SQLException {
         DatabaseMetaData metaData = conn.getMetaData();
-        ResultSet rs = getTables(metaData, database,tablePattern);
+        ResultSet rs = getTables(metaData, database, tablePattern);
         boolean notComment = true;
         QueryResult result = JdbcResolver.parseResultSet(rs);
         List<TableMeta> ret = new ArrayList<>();

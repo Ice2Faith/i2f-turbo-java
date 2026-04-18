@@ -27,14 +27,14 @@ public class TestSwlCertExchanger {
         SwlCertExchanger clientTransfer = new SwlCertExchanger();
         clientTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         clientTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        clientTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
+        clientTransfer.setMessageDigesterSupplier(() -> new SwlSha256MessageDigester());
         clientTransfer.setObfuscator(new SwlBase64Obfuscator());
         clientTransfer.setCertManager(new SwlResourceCertManager());
 
         SwlCertExchanger serverTransfer = new SwlCertExchanger();
         serverTransfer.setAsymmetricEncryptorSupplier(() -> new SwlRsaAsymmetricEncryptor());
         serverTransfer.setSymmetricEncryptorSupplier(() -> new SwlAesSymmetricEncryptor());
-        serverTransfer.setMessageDigesterSupplier(()->new SwlSha256MessageDigester());
+        serverTransfer.setMessageDigesterSupplier(() -> new SwlSha256MessageDigester());
         serverTransfer.setObfuscator(new SwlBase64Obfuscator());
         serverTransfer.setCertManager(new SwlResourceCertManager());
 

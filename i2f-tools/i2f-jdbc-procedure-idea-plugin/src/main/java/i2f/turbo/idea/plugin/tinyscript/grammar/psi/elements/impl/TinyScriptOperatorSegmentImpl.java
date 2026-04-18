@@ -9,7 +9,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 
+import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
+
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
 public class TinyScriptOperatorSegmentImpl extends TinyScriptPsiElement implements TinyScriptOperatorSegment {
@@ -34,10 +37,10 @@ public class TinyScriptOperatorSegmentImpl extends TinyScriptPsiElement implemen
         return findChildByClass(TinyScriptExpress.class);
     }
 
-  @Override
-  @NotNull
-  public List<TinyScriptPipelineFunctionSegment> getPipelineFunctionSegmentList() {
-    return PsiTreeUtil.getChildrenOfTypeAsList(this, TinyScriptPipelineFunctionSegment.class);
-  }
+    @Override
+    @NotNull
+    public List<TinyScriptPipelineFunctionSegment> getPipelineFunctionSegmentList() {
+        return PsiTreeUtil.getChildrenOfTypeAsList(this, TinyScriptPipelineFunctionSegment.class);
+    }
 
 }

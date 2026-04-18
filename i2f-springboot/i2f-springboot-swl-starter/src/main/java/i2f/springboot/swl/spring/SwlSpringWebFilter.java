@@ -16,7 +16,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
 import java.lang.reflect.Method;
@@ -77,7 +76,6 @@ public class SwlSpringWebFilter extends SwlWebFilter {
         }
 
 
-
         Boolean in = null;
         Boolean out = null;
 
@@ -95,7 +93,7 @@ public class SwlSpringWebFilter extends SwlWebFilter {
         }
 
         if (request instanceof MultipartHttpServletRequest) {
-            in=false;
+            in = false;
         }
 
         // 跳过multipart请求
@@ -106,7 +104,7 @@ public class SwlSpringWebFilter extends SwlWebFilter {
         contentType = contentType.toLowerCase();
 
         if (contentType.contains("multipart/form-data")) {
-            in=false;
+            in = false;
         }
 
         return new SwlWebCtrl(in == null ? defaultCtrl.isIn() : in,

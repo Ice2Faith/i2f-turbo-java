@@ -31,10 +31,10 @@ public class DelegateToolsMcpToolProvider implements McpToolProvider {
     }
 
     @Override
-    public Map.Entry<ToolBaseDefinition,Map<String,Object>> matchDefinition(ToolBaseCallRequest request){
+    public Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request) {
         for (McpToolProvider provider : providers) {
             Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = provider.matchDefinition(request);
-            if (entry!=null && entry.getKey()!=null) {
+            if (entry != null && entry.getKey() != null) {
                 return entry;
             }
         }
@@ -50,8 +50,8 @@ public class DelegateToolsMcpToolProvider implements McpToolProvider {
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
         for (McpToolProvider provider : providers) {
             Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = provider.matchDefinition(request);
-            if (entry!=null && entry.getKey()!=null) {
-                return provider.callTool(entry.getKey(),entry.getValue(),request);
+            if (entry != null && entry.getKey() != null) {
+                return provider.callTool(entry.getKey(), entry.getValue(), request);
             }
         }
         throw new IllegalStateException("call tool [" + request.getName() + "] is not support!");

@@ -29,9 +29,9 @@ public class SqlTimeStringConvertor implements Converter<java.sql.Time> {
 
     @Override
     public java.sql.Time convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        Date date= contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
+        Date date = contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
                 DateUtils.parseDate(cellData.getStringValue(), contentProperty.getDateTimeFormatProperty().getFormat()) :
-                DateUtils.parseDate(cellData.getStringValue(), (String)null);
+                DateUtils.parseDate(cellData.getStringValue(), (String) null);
         return new java.sql.Time(date.getTime());
     }
 
@@ -39,6 +39,6 @@ public class SqlTimeStringConvertor implements Converter<java.sql.Time> {
     public WriteCellData<?> convertToExcelData(java.sql.Time value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         return contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
                 new WriteCellData(DateUtils.format(value, contentProperty.getDateTimeFormatProperty().getFormat())) :
-                new WriteCellData(DateUtils.format(value, (String)null));
+                new WriteCellData(DateUtils.format(value, (String) null));
     }
 }

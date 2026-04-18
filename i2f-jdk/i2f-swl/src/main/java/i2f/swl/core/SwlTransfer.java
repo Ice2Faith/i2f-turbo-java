@@ -36,20 +36,20 @@ public class SwlTransfer extends SwlExchanger {
 
     private long certExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    private AsymKeyPair swapKeyPair=new AsymKeyPair(null,SwlTransferConfig.DEFAULT_SWAP_PRIVATE_KEY);
+    private AsymKeyPair swapKeyPair = new AsymKeyPair(null, SwlTransferConfig.DEFAULT_SWAP_PRIVATE_KEY);
 
     public SwlTransfer(SwlTransferConfig config) {
         super(config);
     }
 
-    public void applyConfig(SwlTransferConfig config){
-        if(config==null){
+    public void applyConfig(SwlTransferConfig config) {
+        if (config == null) {
             return;
         }
         super.applyConfig(config);
-        this.cacheKeyPrefix=config.getCacheKeyPrefix();
-        this.certExpireSeconds=config.getCertExpireSeconds();
-        this.swapKeyPair=config.getSwapKeyPair();
+        this.cacheKeyPrefix = config.getCacheKeyPrefix();
+        this.certExpireSeconds = config.getCertExpireSeconds();
+        this.swapKeyPair = config.getSwapKeyPair();
     }
 
     public String cacheKey(String key) {
@@ -100,7 +100,7 @@ public class SwlTransfer extends SwlExchanger {
         String text = SwlCertUtil.serialize(cert);
         String key = certKey(certId);
         cache.set(cacheKey(key), text, this.certExpireSeconds, TimeUnit.SECONDS);
-        cache.set(cacheKey(OTHER_KEY_PUBLIC_DEFAULT),certId);
+        cache.set(cacheKey(OTHER_KEY_PUBLIC_DEFAULT), certId);
     }
 
     public SwlCert removeCert(String certId) {
@@ -162,7 +162,7 @@ public class SwlTransfer extends SwlExchanger {
         return receiveByRaw(clientId, request, cert.getRemotePublicKey(), cert.getPrivateKey());
     }
 
-    public String getOtherCertIdDefault(){
+    public String getOtherCertIdDefault() {
         return cache.get(cacheKey(OTHER_KEY_PUBLIC_DEFAULT));
     }
 

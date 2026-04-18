@@ -14,15 +14,15 @@ import java.util.Map;
 public interface McpToolProvider {
     List<ToolBaseDefinition> getTools();
 
-    Map.Entry<ToolBaseDefinition,Map<String,Object>> matchDefinition(ToolBaseCallRequest request);
+    Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request);
 
-    Object callTool(ToolBaseDefinition definition,Map<String,Object> parameterMap,ToolBaseCallRequest request) throws Throwable;
+    Object callTool(ToolBaseDefinition definition, Map<String, Object> parameterMap, ToolBaseCallRequest request) throws Throwable;
 
-    default Object callTool(ToolBaseCallRequest request) throws Throwable{
+    default Object callTool(ToolBaseCallRequest request) throws Throwable {
         Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = matchDefinition(request);
-        if(entry==null || entry.getKey()==null){
-            throw new IllegalArgumentException("provider not found tool ["+request.getName()+"]");
+        if (entry == null || entry.getKey() == null) {
+            throw new IllegalArgumentException("provider not found tool [" + request.getName() + "]");
         }
-        return callTool(entry.getKey(),entry.getValue(),request);
+        return callTool(entry.getKey(), entry.getValue(), request);
     }
 }

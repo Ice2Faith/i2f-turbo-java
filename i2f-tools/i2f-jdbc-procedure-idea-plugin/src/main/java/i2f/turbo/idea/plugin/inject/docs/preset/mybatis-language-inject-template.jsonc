@@ -1,0 +1,379 @@
+[
+  // ----------------------- mybatis annotation begin-----------------------
+  {
+    "type": "annotation",
+    "points": [
+      {
+        "type": "org.apache.ibatis.annotations.Select",
+        "prop": "value"
+      },
+      {
+        "type": "org.apache.ibatis.annotations.Update",
+        "prop": "value"
+      },
+      {
+        "type": "org.apache.ibatis.annotations.Insert",
+        "prop": "value"
+      },
+      {
+        "type": "org.apache.ibatis.annotations.Delete",
+        "prop": "value"
+      }
+    ],
+    "inject": {
+      "language": "SQL",
+      "prefixTemplate": "",
+      "suffixTemplate": ""
+    }
+  },
+  // ----------------------- mybatis annotation end-----------------------
+
+  // ----------------------- mybatis xml begin-----------------------
+  {
+    "type": "xml-attr-value",
+    "points": [
+      {
+        "attrName": "namespace",
+        "tagName": "mapper",
+        "rootTagName": "mapper"
+      },
+      {
+        "attrName": "resultType",
+        "tagName": "select",
+        "rootTagName": "mapper"
+      },
+      {
+        "attrName": "parameterType",
+        "tagName": "select",
+        "rootTagName": "mapper"
+      },
+      {
+        "attrName": "parameterType",
+        "tagName": "update",
+        "rootTagName": "mapper"
+      },
+      {
+        "attrName": "parameterType",
+        "tagName": "insert",
+        "rootTagName": "mapper"
+      },
+      {
+        "attrName": "parameterType",
+        "tagName": "delete",
+        "rootTagName": "mapper"
+      }
+    ],
+    "inject": {
+      "language": "Java",
+      "prefixTemplate": "public static ",
+      "suffixTemplate": " func(){}"
+    }
+  },
+  {
+    "type": "xml-attr-value",
+    "points": [
+      {
+        "attrName": "id",
+        "tagName": "select",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          }
+        }
+      },
+      {
+        "attrName": "id",
+        "tagName": "update",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          }
+        }
+      },
+      {
+        "attrName": "id",
+        "tagName": "delete",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          }
+        }
+      },
+      {
+        "attrName": "id",
+        "tagName": "insert",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          }
+        }
+      }
+    ],
+    "inject": {
+      "language": "Groovy",
+      "prefixTemplate": "${contextJava.javaClass.fullType} mapper;mapper.",
+      "suffixTemplate": "()"
+    }
+  },
+  {
+    "type": "xml-tag-body",
+    "points": [
+      {
+        "tagName": "select",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "insert",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "update",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "delete",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "sql",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "set",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "if",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "trim",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "where",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "choose",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "when",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "otherwise",
+        "rootTagName": "mapper"
+      },
+      {
+        "tagName": "foreach",
+        "rootTagName": "mapper"
+      }
+    ],
+    "inject": {
+      "language": "SQL",
+      "prefixTemplate": "",
+      "suffixTemplate": ""
+    }
+  },
+  {
+    "type": "xml-attr-value",
+    "points": [
+      {
+        "attrName": "test",
+        "tagName": "if",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "select",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "if",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "update",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "if",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "delete",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "if",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "insert",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "when",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "select",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "when",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "update",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "when",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "delete",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "when",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "insert",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "foreach",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "select",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "foreach",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "update",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "foreach",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "delete",
+            "attrName": "id"
+          }
+        }
+      },
+      {
+        "attrName": "test",
+        "tagName": "foreach",
+        "rootTagName": "mapper",
+        "contextJava": {
+          "javaClass": {
+            "tagName": "mapper",
+            "attrName": "namespace"
+          },
+          "javaMethod": {
+            "tagName": "insert",
+            "attrName": "id"
+          }
+        }
+      }
+    ],
+    "inject": {
+      "language": "Groovy",
+      "prefixTemplate": "class Worker {\n    #foreach( ${item} in ${contextJava.javaMethod.parameters})\n        ${item.fullType} ${item.name};\n    #end\n\n    def run(){",
+      "suffixTemplate": "\n    }\n}"
+    }
+  }
+  // ----------------------- mybatis xml end-----------------------
+]

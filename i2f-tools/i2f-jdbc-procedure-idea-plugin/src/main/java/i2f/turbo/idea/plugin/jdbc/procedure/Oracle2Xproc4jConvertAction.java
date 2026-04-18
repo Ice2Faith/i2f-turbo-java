@@ -30,8 +30,8 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
         }
         Editor editor = event.getData(CommonDataKeys.EDITOR);
         String selectedText = null;
-        if(editor!=null) {
-            selectedText=editor.getSelectionModel().getSelectedText();
+        if (editor != null) {
+            selectedText = editor.getSelectionModel().getSelectedText();
         }
         if (selectedText == null) {
             selectedText = "";
@@ -63,7 +63,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             setTitle("Oracle to XProc4J convertor");
 
             // 设置初始输入文本
-            if (inputArea != null && initialText!=null) {
+            if (inputArea != null && initialText != null) {
                 inputArea.setText(initialText);
             }
         }
@@ -167,12 +167,12 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             try {
                 // 调用你定义的转换函数
                 // 注意：如果 convert 方法是静态的，直接调用；如果是实例方法，需要实例化
-                String result = Oracle2Xproc4j.convert(sourceText,type);
+                String result = Oracle2Xproc4j.convert(sourceText, type);
                 outputArea.setText(result);
             } catch (Exception ex) {
-                StringWriter writer=new StringWriter();
-                PrintWriter pw=new PrintWriter(writer);
-                pw.println("convert error "+ex.getClass()+" : " + ex.getMessage());
+                StringWriter writer = new StringWriter();
+                PrintWriter pw = new PrintWriter(writer);
+                pw.println("convert error " + ex.getClass() + " : " + ex.getMessage());
                 ex.printStackTrace(pw);
                 pw.flush();
                 outputArea.setText(writer.toString());
@@ -188,7 +188,6 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             if (radioOptionOgnl.isSelected()) return ConvertType.OGNL;
             return ConvertType.XPROC4J; // 默认
         }
-
 
 
     }

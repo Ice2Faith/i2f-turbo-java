@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LangLockNode extends AbstractExecutorNode implements ILockProvider {
     public static final String TAG_NAME = TagConsts.LANG_LOCK;
-    public static SecureRandom RANDOM=new SecureRandom();
+    public static SecureRandom RANDOM = new SecureRandom();
     public ILockProvider defaultProvider = new JdkCacheLockProvider();
 
     @Override
@@ -36,20 +36,20 @@ public class LangLockNode extends AbstractExecutorNode implements ILockProvider 
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         Object value = executor.attrValue(AttrConsts.VALUE, FeatureConsts.STRING, node, context);
         String type = (String) executor.attrValue(AttrConsts.TYPE, FeatureConsts.STRING, node, context);
-        boolean enable=true;
+        boolean enable = true;
         String test = node.getTagAttrMap().get(AttrConsts.TEST);
         if (test != null) {
             enable = executor.toBoolean(executor.attrValue(AttrConsts.TEST, FeatureConsts.EVAL, node, context));
         }
-        if(!enable){
+        if (!enable) {
             executor.execAsProcedure(node, context, false, false);
             return;
         }
         String lockKey = String.valueOf(value);
         ConcurrentHashMap<String, ILockProvider> lockProviders = executor.getLockProviders();
         ILockProvider provider = null;
-        if(type!=null){
-            provider=lockProviders.get(type);
+        if (type != null) {
+            provider = lockProviders.get(type);
         }
         if (provider == null) {
             for (Map.Entry<String, ILockProvider> entry : lockProviders.entrySet()) {
@@ -69,16 +69,16 @@ public class LangLockNode extends AbstractExecutorNode implements ILockProvider 
             lock.lock();
             try {
                 executor.execAsProcedure(node, context, false, false);
-                Thread.sleep(TimeUnit.SECONDS.toMillis(RANDOM.nextInt(5)+3));
+                Thread.sleep(TimeUnit.SECONDS.toMillis(RANDOM.nextInt(5) + 3));
             } finally {
                 lock.unlock();
             }
         } catch (Throwable e) {
-            if(e instanceof ControlSignalException){
-                throw (ControlSignalException)e;
+            if (e instanceof ControlSignalException) {
+                throw (ControlSignalException) e;
             }
-            if(e instanceof SignalException){
-                throw (SignalException)e;
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
             }
             throw new ThrowSignalException(e.getMessage(), e);
         }

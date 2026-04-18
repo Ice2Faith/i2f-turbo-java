@@ -43,8 +43,8 @@ public class SwlSpringController {
     @PostMapping("swapKey")
     public SwlDto swapKey(@RequestBody SwlDto dto) throws Exception {
         String reqPayload = dto.getPayload();
-        String reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload),"UTF-8");
-        SwlData reqHandleShake = (SwlData)jsonSerializer.deserialize(reqJson, SwlData.class);
+        String reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload), "UTF-8");
+        SwlData reqHandleShake = (SwlData) jsonSerializer.deserialize(reqJson, SwlData.class);
 
         AsymKeyPair swapKeyPair = swlTransfer.getSelfSwapKey();
 
@@ -66,9 +66,9 @@ public class SwlSpringController {
         );
         respHandleShake.setContext(null);
 
-        SwlDto ret=new SwlDto();
-        String retJson=jsonSerializer.serialize(respHandleShake);
-        String retPayload=Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
+        SwlDto ret = new SwlDto();
+        String retJson = jsonSerializer.serialize(respHandleShake);
+        String retPayload = Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
         ret.setPayload(retPayload);
         return ret;
     }

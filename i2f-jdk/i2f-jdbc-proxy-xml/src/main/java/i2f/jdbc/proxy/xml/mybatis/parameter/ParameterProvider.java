@@ -14,10 +14,9 @@ import java.util.Map;
 @FunctionalInterface
 public interface ParameterProvider {
     /**
-     *
      * @param expression 表达式
-     * @param params 根对象
-     * @param isDollar 是否是在 ${} 占位符中使用
+     * @param params     根对象
+     * @param isDollar   是否是在 ${} 占位符中使用
      * @return
      */
     Object apply(String expression, Map<String, Object> params, boolean isDollar);

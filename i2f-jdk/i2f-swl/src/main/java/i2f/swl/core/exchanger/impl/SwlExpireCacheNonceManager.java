@@ -42,6 +42,6 @@ public class SwlExpireCacheNonceManager implements SwlNonceManager {
 
     @Override
     public void set(String nonce, long timeoutSeconds) {
-        cache.set(cacheKey(nonceKey(nonce)),nonce,timeoutSeconds, TimeUnit.SECONDS);
+        cache.set(cacheKey(nonceKey(nonce)), nonce, timeoutSeconds, TimeUnit.SECONDS);
     }
 }

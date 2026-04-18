@@ -50,6 +50,14 @@ public class MdcWebFilter extends OncePerRequestFilter implements EnvironmentAwa
                     return value;
                 }
             }
+            for (String header : MdcTraces.TRACE_ID_HEADERS) {
+                Object value = request.getAttribute(header);
+                if (value instanceof String) {
+                    if (!StringUtils.isEmpty(value)) {
+                        return (String) value;
+                    }
+                }
+            }
             return null;
         });
 
@@ -59,6 +67,17 @@ public class MdcWebFilter extends OncePerRequestFilter implements EnvironmentAwa
             traceSource = request.getHeader(header);
             if (!StringUtils.isEmpty(traceSource)) {
                 break;
+            }
+        }
+        if (StringUtils.isEmpty(traceSource)) {
+            for (String header : MdcTraces.TRACE_SOURCE_HEADERS) {
+                Object attribute = request.getAttribute(header);
+                if (attribute instanceof String) {
+                    traceSource = (String) attribute;
+                    if (!StringUtils.isEmpty(traceSource)) {
+                        break;
+                    }
+                }
             }
         }
         if (StringUtils.isEmpty(traceSource)) {

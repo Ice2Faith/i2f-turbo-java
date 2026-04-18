@@ -11,17 +11,12 @@ import com.alibaba.dashscope.utils.JsonUtils;
 import com.google.gson.reflect.TypeToken;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.ai.dashscope.tool.DashScopeToolDefinition;
 import i2f.extension.ai.dashscope.tool.DashScopeToolHelper;
-import i2f.typeof.TypeOf;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -157,8 +152,8 @@ public class DashScopeAi {
                                 Throwable callEx = null;
                                 try {
                                     DashScopeToolDefinition definition = toolMap.get(name);
-                                    if(definition==null){
-                                        throw new IllegalArgumentException("not found this tool ["+name+"], please try others.");
+                                    if (definition == null) {
+                                        throw new IllegalArgumentException("not found this tool [" + name + "], please try others.");
                                     }
                                     String arguments = function.getArguments();
                                     String callCounterKey = name + "#" + arguments;
@@ -171,9 +166,9 @@ public class DashScopeAi {
                                     Map<String, Object> argumentsMap = JsonUtils.fromJson(arguments, new TypeToken<Map<String, Object>>() {
                                     }.getType());
                                     Object ret = ToolRawHelper.invokeTool(rawDefinition, argumentsMap);
-                                    if(ret instanceof CharSequence){
+                                    if (ret instanceof CharSequence) {
                                         callResult = String.valueOf(ret);
-                                    }else{
+                                    } else {
                                         String json = JsonUtils.toJson(ret);
                                         callResult = json;
                                     }

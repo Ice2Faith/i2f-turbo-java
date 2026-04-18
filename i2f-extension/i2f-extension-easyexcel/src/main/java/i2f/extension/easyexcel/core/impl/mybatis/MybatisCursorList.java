@@ -13,21 +13,21 @@ import java.util.function.Function;
  * @date 2025/12/29 16:33
  * @desc
  */
-public class MybatisCursorList<T> extends ArrayList<T> implements  Function<SqlSession,Cursor<T>> {
+public class MybatisCursorList<T> extends ArrayList<T> implements Function<SqlSession, Cursor<T>> {
     @Getter
     @Setter
-    protected Function<SqlSession,Cursor<T>> cursorCreator;
+    protected Function<SqlSession, Cursor<T>> cursorCreator;
 
-    public MybatisCursorList(Function<SqlSession,Cursor<T>> cursorCreator) {
-        this.cursorCreator=cursorCreator;
+    public MybatisCursorList(Function<SqlSession, Cursor<T>> cursorCreator) {
+        this.cursorCreator = cursorCreator;
     }
 
-    public static<T> MybatisCursorList<T> of(Function<SqlSession,Cursor<T>> cursorCreator){
+    public static <T> MybatisCursorList<T> of(Function<SqlSession, Cursor<T>> cursorCreator) {
         return new MybatisCursorList<>(cursorCreator);
     }
 
-    public static<M,T> MybatisCursorList<T> of(Class<M> mapperClass, Function<M,Cursor<T>> cursorCreator){
-        return new MybatisCursorList<>((session)->{
+    public static <M, T> MybatisCursorList<T> of(Class<M> mapperClass, Function<M, Cursor<T>> cursorCreator) {
+        return new MybatisCursorList<>((session) -> {
             M mapper = session.getMapper(mapperClass);
             return cursorCreator.apply(mapper);
         });

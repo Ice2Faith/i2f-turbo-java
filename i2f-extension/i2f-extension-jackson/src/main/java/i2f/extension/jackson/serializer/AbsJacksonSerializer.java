@@ -62,6 +62,7 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
 
     @Override
     public Map<String, Object> deserializeAsMap(String text) {
-        return deserialize(text, new TypeReference<Map<String, Object>>() {});
+        return deserialize(text, new TypeReference<Map<String, Object>>() {
+        });
     }
 }

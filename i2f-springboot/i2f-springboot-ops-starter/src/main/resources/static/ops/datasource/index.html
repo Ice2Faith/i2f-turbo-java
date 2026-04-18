@@ -24,6 +24,7 @@
     <script src="../common/OpsSecureHelper.js"></script>
     <script src="../common/OpsSecureTransfer.js"></script>
     <script src="../lib/echarts-5/echarts.min.js"></script>
+    <script src="../lib/vue-contextmenujs-1.4.11/contextmenu.umd.js"></script>
     <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
     <script src="../lib/codemirror-6.65.7/codemirror.min.js" ></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css" />
@@ -241,6 +242,8 @@
             行数：{{metas.resultList.length}}
         </el-row>
         <el-table border stripe highlight-current-row
+                  @row-contextmenu="handleResultTableContextMenu"
+                  @header-contextmenu="handleResultTableHeaderContextMenu"
                   :key="metas.resultListVueKey"
                   :data="metas.resultList"
                   style="width: 100%"
@@ -789,6 +792,8 @@
 </body>
 <script>
     Vue.use(VueVirtualScroller.default);
+    // 注册插件
+    Vue.use(contextmenu.default);
     window.app = new Vue({
         components:{
 
@@ -900,8 +905,26 @@
                         resultSql: '',
                         resultLang: 'text',
                         resultText: '',
-                        resultColumns: [],
-                        resultList: [],
+                        resultColumns: [
+                            {
+                                label:'Name',
+                                jdbcType: 'VARCHAR'
+                            },
+                            {
+                                label:'Age',
+                                jdbcType: 'NUMERIC'
+                            }
+                        ],
+                        resultList: [
+                            {
+                                Name: 'zhang',
+                                Age: 12
+                            },
+                            {
+                                Name: 'li',
+                                Age: 16
+                            }
+                        ],
                         resultListVueKey: 0,
                         langList:[
                             {label: 'Text',value:'text'},
@@ -2494,6 +2517,203 @@
                     text=editor.getValue();
                     editor.setValue(this.formatSql(text))
                 }
+            },
+            castValueAsSqlValue(itemValue,columnMeta){
+                if(itemValue===null || itemValue===undefined){
+                    return 'null';
+                }
+                let jdbcType=columnMeta.jdbcType || 'VARCHAR';
+                if([
+                    "CHAR","VARCHAR","NCHAR","NVARCHAR",
+                    "LONGVARCHAR","LONGNVARCHAR",
+                    "CLOB","NCLOB","BLOB",
+                    "ROWID","SQLXML",
+                ].includes(jdbcType)){
+                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                }else if([
+                    "INT","TINYINT","SMALLINT","BIGINT","INTEGER",
+                    "NUMERIC",
+                    "DECIMAL","DOUBLE","FLOAT",
+                    "REAL"
+                ].includes(jdbcType)){
+                    itemValue=(itemValue+'');
+                }else if([
+                    "DATE","TIME","TIMESTAMP",
+                    "TIME_WITH_TIMEZONE","TIMESTAMP_WITH_TIMEZONE"
+                ].includes(jdbcType)){
+                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                }
+                return itemValue
+            },
+            handleResultTableHeaderContextMenu(column,event){
+                if(column.type=='index'){
+                    // 序号列
+                }
+
+                this.$contextmenu({
+                    items: [
+                        {
+                            label: `列元`,
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                let list=this.metas.resultColumns.filter(e=>e.label==column.property)
+                                let metaColumn=list[0] || {};
+                                this.onViewText(metaColumn,'列 - '+metaColumn.label,'json')
+                            }
+                        },
+                        {
+                            label: '列值',
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                let list=this.metas.resultColumns.filter(e=>e.label==column.property)
+                                let metaColumn=list[0] || {};
+                                this.onViewText(this.metas.resultList.map(e=>e[metaColumn.label]).join('\n'),'列值 - '+metaColumn.label)
+                            }
+                        },
+                        { label: '', divided: true }, // 分割线
+                        {
+                            label: `列名`,
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                let text=this.metas.resultColumns.map(e=>e.label).join(',')
+                                this.onViewText(text,'列名-结果集','json')
+                            }
+                        },
+                        { label: '', divided: true }, // 分割线
+                        {
+                            label: `建表 DDL`,
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                let columnSql=''
+                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                    let meta=this.metas.resultColumns[i];
+                                    if(i>0){
+                                        columnSql+=',\n'
+                                    }
+                                    let columnType=meta.typeName || 'varchar';
+                                    if(meta.precision>0 && meta.scale>0){
+                                        columnType+='('+meta.precision+','+meta.scale+')';
+                                    }else if(meta.precision>0){
+                                        columnType+='('+meta.precision+','+meta.scale+')';
+                                    }
+                                    columnSql+='\t'+meta.label+' '+columnType;
+                                    if(meta.autoIncrement===true){
+                                        columnSql+=' auto_increment';
+                                    }
+                                    if(meta.nullable===false){
+                                        columnSql+=' not null';
+                                    }
+                                }
+                                let sql='create table t_xxx (\n'+columnSql+'\n);';
+                                this.onViewText(sql,'DDL语句','sql')
+                            }
+                        }
+                    ],
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+
+                event.returnValue=false;
+                return false
+            },
+            handleResultTableContextMenu(row, column, event){
+                if(column.type=='index'){
+                    // 序号列
+                }
+                let cellValue=row[column.property]
+
+                this.$contextmenu({
+                    items: [
+                        {
+                            label: `列值`,
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                this.onViewTableCellData(cellValue,{
+                                    row: row
+                                }, column)
+                            }
+                        },
+                        {
+                            label: '行JSON',
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                this.onViewText(row,'数据行','json')
+                            }
+                        },
+                        { label: '', divided: true }, // 分割线
+                        {
+                            label: 'Insert SQL',
+                            icon: 'el-icon-edit',
+                            onClick: () => {
+                                let nameSql='';
+                                let valueSql='';
+                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                    let columnMeta=this.metas.resultColumns[i];
+                                    if(i>0){
+                                        nameSql+=',';
+                                        valueSql+=',';
+                                    }
+                                    nameSql+=columnMeta.label;
+                                    valueSql+=this.castValueAsSqlValue(row[columnMeta.label],columnMeta)
+                                }
+                                let sql='insert into t_xxx ('+nameSql+') \nvalues ('+valueSql+');';
+                                this.onViewText(sql,'SQL语句','sql')
+                            }
+                        },
+                        {
+                            label: 'Update SQL',
+                            icon: 'el-icon-edit',
+                            onClick: () => {
+                                let nameSql='';
+                                let valueSql='';
+                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                    let columnMeta=this.metas.resultColumns[i];
+                                    if(i>0){
+                                        nameSql+=',\n';
+                                        valueSql+='\n\tand ';
+                                    }else{
+                                        valueSql+='\t';
+                                    }
+                                    let pairSql=columnMeta.label+' = '+this.castValueAsSqlValue(row[columnMeta.label],columnMeta);
+
+                                    nameSql+='\t'+ pairSql;
+                                    valueSql+=pairSql;
+                                }
+                                let sql='update t_xxx\nset\n'+nameSql+'\nwhere \n'+valueSql+'\n;';
+
+                                this.onViewText(sql,'SQL语句','sql')
+                            }
+                        },
+                        {
+                            label: 'Delete SQL',
+                            icon: 'el-icon-delete',
+                            onClick: () => {
+                                let valueSql='';
+                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                    let columnMeta=this.metas.resultColumns[i];
+                                    if(i>0){
+                                        valueSql+='\n\tand ';
+                                    }else{
+                                        valueSql+='\t';
+                                    }
+                                    let pairSql=columnMeta.label+' = '+this.castValueAsSqlValue(row[columnMeta.label],columnMeta);
+
+                                    valueSql+=pairSql;
+                                }
+                                let sql='delete from t_xxx\n where \n'+valueSql+'\n;';
+
+                                this.onViewText(sql,'SQL语句','sql')
+                            }
+                        }
+                    ],
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+
+                event.returnValue=false;
+                return false
             }
         }
     })

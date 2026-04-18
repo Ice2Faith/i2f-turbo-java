@@ -68,7 +68,7 @@ public class PostgreSqlDatabaseMetadataProvider extends BaseDatabaseMetadataProv
     }
 
     @Override
-    public ResultSet getTables(DatabaseMetaData metaData, String database,String tablePattern) throws SQLException {
+    public ResultSet getTables(DatabaseMetaData metaData, String database, String tablePattern) throws SQLException {
         return metaData.getTables(database, null, tablePattern, new String[]{"TABLE"});
     }
 

@@ -722,9 +722,9 @@ public class SqlEtlNode extends AbstractExecutorNode {
 
 //            executor.sqlTransCommit(loadDatasource, context);
         } catch (Throwable e) {
-            if(e instanceof ControlSignalException){
+            if (e instanceof ControlSignalException) {
                 executor.sqlTransCommit(loadDatasource, context);
-                throw (ControlSignalException)e;
+                throw (ControlSignalException) e;
             }
 //            executor.sqlTransRollback(loadDatasource, context);
             throw new ThrowSignalException(e.getMessage(), e);

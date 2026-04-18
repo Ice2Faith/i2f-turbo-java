@@ -49,7 +49,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
     @Override
     public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         // 没有开启总开关，直接跳过处理
-        if(!config.isEnable()){
+        if (!config.isEnable()) {
             chain.doFilter(request, response);
             return;
         }
@@ -68,7 +68,6 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
         // 获取控制信息，可子类重写实现白名单等功能
         SwlWebCtrl ctrl = parseCtrl(request, response);
-
 
 
         // 获取安全头，优先从请求头获取，获取不到则从请求参数获取
@@ -95,7 +94,6 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         String swlu = null;
 
 
-
         // 获取客户端IP，用以客户端隔离
         String clientIp = ServletContextUtil.getIp(request);
         if (clientIp != null) {
@@ -115,7 +113,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         // 如果输入需要解密，则进行输入解密
         if (ctrl.isIn() && !Boolean.TRUE.equals(decrypted)) {
             try {
-                if(config.isEnableUrlPathCheck()) {
+                if (config.isEnableUrlPathCheck()) {
                     swlu = request.getHeader(config.getUrlPathName());
                     if (swlu == null || swlu.isEmpty()) {
                         swlu = request.getParameter(config.getUrlPathName());
@@ -175,8 +173,8 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 // 需要进行反序列化字符串
                 if (srcText != null) {
                     srcText = srcText.trim();
-                    if(srcText.startsWith("$.")){
-                        srcText=srcText.substring(2);
+                    if (srcText.startsWith("$.")) {
+                        srcText = srcText.substring(2);
                     }
                     if (srcText.startsWith("\"")) {
                         srcText = (String) jsonSerializer.deserialize(srcText, String.class);
@@ -184,7 +182,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 }
 
                 List<String> attachedHeaders = new ArrayList<>();
-                if(config.isEnableUrlPathCheck()) {
+                if (config.isEnableUrlPathCheck()) {
                     attachedHeaders.add(swlu);
                 }
                 if (this.config.getAttachedHeaderNames() != null) {
@@ -218,7 +216,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
                 // 获取解密后的数据
                 srcText = receiveData.getParts().get(0);
                 swlp = receiveData.getParts().get(1);
-                if(swlp!=null) {
+                if (swlp != null) {
                     if (!transfer.isEnableEncrypt()) {
                         swlp = URLDecoder.decode(swlp, "UTF-8");
                     }
@@ -368,7 +366,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
         response.setHeader(config.getCertIdName(), responseData.getContext().getCertId());
 
         responseText = responseData.getParts().get(0);
-        responseText="$."+responseBody;
+        responseText = "$." + responseBody;
         responseBody = responseText.getBytes("UTF-8");
 
         String responseContentType = responseWrapper.getContentType();
@@ -441,7 +439,7 @@ public class SwlWebFilter extends OncePerHttpServletFilter {
 
 
     public SwlWebCtrl parseCtrl(HttpServletRequest request, HttpServletResponse response) {
-        SwlWebCtrl ret=new SwlWebCtrl(config.getDefaultCtrl().isIn(),
+        SwlWebCtrl ret = new SwlWebCtrl(config.getDefaultCtrl().isIn(),
                 config.getDefaultCtrl().isOut());
         // 跳过multipart请求
         String contentType = request.getContentType();

@@ -173,176 +173,119 @@ public interface TinyScriptTypes {
             IElementType type = node.getElementType();
             if (type == ARGUMENT) {
                 return new TinyScriptArgumentImpl(node);
-            }
-            else if (type == ARGUMENT_LIST) {
+            } else if (type == ARGUMENT_LIST) {
                 return new TinyScriptArgumentListImpl(node);
-            }
-            else if (type == ARGUMENT_VALUE) {
+            } else if (type == ARGUMENT_VALUE) {
                 return new TinyScriptArgumentValueImpl(node);
-            }
-            else if (type == BIN_NUMBER) {
+            } else if (type == BIN_NUMBER) {
                 return new TinyScriptBinNumberImpl(node);
-            }
-            else if (type == CATCH_BODY_BLOCK) {
+            } else if (type == CATCH_BODY_BLOCK) {
                 return new TinyScriptCatchBodyBlockImpl(node);
-            }
-            else if (type == CLASS_NAME_BLOCK) {
+            } else if (type == CLASS_NAME_BLOCK) {
                 return new TinyScriptClassNameBlockImpl(node);
-            }
-            else if (type == COMMENT_SEGMENT) {
+            } else if (type == COMMENT_SEGMENT) {
                 return new TinyScriptCommentSegmentImpl(node);
-            }
-            else if (type == CONDITION_BLOCK) {
+            } else if (type == CONDITION_BLOCK) {
                 return new TinyScriptConditionBlockImpl(node);
-            }
-            else if (type == CONST_BOOL) {
+            } else if (type == CONST_BOOL) {
                 return new TinyScriptConstBoolImpl(node);
-            }
-            else if (type == CONST_CLASS) {
+            } else if (type == CONST_CLASS) {
                 return new TinyScriptConstClassImpl(node);
-            }
-            else if (type == CONST_MULTILINE_STRING) {
+            } else if (type == CONST_MULTILINE_STRING) {
                 return new TinyScriptConstMultilineStringImpl(node);
-            }
-            else if (type == CONST_NULL) {
+            } else if (type == CONST_NULL) {
                 return new TinyScriptConstNullImpl(node);
-            }
-            else if (type == CONST_RENDER_STRING) {
+            } else if (type == CONST_RENDER_STRING) {
                 return new TinyScriptConstRenderStringImpl(node);
-            }
-            else if (type == CONST_STRING) {
+            } else if (type == CONST_STRING) {
                 return new TinyScriptConstStringImpl(node);
-            }
-            else if (type == CONST_VALUE) {
+            } else if (type == CONST_VALUE) {
                 return new TinyScriptConstValueImpl(node);
-            }
-            else if (type == CONTROL_SEGMENT) {
+            } else if (type == CONTROL_SEGMENT) {
                 return new TinyScriptControlSegmentImpl(node);
-            }
-            else if (type == DEBUGGER_SEGMENT) {
+            } else if (type == DEBUGGER_SEGMENT) {
                 return new TinyScriptDebuggerSegmentImpl(node);
-            }
-            else if (type == DECLARE_FUNCTION) {
+            } else if (type == DECLARE_FUNCTION) {
                 return new TinyScriptDeclareFunctionImpl(node);
-            }
-            else if (type == DEC_NUMBER) {
+            } else if (type == DEC_NUMBER) {
                 return new TinyScriptDecNumberImpl(node);
-            }
-            else if (type == DO_WHILE_SEGMENT) {
+            } else if (type == DO_WHILE_SEGMENT) {
                 return new TinyScriptDoWhileSegmentImpl(node);
-            }
-            else if (type == EQUAL_VALUE) {
+            } else if (type == EQUAL_VALUE) {
                 return new TinyScriptEqualValueImpl(node);
-            }
-            else if (type == EXPRESS) {
+            } else if (type == EXPRESS) {
                 return new TinyScriptExpressImpl(node);
-            }
-            else if (type == EXPRESS_SEGMENT) {
+            } else if (type == EXPRESS_SEGMENT) {
                 return new TinyScriptExpressSegmentImpl(node);
-            }
-            else if (type == EXTRACT_EXPRESS) {
+            } else if (type == EXTRACT_EXPRESS) {
                 return new TinyScriptExtractExpressImpl(node);
-            }
-            else if (type == EXTRACT_PAIR) {
+            } else if (type == EXTRACT_PAIR) {
                 return new TinyScriptExtractPairImpl(node);
-            }
-            else if (type == EXTRACT_PAIRS) {
+            } else if (type == EXTRACT_PAIRS) {
                 return new TinyScriptExtractPairsImpl(node);
-            }
-            else if (type == FINALLY_BODY_BLOCK) {
+            } else if (type == FINALLY_BODY_BLOCK) {
                 return new TinyScriptFinallyBodyBlockImpl(node);
-            }
-            else if (type == FOREACH_SEGMENT) {
+            } else if (type == FOREACH_SEGMENT) {
                 return new TinyScriptForeachSegmentImpl(node);
-            }
-            else if (type == FOR_SEGMENT) {
+            } else if (type == FOR_SEGMENT) {
                 return new TinyScriptForSegmentImpl(node);
-            }
-            else if (type == FUNCTION_CALL) {
+            } else if (type == FUNCTION_CALL) {
                 return new TinyScriptFunctionCallImpl(node);
-            }
-            else if (type == HEX_NUMBER) {
+            } else if (type == HEX_NUMBER) {
                 return new TinyScriptHexNumberImpl(node);
-            }
-            else if (type == IF_SEGMENT) {
+            } else if (type == IF_SEGMENT) {
                 return new TinyScriptIfSegmentImpl(node);
-            }
-            else if (type == INVOKE_FUNCTION) {
+            } else if (type == INVOKE_FUNCTION) {
                 return new TinyScriptInvokeFunctionImpl(node);
-            }
-            else if (type == JSON_ARRAY_VALUE) {
+            } else if (type == JSON_ARRAY_VALUE) {
                 return new TinyScriptJsonArrayValueImpl(node);
-            }
-            else if (type == JSON_ITEM_LIST) {
+            } else if (type == JSON_ITEM_LIST) {
                 return new TinyScriptJsonItemListImpl(node);
-            }
-            else if (type == JSON_MAP_VALUE) {
+            } else if (type == JSON_MAP_VALUE) {
                 return new TinyScriptJsonMapValueImpl(node);
-            }
-            else if (type == JSON_PAIR) {
+            } else if (type == JSON_PAIR) {
                 return new TinyScriptJsonPairImpl(node);
-            }
-            else if (type == JSON_PAIRS) {
+            } else if (type == JSON_PAIRS) {
                 return new TinyScriptJsonPairsImpl(node);
-            }
-            else if (type == JSON_VALUE) {
+            } else if (type == JSON_VALUE) {
                 return new TinyScriptJsonValueImpl(node);
-            }
-            else if (type == NAMING_BLOCK) {
+            } else if (type == NAMING_BLOCK) {
                 return new TinyScriptNamingBlockImpl(node);
-            }
-            else if (type == NEGTIVE_SEGMENT) {
+            } else if (type == NEGTIVE_SEGMENT) {
                 return new TinyScriptNegtiveSegmentImpl(node);
-            }
-            else if (type == NEW_INSTANCE) {
+            } else if (type == NEW_INSTANCE) {
                 return new TinyScriptNewInstanceImpl(node);
-            }
-            else if (type == OPERATOR_SEGMENT) {
+            } else if (type == OPERATOR_SEGMENT) {
                 return new TinyScriptOperatorSegmentImpl(node);
-            }
-            else if (type == OTC_NUMBER) {
+            } else if (type == OTC_NUMBER) {
                 return new TinyScriptOtcNumberImpl(node);
-            }
-            else if (type == PARAMETER_LIST) {
+            } else if (type == PARAMETER_LIST) {
                 return new TinyScriptParameterListImpl(node);
-            }
-            else if (type == PAREN_SEGMENT) {
+            } else if (type == PAREN_SEGMENT) {
                 return new TinyScriptParenSegmentImpl(node);
-            }
-            else if (type == PIPELINE_FUNCTION_SEGMENT) {
+            } else if (type == PIPELINE_FUNCTION_SEGMENT) {
                 return new TinyScriptPipelineFunctionSegmentImpl(node);
-            }
-            else if (type == PREFIX_OPERATOR_SEGMENT) {
+            } else if (type == PREFIX_OPERATOR_SEGMENT) {
                 return new TinyScriptPrefixOperatorSegmentImpl(node);
-            }
-            else if (type == REF_CALL) {
+            } else if (type == REF_CALL) {
                 return new TinyScriptRefCallImpl(node);
-            }
-            else if (type == REF_VALUE) {
+            } else if (type == REF_VALUE) {
                 return new TinyScriptRefValueImpl(node);
-            }
-            else if (type == SCRIPT) {
+            } else if (type == SCRIPT) {
                 return new TinyScriptScriptImpl(node);
-            }
-            else if (type == SCRIPT_BLOCK) {
+            } else if (type == SCRIPT_BLOCK) {
                 return new TinyScriptScriptBlockImpl(node);
-            }
-            else if (type == SEGMENT) {
+            } else if (type == SEGMENT) {
                 return new TinyScriptSegmentImpl(node);
-            }
-            else if (type == STATIC_ENUM_VALUE) {
+            } else if (type == STATIC_ENUM_VALUE) {
                 return new TinyScriptStaticEnumValueImpl(node);
-            }
-            else if (type == THROW_SEGMENT) {
+            } else if (type == THROW_SEGMENT) {
                 return new TinyScriptThrowSegmentImpl(node);
-            }
-            else if (type == TRY_BODY_BLOCK) {
+            } else if (type == TRY_BODY_BLOCK) {
                 return new TinyScriptTryBodyBlockImpl(node);
-            }
-            else if (type == TRY_SEGMENT) {
+            } else if (type == TRY_SEGMENT) {
                 return new TinyScriptTrySegmentImpl(node);
-            }
-            else if (type == WHILE_SEGMENT) {
+            } else if (type == WHILE_SEGMENT) {
                 return new TinyScriptWhileSegmentImpl(node);
             }
             throw new AssertionError("Unknown element type: " + type);

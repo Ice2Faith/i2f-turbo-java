@@ -3,8 +3,10 @@ package i2f.turbo.idea.plugin.tinyscript.grammar.parser;
 
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
+
 import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
 import static i2f.turbo.idea.plugin.tinyscript.lang.parser.TinyScriptParserUtil.*;
+
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -208,7 +210,8 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //     |TERM_CONST_STRING_MULTILINE_QUOTE
     public static boolean constMultilineString(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "constMultilineString")) return false;
-        if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE)) return false;
+        if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
+            return false;
         boolean r;
         Marker m = enter_section_(b, l, _NONE_, CONST_MULTILINE_STRING, "<const multiline string>");
         r = consumeToken(b, TERM_CONST_STRING_MULTILINE);
@@ -234,7 +237,8 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     //     |TERM_CONST_STRING_RENDER_SINGLE
     public static boolean constRenderString(PsiBuilder b, int l) {
         if (!recursion_guard_(b, l, "constRenderString")) return false;
-        if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE)) return false;
+        if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
+            return false;
         boolean r;
         Marker m = enter_section_(b, l, _NONE_, CONST_RENDER_STRING, "<const render string>");
         r = consumeToken(b, TERM_CONST_STRING_RENDER);

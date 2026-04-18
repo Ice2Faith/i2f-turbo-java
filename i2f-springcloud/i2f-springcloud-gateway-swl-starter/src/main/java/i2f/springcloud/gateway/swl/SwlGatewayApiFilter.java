@@ -57,7 +57,7 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if(!config.isEnable()){
+        if (!config.isEnable()) {
             return chain.filter(exchange);
         }
         ServerHttpRequest request = exchange.getRequest();
@@ -70,9 +70,9 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
             return chain.filter(exchange);
         }
 
-        String apiKeyPath= config.getApiSwapKeyPath();
-        if(apiKeyPath==null || apiKeyPath.isEmpty()){
-            apiKeyPath=KEY_SWAP_PATH;
+        String apiKeyPath = config.getApiSwapKeyPath();
+        if (apiKeyPath == null || apiKeyPath.isEmpty()) {
+            apiKeyPath = KEY_SWAP_PATH;
         }
 
         if (apiKeyPath.equals(path)) {
@@ -102,8 +102,8 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
                         try {
                             SwlDto dto = (SwlDto) jsonSerializer.deserialize(reqJson, SwlDto.class);
                             String reqPayload = dto.getPayload();
-                            reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload),"UTF-8");
-                            reqHandleShake = (SwlData)jsonSerializer.deserialize(reqJson, SwlData.class);
+                            reqJson = new String(Base64StringByteCodec.INSTANCE.decode(reqPayload), "UTF-8");
+                            reqHandleShake = (SwlData) jsonSerializer.deserialize(reqJson, SwlData.class);
                         } catch (Exception e) {
                         }
 
@@ -130,9 +130,9 @@ public class SwlGatewayApiFilter implements GlobalFilter, Ordered {
 
                         byte[] bytes = null;
                         try {
-                            SwlDto ret=new SwlDto();
-                            String retJson=jsonSerializer.serialize(respHandleShake);
-                            String retPayload=Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
+                            SwlDto ret = new SwlDto();
+                            String retJson = jsonSerializer.serialize(respHandleShake);
+                            String retPayload = Base64StringByteCodec.INSTANCE.encode(retJson.getBytes("UTF-8"));
                             ret.setPayload(retPayload);
 
                             String respJson = jsonSerializer.serialize(ret);

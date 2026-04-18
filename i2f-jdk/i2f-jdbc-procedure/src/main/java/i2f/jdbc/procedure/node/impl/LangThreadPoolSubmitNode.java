@@ -68,12 +68,12 @@ public class LangThreadPoolSubmitNode extends AbstractExecutorNode {
             if (result != null) {
                 executor.visitSet(context, result, latch);
             }
-        }catch (Throwable e){
+        } catch (Throwable e) {
             e.printStackTrace();
-            if(e instanceof SignalException){
-                throw (SignalException)e;
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
             }
-            throw new ThrowSignalException(e.getMessage(),e);
+            throw new ThrowSignalException(e.getMessage(), e);
         }
     }
 

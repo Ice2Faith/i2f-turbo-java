@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Controller
 @RequestMapping("/ops/xproc4j")
 public class XProc4jOpsController implements IOpsProvider {
-    public static final String ATTR_LOG="log";
+    public static final String ATTR_LOG = "log";
 
     @Autowired
     private XProc4jHelper xProc4jHelper;
@@ -145,7 +145,7 @@ public class XProc4jOpsController implements IOpsProvider {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> call(@RequestBody OpsSecureDto reqDto,
                                               HttpServletRequest request) throws Exception {
-        LinkedBlockingQueue<String> buffer=new LinkedBlockingQueue<>();
+        LinkedBlockingQueue<String> buffer = new LinkedBlockingQueue<>();
         try {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -168,11 +168,11 @@ public class XProc4jOpsController implements IOpsProvider {
             Runnable task = () -> {
                 try {
                     xProc4jHelper.debugThread(req.getEnableDebug());
-                    if(req.getEnableLog()!=null && req.getEnableLog()){
-                        xProc4jHelper.applyThreadLogAppender((str)->{
+                    if (req.getEnableLog() != null && req.getEnableLog()) {
+                        xProc4jHelper.applyThreadLogAppender((str) -> {
                             try {
                                 buffer.add(str);
-                                while(buffer.size()>1000){
+                                while (buffer.size() > 1000) {
                                     buffer.take();
                                 }
                             } catch (InterruptedException e) {
@@ -226,10 +226,10 @@ public class XProc4jOpsController implements IOpsProvider {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp).withAttr(ATTR_LOG,new ArrayList<>(buffer));
+            return transfer.success(resp).withAttr(ATTR_LOG, new ArrayList<>(buffer));
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e).withAttr(ATTR_LOG,new ArrayList<>(buffer));
+            return transfer.error(e).withAttr(ATTR_LOG, new ArrayList<>(buffer));
         }
     }
 
@@ -237,7 +237,7 @@ public class XProc4jOpsController implements IOpsProvider {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> evalScript(@RequestBody OpsSecureDto reqDto,
                                                     HttpServletRequest request) throws Exception {
-        LinkedBlockingQueue<String> buffer=new LinkedBlockingQueue<String>();
+        LinkedBlockingQueue<String> buffer = new LinkedBlockingQueue<String>();
         try {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
@@ -260,11 +260,11 @@ public class XProc4jOpsController implements IOpsProvider {
             Runnable task = () -> {
                 try {
                     xProc4jHelper.debugThread(req.getEnableDebug());
-                    if(req.getEnableLog()!=null && req.getEnableLog()){
-                        xProc4jHelper.applyThreadLogAppender((str)->{
+                    if (req.getEnableLog() != null && req.getEnableLog()) {
+                        xProc4jHelper.applyThreadLogAppender((str) -> {
                             try {
                                 buffer.add(str);
-                                while(buffer.size()>1000){
+                                while (buffer.size() > 1000) {
                                     buffer.take();
                                 }
                             } catch (InterruptedException e) {
@@ -322,10 +322,10 @@ public class XProc4jOpsController implements IOpsProvider {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp).withAttr(ATTR_LOG,new ArrayList<>(buffer));
+            return transfer.success(resp).withAttr(ATTR_LOG, new ArrayList<>(buffer));
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            return transfer.error(e).withAttr(ATTR_LOG,new ArrayList<>(buffer));
+            return transfer.error(e).withAttr(ATTR_LOG, new ArrayList<>(buffer));
         }
     }
 }

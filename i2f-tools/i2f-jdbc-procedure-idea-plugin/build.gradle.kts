@@ -18,7 +18,9 @@ repositories {
 dependencies {
     implementation("org.antlr:antlr4-runtime:4.13.2")
     implementation("org.apache.velocity:velocity:1.7")
-    implementation("com.google.code.gson:gson:2.8.6")
+    // 核心依赖
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.5")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5")
 }
 
 tasks.withType<JavaCompile> {
@@ -35,13 +37,15 @@ intellij {
 //    localPath.set("C:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.1")
     localPath.set("D:\\Program Files\\JetBrains\\IntelliJ IDEA 2024.2.1")
 
-    plugins.set(listOf(/* Plugin Dependencies */
+    plugins.set(listOf(
+        /* Plugin Dependencies */
         "com.intellij.java",
         "com.intellij.database",
         "org.intellij.intelliLang",
 //        "com.intellij.modules.xml",
-        "com.intellij.velocity"
-        )
+        "com.intellij.velocity",
+        "org.jetbrains.plugins.yaml",
+    )
     )
 
 }

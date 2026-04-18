@@ -31,8 +31,8 @@ public interface JdbcCursor<E> extends Closeable, Iterable<E> {
     }
 
     default <C extends Collection<E>> C nextCount(int maxCount, C collection) throws SQLException {
-        int count=0;
-        while ((maxCount<0 || count<maxCount) && hasRow()) {
+        int count = 0;
+        while ((maxCount < 0 || count < maxCount) && hasRow()) {
             E elem = nextRow();
             collection.add(elem);
             count++;

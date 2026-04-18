@@ -142,7 +142,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
             certId.set(request.getQueryParams().getFirst(config.getCertIdName()));
         }
 
-        if(certId.get()!=null && !certId.get().isEmpty()){
+        if (certId.get() != null && !certId.get().isEmpty()) {
             transfer.resetCertExpire(certId.get());
         }
 

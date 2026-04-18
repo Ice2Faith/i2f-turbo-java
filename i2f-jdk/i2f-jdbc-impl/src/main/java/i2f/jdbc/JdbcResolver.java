@@ -521,6 +521,7 @@ public class JdbcResolver {
     public static <T> List<T> list(Connection conn, String sql, List<Object> args, Class<T> clazz, int maxCount, Function<String, String> columnNameMapper, BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
         return query(conn, sql, args, (rs) -> parseResultSet(rs, maxCount, clazz, columnNameMapper, rowConvertorBuilder));
     }
+
     public static <T> Page<T> page(Connection conn, BindSql sql, Class<T> clazz, ApiOffsetSize page) throws SQLException {
         PageBindSql pageBindSql = BindSqlWrappers.page(conn, sql, page);
         return page(conn, pageBindSql, clazz, null);
@@ -606,6 +607,7 @@ public class JdbcResolver {
         }
         return null;
     }
+
     public static <T> T find(Connection conn, String sql, List<Object> args, Class<T> clazz, Function<String, String> columnNameMapper, BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
         List<T> list = query(conn, sql, args, (rs) -> parseResultSet(rs, 2, clazz, columnNameMapper, rowConvertorBuilder));
         if (!list.isEmpty()) {
@@ -2034,11 +2036,12 @@ public class JdbcResolver {
         };
         return rowConvertor;
     }
+
     public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return parseResultSet(rs, maxCount, beanClass,
                 columnNameMapper,
                 JdbcResolver::createDefaultRowConvertor);
-        }
+    }
 
 
     public static Map<String, Object> convertResultSetRowAsMap(List<QueryColumn> columns, ResultSet rs) throws SQLException {

@@ -9,19 +9,20 @@ import i2f.jdbc.proxy.xml.mybatis.parameter.ParameterConvertor;
  * @desc
  */
 public class ValEndsParameterConvertor implements ParameterConvertor {
-    public static final ValEndsParameterConvertor INSTANCE=new ValEndsParameterConvertor();
-    public static final String NAME="v-ends";
+    public static final ValEndsParameterConvertor INSTANCE = new ValEndsParameterConvertor();
+    public static final String NAME = "v-ends";
+
     @Override
     public Object convert(Object obj, String expr, boolean isDollar) {
-        if(!(obj instanceof CharSequence)){
+        if (!(obj instanceof CharSequence)) {
             return obj;
         }
-        String str=String.valueOf(obj);
-        str="%"+str;
-        if(isDollar){
-            str=str.replace("'","''");
-            return "'"+str+"'";
+        String str = String.valueOf(obj);
+        str = "%" + str;
+        if (isDollar) {
+            str = str.replace("'", "''");
+            return "'" + str + "'";
         }
-        return BindSql.of("?",str);
+        return BindSql.of("?", str);
     }
 }
