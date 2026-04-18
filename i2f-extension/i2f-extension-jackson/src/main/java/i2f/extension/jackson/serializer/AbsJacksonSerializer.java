@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 import i2f.serialize.std.exception.SerializeException;
 import i2f.serialize.std.str.IStringObjectSerializer;
 
-import java.lang.reflect.Type;
 import java.util.Map;
 
 
