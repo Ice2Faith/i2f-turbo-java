@@ -97,7 +97,7 @@ public class SpringAiModel implements AiModel {
                 } else {
                     item = ToolResponseMessage.builder()
                             .responses(new ArrayList<>(Collections.singletonList(
-                                    new ToolResponseMessage.ToolResponse(rawMsg.getId(), rawMsg.getDefinition().getFunctionName(), rawItem.text())
+                                    new ToolResponseMessage.ToolResponse(rawMsg.getId(), rawMsg.getDefinition().getName(), rawItem.text())
                             )))
                             .build();
                 }

@@ -68,14 +68,14 @@ public class SpringAiToolHelper {
     public static SpringAiToolDefinition fromRaw(ToolRawDefinition definition) {
         SpringAiToolDefinition ret = new SpringAiToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getFunctionJsonSchema();
+        Map<String, Object> functionSchema = definition.getJsonSchema();
 
         Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
 
 
         ToolDefinition def = ToolDefinition.builder()
-                .name(definition.getFunctionName())
-                .description(definition.getFunctionDescription())
+                .name(definition.getName())
+                .description(definition.getDescription())
                 .inputSchema(SpringAiJsonSerializer.INSTANCE.serialize(parametersSchema))
                 .build();
 
