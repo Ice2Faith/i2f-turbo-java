@@ -20,7 +20,7 @@ public class TestSlf4jLogAdapter {
         DefaultClassNamePattenLogDecider defaultDecider = (DefaultClassNamePattenLogDecider) LogHolder.DEFAULT_DECIDER;
         defaultDecider.setRootLevel(LogLevel.ALL);
 
-        MdcHolder.put(MdcTraces.TRACE_ID,MdcTraces.genTraceId());
+        MdcHolder.put(MdcTraces.TRACE_ID, MdcTraces.genTraceId());
 
         Logger logger = LoggerFactory.getLogger(TestSlf4jLogAdapter.class);
         logger.info("adapter");

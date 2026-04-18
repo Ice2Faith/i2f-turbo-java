@@ -56,10 +56,10 @@ public class RagWorker {
         return store.similar(embedding, topN);
     }
 
-    public List<RagRerankDocument> rerank(String question,List<RagEmbedding> embeddings,int topN){
-        return rerankModel.rerank(question,embeddings.stream()
-                .map(RagEmbedding::getContent)
-                .collect(Collectors.toList()),
+    public List<RagRerankDocument> rerank(String question, List<RagEmbedding> embeddings, int topN) {
+        return rerankModel.rerank(question, embeddings.stream()
+                        .map(RagEmbedding::getContent)
+                        .collect(Collectors.toList()),
                 topN);
     }
 

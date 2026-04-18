@@ -125,7 +125,7 @@ public class AnnotationInjectHandler extends IProjectInjectHandler<PsiAnnotation
                     }
 
                     Map<String, Object> context = new HashMap<>();
-                    JavaMetadataResolver.fillJavaMetadata(item,context,annotationElement.getProject());
+                    JavaMetadataResolver.fillJavaMetadata(item, context, annotationElement.getProject());
 
                     if (annotationElement instanceof PsiMethod) {
                         PsiMethod method = (PsiMethod) annotationElement;

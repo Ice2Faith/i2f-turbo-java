@@ -26,7 +26,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                 new PsiReferenceProvider() {
                     @Override
                     public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
-                                                                           @NotNull ProcessingContext context) {
+                                                                          @NotNull ProcessingContext context) {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;
                         }
@@ -45,7 +45,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                                 }
                             }
                         }
-                        if(isSupport) {
+                        if (isSupport) {
                             return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
                         }
                         return PsiReference.EMPTY_ARRAY;
@@ -60,7 +60,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                 new PsiReferenceProvider() {
                     @Override
                     public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
-                                                                           @NotNull ProcessingContext context) {
+                                                                          @NotNull ProcessingContext context) {
                         if (!(element instanceof XmlAttributeValue)) {
                             return PsiReference.EMPTY_ARRAY;
                         }
@@ -78,7 +78,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                                 }
                             }
                         }
-                        if(isSupport) {
+                        if (isSupport) {
                             return new PsiReference[]{new XmlIdRefReference((XmlAttributeValue) element)};
                         }
                         return PsiReference.EMPTY_ARRAY;

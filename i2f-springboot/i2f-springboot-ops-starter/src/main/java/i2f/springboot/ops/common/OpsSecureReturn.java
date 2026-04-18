@@ -25,7 +25,7 @@ public class OpsSecureReturn<T> {
     protected int code;
     protected String msg;
     protected T data;
-    protected Map<String,Object> attrs;
+    protected Map<String, Object> attrs;
 
     public OpsSecureReturn(int code, String msg, T data) {
         this.code = code;
@@ -33,11 +33,11 @@ public class OpsSecureReturn<T> {
         this.data = data;
     }
 
-    public OpsSecureReturn<T> withAttr(String key,Object value){
-        if(attrs==null){
-            attrs=new LinkedHashMap<>();
+    public OpsSecureReturn<T> withAttr(String key, Object value) {
+        if (attrs == null) {
+            attrs = new LinkedHashMap<>();
         }
-        attrs.put(key,value);
+        attrs.put(key, value);
         return this;
     }
 

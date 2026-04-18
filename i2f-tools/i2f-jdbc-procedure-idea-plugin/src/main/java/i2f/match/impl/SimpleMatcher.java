@@ -16,7 +16,8 @@ import i2f.match.std.IPriorMatcher;
  * 因此\\就是\\，而不是\
  */
 public class SimpleMatcher implements IPriorMatcher {
-    public static final SimpleMatcher INSTANCE=new SimpleMatcher();
+    public static final SimpleMatcher INSTANCE = new SimpleMatcher();
+
     /**
      * 通配符匹配
      * 返回值含义，为负数，表示不匹配

@@ -55,14 +55,14 @@ public class JsonUtils {
     }
 
     public static <T> T copy(Object obj, Class<T> type) {
-        if(obj==null){
+        if (obj == null) {
             return null;
         }
         return parseJson(toJson(obj), type);
     }
 
     public static <T> T copy(Object obj, TypeReference<T> type) {
-        if(obj==null){
+        if (obj == null) {
             return null;
         }
         return parseJson(toJson(obj), type);
@@ -70,7 +70,7 @@ public class JsonUtils {
 
     public static <T> List<T> copyList(Collection<?> list, Class<T> type) {
         List<T> ret = new ArrayList<>();
-        if(list==null){
+        if (list == null) {
             return ret;
         }
         for (Object item : list) {
@@ -81,7 +81,7 @@ public class JsonUtils {
 
     public static <T> List<T> copyList(Collection<?> list, TypeReference<T> type) {
         List<T> ret = new ArrayList<>();
-        if(list==null){
+        if (list == null) {
             return ret;
         }
         for (Object item : list) {

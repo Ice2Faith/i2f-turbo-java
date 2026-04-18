@@ -32,11 +32,11 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
     @Override
     public @NotNull ResolveResult[] multiResolve(boolean incompleteCode) {
         PsiElement parent = myElement.getParent();
-        if(!(parent instanceof XmlAttribute)){
+        if (!(parent instanceof XmlAttribute)) {
             return ResolveResult.EMPTY_ARRAY;
         }
         XmlAttribute xmlAttribute = (XmlAttribute) parent;
-        if(!"refid".equals(xmlAttribute.getName())) {
+        if (!"refid".equals(xmlAttribute.getName())) {
             return new ResolveResult[0];
         }
 
@@ -116,7 +116,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
         }
         XmlAttributeValue attributeValue = (XmlAttributeValue) element;
         PsiElement parent = attributeValue.getParent();
-        if(!(parent instanceof XmlAttribute)) {
+        if (!(parent instanceof XmlAttribute)) {
             return false;
         }
         XmlAttribute attr = (XmlAttribute) parent;

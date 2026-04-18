@@ -45,7 +45,7 @@ public final class ScopeValue<T> implements AutoCloseable {
         return of(lock, Lock::unlock);
     }
 
-    public UncheckedScopeValue<T> unchecked(){
+    public UncheckedScopeValue<T> unchecked() {
         return UncheckedScopeValue.of(this.resource, cleaner::accept);
     }
 
@@ -58,7 +58,7 @@ public final class ScopeValue<T> implements AutoCloseable {
         return this.resource;
     }
 
-    public ExConsumer<T> cleaner(){
+    public ExConsumer<T> cleaner() {
         return this.cleaner;
     }
 

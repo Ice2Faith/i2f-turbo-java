@@ -47,7 +47,7 @@ public class XmlTagBodyInjectHandler extends IProjectInjectHandler<XmlText> {
     @Override
     protected void doInjectInner(MultiHostRegistrar registrar, XmlText tagText) {
         XmlTag tag = tagText.getParentTag();
-        if(tag==null){
+        if (tag == null) {
             return;
         }
         List<LanguageInjectItem> configList = ProjectInjectConfig.getProjectInjectConfigForType(tag.getProject(), LanguageInjectItem.TYPE_XML_TAG_BODY);

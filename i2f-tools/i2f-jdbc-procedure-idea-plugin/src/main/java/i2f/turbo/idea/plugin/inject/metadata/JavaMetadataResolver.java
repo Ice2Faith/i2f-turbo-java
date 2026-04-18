@@ -84,18 +84,18 @@ public class JavaMetadataResolver {
     }
 
 
-    protected static final LruMap<String,Map.Entry<Long,PsiClass>> CACHE_CLASS=new LruMap<>(300);
+    protected static final LruMap<String, Map.Entry<Long, PsiClass>> CACHE_CLASS = new LruMap<>(300);
 
     public static PsiClass findClassByName(Project project, String className) {
         if (StringUtils.isEmpty(className)) {
             return null;
         }
-        String cacheKey=project.getProjectFilePath()+"#"+className;
+        String cacheKey = project.getProjectFilePath() + "#" + className;
         Map.Entry<Long, PsiClass> cacheEntry = CACHE_CLASS.get(cacheKey);
-        if(cacheEntry!=null){
-            if(cacheEntry.getKey()<System.currentTimeMillis()){
+        if (cacheEntry != null) {
+            if (cacheEntry.getKey() < System.currentTimeMillis()) {
                 return cacheEntry.getValue();
-            }else{
+            } else {
                 CACHE_CLASS.remove(cacheKey);
             }
         }
@@ -109,18 +109,18 @@ public class JavaMetadataResolver {
                 clazz = arr[0];
             }
         }
-        CACHE_CLASS.put(cacheKey,new AbstractMap.SimpleEntry<>(System.currentTimeMillis()+15*1000,clazz));
+        CACHE_CLASS.put(cacheKey, new AbstractMap.SimpleEntry<>(System.currentTimeMillis() + 15 * 1000, clazz));
         return clazz;
     }
 
 
     public static void fillJavaMetadata(LanguageInjectItem item, Map<String, Object> context, Project project) {
         LanguageInjectJavaMetadata javaMetadata = item.getJavaMetadata();
-        if(javaMetadata!=null){
+        if (javaMetadata != null) {
             Map<String, Object> javaMetadataMap = new HashMap<>();
             context.put("javaMetadata", javaMetadataMap);
 
-            PsiClass clazz=null;
+            PsiClass clazz = null;
             String className = javaMetadata.getClassName();
             if (!StringUtils.isEmpty(className)) {
                 clazz = JavaMetadataResolver.findClassByName(project, className);

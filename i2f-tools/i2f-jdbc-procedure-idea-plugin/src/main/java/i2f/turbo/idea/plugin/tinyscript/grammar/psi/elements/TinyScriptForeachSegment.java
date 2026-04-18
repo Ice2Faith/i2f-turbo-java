@@ -2,18 +2,19 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
 public interface TinyScriptForeachSegment extends PsiElement {
 
-  @NotNull
-  TinyScriptExpress getExpress();
+    @NotNull
+    TinyScriptExpress getExpress();
 
-  @NotNull
-  TinyScriptNamingBlock getNamingBlock();
+    @NotNull
+    TinyScriptNamingBlock getNamingBlock();
 
-  @NotNull
-  TinyScriptScriptBlock getScriptBlock();
+    @NotNull
+    TinyScriptScriptBlock getScriptBlock();
 
 }

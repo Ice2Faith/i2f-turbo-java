@@ -21,9 +21,9 @@ public class ProjectInjectConfig {
 
     protected static final LruMap<String, Map.Entry<Long, List<LanguageInjectItem>>> CACHE_INJECT_CONFIG = new LruMap<>(30);
 
-    public static List<LanguageInjectItem> getProjectInjectConfigForType(Project project,String type){
+    public static List<LanguageInjectItem> getProjectInjectConfigForType(Project project, String type) {
         List<LanguageInjectItem> list = getProjectInjectConfig(project);
-        return list.stream().filter(e->e.getType().equalsIgnoreCase(type)).collect(Collectors.toList());
+        return list.stream().filter(e -> e.getType().equalsIgnoreCase(type)).collect(Collectors.toList());
     }
 
     public static List<LanguageInjectItem> getProjectInjectConfig(Project project) {
@@ -72,9 +72,9 @@ public class ProjectInjectConfig {
         return ret;
     }
 
-    public static File getConfigFile(File baseDir){
+    public static File getConfigFile(File baseDir) {
         File ret = new File(baseDir, "language-inject-template.jsonc");
-        if(ret.exists() && ret.isFile()){
+        if (ret.exists() && ret.isFile()) {
             return ret;
         }
         ret = new File(baseDir, "language-inject-template.json");

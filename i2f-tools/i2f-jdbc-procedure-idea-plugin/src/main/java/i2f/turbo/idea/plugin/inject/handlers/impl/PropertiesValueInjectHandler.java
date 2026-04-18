@@ -45,7 +45,7 @@ public class PropertiesValueInjectHandler extends IProjectInjectHandler<Property
     @Override
     protected void doInjectInner(MultiHostRegistrar registrar, PropertyValueImpl propertyValue) {
         PsiElement parent = propertyValue.getParent();
-        if(!(parent instanceof Property)){
+        if (!(parent instanceof Property)) {
             return;
         }
         Property property = (Property) parent;
@@ -88,7 +88,7 @@ public class PropertiesValueInjectHandler extends IProjectInjectHandler<Property
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item,context,property.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item, context, property.getProject());
 
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
                 try {

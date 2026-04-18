@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
  * @date 2026/1/25 23:04
  * @desc
  */
-public class TinyScriptPairedBraceMatcher  implements PairedBraceMatcher {
+public class TinyScriptPairedBraceMatcher implements PairedBraceMatcher {
 
     private static final BracePair[] PAIRS = new BracePair[]{
             new BracePair(TinyScriptTypes.TERM_BRACKET_SQUARE_L, TinyScriptTypes.TERM_BRACKET_SQUARE_R, false),
@@ -23,7 +23,7 @@ public class TinyScriptPairedBraceMatcher  implements PairedBraceMatcher {
 
     @Override
     public @NotNull
-    BracePair [] getPairs() {
+    BracePair[] getPairs() {
         return PAIRS;
     }
 

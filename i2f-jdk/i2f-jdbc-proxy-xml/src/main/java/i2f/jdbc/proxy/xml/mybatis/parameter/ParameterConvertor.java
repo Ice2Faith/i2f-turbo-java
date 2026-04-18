@@ -12,9 +12,8 @@ package i2f.jdbc.proxy.xml.mybatis.parameter;
 @FunctionalInterface
 public interface ParameterConvertor {
     /**
-     *
-     * @param obj 需要转换的对象
-     * @param expr 取出此对象使用的表达式
+     * @param obj      需要转换的对象
+     * @param expr     取出此对象使用的表达式
      * @param isDollar 是否是在 ${} 占位符中使用
      * @return
      */

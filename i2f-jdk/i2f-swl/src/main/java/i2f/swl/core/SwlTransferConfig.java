@@ -36,6 +36,6 @@ public class SwlTransferConfig extends SwlExchangerConfig {
 
     private long certExpireSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    private AsymKeyPair swapKeyPair=new AsymKeyPair(null,DEFAULT_SWAP_PRIVATE_KEY);
+    private AsymKeyPair swapKeyPair = new AsymKeyPair(null, DEFAULT_SWAP_PRIVATE_KEY);
 
 }

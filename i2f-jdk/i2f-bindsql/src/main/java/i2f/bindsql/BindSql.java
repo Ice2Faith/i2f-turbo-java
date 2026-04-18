@@ -796,12 +796,12 @@ public class BindSql {
 
     // 其他拓展
 
-    public BindSql pretty(){
-        return new BindSql(prettySql(this.sql),new ArrayList<>(this.args));
+    public BindSql pretty() {
+        return new BindSql(prettySql(this.sql), new ArrayList<>(this.args));
     }
 
-    public BindSql trimComment(){
-        return new BindSql(trimCommentSql(this.sql),new ArrayList<>(this.args));
+    public BindSql trimComment() {
+        return new BindSql(trimCommentSql(this.sql), new ArrayList<>(this.args));
     }
 
     public static final Pattern PATTERN_COMMENT = Pattern.compile("('[^']*')" + // 字符串，保持不变

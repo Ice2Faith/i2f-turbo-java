@@ -14,30 +14,30 @@ import java.util.Map;
  * @desc
  */
 public class JsonMetadataResolver {
-    public static Map<String,Object> getPropertyMetadata(JsonProperty jsonProperty) {
-        Map<String,Object> ret=new HashMap<>();
-        ret.put("name",jsonProperty.getName());
-        String parentType=null;
+    public static Map<String, Object> getPropertyMetadata(JsonProperty jsonProperty) {
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("name", jsonProperty.getName());
+        String parentType = null;
         PsiElement parent = jsonProperty.getParent();
-        if(parent instanceof JsonObject){
-            parentType="object";
-        }else if(parent instanceof JsonArray){
-            parentType="array";
+        if (parent instanceof JsonObject) {
+            parentType = "object";
+        } else if (parent instanceof JsonArray) {
+            parentType = "array";
         }
-        ret.put("parentType",parentType);
-        PsiElement parentElem=jsonProperty.getParent();
-        while(!(parentElem instanceof JsonProperty)){
-            parentElem=parentElem.getParent();
+        ret.put("parentType", parentType);
+        PsiElement parentElem = jsonProperty.getParent();
+        while (!(parentElem instanceof JsonProperty)) {
+            parentElem = parentElem.getParent();
             if (parentElem == null) {
                 break;
             }
         }
-        String parentName=null;
-        if(parentElem instanceof JsonProperty){
+        String parentName = null;
+        if (parentElem instanceof JsonProperty) {
             JsonProperty property = (JsonProperty) parentElem;
-            parentName= property.getName();
+            parentName = property.getName();
         }
-        ret.put("parentName",parentName);
+        ret.put("parentName", parentName);
         return ret;
     }
 }

@@ -93,7 +93,7 @@ public class SqlServerDatabaseMetadataProvider extends BaseDatabaseMetadataProvi
     }
 
     @Override
-    public ResultSet getTables(DatabaseMetaData metaData, String database,String tablePattern) throws SQLException {
+    public ResultSet getTables(DatabaseMetaData metaData, String database, String tablePattern) throws SQLException {
         return metaData.getTables(database, null, tablePattern, null);
     }
 

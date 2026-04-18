@@ -30,9 +30,9 @@ public class SqlTimestampStringConvertor implements Converter<Timestamp> {
 
     @Override
     public Timestamp convertToJavaData(ReadCellData<?> cellData, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
-        Date date= contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
+        Date date = contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
                 DateUtils.parseDate(cellData.getStringValue(), contentProperty.getDateTimeFormatProperty().getFormat()) :
-                DateUtils.parseDate(cellData.getStringValue(), (String)null);
+                DateUtils.parseDate(cellData.getStringValue(), (String) null);
         return new Timestamp(date.getTime());
     }
 
@@ -40,6 +40,6 @@ public class SqlTimestampStringConvertor implements Converter<Timestamp> {
     public WriteCellData<?> convertToExcelData(Timestamp value, ExcelContentProperty contentProperty, GlobalConfiguration globalConfiguration) throws Exception {
         return contentProperty != null && contentProperty.getDateTimeFormatProperty() != null ?
                 new WriteCellData(DateUtils.format(value, contentProperty.getDateTimeFormatProperty().getFormat())) :
-                new WriteCellData(DateUtils.format(value, (String)null));
+                new WriteCellData(DateUtils.format(value, (String) null));
     }
 }

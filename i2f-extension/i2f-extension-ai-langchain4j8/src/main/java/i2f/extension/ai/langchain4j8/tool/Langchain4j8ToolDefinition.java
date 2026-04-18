@@ -1,14 +1,12 @@
 package i2f.extension.ai.langchain4j8.tool;
 
+import dev.langchain4j.agent.tool.ToolSpecification;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.context.std.IContext;
-import dev.langchain4j.agent.tool.ToolSpecification;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.lang.reflect.Method;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**

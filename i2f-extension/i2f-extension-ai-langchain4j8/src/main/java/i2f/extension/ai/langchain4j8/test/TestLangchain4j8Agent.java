@@ -17,7 +17,7 @@ import i2f.extension.ai.langchain4j8.tool.Langchain4j8JsonSchemaAnnotationResolv
  * @desc
  */
 public class TestLangchain4j8Agent {
-    public static void main(String[] args){
+    public static void main(String[] args) {
         AiAgent agent = new AiAgent()
                 .model(Langchain4j8Model.openai()
                         .baseUrl(Langchain4j8Ai.DASHSCOPE_BASE_URL)
@@ -29,7 +29,7 @@ public class TestLangchain4j8Agent {
         AiAgentResponse resp = agent.generate(new AiRequest()
                         .user("北京的今天的天气怎么样，并且给出今天的日期，最后告诉我历史上的今天发生了什么")
                         .tools(ToolRawHelper.parseTools(Langchain4j8JsonSchemaAnnotationResolver.INSTANCE, new TestToolComponent()))
-                ,new AiAgentContext());
+                , new AiAgentContext());
         System.out.println(resp);
     }
 }

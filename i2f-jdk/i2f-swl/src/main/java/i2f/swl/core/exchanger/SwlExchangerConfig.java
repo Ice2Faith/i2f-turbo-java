@@ -19,7 +19,7 @@ public class SwlExchangerConfig {
     protected boolean enableNonce = false;
     protected long nonceTimeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
 
-    protected boolean enableEncrypt=true;
+    protected boolean enableEncrypt = true;
 
     protected boolean enableDigital = true;
 }

@@ -117,7 +117,7 @@ public class XmlAttrValueInjectHandler extends IProjectInjectHandler<XmlAttribut
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item,context,tag.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item, context, tag.getProject());
 
                 context.put("tag", XmlMetadataResolver.getTagMetadata(tag));
 

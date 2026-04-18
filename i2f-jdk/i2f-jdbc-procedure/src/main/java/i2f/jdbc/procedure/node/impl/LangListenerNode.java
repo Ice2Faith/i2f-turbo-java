@@ -24,6 +24,7 @@ import java.util.Map;
  */
 public class LangListenerNode extends AbstractExecutorNode {
     public static final String TAG_NAME = TagConsts.LANG_LISTENER;
+
     @Override
     public String tag() {
         return TAG_NAME;

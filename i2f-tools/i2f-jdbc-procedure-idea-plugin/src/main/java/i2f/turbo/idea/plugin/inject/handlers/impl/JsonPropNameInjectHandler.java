@@ -44,27 +44,27 @@ public class JsonPropNameInjectHandler extends IProjectInjectHandler<JsonStringL
     @Override
     protected void doInjectInner(MultiHostRegistrar registrar, JsonStringLiteral jsonStringLiteral) {
         PsiElement parent = jsonStringLiteral.getParent();
-        if(!(parent instanceof JsonProperty)){
+        if (!(parent instanceof JsonProperty)) {
             return;
         }
         JsonProperty jsonProperty = (JsonProperty) parent;
-        JsonStringLiteral propNameLiteral=null;
-        JsonStringLiteral propValueLiteral=null;
-        int index=0;
+        JsonStringLiteral propNameLiteral = null;
+        JsonStringLiteral propValueLiteral = null;
+        int index = 0;
         @NotNull PsiElement[] children = jsonProperty.getChildren();
         for (@NotNull PsiElement item : children) {
-            if(item instanceof JsonStringLiteral){
+            if (item instanceof JsonStringLiteral) {
                 index++;
-                if(index==1){
-                    propNameLiteral=(JsonStringLiteral)item;
+                if (index == 1) {
+                    propNameLiteral = (JsonStringLiteral) item;
                 }
-                if(index==2){
-                    propValueLiteral=(JsonStringLiteral)item;
+                if (index == 2) {
+                    propValueLiteral = (JsonStringLiteral) item;
                 }
             }
         }
 
-        if(propNameLiteral!=jsonStringLiteral){
+        if (propNameLiteral != jsonStringLiteral) {
             return;
         }
 
@@ -89,20 +89,20 @@ public class JsonPropNameInjectHandler extends IProjectInjectHandler<JsonStringL
 
                 String parentNamePattern = point.getParentName();
                 if (!StringUtils.isEmpty(parentNamePattern)) {
-                    if(propNameLiteral==null){
+                    if (propNameLiteral == null) {
                         continue;
                     }
-                    PsiElement parentElem=jsonProperty.getParent();
-                    while(!(parentElem instanceof JsonProperty)){
-                        parentElem=parentElem.getParent();
+                    PsiElement parentElem = jsonProperty.getParent();
+                    while (!(parentElem instanceof JsonProperty)) {
+                        parentElem = parentElem.getParent();
                     }
-                    if(parentElem==null){
+                    if (parentElem == null) {
                         continue;
                     }
-                    if(!(parentElem instanceof JsonProperty)){
+                    if (!(parentElem instanceof JsonProperty)) {
                         continue;
                     }
-                    JsonProperty parentProperty=(JsonProperty)parentElem;
+                    JsonProperty parentProperty = (JsonProperty) parentElem;
                     String propName = parentProperty.getName();
                     if (!SimpleMatcher.INSTANCE.matches(propName, parentNamePattern)) {
                         continue;
@@ -111,14 +111,14 @@ public class JsonPropNameInjectHandler extends IProjectInjectHandler<JsonStringL
 
                 String parentTypePattern = point.getParentType();
                 if (!StringUtils.isEmpty(parentTypePattern)) {
-                    String parentType=null;
+                    String parentType = null;
                     PsiElement jsonParent = jsonProperty.getParent();
-                    if(jsonParent instanceof JsonObject){
-                        parentType="object";
-                    }else if(jsonParent instanceof JsonArray){
-                        parentType="array";
+                    if (jsonParent instanceof JsonObject) {
+                        parentType = "object";
+                    } else if (jsonParent instanceof JsonArray) {
+                        parentType = "array";
                     }
-                    if(parentType==null){
+                    if (parentType == null) {
                         continue;
                     }
                     if (!SimpleMatcher.INSTANCE.matches(parentType, parentTypePattern)) {
@@ -148,7 +148,7 @@ public class JsonPropNameInjectHandler extends IProjectInjectHandler<JsonStringL
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item,context,jsonProperty.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item, context, jsonProperty.getProject());
 
                 context.put("prop", JsonMetadataResolver.getPropertyMetadata(jsonProperty));
 
@@ -182,7 +182,7 @@ public class JsonPropNameInjectHandler extends IProjectInjectHandler<JsonStringL
                         .addPlace(prefix,
                                 suffix,
                                 (PsiLanguageInjectionHost) jsonStringLiteral,
-                                new TextRange(1, jsonStringLiteral.getTextRange().getLength()-1))
+                                new TextRange(1, jsonStringLiteral.getTextRange().getLength() - 1))
                         .doneInjecting();
                 return;
             }

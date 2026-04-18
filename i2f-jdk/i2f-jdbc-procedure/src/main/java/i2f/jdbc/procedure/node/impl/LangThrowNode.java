@@ -41,15 +41,15 @@ public class LangThrowNode extends AbstractExecutorNode {
         String cause = node.getTagAttrMap().get(AttrConsts.CAUSE);
         Throwable ex = (Throwable) executor.visit(cause, context);
 
-        if(exceptionType==null || exceptionType.isEmpty()){
-            exceptionType=RuntimeException.class.getName();
+        if (exceptionType == null || exceptionType.isEmpty()) {
+            exceptionType = RuntimeException.class.getName();
         }
 
         Class<?> clazz = executor.loadClass(exceptionType);
 
         try {
             Constructor<?> constructor = null;
-            if(message!=null && ex!=null) {
+            if (message != null && ex != null) {
                 try {
                     constructor = clazz.getConstructor(String.class, Throwable.class);
                     if (constructor != null) {
@@ -61,7 +61,7 @@ public class LangThrowNode extends AbstractExecutorNode {
                 }
             }
 
-            if(ex!=null) {
+            if (ex != null) {
                 try {
                     constructor = clazz.getConstructor(Throwable.class);
                     if (constructor != null) {
@@ -74,8 +74,8 @@ public class LangThrowNode extends AbstractExecutorNode {
 
             }
 
-            if(message==null){
-                message="error at "+getNodeLocation(node);
+            if (message == null) {
+                message = "error at " + getNodeLocation(node);
             }
 
             try {

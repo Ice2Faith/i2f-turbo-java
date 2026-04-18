@@ -520,6 +520,7 @@ public class MybatisMapperInflater {
     public static final String PROVIDER_KEY = "provider";
 
     private static final LruMap<String, Map<String, String>> CACHE_EXPRESSION_PARTS = new LruMap<>(500);
+
     /**
      * expression:
      * user.name.replace("a,b,c","cba"), jdbcType = VARCHAR, handler= java.util.DateHandler, convertor=java.util.DateConvertor, provider=java.util.DateProvider
@@ -652,6 +653,7 @@ public class MybatisMapperInflater {
      * 然后，如果指定了 convertor 则对参数进行转换
      * 最后，根据 handler > javaType > jdbcType 三者优先级设置参数化的类型处理方式
      * 同时，converter支持多个，使用逗号或者分好分割，多个时按照顺序进行处理链处理
+     *
      * @param sql
      * @param workParam
      * @return
@@ -707,6 +709,7 @@ public class MybatisMapperInflater {
      * 形如：user.name,handler=java.util.DateHandler,jdbcType=DATE,javaType=java.util.Date,convertor=java.util.DateConvertor,provider=java.util.DateProvider
      * 其实就是去掉占位符的外层包裹
      * return 返回值，有两种 BindSql ,  其他
+     *
      * @param workParam
      * @param expression
      * @param isDollar

@@ -18,9 +18,9 @@ import java.util.zip.Checksum;
  */
 public class ChecksumMessageDigester implements IMessageDigester {
 
-    public static final Supplier<ChecksumMessageDigester> ADLER32 =()-> new ChecksumMessageDigester(new Adler32());
-    public static final Supplier<ChecksumMessageDigester> CRC32 =()-> new ChecksumMessageDigester(new CRC32());
-    public static final Supplier<ChecksumMessageDigester> HASHCODE =()-> new ChecksumMessageDigester(new HashcodeChecksum());
+    public static final Supplier<ChecksumMessageDigester> ADLER32 = () -> new ChecksumMessageDigester(new Adler32());
+    public static final Supplier<ChecksumMessageDigester> CRC32 = () -> new ChecksumMessageDigester(new CRC32());
+    public static final Supplier<ChecksumMessageDigester> HASHCODE = () -> new ChecksumMessageDigester(new HashcodeChecksum());
 
     protected Checksum provider;
 

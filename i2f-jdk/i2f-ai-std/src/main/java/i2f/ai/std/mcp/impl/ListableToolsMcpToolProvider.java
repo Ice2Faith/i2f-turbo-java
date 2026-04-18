@@ -31,42 +31,42 @@ public class ListableToolsMcpToolProvider implements McpToolProvider {
     }
 
     @Override
-    public Map.Entry<ToolBaseDefinition,Map<String,Object>> matchDefinition(ToolBaseCallRequest request){
+    public Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request) {
         Map<String, Object> map = jsonSerializer.deserializeAsMap(request.getArguments());
         String name = request.getName();
-        ToolBaseDefinition firstDefinition=null;
-        ToolBaseDefinition definition=null;
+        ToolBaseDefinition firstDefinition = null;
+        ToolBaseDefinition definition = null;
         for (ToolBaseDefinition tool : tools) {
             String toolName = tool.getName();
-            if(Objects.equals(toolName,name)){
-                if(firstDefinition==null) {
+            if (Objects.equals(toolName, name)) {
+                if (firstDefinition == null) {
                     firstDefinition = definition;
                 }
                 List<String> parameterNames = tool.getParameterNames();
-                boolean isMatch=true;
+                boolean isMatch = true;
                 for (String parameterName : parameterNames) {
                     boolean ok = map.containsKey(parameterName);
-                    if(!ok){
-                        isMatch=false;
+                    if (!ok) {
+                        isMatch = false;
                         break;
                     }
                 }
-                if(isMatch){
-                    definition=tool;
+                if (isMatch) {
+                    definition = tool;
                     break;
                 }
             }
         }
-        if(definition==null){
-            definition=firstDefinition;
+        if (definition == null) {
+            definition = firstDefinition;
         }
-        return new AbstractMap.SimpleEntry<>(definition,map);
+        return new AbstractMap.SimpleEntry<>(definition, map);
     }
 
     @Override
     public Object callTool(ToolBaseDefinition definition, Map<String, Object> parameterMap, ToolBaseCallRequest request) throws Throwable {
-        if(!(definition instanceof ToolRawDefinition)){
-            throw new IllegalStateException("un-support tool definition type: "+definition.getClass());
+        if (!(definition instanceof ToolRawDefinition)) {
+            throw new IllegalStateException("un-support tool definition type: " + definition.getClass());
         }
         ToolRawDefinition rawDefinition = (ToolRawDefinition) definition;
         return ToolRawHelper.invokeTool(rawDefinition, parameterMap, invocationHandler);

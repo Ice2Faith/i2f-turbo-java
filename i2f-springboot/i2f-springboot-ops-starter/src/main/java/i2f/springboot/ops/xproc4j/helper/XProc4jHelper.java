@@ -37,8 +37,8 @@ public class XProc4jHelper {
     public static final String METHOD_CALL = "call";
     public static final String METHOD_EVAL_SCRIPT = "evalScript";
     public static final String METHOD_CREATE_PARAMS = "createParams";
-    public static final String METHOD_APPLY_THREAD_LOG_APPENDER="applyThreadLogAppender";
-    public static final String METHOD_DEBUG_THREAD="debugThread";
+    public static final String METHOD_APPLY_THREAD_LOG_APPENDER = "applyThreadLogAppender";
+    public static final String METHOD_DEBUG_THREAD = "debugThread";
 
     public static String DATASOURCES = "datasources";
 
@@ -48,8 +48,8 @@ public class XProc4jHelper {
     private final AtomicReference<Method> callByIdMethodHolder = new AtomicReference<>();
     private final AtomicReference<Method> evalScriptMethodHolder = new AtomicReference<>();
     private final AtomicReference<Method> createParamsMethodHolder = new AtomicReference<>();
-    private final AtomicReference<Method> applyThreadLogAppenderMethodHolder=new AtomicReference<>();
-    private final AtomicReference<Method> debugThreadMethodHolder=new AtomicReference<>();
+    private final AtomicReference<Method> applyThreadLogAppenderMethodHolder = new AtomicReference<>();
+    private final AtomicReference<Method> debugThreadMethodHolder = new AtomicReference<>();
 
     protected boolean isExecutorClass(Class<?> clazz) {
         String simpleName = clazz.getSimpleName();

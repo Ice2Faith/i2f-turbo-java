@@ -18,7 +18,7 @@ public interface ITypeSerializer<E, D> extends ISerializer<E, D> {
         return deserialize(enc);
     }
 
-    default Map<String,Object> deserializeAsMap(E enc){
+    default Map<String, Object> deserializeAsMap(E enc) {
         throw new UnsupportedOperationException("un-implements deserialize as map");
     }
 }

@@ -20,7 +20,7 @@ import java.util.List;
 public class ProjectLanguageTemplateMultiHostInjector implements MultiHostInjector {
     public static final Logger log = Logger.getInstance(ProjectLanguageTemplateMultiHostInjector.class);
 
-    protected final List<IProjectInjectHandler<?>> handlers=Arrays.asList(
+    protected final List<IProjectInjectHandler<?>> handlers = Arrays.asList(
             new AnnotationInjectHandler(),
             new JsonPropNameInjectHandler(),
             new JsonPropValueInjectHandler(),
@@ -34,13 +34,13 @@ public class ProjectLanguageTemplateMultiHostInjector implements MultiHostInject
     @Override
     public void getLanguagesToInject(@NotNull MultiHostRegistrar registrar, @NotNull PsiElement context) {
         for (IProjectInjectHandler<?> handler : handlers) {
-            handler.inject(registrar,context);
+            handler.inject(registrar, context);
         }
     }
 
     @Override
     public @NotNull List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
-        List<Class<? extends PsiElement>> ret=new ArrayList<>();
+        List<Class<? extends PsiElement>> ret = new ArrayList<>();
         for (IProjectInjectHandler<?> handler : handlers) {
             ret.add(handler.supportType());
         }

@@ -46,7 +46,7 @@ public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlP
     protected void doInjectInner(MultiHostRegistrar registrar, SqlParameter sqlParameter) {
 
         XmlTag tag = CompletionHelper.getParentElement(sqlParameter, XmlTag.class);
-        if(tag==null){
+        if (tag == null) {
             return;
         }
 
@@ -112,7 +112,7 @@ public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlP
                 }
 
                 Map<String, Object> context = new HashMap<>();
-                JavaMetadataResolver.fillJavaMetadata(item,context,sqlParameter.getProject());
+                JavaMetadataResolver.fillJavaMetadata(item, context, sqlParameter.getProject());
 
                 context.put("tag", XmlMetadataResolver.getTagMetadata(tag));
 
@@ -168,21 +168,21 @@ public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlP
                 }
 
                 String text = sqlParameter.getText();
-                int beginIndex=0;
-                int endIndex=sqlParameter.getTextRange().getLength();
-                int idx=text.indexOf("{");
-                if(idx>=0){
-                    beginIndex=idx+1;
+                int beginIndex = 0;
+                int endIndex = sqlParameter.getTextRange().getLength();
+                int idx = text.indexOf("{");
+                if (idx >= 0) {
+                    beginIndex = idx + 1;
                 }
-                idx=text.lastIndexOf("}");
-                if(idx>=0){
-                    endIndex=endIndex-(text.substring(idx).length());
+                idx = text.lastIndexOf("}");
+                if (idx >= 0) {
+                    endIndex = endIndex - (text.substring(idx).length());
                 }
                 registrar.startInjecting(targetLang)
                         .addPlace(prefix,
                                 suffix,
                                 (PsiLanguageInjectionHost) sqlParameter,
-                                new TextRange(beginIndex,endIndex))
+                                new TextRange(beginIndex, endIndex))
                         .doneInjecting();
                 return;
             }

@@ -95,7 +95,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
         getCachedAndEnqueue(element);
     }
 
-    public PsiClass[] getCachedAndEnqueue(XmlTag tag){
+    public PsiClass[] getCachedAndEnqueue(XmlTag tag) {
         //        log.warn("xml-tag-ref-elem:"+tag);
         String tagName = tag.getName();
         String className = convertToClassName(tagName);
@@ -104,10 +104,10 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
         Project project = tag.getProject();
         String projectFilePath = project.getProjectFilePath();
 //        log.warn("xml-tag-ref-project-path:"+projectFilePath);
-        PsiClass[] classes =null;
+        PsiClass[] classes = null;
         synchronized (xmlTagRefImplHolder) {
             Map<String, PsiClass[]> map = xmlTagRefImplHolder.computeIfAbsent(projectFilePath, k -> new LinkedHashMap<>());
-            classes=map.get(className);
+            classes = map.get(className);
         }
 //        log.warn("xml-tag-ref-cache1:"+(classes==null || classes.length==0?null:(classes.length+":"+classes[0])));
         if (classes == null) {
@@ -118,7 +118,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
 
     @Override
     public @NotNull ResolveResult[] multiResolve(boolean incompleteCode) {
-        PsiClass[] classes =getCachedAndEnqueue(myElement);
+        PsiClass[] classes = getCachedAndEnqueue(myElement);
 //        log.warn("xml-tag-ref-cache1:"+(classes==null || classes.length==0?null:(classes.length+":"+classes[0])));
         if (classes == null) {
             return new ResolveResult[0];
@@ -174,7 +174,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
         return convertToClassName(tagName);
     }
 
-    public static final Map<String,String> TAG_ALIAS_MAP=new HashMap<>(){
+    public static final Map<String, String> TAG_ALIAS_MAP = new HashMap<>() {
         {
             put("lang-eval-ts", "lang-eval-tinyScript");
             put("lang-eval-tinyscript", "lang-eval-tinyScript");
@@ -195,7 +195,7 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
 
     public static String convertToClassName(String tagName) {
         String aliasName = TAG_ALIAS_MAP.get(tagName);
-        if(aliasName!=null){
+        if (aliasName != null) {
             tagName = aliasName;
         }
         String[] arr = tagName.split("_|-");

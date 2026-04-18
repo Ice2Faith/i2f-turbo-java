@@ -2,42 +2,45 @@
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.impl;
 
 import java.util.List;
+
 import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
+
 import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
+
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
 public class TinyScriptFunctionCallImpl extends TinyScriptPsiElement implements TinyScriptFunctionCall {
 
-  public TinyScriptFunctionCallImpl(@NotNull ASTNode node) {
-    super(node);
-  }
+    public TinyScriptFunctionCallImpl(@NotNull ASTNode node) {
+        super(node);
+    }
 
-  public void accept(@NotNull TinyScriptVisitor visitor) {
-    visitor.visitFunctionCall(this);
-  }
+    public void accept(@NotNull TinyScriptVisitor visitor) {
+        visitor.visitFunctionCall(this);
+    }
 
-  @Override
-  public void accept(@NotNull PsiElementVisitor visitor) {
-    if (visitor instanceof TinyScriptVisitor) accept((TinyScriptVisitor)visitor);
-    else super.accept(visitor);
-  }
+    @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
+        if (visitor instanceof TinyScriptVisitor) accept((TinyScriptVisitor) visitor);
+        else super.accept(visitor);
+    }
 
-  @Override
-  @Nullable
-  public TinyScriptArgumentList getArgumentList() {
-    return findChildByClass(TinyScriptArgumentList.class);
-  }
+    @Override
+    @Nullable
+    public TinyScriptArgumentList getArgumentList() {
+        return findChildByClass(TinyScriptArgumentList.class);
+    }
 
-  @Override
-  @NotNull
-  public PsiElement getNaming() {
-    return findNotNullChildByType(NAMING);
-  }
+    @Override
+    @NotNull
+    public PsiElement getNaming() {
+        return findNotNullChildByType(NAMING);
+    }
 
 }
