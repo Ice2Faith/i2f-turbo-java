@@ -13,6 +13,7 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
+import i2f.match.regex.RegexUtil;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import org.jetbrains.annotations.NotNull;
 
@@ -774,35 +775,72 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         return detectLanguage(tag.getParentTag());
     }
 
-    public void searchEvalJavaParts(PsiElement element, AtomicReference<String> importsRef, AtomicReference<String> membersRef) {
+    public void searchEvalJavaParts(PsiElement element,
+                                    AtomicReference<String> importsRef,
+                                    AtomicReference<String> membersRef,
+                                    AtomicReference<String> bodyRef) {
         if (element == null) {
             return;
         }
         if (element instanceof XmlTag) {
             XmlTag xmlTag = (XmlTag) element;
             String name = xmlTag.getName();
-            if ("lang-eval-java".equals(name)) {
+            if (!Arrays.asList(
+                    "lang-eval-java",
+                    "lang-java-import",
+                    "lang-java-member",
+                    "lang-java-body",
+                    "lang-eval-groovy"
+            ).contains(name)) {
+                if (bodyRef != null) {
+                    String text = xmlTag.getValue().getText();
+                    if (text != null && !text.isEmpty()) {
+                        bodyRef.set(text);
+                    }
+                }
+                return;
+            }
+            if ("lang-eval-java".equals(name)
+                    || "lang-eval-groovy".equals(name)) {
                 XmlTag[] subTags = xmlTag.getSubTags();
-                if (subTags != null) {
+                if (subTags != null && subTags.length > 0) {
                     for (XmlTag subTag : subTags) {
                         String subName = subTag.getName();
                         if ("lang-java-import".equals(subName)) {
-                            String text = subTag.getValue().getText();
-                            if (text != null && !text.isEmpty()) {
-                                importsRef.set(text);
+                            if (importsRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    importsRef.set(text);
+                                }
                             }
                         } else if ("lang-java-member".equals(subName)) {
-                            String text = subTag.getValue().getText();
-                            if (text != null && !text.isEmpty()) {
-                                membersRef.set(text);
+                            if (membersRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    membersRef.set(text);
+                                }
                             }
+                        } else if ("lang-java-body".equals(subName)) {
+                            if (bodyRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    bodyRef.set(text);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (bodyRef != null) {
+                        String text = xmlTag.getValue().getText();
+                        if (text != null && !text.isEmpty()) {
+                            bodyRef.set(text);
                         }
                     }
                 }
                 return;
             }
         }
-        searchEvalJavaParts(element.getParent(), importsRef, membersRef);
+        searchEvalJavaParts(element.getParent(), importsRef, membersRef, bodyRef);
     }
 
     public void injectXmlText(MultiHostRegistrar registrar, XmlText xmlText) {
@@ -822,21 +860,39 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 //        log.info("xml tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
 
         if (targetLang instanceof JavaLanguage) {
+            AtomicReference<String> importsRef = new AtomicReference<>();
+            AtomicReference<String> memberRef = new AtomicReference<>();
+            AtomicReference<String> bodyRef = new AtomicReference<>();
+            searchEvalJavaParts(xmlText, importsRef, memberRef, bodyRef);
+
+            String importSegment = getEvalJavaImports(xmlText.getProject()) + "\n"
+                    + Optional.ofNullable(importsRef.get()).orElse("");
+            String memberSegment = Optional.ofNullable(memberRef.get()).orElse("");
+            String bodySegment = Optional.ofNullable(bodyRef.get()).orElse("");
+
+            Set<String> additionalImports = new LinkedHashSet<>();
+            memberSegment = RegexUtil.regexFindAndReplace(memberSegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            if (!additionalImports.isEmpty()) {
+                importSegment += "\n" + String.join("\n", additionalImports);
+            }
+
             if ("lang-java-import".equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace("",
+                        .addPlace(importSegment + "\n",
                                 "class MyDsl {}",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
             } else if ("lang-java-member".equals(tagName)) {
-                AtomicReference<String> importsRef = new AtomicReference<>();
-                AtomicReference<String> memberRef = new AtomicReference<>();
-                searchEvalJavaParts(xmlText, importsRef, memberRef);
-
                 registrar.startInjecting(targetLang)
-                        .addPlace(getEvalJavaImports(xmlText.getProject())
-                                        + Optional.ofNullable(importsRef.get()).orElse("") + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "public class MyJavaProcedure { ",
                                 " }",
                                 (PsiLanguageInjectionHost) xmlText,
@@ -844,13 +900,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
             } else if ("lang-java-body".equals(tagName)
                     || "lang-eval-java".equals(tagName)) {
-                AtomicReference<String> importsRef = new AtomicReference<>();
-                AtomicReference<String> memberRef = new AtomicReference<>();
-                searchEvalJavaParts(xmlText, importsRef, memberRef);
 
                 registrar.startInjecting(targetLang)
-                        .addPlace(getEvalJavaImports(xmlText.getProject())
-                                        + Optional.ofNullable(importsRef.get()).orElse("") + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "public class MyJavaProcedure { \n"
                                         + Optional.ofNullable(memberRef.get()).orElse("") + "\n"
                                         + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
@@ -861,7 +913,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             } else {
 
                 registrar.startInjecting(targetLang)
-                        .addPlace("public class MyJavaEval { public Object eval() throws Throwable{ ",
+                        .addPlace(importSegment + "\n" +
+                                        "public class MyJavaEval { public Object eval() throws Throwable{ ",
                                 "} }",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
@@ -876,10 +929,32 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             new TextRange(0, xmlText.getTextRange().getLength()))
                     .doneInjecting();
         } else if (Arrays.asList("groovy").contains(targetLang.getID().toLowerCase())) {
+            AtomicReference<String> importsRef = new AtomicReference<>();
+            AtomicReference<String> memberRef = new AtomicReference<>();
+            AtomicReference<String> bodyRef = new AtomicReference<>();
+            searchEvalJavaParts(xmlText, importsRef, memberRef, bodyRef);
+
+            String importSegment = getEvalJavaImports(xmlText.getProject()) + "\n"
+                    + Optional.ofNullable(importsRef.get()).orElse("");
+            String memberSegment = Optional.ofNullable(memberRef.get()).orElse("");
+            String bodySegment = Optional.ofNullable(bodyRef.get()).orElse("");
+
+            Set<String> additionalImports = new LinkedHashSet<>();
+            memberSegment = RegexUtil.regexFindAndReplace(memberSegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            if (!additionalImports.isEmpty()) {
+                importSegment += "\n" + String.join("\n", additionalImports);
+            }
 
             if ("lang-eval-groovy".equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace(getEvalJavaImports(xmlText.getProject()) + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "class MyGroovyProcedure { \n"
                                         + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
@@ -888,7 +963,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
             } else {
                 registrar.startInjecting(targetLang)
-                        .addPlace("",
+                        .addPlace(importSegment + "\n",
                                 "",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
