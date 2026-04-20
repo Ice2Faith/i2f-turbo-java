@@ -9,7 +9,9 @@ import java.util.*;
  * @desc
  */
 public interface TinyScriptFunctions {
-    Date now();
+    long current_time_millis();
+
+    long current_time_seconds();
 
     int rand();
 
@@ -18,10 +20,6 @@ public interface TinyScriptFunctions {
     int rand(int min, int max);
 
     double random();
-
-    String uuid();
-
-    void println(Object... obj);
 
     String format(String format, Object... obj);
 
@@ -47,6 +45,52 @@ public interface TinyScriptFunctions {
 
     void put(Map map, Object key, Object value);
 
+    Object map_get(Map map, Object key);
+
+    boolean map_contains(Map map, Object key);
+
+    Object map_remove(Map map, Object key);
+
+    Object list_get(List list, int index);
+
+    boolean collection_contains(Collection collection, Object elem);
+
+    boolean collection_remove(Collection collection, Object elem);
+
+    Object list_remove(List list, int index);
+
+    Object visit_get(Object obj, String expression);
+
+    void visit_set(Object obj, String expression, Object value);
+
+    void visit_del(Object obj, String expression);
+
+    boolean iterator_has(Iterator iterator);
+
+    Object iterator_next(Iterator iterator);
+
+    boolean enumeration_has(Enumeration enumeration);
+
+    Object enumeration_next(Enumeration enumeration);
+
+    void clear(Collection collection);
+
+    void clear(Map map);
+
+    Map<String, Object> local_map();
+
+    Object local_get(String key);
+
+    void local_set(String key, Object value);
+
+    void local_remove(String key);
+
+    boolean local_contains(String key);
+
+    void local_reset();
+
+    void local_clear();
+
     int length(Collection collection);
 
     int length(Map map);
@@ -55,13 +99,23 @@ public interface TinyScriptFunctions {
 
     long length(File file);
 
-    long length(Object obj);
-
     long hashcode(Object obj);
 
-    void sleep(long millis);
+    void sleep_ms(long millis);
 
-    void yield();
+    int compare(Object v1, Object v2);
+
+    boolean cmp_eq(Object v1, Object v2);
+
+    boolean cmp_neq(Object v1, Object v2);
+
+    boolean cmp_gt(Object v1, Object v2);
+
+    boolean cmp_lt(Object v1, Object v2);
+
+    boolean cmp_gte(Object v1, Object v2);
+
+    boolean cmp_lte(Object v1, Object v2);
 
     File file(String path);
 

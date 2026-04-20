@@ -13,6 +13,7 @@ import java.util.Map;
  * @date 2025/2/17 16:09
  */
 public interface ContextFunctions {
+
     String convertOracleRegexExpression(String regex);
 
     String convertOracleRegexReplacement(String replacement);
@@ -93,7 +94,17 @@ public interface ContextFunctions {
 
     String regex_extra(Object oStr, String regex);
 
+    String regex_extra(Object oStr, String regex, int index);
+
     String regexp_extra(Object str, String regex);
+
+    String regexp_extra(Object str, String regex, int index);
+
+    String regex_drop(Object oStr, String regex);
+
+    String regex_drop(Object oStr, String regex, int index);
+
+    String regex_drop(Object oStr, String regex, int index, int count);
 
     String regex_find_join(Object str, String regex);
 
@@ -116,6 +127,14 @@ public interface ContextFunctions {
     String join(Object obj, Object separator, boolean ignoreNull, boolean ignoreEmpty);
 
     String trim(String str);
+
+    String trim_empty_lines(String str);
+
+    String init_capital(Object obj);
+
+    String first_upper(String str);
+
+    String first_lower(String str);
 
     String upper(String str);
 
@@ -149,6 +168,8 @@ public interface ContextFunctions {
 
     Object ifnull(Object v1, Object v2);
 
+    Object nullif(Object v1, Object v2);
+
     Object if_empty(Object v1, Object v2);
 
     Object evl(Object v1, Object v2);
@@ -160,6 +181,14 @@ public interface ContextFunctions {
     Object if2(Object cond, Object trueVal, Object falseVal);
 
     Object nvl2(Object cond, Object trueVal, Object falseVal);
+
+    Object nvl_args(Object value, Object... values);
+
+    Object coalesce(Object value, Object... values);
+
+    Object evl_args(Object value, Object... values);
+
+    Object coalesce_empty(Object value, Object... values);
 
     Object decode(Object target, Object... args);
 
@@ -177,6 +206,10 @@ public interface ContextFunctions {
 
     Date to_date(Object obj, String pattern);
 
+    Date str_to_date(Object obj);
+
+    Date str_to_date(Object obj, String pattern);
+
     String date_format(Object date, String pattern);
 
     Object last_day(Object date);
@@ -185,9 +218,15 @@ public interface ContextFunctions {
 
     String to_char(Object obj, String pattern);
 
+    String repeat(CharSequence str, int count);
+
     String to_string(Object obj);
 
     String to_string(Object obj, String pattern);
+
+    String escape_sql_string(Object obj);
+
+    String descape_sql_string(Object obj);
 
     String left(Object obj, int len);
 
@@ -226,6 +265,10 @@ public interface ContextFunctions {
     String concat(Object... args);
 
     String concat(Iterable<?> args);
+
+    String concat_ws(Object separator, Object... args);
+
+    String concat_ws(Object separator, Iterable<Object> args);
 
     String join(Object separator, Object... args);
 
@@ -315,13 +358,21 @@ public interface ContextFunctions {
 
     boolean like(Object obj, Object substr);
 
-    boolean ends(Object obj, Object substr);
-
     boolean starts_with(Object obj, Object substr);
+
+    boolean starts_with(Object obj, Object substr, int offset);
 
     boolean starts(Object obj, String substr);
 
+    boolean starts(Object obj, String substr, int offset);
+
     boolean ends_with(Object obj, Object substr);
+
+    boolean ends_with(Object obj, Object substr, int offset);
+
+    boolean ends(Object obj, Object substr);
+
+    boolean ends(Object obj, Object substr, int offset);
 
     Object neg(Object number);
 

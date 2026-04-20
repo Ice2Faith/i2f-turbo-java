@@ -73,12 +73,19 @@ public class ProjectInjectConfig {
     }
 
     public static File getConfigFile(File baseDir) {
-        File ret = new File(baseDir, "language-inject-template.jsonc");
-        if (ret.exists() && ret.isFile()) {
-            return ret;
+        String[] searchFiles = {
+                "language-inject-template.jsonc",
+                "language-inject-template.json",
+                ".idea/language-inject-template.jsonc",
+                ".idea/language-inject-template.json"
+        };
+        for (String searchFile : searchFiles) {
+            File ret = new File(baseDir, searchFile);
+            if (ret.exists() && ret.isFile()) {
+                return ret;
+            }
         }
-        ret = new File(baseDir, "language-inject-template.json");
-        return ret;
+        return new File(baseDir, "language-inject-template.json");
     }
 
 
