@@ -318,6 +318,54 @@ public class CompletionHelper {
         return ret;
     }
 
+    public static final LruMap<String, Map.Entry<Long, String>> CACHE_BASE_PACKAGE_MAP = new LruMap<>(30);
+
+    public static String getBasePackage(Project project) {
+        String basePath = project.getBasePath();
+        Map.Entry<Long, String> entry = CACHE_BASE_PACKAGE_MAP.get(basePath);
+        if (entry != null) {
+            Long key = entry.getKey();
+            if (System.currentTimeMillis() < key) {
+                String value = entry.getValue();
+                if (value != null && !value.isEmpty()) {
+                    return value;
+                }
+                return "i2f";
+            }
+        }
+        GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
+        PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
+        Set<String> classNames = new LinkedHashSet<>(Arrays.asList(
+                "ContextFunctions",
+                "TinyScriptFunctions",
+                "ExecContextMethodProvider",
+                "ExecutorMethodProvider",
+                "JdbcProcedureParser"
+        ));
+        PsiClass psiClass = null;
+        for (String className : classNames) {
+            PsiClass[] psiClassArr = shortNamesCache.getClassesByName(className, searchScope);
+            if (psiClassArr != null && psiClassArr.length > 0) {
+                psiClass = psiClassArr[0];
+                break;
+            }
+        }
+        String ret = null;
+        if (psiClass != null) {
+            String fullClassName = psiClass.getQualifiedName();
+            if (fullClassName != null) {
+                int idx = fullClassName.indexOf(".jdbc.procedure.");
+                if (idx >= 0) {
+                    ret = fullClassName.substring(0, idx);
+                }
+            }
+        }
+
+        CACHE_BASE_PACKAGE_MAP.put(basePath, new AbstractMap.SimpleEntry<>(System.currentTimeMillis() + 15 * 1000, ret));
+
+        return ret;
+    }
+
     public static Map<String, Map.Entry<LookupElement, PsiElement>> getXmlFileFunctions(Project project) {
         Map<String, Map.Entry<LookupElement, PsiElement>> ret = new LinkedHashMap<>();
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);

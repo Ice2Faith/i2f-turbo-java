@@ -5,6 +5,7 @@ import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
@@ -12,6 +13,7 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
+import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -20,6 +22,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -136,79 +139,105 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             "sql-etl"
     };
 
-    public static final String EVAL_JAVA_IMPORTS = "\n" +
+    public static final String EVAL_JAVA_IMPORTS_TEMPLATE = "\n" +
 
-            "import i2f.jdbc.procedure.annotations.*;\n" +
+            "\n" +
+            "import i2f.bindsql.BindSql;\n" +
+            "import i2f.bindsql.count.CountWrappers;\n" +
+            "import i2f.bindsql.count.ICountWrapper;\n" +
+            "import i2f.bindsql.page.IPageWrapper;\n" +
+            "import i2f.bindsql.page.PageWrappers;\n" +
+            "import i2f.clock.SystemClock;\n" +
+            "import i2f.context.impl.ListableNamingContext;\n" +
+            "import i2f.context.std.INamingContext;\n" +
+            "import i2f.convert.obj.ObjectConvertor;\n" +
+            "import i2f.database.type.DatabaseType;\n" +
+            "import i2f.environment.impl.ListableDelegateEnvironment;\n" +
+            "import i2f.environment.std.IEnvironment;\n" +
+            "import i2f.invokable.method.IMethod;\n" +
+            "import i2f.jdbc.JdbcResolver;\n" +
+            "import i2f.jdbc.data.QueryColumn;\n" +
+            "import i2f.jdbc.data.QueryResult;\n" +
+            "import i2f.jdbc.procedure.annotations.JdbcProcedureComponent;\n" +
+            "import i2f.jdbc.procedure.annotations.JdbcProcedureFunction;\n" +
             "import i2f.jdbc.procedure.consts.*;\n" +
-            "import i2f.jdbc.procedure.context.impl.*;\n" +
-            "import i2f.jdbc.procedure.context.*;\n" +
-            "import i2f.jdbc.procedure.executor.impl.*;\n" +
+            "import i2f.jdbc.procedure.context.ContextHolder;\n" +
+            "import i2f.jdbc.procedure.context.JdbcProcedureContext;\n" +
+            "import i2f.jdbc.procedure.context.ProcedureMeta;\n" +
+            "import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;\n" +
+            "import i2f.jdbc.procedure.datasource.DataSourceProvider;\n" +
+            "import i2f.jdbc.procedure.datasource.impl.NamingContextDataSourceProvider;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEvent;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEventHandler;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEventListener;\n" +
+            "import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;\n" +
             "import i2f.jdbc.procedure.executor.*;\n" +
-            "import i2f.jdbc.procedure.node.base.*;\n" +
-            "import i2f.jdbc.procedure.node.basic.*;\n" +
+            "import i2f.jdbc.procedure.executor.event.*;\n" +
+            "import i2f.jdbc.procedure.log.JdbcProcedureLogger;\n" +
+            "import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;\n" +
+            "import i2f.jdbc.procedure.node.ExecutorNode;\n" +
+            "import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;\n" +
             "import i2f.jdbc.procedure.node.impl.*;\n" +
-            "import i2f.jdbc.procedure.node.*;\n" +
-            "import i2f.jdbc.procedure.parser.data.*;\n" +
-            "import i2f.jdbc.procedure.parser.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.class4j.impl.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.class4j.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.xml.impl.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.xml.*;\n" +
-            "import i2f.jdbc.procedure.provider.*;\n" +
-            "import i2f.jdbc.procedure.registry.impl.*;\n" +
-            "import i2f.jdbc.procedure.registry.*;\n" +
-            "import i2f.jdbc.procedure.reportor.*;\n" +
-            "import i2f.jdbc.procedure.signal.impl.*;\n" +
-            "import i2f.jdbc.procedure.signal.*;\n" +
-            "import i2f.jdbc.*;\n" +
-            "import i2f.jdbc.data.*;\n" +
-            "import i2f.database.type.*;\n" +
-            "import i2f.bindsql.*;\n" +
-            "import i2f.bindsql.page.*;\n" +
-            "import i2f.bindsql.data.*;\n" +
-            "import i2f.bindsql.count.*;\n" +
-            "import i2f.compiler.*;\n" +
-            "import i2f.script.*;\n" +
-            "import i2f.reflect.*;\n" +
-            "import i2f.reflect.vistor.*;\n" +
-            "import i2f.convert.obj.*;\n" +
-            "import i2f.container.builder.map.*;\n" +
-            "import i2f.check.*;\n" +
-            "import i2f.match.regex.*;\n" +
-            "import i2f.match.regex.data.*;\n" +
-            "import i2f.page.*;\n" +
-            "import i2f.reference.*;\n" +
-            "import i2f.text.*;\n" +
-            "import i2f.typeof.*;\n" +
-            "import i2f.typeof.token.*;\n" +
-            "import i2f.typeof.token.data.*;\n" +
-            "import i2f.uid.*;\n" +
-            "import i2f.clock.std.*;\n" +
-            "import i2f.clock.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.exception.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.exception.impl.*;\n" +
-            "import i2f.extension.groovy.*;\n" +
-            "import i2f.extension.ognl.*;\n" +
-            "import i2f.extension.velocity.*;\n" +
-
+            "import i2f.jdbc.procedure.parser.JdbcProcedureParser;\n" +
+            "import i2f.jdbc.procedure.parser.data.XmlNode;\n" +
+            "import i2f.jdbc.procedure.reportor.GrammarReporter;\n" +
+            "import i2f.jdbc.procedure.script.EvalScriptProvider;\n" +
+            "import i2f.jdbc.procedure.signal.SignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.ControlSignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.ThrowSignalException;\n" +
+            "import i2f.jdbc.procedure.util.JdbcProcedureUtil;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;\n" +
+            "import i2f.lock.ILockProvider;\n" +
+            "import i2f.lru.CachedSupplier;\n" +
+            "import i2f.lru.LruMap;\n" +
+            "import i2f.lru.WeakStackRetrieveCacheProvider;\n" +
+            "import i2f.page.ApiOffsetSize;\n" +
+            "import i2f.reference.Reference;\n" +
+            "import i2f.reflect.ReflectResolver;\n" +
+            "import i2f.reflect.vistor.Visitor;\n" +
+            "import i2f.text.StringUtils;\n" +
+            "import i2f.typeof.TypeOf;\n" +
+            "import i2f.uid.SnowflakeLongUid;\n" +
+            "\n" +
+            "import javax.sql.DataSource;\n" +
+            "import java.io.ByteArrayOutputStream;\n" +
+            "import java.io.PrintStream;\n" +
+            "import java.sql.Connection;\n" +
+            "import java.sql.SQLException;\n" +
+            "import java.text.SimpleDateFormat;\n" +
+            "import java.time.Duration;\n" +
+            "import java.time.LocalDate;\n" +
+            "import java.time.LocalDateTime;\n" +
+            "import java.time.LocalTime;\n" +
+            "import java.time.format.DateTimeFormatter;\n" +
             "import java.util.*;\n" +
-            "import java.math.*;\n" +
-            "import java.time.*;\n" +
-            "import java.text.*;\n" +
-            "import java.util.regex.*;\n" +
-            "import java.io.*;\n" +
-            "import java.lang.reflect.*;\n" +
-            "import javax.sql.*;\n" +
-            "import java.util.concurrent.*;\n" +
-            "import java.nio.*;\n" +
-            "import java.nio.charset.*;\n" +
-            "import java.util.concurrent.atomic.*;\n" +
-            "import java.util.concurrent.locks.*;\n" +
-            "import java.time.chrono.*;\n" +
-            "import java.time.format.*;\n" +
-            "import java.time.temporal.*;\n" +
-            "import java.time.zone.*;\n";
+            "import java.util.concurrent.ConcurrentHashMap;\n" +
+            "import java.util.concurrent.CopyOnWriteArrayList;\n" +
+            "import java.util.concurrent.CopyOnWriteArraySet;\n" +
+            "import java.util.concurrent.TimeUnit;\n" +
+            "import java.util.concurrent.atomic.AtomicBoolean;\n" +
+            "import java.util.concurrent.atomic.AtomicInteger;\n" +
+            "import java.util.concurrent.atomic.AtomicLong;\n" +
+            "import java.util.concurrent.atomic.AtomicReference;\n" +
+            "import java.util.concurrent.locks.ReentrantLock;\n" +
+            "import java.util.function.Consumer;\n" +
+            "import java.util.function.Function;\n" +
+            "import java.util.function.Supplier;\n";
+
+
+    public static String getEvalJavaImports(Project project) {
+        String pkg = CompletionHelper.getBasePackage(project);
+        if (pkg == null || pkg.isEmpty()) {
+            return EVAL_JAVA_IMPORTS_TEMPLATE;
+        }
+        if (!pkg.endsWith(".")) {
+            pkg = pkg + ".";
+        }
+        return EVAL_JAVA_IMPORTS_TEMPLATE.replace("i2f.", pkg);
+    }
 
 
     @Override
@@ -745,6 +774,37 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         return detectLanguage(tag.getParentTag());
     }
 
+    public void searchEvalJavaParts(PsiElement element, AtomicReference<String> importsRef, AtomicReference<String> membersRef) {
+        if (element == null) {
+            return;
+        }
+        if (element instanceof XmlTag) {
+            XmlTag xmlTag = (XmlTag) element;
+            String name = xmlTag.getName();
+            if ("lang-eval-java".equals(name)) {
+                XmlTag[] subTags = xmlTag.getSubTags();
+                if (subTags != null) {
+                    for (XmlTag subTag : subTags) {
+                        String subName = subTag.getName();
+                        if ("lang-java-import".equals(subName)) {
+                            String text = subTag.getValue().getText();
+                            if (text != null && !text.isEmpty()) {
+                                importsRef.set(text);
+                            }
+                        } else if ("lang-java-member".equals(subName)) {
+                            String text = subTag.getValue().getText();
+                            if (text != null && !text.isEmpty()) {
+                                membersRef.set(text);
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+        }
+        searchEvalJavaParts(element.getParent(), importsRef, membersRef);
+    }
+
     public void injectXmlText(MultiHostRegistrar registrar, XmlText xmlText) {
         XmlTag tag = (XmlTag) xmlText.getParentTag();
         Language targetLang = detectLanguage(xmlText);
@@ -770,8 +830,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
             } else if ("lang-java-member".equals(tagName)) {
+                AtomicReference<String> importsRef = new AtomicReference<>();
+                AtomicReference<String> memberRef = new AtomicReference<>();
+                searchEvalJavaParts(xmlText, importsRef, memberRef);
+
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(xmlText.getProject())
+                                        + Optional.ofNullable(importsRef.get()).orElse("") + "\n"
                                         + "public class MyJavaProcedure { ",
                                 " }",
                                 (PsiLanguageInjectionHost) xmlText,
@@ -779,9 +844,15 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
             } else if ("lang-java-body".equals(tagName)
                     || "lang-eval-java".equals(tagName)) {
+                AtomicReference<String> importsRef = new AtomicReference<>();
+                AtomicReference<String> memberRef = new AtomicReference<>();
+                searchEvalJavaParts(xmlText, importsRef, memberRef);
+
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(xmlText.getProject())
+                                        + Optional.ofNullable(importsRef.get()).orElse("") + "\n"
                                         + "public class MyJavaProcedure { \n"
+                                        + Optional.ofNullable(memberRef.get()).orElse("") + "\n"
                                         + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
                                 (PsiLanguageInjectionHost) xmlText,
@@ -808,7 +879,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 
             if ("lang-eval-groovy".equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(xmlText.getProject()) + "\n"
                                         + "class MyGroovyProcedure { \n"
                                         + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
@@ -891,7 +962,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
-                            .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                            .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                             + "public class MyJavaProcedure { \n"
                                             + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                     "\n} \n}",
@@ -1086,7 +1157,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                         + "public class MyJavaProcedure { \n"
                                         + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
@@ -1129,7 +1200,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             Language lang = findPossibleLanguage("groovy");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                         + "class MyGroovyProcedure { \n"
                                         + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
