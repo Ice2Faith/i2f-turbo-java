@@ -4,6 +4,7 @@ import i2f.clock.SystemClock;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.io.stream.StreamUtil;
 import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.match.regex.data.RegexMatchItem;
 import i2f.reflect.ReflectResolver;
 import i2f.text.StringUtils;
@@ -480,6 +481,43 @@ public interface ContextFunctions {
 
     default String regexp_extra(Object str, String regex, int index) {
         return regex_extra(str, regex, index);
+    }
+
+    default String regex_drop(Object oStr, String regex) {
+        return regex_drop(oStr, regex, 0, -1);
+    }
+
+    default String regex_drop(Object oStr, String regex, int index) {
+        return regex_drop(oStr, regex, index, -1);
+    }
+
+    default String regex_drop(Object oStr, String regex, int index, int count) {
+        if (oStr == null) {
+            return null;
+        }
+        if (regex == null) {
+            return null;
+        }
+        String str = String.valueOf(oStr);
+        regex = convertOracleRegexExpression(regex);
+        List<RegexFindPartMeta> parts = RegexUtil.regexFindParts(str, regex);
+        StringBuilder builder = new StringBuilder();
+        int i = 0;
+        int n = 0;
+        for (RegexFindPartMeta part : parts) {
+            if (part.isMatch()) {
+                if (i >= index) {
+                    if (n < count || count < 0) {
+                        builder.append(part.getPart());
+                    }
+                    n++;
+                }
+                i++;
+            } else {
+                builder.append(part.getPart());
+            }
+        }
+        return builder.toString();
     }
 
     default String regex_find_join(Object str, String regex) {
@@ -1984,11 +2022,11 @@ public interface ContextFunctions {
         return contains(obj, substr);
     }
 
-    default boolean ends(Object obj, Object substr) {
-        return ends_with(obj, substr);
+    default boolean starts_with(Object obj, Object substr) {
+        return starts_with(obj, substr, 0);
     }
 
-    default boolean starts_with(Object obj, Object substr) {
+    default boolean starts_with(Object obj, Object substr, int offset) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -2000,14 +2038,22 @@ public interface ContextFunctions {
         if (str == null) {
             return false;
         }
-        return str.startsWith(sstr);
+        return str.startsWith(sstr, offset);
     }
 
     default boolean starts(Object obj, String substr) {
         return starts_with(obj, substr);
     }
 
+    default boolean starts(Object obj, String substr, int offset) {
+        return starts_with(obj, substr, offset);
+    }
+
     default boolean ends_with(Object obj, Object substr) {
+        return ends_with(obj, substr, 0);
+    }
+
+    default boolean ends_with(Object obj, Object substr, int offset) {
         if (obj == null || substr == null) {
             return false;
         }
@@ -2019,7 +2065,15 @@ public interface ContextFunctions {
         if (str == null) {
             return false;
         }
-        return str.endsWith(sstr);
+        return starts_with(str, sstr, str.length() - sstr.length() - offset);
+    }
+
+    default boolean ends(Object obj, Object substr) {
+        return ends_with(obj, substr);
+    }
+
+    default boolean ends(Object obj, Object substr, int offset) {
+        return ends_with(obj, substr, offset);
     }
 
     default Object neg(Object number) {

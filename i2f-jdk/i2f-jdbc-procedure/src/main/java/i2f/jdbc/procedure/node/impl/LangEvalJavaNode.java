@@ -9,14 +9,17 @@ import i2f.clock.SystemClock;
 import i2f.clock.std.IClock;
 import i2f.compiler.MemoryCompiler;
 import i2f.container.builder.map.MapBuilder;
+import i2f.context.std.INamingContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.database.type.DatabaseType;
+import i2f.environment.std.IEnvironment;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.groovy.GroovyScript;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
+import i2f.invokable.method.IMethod;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.procedure.annotations.JdbcProcedure;
@@ -26,8 +29,12 @@ import i2f.jdbc.procedure.consts.LangConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
+import i2f.jdbc.procedure.datasource.DataSourceProvider;
+import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.event.ExecutorContextEvent;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
+import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.base.SqlDialect;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
@@ -44,9 +51,11 @@ import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
+import i2f.lock.ILockProvider;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
+import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -96,7 +105,16 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             .append("import ").append(castAsImportPackageName(GrammarReporter.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(BreakSignalException.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(SignalException.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(EvalScriptProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ILockProvider.class.getName())).append(";").append("\n")
             ///////////////////////////////////////////////////////////////////////////////////////////////
+            .append("import ").append(castAsImportPackageName(INamingContext.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(IEnvironment.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(IMethod.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(DataSourceProvider.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(XProc4jEvent.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ExecutorContextEvent.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(JdbcProcedureLogger.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(JdbcResolver.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(QueryColumn.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(DatabaseType.class.getName())).append(";").append("\n")
@@ -122,6 +140,8 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             .append("import ").append(castAsImportPackageName(SnowflakeLongUid.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(IClock.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(SystemClock.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(LruMap.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(ApiOffsetSize.class.getName())).append(";").append("\n")
             ///////////////////////////////////////////////////////////////////////////////////////////////
             .append("import ").append(castAsImportPackageName(TinyScript.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(TinyScriptException.class.getName())).append(";").append("\n")
@@ -216,6 +236,21 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
         if (bodySegment == null) {
             bodySegment = "";
         }
+
+        Set<String> additionalImports=new LinkedHashSet<>();
+        memberSegment=RegexUtil.regexFindAndReplace(memberSegment,"(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;",s->{
+            additionalImports.add(s);
+            return "/*"+s+"*/";
+        });
+        bodySegment=RegexUtil.regexFindAndReplace(bodySegment,"(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;",s->{
+            additionalImports.add(s);
+            return "";
+        });
+        if(!additionalImports.isEmpty()){
+            importSegment+="\n"+String.join("\n",additionalImports);
+        }
+
+
         String cacheKey = importSegment + "###" + memberSegment + "###" + bodySegment + "###";
         Map.Entry<String, String> ret = FULL_JAVA_SOURCE_MAP.get(cacheKey);
         if (ret != null) {

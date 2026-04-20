@@ -23,10 +23,6 @@ public interface TinyScriptFunctions {
 
     ThreadLocal<Map<String, Object>> LOCAL = ThreadLocal.withInitial(HashMap::new);
 
-    default Date now() {
-        return new Date();
-    }
-
     default long current_time_millis() {
         return System.currentTimeMillis();
     }
@@ -49,23 +45,6 @@ public interface TinyScriptFunctions {
 
     default double random() {
         return RANDOM.nextDouble();
-    }
-
-    default String uuid() {
-        return UUID.randomUUID().toString();
-    }
-
-    default void println(Object... obj) {
-        StringBuilder builder = new StringBuilder();
-        boolean isFirst = true;
-        for (Object item : obj) {
-            if (!isFirst) {
-                builder.append(", ");
-            }
-            builder.append(item);
-            isFirst = false;
-        }
-        System.out.println(builder.toString());
     }
 
     default String format(String format, Object... obj) {
@@ -253,24 +232,6 @@ public interface TinyScriptFunctions {
         return file.length();
     }
 
-    default long length(Object obj) {
-        if (obj == null) {
-            return 0;
-        }
-        if (is_array(obj)) {
-            return arr_len(obj);
-        } else if (obj instanceof Collection) {
-            return length((Collection) obj);
-        } else if (obj instanceof Map) {
-            return length((Map) obj);
-        } else if (obj instanceof CharSequence) {
-            return length((CharSequence) obj);
-        } else if (obj instanceof File) {
-            return length((File) obj);
-        }
-        return 1;
-    }
-
     default long hashcode(Object obj) {
         if (obj == null) {
             return 0;
@@ -278,16 +239,12 @@ public interface TinyScriptFunctions {
         return obj.hashCode();
     }
 
-    default void sleep(long millis) {
+    default void sleep_ms(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
-    }
-
-    default void yield() {
-        Thread.yield();
     }
 
     default int compare(Object v1, Object v2) {

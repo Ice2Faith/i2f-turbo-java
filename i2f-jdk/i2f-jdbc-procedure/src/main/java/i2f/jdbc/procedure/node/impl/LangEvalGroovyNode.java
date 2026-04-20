@@ -11,9 +11,12 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.reportor.GrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
+import i2f.match.regex.RegexUtil;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -34,10 +37,22 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
     }
 
     public static String getFullSourceCode(String script) {
+        String importSegment = LangEvalJavaNode.EVAL_JAVA_IMPORTS;
+        String bodySegment = script;
+
+        Set<String> additionalImports = new LinkedHashSet<>();
+        bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+            additionalImports.add(s);
+            return "";
+        });
+        if (!additionalImports.isEmpty()) {
+            importSegment += "\n" + String.join("\n", additionalImports);
+        }
+
         return new StringBuilder()
-                .append(LangEvalJavaNode.EVAL_JAVA_IMPORTS).append("\n")
+                .append(importSegment).append("\n")
                 .append("def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable {").append("\n")
-                .append(script).append("\n")
+                .append(bodySegment).append("\n")
                 .append("}").append("\n")
                 .append("exec(executor,params);").append("\n")
                 .toString();
