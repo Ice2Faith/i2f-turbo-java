@@ -43,7 +43,7 @@ public class LangEvalGroovyNode extends AbstractExecutorNode implements EvalScri
         Set<String> additionalImports = new LinkedHashSet<>();
         bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
             additionalImports.add(s);
-            return "";
+            return "/*" + s +"*/";
         });
         if (!additionalImports.isEmpty()) {
             importSegment += "\n" + String.join("\n", additionalImports);
