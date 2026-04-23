@@ -13,7 +13,6 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -34,13 +33,6 @@ public class Funic {
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
     }
 
-    public static void main(String[] args) {
-        String formula = "b=1;b+'***'.length()+'*'";
-        HashMap<Object, Object> map = new HashMap<>();
-        map.put("a", 1);
-        Object ret = script(formula, map);
-        System.out.println(ret);
-    }
 
     public static Object script(String formula, Object context) {
         return script(formula, context, null);
