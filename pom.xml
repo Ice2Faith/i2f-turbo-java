@@ -41,7 +41,7 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 
-        <lombok.version>1.18.30</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
 
         <!-- spring 体系 -->
         <spring.version>5.3.31</spring.version>

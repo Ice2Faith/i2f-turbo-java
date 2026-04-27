@@ -90,6 +90,7 @@
         <module>i2f-extension-zookeeper</module>
         <module>test-extension</module>
         <module>test-flink</module>
+        <module>i2f-extension-freemarker</module>
     </modules>
 
 
