@@ -242,7 +242,7 @@ public class VelocityGenerator {
         engine.loadDirective(ScriptDirective.class.getName());
 
         engine.setProperty(Velocity.ENCODING_DEFAULT, "UTF-8");
-        engine.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
+//        engine.setProperty(Velocity.OUTPUT_ENCODING, "UTF-8");
         engine.setProperty(Velocity.INPUT_ENCODING, "UTF-8");
     }
 
