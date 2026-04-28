@@ -159,7 +159,7 @@ public class VelocityGenerator {
         settingEngine(engine);
 
         // 设置资源加载器为字符串资源加载器
-        engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "string");
+        engine.setProperty(RuntimeConstants.RESOURCE_LOADERS, "string");
         engine.setProperty("resource.loader.string.class", StringResourceLoader.class.getName());
         engine.setProperty("resource.loader.string.repository.name", stringRepo);
         engine.setProperty("resource.loader.string.repository.class", StringResourceRepositoryImpl.class.getName());
@@ -216,7 +216,7 @@ public class VelocityGenerator {
     public static String useFileResource(VelocityEngine engine, boolean isInClassPath, String fileName) {
         String templateName = fileName;
         if (isInClassPath) {
-            engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
+            engine.setProperty(RuntimeConstants.RESOURCE_LOADERS, "classpath");
             engine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         } else {
             File file = new File(fileName);
