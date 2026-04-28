@@ -171,7 +171,7 @@ public class JdbcProcedureProjectMetaHolder {
                 Xml xml = XmlUtil.parseXmlSax(value.getName(), is);
                 Xml root = XmlUtil.getRootNode(xml);
                 inflateXml2Meta(null, 0, root, value);
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
         }

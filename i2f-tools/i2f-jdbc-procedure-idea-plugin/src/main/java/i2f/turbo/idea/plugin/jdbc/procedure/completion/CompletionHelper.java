@@ -283,7 +283,7 @@ public class CompletionHelper {
         if (file.exists() && file.isFile()) {
             try {
                 xml = XmlUtil.parseXmlSax(file);
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
         }
@@ -503,7 +503,7 @@ public class CompletionHelper {
                     XmlFile xmlFile = (XmlFile) psiFile;
                     rootTag = xmlFile.getRootTag();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
             ret.put(signature, new AbstractMap.SimpleEntry<>(elem, rootTag));
@@ -601,7 +601,7 @@ public class CompletionHelper {
                         getXmlFileVariables(item, variables, sqlIdentifiers);
                     }
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
 
@@ -677,7 +677,7 @@ public class CompletionHelper {
                         getXmlFileVariables(item, variables, sqlIdentifiers);
                     }
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
 
             }
         }

@@ -169,7 +169,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
                 // 注意：如果 convert 方法是静态的，直接调用；如果是实例方法，需要实例化
                 String result = Oracle2Xproc4j.convert(sourceText, type);
                 outputArea.setText(result);
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 StringWriter writer = new StringWriter();
                 PrintWriter pw = new PrintWriter(writer);
                 pw.println("convert error " + ex.getClass() + " : " + ex.getMessage());

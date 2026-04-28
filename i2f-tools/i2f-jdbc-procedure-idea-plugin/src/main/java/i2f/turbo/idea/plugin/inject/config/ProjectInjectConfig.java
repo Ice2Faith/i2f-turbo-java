@@ -66,7 +66,7 @@ public class ProjectInjectConfig {
             });
 
             return ret;
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
         return ret;
