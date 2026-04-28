@@ -23,6 +23,8 @@ import java.util.UUID;
 
 public class VelocityGenerator {
 
+    public static final String stringRepo = "stringRepo";
+
     /**
      * 批量渲染整个目录模板
      * 说明：
@@ -159,7 +161,7 @@ public class VelocityGenerator {
         // 设置资源加载器为字符串资源加载器
         engine.setProperty(RuntimeConstants.RESOURCE_LOADER, "string");
         engine.setProperty("resource.loader.string.class", StringResourceLoader.class.getName());
-        engine.setProperty("resource.loader.string.repository.name", "stringRepo");
+        engine.setProperty("resource.loader.string.repository.name", stringRepo);
         engine.setProperty("resource.loader.string.repository.class", StringResourceRepositoryImpl.class.getName());
 
         initEngine(config, engine);
@@ -181,21 +183,30 @@ public class VelocityGenerator {
 
     public static void removeStringResource(VelocityEngine engine, String templateName) {
         // 创建并配置字符串资源仓库
-        StringResourceRepository repo = (StringResourceRepository) engine.getApplicationAttribute("stringRepo");
+        StringResourceRepository repo = getStringRepo(engine);
+        repo.removeStringResource(templateName);
+    }
+
+    public static StringResourceRepository getStringRepo(VelocityEngine engine) {
+        StringResourceRepository repo = (StringResourceRepository) engine.getApplicationAttribute(stringRepo);
+        if (repo == null) {
+            repo = StringResourceLoader.getRepository(stringRepo);
+            engine.setApplicationAttribute(stringRepo, repo);
+        }
         if (repo == null) {
             repo = StringResourceLoader.getRepository();
-            engine.setApplicationAttribute("stringRepo", repo);
+            engine.setApplicationAttribute(stringRepo, repo);
         }
-        repo.removeStringResource(templateName);
+        if (repo == null) {
+            repo = new StringResourceRepositoryImpl();
+            engine.setApplicationAttribute(stringRepo, repo);
+        }
+        return repo;
     }
 
     public static String useStringResource(VelocityEngine engine, String template) {
         // 创建并配置字符串资源仓库
-        StringResourceRepository repo = (StringResourceRepository) engine.getApplicationAttribute("stringRepo");
-        if (repo == null) {
-            repo = StringResourceLoader.getRepository();
-            engine.setApplicationAttribute("stringRepo", repo);
-        }
+        StringResourceRepository repo = getStringRepo(engine);
         String templateName = UUID.randomUUID().toString().replaceAll("-", "").toLowerCase();
         repo.putStringResource(templateName, template);
 
@@ -222,14 +233,18 @@ public class VelocityGenerator {
         //创建绑定对象
         VelocityContext ctx = new VelocityContext(params);
         ctx.put("_vm", new GeneratorTool());
+        try {
 
-        //创建写出对象
-        StringWriter writer = new StringWriter();
+            //创建写出对象
+            StringWriter writer = new StringWriter();
 
-        //渲染结果
-        template.merge(ctx, writer);
+            //渲染结果
+            template.merge(ctx, writer);
 
-        return writer.toString();
+            return writer.toString();
+        } finally {
+            ctx.remove("_vm");
+        }
     }
 
     public static void settingEngine(VelocityEngine engine) {
