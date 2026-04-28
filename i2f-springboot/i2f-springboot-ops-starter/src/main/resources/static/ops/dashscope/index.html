@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 1小时缓存过期 -->
+    <meta http-equiv="Cache-Control" content="max-age=3600, public">
+    <title>DashScope Home</title>
+    <script src="../lib/vue/vue-2.js"></script>
+    <script src="../lib/moment/moment-2.24.0.js"></script>
+    <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../lib/element-ui/fonts/element-icons.woff"/>
+
+    <script src="../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../lib/axios/qs.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-card shadow="never">
+        <div slot="header">
+            <span>DashScope Home</span>
+        </div>
+        <el-row :gutter="15" v-loading="menuLoading">
+            <el-col :span="6" v-for="item in displayMenus">
+                <el-result :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
+                    <template slot="icon">
+                        <a :href="item.href" target="_blank">
+                            <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
+                        </a>
+                    </template>
+                    <template slot="subTitle">
+                        <span style="color: #777;">{{item.subTitle}}</span>
+                    </template>
+                    <template slot="extra">
+                        <a :href="item.href" target="_blank">
+                            访问
+                        </a>
+                    </template>
+                </el-result>
+            </el-col>
+
+        </el-row>
+    </el-card>
+</div>
+</body>
+
+<script>
+    window.app = new Vue({
+        components: {},
+        data() {
+            return {
+                menuLoading: false,
+                menus: [],
+                additionalMenus: [],
+                defaultMenus: [
+                    {
+                        title: '视频换人',
+                        subTitle: '使用给定的图像任人物替换视频中的人物',
+                        icon: 'el-icon-coin',
+                        href: './video/wan/instead-people.html'
+                    }
+                ]
+            }
+        },
+        created() {
+
+        },
+        mounted() {
+            this.onLoadMenus();
+        },
+        watch: {},
+        computed: {
+            displayMenus() {
+                return this.menus.filter(e => !e.disabled)
+            }
+        },
+        methods: {
+            onLoadMenus() {
+                this.menuLoading = true;
+                if (this.menus.length == 0) {
+                    this.menus = [...this.defaultMenus, ...this.additionalMenus]
+                }
+                this.menuLoading = false;
+            },
+            onClickMenuItem(item) {
+
+            }
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+
+    .scroller {
+        height: 260px
+    }
+
+    a {
+        color: dodgerblue;
+        text-decoration: none;
+    }
+
+    a:link {
+        color: dodgerblue;
+    }
+
+    a:visited {
+        color: dodgerblue;
+    }
+
+    a:hover {
+        color: coral;
+    }
+
+    a:active {
+        color: dodgerblue;
+    }
+
+
+</style>
+</html>
