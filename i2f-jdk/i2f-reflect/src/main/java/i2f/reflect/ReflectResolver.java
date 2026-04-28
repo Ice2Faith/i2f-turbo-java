@@ -20,6 +20,7 @@ import java.lang.annotation.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -1068,119 +1069,167 @@ public class ReflectResolver {
         return ret;
     }
 
+
+    public static int getTypeDistance(Class<?> realType, Class<?> requireType, int dis) {
+        if (realType == null || requireType == null) {
+            return dis + 100;
+        }
+        if (realType.equals(requireType)) {
+            return dis;
+        }
+        if (realType.equals(Object.class)) {
+            return Integer.MAX_VALUE;
+        }
+        Class<?> superclass = realType.getSuperclass();
+        if (superclass != null) {
+            int next = getTypeDistance(superclass, requireType, dis + 1);
+            if (next != Integer.MAX_VALUE) {
+                return next;
+            }
+        }
+        Class<?>[] interfaces = realType.getInterfaces();
+        if (interfaces != null) {
+            for (Class<?> nextClass : interfaces) {
+                int next = getTypeDistance(nextClass, requireType, dis + 1);
+                if (next != -1) {
+                    return next;
+                }
+            }
+        }
+        return Integer.MAX_VALUE;
+    }
+
+
     public static <T extends IMethod> T matchExecMethod(Iterable<T> executables, List<Object> args, boolean supportConvert) {
-        T exec = null;
-        T execArgs = null;
-        T execMatched = null;
-        T execArgsMatched = null;
+        List<T> unknownList = new ArrayList<>();
+        List<T> unknownArgsList = new ArrayList<>();
+        List<Map.Entry<T, AtomicInteger>> candidateList = new ArrayList<>();
+        List<Map.Entry<T, AtomicInteger>> candidateArgsList = new ArrayList<>();
+
         for (T item : executables) {
             if (item.getParameterCount() == args.size()) {
-                if (exec == null) {
-                    exec = item;
-                }
-                if (execMatched == null) {
-                    boolean matched = true;
-                    Class[] parameterTypes = item.getParameterTypes();
-                    for (int i = 0; i < parameterTypes.length; i++) {
-                        Object val = args.get(i);
-                        if (val == null) {
+                unknownList.add(item);
+
+                Map.Entry<T, AtomicInteger> matchEntry = new AbstractMap.SimpleEntry<>(item, new AtomicInteger(0));
+
+                boolean matched = true;
+                Class[] parameterTypes = item.getParameterTypes();
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    Object val = args.get(i);
+                    if (val == null) {
+                        matchEntry.getValue().addAndGet(100);
+                        continue;
+                    }
+                    Class<?> argType = val.getClass();
+                    Class<?> paramType = parameterTypes[i];
+                    if (TypeOf.typeOf(argType, paramType)) {
+                        int dis = getTypeDistance(argType, paramType, 0);
+                        matchEntry.getValue().addAndGet(dis);
+                        continue;
+                    }
+                    if (supportConvert) {
+                        Object test = ObjectConvertor.tryConvertAsType(val, paramType);
+                        if (TypeOf.instanceOf(test, paramType)) {
+                            int dis = getTypeDistance(test.getClass(), paramType, 200);
+                            matchEntry.getValue().addAndGet(dis);
                             continue;
                         }
-                        Class<?> argType = val.getClass();
-                        Class<?> paramType = parameterTypes[i];
-                        if (TypeOf.typeOf(argType, paramType)) {
-                            continue;
-                        }
-                        if (supportConvert) {
-                            Object test = ObjectConvertor.tryConvertAsType(val, paramType);
-                            if (TypeOf.instanceOf(test, paramType)) {
-                                continue;
-                            }
-                        }
-                        matched = false;
-                        if (matched == false) {
-                            break;
-                        }
                     }
-                    if (matched) {
-                        execMatched = item;
-                        return execMatched;
-                    }
+                    matched = false;
+                    break;
                 }
+                if (matched) {
+                    candidateList.add(matchEntry);
+                }
+
             }
             if (args.size() > item.getParameterCount()) {
                 if (item.getParameterCount() > 0) {
                     if (item.getParameterTypes()[item.getParameterCount() - 1].isArray()) {
-                        if (execArgs == null) {
-                            execArgs = item;
+                        unknownArgsList.add(item);
+
+                        Map.Entry<T, AtomicInteger> matchEntry = new AbstractMap.SimpleEntry<>(item, new AtomicInteger(0));
+
+                        boolean matched = true;
+                        Class[] parameterTypes = item.getParameterTypes();
+                        for (int i = 0; i < parameterTypes.length - 1; i++) {
+                            Object val = args.get(i);
+                            if (val == null) {
+                                matchEntry.getValue().addAndGet(100);
+                                continue;
+                            }
+                            Class<?> argType = val.getClass();
+                            Class<?> paramType = parameterTypes[i];
+                            if (TypeOf.typeOf(argType, paramType)) {
+                                int dis = getTypeDistance(argType, paramType, 0);
+                                matchEntry.getValue().addAndGet(dis);
+                                continue;
+                            }
+                            if (supportConvert) {
+                                Object test = ObjectConvertor.tryConvertAsType(val, paramType);
+                                if (TypeOf.instanceOf(test, paramType)) {
+                                    int dis = getTypeDistance(test.getClass(), paramType, 200);
+                                    matchEntry.getValue().addAndGet(dis);
+                                    continue;
+                                }
+                            }
+                            matched = false;
+                            break;
+
                         }
-                        if (execArgsMatched == null) {
-                            boolean matched = true;
-                            Class[] parameterTypes = item.getParameterTypes();
-                            for (int i = 0; i < parameterTypes.length - 1; i++) {
-                                Object val = args.get(i);
-                                if (val == null) {
+                        Class<?> elemType = parameterTypes[parameterTypes.length - 1].getComponentType();
+                        for (int i = parameterTypes.length; i < args.size(); i++) {
+                            Object val = args.get(i);
+                            if (val == null) {
+                                matchEntry.getValue().addAndGet(100);
+                                continue;
+                            }
+                            Class<?> argType = val.getClass();
+                            if (TypeOf.typeOf(argType, elemType)) {
+                                int dis = getTypeDistance(argType, elemType, 0);
+                                matchEntry.getValue().addAndGet(dis);
+                                continue;
+                            }
+                            if (supportConvert) {
+                                Object test = ObjectConvertor.tryConvertAsType(val, elemType);
+                                if (TypeOf.instanceOf(test, elemType)) {
+                                    int dis = getTypeDistance(test.getClass(), elemType, 200);
+                                    matchEntry.getValue().addAndGet(dis + 200);
                                     continue;
-                                }
-                                Class<?> argType = val.getClass();
-                                Class<?> paramType = parameterTypes[i];
-                                if (TypeOf.typeOf(argType, paramType)) {
-                                    continue;
-                                }
-                                if (supportConvert) {
-                                    Object test = ObjectConvertor.tryConvertAsType(val, paramType);
-                                    if (TypeOf.instanceOf(test, paramType)) {
-                                        continue;
-                                    }
-                                }
-                                matched = false;
-                                if (matched == false) {
-                                    break;
                                 }
                             }
-                            Class<?> elemType = parameterTypes[parameterTypes.length - 1].getComponentType();
-                            for (int i = parameterTypes.length; i < args.size(); i++) {
-                                Object val = args.get(i);
-                                if (val == null) {
-                                    continue;
-                                }
-                                Class<?> argType = val.getClass();
-                                if (TypeOf.typeOf(argType, elemType)) {
-                                    continue;
-                                }
-                                if (supportConvert) {
-                                    Object test = ObjectConvertor.tryConvertAsType(val, elemType);
-                                    if (TypeOf.instanceOf(test, elemType)) {
-                                        continue;
-                                    }
-                                }
-                                matched = false;
-                                if (matched == false) {
-                                    break;
-                                }
-                            }
-                            if (matched) {
-                                execArgsMatched = item;
-                                return execArgsMatched;
-                            }
+                            matched = false;
+                            break;
+
                         }
+                        if (matched) {
+                            candidateArgsList.add(matchEntry);
+                        }
+
                     }
                 }
             }
         }
 
-        if (execMatched != null) {
-            return execMatched;
-        }
-        if (execArgsMatched != null) {
-            return execArgsMatched;
+        if (!candidateList.isEmpty()) {
+            candidateList.sort((v1, v2) -> Integer.compare(v1.getValue().get(), v2.getValue().get()));
+            return candidateList.get(0).getKey();
         }
 
-        if (execArgs != null) {
-            return execArgs;
+        if (!candidateArgsList.isEmpty()) {
+            candidateArgsList.sort((v1, v2) -> Integer.compare(v1.getValue().get(), v2.getValue().get()));
+            return candidateArgsList.get(0).getKey();
         }
 
-        return exec;
+        if (!unknownList.isEmpty()) {
+            return unknownList.get(0);
+        }
+
+        if (!unknownArgsList.isEmpty()) {
+            return unknownArgsList.get(0);
+        }
+
+        return null;
     }
 
     public static Object valueGetStatic(Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
