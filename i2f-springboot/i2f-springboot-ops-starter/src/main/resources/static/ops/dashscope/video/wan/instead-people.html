@@ -95,32 +95,114 @@
                     <el-col :span="12">
                         <el-form-item label="视频">
                             <el-upload
+                                    class="upload-image"
                                     ref="uploadVideo"
                                     style="display: inline-block;"
                                     action="#"
-                                    drag
+                                    list-type="picture-card"
                                     :file-list="metas.uploadVideoList"
                                     accept=".mp4,.avi"
                                     :auto-upload="false"
                                     :on-change="onUploadVideoFileChange">
                                 <i class="el-icon-upload"></i>
-                                <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-                                <div class="el-upload__tip" slot="tip">只能上传mp4/avi文件，且不超过30s时长</div>
+                                <div slot="file" slot-scope="{file}">
+
+                                    <video
+                                           :src="file.url"
+                                           class="el-upload-list__item-thumbnail"
+                                           controls
+                                           title="Output Video">
+                                        Output Video
+                                    </video>
+                                    <span class="el-upload-list__item-actions">
+                                        <span
+                                                class="el-upload-list__item-preview"
+                                                @click="handleVideoCardPreview(file)"
+                                        >
+                                          <i class="el-icon-zoom-in"></i>
+                                        </span>
+                                        <span
+                                                class="el-upload-list__item-delete"
+                                                @click="metas.uploadVideoList=[]"
+                                        >
+                                          <i class="el-icon-delete"></i>
+                                        </span>
+                                  </span>
+                                </div>
                             </el-upload>
                         </el-form-item>
                     </el-col>
                 </el-row>
+            </el-form>
 
                 <el-divider></el-divider>
+            <el-form inline label-position="left" label-width="80px">
+                <el-row type="flex">
+                    <el-col :span="10">
+                        <el-row type="flex">
+                            <el-form-item>
+                                <span slot="label">
+                                    模型
+                                     <el-popover
+                                             placement="top-start"
+                                             title="模型类型"
+                                             width="360"
+                                             trigger="hover">
+                                         切换不同模型之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
+                                         如果不重新上传，模型将会找不到上传的图片和视频。
+                                        <i slot="reference" class="el-icon-question"></i>
+                                      </el-popover>
+                                </span>
+                                <el-select  clearable filterable v-model="form.modelName"  placeholder="模型" style="width: 260px;">
+                                    <el-option
+                                            v-for="item in metas.modelList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="模式">
+                                <el-select  clearable filterable v-model="form.mode"  placeholder="模式" >
+                                    <el-option
+                                            v-for="item in metas.parameterModeList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-row type="flex" justify="center">
+                            <el-form-item>
+                                <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                           type="primary"
+                                           @click="onExecute">
+                                    执行
+                                </el-button>
+                                <el-popover
+                                        placement="top-start"
+                                        title="执行"
+                                        width="360"
+                                        trigger="hover">
+                                    点击执行之后，将会提交异步任务给平台。<br/>
+                                    后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
+                                    只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
+                                    <i slot="reference" class="el-icon-question"></i>
+                                </el-popover>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-row type="flex" justify="end">
 
-                <el-row type="flex" justify="center">
-                    <el-form-item>
-                        <el-button v-loading="metas.resultTaskLoading" size="medium"
-                                   type="primary"
-                                   @click="onExecute">
-                            执行
-                        </el-button>
-                    </el-form-item>
+                        </el-row>
+                    </el-col>
                 </el-row>
 
 
@@ -137,14 +219,21 @@
                                    @click="onQueryStatus">
                             查询
                         </el-button>
+                        <el-link v-if="metas.resultVideoUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultVideoUrl"
+                                   type="success">
+                            下载<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
                     </el-form-item>
                 </el-row>
 
                 <video v-if="metas.resultVideoUrl"
                        :src="metas.resultVideoUrl"
                        controls
-                       style="max-width:100%;"
-                       title="Output Video">Output Video
+                       style="max-width:100%;max-height: 960px;"
+                       title="Output Video">
+                    Output Video
                 </video>
             </el-form>
 
@@ -153,8 +242,18 @@
     </el-card>
 
 
-    <el-dialog :visible.sync="dialog.imagePreview.show">
+    <el-dialog :visible.sync="dialog.imagePreview.show" style="text-align: center;">
         <img width="100%" :src="dialog.imagePreview.imageUrl" alt="">
+    </el-dialog>
+
+    <el-dialog :visible.sync="dialog.videoPreview.show" style="text-align: center;">
+        <video v-if="dialog.videoPreview.videoUrl"
+               :src="dialog.videoPreview.videoUrl"
+               controls
+               style="max-width:100%;max-height: 960px;"
+               title="Video">
+            Video
+        </video>
     </el-dialog>
 
 </div>
@@ -180,6 +279,10 @@
                 this.dialog.imagePreview.imageUrl = file.url;
                 this.dialog.imagePreview.show = true;
             },
+            handleVideoCardPreview(file){
+                this.dialog.videoPreview.videoUrl = file.url;
+                this.dialog.videoPreview.show = true;
+            },
             getDefaultData() {
                 return {
                     dialogImageUrl: '',
@@ -201,22 +304,36 @@
                         langList: [
                             {label: 'Text', value: 'text'},
                         ],
+                        modelList: [
+                            {label: '动作迁移(人和背景不变)(0.4元/s)', value: 'wan2.2-animate-move'},
+                            {label: '视频换人(人变背景不变)(0.6元/s)', value: 'wan2.2-animate-mix'},
+
+                        ],
+                        parameterModeList:[
+                            {label: '标准模式，生成速度较快，性价比高，适用于快速预览和基础动画场景', value: 'wan-std'},
+                            {label: '专业模式，动画流畅度更高，效果更佳，但处理时间和费用也相应增加(+0.2元/s)', value: 'wan-pro'},
+                        ]
                     },
                     drawer: {},
                     dialog: {
                         imagePreview: {
                             show: false,
                             imageUrl: ''
+                        },
+                        videoPreview: {
+                            show: false,
+                            videoUrl: ''
                         }
                     },
                     form: {
                         meta: {
-                            apiKey: 'sk-***********',
+                            apiKey: '',
                         },
-                        modelName: 'wan2.2-animate-mix',
+                        modelName: 'wan2.2-animate-move',
                         imageUrl: '',
                         videoUrl: '',
-                        watermark: false
+                        watermark: false,
+                        mode: 'wan-std'
                     }
                 }
             },
@@ -329,7 +446,11 @@
             },
             assignDashScopeMeta(req) {
                 req.meta = this.form.meta;
-                req.modelName = this.modelName;
+                req.modelName = this.form.modelName;
+                req.mode=this.form.mode;
+                if(!req.meta.apiKey){
+                    throw new Error('请先填写 Api Key')
+                }
                 return req;
             },
             md5ForFile(file) {
@@ -488,6 +609,7 @@
                             let resp = transfer.recv(res.data.data)
                             // console.log(resp)
                             this.metas.resultTaskId = resp;
+                            this.onQueryStatus();
                         } else {
                             this.messageError(res.data.msg, 300)
                         }
@@ -525,17 +647,19 @@
                                 }, 3000)
                             } else if ('SUCCEEDED' == taskStatus) {
                                 this.metas.resultVideoUrl = resp.output.results.video_url
+                                this.metas.resultVideoLoading = false;
                             } else {
                                 let code = resp.output.code;
                                 let message = resp.output.message;
                                 this.messageError(`${code}: ${message}`, 300)
+                                this.metas.resultVideoLoading = false;
                             }
                         } else {
                             this.messageError(res.data.msg, 300)
+                            this.metas.resultVideoLoading = false;
                         }
                     }).catch(err => {
                         this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                    }).finally(() => {
                         this.metas.resultVideoLoading = false;
                     })
                 } catch (err) {

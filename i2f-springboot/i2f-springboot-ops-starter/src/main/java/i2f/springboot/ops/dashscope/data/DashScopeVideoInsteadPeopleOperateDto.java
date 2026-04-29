@@ -14,4 +14,5 @@ public class DashScopeVideoInsteadPeopleOperateDto extends DashScopeBaseOperateD
     protected String videoUrl;
     protected String imageUrl;
     protected boolean watermark;
+    protected String mode;
 }

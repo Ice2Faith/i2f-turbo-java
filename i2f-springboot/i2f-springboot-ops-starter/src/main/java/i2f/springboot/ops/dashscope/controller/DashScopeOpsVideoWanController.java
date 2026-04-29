@@ -59,7 +59,7 @@ public class DashScopeOpsVideoWanController {
         inputMap.put("watermark", req.isWatermark());
         body.put("input", inputMap);
         Map<String, Object> parametersMap = new HashMap<>();
-        parametersMap.put("mode", "wan-std");
+        parametersMap.put("mode", req.getMode());
         body.put("parameters", parametersMap);
 
         HttpHeaders headers = new HttpHeaders();
