@@ -63,6 +63,9 @@ public class XxlJobOpsController implements IOpsProvider {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
     @Autowired(required = false)
     private DatasourceProvider datasourceProvider;
 
@@ -232,7 +235,7 @@ public class XxlJobOpsController implements IOpsProvider {
             XxlJobOperateDto req = transfer.recv(reqDto, XxlJobOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -272,7 +275,7 @@ public class XxlJobOpsController implements IOpsProvider {
             XxlJobOperateDto req = transfer.recv(reqDto, XxlJobOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

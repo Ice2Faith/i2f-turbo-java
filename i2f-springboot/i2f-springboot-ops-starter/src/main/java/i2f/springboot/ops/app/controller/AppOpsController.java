@@ -56,6 +56,9 @@ public class AppOpsController implements IOpsProvider {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
     @Override
     public List<OpsHomeMenuDto> getMenus() {
         return Collections.singletonList(new OpsHomeMenuDto()
@@ -98,7 +101,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -135,7 +138,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -162,7 +165,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -183,7 +186,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -208,7 +211,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -234,7 +237,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -265,7 +268,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

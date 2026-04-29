@@ -49,6 +49,9 @@ public class XProc4jOpsController implements IOpsProvider {
     private HostIdHelper hostIdHelper;
 
     @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
+    @Autowired
     protected OpsSecureTransfer transfer;
 
     @Autowired
@@ -105,7 +108,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -125,7 +128,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -150,7 +153,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -242,7 +245,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

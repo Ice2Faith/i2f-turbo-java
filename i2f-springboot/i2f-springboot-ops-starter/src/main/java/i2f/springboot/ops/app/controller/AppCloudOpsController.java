@@ -46,6 +46,9 @@ public class AppCloudOpsController {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
     public void assertHostId(AppOperationDto req) {
         if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
             throw new OpsException("request not equals require hostId");
@@ -60,7 +63,7 @@ public class AppCloudOpsController {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

@@ -46,6 +46,9 @@ public class HostOpsController implements IOpsProvider {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
     @Override
     public List<OpsHomeMenuDto> getMenus() {
         return Collections.singletonList(new OpsHomeMenuDto()
@@ -88,7 +91,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -111,7 +114,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -184,7 +187,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -221,7 +224,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -245,7 +248,7 @@ public class HostOpsController implements IOpsProvider {
             File file = new File(path);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    hostIdHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
+                    hostIdProxyHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
                         InputStream is = proxyResp.getBody();
                         ServletFileUtil.responseAsFileAttachment(is, true, file.getName(), null, !req.isInline(), response);
                     });
@@ -274,7 +277,7 @@ public class HostOpsController implements IOpsProvider {
             File file = new File(path);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    hostIdHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
+                    hostIdProxyHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
                         InputStream is = proxyResp.getBody();
                         ServletFileUtil.responseAsFileAttachment(is, true, file.getName(), null, !req.isInline(), response);
                     });
@@ -328,7 +331,7 @@ public class HostOpsController implements IOpsProvider {
             File file = new File(path);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    hostIdHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
+                    hostIdProxyHelper.proxyHostIdDownload(req, req.getHostId(), request, proxyResp -> {
                         InputStream is = proxyResp.getBody();
                         ServletFileUtil.responseAsFileAttachment(is, true, file.getName(), null, !req.isInline(), response);
                     });
@@ -375,7 +378,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostIdUpload(req, req.getHostId(), request, file);
+                    return hostIdProxyHelper.proxyHostIdUpload(req, req.getHostId(), request, file);
                 }
             }
             assertHostId(req);
@@ -436,7 +439,7 @@ public class HostOpsController implements IOpsProvider {
             HostOperateDto req = transfer.recv(reqDto, HostOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
