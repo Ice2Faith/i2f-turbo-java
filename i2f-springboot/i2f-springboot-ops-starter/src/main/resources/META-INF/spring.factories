@@ -29,4 +29,5 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController,\
-    i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanController
+    i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanInsteadPeopleController,\
+    i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanDigitalPeopleController

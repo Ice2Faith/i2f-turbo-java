@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class DashScopeVideoInsteadPeopleOperateDto extends DashScopeBaseOperateDto {
+public class DashScopeVideoWanInsteadPeopleOperateDto extends DashScopeBaseOperateDto {
     protected String videoUrl;
     protected String imageUrl;
     protected boolean watermark;

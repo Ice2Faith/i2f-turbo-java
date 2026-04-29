@@ -600,7 +600,7 @@
                     });
                     let transfer = this.getTransfer();
                     this.$axios({
-                        url: `/instead-people`,
+                        url: `/instead-people/generate`,
                         method: 'post',
                         data: transfer.send(req)
                     }).then(res => {

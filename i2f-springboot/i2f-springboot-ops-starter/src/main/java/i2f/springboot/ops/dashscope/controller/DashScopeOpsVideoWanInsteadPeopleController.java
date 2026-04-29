@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
-import i2f.springboot.ops.dashscope.data.DashScopeVideoInsteadPeopleOperateDto;
+import i2f.springboot.ops.dashscope.data.DashScopeVideoWanInsteadPeopleOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,8 +34,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/video/wan")
-public class DashScopeOpsVideoWanController {
+@RequestMapping("/ops/dashscope/video/wan/instead-people")
+public class DashScopeOpsVideoWanInsteadPeopleController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -49,7 +49,7 @@ public class DashScopeOpsVideoWanController {
     @Autowired
     private DashScopeOpsController controller;
 
-    public String videoInsteadPeople(DashScopeVideoInsteadPeopleOperateDto req) throws Exception {
+    public String videoInsteadPeople(DashScopeVideoWanInsteadPeopleOperateDto req) throws Exception {
 
         Map<String, Object> body = new HashMap<>();
         body.put("model", req.getModelName());
@@ -89,12 +89,12 @@ public class DashScopeOpsVideoWanController {
         return taskId;
     }
 
-    @PostMapping("/instead-people")
+    @PostMapping("/generate")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> videoInsteadPeople(@RequestBody OpsSecureDto reqDto,
                                                             HttpServletRequest request) throws Exception {
         try {
-            DashScopeVideoInsteadPeopleOperateDto req = transfer.recv(reqDto, DashScopeVideoInsteadPeopleOperateDto.class);
+            DashScopeVideoWanInsteadPeopleOperateDto req = transfer.recv(reqDto, DashScopeVideoWanInsteadPeopleOperateDto.class);
 
             String taskId = videoInsteadPeople(req);
             return transfer.success(taskId);
