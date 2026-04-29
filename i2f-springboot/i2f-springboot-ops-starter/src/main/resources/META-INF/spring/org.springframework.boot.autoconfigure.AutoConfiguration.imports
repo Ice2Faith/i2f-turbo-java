@@ -25,3 +25,7 @@ i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper
 i2f.springboot.ops.elasticsearch.controller.ElasticSearchOpsController
 i2f.springboot.ops.xproc4j.controller.XProc4jOpsController
 i2f.springboot.ops.xproc4j.helper.XProc4jHelper
+i2f.springboot.ops.dashscope.controller.DashScopeOpsController
+i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController
+i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController
+i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanController
