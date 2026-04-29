@@ -644,7 +644,7 @@
                                 || 'RUNNING' == taskStatus) {
                                 setTimeout(() => {
                                     this.onQueryStatus()
-                                }, 3000)
+                                }, 5000)
                             } else if ('SUCCEEDED' == taskStatus) {
                                 this.metas.resultVideoUrl = resp.output.results.video_url
                                 this.metas.resultVideoLoading = false;
