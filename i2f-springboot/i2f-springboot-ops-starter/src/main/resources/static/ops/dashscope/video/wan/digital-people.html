@@ -59,7 +59,7 @@
                     <el-col :span="12">
                         <el-form-item>
                             <span slot="label">
-                                人物肖像图片
+                                人物
                                 <el-popover
                                         placement="top-start"
                                         title="图片要求"
@@ -88,16 +88,12 @@
                             <div v-if="metas.uploadImageLoading" style="color:#409EFF;">
                                 <i class="el-icon-loading"></i> 上传中...
                             </div>
-                            <div v-if="form.imageUrl"
-                                 style="color:#67C23A;word-break:break-all;max-width:260px;font-size:12px;">
-                                <i class="el-icon-check"></i> {{ form.imageUrl }}
-                            </div>
                         </el-form-item>
                     </el-col>
                     <el-col :span="12">
                         <el-form-item>
                             <span slot="label">
-                                驱动音频
+                                音频
                                 <el-popover
                                         placement="top-start"
                                         title="音频要求"
@@ -131,10 +127,6 @@
                             </div>
                             <div v-if="metas.uploadAudioObjectUrl" style="margin-top:8px;">
                                 <audio :src="metas.uploadAudioObjectUrl" controls style="max-width:260px;"></audio>
-                            </div>
-                            <div v-if="form.audioUrl"
-                                 style="color:#67C23A;word-break:break-all;max-width:260px;font-size:12px;margin-top:4px;">
-                                <i class="el-icon-check"></i> {{ form.audioUrl }}
                             </div>
                         </el-form-item>
                     </el-col>
@@ -183,7 +175,7 @@
 
             <el-form inline label-position="left" label-width="80px">
                 <el-row type="flex">
-                    <el-col :span="14">
+                    <el-col :span="10">
                         <el-row type="flex" align="middle">
                             <el-form-item>
                                 <span slot="label">
@@ -214,7 +206,7 @@
                                     </el-popover>
                                 </span>
                                 <el-select clearable v-model="form.resolution" placeholder="分辨率"
-                                           style="width: 120px;">
+                                           style="width: 240px;">
                                     <el-option
                                             v-for="item in metas.resolutionList"
                                             :key="item.value"
@@ -231,13 +223,14 @@
                                 <el-button v-loading="metas.resultTaskLoading" size="medium"
                                            type="primary"
                                            @click="onExecute">
-                                    生成视频
+                                    执行
                                 </el-button>
                                 <el-popover
                                         placement="top-start"
                                         title="生成视频"
                                         width="360"
                                         trigger="hover">
+                                    执行前请先进行图片检查，检查合格之后再执行，否则会浪费费用。<br/>
                                     点击后将异步提交任务给平台。<br/>
                                     可通过下方[查询]按钮轮询结果，约需 5~10 分钟。<br/>
                                     任务提交即计费，仅查询不计费。<br/>
@@ -263,7 +256,7 @@
                         <el-button v-loading="metas.resultVideoLoading" size="medium"
                                    type="primary"
                                    @click="onQueryStatus">
-                            查询结果
+                            查询
                         </el-button>
                         <el-link v-if="metas.resultVideoUrl"
                                  style="margin-left: 15px;"
@@ -335,11 +328,11 @@
                         resultVideoUrl: '',
                         // 模型列表
                         modelList: [
-                            {label: '数字人对口型视频生成(480P:0.5元/s, 720P:0.9元/s)', value: 'wan2.2-s2v'},
+                            {label: '数字人对口型(0.5元/s)', value: 'wan2.2-s2v'},
                         ],
                         resolutionList: [
-                            {label: '480P（0.5元/秒，标准清晰度，速度快）', value: '480P'},
-                            {label: '720P（0.9元/秒，高清晰度）', value: '720P'},
+                            {label: '480P（标准清晰度，速度快）', value: '480P'},
+                            {label: '720P（高清晰度，+0.4元/秒）', value: '720P'},
                         ],
                     },
                     dialog: {
