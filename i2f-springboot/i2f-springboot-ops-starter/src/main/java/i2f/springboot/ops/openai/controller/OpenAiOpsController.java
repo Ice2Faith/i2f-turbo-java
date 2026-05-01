@@ -36,6 +36,8 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,6 +68,8 @@ public class OpenAiOpsController  implements IOpsProvider {
     private HostIdProxyHelper hostIdProxyHelper;
 
     private RestTemplate restTemplate=createRestTemplate();
+
+    private ExecutorService pool= Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors()*4+2);
 
     private RestTemplate createRestTemplate(){
         return new RestTemplateBuilder()
@@ -147,7 +151,7 @@ public class OpenAiOpsController  implements IOpsProvider {
                         emitter.completeWithError(ex);
                     }
                 }
-            });
+            },pool);
 
 //            emitter.onCompletion(() -> System.out.println("前端 SSE 连接已正常关闭"));
             emitter.onTimeout(() -> System.out.println("前端 SSE 连接超时"));
