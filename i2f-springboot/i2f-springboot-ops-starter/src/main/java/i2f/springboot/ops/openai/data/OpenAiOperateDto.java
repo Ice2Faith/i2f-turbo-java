@@ -13,4 +13,5 @@ import lombok.NoArgsConstructor;
 public class OpenAiOperateDto {
     protected OpenAiMeta meta;
     protected OpenAiCompletionDto completion;
+    protected boolean encryptOutput=false;
 }

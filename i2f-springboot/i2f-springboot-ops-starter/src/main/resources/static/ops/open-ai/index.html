@@ -217,6 +217,7 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
+                    <el-checkbox v-model="form.encryptOutput">输出加密</el-checkbox>
                     <el-select v-model="form.messageType"
                                placeholder="发送消息类型"
                                style="width:160px;">
@@ -604,7 +605,8 @@
                         modelName: 'qwen-plus',
                         messageList: [],
                         inputText: '',
-                        messageType: 'user'
+                        messageType: 'user',
+                        encryptOutput: false
                     }
                 }
             },
@@ -886,6 +888,7 @@
                 let assistantIdx = messages.length - 1;
 
                 let _this = this;
+                let encryptOutput=this.form.encryptOutput;
                 // SSE 消息处理：逐步写入助手消息内容，实现打字机效果
                 function handleChunk(raw) {
                     if (!raw || raw === '[DONE]') {
@@ -895,8 +898,12 @@
                         let json = JSON.parse(raw);
                         if (json.code == 200) {
                             //console.log(res.data)
-                            json = _this.transferRecv(json.data) || null
-                            json=JSON.parse(json)
+                            if(encryptOutput){
+                                json = _this.transferRecv(json.data) || null
+                                json=JSON.parse(json)
+                            }else{
+                                json=JSON.parse(json.data);
+                            }
                         } else {
                             _this.messageError(json.msg,300)
                         }
@@ -921,6 +928,7 @@
                             stream: true,
                         }
                     });
+                    req.encryptOutput=encryptOutput;
                     req=this.transferSend(req);
 
                     // 原生 fetch + ReadableStream 解析 SSE

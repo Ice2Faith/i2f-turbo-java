@@ -39,6 +39,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -102,8 +103,10 @@ public class OpenAiOpsController  implements IOpsProvider {
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
+        AtomicReference<OpenAiOperateDto> reqRef=new AtomicReference<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
+            reqRef.set(req);
 
             CompletableFuture.runAsync(() -> {
                 try {
@@ -122,14 +125,24 @@ public class OpenAiOpsController  implements IOpsProvider {
                                 while ((line = reader.readLine()) != null) {
                                     if (line.startsWith("data:")) {
                                         String data = line.substring(5).trim();
-                                        OpsSecureReturn<OpsSecureDto> resp = transfer.success(data);
+                                        OpsSecureReturn<?> resp = null;
+                                        if(req.isEncryptOutput()){
+                                            resp=transfer.success(data);
+                                        }else{
+                                            resp=OpsSecureReturn.success(data);
+                                        }
                                         String respJson = objectMapper.writeValueAsString(resp);
                                         emitter.send(respJson);
                                     }
                                 }
                             } catch (Exception e) {
                                 try {
-                                    OpsSecureReturn<OpsSecureDto> resp = transfer.error(e);
+                                    OpsSecureReturn<?> resp = null;
+                                    if(req.isEncryptOutput()) {
+                                        resp=transfer.error(e);
+                                    }else{
+                                        resp=OpsSecureReturn.error(e);
+                                    }
                                     String respJson = objectMapper.writeValueAsString(resp);
                                     emitter.send(respJson);
                                     emitter.complete();
@@ -143,7 +156,12 @@ public class OpenAiOpsController  implements IOpsProvider {
                     emitter.complete();
                 } catch (Exception e) {
                     try {
-                        OpsSecureReturn<OpsSecureDto> resp = transfer.error(e);
+                        OpsSecureReturn<?> resp = null;
+                        if(req.isEncryptOutput()) {
+                            resp=transfer.error(e);
+                        }else{
+                            resp=OpsSecureReturn.error(e);
+                        }
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                         emitter.complete();
@@ -159,7 +177,13 @@ public class OpenAiOpsController  implements IOpsProvider {
 
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
-            OpsSecureReturn<OpsSecureDto> resp = transfer.error(e);
+            OpsSecureReturn<?> resp = null;
+            OpenAiOperateDto req = reqRef.get();
+            if(req!=null && req.isEncryptOutput()) {
+                resp=transfer.error(e);
+            }else{
+                resp=OpsSecureReturn.error(e);
+            }
             String respJson = objectMapper.writeValueAsString(resp);
             emitter.send(respJson);
             emitter.complete();
