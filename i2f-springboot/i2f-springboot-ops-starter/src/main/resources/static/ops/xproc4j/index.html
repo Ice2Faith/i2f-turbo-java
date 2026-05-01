@@ -1058,6 +1058,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             evalWorker(){
                 if (!window.worker) {
                     window.worker = new Worker(URL.createObjectURL(new Blob([`
@@ -1123,15 +1151,14 @@
                     let req = {
 
                     }
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/hostId',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || ''
+                            let resp = this.transferRecv(res.data.data) || ''
                             //console.log(resp)
                             let list=[...this.metas.hostIdList];
                             if(resp && resp!='') {
@@ -1159,15 +1186,14 @@
                     let req = this.assignHostId({
 
                     })
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metas',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {}
+                            let resp = this.transferRecv(res.data.data) || {}
                             //console.log(resp)
                             this.metas.metas = resp;
                         } else {
@@ -1189,15 +1215,14 @@
                     let req = this.assignHostId({
 
                     })
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/datasources',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {}
+                            let resp = this.transferRecv(res.data.data) || {}
                             //console.log(resp)
                             this.metas.datasources = resp;
                         } else {
@@ -1257,16 +1282,15 @@
 
                                 url='/eval-script'
                             }
-                            let transfer = this.getTransfer();
                             this.$axios({
                                 url: url,
                                 method: 'post',
-                                data: transfer.send(req)
+                                data: this.transferSend(req)
                             }).then(res => {
                                 this.metas.logList=(res.data.attrs)?(res.data.attrs.log || []):([]);
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
-                                    let resp = transfer.recv(res.data.data)
+                                    let resp = this.transferRecv(res.data.data)
                                     // console.log(resp)
                                     resp=resp+'';
                                     try{

@@ -1382,6 +1382,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1399,15 +1427,14 @@
                 this.metas.datasourceListLoading = true;
                 try {
                     let timestamp = new Date().getTime();
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/datasources',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: this.transferSend(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.datasourceList = resp.list;
                             this.form.datasource = resp.defaultName;
@@ -1430,15 +1457,14 @@
                 this.metas.driverListLoading = true;
                 try {
                     let timestamp = new Date().getTime();
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/drivers',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: this.transferSend(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.driverList = resp;
                             if (resp.length > 0 && this.form.driver == '') {
@@ -1552,15 +1578,14 @@
                         maxCount: this.form.maxCount,
                     },true);
                     let operate = this.metas.operate;
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/${operate}`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             this.metas.resultSql=sql;
                             // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
@@ -1623,11 +1648,10 @@
                         maxCount: this.form.maxCount,
                     },true);
                     let operate = this.metas.operate;
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/export`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         let contentDisposition = ''
                         let contentType = ''
@@ -1719,15 +1743,14 @@
                         sendFullScript: this.dialog.scriptRunner.sendFullScript,
                         stopOnError: this.dialog.scriptRunner.stopOnError,
                     },true);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/runner`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
@@ -1761,15 +1784,14 @@
                 this.drawer.metadata.databasesLoading = true;
                 try {
                     let req = this.fillDatasourceForm({});
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/databases',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.metadata.databases = resp.list;
                             this.drawer.metadata.checkDatabase = resp.defaultName;
@@ -1812,15 +1834,14 @@
                         table: tablePattern,
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/tables',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || []
+                            let resp = this.transferRecv(res.data.data) || []
                             // console.log(resp)
                             this.drawer.metadata.tables = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database;
@@ -1911,15 +1932,14 @@
                         table: this.drawer.metadata.checkTable
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/table/info',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {};
+                            let resp = this.transferRecv(res.data.data) || {};
                             // console.log(resp)
                             this.dialog.tableInfo.meta = resp;
                             this.dialog.tableInfo.title = resp.name;
@@ -1948,15 +1968,14 @@
                         ddlType: this.dialog.tableInfo.ddlType
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/table/ddl',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data);
+                            let resp = this.transferRecv(res.data.data);
                             // console.log(resp)
                             this.dialog.tableInfo.tableDdl = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;

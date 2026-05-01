@@ -1038,6 +1038,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1068,15 +1096,14 @@
                     let req = {
 
                     }
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/hostId',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || ''
+                            let resp = this.transferRecv(res.data.data) || ''
                             //console.log(resp)
                             let list=[...this.metas.hostIdList];
                             if(resp && resp!='') {
@@ -1139,15 +1166,14 @@
                         script: script,
                         waitForSeconds: this.form.waitForSeconds,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/eval`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = resp || '';
                             try {
@@ -1202,15 +1228,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/system-properties`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.systemProperties.items = resp || [];
                         } else {
@@ -1236,15 +1261,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/system-env`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.systemEnv.items = resp || [];
                         } else {
@@ -1270,15 +1294,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/input-arguments`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.inputArguments.items = resp || [];
                         } else {
@@ -1304,15 +1327,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/beans`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.beans.items = resp || [];
                         } else {
@@ -1338,15 +1360,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/service-instances`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.serviceInstances.items = resp || [];
                         } else {
@@ -1372,15 +1393,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/locked-threads`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.lockedThreads.items = resp || [];
                         } else {

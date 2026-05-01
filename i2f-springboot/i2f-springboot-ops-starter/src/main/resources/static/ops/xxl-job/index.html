@@ -629,6 +629,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -660,15 +688,14 @@
                     let req = {
 
                     }
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/hostId',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || ''
+                            let resp = this.transferRecv(res.data.data) || ''
                             //console.log(resp)
                             let list=[...this.metas.hostIdList];
                             if(resp && resp!='') {
@@ -696,15 +723,14 @@
                     let req = this.assignHostId({
 
                     })
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/jobs',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {}
+                            let resp = this.transferRecv(res.data.data) || {}
                             //console.log(resp)
                             this.metas.jobs = resp;
                         } else {
@@ -744,15 +770,14 @@
                         async: this.form.async,
                         waitForSeconds: this.form.waitForSeconds,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/run`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = JSON.stringify(resp,null,'    ');
                             this.metas.resultLang='javascript';

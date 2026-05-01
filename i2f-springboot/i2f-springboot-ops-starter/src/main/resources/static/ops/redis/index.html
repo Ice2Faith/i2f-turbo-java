@@ -380,6 +380,34 @@
         }
         throw ex;
       },
+      transferSend(req){
+        let ex=null;
+        for (let i = 0; i < 5; i++) {
+          try{
+            let transfer = this.getTransfer();
+            return transfer.send(req);
+          }catch (e){
+            ex=e;
+          }
+        }
+        if(ex!=null){
+          throw ex;
+        }
+      },
+      transferRecv(req){
+        let ex=null;
+        for (let i = 0; i < 5; i++) {
+          try{
+            let transfer = this.getTransfer();
+            return transfer.recv(req);
+          }catch (e){
+            ex=e;
+          }
+        }
+        if(ex!=null){
+          throw ex;
+        }
+      },
       messageError(msg,limit){
         window._lastError=msg;
         if(limit && limit>=0) {
@@ -479,15 +507,14 @@
           }
 
 
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/'+(useScanKeys?'scan':'keys'),
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.metas.keyList = resp;
               let tree=this.rebuildKeyTree(resp);
@@ -613,15 +640,14 @@
           let req = {
             keys: keys,
           }
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/delete',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
@@ -650,15 +676,14 @@
           let req = {
             key: this.form.key,
           }
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/get',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.form.key=resp.key;
               this.form.ttl=resp.ttl || -1;
@@ -700,15 +725,14 @@
             ttl: this.form.ttl,
             value: this.form.value,
           }
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/set',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
@@ -747,15 +771,14 @@
             key: this.form.key,
             ttl: this.form.ttl
           }
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/ttl',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {

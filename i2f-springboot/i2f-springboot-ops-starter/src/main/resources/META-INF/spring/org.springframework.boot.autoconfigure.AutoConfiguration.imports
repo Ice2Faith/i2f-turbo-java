@@ -30,3 +30,4 @@ i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanInsteadPeopleController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanDigitalPeopleController
+i2f.springboot.ops.openai.controller.OpenAiOpsController

@@ -441,6 +441,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg, limit) {
                 window._lastError = msg;
                 if (limit && limit >= 0) {
@@ -521,8 +549,7 @@
                             let form = new FormData();
                             form.append('file', file.raw, file.name);
                             let req = this.assignDashScopeMeta({md5: md5});
-                            let transfer = this.getTransfer();
-                            let reqData = transfer.send(req);
+                            let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k]);
                             });
@@ -533,7 +560,7 @@
                                 data: form
                             }).then(res => {
                                 if (res.data.code == 200) {
-                                    let resp = transfer.recv(res.data.data);
+                                    let resp = this.transferRecv(res.data.data);
                                     if (type == 'image') {
                                         this.form.imageUrl = resp;
                                     } else if (type == 'audio') {
@@ -591,14 +618,13 @@
                     let req = this.assignDashScopeMeta({
                         imageUrl: this.form.imageUrl,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `./digital-people/detect`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            let resp = transfer.recv(res.data.data);
+                            let resp = this.transferRecv(res.data.data);
                             this.metas.detectResult = resp;
                             if (resp.output && resp.output.check_pass) {
                                 this.$message.success('图像检测通过，可以生成视频');
@@ -648,14 +674,13 @@
                         audioUrl: this.form.audioUrl,
                         resolution: this.form.resolution,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `./digital-people/generate`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            let resp = transfer.recv(res.data.data);
+                            let resp = this.transferRecv(res.data.data);
                             this.metas.resultTaskId = resp;
                             this.$message.success('任务提交成功，正在查询结果...');
                             this.onQueryStatus();
@@ -682,14 +707,13 @@
                     let req = this.assignDashScopeMeta({
                         taskId: this.metas.resultTaskId
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `../../task/status`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
-                            let resp = transfer.recv(res.data.data);
+                            let resp = this.transferRecv(res.data.data);
                             let taskStatus = resp.output.task_status;
                             if ('PENDING' == taskStatus || 'RUNNING' == taskStatus) {
                                 this.$message.info('任务' + (taskStatus == 'PENDING' ? '排队中' : '处理中') + '，将在 15 秒后自动重试...');

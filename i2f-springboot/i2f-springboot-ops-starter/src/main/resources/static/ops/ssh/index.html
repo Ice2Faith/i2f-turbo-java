@@ -734,6 +734,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -760,15 +788,14 @@
                 this.metas.workdirLoading = true;
                 try {
                     let req = this.assignSshMeta({})
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/workdir',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {}
+                            let resp = this.transferRecv(res.data.data) || {}
                             //console.log(resp)
                             this.form.workdir = resp.workdir;
                         } else {
@@ -831,15 +858,14 @@
                         runAsFile: this.form.runAsFile,
                         waitForSeconds: this.form.waitForSeconds,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/cmd`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = resp || '';
                             try {
@@ -876,15 +902,14 @@
                     let req = this.assignSshMeta({
                         workdir: this.form.workdir
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/file-list',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || []
+                            let resp = this.transferRecv(res.data.data) || []
                             // console.log(resp)
                             this.drawer.fileList.files = resp;
                         } else {
@@ -927,12 +952,11 @@
                 let req = this.assignSshMeta({
                     path: path,
                 });
-                let transfer = this.getTransfer();
                 return this.$axios({
                     url: `/download`,
                     method: 'post',
                     responseType: 'blob',
-                    data: transfer.send(req)
+                    data: this.transferSend(req)
                 }).then(res => {
                     let contentDisposition = ''
                     let contentType = ''
@@ -1090,15 +1114,14 @@
                     let req = this.assignSshMeta({
                         path: path
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/delete`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.$message.success('操作成功')
                             this.onRefreshFiles()
@@ -1170,8 +1193,7 @@
                                 path: this.dialog.fileEditor.path,
                                 md5: md5
                             })
-                            let transfer = this.getTransfer();
-                            let reqData = transfer.send(req);
+                            let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k])
                             })
@@ -1186,7 +1208,7 @@
                             }).then(res => {
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
-                                    let resp = transfer.recv(res.data.data)
+                                    let resp = this.transferRecv(res.data.data)
                                     // console.log(resp)
                                     this.$message.success('操作成功')
                                     this.dialog.fileEditor.show = false;
@@ -1221,15 +1243,14 @@
                     let req = this.assignSshMeta({
                         path: this.dialog.createDirectory.text
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/mkdirs`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.$message.success('操作成功')
                             this.dialog.createDirectory.show = false;
@@ -1291,8 +1312,7 @@
                                 workdir: this.form.workdir,
                                 md5: md5
                             })
-                            let transfer = this.getTransfer();
-                            let reqData = transfer.send(req);
+                            let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k])
                             })
@@ -1307,7 +1327,7 @@
                             }).then(res => {
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
-                                    let resp = transfer.recv(res.data.data)
+                                    let resp = this.transferRecv(res.data.data)
                                     // console.log(resp)
                                     this.$message.success('操作成功')
                                     this.onRefreshFiles()
