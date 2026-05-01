@@ -79,7 +79,7 @@ public class OpenAiOpsController  implements IOpsProvider {
         return Collections.singletonList(new OpsHomeMenuDto()
                 .title("Open Ai")
                 .subTitle("Open Ai 兼容的 Ai 对话工具")
-                .icon("el-icon-mobile")
+                .icon("el-icon-cpu")
                 .href("./open-ai/index.html")
         );
     }
