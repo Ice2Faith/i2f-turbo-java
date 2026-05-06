@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 1小时缓存过期 -->
+    <meta http-equiv="Cache-Control" content="max-age=3600, public">
+    <title>Ops - 文生图</title>
+    <script src="../../lib/vue/vue-2.js"></script>
+    <script src="../../lib/moment/moment-2.24.0.js"></script>
+    <script src="../../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../../lib/element-ui/fonts/element-icons.woff"/>
+    <script src="../../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../../lib/axios/qs.js"></script>
+    <script src="../../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+    <script src="../../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+    <script src="../../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+    <script src="../../lib/base64/Base64.js"></script>
+    <script src="../../common/OpsSecureKeyPair.js"></script>
+    <script src="../../common/OpsSecureCertPair.js"></script>
+    <script src="../../common/OpsSecureDto.js"></script>
+    <script src="../../common/OpsSecureHelper.js"></script>
+    <script src="../../common/OpsSecureTransfer.js"></script>
+    <script src="../../lib/echarts-5/echarts.min.js"></script>
+    <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
+    <script src="../../lib/codemirror-6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror-6.65.7/codemirror.min.css"/>
+    <link rel="stylesheet" href="../../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
+    <script src="../../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
+    <link rel="stylesheet" href="../../lib/codemirror-6.65.7/theme/idea.min.css"/>
+
+    <script src="../../lib/codemirror-6.65.7/addon/search/search.min.js"></script>
+    <script src="../../lib/codemirror-6.65.7/addon/search/searchcursor.min.js"></script>
+    <script src="../../lib/codemirror-6.65.7/addon/search/jump-to-line.min.js"></script>
+    <script src="../../lib/codemirror-6.65.7/addon/search/match-highlighter.min.js"></script>
+
+    <script src="../../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <link rel="stylesheet" href="../../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
+    <script src="../../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
+</head>
+<body>
+<div id="app">
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+    <el-row class="cert-block">
+        <el-divider>DashScope 操作<i class="el-icon-d-caret"></i></el-divider>
+        <el-form inline label-position="left" label-width="120px">
+            <el-form-item>
+                <el-row slot="label">
+                    Api Key
+                    <el-link href="https://bailian.console.aliyun.com/cn-beijing?tab=model#/api-key" target="_blank">
+                        <i class="el-icon-question"></i>
+                    </el-link>
+                </el-row>
+                <el-input clearable v-model="form.meta.apiKey" placeholder="Api Key"></el-input>
+            </el-form-item>
+        </el-form>
+    </el-row>
+
+
+    <el-card shadow="never">
+        <el-row style="width: 100%;">
+            <el-form inline label-position="top" label-width="120px">
+                <el-row type="flex" :gutter="20">
+                    <el-col v-if="supportEditImage" :span="supportEditImage?8:12">
+                        <el-form-item label="参考图片" style="width: 100%;">
+                            <el-upload
+                                    class="upload-image"
+                                    ref="uploadImage"
+                                    style="display: inline-block;"
+                                    action="#"
+                                    list-type="picture-card"
+                                    :file-list="metas.uploadImageList"
+                                    accept=".png,.jpeg,.jpg"
+                                    :auto-upload="false"
+                                    :on-preview="handlePictureCardPreview"
+                                    :on-change="onUploadImageFileChange">
+                                <i class="el-icon-plus"></i>
+                            </el-upload>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="supportEditImage?8:12">
+                        <el-form-item label="提示词" style="width: 100%;">
+                            <el-input
+                                    style="width: 100%"
+                                    type="textarea"
+                                    :rows="12"
+                                    placeholder="正向描述画面细节"
+                                    v-model="form.prompt">
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="supportEditImage?8:12">
+                        <el-form-item label="反向提示词" style="width: 100%;">
+                            <el-input
+                                    style="width: 100%"
+                                    type="textarea"
+                                    :rows="12"
+                                    placeholder="不要画面中出现的内容"
+                                    v-model="form.negativePrompt">
+                            </el-input>
+                        </el-form-item>
+                    </el-col>
+
+                </el-row>
+            </el-form>
+
+                <el-divider></el-divider>
+            <el-form label-position="left" label-width="80px">
+                <el-row type="flex">
+                    <el-col :span="10">
+                        <el-row type="flex">
+                            <el-form-item>
+                                <span slot="label">
+                                    模型
+                                     <el-popover
+                                             placement="top-start"
+                                             title="模型类型"
+                                             width="280"
+                                             trigger="hover">
+                                         Image 2.0系列提供更加大尺寸输出。<br/>
+                                         以及提供多图结果输出。
+                                        <i slot="reference" class="el-icon-question"></i>
+                                      </el-popover>
+                                </span>
+                                <el-select  clearable filterable v-model="form.modelName"  placeholder="模型" style="width: 180px;" @change="onModelChange">
+                                    <el-option
+                                            v-for="item in metas.modelList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="尺寸">
+                                <el-select  clearable filterable v-model="form.size"  placeholder="尺寸" style="width: 80px">
+                                    <el-option
+                                            v-for="item in metas.imageSizeList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="输出数量">
+                                <el-input-number v-model="form.count" :min="1" :max="metas.modelMaxOutputCount" size="small"/>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                            </el-form-item>
+                            <el-form-item>
+                                <el-checkbox v-model="form.extendPrompt">改写提示词</el-checkbox>
+                            </el-form-item>
+
+                        </el-row>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-row type="flex" justify="center">
+                            <el-form-item>
+                                <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                           type="primary"
+                                           @click="onExecute">
+                                    执行
+                                </el-button>
+                                <el-popover
+                                        placement="top-start"
+                                        title="执行"
+                                        width="360"
+                                        trigger="hover">
+                                    点击执行之后，将会同步等待结果。<br/>
+                                    因此后端需要设置合理的响应时长，大约1分钟内，30秒左右。
+                                    <i slot="reference" class="el-icon-question"></i>
+                                </el-popover>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-row type="flex" justify="end">
+                            <el-form-item>
+                                <el-button size="medium"
+                                           @click="metas.resultImages=[]">
+                                    清空结果
+                                </el-button>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                </el-row>
+
+
+                <!-- 结果展示 -->
+                <el-row v-loading="metas.resultLoading" type="flex" :gutter="12">
+                    <el-col :span="resultColumnsSpan" v-for="(item,index) in metas.resultImages">
+                        <img width="100%" :src="item.image" alt="" @click="handlePictureCardPreview(item.image)">
+                    </el-col>
+                </el-row>
+            </el-form>
+
+        </el-row>
+    </el-card>
+
+
+    <el-dialog :visible.sync="dialog.imagePreview.show" style="text-align: center;">
+        <img width="100%" :src="dialog.imagePreview.imageUrl" alt="">
+    </el-dialog>
+
+</div>
+</body>
+<script>
+    Vue.use(VueVirtualScroller.default);
+    window.app = new Vue({
+        components: {},
+        data() {
+            return this.getDefaultData()
+        },
+        created() {
+            this.initStoreData();
+            this.initBroadcast();
+        },
+        mounted() {
+
+        },
+        watch: {},
+        computed: {
+            supportEditImage(){
+                return this.form.modelName.indexOf('image-2') >=0
+                ||this.form.modelName.indexOf('image-edit') >=0;
+            },
+            imageRealSize(){
+                if(this.form.modelName.indexOf('image-2')>=0){
+                    return this.metas.imageRealSize2Map[this.form.size];
+                }
+                return this.metas.imageRealSize1Map[this.form.size];
+            },
+            resultColumnsSpan(){
+                if(this.metas.resultImages.length<=4){
+                    return Math.floor(24/this.metas.resultImages.length)
+                }
+                return 6;
+            }
+        },
+        methods: {
+            onModelChange(){
+                if(this.form.modelName.indexOf('image-2')>=0){
+                    this.metas.modelMaxOutputCount=5;
+                    return;
+                }
+                this.metas.modelMaxOutputCount=1;
+                this.form.count=1;
+            },
+            handlePictureCardPreview(url) {
+                this.dialog.imagePreview.imageUrl = url.url || url;
+                this.dialog.imagePreview.show = true;
+            },
+            getDefaultData() {
+                return {
+                    opsBroadcastChannel: null,
+                    langEditors: {},
+                    completions: [],
+                    storage: {},
+                    metas: {
+                        cert: '',
+                        uploadImageLoading: false,
+                        uploadImageList: [],
+                        resultLoading: false,
+                        resultImages:[],
+                        langList: [
+                            {label: 'Text', value: 'text'},
+                        ],
+                        modelList: [
+                            {label: 'Qwen-Image-2.0-Pro', value: 'qwen-image-2.0-pro'},
+                            {label: 'Qwen-Image-2.0', value: 'qwen-image-2.0'},
+                            {label: 'Qwen-Image-Max', value: 'qwen-image-max'},
+                            {label: 'Qwen-Image-Plus', value: 'qwen-image-plus'},
+                            {label: 'Qwen-Image', value: 'qwen-image'},
+                            {label: 'Qwen-Image-Edit-Max', value: 'qwen-image-edit-max'},
+                            {label: 'Qwen-Image-Edit-Plus', value: 'qwen-image-edit-plus'},
+                            {label: 'Qwen-Image-Edit', value: 'qwen-image-edit'},
+                        ],
+                        modelMaxOutputCount: 5,
+                        imageSizeList:[
+                            {label: '16:9', value: 'p16_9'},
+                            {label: '4:3', value: 'p4_3'},
+                            {label: '3:2', value: 'p3_2'},
+                            {label: '1:1', value: 'p1_1'},
+                            {label: '2:3', value: 'p2_3'},
+                            {label: '3:4', value: 'p3_4'},
+                            {label: '9:16', value: 'p9_16'},
+                        ],
+                        imageRealSize2Map:{
+                            'p16_9':'2688*1536',
+                            'p4_3':'2368*1728',
+                            'p3_2':'2046*1365',
+                            'p1_1':'2048*2048',
+                            'p2_3':'1365*2046',
+                            'p3_4':'1728*2368',
+                            'p9_16':'1536*2688',
+                        },
+                        imageRealSize1Map:{
+                            'p16_9':'1664*928',
+                            'p4_3':'1472*1104',
+                            'p3_2':'1328*885',
+                            'p1_1':'1328*1328',
+                            'p2_3':'884*1326',
+                            'p3_4':'1104*1472',
+                            'p9_16':'928*1664',
+                        },
+                    },
+                    drawer: {},
+                    dialog: {
+                        imagePreview: {
+                            show: false,
+                            imageUrl: ''
+                        }
+                    },
+                    form: {
+                        meta: {
+                            apiKey: '',
+                        },
+                        modelName: 'qwen-image-2.0-pro',
+                        imageUrl: '',
+                        prompt: '',
+                        negativePrompt: '低分辨率，低画质。\n' +
+                            '肢体畸形，手指畸形，蜡像感，人脸无细节。\n' +
+                            '画面过饱和，过度光滑，画面具有AI感。\n' +
+                            '构图混乱。\n' +
+                            '文字模糊，扭曲。\n' +
+                            '光影不真实，纹理不清晰。\n' +
+                            '整体画面太过昏暗，或者太过明亮。\n' +
+                            '人物四肢不全，未全身出境，未包括双腿，未包括双脚，未包括双手，未包括手指，未包括头部。\n' +
+                            '人物肢体不协调，出现多余肢体。',
+                        size: 'p16_9',
+                        watermark: false,
+                        extendPrompt: false,
+                        count: 4,
+                    }
+                }
+            },
+            initBroadcast() {
+                this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
+                setInterval(() => {
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'cert',
+                        data: this.metas.cert
+                    });
+                }, 3000)
+
+
+                this.opsBroadcastChannel.onmessage = (event) => {
+                    let data = event.data;
+                    if (data.type == 'cert') {
+                        if (!this.metas.cert || this.metas.cert == '') {
+                            this.metas.cert = data.data;
+                        }
+                    }
+                };
+
+            },
+            loadData() {
+                let content = localStorage.getItem('ops:dashscope:image:text2image:data');
+                if (!content) {
+                    return
+                }
+                content = content.trim();
+                if (content.length == 0) {
+                    return;
+                }
+                try {
+                    let obj = JSON.parse(content);
+                    Object.keys(obj).forEach(k => {
+                        this.$data[k] = obj[k];
+                    });
+                } catch (e) {
+
+                }
+            },
+            storeData() {
+                try {
+                    let data = {...this.$data};
+                    data.opsBroadcastChannel = null;
+                    data.langEditors = {};
+                    Object.keys(this.$data.langEditors).forEach(k => {
+                        data.langEditors[k] = null;
+                    })
+                    let json = JSON.stringify(data);
+                    let obj = JSON.parse(json);
+                    obj.metas.cert = '';
+                    obj.form.meta.apiKey = '';
+                    let content = JSON.stringify(obj);
+                    localStorage.setItem('ops:dashscope:image:text2image:data', content);
+                } catch (e) {
+                    // console.log(e)
+                }
+            },
+            initStoreData() {
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if (reset != 'true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
+            },
+            getTransfer() {
+                let cert = this.metas.cert;
+                if (!cert || cert.length == 0) {
+                    cert = '';
+                }
+                cert = cert.trim();
+                if (!cert || cert.length == 0) {
+                    throw new Error('请先填写连接证书')
+                }
+                let ex = null;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (!ex) {
+                    ex = new Error('init transfer error')
+                }
+                throw ex;
+            },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            messageError(msg, limit) {
+                window._lastError = msg;
+                if (limit && limit >= 0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
+            onCertChange() {
+
+            },
+            assignDashScopeMeta(req) {
+                req.meta = this.form.meta;
+                req.modelName = this.form.modelName;
+                if(!req.meta.apiKey){
+                    throw new Error('请先填写 Api Key')
+                }
+                return req;
+            },
+            onExecute() {
+                this.$confirm('即将执行转换，是否继续？<br/>', '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute() {
+                this.metas.resultLoading = true;
+                try {
+                    let req = this.assignDashScopeMeta({
+                        imageUrl: this.form.imageUrl,
+                        prompt: this.form.prompt,
+                        negativePrompt: this.form.negativePrompt,
+                        size: this.imageRealSize,
+                        count: this.form.count,
+                        watermark: this.form.watermark,
+                        extendPrompt: this.form.extendPrompt,
+                    });
+                    this.$axios({
+                        url: `/text2image/generate`,
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            let resultImages=[]
+                            let choices=resp.choices || [];
+                            for (let i = 0; i < choices.length; i++) {
+                                let choice=choices[i];
+                                let choiceMessage=choice.message || {};
+                                let choiceMessageContents=choiceMessage.content || [];
+                                for(let j=0;j<choiceMessageContents.length;j++){
+                                    let content=choiceMessageContents[j];
+                                    let image=content.image
+                                    if(image){
+                                        resultImages.push({
+                                            image: image
+                                        })
+                                    }
+                                }
+                            }
+                            // console.log(resp)
+                            this.metas.resultImages = resultImages;
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultLoading = false;
+                }
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function (e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function (e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            onUploadImageFileChange(file) {
+                this.metas.uploadImageList = []
+                this.metas.uploadImageList.push(file)
+                this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doUploadFile(file)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doUploadFile(file) {
+                this.metas.uploadImageLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5 => {
+                            let form = new FormData();
+                            form.append('file', file.raw, file.name);
+
+                            let req = this.assignDashScopeMeta({
+                                md5: md5
+                            })
+                            let reqData = this.transferSend(req);
+                            Object.keys(reqData).forEach(k => {
+                                form.append(k, reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `../tmp-file/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data)
+                                    this.form.imageUrl = resp;
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                } else {
+                                    this.messageError(res.data.msg, 300)
+                                }
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            }).finally(() => {
+                                this.metas.uploadImageLoading = false;
+                            })
+                        }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.uploadImageLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.uploadImageLoading = false;
+                }
+            },
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+    .cert-block {
+        max-height: 32px;
+        overflow: hidden;
+    }
+
+    .cert-block:hover {
+        max-height: 280px;
+    }
+
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+
+    .el-table__cell .table-cell-hidden {
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden {
+        display: inline-block;
+    }
+
+    .scroller {
+        height: calc(100vh - 200px);
+    }
+
+    .upload-image .el-upload-list--picture-card .el-upload-list__item {
+        width: 260px;
+        height: 260px;
+    }
+
+    .upload-image .el-upload--picture-card {
+        width: 260px;
+        height: 260px;
+        line-height: 260px;
+    }
+</style>
+</html>
