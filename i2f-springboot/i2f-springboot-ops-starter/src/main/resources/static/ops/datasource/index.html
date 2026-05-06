@@ -2873,14 +2873,17 @@
                                     //console.log(resp)
                                     this.metas.resultText = resp + '';
                                     this.metas.resultType = 'text';
-                                    this.metas.resultLang='shell';
+                                    this.metas.resultLang='text';
                                     this.form.useMultiDatasource=false;
                                 } else {
                                     this.metas.resultText = res.data.msg;
                                     this.metas.resultType = 'text';
-                                    this.metas.resultLang='shell';
+                                    this.metas.resultLang='text';
                                     this.messageError(res.data.msg,300)
                                 }
+                                setTimeout(()=>{
+                                    this.initResultEditor();
+                                },200)
                             }).catch(err => {
                                 this.messageError(err.errorMessage || err.message || '操作失败',300)
                             }).finally(() => {
