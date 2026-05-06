@@ -42,6 +42,7 @@
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css" />
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
 
 
     <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
@@ -210,6 +211,11 @@
                                type="success"
                                @click="onExport">
                         导出
+                    </el-button>
+                    <el-button v-loading="metas.importLoading" size="medium"
+                               type="danger"
+                               @click="onImport(null)">
+                        导入
                     </el-button>
                 </el-form-item>
             </el-row>
@@ -788,6 +794,40 @@
 
         <div ref="refEchartDom" style="height: 480px;width:100%;"></div>
     </el-dialog>
+
+
+    <el-dialog
+            :title="dialog.importData.title"
+            :visible.sync="dialog.importData.show"
+            width="60%">
+        <el-row>
+            <el-form label-width="80px">
+                <el-form-item label="目标表名">
+                    <el-input clearable
+                              placeholder="目标表名"
+                              v-model="dialog.importData.table">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="导入文件">
+                    <el-upload
+                            ref="upload"
+                            style="display: inline-block;"
+                            action="#"
+                            accept=".csv"
+                            :file-list="dialog.importData.uploadList"
+                            :auto-upload="false"
+                            :on-change="onImportFileChange"
+                    >
+                        <el-button slot="trigger" type="success" size="medium" :loading="metas.uploadLoading" type="primary">导入文件</el-button>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+        </el-row>
+        <el-row type="flex" justify="end">
+            <el-button @click="dialog.importData.show=false">取消</el-button>
+        </el-row>
+
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -1035,6 +1075,12 @@
                                 startProp: null,
                                 endProp: null,
                             }
+                        },
+                        importData:{
+                            show: false,
+                            title: '数据导入',
+                            table: '',
+                            uploadList: []
                         }
                     },
                     form: {
@@ -2733,6 +2779,107 @@
 
                 event.returnValue=false;
                 return false
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function(e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function(e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            onImport(table){
+                if(table){
+                    this.dialog.importData.table=table;
+                }
+                this.dialog.importData.show=true;
+            },
+            onImportFileChange(file){
+                this.dialog.importData.uploadList = []
+                this.dialog.importData.uploadList.push(file)
+                this.$confirm('即将导入文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doImportFile(file)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doImportFile(file){
+                this.metas.resultLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5=>{
+                            let form=new FormData();
+                            form.append('file',file.raw,file.name);
+
+                            let req=this.fillDatasourceForm({
+                                table: this.dialog.importData.table,
+                                md5: md5
+                            },true)
+
+                            if(!req.table){
+                                throw new Error('请先填写目标表')
+                            }
+
+                            let reqData=this.transferSend(req);
+                            Object.keys(reqData).forEach(k=>{
+                                form.append(k,reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `/import`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data)
+                                    //console.log(resp)
+                                    this.metas.resultText = resp + '';
+                                    this.metas.resultType = 'text';
+                                    this.metas.resultLang='text';
+                                    this.form.useMultiDatasource=false;
+                                } else {
+                                    this.metas.resultText = res.data.msg;
+                                    this.metas.resultType = 'text';
+                                    this.metas.resultLang='text';
+                                    this.messageError(res.data.msg,300)
+                                }
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            }).finally(() => {
+                                this.metas.resultLoading = false;
+                            })
+                        }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败',300)
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
+                    this.metas.resultLoading = false;
+                }
             }
         }
     })

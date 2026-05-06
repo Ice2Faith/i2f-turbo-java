@@ -1,17 +1,25 @@
 package i2f.springboot.ops.datasource.controller;
 
 import i2f.bindsql.BindSql;
+import i2f.convert.obj.ObjectConvertor;
+import i2f.database.metadata.data.ColumnMeta;
+import i2f.database.metadata.data.TableMeta;
+import i2f.database.metadata.impl.DatabaseMetadataProviders;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.QueryResult;
 import i2f.jdbc.script.JdbcScriptRunner;
+import i2f.rowset.impl.csv.CsvMapRowSetReader;
 import i2f.rowset.impl.csv.CsvMapRowSetWriter;
 import i2f.rowset.std.IRowHeader;
+import i2f.rowset.std.IRowSet;
 import i2f.rowset.std.impl.SimpleIteratorRowSet;
 import i2f.rowset.std.impl.SimpleRowHeader;
+import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.datasource.data.DatasourceImportOperateDto;
 import i2f.springboot.ops.datasource.data.DatasourceListRespDto;
 import i2f.springboot.ops.datasource.data.DatasourceOperateDto;
 import i2f.springboot.ops.datasource.data.DatasourceRunnerDto;
@@ -31,13 +39,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.sql.DataSource;
 import java.io.*;
+import java.security.MessageDigest;
 import java.sql.*;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Ice2Faith
@@ -328,4 +339,149 @@ public class DatasourceOpsController implements IOpsProvider {
         }
     }
 
+    @PostMapping("/import")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> doImport(MultipartFile file,
+                                                  @RequestBody OpsSecureDto reqDto,
+                                                  HttpServletRequest request) throws Exception {
+        StringBuilder respBuilder = new StringBuilder();
+        AtomicInteger respCount = new AtomicInteger(0);
+        try {
+            DatasourceImportOperateDto req = transfer.recv(reqDto, DatasourceImportOperateDto.class);
+
+            String table = req.getTable();
+
+            String originalFilename = file.getOriginalFilename();
+            if (originalFilename == null) {
+                originalFilename = "tmp.data";
+            }
+            String suffix = "";
+            int idx = originalFilename.lastIndexOf(".");
+            if (idx >= 0) {
+                suffix = originalFilename.substring(idx).toLowerCase();
+            }
+            if (!".csv".equals(suffix)) {
+                return transfer.error("仅支持导入 .csv 文件");
+            }
+
+            File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")), ".tmp");
+            try {
+                MessageDigest digest = MessageDigest.getInstance("MD5");
+                OutputStream os = new FileOutputStream(tmpFile);
+                byte[] buffer = new byte[2048];
+                int len = 0;
+                InputStream is = file.getInputStream();
+                while ((len = is.read(buffer)) > 0) {
+                    digest.update(buffer, 0, len);
+                    os.write(buffer, 0, len);
+                }
+                os.close();
+                byte[] bytes = digest.digest();
+                StringBuilder builder = new StringBuilder();
+                for (byte bt : bytes) {
+                    builder.append(String.format("%02x", (int) (bt & 0x0ff)));
+                }
+                String calcMd5 = builder.toString();
+                if (!calcMd5.equalsIgnoreCase(req.getMd5())) {
+                    throw new OpsException("file check sum error");
+                }
+
+                Map<String, Connection> connMap = datasourceOpsHelper.getMultipleConnection(req);
+                for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
+                    respCount.set(0);
+                    respBuilder.append("-- =============== import on " + entry.getKey() + " ===============\n");
+                    CsvMapRowSetReader reader = new CsvMapRowSetReader();
+                    try (Connection conn = entry.getValue();
+                         IRowSet<Map<String, Object>> read = reader.read(new FileInputStream(tmpFile))) {
+                        List<IRowHeader> headers = read.getHeaders();
+                        if (headers == null || headers.isEmpty()) {
+                            throw new IllegalArgumentException("导入文件没有表头");
+                        }
+                        Map<String, IRowHeader> rowHeaderMap = new LinkedHashMap<>();
+                        for (IRowHeader header : headers) {
+                            String name = header.getName().toLowerCase();
+                            rowHeaderMap.put(name, header);
+                        }
+
+                        TableMeta tableMeta = DatabaseMetadataProviders.findProvider(conn).getTableInfoByQuery(conn, table);
+                        List<ColumnMeta> columns = tableMeta.getColumns();
+                        Map<String, ColumnMeta> columnMetaMap = new LinkedHashMap<>();
+                        for (ColumnMeta column : columns) {
+                            String name = column.getName().toLowerCase();
+                            columnMetaMap.put(name, column);
+                        }
+
+                        Set<String> matchColumns = new LinkedHashSet<>();
+                        for (IRowHeader header : headers) {
+                            String name = header.getName().toLowerCase();
+                            if (!columnMetaMap.containsKey(name)) {
+                                continue;
+                            }
+                            matchColumns.add(name);
+                        }
+
+                        StringBuilder sqlBuilder = new StringBuilder();
+                        sqlBuilder.append("insert into ").append(table).append(" (");
+                        boolean isFirst = true;
+                        for (String name : matchColumns) {
+                            if (!isFirst) {
+                                sqlBuilder.append(", ");
+                            }
+                            IRowHeader header = rowHeaderMap.get(name);
+                            sqlBuilder.append(header.getName());
+                            isFirst = false;
+                        }
+                        sqlBuilder.append(") values (");
+                        isFirst = true;
+                        for (String name : matchColumns) {
+                            if (!isFirst) {
+                                sqlBuilder.append(", ");
+                            }
+                            IRowHeader header = rowHeaderMap.get(name);
+                            sqlBuilder.append("${").append(header.getName()).append("}");
+                            isFirst = false;
+                        }
+                        sqlBuilder.append(")");
+
+
+                        JdbcResolver.batch(conn, sqlBuilder.toString(), new Iterator<Object>() {
+                            @Override
+                            public boolean hasNext() {
+                                return read.hasNext();
+                            }
+
+                            @Override
+                            public Object next() {
+                                respCount.incrementAndGet();
+                                Map<String, Object> map = read.next();
+                                for (String name : matchColumns) {
+                                    IRowHeader header = rowHeaderMap.get(name);
+                                    String headerName = header.getName();
+                                    Object value = map.get(headerName);
+                                    ColumnMeta column = columnMetaMap.get(name);
+                                    Class<?> javaType = column.getRawLooseJavaType();
+                                    try {
+                                        value = ObjectConvertor.tryConvertAsType(value, javaType);
+                                    } catch (Throwable e) {
+
+                                    }
+                                    map.put(headerName, value);
+                                }
+                                return map;
+                            }
+                        }, 300);
+                    }
+                    respBuilder.append("import count: " + respCount.get());
+                }
+                return transfer.success(respBuilder.toString());
+            } finally {
+                if (tmpFile != null && tmpFile.exists()) {
+                    tmpFile.delete();
+                }
+            }
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(respBuilder + "\n" + e.getMessage(), e);
+        }
+    }
 }
