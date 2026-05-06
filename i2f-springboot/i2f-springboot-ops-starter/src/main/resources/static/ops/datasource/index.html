@@ -2828,6 +2828,7 @@
                     type: 'warning',
                     dangerouslyUseHTMLString: true
                 }).then(() => {
+                    this.dialog.importData.show=false;
                     this.doImportFile(file)
                 }).catch(() => {
                     this.$message({
@@ -2872,12 +2873,12 @@
                                     //console.log(resp)
                                     this.metas.resultText = resp + '';
                                     this.metas.resultType = 'text';
-                                    this.metas.resultLang='text';
+                                    this.metas.resultLang='shell';
                                     this.form.useMultiDatasource=false;
                                 } else {
                                     this.metas.resultText = res.data.msg;
                                     this.metas.resultType = 'text';
-                                    this.metas.resultLang='text';
+                                    this.metas.resultLang='shell';
                                     this.messageError(res.data.msg,300)
                                 }
                             }).catch(err => {
@@ -2886,10 +2887,9 @@
                                 this.metas.resultLoading = false;
                             })
                         }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败',300)
-                    }).finally(() => {
-                        this.metas.resultLoading = false;
-                    })
+                            this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            this.metas.resultLoading = false;
+                        })
                 } catch (err) {
                     this.messageError(err.errorMessage || err.message || '操作失败',300)
                     this.metas.resultLoading = false;

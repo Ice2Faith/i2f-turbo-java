@@ -1,6 +1,7 @@
 package i2f.springboot.ops.app.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import groovy.lang.GroovyShell;
 import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
@@ -8,6 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnClass(GroovyShell.class)
 @Slf4j
 @Data
 @NoArgsConstructor
