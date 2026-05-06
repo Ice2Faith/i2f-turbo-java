@@ -820,6 +820,20 @@
                     >
                         <el-button slot="trigger" type="success" size="medium" :loading="metas.uploadLoading" type="primary">导入文件</el-button>
                     </el-upload>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="360"
+                            trigger="hover">
+                        点击[导入文件]之后，确认导入文件就开始导入文件。<br/>
+                        目前仅支持 .csv 文件类型进行导入，请体检在 Excel 中转换文件类型。<br/>
+                        导入规则为，CSV 文件第一行，也就是表头行，含义为对应的列名。<br/>
+                        因此，表头行需要和导入表的列名能够对应上，允许大小写不一致，没匹配上的列不会被导入。<br/>
+                        导入程序将会尝试匹配数据库的列类型，如果匹配错误，将会按照字符串进行插入。<br/>
+                        因此，如果有特殊的情况，可以创建一个全为 varchar 类型的临时导入表进行导入。<br/>
+                        后续在数据库中进行类型转换。
+                        <i slot="reference" class="el-icon-question"></i>
+                    </el-popover>
                 </el-form-item>
             </el-form>
         </el-row>

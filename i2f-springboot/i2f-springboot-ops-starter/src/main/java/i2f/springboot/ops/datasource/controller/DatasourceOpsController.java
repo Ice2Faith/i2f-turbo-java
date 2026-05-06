@@ -342,7 +342,7 @@ public class DatasourceOpsController implements IOpsProvider {
     @PostMapping("/import")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> doImport(MultipartFile file,
-                                                  @RequestBody OpsSecureDto reqDto,
+                                                  OpsSecureDto reqDto,
                                                   HttpServletRequest request) throws Exception {
         StringBuilder respBuilder = new StringBuilder();
         AtomicInteger respCount = new AtomicInteger(0);
