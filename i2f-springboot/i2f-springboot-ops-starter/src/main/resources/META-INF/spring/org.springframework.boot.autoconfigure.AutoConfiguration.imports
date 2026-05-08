@@ -32,4 +32,5 @@ i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanInsteadPeopleControl
 i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanDigitalPeopleController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsImageText2ImageController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoHappyHorseController
+i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoViduController
 i2f.springboot.ops.openai.controller.OpenAiOpsController
