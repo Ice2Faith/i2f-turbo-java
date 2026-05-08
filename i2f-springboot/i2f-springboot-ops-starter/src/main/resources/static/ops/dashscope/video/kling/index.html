@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
-    <title>Ops - HappyHorse</title>
+    <title>Ops - Kling</title>
     <script src="../../../lib/vue/vue-2.js"></script>
     <script src="../../../lib/moment/moment-2.24.0.js"></script>
     <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -75,14 +75,14 @@
         <el-row style="width: 100%;">
             <el-form inline label-position="top" label-width="120px">
                 <el-row type="flex">
-                    <template v-if="form.workMode=='t2v'">
+                    <template v-if="klingWorkMode=='t2v'">
                         <el-col :span="24">
                             <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="form.workMode=='i2v'">
+                    <template v-if="klingWorkMode=='i2v'">
                         <el-col :span="12">
                             <el-form-item label="首帧图片">
                                 <el-upload
@@ -101,12 +101,12 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="提示词"  style="width: 100%;">
+                            <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="form.workMode=='r2v'">
+                    <template v-if="klingWorkMode=='r2v'">
                         <el-col :span="12">
                             <el-form-item label="参考图片">
                                 <el-upload
@@ -131,7 +131,7 @@
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="form.workMode=='edit'">
+                    <template v-if="klingWorkMode=='edit'">
                         <el-col :span="12">
                             <el-row>
                                 <el-form-item label="人物">
@@ -228,17 +228,17 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(form.workMode)" label="分辨率">
-                                <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
+                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(klingWorkMode)" label="视频模式">
+                                <el-select clearable filterable v-model="form.mode" placeholder="视频模式">
                                     <el-option
-                                            v-for="item in metas.resolutionList"
+                                            v-for="item in metas.parameterModeList"
                                             :key="item.value"
                                             :label="item.label"
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','r2v'].includes(form.workMode)" label="宽高比">
+                            <el-form-item v-if="['t2v','r2v'].includes(klingWorkMode)" label="宽高比">
                                 <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
                                     <el-option
                                             v-for="item in metas.ratioList"
@@ -248,7 +248,8 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['edit'].includes(form.workMode)" label="声音控制">
+                            <el-form-item v-if="klingSupportAudio && ['t2v','i2v','r2v','edit'].includes(klingWorkMode)"
+                                          label="声音控制">
                                 <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
                                     <el-option
                                             v-for="item in metas.audioSettingList"
@@ -258,11 +259,14 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v'].includes(form.workMode)" label="时长(s)">
-                                <el-input-number v-model="form.duration" :min="1" :max="15" size="small"/>
+                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(klingWorkMode)" label="时长(s)">
+                                <el-input-number v-model="form.duration" :min="1" :max="klingMaxDuration" size="small"/>
                             </el-form-item>
                             <el-form-item label="选项">
                                 <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                                <el-checkbox v-if="['edit'].includes(klingWorkMode)" v-model="form.keepSound">
+                                    保持视频原声
+                                </el-checkbox>
                             </el-form-item>
                         </el-row>
                     </el-col>
@@ -362,7 +366,21 @@
 
         },
         watch: {},
-        computed: {},
+        computed: {
+            klingWorkMode() {
+                let mode = this.form.workMode
+                return mode.split('_', 2)[0]
+            },
+            klingModelName() {
+                return this.metas.workModeModelNameMap[this.form.workMode].name;
+            },
+            klingMaxDuration() {
+                return this.metas.workModeModelNameMap[this.form.workMode].duration;
+            },
+            klingSupportAudio() {
+                return this.metas.workModeModelNameMap[this.form.workMode].audio;
+            },
+        },
         methods: {
             handlePictureCardPreview(file) {
                 this.dialog.imagePreview.imageUrl = file.url;
@@ -394,39 +412,58 @@
                             {label: 'Text', value: 'text'},
                         ],
                         workModeList: [
-                            {label: '文生视频', value: 't2v'},
-                            {label: '首帧生视频', value: 'i2v'},
-                            {label: '多图参考生视频', value: 'r2v'},
-                            {label: '视频编辑', value: 'edit'},
+                            {label: '文生视频 Omni', value: 't2v_omni'},
+                            {label: '文生视频', value: 't2v_gen'},
+                            {label: '首帧生视频 Omni', value: 'i2v_omni'},
+                            {label: '首帧生视频', value: 'i2v_gen'},
+                            {label: '多图参考生视频 Omni', value: 'r2v_omni'},
+                            {label: '视频编辑 Omni', value: 'edit_omni'},
                         ],
-                        resolutionList:[
-                            {label: '720P', value: '720P'},
-                            {label: '1080P', value: '1080P'},
+                        parameterModeList: [
+                            {label: '专业模式，输出视频分辨率为1080P', value: 'pro'},
+                            {label: '标准模式，输出视频分辨率为720P', value: 'std'},
                         ],
-                        ratioList:[
+                        ratioList: [
                             {label: '16:9', value: '16:9'},
                             {label: '9:16', value: '9:16'},
                             {label: '1:1', value: '1:1'},
-                            {label: '4:3', value: '4:3'},
-                            {label: '3:4', value: '3:4'},
                         ],
-                        audioSettingList:[
-                            {label: '自动', value: 'auto'},
-                            {label: '保持', value: 'origin'},
+                        audioSettingList: [
+                            {label: '有声', value: true},
+                            {label: '无声', value: false},
                         ],
                         workModeModelNameMap: {
-                            't2v': 'happyhorse-1.0-t2v',
-                            'i2v': 'happyhorse-1.0-i2v',
-                            'r2v': 'happyhorse-1.0-r2v',
-                            'edit': 'happyhorse-1.0-video-edit'
-                        },
-                        parameterModeList: [
-                            {label: '标准模式，生成速度较快，性价比高，适用于快速预览和基础动画场景', value: 'wan-std'},
-                            {
-                                label: '专业模式，动画流畅度更高，效果更佳，但处理时间和费用也相应增加(+0.2元/s)',
-                                value: 'wan-pro'
+                            't2v_omni': {
+                                name: 'kling/kling-v3-omni-video-generation',
+                                duration: 15,
+                                audio: true,
                             },
-                        ]
+                            't2v_gen': {
+                                name: 'kling/kling-v3-video-generation',
+                                duration: 15,
+                                audio: true,
+                            },
+                            'i2v_omni': {
+                                name: 'kling/kling-v3-omni-video-generation',
+                                duration: 15,
+                                audio: true,
+                            },
+                            'i2v_gen': {
+                                name: 'kling/kling-v3-video-generation',
+                                duration: 15,
+                                audio: true,
+                            },
+                            'r2v_omni': {
+                                name: 'kling/kling-v3-omni-video-generation',
+                                duration: 15,
+                                audio: true,
+                            },
+                            'edit_omni': {
+                                name: 'kling/kling-v3-omni-video-generation',
+                                duration: 15,
+                                audio: true,
+                            },
+                        },
                     },
                     drawer: {},
                     dialog: {
@@ -443,15 +480,16 @@
                         meta: {
                             apiKey: '',
                         },
-                        workMode: 'i2v',
+                        workMode: 'i2v_gen',
                         prompt: '',
                         imageUrlList: [],
                         videoUrl: '',
-                        resolution: '720P',
+                        mode: 'std',
                         ratio: '16:9',
                         duration: 10,
                         watermark: false,
-                        audioSetting: 'auto'
+                        audioSetting: true,
+                        keepSound: true,
                     }
                 }
             },
@@ -486,7 +524,7 @@
 
             },
             loadData() {
-                let content = localStorage.getItem('ops:dashscope:video:happyhorse:data');
+                let content = localStorage.getItem('ops:dashscope:video:pix-verse:data');
                 if (!content) {
                     return
                 }
@@ -516,7 +554,7 @@
                     obj.metas.cert = '';
                     obj.form.meta.apiKey = '';
                     let content = JSON.stringify(obj);
-                    localStorage.setItem('ops:dashscope:video:happyhorse:data', content);
+                    localStorage.setItem('ops:dashscope:video:pix-verse:data', content);
                 } catch (e) {
                     // console.log(e)
                 }
@@ -601,7 +639,7 @@
             },
             assignDashScopeMeta(req) {
                 req.meta = this.form.meta;
-                req.modelName = this.metas.workModeModelNameMap[this.form.workMode];
+                req.modelName = this.klingModelName;
                 if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key')
                 }
@@ -626,16 +664,16 @@
                     reader.readAsArrayBuffer(file)
                 })
             },
-            onRemoveImageFile(file,fileList){
-                this.metas.uploadImageList=fileList || []
+            onRemoveImageFile(file, fileList) {
+                this.metas.uploadImageList = fileList || []
                 this.updateUploadImageUrls()
             },
-            updateUploadImageUrls(){
-                this.form.imageUrlList=this.metas.uploadImageList.map(e=>e.saveUrl).filter(e=>e && e!='')
+            updateUploadImageUrls() {
+                this.form.imageUrlList = this.metas.uploadImageList.map(e => e.saveUrl).filter(e => e && e != '')
             },
             onUploadImageFileChange(file) {
-                if(this.form.workMode!='r2v'){
-                    this.metas.uploadImageList=[]
+                if (this.klingWorkMode != 'r2v') {
+                    this.metas.uploadImageList = []
                 }
                 this.metas.uploadImageList.push(file)
                 this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
@@ -700,7 +738,7 @@
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
                                     let resp = this.transferRecv(res.data.data)
-                                    file.saveUrl=resp;
+                                    file.saveUrl = resp;
                                     if (type == 'image') {
                                         this.updateUploadImageUrls()
                                     } else if (type == 'video') {
@@ -756,23 +794,24 @@
             doExecute() {
                 this.metas.resultTaskLoading = true;
                 try {
-                    let payload={
-
-                    }
-                    if(this.form.workMode=='t2v'){
-                        payload={
+                    let payload = {}
+                    if (this.klingWorkMode == 't2v') {
+                        payload = {
                             input: {
                                 prompt: this.form.prompt
                             },
                             parameters: {
-                                resolution: this.form.resolution,
-                                ratio: this.form.ratio,
+                                mode: this.form.mode,
+                                aspect_ratio: this.form.ratio,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
+                                watermark: this.form.watermark,
+                                ...(this.klingSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else if(this.form.workMode=='i2v'){
-                        payload={
+                    } else if (this.klingWorkMode == 'i2v') {
+                        payload = {
                             input: {
                                 prompt: this.form.prompt,
                                 media: [
@@ -783,54 +822,68 @@
                                 ]
                             },
                             parameters: {
-                                resolution: this.form.resolution,
+                                mode: this.form.mode,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
+                                watermark: this.form.watermark,
+                                ...(this.klingSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else if(this.form.workMode=='r2v'){
-                        let mediaList=this.form.imageUrlList.map(e=>{
+                    } else if (this.klingWorkMode == 'r2v') {
+                        let mediaList = this.form.imageUrlList.map(e => {
                             return {
-                                type: "reference_image",
+                                type: "refer",
                                 url: e
                             }
                         })
-                        payload={
+                        payload = {
                             input: {
                                 prompt: this.form.prompt,
                                 media: [
                                     ...mediaList
-                                ]
+                                ],
+                                multi_shot: false,
+                                shot_type: "intelligence",
+                                multi_prompt: [],
+                                element_list: [],
                             },
                             parameters: {
-                                resolution: this.form.resolution,
-                                ratio: this.form.ratio,
+                                mode: this.form.mode,
+                                aspect_ratio: this.form.ratio,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
+                                watermark: this.form.watermark,
+                                ...(this.klingSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else if(this.form.workMode=='edit'){
-                        payload={
+                    } else if (this.form.workMode == 'edit') {
+                        payload = {
                             input: {
                                 prompt: this.form.prompt,
                                 media: [
                                     {
-                                        type: "video",
-                                        url: this.form.videoUrl
+                                        type: "base",
+                                        url: this.form.videoUrl,
+                                        keep_original_sound: this.form.keepSound ? 'yes' : 'no'
                                     },
                                     {
-                                        type: "reference_image",
+                                        type: "refer",
                                         url: this.form.imageUrlList[0]
                                     }
                                 ]
                             },
                             parameters: {
-                                resolution: this.form.resolution,
+                                mode: this.form.mode,
+                                duration: this.form.duration,
                                 watermark: this.form.watermark,
-                                audio_setting: this.form.audioSetting
+                                ...(this.klingSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else{
+                    } else {
                         throw new Error('请选择运行模式！')
                     }
                     let req = this.assignDashScopeMeta(payload);

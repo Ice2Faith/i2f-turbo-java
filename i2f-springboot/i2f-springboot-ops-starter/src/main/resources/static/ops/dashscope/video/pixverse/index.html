@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
-    <title>Ops - HappyHorse</title>
+    <title>Ops - PixVerse</title>
     <script src="../../../lib/vue/vue-2.js"></script>
     <script src="../../../lib/moment/moment-2.24.0.js"></script>
     <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -75,14 +75,14 @@
         <el-row style="width: 100%;">
             <el-form inline label-position="top" label-width="120px">
                 <el-row type="flex">
-                    <template v-if="form.workMode=='t2v'">
+                    <template v-if="pixVerseWorkMode=='t2v'">
                         <el-col :span="24">
                             <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="form.workMode=='i2v'">
+                    <template v-if="pixVerseWorkMode=='i2v'">
                         <el-col :span="12">
                             <el-form-item label="首帧图片">
                                 <el-upload
@@ -101,12 +101,12 @@
                             </el-form-item>
                         </el-col>
                         <el-col :span="12">
-                            <el-form-item label="提示词"  style="width: 100%;">
+                            <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="form.workMode=='r2v'">
+                    <template v-if="pixVerseWorkMode=='r2v'">
                         <el-col :span="12">
                             <el-form-item label="参考图片">
                                 <el-upload
@@ -128,72 +128,6 @@
                         <el-col :span="12">
                             <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                    <template v-if="form.workMode=='edit'">
-                        <el-col :span="12">
-                            <el-row>
-                                <el-form-item label="人物">
-                                    <el-upload
-                                            class="upload-image"
-                                            ref="uploadImage"
-                                            style="display: inline-block;"
-                                            action="#"
-                                            list-type="picture-card"
-                                            :file-list="metas.uploadImageList"
-                                            accept=".png,.jpeg,.jpg"
-                                            :auto-upload="false"
-                                            :on-preview="handlePictureCardPreview"
-                                            :on-change="onUploadImageFileChange">
-                                        <i class="el-icon-plus"></i>
-                                    </el-upload>
-                                </el-form-item>
-                            </el-row>
-                            <el-row>
-                                <el-form-item label="视频">
-                                    <el-upload
-                                            class="upload-image"
-                                            ref="uploadVideo"
-                                            style="display: inline-block;"
-                                            action="#"
-                                            list-type="picture-card"
-                                            :file-list="metas.uploadVideoList"
-                                            accept=".mp4,.avi"
-                                            :auto-upload="false"
-                                            :on-change="onUploadVideoFileChange">
-                                        <i class="el-icon-upload"></i>
-                                        <div slot="file" slot-scope="{file}">
-
-                                            <video
-                                                    :src="file.url"
-                                                    class="el-upload-list__item-thumbnail"
-                                                    controls
-                                                    title="Output Video">
-                                                Output Video
-                                            </video>
-                                            <span class="el-upload-list__item-actions">
-                                        <span
-                                                class="el-upload-list__item-preview"
-                                                @click="handleVideoCardPreview(file)"
-                                        >
-                                          <i class="el-icon-zoom-in"></i>
-                                        </span>
-                                        <span
-                                                class="el-upload-list__item-delete"
-                                                @click="metas.uploadVideoList=[]"
-                                        >
-                                          <i class="el-icon-delete"></i>
-                                        </span>
-                                  </span>
-                                        </div>
-                                    </el-upload>
-                                </el-form-item>
-                            </el-row>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="提示词" style="width: 100%;">
-                                <el-input type="textarea" :rows="28" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
@@ -228,7 +162,7 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(form.workMode)" label="分辨率">
+                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="分辨率">
                                 <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
                                     <el-option
                                             v-for="item in metas.resolutionList"
@@ -238,7 +172,7 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','r2v'].includes(form.workMode)" label="宽高比">
+                            <el-form-item v-if="['t2v','r2v'].includes(pixVerseWorkMode)" label="宽高比">
                                 <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
                                     <el-option
                                             v-for="item in metas.ratioList"
@@ -248,7 +182,8 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['edit'].includes(form.workMode)" label="声音控制">
+                            <el-form-item v-if="pixVerseSupportAudio && ['t2v','i2v','r2v'].includes(pixVerseWorkMode)"
+                                          label="声音控制">
                                 <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
                                     <el-option
                                             v-for="item in metas.audioSettingList"
@@ -258,8 +193,9 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v'].includes(form.workMode)" label="时长(s)">
-                                <el-input-number v-model="form.duration" :min="1" :max="15" size="small"/>
+                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="时长(s)">
+                                <el-input-number v-model="form.duration" :min="1" :max="pixVerseMaxDuration"
+                                                 size="small"/>
                             </el-form-item>
                             <el-form-item label="选项">
                                 <el-checkbox v-model="form.watermark">带水印</el-checkbox>
@@ -362,7 +298,26 @@
 
         },
         watch: {},
-        computed: {},
+        computed: {
+            pixVerseWorkMode() {
+                let mode = this.form.workMode
+                return mode.split('_', 2)[0]
+            },
+            pixVerseModelName() {
+                return this.metas.workModeModelNameMap[this.form.workMode].name;
+            },
+            pixVerseMaxDuration() {
+                return this.metas.workModeModelNameMap[this.form.workMode].duration;
+            },
+            pixVerseSupportAudio() {
+                return this.metas.workModeModelNameMap[this.form.workMode].audio;
+            },
+            pixVerseSize() {
+                const dictMap = this.metas.workModeModelNameMap[this.form.workMode].size;
+                return dictMap[this.form.resolution][this.form.ratio]
+
+            },
+        },
         methods: {
             handlePictureCardPreview(file) {
                 this.dialog.imagePreview.imageUrl = file.url;
@@ -394,31 +349,242 @@
                             {label: 'Text', value: 'text'},
                         ],
                         workModeList: [
-                            {label: '文生视频', value: 't2v'},
-                            {label: '首帧生视频', value: 'i2v'},
-                            {label: '多图参考生视频', value: 'r2v'},
-                            {label: '视频编辑', value: 'edit'},
+                            {label: '文生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 't2v_c1'},
+                            {label: '文生视频 6.0(通用)', value: 't2v_v6'},
+                            {label: '文生视频 5.6(通用)', value: 't2v_v5'},
+                            {label: '首帧生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 'i2v_c1'},
+                            {label: '首帧生视频 6.0(通用)', value: 'i2v_v6'},
+                            {label: '首帧生视频 5.6(通用)', value: 'i2v_v5'},
+
+                            {label: '多图参考生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 'r2v_c1'},
+                            {label: '多图参考生视频 5.6(通用)', value: 'r2v_v5'},
                         ],
-                        resolutionList:[
+                        resolutionList: [
+                            {label: '360P', value: '360P'},
+                            {label: '540P', value: '540P'},
                             {label: '720P', value: '720P'},
                             {label: '1080P', value: '1080P'},
                         ],
-                        ratioList:[
+                        ratioList: [
                             {label: '16:9', value: '16:9'},
                             {label: '9:16', value: '9:16'},
                             {label: '1:1', value: '1:1'},
                             {label: '4:3', value: '4:3'},
                             {label: '3:4', value: '3:4'},
                         ],
-                        audioSettingList:[
-                            {label: '自动', value: 'auto'},
-                            {label: '保持', value: 'origin'},
+                        audioSettingList: [
+                            {label: '有声', value: true},
+                            {label: '无声', value: false},
                         ],
                         workModeModelNameMap: {
-                            't2v': 'happyhorse-1.0-t2v',
-                            'i2v': 'happyhorse-1.0-i2v',
-                            'r2v': 'happyhorse-1.0-r2v',
-                            'edit': 'happyhorse-1.0-video-edit'
+                            't2v_c1': {
+                                name: 'pixverse/pixverse-c1-t2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            't2v_v6': {
+                                name: 'pixverse/pixverse-v6-t2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            't2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-t2v',
+                                duration: 10,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1280*960',
+                                        '1:1': '1280*1280',
+                                        '3:4': '960*1280',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1920*1440',
+                                        '1:1': '1808*1808',
+                                        '3:4': '1440*1920',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            'i2v_c1': {
+                                name: 'pixverse/pixverse-c1-it2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'i2v_v6': {
+                                name: 'pixverse/pixverse-v6-it2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'i2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-it2v',
+                                duration: 10,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'r2v_c1': {
+                                name: 'pixverse/pixverse-c1-r2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            'r2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-r2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*830',
+                                        '1:1': '960*960',
+                                        '3:4': '830*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1662*1246',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1246*1662',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
                         },
                         parameterModeList: [
                             {label: '标准模式，生成速度较快，性价比高，适用于快速预览和基础动画场景', value: 'wan-std'},
@@ -443,7 +609,7 @@
                         meta: {
                             apiKey: '',
                         },
-                        workMode: 'i2v',
+                        workMode: 'i2v_c1',
                         prompt: '',
                         imageUrlList: [],
                         videoUrl: '',
@@ -451,7 +617,7 @@
                         ratio: '16:9',
                         duration: 10,
                         watermark: false,
-                        audioSetting: 'auto'
+                        audioSetting: true
                     }
                 }
             },
@@ -486,7 +652,7 @@
 
             },
             loadData() {
-                let content = localStorage.getItem('ops:dashscope:video:happyhorse:data');
+                let content = localStorage.getItem('ops:dashscope:video:pix-verse:data');
                 if (!content) {
                     return
                 }
@@ -516,7 +682,7 @@
                     obj.metas.cert = '';
                     obj.form.meta.apiKey = '';
                     let content = JSON.stringify(obj);
-                    localStorage.setItem('ops:dashscope:video:happyhorse:data', content);
+                    localStorage.setItem('ops:dashscope:video:pix-verse:data', content);
                 } catch (e) {
                     // console.log(e)
                 }
@@ -601,7 +767,7 @@
             },
             assignDashScopeMeta(req) {
                 req.meta = this.form.meta;
-                req.modelName = this.metas.workModeModelNameMap[this.form.workMode];
+                req.modelName = this.pixVerseModelName;
                 if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key')
                 }
@@ -626,16 +792,16 @@
                     reader.readAsArrayBuffer(file)
                 })
             },
-            onRemoveImageFile(file,fileList){
-                this.metas.uploadImageList=fileList || []
+            onRemoveImageFile(file, fileList) {
+                this.metas.uploadImageList = fileList || []
                 this.updateUploadImageUrls()
             },
-            updateUploadImageUrls(){
-                this.form.imageUrlList=this.metas.uploadImageList.map(e=>e.saveUrl).filter(e=>e && e!='')
+            updateUploadImageUrls() {
+                this.form.imageUrlList = this.metas.uploadImageList.map(e => e.saveUrl).filter(e => e && e != '')
             },
             onUploadImageFileChange(file) {
-                if(this.form.workMode!='r2v'){
-                    this.metas.uploadImageList=[]
+                if (this.pixVerseWorkMode != 'r2v') {
+                    this.metas.uploadImageList = []
                 }
                 this.metas.uploadImageList.push(file)
                 this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
@@ -700,7 +866,7 @@
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
                                     let resp = this.transferRecv(res.data.data)
-                                    file.saveUrl=resp;
+                                    file.saveUrl = resp;
                                     if (type == 'image') {
                                         this.updateUploadImageUrls()
                                     } else if (type == 'video') {
@@ -756,28 +922,28 @@
             doExecute() {
                 this.metas.resultTaskLoading = true;
                 try {
-                    let payload={
-
-                    }
-                    if(this.form.workMode=='t2v'){
-                        payload={
+                    let payload = {}
+                    if (this.pixVerseWorkMode == 't2v') {
+                        payload = {
                             input: {
                                 prompt: this.form.prompt
                             },
                             parameters: {
-                                resolution: this.form.resolution,
-                                ratio: this.form.ratio,
+                                size: this.pixVerseSize,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
+                                watermark: this.form.watermark,
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else if(this.form.workMode=='i2v'){
-                        payload={
+                    } else if (this.pixVerseWorkMode == 'i2v') {
+                        payload = {
                             input: {
                                 prompt: this.form.prompt,
                                 media: [
                                     {
-                                        type: "first_frame",
+                                        type: "image_url",
                                         url: this.form.imageUrlList[0]
                                     }
                                 ]
@@ -785,17 +951,20 @@
                             parameters: {
                                 resolution: this.form.resolution,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
+                                watermark: this.form.watermark,
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else if(this.form.workMode=='r2v'){
-                        let mediaList=this.form.imageUrlList.map(e=>{
+                    } else if (this.pixVerseWorkMode == 'r2v') {
+                        let mediaList = this.form.imageUrlList.map(e => {
                             return {
-                                type: "reference_image",
+                                type: "image_url",
                                 url: e
                             }
                         })
-                        payload={
+                        payload = {
                             input: {
                                 prompt: this.form.prompt,
                                 media: [
@@ -803,34 +972,15 @@
                                 ]
                             },
                             parameters: {
-                                resolution: this.form.resolution,
-                                ratio: this.form.ratio,
+                                size: this.pixVerseSize,
                                 duration: this.form.duration,
-                                watermark: this.form.watermark
-                            }
-                        }
-                    }else if(this.form.workMode=='edit'){
-                        payload={
-                            input: {
-                                prompt: this.form.prompt,
-                                media: [
-                                    {
-                                        type: "video",
-                                        url: this.form.videoUrl
-                                    },
-                                    {
-                                        type: "reference_image",
-                                        url: this.form.imageUrlList[0]
-                                    }
-                                ]
-                            },
-                            parameters: {
-                                resolution: this.form.resolution,
                                 watermark: this.form.watermark,
-                                audio_setting: this.form.audioSetting
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
                             }
                         }
-                    }else{
+                    } else {
                         throw new Error('请选择运行模式！')
                     }
                     let req = this.assignDashScopeMeta(payload);

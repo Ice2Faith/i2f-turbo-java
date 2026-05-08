@@ -34,8 +34,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/video/vidu")
-public class DashScopeOpsVideoViduController {
+@RequestMapping("/ops/dashscope/video/kling")
+public class DashScopeOpsVideoKlingController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -49,7 +49,7 @@ public class DashScopeOpsVideoViduController {
     @Autowired
     private DashScopeOpsController controller;
 
-    public String videoVidu(DashScopeVideoViduOperateDto req) throws Exception {
+    public String videoKling(DashScopeVideoViduOperateDto req) throws Exception {
 
         Map<String, Object> body = new HashMap<>();
         body.put("model", req.getModelName());
@@ -90,7 +90,7 @@ public class DashScopeOpsVideoViduController {
         try {
             DashScopeVideoViduOperateDto req = transfer.recv(reqDto, DashScopeVideoViduOperateDto.class);
 
-            String taskId = videoVidu(req);
+            String taskId = videoKling(req);
             return transfer.success(taskId);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
