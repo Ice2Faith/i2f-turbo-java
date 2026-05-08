@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
-    <title>Ops - 视频换人</title>
+    <title>Ops - HappyHorse</title>
     <script src="../../../lib/vue/vue-2.js"></script>
     <script src="../../../lib/moment/moment-2.24.0.js"></script>
     <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -75,46 +75,104 @@
         <el-row style="width: 100%;">
             <el-form inline label-position="top" label-width="120px">
                 <el-row type="flex">
-                    <el-col :span="12">
-                        <el-form-item label="人物">
-                            <el-upload
-                                    class="upload-image"
-                                    ref="uploadImage"
-                                    style="display: inline-block;"
-                                    action="#"
-                                    list-type="picture-card"
-                                    :file-list="metas.uploadImageList"
-                                    accept=".png,.jpeg,.jpg"
-                                    :auto-upload="false"
-                                    :on-preview="handlePictureCardPreview"
-                                    :on-change="onUploadImageFileChange">
-                                <i class="el-icon-plus"></i>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
-                    <el-col :span="12">
-                        <el-form-item label="视频">
-                            <el-upload
-                                    class="upload-image"
-                                    ref="uploadVideo"
-                                    style="display: inline-block;"
-                                    action="#"
-                                    list-type="picture-card"
-                                    :file-list="metas.uploadVideoList"
-                                    accept=".mp4,.avi"
-                                    :auto-upload="false"
-                                    :on-change="onUploadVideoFileChange">
-                                <i class="el-icon-upload"></i>
-                                <div slot="file" slot-scope="{file}">
+                    <template v-if="form.workMode=='t2v'">
+                        <el-col :span="24">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="form.workMode=='i2v'">
+                        <el-col :span="12">
+                            <el-form-item label="首帧图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="提示词"  style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="form.workMode=='r2v'">
+                        <el-col :span="12">
+                            <el-form-item label="参考图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-remove="onRemoveImageFile"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="form.workMode=='edit'">
+                        <el-col :span="12">
+                            <el-row>
+                                <el-form-item label="人物">
+                                    <el-upload
+                                            class="upload-image"
+                                            ref="uploadImage"
+                                            style="display: inline-block;"
+                                            action="#"
+                                            list-type="picture-card"
+                                            :file-list="metas.uploadImageList"
+                                            accept=".png,.jpeg,.jpg"
+                                            :auto-upload="false"
+                                            :on-preview="handlePictureCardPreview"
+                                            :on-change="onUploadImageFileChange">
+                                        <i class="el-icon-plus"></i>
+                                    </el-upload>
+                                </el-form-item>
+                            </el-row>
+                            <el-row>
+                                <el-form-item label="视频">
+                                    <el-upload
+                                            class="upload-image"
+                                            ref="uploadVideo"
+                                            style="display: inline-block;"
+                                            action="#"
+                                            list-type="picture-card"
+                                            :file-list="metas.uploadVideoList"
+                                            accept=".mp4,.avi"
+                                            :auto-upload="false"
+                                            :on-change="onUploadVideoFileChange">
+                                        <i class="el-icon-upload"></i>
+                                        <div slot="file" slot-scope="{file}">
 
-                                    <video
-                                           :src="file.url"
-                                           class="el-upload-list__item-thumbnail"
-                                           controls
-                                           title="Output Video">
-                                        Output Video
-                                    </video>
-                                    <span class="el-upload-list__item-actions">
+                                            <video
+                                                    :src="file.url"
+                                                    class="el-upload-list__item-thumbnail"
+                                                    controls
+                                                    title="Output Video">
+                                                Output Video
+                                            </video>
+                                            <span class="el-upload-list__item-actions">
                                         <span
                                                 class="el-upload-list__item-preview"
                                                 @click="handleVideoCardPreview(file)"
@@ -128,58 +186,89 @@
                                           <i class="el-icon-delete"></i>
                                         </span>
                                   </span>
-                                </div>
-                            </el-upload>
-                        </el-form-item>
-                    </el-col>
+                                        </div>
+                                    </el-upload>
+                                </el-form-item>
+                            </el-row>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="28" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
                 </el-row>
             </el-form>
 
-                <el-divider></el-divider>
-            <el-form inline label-position="left" label-width="80px">
+            <el-divider></el-divider>
+            <el-form inline label-position="top" label-width="80px">
                 <el-row type="flex">
                     <el-col :span="10">
                         <el-row type="flex">
                             <el-form-item>
                                 <span slot="label">
-                                    模型
+                                    模式
                                      <el-popover
                                              placement="top-start"
                                              title="模型类型"
                                              width="360"
                                              trigger="hover">
-                                         切换不同模型之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
+                                         切换不同模式之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
                                          如果不重新上传，模型将会找不到上传的图片和视频。
                                         <i slot="reference" class="el-icon-question"></i>
                                       </el-popover>
                                 </span>
-                                <el-select  clearable filterable v-model="form.modelName"  placeholder="模型" style="width: 260px;">
+                                <el-select clearable filterable v-model="form.workMode" placeholder="模式"
+                                           style="width: 180px;">
                                     <el-option
-                                            v-for="item in metas.modelList"
+                                            v-for="item in metas.workModeList"
                                             :key="item.value"
                                             :label="item.label"
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item label="模式">
-                                <el-select  clearable filterable v-model="form.mode"  placeholder="模式" >
+                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(form.workMode)" label="分辨率">
+                                <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
                                     <el-option
-                                            v-for="item in metas.parameterModeList"
+                                            v-for="item in metas.resolutionList"
                                             :key="item.value"
                                             :label="item.label"
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item>
+                            <el-form-item v-if="['t2v','r2v'].includes(form.workMode)" label="宽高比">
+                                <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
+                                    <el-option
+                                            v-for="item in metas.ratioList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['edit'].includes(form.workMode)" label="声音控制">
+                                <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
+                                    <el-option
+                                            v-for="item in metas.audioSettingList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['t2v','i2v','r2v'].includes(form.workMode)" label="时长(s)">
+                                <el-input-number v-model="form.duration" :min="1" :max="15" size="small"/>
+                            </el-form-item>
+                            <el-form-item label="选项">
                                 <el-checkbox v-model="form.watermark">带水印</el-checkbox>
                             </el-form-item>
                         </el-row>
                     </el-col>
                     <el-col :span="4">
                         <el-row type="flex" justify="center">
-                            <el-form-item>
+                            <el-form-item label="操作">
                                 <el-button v-loading="metas.resultTaskLoading" size="medium"
                                            type="primary"
                                            @click="onExecute">
@@ -222,7 +311,7 @@
                         <el-link v-if="metas.resultVideoUrl"
                                  style="margin-left: 15px;"
                                  :href="metas.resultVideoUrl"
-                                   type="success">
+                                 type="success">
                             下载<i class="el-icon-download el-icon--right"></i>
                         </el-link>
                     </el-form-item>
@@ -279,7 +368,7 @@
                 this.dialog.imagePreview.imageUrl = file.url;
                 this.dialog.imagePreview.show = true;
             },
-            handleVideoCardPreview(file){
+            handleVideoCardPreview(file) {
                 this.dialog.videoPreview.videoUrl = file.url;
                 this.dialog.videoPreview.show = true;
             },
@@ -304,14 +393,39 @@
                         langList: [
                             {label: 'Text', value: 'text'},
                         ],
-                        modelList: [
-                            {label: '动作迁移(人和背景不变)(0.4元/s)', value: 'wan2.2-animate-move'},
-                            {label: '视频换人(人变背景不变)(0.6元/s)', value: 'wan2.2-animate-mix'},
-
+                        workModeList: [
+                            {label: '文生视频', value: 't2v'},
+                            {label: '首帧生视频', value: 'i2v'},
+                            {label: '多图参考生视频', value: 'r2v'},
+                            {label: '视频编辑', value: 'edit'},
                         ],
-                        parameterModeList:[
+                        resolutionList:[
+                            {label: '720P', value: '720P'},
+                            {label: '1080P', value: '1080P'},
+                        ],
+                        ratioList:[
+                            {label: '16:9', value: '16:9'},
+                            {label: '9:16', value: '9:16'},
+                            {label: '1:1', value: '1:1'},
+                            {label: '4:3', value: '4:3'},
+                            {label: '3:4', value: '3:4'},
+                        ],
+                        audioSettingList:[
+                            {label: '自动', value: 'auto'},
+                            {label: '保持', value: 'origin'},
+                        ],
+                        workModeModelNameMap: {
+                            't2v': 'happyhorse-1.0-t2v',
+                            'i2v': 'happyhorse-1.0-i2v',
+                            'r2v': 'happyhorse-1.0-r2v',
+                            'edit': 'happyhorse-1.0-video-edit'
+                        },
+                        parameterModeList: [
                             {label: '标准模式，生成速度较快，性价比高，适用于快速预览和基础动画场景', value: 'wan-std'},
-                            {label: '专业模式，动画流畅度更高，效果更佳，但处理时间和费用也相应增加(+0.2元/s)', value: 'wan-pro'},
+                            {
+                                label: '专业模式，动画流畅度更高，效果更佳，但处理时间和费用也相应增加(+0.2元/s)',
+                                value: 'wan-pro'
+                            },
                         ]
                     },
                     drawer: {},
@@ -329,11 +443,15 @@
                         meta: {
                             apiKey: '',
                         },
-                        modelName: 'wan2.2-animate-move',
-                        imageUrl: '',
+                        workMode: 'i2v',
+                        prompt: '',
+                        imageUrlList: [],
                         videoUrl: '',
+                        resolution: '720P',
+                        ratio: '16:9',
+                        duration: 10,
                         watermark: false,
-                        mode: 'wan-std'
+                        audioSetting: 'auto'
                     }
                 }
             },
@@ -368,7 +486,7 @@
 
             },
             loadData() {
-                let content = localStorage.getItem('ops:dashscope:video:wan:instead-video:data');
+                let content = localStorage.getItem('ops:dashscope:video:happyhorse:data');
                 if (!content) {
                     return
                 }
@@ -398,7 +516,7 @@
                     obj.metas.cert = '';
                     obj.form.meta.apiKey = '';
                     let content = JSON.stringify(obj);
-                    localStorage.setItem('ops:dashscope:video:wan:instead-video:data', content);
+                    localStorage.setItem('ops:dashscope:video:happyhorse:data', content);
                 } catch (e) {
                     // console.log(e)
                 }
@@ -441,31 +559,31 @@
                 }
                 throw ex;
             },
-            transferSend(req){
-                let ex=null;
+            transferSend(req) {
+                let ex = null;
                 for (let i = 0; i < 5; i++) {
-                    try{
+                    try {
                         let transfer = this.getTransfer();
                         return transfer.send(req);
-                    }catch (e){
-                        ex=e;
+                    } catch (e) {
+                        ex = e;
                     }
                 }
-                if(ex!=null){
+                if (ex != null) {
                     throw ex;
                 }
             },
-            transferRecv(req){
-                let ex=null;
+            transferRecv(req) {
+                let ex = null;
                 for (let i = 0; i < 5; i++) {
-                    try{
+                    try {
                         let transfer = this.getTransfer();
                         return transfer.recv(req);
-                    }catch (e){
-                        ex=e;
+                    } catch (e) {
+                        ex = e;
                     }
                 }
-                if(ex!=null){
+                if (ex != null) {
                     throw ex;
                 }
             },
@@ -483,9 +601,8 @@
             },
             assignDashScopeMeta(req) {
                 req.meta = this.form.meta;
-                req.modelName = this.form.modelName;
-                req.mode=this.form.mode;
-                if(!req.meta.apiKey){
+                req.modelName = this.metas.workModeModelNameMap[this.form.workMode];
+                if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key')
                 }
                 return req;
@@ -509,8 +626,17 @@
                     reader.readAsArrayBuffer(file)
                 })
             },
+            onRemoveImageFile(file,fileList){
+                this.metas.uploadImageList=fileList || []
+                this.updateUploadImageUrls()
+            },
+            updateUploadImageUrls(){
+                this.form.imageUrlList=this.metas.uploadImageList.map(e=>e.saveUrl).filter(e=>e && e!='')
+            },
             onUploadImageFileChange(file) {
-                this.metas.uploadImageList = []
+                if(this.form.workMode!='r2v'){
+                    this.metas.uploadImageList=[]
+                }
                 this.metas.uploadImageList.push(file)
                 this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
                     confirmButtonText: '确定',
@@ -574,8 +700,9 @@
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
                                     let resp = this.transferRecv(res.data.data)
+                                    file.saveUrl=resp;
                                     if (type == 'image') {
-                                        this.form.imageUrl = resp;
+                                        this.updateUploadImageUrls()
                                     } else if (type == 'video') {
                                         this.form.videoUrl = resp;
                                     }
@@ -629,13 +756,86 @@
             doExecute() {
                 this.metas.resultTaskLoading = true;
                 try {
-                    let req = this.assignDashScopeMeta({
-                        imageUrl: this.form.imageUrl,
-                        videoUrl: this.form.videoUrl,
-                        watermark: this.form.watermark
-                    });
+                    let payload={
+
+                    }
+                    if(this.form.workMode=='t2v'){
+                        payload={
+                            input: {
+                                prompt: this.form.prompt
+                            },
+                            parameters: {
+                                resolution: this.form.resolution,
+                                ratio: this.form.ratio,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark
+                            }
+                        }
+                    }else if(this.form.workMode=='i2v'){
+                        payload={
+                            input: {
+                                prompt: this.form.prompt,
+                                media: [
+                                    {
+                                        type: "first_frame",
+                                        url: this.form.imageUrlList[0]
+                                    }
+                                ]
+                            },
+                            parameters: {
+                                resolution: this.form.resolution,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark
+                            }
+                        }
+                    }else if(this.form.workMode=='r2v'){
+                        let mediaList=this.form.imageUrlList.map(e=>{
+                            return {
+                                type: "reference_image",
+                                url: e
+                            }
+                        })
+                        payload={
+                            input: {
+                                prompt: this.form.prompt,
+                                media: [
+                                    ...mediaList
+                                ]
+                            },
+                            parameters: {
+                                resolution: this.form.resolution,
+                                ratio: this.form.ratio,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark
+                            }
+                        }
+                    }else if(this.form.workMode=='edit'){
+                        payload={
+                            input: {
+                                prompt: this.form.prompt,
+                                media: [
+                                    {
+                                        type: "video",
+                                        url: this.form.imageUrlList[0]
+                                    },
+                                    {
+                                        type: "reference_image",
+                                        url: this.form.videoUrl
+                                    }
+                                ]
+                            },
+                            parameters: {
+                                resolution: this.form.resolution,
+                                watermark: this.form.watermark,
+                                audio_setting: this.form.audioSetting
+                            }
+                        }
+                    }else{
+                        throw new Error('请选择运行模式！')
+                    }
+                    let req = this.assignDashScopeMeta(payload);
                     this.$axios({
-                        url: `/instead-people/generate`,
+                        url: `./generate`,
                         method: 'post',
                         data: this.transferSend(req)
                     }).then(res => {
@@ -680,7 +880,7 @@
                                     this.onQueryStatus()
                                 }, 5000)
                             } else if ('SUCCEEDED' == taskStatus) {
-                                this.metas.resultVideoUrl = resp.output.results.video_url
+                                this.metas.resultVideoUrl = resp.output.video_url
                                 this.metas.resultVideoLoading = false;
                             } else {
                                 let code = resp.output.code;

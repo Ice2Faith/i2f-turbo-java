@@ -354,12 +354,19 @@
             },
             initBroadcast() {
                 this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
                 setInterval(() => {
                     this.opsBroadcastChannel.postMessage({
                         type: 'cert',
                         data: this.metas.cert
                     });
-                }, 3000);
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'dashscope',
+                        data: this.form.meta.apiKey
+                    });
+                }, 3000)
+
+
                 this.opsBroadcastChannel.onmessage = (event) => {
                     let data = event.data;
                     if (data.type == 'cert') {
@@ -367,7 +374,13 @@
                             this.metas.cert = data.data;
                         }
                     }
+                    if (data.type == 'dashscope') {
+                        if (!this.form.meta.apiKey || this.form.meta.apiKey == '') {
+                            this.form.meta.apiKey = data.data;
+                        }
+                    }
                 };
+
             },
             loadData() {
                 let content = localStorage.getItem('ops:dashscope:video:wan:digital-people:data');

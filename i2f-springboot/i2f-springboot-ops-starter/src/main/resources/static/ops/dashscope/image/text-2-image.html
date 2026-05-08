@@ -356,6 +356,10 @@
                         type: 'cert',
                         data: this.metas.cert
                     });
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'dashscope',
+                        data: this.form.meta.apiKey
+                    });
                 }, 3000)
 
 
@@ -364,6 +368,11 @@
                     if (data.type == 'cert') {
                         if (!this.metas.cert || this.metas.cert == '') {
                             this.metas.cert = data.data;
+                        }
+                    }
+                    if (data.type == 'dashscope') {
+                        if (!this.form.meta.apiKey || this.form.meta.apiKey == '') {
+                            this.form.meta.apiKey = data.data;
                         }
                     }
                 };
