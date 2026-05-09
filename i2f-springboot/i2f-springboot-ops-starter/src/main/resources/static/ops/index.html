@@ -233,5 +233,35 @@
     height: 48px;
   }
 
+  .el-card__header{
+    background: linear-gradient(145deg, #bae5ff9e, transparent, transparent);
+    animation: aniHtml 6s infinite;
+    background-size: 180%;
+  }
+
+  .el-result{
+    background: linear-gradient(345deg, #b9d2ffb3, #b9fffab3, transparent, transparent, transparent);
+    animation: aniHtml 4s infinite;
+    background-size: 300%;
+  }
+
+  .el-input__inner{
+    background: linear-gradient(312deg, #a5e7ffbf, transparent, transparent);
+    animation: aniHtml 4s infinite;
+    background-size: 150%;
+  }
+
+  @keyframes aniHtml {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 30% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
 </style>
 </html>
