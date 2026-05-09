@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
-import i2f.springboot.ops.dashscope.data.DashScopeImageText2ImageOperateDto;
+import i2f.springboot.ops.dashscope.data.DashScopeImageWanText2ImageOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +36,8 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/image/text2image")
-public class DashScopeOpsImageText2ImageController {
+@RequestMapping("/ops/dashscope/image/wan/text2image")
+public class DashScopeOpsImageWanText2ImageController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -51,7 +51,7 @@ public class DashScopeOpsImageText2ImageController {
     @Autowired
     private DashScopeOpsController controller;
 
-    public Map<String, Object> imageText2Image(DashScopeImageText2ImageOperateDto req) throws Exception {
+    public Map<String, Object> imageText2Image(DashScopeImageWanText2ImageOperateDto req) throws Exception {
 
         Map<String, Object> body = new HashMap<>();
         body.put("model", req.getModelName());
@@ -132,7 +132,7 @@ public class DashScopeOpsImageText2ImageController {
     public OpsSecureReturn<OpsSecureDto> imageText2Image(@RequestBody OpsSecureDto reqDto,
                                                             HttpServletRequest request) throws Exception {
         try {
-            DashScopeImageText2ImageOperateDto req = transfer.recv(reqDto, DashScopeImageText2ImageOperateDto.class);
+            DashScopeImageWanText2ImageOperateDto req = transfer.recv(reqDto, DashScopeImageWanText2ImageOperateDto.class);
 
             Map<String, Object> output = imageText2Image(req);
             return transfer.success(output);

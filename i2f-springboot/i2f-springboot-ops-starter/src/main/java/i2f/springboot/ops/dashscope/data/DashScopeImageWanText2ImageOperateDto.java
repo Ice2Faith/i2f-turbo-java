@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class DashScopeImageText2ImageOperateDto extends DashScopeBaseOperateDto {
+public class DashScopeImageWanText2ImageOperateDto extends DashScopeBaseOperateDto {
     protected String imageUrl;
     protected String prompt;
     protected String negativePrompt;
