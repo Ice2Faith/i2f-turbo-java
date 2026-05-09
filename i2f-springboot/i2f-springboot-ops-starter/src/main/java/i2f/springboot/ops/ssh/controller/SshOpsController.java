@@ -8,6 +8,7 @@ import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.ssh.data.SshOperateDto;
@@ -54,6 +55,7 @@ public class SshOpsController implements IOpsProvider {
                 .subTitle("连接/操作SSH主机命令/文件")
                 .icon("el-icon-link")
                 .href("./ssh/index.html")
+                .group(OpsHomeMenuGroup.Host)
         );
     }
 

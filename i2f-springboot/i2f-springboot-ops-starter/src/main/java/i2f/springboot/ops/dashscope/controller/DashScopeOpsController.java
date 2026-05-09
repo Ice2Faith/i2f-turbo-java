@@ -3,6 +3,7 @@ package i2f.springboot.ops.dashscope.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -58,6 +59,7 @@ public class DashScopeOpsController implements IOpsProvider {
                 .subTitle("阿里云百炼大模型平台")
                 .icon("el-icon-magic-stick")
                 .href("./dashscope/index.html")
+                .group(OpsHomeMenuGroup.AI)
         );
     }
 

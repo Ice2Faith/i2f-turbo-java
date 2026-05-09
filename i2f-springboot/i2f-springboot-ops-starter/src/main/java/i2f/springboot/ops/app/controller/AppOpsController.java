@@ -9,6 +9,7 @@ import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
 import i2f.springboot.ops.app.util.AppUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import lombok.Data;
@@ -66,6 +67,7 @@ public class AppOpsController implements IOpsProvider {
                 .subTitle("获取应用信息与执行表达式脚本")
                 .icon("el-icon-mobile")
                 .href("./app/index.html")
+                .group(OpsHomeMenuGroup.App)
         );
     }
 

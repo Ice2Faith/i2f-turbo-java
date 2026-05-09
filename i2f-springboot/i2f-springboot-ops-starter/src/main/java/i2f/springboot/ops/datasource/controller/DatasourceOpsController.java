@@ -26,6 +26,7 @@ import i2f.springboot.ops.datasource.data.DatasourceRunnerDto;
 import i2f.springboot.ops.datasource.helper.DatasourceOpsHelper;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
@@ -79,6 +80,7 @@ public class DatasourceOpsController implements IOpsProvider {
                 .subTitle("连接/操作数据库")
                 .icon("el-icon-coin")
                 .href("./datasource/index.html")
+                .group(OpsHomeMenuGroup.SQL)
         );
     }
 

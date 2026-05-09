@@ -20,27 +20,38 @@
     <div id="app">
       <el-card shadow="never">
         <div slot="header">
-          <span>Ops Home</span>
+          <el-row type="flex" style="line-height: 40px;">
+            <el-col :span="20">
+              <span>Ops Home</span>
+            </el-col>
+            <el-col :span="4">
+              <el-input v-model="filterText" placeholder="搜索关键字"></el-input>
+            </el-col>
+          </el-row>
         </div>
         <el-row :gutter="15" v-loading="menuLoading">
-          <el-col :span="6" v-for="item in displayMenus">
-            <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
-              <template slot="icon">
-                <a :href="item.href" target="_blank">
+          <el-card v-for="(group,groupIndex) in menuGroups" shadow="never" style="margin-bottom: 12px;">
+            <div slot="header">
+              <span>{{group.group}}</span>
+            </div>
+            <el-col :span="6" v-for="item in group.menus">
+              <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
+                <template slot="icon">
+                  <a :href="item.href" target="_blank">
                     <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
-                </a>
-              </template>
-              <template slot="subTitle">
-                <span style="color: #777;">{{item.subTitle}}</span>
-              </template>
-              <template slot="extra">
-                <a :href="item.href" target="_blank">
-                  访问
-                </a>
-              </template>
-            </el-result>
-          </el-col>
-
+                  </a>
+                </template>
+                <template slot="subTitle">
+                  <span style="color: #777;">{{item.subTitle}}</span>
+                </template>
+                <template slot="extra">
+                  <a :href="item.href" target="_blank">
+                    访问
+                  </a>
+                </template>
+              </el-result>
+            </el-col>
+          </el-card>
         </el-row>
       </el-card>
     </div>
@@ -51,87 +62,42 @@
     components: {},
     data() {
       return {
+        filterText: '',
         menuLoading: false,
         menus:[
 
         ],
         additionalMenus:[
-          {
+          /*{
             title: 'Aliyun Oss',
             subTitle: '阿里云 Oss 对象存储管理',
             icon: 'el-icon-files',
             href: './aliyun-oss/index.html',
+            group: '60/Oss',
             disabled: true
-          },
-          {
-            title: 'MongoDB',
-            subTitle: 'MongoDB 管理',
-            icon: 'el-icon-collection',
-            href: './mongodb/index.html',
-            disabled: true
-          }
+          }*/
         ],
         defaultMenus: [
           {
-            title: 'Database',
-            subTitle: '连接/操作数据库',
-            icon: 'el-icon-coin',
-            href: './datasource/index.html'
-          },
-          {
-            title: 'Redis',
-            subTitle: '连接/操作Redis缓存',
-            icon: 'el-icon-connection',
-            href: './redis/index.html'
+            title: 'Application',
+            subTitle: '获取应用信息与执行表达式脚本',
+            icon: 'el-icon-mobile',
+            href: './app/index.html',
+            group: '20/App',
           },
           {
             title: 'Host',
             subTitle: '连接/操作Host主机命令/文件',
             icon: 'el-icon-monitor',
-            href: './host/index.html'
+            href: './host/index.html',
+            group: '30/Host',
           },
           {
-            title: 'Ssh',
-            subTitle: '连接/操作SSH主机命令/文件',
-            icon: 'el-icon-link',
-            href: './ssh/index.html'
-          },
-          {
-            title: 'Xxl Job',
-            subTitle: '执行XXL-JOB任务',
-            icon: 'el-icon-timer',
-            href: './xxl-job/index.html'
-          },
-          {
-            title: 'Application',
-            subTitle: '获取应用信息与执行表达式脚本',
-            icon: 'el-icon-mobile',
-            href: './app/index.html'
-          },
-          {
-            title: 'Aws S3',
-            subTitle: 'Aws S3 Oss 对象存储管理',
-            icon: 'el-icon-files',
-            href: './aws-s3/index.html'
-          },
-          {
-            title: 'Minio',
-            subTitle: 'Minio Oss 对象存储管理',
-            icon: 'el-icon-receiving',
-            href: './minio/index.html'
-          },
-          {
-            title: 'XProc4J',
-            subTitle: '执行 XProc4J 脚本',
-            icon: 'el-icon-table-lamp',
-            href: './xproc4j/index.html'
-          },
-          {
-            title: 'ElasticSearch',
-            subTitle: 'ElasticSearch 搜索引擎管理',
-            icon: 'el-icon-search',
-            href: './elasticsearch/index.html',
-            disabled: true
+            title: 'Database',
+            subTitle: '连接/操作数据库',
+            icon: 'el-icon-coin',
+            href: './datasource/index.html',
+            group: '40/SQL',
           },
 
         ]
@@ -145,8 +111,41 @@
     },
     watch: {},
     computed: {
+      menuGroups(){
+        let retMap={}
+        let menus=[...this.displayMenus]
+        for (let i = 0; i < menus.length; i++) {
+          let item=menus[i]
+          let group=item.group
+          if(!group || group==''){
+            group='10/Default'
+          }
+          group=group.substring(0,1).toUpperCase()+group.substring(1)
+          if(!retMap[group]){
+            retMap[group]=[]
+          }
+          retMap[group].push(item)
+        }
+        let retList=[];
+        Object.keys(retMap).forEach(key=>{
+          retList.push({
+            group: key,
+            menus: retMap[key]
+          })
+        })
+        retList.sort((v1,v2)=>v1.group.localeCompare(v2.group))
+        return retList;
+      },
       displayMenus(){
         return this.menus.filter(e=>!e.disabled)
+                .filter(e=>{
+                  if(!this.filterText || this.filterText==''){
+                    return true;
+                  }
+                  let ltext = this.filterText.toLowerCase();
+                  return e.title.toLowerCase().indexOf(ltext)>=0
+                          || e.subTitle.toLowerCase().indexOf(ltext)>=0;
+                })
       }
     },
     methods: {

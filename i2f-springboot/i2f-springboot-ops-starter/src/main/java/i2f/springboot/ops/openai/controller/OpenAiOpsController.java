@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
@@ -86,6 +87,7 @@ public class OpenAiOpsController  implements IOpsProvider {
                 .subTitle("Open Ai 兼容的 Ai 对话工具")
                 .icon("el-icon-cpu")
                 .href("./open-ai/index.html")
+                .group(OpsHomeMenuGroup.AI)
         );
     }
 

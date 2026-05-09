@@ -5,6 +5,7 @@ import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.redis.data.RedisOperateDto;
 import lombok.Data;
@@ -56,6 +57,7 @@ public class RedisOpsController implements IOpsProvider {
                 .subTitle("连接/操作Redis缓存")
                 .icon("el-icon-connection")
                 .href("./redis/index.html")
+                .group(OpsHomeMenuGroup.NoSQL)
         );
     }
 

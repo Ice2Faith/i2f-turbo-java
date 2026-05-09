@@ -20,27 +20,38 @@
 <div id="app">
     <el-card shadow="never">
         <div slot="header">
-            <span>DashScope Home</span>
+            <el-row type="flex" style="line-height: 40px;">
+                <el-col :span="20">
+                    <span>DashScope Home</span>
+                </el-col>
+                <el-col :span="4">
+                    <el-input v-model="filterText" placeholder="搜索关键字"></el-input>
+                </el-col>
+            </el-row>
         </div>
         <el-row :gutter="15" v-loading="menuLoading">
-            <el-col :span="6" v-for="item in displayMenus">
-                <el-result :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
-                    <template slot="icon">
-                        <a :href="item.href" target="_blank">
-                            <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
-                        </a>
-                    </template>
-                    <template slot="subTitle">
-                        <span style="color: #777;">{{item.subTitle}}</span>
-                    </template>
-                    <template slot="extra">
-                        <a :href="item.href" target="_blank">
-                            访问
-                        </a>
-                    </template>
-                </el-result>
-            </el-col>
-
+            <el-card v-for="(group,groupIndex) in menuGroups" shadow="never" style="margin-bottom: 12px;">
+                <div slot="header">
+                    <span>{{group.group}}</span>
+                </div>
+                <el-col :span="6" v-for="item in group.menus">
+                    <el-result  :title="item.title" style="border: solid 1px #777; border-radius: 5px;margin-bottom: 15px;">
+                        <template slot="icon">
+                            <a :href="item.href" target="_blank">
+                                <i :class="item.icon||'el-icon-monitor'" style="font-size: 32px"></i>
+                            </a>
+                        </template>
+                        <template slot="subTitle">
+                            <span style="color: #777;">{{item.subTitle}}</span>
+                        </template>
+                        <template slot="extra">
+                            <a :href="item.href" target="_blank">
+                                访问
+                            </a>
+                        </template>
+                    </el-result>
+                </el-col>
+            </el-card>
         </el-row>
     </el-card>
 </div>
@@ -51,6 +62,7 @@
         components: {},
         data() {
             return {
+                filterText: '',
                 menuLoading: false,
                 menus: [],
                 additionalMenus: [],
@@ -59,43 +71,50 @@
                         title: '文生图（阿里）',
                         subTitle: '用文本描述生成图片或参考生成',
                         icon: 'el-icon-picture-outline',
-                        href: './image/text-2-image.html'
+                        href: './image/text-2-image.html',
+                        group: '10/Image generation',
                     },
                     {
                         title: 'HappyHorse 视频生成（阿里）',
                         subTitle: '文生视频、首帧视频、参考视频、视频编辑',
                         icon: 'el-icon-video-camera',
-                        href: './video/happyhorse/index.html'
+                        href: './video/happyhorse/index.html',
+                        group: '20/Video generation',
                     },
                     {
                         title: 'Vidu 视频生成（生数科技）',
                         subTitle: '文生视频、首帧视频、参考视频',
                         icon: 'el-icon-video-camera',
-                        href: './video/vidu/index.html'
+                        href: './video/vidu/index.html',
+                        group: '20/Video generation',
                     },
                     {
                         title: '爱诗 视频生成（字节）',
                         subTitle: '文生视频、首帧视频、参考视频',
                         icon: 'el-icon-video-camera',
-                        href: './video/pixverse/index.html'
+                        href: './video/pixverse/index.html',
+                        group: '20/Video generation',
                     },
                     {
                         title: '可灵 视频生成（快手）',
                         subTitle: '文生视频、首帧视频、参考视频',
                         icon: 'el-icon-video-camera',
-                        href: './video/kling/index.html'
+                        href: './video/kling/index.html',
+                        group: '20/Video generation',
                     },
                     {
                         title: '动作迁移/视频换人（阿里）',
                         subTitle: '将视频中的动作用图片中的人物进行表示',
                         icon: 'el-icon-coin',
-                        href: './video/wan/instead-people.html'
+                        href: './video/wan/instead-people.html',
+                        group: '30/Video fake',
                     },
                     {
                         title: '数字人视频（阿里）',
                         subTitle: '用音频和图片中的人物进行对口型',
                         icon: 'el-icon-user',
-                        href: './video/wan/digital-people.html'
+                        href: './video/wan/digital-people.html',
+                        group: '40/Video digital',
                     }
                 ]
             }
@@ -108,8 +127,41 @@
         },
         watch: {},
         computed: {
-            displayMenus() {
-                return this.menus.filter(e => !e.disabled)
+            menuGroups(){
+                let retMap={}
+                let menus=[...this.displayMenus]
+                for (let i = 0; i < menus.length; i++) {
+                    let item=menus[i]
+                    let group=item.group
+                    if(!group || group==''){
+                        group='10/Default'
+                    }
+                    group=group.substring(0,1).toUpperCase()+group.substring(1)
+                    if(!retMap[group]){
+                        retMap[group]=[]
+                    }
+                    retMap[group].push(item)
+                }
+                let retList=[];
+                Object.keys(retMap).forEach(key=>{
+                    retList.push({
+                        group: key,
+                        menus: retMap[key]
+                    })
+                })
+                retList.sort((v1,v2)=>v1.group.localeCompare(v2.group))
+                return retList;
+            },
+            displayMenus(){
+                return this.menus.filter(e=>!e.disabled)
+                    .filter(e=>{
+                        if(!this.filterText || this.filterText==''){
+                            return true;
+                        }
+                        let ltext = this.filterText.toLowerCase();
+                        return e.title.toLowerCase().indexOf(ltext)>=0
+                            || e.subTitle.toLowerCase().indexOf(ltext)>=0;
+                    })
             }
         },
         methods: {

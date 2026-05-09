@@ -10,6 +10,7 @@ import i2f.jdbc.JdbcResolver;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.xxljob.data.XxlJobInfoMeta;
@@ -159,6 +160,7 @@ public class XxlJobOpsController implements IOpsProvider {
                 .subTitle("执行XXL-JOB任务")
                 .icon("el-icon-timer")
                 .href("./xxl-job/index.html")
+                .group(OpsHomeMenuGroup.Schedule)
         );
     }
 

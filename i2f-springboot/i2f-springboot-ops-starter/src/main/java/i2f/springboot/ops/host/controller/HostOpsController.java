@@ -3,6 +3,7 @@ package i2f.springboot.ops.host.controller;
 import i2f.os.OsUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.host.data.HostOperateDto;
@@ -56,6 +57,7 @@ public class HostOpsController implements IOpsProvider {
                 .subTitle("连接/操作Host主机命令/文件")
                 .icon("el-icon-monitor")
                 .href("./host/index.html")
+                .group(OpsHomeMenuGroup.Host)
         );
     }
 

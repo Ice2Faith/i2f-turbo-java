@@ -9,6 +9,7 @@ import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.minio.data.MinioOperateDto;
@@ -63,6 +64,7 @@ public class MinioOpsController implements IOpsProvider {
                 .subTitle("Minio Oss 对象存储管理")
                 .icon("el-icon-receiving")
                 .href("./minio/index.html")
+                .group(OpsHomeMenuGroup.Oss)
         );
     }
 
