@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
-    <title>Ops - Kling</title>
+    <title>Ops - Tripo 3D</title>
     <link rel="icon" type="image/png" href="../../../favicon.png">
     <script src="../../../lib/vue/vue-2.js"></script>
     <script src="../../../lib/moment/moment-2.24.0.js"></script>
@@ -76,16 +76,16 @@
         <el-row style="width: 100%;">
             <el-form inline label-position="top" label-width="120px">
                 <el-row type="flex">
-                    <template v-if="klingWorkMode=='t2v'">
+                    <template v-if="form.workMode=='t2m'">
                         <el-col :span="24">
                             <el-form-item label="提示词" style="width: 100%;">
                                 <el-input type="textarea" :rows="12" v-model="form.prompt"/>
                             </el-form-item>
                         </el-col>
                     </template>
-                    <template v-if="klingWorkMode=='i2v'">
-                        <el-col :span="12">
-                            <el-form-item label="首帧图片">
+                    <template v-if="form.workMode=='i2m'">
+                        <el-col :span="24">
+                            <el-form-item label="参考图片">
                                 <el-upload
                                         class="upload-image"
                                         ref="uploadImage"
@@ -101,14 +101,9 @@
                                 </el-upload>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="提示词" style="width: 100%;">
-                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
-                            </el-form-item>
-                        </el-col>
                     </template>
-                    <template v-if="klingWorkMode=='r2v'">
-                        <el-col :span="12">
+                    <template v-if="form.workMode=='r2m'">
+                        <el-col :span="24">
                             <el-form-item label="参考图片">
                                 <el-upload
                                         class="upload-image"
@@ -126,77 +121,6 @@
                                 </el-upload>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="提示词" style="width: 100%;">
-                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
-                            </el-form-item>
-                        </el-col>
-                    </template>
-                    <template v-if="klingWorkMode=='edit'">
-                        <el-col :span="12">
-                            <el-row>
-                                <el-form-item label="人物">
-                                    <el-upload
-                                            class="upload-image"
-                                            ref="uploadImage"
-                                            style="display: inline-block;"
-                                            action="#"
-                                            list-type="picture-card"
-                                            :file-list="metas.uploadImageList"
-                                            accept=".png,.jpeg,.jpg"
-                                            :auto-upload="false"
-                                            :on-preview="handlePictureCardPreview"
-                                            :on-change="onUploadImageFileChange">
-                                        <i class="el-icon-plus"></i>
-                                    </el-upload>
-                                </el-form-item>
-                            </el-row>
-                            <el-row>
-                                <el-form-item label="视频">
-                                    <el-upload
-                                            class="upload-image"
-                                            ref="uploadVideo"
-                                            style="display: inline-block;"
-                                            action="#"
-                                            list-type="picture-card"
-                                            :file-list="metas.uploadVideoList"
-                                            accept=".mp4,.avi"
-                                            :auto-upload="false"
-                                            :on-change="onUploadVideoFileChange">
-                                        <i class="el-icon-upload"></i>
-                                        <div slot="file" slot-scope="{file}">
-
-                                            <video
-                                                    :src="file.url"
-                                                    class="el-upload-list__item-thumbnail"
-                                                    controls
-                                                    title="Output Video">
-                                                Output Video
-                                            </video>
-                                            <span class="el-upload-list__item-actions">
-                                        <span
-                                                class="el-upload-list__item-preview"
-                                                @click="handleVideoCardPreview(file)"
-                                        >
-                                          <i class="el-icon-zoom-in"></i>
-                                        </span>
-                                        <span
-                                                class="el-upload-list__item-delete"
-                                                @click="metas.uploadVideoList=[]"
-                                        >
-                                          <i class="el-icon-delete"></i>
-                                        </span>
-                                  </span>
-                                        </div>
-                                    </el-upload>
-                                </el-form-item>
-                            </el-row>
-                        </el-col>
-                        <el-col :span="12">
-                            <el-form-item label="提示词" style="width: 100%;">
-                                <el-input type="textarea" :rows="28" v-model="form.prompt"/>
-                            </el-form-item>
-                        </el-col>
                     </template>
                 </el-row>
             </el-form>
@@ -206,6 +130,16 @@
                 <el-row type="flex">
                     <el-col :span="10">
                         <el-row type="flex">
+                            <el-form-item label="模型">
+                                <el-select clearable filterable v-model="form.modelName" placeholder="模型">
+                                    <el-option
+                                            v-for="item in metas.modelList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
                             <el-form-item>
                                 <span slot="label">
                                     模式
@@ -214,8 +148,8 @@
                                              title="模型类型"
                                              width="360"
                                              trigger="hover">
-                                         切换不同模式之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
-                                         如果不重新上传，模型将会找不到上传的图片和视频。
+                                         切换不同模式之后，需要重新上传图片，因为使用的是临时文件，和模型是绑定的。<br/>
+                                         如果不重新上传，模型将会找不到上传的图片。
                                         <i slot="reference" class="el-icon-question"></i>
                                       </el-popover>
                                 </span>
@@ -229,45 +163,28 @@
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(klingWorkMode)" label="视频模式">
-                                <el-select clearable filterable v-model="form.mode" placeholder="视频模式">
+                            <el-form-item v-if="['t2m','i2m','r2m'].includes(form.workMode)" label="贴图质量">
+                                <el-select clearable filterable v-model="form.textureQuality" placeholder="贴图质量">
                                     <el-option
-                                            v-for="item in metas.parameterModeList"
+                                            v-for="item in metas.textureQualityList"
                                             :key="item.value"
                                             :label="item.label"
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
                             </el-form-item>
-                            <el-form-item v-if="['t2v','r2v'].includes(klingWorkMode)" label="宽高比">
-                                <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
+                            <el-form-item v-if="supportHigh && ['t2m','r2m'].includes(form.workMode)" label="几何精度">
+                                <el-select clearable filterable v-model="form.geometryQuality" placeholder="几何精度">
                                     <el-option
-                                            v-for="item in metas.ratioList"
+                                            v-for="item in metas.geometryQualityList"
                                             :key="item.value"
                                             :label="item.label"
                                             :value="item.value">
                                     </el-option>
                                 </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="klingSupportAudio && ['t2v','i2v','r2v','edit'].includes(klingWorkMode)"
-                                          label="声音控制">
-                                <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
-                                    <el-option
-                                            v-for="item in metas.audioSettingList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v','edit'].includes(klingWorkMode)" label="时长(s)">
-                                <el-input-number v-model="form.duration" :min="1" :max="klingMaxDuration" size="small"/>
                             </el-form-item>
                             <el-form-item label="选项">
-                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
-                                <el-checkbox v-if="['edit'].includes(klingWorkMode)" v-model="form.keepSound">
-                                    保持视频原声
-                                </el-checkbox>
+                                <el-checkbox v-model="form.texture">包含贴图</el-checkbox>
                             </el-form-item>
                         </el-row>
                     </el-col>
@@ -308,27 +225,38 @@
                     </el-form-item>
 
                     <el-form-item>
-                        <el-button v-loading="metas.resultVideoLoading" size="medium"
+                        <el-button v-loading="metas.resultModelLoading" size="medium"
                                    type="primary"
                                    @click="onQueryStatus">
                             查询
                         </el-button>
-                        <el-link v-if="metas.resultVideoUrl"
+                        <el-link v-if="metas.resultPreviewModelImageUrl"
                                  style="margin-left: 15px;"
-                                 :href="metas.resultVideoUrl"
+                                 :href="metas.resultPreviewModelImageUrl"
                                  type="success">
-                            下载<i class="el-icon-download el-icon--right"></i>
+                            下载预览图<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultPbrModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultPbrModelUrl"
+                                 type="success">
+                            下载PBR模型<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultBaseModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultBaseModelUrl"
+                                 type="success">
+                            下载无贴图模型<i class="el-icon-download el-icon--right"></i>
                         </el-link>
                     </el-form-item>
                 </el-row>
 
-                <video v-if="metas.resultVideoUrl"
-                       :src="metas.resultVideoUrl"
+                <img v-if="metas.resultPreviewModelImageUrl"
+                       :src="metas.resultPreviewModelImageUrl"
                        controls
                        style="max-width:100%;max-height: 960px;"
-                       title="Output Video">
-                    Output Video
-                </video>
+                       title="Output Image">
+                </img>
             </el-form>
 
 
@@ -340,15 +268,6 @@
         <img width="100%" :src="dialog.imagePreview.imageUrl" alt="">
     </el-dialog>
 
-    <el-dialog :visible.sync="dialog.videoPreview.show" style="text-align: center;">
-        <video v-if="dialog.videoPreview.videoUrl"
-               :src="dialog.videoPreview.videoUrl"
-               controls
-               style="max-width:100%;max-height: 960px;"
-               title="Video">
-            Video
-        </video>
-    </el-dialog>
 
 </div>
 </body>
@@ -368,28 +287,14 @@
         },
         watch: {},
         computed: {
-            klingWorkMode() {
-                let mode = this.form.workMode
-                return mode.split('_', 2)[0]
-            },
-            klingModelName() {
-                return this.metas.workModeModelNameMap[this.form.workMode].name;
-            },
-            klingMaxDuration() {
-                return this.metas.workModeModelNameMap[this.form.workMode].duration;
-            },
-            klingSupportAudio() {
-                return this.metas.workModeModelNameMap[this.form.workMode].audio;
-            },
+            supportHigh(){
+                return this.form.modelName.indexOf('Tripo-H') >=0;
+            }
         },
         methods: {
             handlePictureCardPreview(file) {
                 this.dialog.imagePreview.imageUrl = file.url;
                 this.dialog.imagePreview.show = true;
-            },
-            handleVideoCardPreview(file) {
-                this.dialog.videoPreview.videoUrl = file.url;
-                this.dialog.videoPreview.show = true;
             },
             getDefaultData() {
                 return {
@@ -403,68 +308,32 @@
                         cert: '',
                         resultTaskLoading: false,
                         resultTaskId: '',
-                        resultVideoLoading: false,
-                        resultVideoUrl: '',
+                        resultModelLoading: false,
+                        resultPbrModelUrl: '',
+                        resultBaseModelUrl: '',
+                        resultPreviewModelImageUrl: '',
                         uploadImageLoading: false,
                         uploadImageList: [],
-                        uploadVideoLoading: false,
-                        uploadVideoList: [],
                         langList: [
                             {label: 'Text', value: 'text'},
                         ],
+                        modelList:[
+                            {label:'高精度3D模型生成，输出产物最高200万面',value:'Tripo/Tripo-H3.1'},
+                            {label:'专业3D模型生成，输出产物最高2万面，速度更快',value:'Tripo/Tripo-P1.0'}
+                        ],
                         workModeList: [
-                            {label: '文生视频 Omni', value: 't2v_omni'},
-                            {label: '文生视频', value: 't2v_gen'},
-                            {label: '首帧生视频 Omni', value: 'i2v_omni'},
-                            {label: '首帧生视频', value: 'i2v_gen'},
-                            {label: '多图参考生视频 Omni', value: 'r2v_omni'},
-                            {label: '视频编辑 Omni', value: 'edit_omni'},
+                            {label: '文生模型', value: 't2m'},
+                            {label: '图生模型', value: 'i2m'},
+                            {label: '多图参考生模型', value: 'r2m'},
                         ],
-                        parameterModeList: [
-                            {label: '专业模式，输出视频分辨率为1080P', value: 'pro'},
-                            {label: '标准模式，输出视频分辨率为720P', value: 'std'},
+                        textureQualityList: [
+                            {label: '标清贴图', value: 'standard'},
+                            {label: '高清贴图', value: 'detailed'},
                         ],
-                        ratioList: [
-                            {label: '16:9', value: '16:9'},
-                            {label: '9:16', value: '9:16'},
-                            {label: '1:1', value: '1:1'},
+                        geometryQualityList: [
+                            {label: '标准版。生成的3D模型最高150万面', value: 'standard'},
+                            {label: '超清版。生成的3D模型最高200万面', value: 'ultra'},
                         ],
-                        audioSettingList: [
-                            {label: '有声', value: true},
-                            {label: '无声', value: false},
-                        ],
-                        workModeModelNameMap: {
-                            't2v_omni': {
-                                name: 'kling/kling-v3-omni-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                            't2v_gen': {
-                                name: 'kling/kling-v3-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                            'i2v_omni': {
-                                name: 'kling/kling-v3-omni-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                            'i2v_gen': {
-                                name: 'kling/kling-v3-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                            'r2v_omni': {
-                                name: 'kling/kling-v3-omni-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                            'edit_omni': {
-                                name: 'kling/kling-v3-omni-video-generation',
-                                duration: 15,
-                                audio: true,
-                            },
-                        },
                     },
                     drawer: {},
                     dialog: {
@@ -472,25 +341,18 @@
                             show: false,
                             imageUrl: ''
                         },
-                        videoPreview: {
-                            show: false,
-                            videoUrl: ''
-                        }
                     },
                     form: {
                         meta: {
                             apiKey: '',
                         },
-                        workMode: 'i2v_gen',
+                        workMode: 't2m',
+                        modelName: 'Tripo/Tripo-P1.0',
                         prompt: '',
                         imageUrlList: [],
-                        videoUrl: '',
-                        mode: 'std',
-                        ratio: '16:9',
-                        duration: 10,
-                        watermark: false,
-                        audioSetting: true,
-                        keepSound: true,
+                        textureQuality: 'standard',
+                        geometryQuality: 'standard',
+                        texture: true,
                     }
                 }
             },
@@ -525,7 +387,7 @@
 
             },
             loadData() {
-                let content = localStorage.getItem('ops:dashscope:video:kling:data');
+                let content = localStorage.getItem('ops:dashscope:d3:tripo-3d:data');
                 if (!content) {
                     return
                 }
@@ -555,7 +417,7 @@
                     obj.metas.cert = '';
                     obj.form.meta.apiKey = '';
                     let content = JSON.stringify(obj);
-                    localStorage.setItem('ops:dashscope:video:kling:data', content);
+                    localStorage.setItem('ops:dashscope:d3:tripo-3d:data', content);
                 } catch (e) {
                     // console.log(e)
                 }
@@ -640,7 +502,7 @@
             },
             assignDashScopeMeta(req) {
                 req.meta = this.form.meta;
-                req.modelName = this.klingModelName;
+                req.modelName = this.form.modelName;
                 if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key')
                 }
@@ -673,7 +535,7 @@
                 this.form.imageUrlList = this.metas.uploadImageList.map(e => e.saveUrl).filter(e => e && e != '')
             },
             onUploadImageFileChange(file) {
-                if (this.klingWorkMode != 'r2v') {
+                if (this.form.workMode != 'r2m') {
                     this.metas.uploadImageList = []
                 }
                 this.metas.uploadImageList.push(file)
@@ -683,24 +545,7 @@
                     type: 'warning',
                     dangerouslyUseHTMLString: true
                 }).then(() => {
-                    this.doUploadFile(file, 'image')
-                }).catch(() => {
-                    this.$message({
-                        type: 'info',
-                        message: '已取消执行'
-                    });
-                });
-            },
-            onUploadVideoFileChange(file) {
-                this.metas.uploadVideoList = []
-                this.metas.uploadVideoList.push(file)
-                this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
-                    confirmButtonText: '确定',
-                    cancelButtonText: '取消',
-                    type: 'warning',
-                    dangerouslyUseHTMLString: true
-                }).then(() => {
-                    this.doUploadFile(file, 'video')
+                    this.doUploadFile(file)
                 }).catch(() => {
                     this.$message({
                         type: 'info',
@@ -709,11 +554,7 @@
                 });
             },
             doUploadFile(file, type) {
-                if (type == 'image') {
-                    this.metas.uploadImageLoading = true;
-                } else if (type == 'video') {
-                    this.metas.uploadVideoLoading = true;
-                }
+                this.metas.uploadImageLoading = true;
                 try {
                     this.md5ForFile(file.raw)
                         .then(md5 => {
@@ -740,11 +581,8 @@
                                     //console.log(res.data)
                                     let resp = this.transferRecv(res.data.data)
                                     file.saveUrl = resp;
-                                    if (type == 'image') {
-                                        this.updateUploadImageUrls()
-                                    } else if (type == 'video') {
-                                        this.form.videoUrl = resp;
-                                    }
+                                    this.updateUploadImageUrls()
+
                                     // console.log(resp)
                                     this.$message.success('操作成功')
                                 } else {
@@ -753,28 +591,16 @@
                             }).catch(err => {
                                 this.messageError(err.errorMessage || err.message || '操作失败', 300)
                             }).finally(() => {
-                                if (type == 'image') {
-                                    this.metas.uploadImageLoading = false;
-                                } else if (type == 'video') {
-                                    this.metas.uploadVideoLoading = false;
-                                }
+                                this.metas.uploadImageLoading = false;
                             })
                         }).catch(err => {
                         this.messageError(err.errorMessage || err.message || '操作失败', 300)
                     }).finally(() => {
-                        if (type == 'image') {
-                            this.metas.uploadImageLoading = false;
-                        } else if (type == 'video') {
-                            this.metas.uploadVideoLoading = false;
-                        }
+                        this.metas.uploadImageLoading = false;
                     })
                 } catch (err) {
                     this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                    if (type == 'image') {
-                        this.metas.uploadImageLoading = false;
-                    } else if (type == 'video') {
-                        this.metas.uploadVideoLoading = false;
-                    }
+                    this.metas.uploadImageLoading = false;
                 }
             },
             onExecute() {
@@ -796,96 +622,54 @@
                 this.metas.resultTaskLoading = true;
                 try {
                     let payload = {}
-                    if (this.klingWorkMode == 't2v') {
+                    if (this.form.workMode == 't2m') {
                         payload = {
                             input: {
                                 prompt: this.form.prompt
                             },
                             parameters: {
-                                mode: this.form.mode,
-                                aspect_ratio: this.form.ratio,
-                                duration: this.form.duration,
-                                watermark: this.form.watermark,
-                                ...(this.klingSupportAudio ? {
-                                    audio: this.form.audioSetting,
-                                } : {})
+                                texture_quality: this.form.textureQuality,
                             }
                         }
-                    } else if (this.klingWorkMode == 'i2v') {
+                    } else if (this.form.workMode == 'i2m') {
                         payload = {
                             input: {
-                                prompt: this.form.prompt,
-                                media: [
-                                    {
-                                        type: "first_frame",
-                                        url: this.form.imageUrlList[0]
-                                    }
-                                ]
+                                image: this.form.imageUrlList[0]
                             },
                             parameters: {
-                                mode: this.form.mode,
-                                duration: this.form.duration,
-                                watermark: this.form.watermark,
-                                ...(this.klingSupportAudio ? {
-                                    audio: this.form.audioSetting,
-                                } : {})
+                                texture_quality: this.form.textureQuality,
                             }
                         }
-                    } else if (this.klingWorkMode == 'r2v') {
-                        let mediaList = this.form.imageUrlList.map(e => {
-                            return {
-                                type: "refer",
-                                url: e
-                            }
-                        })
+                    } else if (this.form.workMode == 'r2m') {
                         payload = {
                             input: {
-                                prompt: this.form.prompt,
-                                media: [
-                                    ...mediaList
-                                ],
-                                multi_shot: false,
-                                shot_type: "intelligence",
-                                multi_prompt: [],
-                                element_list: [],
+                                images: this.form.imageUrlList
                             },
                             parameters: {
-                                mode: this.form.mode,
-                                aspect_ratio: this.form.ratio,
-                                duration: this.form.duration,
-                                watermark: this.form.watermark,
-                                ...(this.klingSupportAudio ? {
-                                    audio: this.form.audioSetting,
-                                } : {})
-                            }
-                        }
-                    } else if (this.form.workMode == 'edit') {
-                        payload = {
-                            input: {
-                                prompt: this.form.prompt,
-                                media: [
-                                    {
-                                        type: "base",
-                                        url: this.form.videoUrl,
-                                        keep_original_sound: this.form.keepSound ? 'yes' : 'no'
-                                    },
-                                    {
-                                        type: "refer",
-                                        url: this.form.imageUrlList[0]
-                                    }
-                                ]
-                            },
-                            parameters: {
-                                mode: this.form.mode,
-                                duration: this.form.duration,
-                                watermark: this.form.watermark,
-                                ...(this.klingSupportAudio ? {
-                                    audio: this.form.audioSetting,
-                                } : {})
+                                texture_quality: this.form.textureQuality,
                             }
                         }
                     } else {
                         throw new Error('请选择运行模式！')
+                    }
+                    if(this.supportHigh){
+                        payload.parameters={
+                            ...payload.parameters,
+                            geometry_quality: this.form.geometry_quality,
+                        }
+                    }
+                    if(this.form.texture){
+                        payload.parameters={
+                            ...payload.parameters,
+                            pbr: true,
+                            texture: true
+                        }
+                    }else{
+                        payload.parameters={
+                            ...payload.parameters,
+                            pbr: false,
+                            texture: false
+                        }
                     }
                     let req = this.assignDashScopeMeta(payload);
                     this.$axios({
@@ -913,7 +697,7 @@
                 }
             },
             onQueryStatus() {
-                this.metas.resultVideoLoading = true;
+                this.metas.resultModelLoading = true;
                 try {
                     let req = this.assignDashScopeMeta({
                         taskId: this.metas.resultTaskId
@@ -934,25 +718,28 @@
                                     this.onQueryStatus()
                                 }, 5000)
                             } else if ('SUCCEEDED' == taskStatus) {
-                                this.metas.resultVideoUrl = resp.output.video_url
-                                this.metas.resultVideoLoading = false;
+                                let result=resp.output.results[0] || {}
+                                this.metas.resultPbrModelUrl=result.pbr_model_url;
+                                this.metas.resultBaseModelUrl=result.base_model_url;
+                                this.metas.resultPreviewModelImageUrl =result.rendered_image_url
+                                this.metas.resultModelLoading = false;
                             } else {
                                 let code = resp.output.code;
                                 let message = resp.output.message;
                                 this.messageError(`${code}: ${message}`, 300)
-                                this.metas.resultVideoLoading = false;
+                                this.metas.resultModelLoading = false;
                             }
                         } else {
                             this.messageError(res.data.msg, 300)
-                            this.metas.resultVideoLoading = false;
+                            this.metas.resultModelLoading = false;
                         }
                     }).catch(err => {
                         this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                        this.metas.resultVideoLoading = false;
+                        this.metas.resultModelLoading = false;
                     })
                 } catch (err) {
                     this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                    this.metas.resultVideoLoading = false;
+                    this.metas.resultModelLoading = false;
                 }
             }
 
