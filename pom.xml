@@ -1634,6 +1634,7 @@
                             <nonFilteredFileExtension>ttf</nonFilteredFileExtension>
                             <nonFilteredFileExtension>woff</nonFilteredFileExtension>
                             <nonFilteredFileExtension>woff2</nonFilteredFileExtension>
+                            <nonFilteredFileExtension>hdr</nonFilteredFileExtension>
                         </nonFilteredFileExtensions>
                     </configuration>
                     <executions>
