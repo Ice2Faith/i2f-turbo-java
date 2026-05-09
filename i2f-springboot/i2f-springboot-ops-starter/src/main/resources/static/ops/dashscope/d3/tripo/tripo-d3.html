@@ -248,15 +248,29 @@
                                  type="success">
                             下载无贴图模型<i class="el-icon-download el-icon--right"></i>
                         </el-link>
+                        <el-divider direction="vertical"></el-divider>
+                        <el-link v-if="metas.resultPbrModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="getModelPreviewUrl(metas.resultPbrModelUrl)"
+                                 target="_blank"
+                                 type="success">
+                            查看PBR模型<i class="el-icon-view el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultBaseModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="getModelPreviewUrl(metas.resultBaseModelUrl)"
+                                 target="_blank"
+                                 type="success">
+                            查看无贴图模型<i class="el-icon-view el-icon--right"></i>
+                        </el-link>
                     </el-form-item>
                 </el-row>
 
                 <img v-if="metas.resultPreviewModelImageUrl"
                        :src="metas.resultPreviewModelImageUrl"
-                       controls
+                        @click="handlePictureCardPreview(metas.resultPreviewModelImageUrl)"
                        style="max-width:100%;max-height: 960px;"
-                       title="Output Image">
-                </img>
+                       title="Output Image"/>
             </el-form>
 
 
@@ -293,7 +307,7 @@
         },
         methods: {
             handlePictureCardPreview(file) {
-                this.dialog.imagePreview.imageUrl = file.url;
+                this.dialog.imagePreview.imageUrl = file.url || file;
                 this.dialog.imagePreview.show = true;
             },
             getDefaultData() {
@@ -741,6 +755,9 @@
                     this.messageError(err.errorMessage || err.message || '操作失败', 300)
                     this.metas.resultModelLoading = false;
                 }
+            },
+            getModelPreviewUrl(modelUrl){
+                return '../../../viewer/d3-viewer.html?modelType=glb&modelUrl='+encodeURIComponent(new URL('./download',window.location.href).href+'?modelUrl='+encodeURIComponent(modelUrl))
             }
 
         }

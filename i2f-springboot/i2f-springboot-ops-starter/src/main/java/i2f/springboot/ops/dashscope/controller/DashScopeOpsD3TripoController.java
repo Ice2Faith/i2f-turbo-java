@@ -2,6 +2,7 @@ package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.io.stream.StreamUtil;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -15,13 +16,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -97,6 +98,26 @@ public class DashScopeOpsD3TripoController {
             log.warn(e.getMessage(), e);
             return transfer.error(e);
         }
+    }
+
+    @GetMapping("/download")
+    @ResponseBody
+    public void downloadModel(@RequestParam("modelUrl") String modelUrl,
+                              HttpServletResponse response) throws Exception {
+
+        controller.getRestTemplate().execute(modelUrl, HttpMethod.GET,null,(resp)->{
+            MediaType contentType = resp.getHeaders().getContentType();
+            response.setContentType(contentType.getType());
+            long contentLength = resp.getHeaders().getContentLength();
+            response.setContentLengthLong(contentLength);
+
+            InputStream is = resp.getBody();
+            ServletOutputStream os = response.getOutputStream();
+            StreamUtil.streamCopy(is,os,true);
+
+            return null;
+        });
+
     }
 
 }
