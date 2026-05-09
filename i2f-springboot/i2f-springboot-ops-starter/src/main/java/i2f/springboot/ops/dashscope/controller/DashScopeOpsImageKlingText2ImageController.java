@@ -69,7 +69,7 @@ public class DashScopeOpsImageKlingText2ImageController {
 
         HttpEntity<Map<String, Object>> reqEntity = new HttpEntity<>(body, headers);
 
-        ResponseEntity<String> respEntity = controller.getRestTemplate().exchange("https://dashscope.aliyuncs.com/api/v1/services/aigc/video-generation/video-synthesis",
+        ResponseEntity<String> respEntity = controller.getRestTemplate().exchange("https://dashscope.aliyuncs.com/api/v1/services/aigc/image-generation/generation",
                 HttpMethod.POST,
                 reqEntity,
                 String.class);
