@@ -371,6 +371,7 @@ public class DefaultFunicResolver implements FunicResolver {
             return v != 0;
         });
         doubleOperatorFunctionMap.put("neq", doubleOperatorFunctionMap.get("!="));
+        doubleOperatorFunctionMap.put("ne", doubleOperatorFunctionMap.get("!="));
         doubleOperatorFunctionMap.put("<>", doubleOperatorFunctionMap.get("!="));
         doubleOperatorFunctionMap.put("in", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);

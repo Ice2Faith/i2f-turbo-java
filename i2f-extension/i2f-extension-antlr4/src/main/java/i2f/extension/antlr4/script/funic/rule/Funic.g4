@@ -57,6 +57,7 @@ fragment CH_E: E ('-'|'+')?;
 
 fragment CH_0X: '0' X;
 fragment CH_0O: '0' O;
+fragment CH_0T: '0' T;
 fragment CH_0B: '0' B;
 
 
@@ -78,7 +79,7 @@ TERM_CONST_NUMBER_HEX:
 
 
 TERM_CONST_NUMBER_OTC:
-    CH_0O (TERM_OTC_LETTER)+ L?
+    (CH_0O|CH_0T) (TERM_OTC_LETTER)+ L?
     ;
 
 
@@ -152,6 +153,7 @@ KW_LTE: 'lte';
 KW_GT: 'gt';
 KW_LT: 'lt';
 KW_NEQ: 'neq';
+KW_NE: 'ne';
 KW_EQ: 'eq';
 KW_IN: 'in';
 KW_INSTANCEOF: 'instanceof';
@@ -250,7 +252,7 @@ logicalLinkOperatorPart:
 
 
 compareOperatorPart:
-    ('===' | KW_TEQ | '!==' | KW_TNEQ | '>' | KW_GT | '>=' | KW_GTE | '<' | KW_LT | '<=' | KW_LTE | '==' | KW_EQ | '!=' | '<>' | KW_NEQ | KW_IN | (KW_NOT KW_IN) | KW_INSTANCEOF | KW_IS )
+    ('===' | KW_TEQ | '!==' | KW_TNEQ | '>' | KW_GT | '>=' | KW_GTE | '<' | KW_LT | '<=' | KW_LTE | '==' | KW_EQ | '!=' | '<>' | KW_NEQ | KW_NE | KW_IN | (KW_NOT KW_IN) | KW_INSTANCEOF | KW_IS )
 ;
 
 bitOperatorPart:
