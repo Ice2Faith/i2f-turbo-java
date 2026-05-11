@@ -13,6 +13,7 @@ import i2f.extension.antlr4.script.funic.lang.exception.throwable.FunicThrowData
 import i2f.extension.antlr4.script.funic.lang.lambda.FunicLambda;
 import i2f.extension.antlr4.script.funic.lang.method.FunicMethod;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
+import i2f.extension.antlr4.script.funic.lang.resolver.FunicSupplier;
 import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.extension.antlr4.script.funic.lang.value.impl.*;
@@ -301,11 +302,14 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     ListFunicValue secondValue = (ListFunicValue) visitLogicalLinkOperatorPart(secondCtx);
                     String operator = (String) secondValue.getList().get(0);
 
-                    FunicParser.ExpressContext rightCtx = (FunicParser.ExpressContext) ctx.getChild(2);
-                    FunicValue rightValue = visitExpress(rightCtx);
+                    FunicSupplier<Object> rightSupplier = () -> {
+                        FunicParser.ExpressContext rightCtx = (FunicParser.ExpressContext) ctx.getChild(2);
+                        FunicValue rightValue = visitExpress(rightCtx);
 
-                    Object value = rightValue.get();
-                    Object ret = resolver.doubleOperator(firstValue.get(), operator, value, this);
+                        Object value = rightValue.get();
+                        return value;
+                    };
+                    Object ret = resolver.doubleOperator(firstValue.get(), operator, rightSupplier, this);
                     return DefaultFunicValue.builder()
                             .node(ctx)
                             .value(ret)
@@ -1271,6 +1275,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 ret = visitScriptBlock(scriptCtx);
             } catch (FunicControlException e) {
                 if (e instanceof FunicContinueException) {
+                    // 增量语句在continue时，需要执行
+                    if (nextCtx != null) {
+                        FunicValue value = visitExpress(nextCtx);
+                    }
                     continue;
                 }
                 if (e instanceof FunicBreakException) {
