@@ -50,6 +50,8 @@ TERM_CONST_STRING_RENDER_SINGLE: R '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 TERM_CONST_STRING: '"' (ESCAPED_CHAR | ~[\\"])* '"';
 TERM_CONST_STRING_SINGLE: '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
+TERM_CONST_VISITOR: '$' ('!')? '{' (~[}])* '}';
+
 // 数值
 fragment CH_E: E ('-'|'+')?;
 
@@ -163,6 +165,8 @@ KW_SYNCHRONIZED: 'synchronized';
 
 KW_IMPORT: 'import';
 
+KW_DEBUGGER: 'debugger';
+
 IDENTIFIER: ID;
 
 WS       : [ \t\r\n]+ -> skip ;
@@ -217,10 +221,28 @@ express:
     | express thirdOperateRightPart // 三目运算符
     | express pipelineFunctionExpress+ // 管道函数
     | scriptBlock // 语句块
+    | debuggerExpress
+    | KW_DEF extractExpress assignRightPart // 等号赋值表达式
+    | extractExpress assignRightPart // 等号赋值表达式
     | KW_DEF express assignRightPart // 等号赋值表达式
     | express assignRightPart // 等号赋值表达式
     | valueSegment // 字面值常量
 ;
+
+debuggerExpress:
+    KW_DEBUGGER fullName? ('(' express ')')?;
+
+extractExpress:
+    '#' '{' extractPairs? '}'
+    ;
+
+extractPairs:
+    extractPair (',' extractPair)*
+    ;
+
+extractPair:
+    (express) (':' (express))?
+    ;
 
 logicalLinkOperatorPart:
     ('&&' | KW_AND | '||' | KW_OR )
@@ -254,7 +276,7 @@ prefixOperatorPart:
 // :: 用来访问表示上一个管道传递过来的成员函数
 // 参数，支持使用 $_ 作为占位符表示传递过来的参数作为第几个值(暂未实现)，默认第一个值
 pipelineFunctionExpress:
-   '|>' (staticFunctionCall | IDENTIFIER | '::'? (globalFunctionCall|IDENTIFIER)) // 函数链
+   '|>' (staticFunctionCall | staticFieldValue | IDENTIFIER | '::'? (globalFunctionCall|IDENTIFIER)) // 函数链
 ;
 
 synchronizedExpress:
@@ -326,7 +348,7 @@ breakExpress:
 
 // for(i 0...20) 这种循环
 forRangeExpress:
-    KW_FOR '(' IDENTIFIER constNumber '...' constNumber ')' scriptBlock
+    KW_FOR '(' IDENTIFIER express '...' express ')' scriptBlock
 ;
 
 // for(i=0;i<10;i++) 这种循环
@@ -361,7 +383,7 @@ scriptBlock:
 
 // a as int.class 进行类型转换
 castAsRightPart:
-    KW_AS typeClass
+    KW_AS (typeClass| express)
 ;
 
 // {a:1,...user,b}
@@ -386,7 +408,7 @@ thirdOperateRightPart:
 ;
 
 instanceFieldValueRightPart:
-    ('.'|'.?') IDENTIFIER // 实例属性
+    ('.'|'?.') IDENTIFIER // 实例属性
 ;
 
 circleExpress:
@@ -473,9 +495,14 @@ typeMember:
 
 valueSegment:
     constValue
+    | refValue
     | variableValue
     | typeClass
 ;
+
+refValue:
+    TERM_CONST_VISITOR
+    ;
 
 variableValue:
     IDENTIFIER

@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.resolver;
 
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.invokable.method.IMethod;
 
@@ -62,4 +63,6 @@ public interface FunicResolver {
     boolean onPreRegistryContextImportPackage(String packageName, DefaultFunicVisitor visitor);
 
     boolean onPreRegisterContextGlobalMethod(IMethod method, DefaultFunicVisitor visitor);
+
+    void onDebugger(String label, Object value, FunicParser.DebuggerExpressContext ctx, DefaultFunicVisitor visitor);
 }

@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
@@ -50,6 +50,62 @@ public interface FunicListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitExpress(FunicParser.ExpressContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link FunicParser#debuggerExpress}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterDebuggerExpress(FunicParser.DebuggerExpressContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link FunicParser#debuggerExpress}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitDebuggerExpress(FunicParser.DebuggerExpressContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link FunicParser#extractExpress}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterExtractExpress(FunicParser.ExtractExpressContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link FunicParser#extractExpress}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitExtractExpress(FunicParser.ExtractExpressContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link FunicParser#extractPairs}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterExtractPairs(FunicParser.ExtractPairsContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link FunicParser#extractPairs}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitExtractPairs(FunicParser.ExtractPairsContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link FunicParser#extractPair}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterExtractPair(FunicParser.ExtractPairContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link FunicParser#extractPair}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitExtractPair(FunicParser.ExtractPairContext ctx);
 
     /**
      * Enter a parse tree produced by {@link FunicParser#logicalLinkOperatorPart}.
@@ -848,6 +904,20 @@ public interface FunicListener extends ParseTreeListener {
      * @param ctx the parse tree
      */
     void exitValueSegment(FunicParser.ValueSegmentContext ctx);
+
+    /**
+     * Enter a parse tree produced by {@link FunicParser#refValue}.
+     *
+     * @param ctx the parse tree
+     */
+    void enterRefValue(FunicParser.RefValueContext ctx);
+
+    /**
+     * Exit a parse tree produced by {@link FunicParser#refValue}.
+     *
+     * @param ctx the parse tree
+     */
+    void exitRefValue(FunicParser.RefValueContext ctx);
 
     /**
      * Enter a parse tree produced by {@link FunicParser#variableValue}.

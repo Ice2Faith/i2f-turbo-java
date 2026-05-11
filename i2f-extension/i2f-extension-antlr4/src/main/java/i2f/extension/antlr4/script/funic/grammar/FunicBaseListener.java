@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
@@ -66,6 +66,78 @@ public class FunicBaseListener implements FunicListener {
      */
     @Override
     public void exitExpress(FunicParser.ExpressContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterExtractExpress(FunicParser.ExtractExpressContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitExtractExpress(FunicParser.ExtractExpressContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterExtractPairs(FunicParser.ExtractPairsContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitExtractPairs(FunicParser.ExtractPairsContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterExtractPair(FunicParser.ExtractPairContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitExtractPair(FunicParser.ExtractPairContext ctx) {
     }
 
     /**
@@ -1092,6 +1164,24 @@ public class FunicBaseListener implements FunicListener {
      */
     @Override
     public void exitValueSegment(FunicParser.ValueSegmentContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterRefValue(FunicParser.RefValueContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitRefValue(FunicParser.RefValueContext ctx) {
     }
 
     /**

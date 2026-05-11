@@ -21,15 +21,15 @@ public class FunicBuiltinFunctions {
         this.visitor = visitor;
     }
 
-    public Object eval(String formula) {
-        return Funic.script(formula, visitor);
+    public Object eval(CharSequence formula) {
+        return Funic.script(formula == null ? null : String.valueOf(formula), visitor);
     }
 
-    public String render(String text) {
+    public String render(CharSequence text) {
         if (text == null) {
             return null;
         }
-        return visitor.getResolver().renderString(text, visitor);
+        return visitor.getResolver().renderString(text == null ? null : String.valueOf(text), visitor);
     }
 
     public Object assign(Object obj, Object... args) {
@@ -136,5 +136,26 @@ public class FunicBuiltinFunctions {
     @FunicFunction(value = "decimal")
     public BigDecimal to_decimal(Object value) {
         return (BigDecimal) cast(value, BigDecimal.class);
+    }
+
+    public void println(Object... args) {
+        for (Object arg : args) {
+            System.out.print(arg);
+            System.out.print(" ");
+        }
+        System.out.println();
+    }
+
+    public void printf(CharSequence format, Object... args) {
+        System.out.printf(format == null ? null : String.valueOf(format), args);
+        System.out.println();
+    }
+
+    public String repeat(CharSequence str, int count) {
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < count; i++) {
+            builder.append(str);
+        }
+        return builder.toString();
     }
 }

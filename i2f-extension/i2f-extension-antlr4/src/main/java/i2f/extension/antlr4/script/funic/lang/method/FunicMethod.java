@@ -2,6 +2,10 @@ package i2f.extension.antlr4.script.funic.lang.method;
 
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
+import i2f.extension.antlr4.script.funic.lang.exception.control.FunicBreakException;
+import i2f.extension.antlr4.script.funic.lang.exception.control.FunicContinueException;
+import i2f.extension.antlr4.script.funic.lang.exception.control.FunicReturnException;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
@@ -79,8 +83,22 @@ public class FunicMethod implements IMethod {
         for (Map.Entry<String, CopyOnWriteArrayList<IMethod>> entry : registryMethods.entrySet()) {
             newVisitor.getRegistryMethods().put(entry.getKey(), new CopyOnWriteArrayList<>(entry.getValue()));
         }
-        FunicValue retValue = newVisitor.visitScriptBlock(body);
-        return retValue.get();
+        try {
+            FunicValue retValue = newVisitor.visitScriptBlock(body);
+            return retValue.get();
+        } catch (FunicControlException e) {
+            if (e instanceof FunicBreakException) {
+
+            } else if (e instanceof FunicContinueException) {
+
+            } else if (e instanceof FunicReturnException) {
+                FunicReturnException returnEx = (FunicReturnException) e;
+                if (returnEx.isHasRetValue()) {
+                    return returnEx.getRetValue();
+                }
+            }
+        }
+        return null;
     }
 
     @Override

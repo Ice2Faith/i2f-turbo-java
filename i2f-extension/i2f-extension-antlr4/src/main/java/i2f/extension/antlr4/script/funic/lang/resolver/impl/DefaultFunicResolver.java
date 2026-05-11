@@ -1,12 +1,14 @@
 package i2f.extension.antlr4.script.funic.lang.resolver.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicBuiltinFunctions;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.method.FunicMethod;
+import i2f.extension.antlr4.script.funic.lang.method.GlobalMoveInstanceMethod;
 import i2f.extension.antlr4.script.funic.lang.operator.DoubleOperatorFunction;
 import i2f.extension.antlr4.script.funic.lang.operator.PrefixOperatorFunction;
 import i2f.extension.antlr4.script.funic.lang.operator.SuffixOperatorFunction;
@@ -16,6 +18,7 @@ import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.iterator.iterator.Iterators;
 import i2f.match.regex.RegexUtil;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.RichConverter;
 import i2f.typeof.TypeOf;
@@ -30,6 +33,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 /**
@@ -105,6 +110,16 @@ public class DefaultFunicResolver implements FunicResolver {
             if (value == null) {
                 throw new FunicThrowException("math incr cannot be null");
             }
+            if (value instanceof AtomicInteger) {
+                AtomicInteger num = (AtomicInteger) value;
+                num.incrementAndGet();
+                return num;
+            }
+            if (value instanceof AtomicLong) {
+                AtomicLong num = (AtomicLong) value;
+                num.incrementAndGet();
+                return num;
+            }
             BigDecimal num = ofBigDecimal(value);
             BigDecimal ret = num.add(BigDecimal.ONE, MATH_CONTEXT);
             return castAsNumberType(ret, value);
@@ -113,6 +128,16 @@ public class DefaultFunicResolver implements FunicResolver {
             value = unwrapSupplierValue(value);
             if (value == null) {
                 throw new FunicThrowException("math decr cannot be null");
+            }
+            if (value instanceof AtomicInteger) {
+                AtomicInteger num = (AtomicInteger) value;
+                num.decrementAndGet();
+                return num;
+            }
+            if (value instanceof AtomicLong) {
+                AtomicLong num = (AtomicLong) value;
+                num.decrementAndGet();
+                return num;
             }
             BigDecimal num = ofBigDecimal(value);
             BigDecimal ret = num.subtract(BigDecimal.ONE, MATH_CONTEXT);
@@ -149,6 +174,16 @@ public class DefaultFunicResolver implements FunicResolver {
             if (value == null) {
                 throw new FunicThrowException("math incr cannot be null");
             }
+            if (value instanceof AtomicInteger) {
+                AtomicInteger num = (AtomicInteger) value;
+                num.incrementAndGet();
+                return num;
+            }
+            if (value instanceof AtomicLong) {
+                AtomicLong num = (AtomicLong) value;
+                num.incrementAndGet();
+                return num;
+            }
             BigDecimal num = ofBigDecimal(value);
             BigDecimal ret = num.add(BigDecimal.ONE, MATH_CONTEXT);
             return castAsNumberType(ret, value);
@@ -157,6 +192,16 @@ public class DefaultFunicResolver implements FunicResolver {
             value = unwrapSupplierValue(value);
             if (value == null) {
                 throw new FunicThrowException("math decr cannot be null");
+            }
+            if (value instanceof AtomicInteger) {
+                AtomicInteger num = (AtomicInteger) value;
+                num.decrementAndGet();
+                return num;
+            }
+            if (value instanceof AtomicLong) {
+                AtomicLong num = (AtomicLong) value;
+                num.decrementAndGet();
+                return num;
             }
             BigDecimal num = ofBigDecimal(value);
             BigDecimal ret = num.subtract(BigDecimal.ONE, MATH_CONTEXT);
@@ -234,6 +279,7 @@ public class DefaultFunicResolver implements FunicResolver {
             if (rightValue == null) {
                 throw new FunicThrowException("math add right cannot be null");
             }
+
             if (ObjectConvertor.isDateType(leftValue.getClass())
                     && ObjectConvertor.isNumericType(rightValue.getClass())) {
                 LocalDateTime date = (LocalDateTime) ObjectConvertor.tryConvertAsType(leftValue, LocalDateTime.class);
@@ -667,6 +713,9 @@ public class DefaultFunicResolver implements FunicResolver {
         try {
             return ReflectResolver.valueGet(target, fieldName);
         } catch (Exception e) {
+            if (e instanceof NullPointerException) {
+                throw new FunicThrowException("null object cannot get field[" + fieldName + "] value: " + e.getMessage(), e);
+            }
             if (e instanceof RuntimeException) {
                 throw (RuntimeException) e;
             }
@@ -844,6 +893,10 @@ public class DefaultFunicResolver implements FunicResolver {
     public Object invokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
         VISITOR.set(visitor);
         try {
+            Reference<?> ref = beforeInvokeInstanceMethod(target, methodName, args, visitor);
+            if (ref != null && ref.hasValue()) {
+                return ref.get();
+            }
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             List<IMethod> list = new ArrayList<>();
             List<IMethod> expandList = getExpandInstanceMethod(target, methodName, visitor);
@@ -868,8 +921,28 @@ public class DefaultFunicResolver implements FunicResolver {
         }
     }
 
+    public Reference<?> beforeInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return Reference.nop();
+    }
+
     public List<IMethod> getExpandInstanceMethod(Object target, String methodName, DefaultFunicVisitor visitor) {
-        return new ArrayList<>();
+        List<IMethod> ret = new ArrayList<>();
+        if (target == null) {
+            return ret;
+        }
+        Class<?> targetType = target.getClass();
+        List<IMethod> methods = searchGlobalMethod(methodName, visitor);
+        for (IMethod item : methods) {
+            Class<?>[] parameterTypes = item.getParameterTypes();
+            if (parameterTypes.length == 0) {
+                continue;
+            }
+            Class<?> firstType = parameterTypes[0];
+            if (TypeOf.typeOfAny(targetType, firstType)) {
+                ret.add(new GlobalMoveInstanceMethod(item));
+            }
+        }
+        return ret;
     }
 
     public Object doExecMethod(Object target, IMethod method, List<Object> args, DefaultFunicVisitor visitor) throws Exception {
@@ -880,6 +953,10 @@ public class DefaultFunicResolver implements FunicResolver {
     public Object invokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
         VISITOR.set(visitor);
         try {
+            Reference<?> ref = beforeInvokeGlobalMethod(methodName, args, visitor);
+            if (ref != null && ref.hasValue()) {
+                return ref.get();
+            }
             List<IMethod> methods = searchGlobalMethod(methodName, visitor);
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             IMethod method = ReflectResolver.matchExecMethod(methods, argsList);
@@ -904,6 +981,10 @@ public class DefaultFunicResolver implements FunicResolver {
         } finally {
             VISITOR.remove();
         }
+    }
+
+    public Reference<?> beforeInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return Reference.nop();
     }
 
     public List<IMethod> searchGlobalMethod(String methodName, DefaultFunicVisitor visitor) {
@@ -932,6 +1013,10 @@ public class DefaultFunicResolver implements FunicResolver {
     public Object invokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
         VISITOR.set(visitor);
         try {
+            Reference<?> ref = beforeInvokeStaticMethod(type, methodName, args, visitor);
+            if (ref != null && ref.hasValue()) {
+                return ref.get();
+            }
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             Method method = ReflectResolver.matchMethod(type, methodName, argsList.toArray(new Object[0]));
             return doExecMethod(null, new JdkMethod(method), argsList, visitor);
@@ -943,6 +1028,10 @@ public class DefaultFunicResolver implements FunicResolver {
         } finally {
             VISITOR.remove();
         }
+    }
+
+    public Reference<?> beforeInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return Reference.nop();
     }
 
     @Override
@@ -1199,5 +1288,10 @@ public class DefaultFunicResolver implements FunicResolver {
     @Override
     public boolean onPreRegisterContextGlobalMethod(IMethod method, DefaultFunicVisitor visitor) {
         return true;
+    }
+
+    @Override
+    public void onDebugger(String label, Object value, FunicParser.DebuggerExpressContext ctx, DefaultFunicVisitor visitor) {
+        System.out.println("debugger [" + label + "] triggered!");
     }
 }

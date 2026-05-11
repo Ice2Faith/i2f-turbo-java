@@ -4,6 +4,7 @@ import i2f.extension.antlr4.script.funic.grammar.FunicLexer;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.errors.DefaultAntlrErrorListener;
 import i2f.extension.antlr4.script.funic.lang.errors.DefaultErrorStrategy;
+import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
@@ -13,8 +14,11 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.lang.reflect.Method;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -31,6 +35,9 @@ public class Funic {
 
     static {
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
+
+        registryMethods(System.out, e -> e.getName().toLowerCase().contains("print"));
+        registryMethods(Math.class, e -> !e.getName().toLowerCase().contains("extra"));
     }
 
 
@@ -55,6 +62,35 @@ public class Funic {
     public static Object script(String formula, DefaultFunicVisitor visitor) {
         FunicParser.RootContext root = parse(formula);
         return script(root, visitor);
+    }
+
+    public static void registryMethods(Class<?> clazz) {
+        registryMethods(clazz, null);
+    }
+
+    public static void registryMethods(Class<?> clazz, Predicate<Method> filter) {
+        List<IMethod> methods = FunicFunctionHelper.ofMethods(clazz, filter);
+        registryMethods(methods);
+    }
+
+    public static void registryMethods(Object target) {
+        registryMethods(target);
+    }
+
+    public static void registryMethods(Object target, Predicate<Method> filter) {
+        List<IMethod> methods = FunicFunctionHelper.ofInstanceMethods(target, filter);
+        registryMethods(methods);
+    }
+
+    public static void registryMethods(Iterable<? extends IMethod> iterable) {
+        if (iterable == null) {
+            return;
+        }
+        for (IMethod item : iterable) {
+            String name = item.getName();
+            CopyOnWriteArrayList<IMethod> list = GLOBAL_METHODS.computeIfAbsent(name, key -> new CopyOnWriteArrayList<>());
+            list.add(item);
+        }
     }
 
     public static Object script(FunicParser.RootContext tree, DefaultFunicVisitor visitor) {

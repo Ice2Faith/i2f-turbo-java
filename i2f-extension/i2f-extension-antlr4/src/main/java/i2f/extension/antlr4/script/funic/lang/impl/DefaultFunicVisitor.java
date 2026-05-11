@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.funic.lang.impl;
 
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.grammar.FunicVisitor;
+import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
 import i2f.extension.antlr4.script.funic.lang.exception.control.FunicBreakException;
@@ -86,6 +87,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
         }
+        if (ret == null) {
+            return NullFunicValue.builder()
+                    .node(ctx)
+                    .build();
+        }
         return ret;
     }
 
@@ -115,6 +121,41 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicValue firstValue = visitExpress(firstCtx);
 
             int count = ctx.getChildCount();
+            if (count >= 2) {
+                ParseTree second = ctx.getChild(1);
+                if (second instanceof FunicParser.PipelineFunctionExpressContext) {
+                    List<FunicParser.PipelineFunctionExpressContext> pipeList = new ArrayList<>();
+                    for (int i = 0; i < count; i++) {
+                        ParseTree item = ctx.getChild(i);
+                        if (item instanceof FunicParser.PipelineFunctionExpressContext) {
+                            pipeList.add((FunicParser.PipelineFunctionExpressContext) item);
+                        }
+                    }
+
+                    Object ret = firstValue.get();
+
+                    for (FunicParser.PipelineFunctionExpressContext nextCtx : pipeList) {
+                        PipelineFunctionFunicValue pipeValue = (PipelineFunctionFunicValue) visitPipelineFunctionExpress(nextCtx);
+                        PipelineFunctionFunicValue.Type type = pipeValue.getType();
+                        if (type == PipelineFunctionFunicValue.Type.INSTANCE) {
+                            ret = resolver.invokeInstanceMethod(ret, pipeValue.getName(), pipeValue.getArgs(), this);
+                        } else if (type == PipelineFunctionFunicValue.Type.STATIC) {
+                            List<Map.Entry<String, Object>> args = pipeValue.getArgs();
+                            args.add(0, new AbstractMap.SimpleEntry<>(null, ret));
+                            ret = resolver.invokeStaticMethod(pipeValue.getClazz(), pipeValue.getName(), args, this);
+                        } else if (type == PipelineFunctionFunicValue.Type.GLOBAL) {
+                            List<Map.Entry<String, Object>> args = pipeValue.getArgs();
+                            args.add(0, new AbstractMap.SimpleEntry<>(null, ret));
+                            ret = resolver.invokeGlobalMethod(pipeValue.getName(), args, this);
+                        }
+                    }
+
+                    return DefaultFunicValue.builder()
+                            .node(ctx)
+                            .value(ret)
+                            .build();
+                }
+            }
             if (count == 2) {
                 ParseTree second = ctx.getChild(1);
                 if (second instanceof FunicParser.InstanceFunctionCallRightPartContext) {
@@ -133,7 +174,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     KeyPairFunicValue secondValue = (KeyPairFunicValue) visitInstanceFieldValueRightPart(secondCtx);
                     String operator = secondValue.getKey();
                     if (firstValue.get() == null) {
-                        if (".?".equals(operator)) {
+                        if ("?.".equals(operator)) {
                             return NullFunicValue.builder()
                                     .node(ctx)
                                     .build();
@@ -285,41 +326,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                             .value(ret)
                             .build();
                 }
-            } else {
-                ParseTree second = ctx.getChild(1);
-                if (second instanceof FunicParser.PipelineFunctionExpressContext) {
-                    List<FunicParser.PipelineFunctionExpressContext> pipeList = new ArrayList<>();
-                    for (int i = 0; i < count; i++) {
-                        ParseTree item = ctx.getChild(i);
-                        if (item instanceof FunicParser.PipelineFunctionExpressContext) {
-                            pipeList.add((FunicParser.PipelineFunctionExpressContext) item);
-                        }
-                    }
-
-                    Object ret = firstValue.get();
-
-                    for (FunicParser.PipelineFunctionExpressContext nextCtx : pipeList) {
-                        PipelineFunctionFunicValue pipeValue = (PipelineFunctionFunicValue) visitPipelineFunctionExpress(nextCtx);
-                        PipelineFunctionFunicValue.Type type = pipeValue.getType();
-                        if (type == PipelineFunctionFunicValue.Type.INSTANCE) {
-                            ret = resolver.invokeInstanceMethod(ret, pipeValue.getName(), pipeValue.getArgs(), this);
-                        } else if (type == PipelineFunctionFunicValue.Type.STATIC) {
-                            List<Map.Entry<String, Object>> args = pipeValue.getArgs();
-                            args.add(0, new AbstractMap.SimpleEntry<>(null, ret));
-                            ret = resolver.invokeStaticMethod(pipeValue.getClazz(), pipeValue.getName(), args, this);
-                        } else if (type == PipelineFunctionFunicValue.Type.GLOBAL) {
-                            List<Map.Entry<String, Object>> args = pipeValue.getArgs();
-                            args.add(0, new AbstractMap.SimpleEntry<>(null, ret));
-                            ret = resolver.invokeGlobalMethod(pipeValue.getName(), args, this);
-                        }
-                    }
-
-                    return DefaultFunicValue.builder()
-                            .node(ctx)
-                            .value(ret)
-                            .build();
-                }
             }
+        }
+        if (child instanceof FunicParser.ExtractExpressContext) {
+            FunicParser.ExtractExpressContext extraCtx = (FunicParser.ExtractExpressContext) child;
+            FunicParser.AssignRightPartContext rightCtx = (FunicParser.AssignRightPartContext) ctx.getChild(1);
+            return processExtraExpress(extraCtx, rightCtx);
         }
         if (child instanceof FunicParser.NewInstanceExpressContext) {
             FunicParser.NewInstanceExpressContext nextCtx = (FunicParser.NewInstanceExpressContext) child;
@@ -448,14 +460,25 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.ScriptBlockContext nextCtx = (FunicParser.ScriptBlockContext) child;
             return visitScriptBlock(nextCtx);
         }
+        if (child instanceof FunicParser.DebuggerExpressContext) {
+            FunicParser.DebuggerExpressContext nextCtx = (FunicParser.DebuggerExpressContext) child;
+            return visitDebuggerExpress(nextCtx);
+        }
         if (child instanceof TerminalNode) {
             TerminalNode nextCtx = (TerminalNode) child;
             TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(nextCtx);
             String text = terminalValue.getText();
             if ("def".equals(text)) {
-                FunicParser.ExpressContext leftCtx = (FunicParser.ExpressContext) ctx.getChild(1);
-                FunicParser.AssignRightPartContext rightCtx = (FunicParser.AssignRightPartContext) ctx.getChild(2);
-                return getAssignValue(null, ctx, leftCtx, rightCtx);
+                ParseTree second = ctx.getChild(1);
+                if (second instanceof FunicParser.ExpressContext) {
+                    FunicParser.ExpressContext leftCtx = (FunicParser.ExpressContext) second;
+                    FunicParser.AssignRightPartContext rightCtx = (FunicParser.AssignRightPartContext) ctx.getChild(2);
+                    return getAssignValue(null, ctx, leftCtx, rightCtx);
+                } else if (second instanceof FunicParser.ExtractExpressContext) {
+                    FunicParser.ExtractExpressContext extraCtx = (FunicParser.ExtractExpressContext) second;
+                    FunicParser.AssignRightPartContext rightCtx = (FunicParser.AssignRightPartContext) ctx.getChild(2);
+                    return processExtraExpress(extraCtx, rightCtx);
+                }
             }
         }
         if (child instanceof FunicParser.ValueSegmentContext) {
@@ -464,6 +487,124 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         }
 
         throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support key-value node!");
+    }
+
+    @Override
+    public FunicValue visitDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
+        FunicValue ret = null;
+        String label = null;
+        Object value = null;
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof FunicParser.FullNameContext) {
+                FunicParser.FullNameContext labelCtx = (FunicParser.FullNameContext) ctx.getChild(1);
+                FullNameFunicValue labelValue = (FullNameFunicValue) visitFullName(labelCtx);
+                label = labelValue.getName();
+            } else if (child instanceof FunicParser.ExpressContext) {
+                FunicParser.ExpressContext condCtx = (FunicParser.ExpressContext) ctx.getChild(1);
+                FunicValue condValue = visitExpress(condCtx);
+                ret = condValue;
+                value = condValue.get();
+            }
+        }
+
+        resolver.onDebugger(label, value, ctx, this);
+
+        if (ret == null) {
+            return NullFunicValue.builder()
+                    .node(ctx)
+                    .build();
+        }
+        return ret;
+    }
+
+    public FunicValue processExtraExpress(FunicParser.ExtractExpressContext extraCtx,
+                                          FunicParser.AssignRightPartContext rightCtx) {
+        FunicValue ret = null;
+
+        KeyPairFunicValue assignValue = (KeyPairFunicValue) visitAssignRightPart(rightCtx);
+        String operator = assignValue.getKey();
+        if (!"=".equalsIgnoreCase(operator)) {
+            throw new FunicEvaluateException("extra express only support '=' operator, but found '" + operator + "'!");
+        }
+        ListFunicValue extraValue = (ListFunicValue) visitExtractExpress(extraCtx);
+        Object value = assignValue.getValue();
+        DefaultFunicVisitor rightVisitor = new DefaultFunicVisitor(value, resolver);
+
+        List<Object> extraList = extraValue.getList();
+        for (Object item : extraList) {
+            List<FunicParser.ExpressContext> pairList = (List<FunicParser.ExpressContext>) item;
+            FunicParser.ExpressContext keyCtx = null;
+            FunicParser.ExpressContext valueCtx = null;
+            if (pairList.size() > 1) {
+                keyCtx = pairList.get(0);
+                valueCtx = pairList.get(1);
+            } else {
+                keyCtx = pairList.get(0);
+                valueCtx = keyCtx;
+            }
+
+            FunicValue rightExtraValue = rightVisitor.visitExpress(valueCtx);
+            ret = rightExtraValue;
+
+            FunicValue leftExtraValue = visitExpress(keyCtx);
+            if (!(leftExtraValue instanceof ParentFunicValue)) {
+                throw new FunicEvaluateException("extra express key cannot be assigned!");
+            }
+            ParentFunicValue leftParentValue = (ParentFunicValue) leftExtraValue;
+            resolver.setSquareFieldValue(leftParentValue.getParent(),
+                    leftParentValue.getKey(),
+                    rightExtraValue.get(),
+                    this);
+        }
+        if (ret == null) {
+            return NullFunicValue.builder()
+                    .node(extraCtx)
+                    .build();
+        }
+        return ret;
+    }
+
+    @Override
+    public FunicValue visitExtractExpress(FunicParser.ExtractExpressContext ctx) {
+        FunicParser.ExtractPairsContext pairsCtx = (FunicParser.ExtractPairsContext) ctx.getChild(2);
+        return visitExtractPairs(pairsCtx);
+    }
+
+    @Override
+    public FunicValue visitExtractPairs(FunicParser.ExtractPairsContext ctx) {
+        List<Object> list = new ArrayList<>();
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof FunicParser.ExtractPairContext) {
+                FunicParser.ExtractPairContext nextCtx = (FunicParser.ExtractPairContext) child;
+                ListFunicValue nextValue = (ListFunicValue) visitExtractPair(nextCtx);
+                list.add(nextValue.getList());
+            }
+        }
+        return ListFunicValue.builder()
+                .node(ctx)
+                .value(list)
+                .build();
+    }
+
+    @Override
+    public FunicValue visitExtractPair(FunicParser.ExtractPairContext ctx) {
+        List<Object> list = new ArrayList<>();
+        int count = ctx.getChildCount();
+        for (int i = 0; i < count; i++) {
+            ParseTree child = ctx.getChild(i);
+            if (child instanceof FunicParser.ExpressContext) {
+                FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) child;
+                list.add(nextCtx);
+            }
+        }
+        return ListFunicValue.builder()
+                .node(ctx)
+                .value(list)
+                .build();
     }
 
     public FunicValue getAssignValue(FunicValue leftValue, RuleNode triggerNode, FunicParser.ExpressContext leftCtx, FunicParser.AssignRightPartContext rightCtx) {
@@ -566,6 +707,8 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 ret.setType(PipelineFunctionFunicValue.Type.GLOBAL);
             } else if (child instanceof FunicParser.StaticFunctionCallContext) {
                 ret.setType(PipelineFunctionFunicValue.Type.STATIC);
+            } else if (child instanceof FunicParser.StaticFieldValueContext) {
+                ret.setType(PipelineFunctionFunicValue.Type.STATIC);
             } else if (child instanceof FunicParser.GlobalFunctionCallContext) {
                 ret.setType(PipelineFunctionFunicValue.Type.GLOBAL);
             }
@@ -592,6 +735,14 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             ret.setClazz(null);
             ret.setName(nextValue.getName());
             ret.setArgs(nextValue.getArgs());
+        } else if (child instanceof FunicParser.StaticFieldValueContext) {
+            FunicParser.StaticFieldValueContext nextCtx = (FunicParser.StaticFieldValueContext) child;
+            KeyPairFunicValue nextValue = getStaticFieldMetaValue(nextCtx);
+            Class<?> invokeClass = (Class<?>) nextValue.getValue();
+            String invokeName = nextValue.getKey();
+            ret.setClazz(invokeClass);
+            ret.setName(invokeName);
+            ret.setArgs(new ArrayList<>());
         }
 
         return ret;
@@ -788,7 +939,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             bodyCtx = (FunicParser.ScriptBlockContext) ctx.getChild(3);
         } else {
             returnCtx = (FunicParser.FunctionDeclareReturnContext) ctx.getChild(3);
-            bodyCtx = (FunicParser.ScriptBlockContext) ctx.getChild(3);
+            bodyCtx = (FunicParser.ScriptBlockContext) ctx.getChild(4);
         }
         TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
         String name = nameValue.getText();
@@ -941,6 +1092,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                                     || type.isAssignableFrom(clazz)) {
                                 Object bakValue = resolver.getFieldValue(context, nextValue.getName(), this);
                                 try {
+                                    resolver.setFieldValue(context, nextValue.getName(), e, this);
                                     FunicValue value = visitScriptBlock(nextValue.getScriptCtx());
                                     break;
                                 } finally {
@@ -1030,15 +1182,15 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     @Override
     public FunicValue visitForRangeExpress(FunicParser.ForRangeExpressContext ctx) {
         TerminalNode nameCtx = (TerminalNode) ctx.getChild(2);
-        FunicParser.ConstNumberContext leftCtx = (FunicParser.ConstNumberContext) ctx.getChild(3);
-        FunicParser.ConstNumberContext rightCtx = (FunicParser.ConstNumberContext) ctx.getChild(5);
+        FunicParser.ExpressContext leftCtx = (FunicParser.ExpressContext) ctx.getChild(3);
+        FunicParser.ExpressContext rightCtx = (FunicParser.ExpressContext) ctx.getChild(5);
         FunicParser.ScriptBlockContext scriptCtx = (FunicParser.ScriptBlockContext) ctx.getChild(7);
         TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
         String name = nameValue.getText();
-        NumberFunicValue leftValue = (NumberFunicValue) visitConstNumber(leftCtx);
-        long left = leftValue.getLong();
-        NumberFunicValue rightValue = (NumberFunicValue) visitConstNumber(rightCtx);
-        long right = rightValue.getLong();
+        FunicValue leftValue = visitExpress(leftCtx);
+        long left = ((BigDecimal) resolver.convertType(leftValue.get(), BigDecimal.class, this)).longValue();
+        FunicValue rightValue = visitExpress(rightCtx);
+        long right = ((BigDecimal) resolver.convertType(rightValue.get(), BigDecimal.class, this)).longValue();
         AtomicReference<Object> bakNameValue = null;
         FunicValue ret = null;
         try {
@@ -1291,9 +1443,24 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
     @Override
     public FunicValue visitCastAsRightPart(FunicParser.CastAsRightPartContext ctx) {
-        FunicParser.TypeClassContext nextCtx = (FunicParser.TypeClassContext) ctx.getChild(1);
-        TypeFunicValue nextValue = (TypeFunicValue) visitTypeClass(nextCtx);
-        return nextValue;
+        ParseTree child = ctx.getChild(1);
+        if (child instanceof FunicParser.TypeClassContext) {
+            FunicParser.TypeClassContext nextCtx = (FunicParser.TypeClassContext) child;
+            TypeFunicValue nextValue = (TypeFunicValue) visitTypeClass(nextCtx);
+            return nextValue;
+        } else if (child instanceof FunicParser.ExpressContext) {
+            FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) child;
+            FunicValue nextValue = visitExpress(nextCtx);
+            if (nextValue instanceof TypeFunicValue) {
+                return nextValue;
+            }
+            Object typeObj = nextValue.get();
+            return TypeFunicValue.builder()
+                    .node(ctx)
+                    .value(typeObj == null ? Object.class : typeObj.getClass())
+                    .build();
+        }
+        throw new FunicEvaluateException("cast express un-support child type:" + child.getClass());
     }
 
     @Override
@@ -1342,7 +1509,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             ParentFunicValue value = (ParentFunicValue) visitVariableValue(nextCtx);
             return KeyPairFunicValue.builder()
                     .node(ctx)
-                    .key(null)
+                    .key((String) value.getKey())
                     .value(value.get())
                     .build();
         } else if (count == 3) {
@@ -1555,8 +1722,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 .build();
     }
 
-    @Override
-    public FunicValue visitStaticFieldValue(FunicParser.StaticFieldValueContext ctx) {
+    public KeyPairFunicValue getStaticFieldMetaValue(FunicParser.StaticFieldValueContext ctx) {
         FunicParser.TypeMemberContext memberCtx = (FunicParser.TypeMemberContext) ctx.getChild(0);
         TypeFunicValue memberValue = (TypeFunicValue) visitTypeMember(memberCtx);
         Class<?> type = memberValue.getType();
@@ -1564,10 +1730,24 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         TerminalNode nameCtx = (TerminalNode) ctx.getChild(1);
         TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
         String name = nameValue.getText();
+        return KeyPairFunicValue.builder()
+                .node(ctx)
+                .key(name)
+                .value(type)
+                .build();
+    }
+
+    @Override
+    public FunicValue visitStaticFieldValue(FunicParser.StaticFieldValueContext ctx) {
+        KeyPairFunicValue metaValue = getStaticFieldMetaValue(ctx);
+        String name = metaValue.getKey();
+        Class<?> type = (Class<?>) metaValue.getValue();
 
         Object value = resolver.getStaticFieldOrEnum(type, name, this);
-        return DefaultFunicValue.builder()
+        return ParentFunicValue.builder()
                 .node(ctx)
+                .parent(type)
+                .key(name)
                 .value(value)
                 .build();
     }
@@ -1767,9 +1947,49 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         } else if (child instanceof FunicParser.TypeClassContext) {
             FunicParser.TypeClassContext nextCtx = (FunicParser.TypeClassContext) child;
             return visitTypeClass(nextCtx);
+        } else if (child instanceof FunicParser.RefValueContext) {
+            FunicParser.RefValueContext nextCtx = (FunicParser.RefValueContext) child;
+            return visitRefValue(nextCtx);
         }
         throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support value segment node!");
 
+    }
+
+    @Override
+    public FunicValue visitRefValue(FunicParser.RefValueContext ctx) {
+        ParseTree child = ctx.getChild(0);
+        TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal((TerminalNode) child);
+        String text = terminalValue.getText();
+        text = text.substring(0, text.length() - 1);
+        boolean null2empty = false;
+        if (text.startsWith("$!{")) {
+            null2empty = true;
+            text = text.substring(3);
+        } else {
+            null2empty = false;
+            text = text.substring(2);
+        }
+        FunicParser.RootContext context = Funic.parse(text);
+        FunicValue contextValue = visitRoot(context);
+        Object value = contextValue.get();
+        if (value == null) {
+            if (null2empty) {
+                value = "";
+            }
+        }
+        if (contextValue instanceof ParentFunicValue) {
+            ParentFunicValue parentValue = (ParentFunicValue) contextValue;
+            return ParentFunicValue.builder()
+                    .node(ctx)
+                    .parent(parentValue.getParent())
+                    .key(parentValue.getKey())
+                    .value(value)
+                    .build();
+        }
+        return DefaultFunicValue.builder()
+                .node(ctx)
+                .value(value)
+                .build();
     }
 
     @Override
@@ -1852,7 +2072,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         ParseTree child = ctx.getChild(0);
         FunicValue nextValue = visitTerminal((TerminalNode) child);
         TerminalFunicValue terminalValue = (TerminalFunicValue) nextValue;
-        String text = (String) terminalValue.get();
+        String text = (String) terminalValue.get() + " ";
         String[] lines = text.split("\n");
         List<String> features = new ArrayList<>();
         StringBuilder builder = new StringBuilder();
@@ -1871,13 +2091,13 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 // drop
             } else {
                 builder.append(lines[i]);
-                if (i < lines.length - 1) {
+                if (i < lines.length - 2) {
                     builder.append("\n");
                 }
             }
         }
 
-        Object value = resolver.multilineString(text, features, this);
+        Object value = resolver.multilineString(builder.toString(), features, this);
         return DefaultFunicValue.builder()
                 .node(ctx)
                 .value(value)
@@ -1892,7 +2112,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicValue value = visitConstFloat(nextCtx);
             return NumericFunicValue.builder()
                     .node(ctx)
-                    .value(value)
+                    .value(value.get())
                     .build();
         } else if (child instanceof FunicParser.ConstNumberContext) {
             FunicParser.ConstNumberContext nextCtx = (FunicParser.ConstNumberContext) child;

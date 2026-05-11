@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
@@ -44,6 +44,50 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      */
     @Override
     public T visitExpress(FunicParser.ExpressContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitExtractExpress(FunicParser.ExtractExpressContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitExtractPairs(FunicParser.ExtractPairsContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitExtractPair(FunicParser.ExtractPairContext ctx) {
         return visitChildren(ctx);
     }
 
@@ -671,6 +715,17 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
      */
     @Override
     public T visitValueSegment(FunicParser.ValueSegmentContext ctx) {
+        return visitChildren(ctx);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation returns the result of calling
+     * {@link #visitChildren} on {@code ctx}.</p>
+     */
+    @Override
+    public T visitRefValue(FunicParser.RefValueContext ctx) {
         return visitChildren(ctx);
     }
 

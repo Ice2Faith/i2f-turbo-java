@@ -1,4 +1,4 @@
-// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
@@ -35,6 +35,38 @@ public interface FunicVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitExpress(FunicParser.ExpressContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link FunicParser#debuggerExpress}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitDebuggerExpress(FunicParser.DebuggerExpressContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link FunicParser#extractExpress}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractExpress(FunicParser.ExtractExpressContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link FunicParser#extractPairs}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractPairs(FunicParser.ExtractPairsContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link FunicParser#extractPair}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitExtractPair(FunicParser.ExtractPairContext ctx);
 
     /**
      * Visit a parse tree produced by {@link FunicParser#logicalLinkOperatorPart}.
@@ -491,6 +523,14 @@ public interface FunicVisitor<T> extends ParseTreeVisitor<T> {
      * @return the visitor result
      */
     T visitValueSegment(FunicParser.ValueSegmentContext ctx);
+
+    /**
+     * Visit a parse tree produced by {@link FunicParser#refValue}.
+     *
+     * @param ctx the parse tree
+     * @return the visitor result
+     */
+    T visitRefValue(FunicParser.RefValueContext ctx);
 
     /**
      * Visit a parse tree produced by {@link FunicParser#variableValue}.
