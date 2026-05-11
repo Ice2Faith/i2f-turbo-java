@@ -44,6 +44,7 @@ public static Object script(String formula, Object context);
 ```shell
 1;
 123;
+1_000_000;   // 支持使用下划线分隔提高可读性
 0xabc;
 0o754;
 0b10110;
@@ -51,6 +52,7 @@ public static Object script(String formula, Object context);
 
 - 默认情况下，不带小数点的，都是int类型
 - 其中0x表示16进制，0o表示8进制，0b表示2进制
+- 数值字面量允许使用下划线 `_` 作为分隔符（如 `1_000_000`），仅用于提高可读性，不影响数值
 - long书写
 
 ```shell
@@ -70,7 +72,7 @@ public static Object script(String formula, Object context);
 ```
 
 - 默认情况下，带小数点的都是double类型
-- 没有0x/0t/0b这种写法
+- 没有0x/0o/0b这种写法
 - 支持科学计数法
 - float书写
 
@@ -246,6 +248,25 @@ $!{要访问的变量路径}
 R"age: $!{user.age}";
 ```
 
+### 安全访问运算符
+
+- 定义
+
+```shell
+对象?.字段名
+```
+
+- 当左侧对象为 null 时，不抛出 NullPointerException，而是直接返回 null
+- 举例
+
+```shell
+user?.name;
+user?.address?.city;
+images?.defaultImage;
+```
+
+- 与普通 `.` 的区别：普通 `.` 在对象为 null 时会抛出空指针异常
+
 ### 赋值语句
 
 - 修改context里面的值，通过赋值语句修改
@@ -288,6 +309,32 @@ cnt-=1;
 cnt*=2;
 cnt/=2;
 cnt%=10;
+```
+
+### def 变量声明语句
+
+- 使用 `def` 关键字可以显式声明一个变量
+- 功能上等同于普通赋值语句，语义上表示"此处新声明一个变量"
+- 实际上，对于本脚本而言，def这个关键字不是必须的
+- 严格意义上来说，对于脚本而言，变量未声明也是可以使用的，默认就是null值
+- 定义
+
+```shell
+def 变量路径 = 变量值
+```
+
+- 举例
+
+```shell
+def name = "zhang";
+def count = 0;
+def result = calculate(x, y);
+```
+
+- `def` 也可以用于解包赋值语句
+
+```shell
+def #{name:userName, age:detail.age} = user;
 ```
 
 ### 解包语句
@@ -368,9 +415,12 @@ tmp=getUserInfo();
 - 操作符说明
 
 ```shell
-! 取反
-not 取反
-- 取负数,由于可能和其他操作符发生结合性问题，如果在复杂的表达式中使用，请使用括号包裹
+! 取反（逻辑非）
+not 取反（逻辑非），! 的别名
+- 取负数，由于可能和其他操作符发生结合性问题，如果在复杂的表达式中使用，请使用括号包裹
+~ 位取反（按位取反），对整数类型按位取反
+++ 前置自增，先自增，再返回新值（要求操作数可赋值）
+-- 前置自减，先自减，再返回新值（要求操作数可赋值）
 ```
 
 - 举例
@@ -380,6 +430,10 @@ not 取反
 not flag;
 -1;
 -cnt;
+~0xFF;
+~flags;
+++i;
+--i;
 ```
 
 ### 后置操作符表达式
@@ -393,7 +447,10 @@ not flag;
 - 操作符说明
 
 ```shell
-% 百分数
+! 阶乘，计算整数阶乘，结果为整数类型
+% 百分数，将数值除以100
+++ 后置自增，先返回原值，再将变量自增（要求操作数可赋值）
+-- 后置自减，先返回原值，再将变量自减（要求操作数可赋值）
 ```
 
 - 举例
@@ -401,6 +458,9 @@ not flag;
 ```shell
 15%;
 per%;
+5!;
+i++;
+i--;
 ```
 
 ### 三元运算符表达式
@@ -457,7 +517,7 @@ v_index=3;
 iter[v_index];
 ```
 
-### 逗号表达式
+### 语句块（逗号表达式）
 
 - 因为脚本的性质，实际上并不需要逗号表达式
 - 如果你确实需要类似逗号表达式的功能
@@ -478,8 +538,8 @@ iter[v_index];
 ```shell
 m={ a+1; b-1; a+b };
 // 等价依次执行
-// a+1; 
-// b-1; 
+// a+1;
+// b-1;
 // m=a+b;
 
 a={1;2;3 };
@@ -500,7 +560,7 @@ a={1;2;3 };
 - 管道函数定义
 
 ```shell
-// 普通管道函数
+// 普通管道函数（全局函数）
 函数名称(形式参数列表)
 // 例如
 trim()
@@ -522,9 +582,13 @@ String.valueOf(前一个值)
 :: 函数名称(形式参数列表)
 // 例如
 ::getName()
-// 实际调用 
+// 实际调用
 前一个值.getName()
 
+// 管道函数也可以不带括号，在函数无参数时
+trim
+::length
+String::valueOf
 ```
 
 - 管道函数表达式，是一种语法糖，现代编程语言中开始使用
@@ -584,6 +648,24 @@ new Date();
 new org.apache.User(1L,"xxx",status,decode(str,"是",1,0));
 ```
 
+### 创建数组
+
+- 定义
+
+```shell
+new 元素类型[长度]
+```
+
+- 元素类型可以是基本类型也可以是类名
+- 长度必须是整数字面量
+- 举例
+
+```shell
+new int[10];
+new String[5];
+new java.util.Date[3];
+```
+
 ### 函数调用
 
 - 函数名需要携带类名，也就是全限定函数名
@@ -601,7 +683,7 @@ new org.apache.User(1L,"xxx",status,decode(str,"是",1,0));
 ```
 
 - 全局函数定义
-    - 全局函数式通过注册方式注册到环境中的
+  - 全局函数是通过注册方式注册到环境中的
     - 直接通过函数名的方式进行调用，无类名限定
 
 ```shell
@@ -680,44 +762,64 @@ int 'xxx'.repeat(int count);
 表达式 运算符 表达式
 ```
 
-- 运算符含义说明
+- 运算符含义说明（按优先级从高到低分组）
 
 ```shell
+*  乘
+/  除
+// 整除，结果向零取整为整数
+%  取模（右侧为整数，结果一定为整数）
+
++  加；若任意一侧为字符串，则执行字符串拼接
+-  减
+
+（位运算符，操作数视为long整型）
+<< 左移
+>> 右移（有符号右移）
+>>> 无符号右移
+
+（位运算）
+^  按位异或
+&  按位与
+|  按位或
+
+（比较运算）
+>  大于
+gt 大于
 >= 大于等于
 gte 大于等于
+<  小于
+lt 小于
 <= 小于等于
 lte 小于等于
-!= 不等于
-ne 不等于
-<> 不等于
-neq 不等于
-== 相等
+
+（类型不严格匹配，数值类型之间可互相比较）
 eq 相等
-> 大于
-gt 大于 
-< 小于
-lt 小于
-in 元素在其中
-not in 元素不在其中
-&& 逻辑与
-and 逻辑与
-|| 逻辑或
-or 逻辑或
+!= 不等于
+neq 不等于
+<> 不等于
+
+（严格相等，类型必须相同才比较值）
+teq 严格相等（=== 的别名）
+!== 严格不等于
+tneq 严格不等于（!== 的别名）
+
+in 元素在其中（右侧需为可迭代对象）
+not in 元素不在其中（右侧需为可迭代对象）
+
+instanceof 类型判断，前面的值是否是后面值的类型（任意一侧为null则返回false）
+is  类型判断（instanceof 的别名）
+
 as 类型转换运算符，前面的值转换为后面的值类型
-  定义：值 as (值|class)
-  例如: str as int.class;str as cnt;str as 1;
-  注意：左边为null,则允许直接转换；右边为null，则视为Object类型；不能转换，则抛出类转换异常
-is 类型判断运算符，前面的值是否是后面的值的类型，
-  定义：值 is (值|class)
-  例如：${str} is string.class;${str} is ${name};${obj}.getClass() is string.class;
-  注意：前后任意值为null,结果都为false
-instanceof 用法和is一样，是is的别名
-+ 加
-- 减
-* 乘
-/ 除
-// 整除
-% 取模，结果一定是int
+   定义：值 as (值|class)
+   例如: str as int.class; str as cnt; str as 1;
+   注意：左边为null,则允许直接转换；右边为null，则视为Object类型；不能转换，则抛出类转换异常
+
+（逻辑运算）
+&& 逻辑与（短路求值）
+and 逻辑与（&& 的别名）
+|| 逻辑或（短路求值）
+or 逻辑或（|| 的别名）
 ```
 
 - 举例
@@ -725,6 +827,18 @@ instanceof 用法和is一样，是is的别名
 ```shell
 1>2;
 "xxx"+1;
+1<<2;
+0xFF & 0x0F;
+flags | 0x01;
+cnt ^ mask;
+value >>> 1;
+str is String.class;
+num is 1; // 可以直接使用值来判断同类型
+obj instanceof java.util.List.class;
+age as int.class;
+age as 1; // 可以直接使用值转换为目标类型
+1 === 1;
+1 !== 2;
 ```
 
 ### 静态变量/枚举值访问与赋值
@@ -747,10 +861,98 @@ java.sql.Types::VARCHAR;
 @java.sql.JDBCType.VARCHAR;
 java.sql.JDBCType::VARCHAR;
 // 赋值静态变量
-// 虽然语法上不限制对枚举值进行复制，但是这样的操作实际上是不可行的
+// 虽然语法上不限制对枚举值进行赋值，但是这样的操作实际上是不可行的
 // 因为枚举值不能够被赋值
 @DatabaseTypeHolder.TYPE=@DatabaseType.MYSQL;
 ```
+
+### 列表表达式
+
+- 定义
+
+```shell
+[ 元素1, 元素2, ... ]
+```
+
+- 支持使用 `...` 展开运算符将可迭代对象的元素展开内联到列表中
+
+```shell
+[ ...iterable, 额外元素 ]
+```
+
+- 举例
+
+```shell
+[1, 2, 3];
+["admin", "logger", 3, true];
+
+// 展开已有列表
+base = [1, 2, 3];
+extended = [...base, 4, 5];
+// 等价于 [1, 2, 3, 4, 5]
+```
+
+### 映射表达式
+
+- 定义
+
+```shell
+{ 键: 值, 键: 值, ... }
+```
+
+- 键名可以是标识符、字符串字面量或模板字符串
+- 支持使用 `...` 展开运算符将对象/Map 的键值对展开内联
+
+```shell
+{ ...obj, 额外键: 额外值 }
+```
+
+- 当只写变量名不写键名时，变量名同时作为键名
+
+```shell
+{ varName }  // 等价于 { varName: varName }
+```
+
+- 举例
+
+```shell
+{name: "zhang", age: 12};
+{'platform.prefer': "windows"};
+
+// 展开对象
+base = {a: 1, b: 2};
+ext = {...base, c: 3};
+// 等价于 {a:1, b:2, c:3}
+
+// 变量名直接作为键名
+x = 10;
+y = 20;
+{x, y};
+// 等价于 {x: 10, y: 20}
+```
+
+### import 导入语句
+
+- 用于向当前脚本上下文注册包名，以便后续使用短类名
+- 定义
+
+```shell
+import 包名
+import 包名.*
+```
+
+- 举例
+
+```shell
+import java.util;
+import java.util.*;
+import org.apache.commons.lang3;
+```
+
+- 导入后，对应包下的类就可以直接使用短类名
+- 例如导入 `java.util.*` 后，可以直接写 `ArrayList` 而不需要写 `java.util.ArrayList`
+-
+默认已导入的包：java.lang、java.util、java.util.concurrent、java.util.concurrent.atomic、java.time、java.math、java.text、java.sql、javax.sql、java.lang.reflect
 
 ### if-else条件语句
 
@@ -766,7 +968,7 @@ if(条件表达式){
 };
 ```
 
-- 其中 else if 可以运行使用别名 elif
+- 其中 else if 可以使用别名 elif
 - 也就是允许这样写
 
 ```shell
@@ -782,7 +984,7 @@ if(条件表达式){
 ```
 
 - 用法和Java中类似
-- 条件语句块比较特殊，不一样需要时boolean值
+- 条件语句块比较特殊，不一定需要是boolean值
 - 内部会自动转换为boolean值
 - 比如，null空值,""空字符串,{}空Map,[]空Collection都认为是false
 - 需要注意的是，if语句也算是一条语句，因此最后需要添加分号[;]结尾
@@ -831,7 +1033,7 @@ for(item : arr){
 sum;
 ```
 
-- 在这个例子中,介绍了大多数情况下foreach语句的使用场景
+- 在这个例子中，介绍了大多数情况下foreach语句的使用场景
 - 包含直接使用立即值[1,2,3,4,5]进行迭代和使用引用值 arr 进行迭代
 - 同时演示了结合if进行continue和break控制的场景
 
@@ -846,6 +1048,7 @@ for(初始化语句 ; 条件语句 ; 增量语句){
 ```
 
 - 和Java中常用的for-i循环的结构一致
+- 初始化语句、条件语句、增量语句均可省略（省略条件语句则为无限循环）
 - 需要注意的是，for语句也算是一条语句，因此最后需要添加分号[;]结尾
 - 举例
 
@@ -873,6 +1076,8 @@ for(迭代变量 开始值...结束值){
 ```
 
 - 和Python中常用的for-range循环的结构一致
+- 区间为左闭右开 [开始值, 结束值)，即不包含结束值
+- 支持递减迭代：若开始值大于结束值，则自动步进为-1
 - 需要注意的是，for语句也算是一条语句，因此最后需要添加分号[;]结尾
 - 举例
 
@@ -1004,6 +1209,9 @@ try{
 };
 ```
 
+- catch 块支持多异常类型用 `|` 分隔
+- catch 块可以省略捕获类型，省略时捕获所有 Throwable
+- catch 块和 finally 块均可省略，但两者不能同时省略
 - 举例
 
 ```shell
@@ -1013,6 +1221,13 @@ try{
   null;
 }finally{
   null;
+};
+
+// 省略异常类型，捕获所有异常
+try{
+  risky();
+}catch(e){
+  println("error:", e);
 };
 ```
 
@@ -1063,6 +1278,118 @@ debugger user.loop (${item}==null);
 - 推荐对 DefaultFunicResolver.onDebugger 方法添加断点
 - 也可以对 DefaultFunicVisitor.visitDebuggerExpress 方法添加断点
 
+### Lambda 表达式
+
+- 用于定义一个匿名函数（闭包），可以赋值给变量或直接传递给函数
+- 定义
+
+```shell
+(参数列表) -> { 函数体 }
+```
+
+- Lambda 本身作为值存在，不会立即执行
+- 参数列表是用来捕获声明是的变量的
+- 举例
+
+```shell
+// 定义一个 Lambda
+add = (a, b) -> { a + b };
+
+// 将 Lambda 赋值给变量后通过 go 执行
+task = () -> { println("async task"); };
+go task;
+
+// 无参 Lambda
+task = () -> { println("hello"); };
+
+// 直接结合 go 异步运行
+go () -> { println("async task"); };
+```
+
+- Lambda 表达式的参数列表写法和函数调用参数列表一致（参数名，可选类型）
+- Lambda 体是一个语句块，返回块内最后一条语句的值
+- lambda 调用时，不再需要传入参数，因为已经在声明时捕获了变量
+
+### go 异步执行语句
+
+- 用于异步地执行一个任务，类似于 Go 语言的 goroutine
+- 返回值为 `CompletableFuture<Object>`，可以通过 `await` 等待其完成
+- 定义
+
+```shell
+go 表达式
+go { 语句块 }
+go (参数列表) -> { Lambda函数体 }
+```
+
+- 举例
+
+```shell
+// 异步执行一个语句块
+f = go { println("async!"); };
+
+// 异步执行一个无参用户自定义函数（函数无参数才能直接 go）
+func task(){ println("running"); };
+f = go task;
+
+// 异步执行 Lambda
+f = go () -> { println("lambda async"); };
+
+// 等待异步结果
+result = <- f;
+```
+
+### await 等待语句
+
+- 用于等待异步任务完成或同步原语
+- 定义
+
+```shell
+<- 表达式
+<- 表达式1 <- 表达式2 ...
+```
+
+- 支持等待的类型：`Future`/`CompletableFuture`、`CountDownLatch`、`CyclicBarrier`、`Condition`、`Semaphore`、`Lock`
+- 若等待多个，最终返回的是一个List结果集
+- 举例
+
+```shell
+f1 = go { longTask1(); };
+f2 = go { longTask2(); };
+
+// 等待单个
+result1 = <- f1;
+
+// 等待多个（返回最后一个的结果）
+result = <- f1 <- f2;
+
+// 等待 CountDownLatch
+latch = new CountDownLatch(3);
+<- latch;
+```
+
+### synchronized 同步语句
+
+- 用于对某个对象加锁，保证同步执行，类似于 Java 的 synchronized 关键字
+- 定义
+
+```shell
+synchronized(锁对象表达式) {
+  语句块
+}
+```
+
+- 若锁对象为 null，则以当前 visitor 实例作为锁对象
+- 举例
+
+```shell
+counter = 0;
+lock = new Object();
+synchronized(lock) {
+  counter = counter + 1;
+};
+```
+
 ### 具名参数函数
 
 - 和常规函数调用一样，只不过，这种调用，适用于一些特殊的场景
@@ -1103,23 +1430,36 @@ params.put("replacement","true");
 
 ### 内建函数
 
-- 核心内建全局函数 FunicBuiltinFunctions
-- 其他全局函数，也在此包下面实现
-- 内建函数，也就是自带的函数
-- eval函数
-- 用于将内部的字符看做Funic脚本进行运行
-- 运行时共享内部的上下文
-- 定义
-- 函数名：eval
-- 返回值：Object
-- 参数：String|Appendable|CharSequence|StringBuilder|StringBuffer 总之就是字符串兼容类型
+- 核心内建全局函数 `FunicBuiltinFunctions`
+- 内建函数，也就是自带的函数，无需注册直接使用
+
+| 函数签名                                               | 说明                                              |
+|----------------------------------------------------|-------------------------------------------------|
+| `eval(String script)`                              | 将字符串作为 Funic 脚本在当前上下文中执行，返回执行结果                 |
+| `render(String text)`                              | 对字符串进行模板渲染（处理 `${...}` 占位符）                     |
+| `assign(Object target, Object... sources)`         | 将 sources 的内容合并到 target（支持 Collection/Map/Bean） |
+| `compare(Object v1, Object v2)`                    | 比较两个值，返回负数/0/正数                                 |
+| `compare(Object v1, Object v2, boolean forceType)` | 比较两个值，forceType=true 时强制类型匹配                    |
+| `cast(Object value, Class clazz)`                  | 将 value 转换为指定类型                                 |
+| `int(Object value)`                                | 将值转换为 Integer                                   |
+| `string(Object value)`                             | 将值转换为 String                                    |
+| `double(Object value)`                             | 将值转换为 Double                                    |
+| `boolean(Object value)`                            | 将值转换为 boolean                                   |
+| `decimal(Object value)`                            | 将值转换为 BigDecimal                                |
+| `println(Object... args)`                          | 打印参数到标准输出（空格分隔，末尾换行）                            |
+| `printf(String format, Object... args)`            | 格式化打印到标准输出                                      |
+
+- 举例
 
 ```shell
-Object eval(String|Appendable|CharSequence|StringBuilder|StringBuffer script)
+eval("1+2");           // 3
+render("age=${age}");  // 渲染模板
+int("123");            // 123 (Integer)
+string(456);           // "456"
+println("hello", "world");
 ```
 
-- 其他内建函数
-- 详情查阅源码类的静态构造代码块
+- 其他全局函数，也在此包下面实现
 
 ```java
 public class Funic {
@@ -1144,14 +1484,14 @@ func 函数名(参数名列表){
   函数体
 };
 
-// 允许写名绘制类型
+// 允许声明返回类型
 def 函数名(参数名列表) : 返回值类型{
   函数体
 };
 
 // 参数名写法，也就是允许声明参数类型，不指定类名默认为Object
 类型 参数名
-参数名 : 类型 
+参数名 : 类型
 参数名
 ```
 
@@ -1165,7 +1505,7 @@ def 函数名(参数名列表) : 返回值类型{
 
 ```shell
 v_num=5;
-func factor(int in_num,in_level : int): int{
+func factor(int in_num, in_level : int) : int{
     println('level='+in_level);
     if(in_num<=1){
         println('v_num='+global.v_num);
@@ -1190,7 +1530,7 @@ v_ret;
 - 所以，在函数内部的时候，可以通过 global 变量访问到默认的全局上下文
 - 因此，在上面的例子中，函数内无法直接访问到全局的 v_num 变量
 - 如果要访问这个全局变量，则可以通过 global.v_num 进行访问
-- 这个 global 变量无论内部函数递归了多少层次，始终都会死最外层的全局上下文参数
+- 这个 global 变量无论内部函数递归了多少层次，始终都会是最外层的全局上下文参数
 - 虽然，提供了自定义函数的能力，但是自定义函数目前的能力有限
 - 有特殊需求的情况下，使用注册内建函数的方式会更加灵活
 
@@ -1294,6 +1634,28 @@ println(context);
 1
 {num=2.125, srptlen=42, svl=1, str=1,2,3 4-5-6  7  8  91, numeeq=false, tmp=@@@, streq=true, slen=21, complex=[{username=123, roles=[admin, log], status=true, age=12, image=1,2,3 4-5-6  7  8  91, len=0, token=null}], sadd=1,2,3 4-5-6  7  8  91, strneq=false, ok=1, num2=12.125}
 
+```
+
+- 并发异步案例
+
+```shell
+results = [];
+f1 = go { 1+1 };
+f2 = go { 2+2 };
+results= <- f1 <- f2;
+```
+
+- 位运算案例
+
+```shell
+flags = 0b1010;
+mask  = 0b1100;
+and_result  = flags & mask;    // 0b1000
+or_result   = flags | mask;    // 0b1110
+xor_result  = flags ^ mask;    // 0b0110
+not_result  = ~flags;          // 按位取反
+lsh_result  = flags << 1;      // 0b10100
+rsh_result  = flags >> 1;      // 0b0101
 ```
 
 - 复杂使用案例
