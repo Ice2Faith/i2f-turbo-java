@@ -33,8 +33,7 @@ public static Object script(String formula, Object context);
 /* 多行注释 */
 ```
 
-- 多行注释内部的*号需要使用\进行转义
-- 这是一个特殊的地方
+- 多行注释以 `*/` 作为结束符，因此注释内部不应出现 `*/` 序列，否则会提前终止注释
 
 ### 基础数据类型
 
@@ -492,8 +491,9 @@ loginStatus=user?1:0;
 
 - 和JAVA中一样
 - 但是表达式的约束是宽泛的
-- 左表达式可以是 数组Array，集合Iterable，列表List，映射Map，对象Object
+- 左表达式可以是 数组Array，集合Iterable，列表List，映射Map，字符串String/CharSequence，对象Object
 - 右表达式根据左表达式而定，常见的就是 可以转换为Integer的值和String数值类型
+- 当左表达式为 String/CharSequence 时，右表达式为下标，返回对应位置的 char 字符
 
 - 举例
 
@@ -770,7 +770,7 @@ int 'xxx'.repeat(int count);
 // 整除，结果向零取整为整数
 %  取模（右侧为整数，结果一定为整数）
 
-+  加；若任意一侧为字符串，则执行字符串拼接
++  加；若任意一侧为字符串，则执行字符串拼接；若一侧为日期类型、另一侧为数值，则对日期加减对应天数
 -  减
 
 （位运算符，操作数视为long整型）
@@ -794,10 +794,11 @@ lt 小于
 lte 小于等于
 
 （类型不严格匹配，数值类型之间可互相比较）
-eq 相等
+==  相等
+eq 相等（== 的别名）
 != 不等于
-neq 不等于
-<> 不等于
+neq 不等于（!= 的别名）
+<> 不等于（!= 的别名）
 
 （严格相等，类型必须相同才比较值）
 teq 严格相等（=== 的别名）
@@ -1360,7 +1361,7 @@ f2 = go { longTask2(); };
 // 等待单个
 result1 = <- f1;
 
-// 等待多个（返回最后一个的结果）
+// 等待多个（返回所有结果的 List 集合）
 result = <- f1 <- f2;
 
 // 等待 CountDownLatch
@@ -1447,7 +1448,7 @@ params.put("replacement","true");
 | `boolean(Object value)`                            | 将值转换为 boolean                                   |
 | `decimal(Object value)`                            | 将值转换为 BigDecimal                                |
 | `println(Object... args)`                          | 打印参数到标准输出（空格分隔，末尾换行）                            |
-| `printf(String format, Object... args)`            | 格式化打印到标准输出                                      |
+| `printf(String format, Object... args)`            | 格式化打印到标准输出（末尾自动追加换行）                            |
 
 - 举例
 
@@ -1470,6 +1471,10 @@ public class Funic {
 ```
 
 - 你也可以参照此方式注册内建函数
+
+- 除上述内建函数外，引擎默认还向 `Funic.GLOBAL_METHODS` 注册了以下全局函数：
+  - `System.out` 的所有 `print` 相关方法（如 `print`）
+  - `java.lang.Math` 类的全部静态方法（如 `sin`、`cos`、`abs`、`max`、`min`、`pow`、`sqrt`、`floor`、`ceil`、`round`、`random` 等）
 
 ### 用户自定义函数
 
