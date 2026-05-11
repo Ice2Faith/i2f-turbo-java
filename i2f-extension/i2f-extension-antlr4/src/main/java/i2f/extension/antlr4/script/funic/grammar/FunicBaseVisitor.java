@@ -24,7 +24,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitRoot(FunicParser.RootContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -35,7 +34,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitScript(FunicParser.ScriptContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -46,7 +44,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitExpress(FunicParser.ExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -57,7 +54,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -68,7 +64,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitExtractExpress(FunicParser.ExtractExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -79,7 +74,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitExtractPairs(FunicParser.ExtractPairsContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -90,7 +84,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitExtractPair(FunicParser.ExtractPairContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -101,7 +94,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -112,7 +104,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitCompareOperatorPart(FunicParser.CompareOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -123,7 +114,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitBitOperatorPart(FunicParser.BitOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -134,7 +124,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitMathAddSubOperatorPart(FunicParser.MathAddSubOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -145,7 +134,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitMathMulDivOperatorPart(FunicParser.MathMulDivOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -156,7 +144,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitIncrDecrPrefixOperatorPart(FunicParser.IncrDecrPrefixOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -167,7 +154,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitPrefixOperatorPart(FunicParser.PrefixOperatorPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -178,7 +164,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitPipelineFunctionExpress(FunicParser.PipelineFunctionExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -189,7 +174,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitSynchronizedExpress(FunicParser.SynchronizedExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -200,7 +184,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitLambdaExpress(FunicParser.LambdaExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -211,7 +194,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitImportExpress(FunicParser.ImportExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -222,7 +204,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitGoRunExpress(FunicParser.GoRunExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -233,7 +214,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitAwaitExpress(FunicParser.AwaitExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -244,7 +224,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionDeclareExpress(FunicParser.FunctionDeclareExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -255,7 +234,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionDeclareReturn(FunicParser.FunctionDeclareReturnContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -266,7 +244,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionDeclareParameters(FunicParser.FunctionDeclareParametersContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -277,7 +254,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionParameter(FunicParser.FunctionParameterContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -288,7 +264,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitTryCatchFinallyExpress(FunicParser.TryCatchFinallyExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -299,7 +274,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitCatchBlock(FunicParser.CatchBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -310,7 +284,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitThrowExpress(FunicParser.ThrowExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -321,7 +294,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitReturnExpress(FunicParser.ReturnExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -332,7 +304,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitContinueExpress(FunicParser.ContinueExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -343,7 +314,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitBreakExpress(FunicParser.BreakExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -354,7 +324,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitForRangeExpress(FunicParser.ForRangeExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -365,7 +334,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitForLoopExpress(FunicParser.ForLoopExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -376,7 +344,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitForeachExpress(FunicParser.ForeachExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -387,7 +354,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitDoWhileExpress(FunicParser.DoWhileExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -398,7 +364,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitWhileExpress(FunicParser.WhileExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -409,7 +374,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitIfElseExpress(FunicParser.IfElseExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -420,7 +384,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConditionBlock(FunicParser.ConditionBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -431,7 +394,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitScriptBlock(FunicParser.ScriptBlockContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -442,7 +404,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitCastAsRightPart(FunicParser.CastAsRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -453,7 +414,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitMapValueExpress(FunicParser.MapValueExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -464,7 +424,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitUnpackMapExpress(FunicParser.UnpackMapExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -475,7 +434,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitKeyValueExpress(FunicParser.KeyValueExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -486,7 +444,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitThirdOperateRightPart(FunicParser.ThirdOperateRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -497,7 +454,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitInstanceFieldValueRightPart(FunicParser.InstanceFieldValueRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -508,7 +464,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitCircleExpress(FunicParser.CircleExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -519,7 +474,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitNewArrayExpress(FunicParser.NewArrayExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -530,7 +484,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitNewInstanceExpress(FunicParser.NewInstanceExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -541,7 +494,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitInstanceFunctionCallRightPart(FunicParser.InstanceFunctionCallRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -552,7 +504,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitGlobalFunctionCall(FunicParser.GlobalFunctionCallContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -563,7 +514,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitSquareQuoteRightPart(FunicParser.SquareQuoteRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -574,7 +524,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFactorPercentRightPart(FunicParser.FactorPercentRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -585,7 +534,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitIncrDecrAfterRightPart(FunicParser.IncrDecrAfterRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -596,7 +544,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitAssignRightPart(FunicParser.AssignRightPartContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -607,7 +554,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitStaticFieldValue(FunicParser.StaticFieldValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -618,7 +564,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitStaticFunctionCall(FunicParser.StaticFunctionCallContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -629,7 +574,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionArguments(FunicParser.FunctionArgumentsContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -640,7 +584,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFunctionArgument(FunicParser.FunctionArgumentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -651,7 +594,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitListValueExpress(FunicParser.ListValueExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -662,7 +604,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitUnpackListExpress(FunicParser.UnpackListExpressContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -673,7 +614,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitFullName(FunicParser.FullNameContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -684,7 +624,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitTypeClass(FunicParser.TypeClassContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -695,7 +634,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitTypeReference(FunicParser.TypeReferenceContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -706,7 +644,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitTypeMember(FunicParser.TypeMemberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -717,7 +654,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitValueSegment(FunicParser.ValueSegmentContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -728,7 +664,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitRefValue(FunicParser.RefValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -739,7 +674,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitVariableValue(FunicParser.VariableValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -750,7 +684,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstValue(FunicParser.ConstValueContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -761,7 +694,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstCharSequence(FunicParser.ConstCharSequenceContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -772,7 +704,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstString(FunicParser.ConstStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -783,7 +714,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstRenderString(FunicParser.ConstRenderStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -794,7 +724,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstMultiString(FunicParser.ConstMultiStringContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -805,7 +734,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstNumeric(FunicParser.ConstNumericContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -816,7 +744,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstNumber(FunicParser.ConstNumberContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -827,7 +754,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstFloat(FunicParser.ConstFloatContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -838,7 +764,6 @@ public class FunicBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	public T visitConstBoolean(FunicParser.ConstBooleanContext ctx) {
 		return visitChildren(ctx);
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *

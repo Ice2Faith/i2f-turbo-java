@@ -74,7 +74,6 @@ public class FunicLexer extends Lexer {
 				"KW_IMPORT", "KW_DEBUGGER", "IDENTIFIER", "WS"
 		};
 	}
-
 	public static final String[] ruleNames = makeRuleNames();
 
 	private static String[] makeLiteralNames() {
@@ -94,9 +93,7 @@ public class FunicLexer extends Lexer {
 				"'import'", "'debugger'"
 		};
 	}
-
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
-
 	private static String[] makeSymbolicNames() {
 		return new String[]{
 				null, null, null, null, null, null, null, null, null, null, null, null,
@@ -118,7 +115,6 @@ public class FunicLexer extends Lexer {
 				"KW_DEBUGGER", "IDENTIFIER", "WS"
 		};
 	}
-
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
 
@@ -127,7 +123,6 @@ public class FunicLexer extends Lexer {
 	 */
 	@Deprecated
 	public static final String[] tokenNames;
-
 	static {
 		tokenNames = new String[_SYMBOLIC_NAMES.length];
 		for (int i = 0; i < tokenNames.length; i++) {
@@ -797,7 +792,6 @@ public class FunicLexer extends Lexer {
 					"\u02f0\u02f6\u02fc\u0300\u030b\u03d2\u0001\u0006\u0000\u0000";
 	public static final ATN _ATN =
 			new ATNDeserializer().deserialize(_serializedATN.toCharArray());
-
 	static {
 		_decisionToDFA = new DFA[_ATN.getNumberOfDecisions()];
 		for (int i = 0; i < _ATN.getNumberOfDecisions(); i++) {

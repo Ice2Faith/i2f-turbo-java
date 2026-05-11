@@ -50,6 +50,8 @@ public interface FunicResolver {
 
     Map<String, Object> unpackMap(Object object, DefaultFunicVisitor visitor);
 
+    void assign(Object obj, List<?> objs, DefaultFunicVisitor visitor);
+
     Class<?> findClass(String className, DefaultFunicVisitor visitor);
 
     int compare(Object left, Object right, boolean forceType);
@@ -65,4 +67,5 @@ public interface FunicResolver {
     boolean onPreRegisterContextGlobalMethod(IMethod method, DefaultFunicVisitor visitor);
 
     void onDebugger(String label, Object value, FunicParser.DebuggerExpressContext ctx, DefaultFunicVisitor visitor);
+
 }

@@ -28,6 +28,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.RuleNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
@@ -1591,12 +1592,37 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         FullNameFunicValue nameValue = (FullNameFunicValue) visitFullName(nameCtx);
         String name = nameValue.getName();
 
-        FunicParser.ConstNumberContext countCtx = (FunicParser.ConstNumberContext) ctx.getChild(3);
-        NumberFunicValue countValue = (NumberFunicValue) visitConstNumber(countCtx);
-        int count = countValue.getInteger();
+        List<Object> initList = null;
+        int count = ctx.getChildCount();
+        ParseTree initCtx = ctx.getChild(count - 1);
+        if (initCtx instanceof FunicParser.ListValueExpressContext) {
+            FunicParser.ListValueExpressContext listCtx = (FunicParser.ListValueExpressContext) initCtx;
+            ListFunicValue listValue = (ListFunicValue) visitListValueExpress(listCtx);
+            initList = listValue.getList();
+        }
+
+        int length = 0;
+        ParseTree candidateCtx = ctx.getChild(3);
+        if (candidateCtx instanceof FunicParser.ConstNumberContext) {
+            FunicParser.ConstNumberContext countCtx = (FunicParser.ConstNumberContext) candidateCtx;
+            NumberFunicValue countValue = (NumberFunicValue) visitConstNumber(countCtx);
+            length = countValue.getInteger();
+        } else {
+            if (initList == null) {
+                throw new FunicThrowException("new array with list detect array length, must has init list!");
+            }
+            length = initList.size();
+        }
 
         Class<?> clazz = resolver.findClass(name, this);
-        Object obj = resolver.newArray(clazz, count, this);
+        Object obj = resolver.newArray(clazz, length, this);
+        if (initList != null) {
+            int listSize = initList.size();
+            for (int i = 0; i < listSize && i < count; i++) {
+                Object item = initList.get(i);
+                Array.set(obj, i, item);
+            }
+        }
         return DefaultFunicValue.builder()
                 .node(ctx)
                 .value(obj)
@@ -1613,8 +1639,19 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         ListKeyPairFunicValue argsValue = (ListKeyPairFunicValue) visitFunctionArguments(argsCtx);
         List<Map.Entry<String, Object>> args = argsValue.getList();
 
+        Map<String, Object> initMap = null;
+        int count = ctx.getChildCount();
+        if (count == 5) {
+            FunicParser.MapValueExpressContext mapCtx = (FunicParser.MapValueExpressContext) ctx.getChild(4);
+            MapFunicValue mapValue = (MapFunicValue) visitMapValueExpress(mapCtx);
+            initMap = mapValue.getMap();
+        }
+
         Class<?> clazz = resolver.findClass(name, this);
         Object obj = resolver.newInstance(clazz, args, this);
+        if (initMap != null) {
+            resolver.assign(obj, Collections.singletonList(initMap), this);
+        }
         return DefaultFunicValue.builder()
                 .node(ctx)
                 .value(obj)

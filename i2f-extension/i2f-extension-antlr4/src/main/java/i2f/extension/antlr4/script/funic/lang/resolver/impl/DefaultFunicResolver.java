@@ -1189,6 +1189,15 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     @Override
+    public void assign(Object obj, List<?> objs, DefaultFunicVisitor visitor) {
+        if (objs == null || objs.isEmpty()) {
+            return;
+        }
+        FunicBuiltinFunctions helper = new FunicBuiltinFunctions(visitor);
+        helper.assign(obj, objs.toArray());
+    }
+
+    @Override
     public Class<?> findClass(String className, DefaultFunicVisitor visitor) {
         VISITOR.set(visitor);
         try {

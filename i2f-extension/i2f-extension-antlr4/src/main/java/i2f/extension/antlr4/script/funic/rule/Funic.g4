@@ -418,11 +418,12 @@ circleExpress:
 ;
 
 newArrayExpress:
-    KW_NEW fullName '[' constNumber ']'
+    KW_NEW fullName '[' constNumber ']' ('->' listValueExpress)?
+    | KW_NEW fullName '['  ']' ('->' listValueExpress)
 ;
 
 newInstanceExpress:
-    KW_NEW fullName functionArguments
+    KW_NEW fullName functionArguments ('->' mapValueExpress)?
 ;
 
 instanceFunctionCallRightPart:

@@ -22,7 +22,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterRoot(FunicParser.RootContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -31,7 +30,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitRoot(FunicParser.RootContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -40,7 +38,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterScript(FunicParser.ScriptContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -49,7 +46,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitScript(FunicParser.ScriptContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -58,7 +54,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterExpress(FunicParser.ExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -67,7 +62,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitExpress(FunicParser.ExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -76,7 +70,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -85,7 +78,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitDebuggerExpress(FunicParser.DebuggerExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -94,7 +86,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterExtractExpress(FunicParser.ExtractExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -103,7 +94,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitExtractExpress(FunicParser.ExtractExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -112,7 +102,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterExtractPairs(FunicParser.ExtractPairsContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -121,7 +110,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitExtractPairs(FunicParser.ExtractPairsContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -130,7 +118,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterExtractPair(FunicParser.ExtractPairContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -139,7 +126,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitExtractPair(FunicParser.ExtractPairContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -148,7 +134,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -157,7 +142,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -166,7 +150,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterCompareOperatorPart(FunicParser.CompareOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -175,7 +158,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitCompareOperatorPart(FunicParser.CompareOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -184,7 +166,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterBitOperatorPart(FunicParser.BitOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -193,7 +174,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitBitOperatorPart(FunicParser.BitOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -202,7 +182,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterMathAddSubOperatorPart(FunicParser.MathAddSubOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -211,7 +190,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitMathAddSubOperatorPart(FunicParser.MathAddSubOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -220,7 +198,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterMathMulDivOperatorPart(FunicParser.MathMulDivOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -229,7 +206,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitMathMulDivOperatorPart(FunicParser.MathMulDivOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -238,7 +214,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterIncrDecrPrefixOperatorPart(FunicParser.IncrDecrPrefixOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -247,7 +222,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitIncrDecrPrefixOperatorPart(FunicParser.IncrDecrPrefixOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -256,7 +230,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterPrefixOperatorPart(FunicParser.PrefixOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -265,7 +238,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitPrefixOperatorPart(FunicParser.PrefixOperatorPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -274,7 +246,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterPipelineFunctionExpress(FunicParser.PipelineFunctionExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -283,7 +254,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitPipelineFunctionExpress(FunicParser.PipelineFunctionExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -292,7 +262,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterSynchronizedExpress(FunicParser.SynchronizedExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -301,7 +270,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitSynchronizedExpress(FunicParser.SynchronizedExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -310,7 +278,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterLambdaExpress(FunicParser.LambdaExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -319,7 +286,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitLambdaExpress(FunicParser.LambdaExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -328,7 +294,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterImportExpress(FunicParser.ImportExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -337,7 +302,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitImportExpress(FunicParser.ImportExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -346,7 +310,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterGoRunExpress(FunicParser.GoRunExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -355,7 +318,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitGoRunExpress(FunicParser.GoRunExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -364,7 +326,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterAwaitExpress(FunicParser.AwaitExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -373,7 +334,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitAwaitExpress(FunicParser.AwaitExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -382,7 +342,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionDeclareExpress(FunicParser.FunctionDeclareExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -391,7 +350,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionDeclareExpress(FunicParser.FunctionDeclareExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -400,7 +358,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionDeclareReturn(FunicParser.FunctionDeclareReturnContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -409,7 +366,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionDeclareReturn(FunicParser.FunctionDeclareReturnContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -418,7 +374,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionDeclareParameters(FunicParser.FunctionDeclareParametersContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -427,7 +382,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionDeclareParameters(FunicParser.FunctionDeclareParametersContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -436,7 +390,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionParameter(FunicParser.FunctionParameterContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -445,7 +398,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionParameter(FunicParser.FunctionParameterContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -454,7 +406,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterTryCatchFinallyExpress(FunicParser.TryCatchFinallyExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -463,7 +414,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitTryCatchFinallyExpress(FunicParser.TryCatchFinallyExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -472,7 +422,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterCatchBlock(FunicParser.CatchBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -481,7 +430,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitCatchBlock(FunicParser.CatchBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -490,7 +438,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterThrowExpress(FunicParser.ThrowExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -499,7 +446,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitThrowExpress(FunicParser.ThrowExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -508,7 +454,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterReturnExpress(FunicParser.ReturnExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -517,7 +462,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitReturnExpress(FunicParser.ReturnExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -526,7 +470,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterContinueExpress(FunicParser.ContinueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -535,7 +478,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitContinueExpress(FunicParser.ContinueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -544,7 +486,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterBreakExpress(FunicParser.BreakExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -553,7 +494,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitBreakExpress(FunicParser.BreakExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -562,7 +502,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterForRangeExpress(FunicParser.ForRangeExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -571,7 +510,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitForRangeExpress(FunicParser.ForRangeExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -580,7 +518,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterForLoopExpress(FunicParser.ForLoopExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -589,7 +526,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitForLoopExpress(FunicParser.ForLoopExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -598,7 +534,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterForeachExpress(FunicParser.ForeachExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -607,7 +542,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitForeachExpress(FunicParser.ForeachExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -616,7 +550,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterDoWhileExpress(FunicParser.DoWhileExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -625,7 +558,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitDoWhileExpress(FunicParser.DoWhileExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -634,7 +566,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterWhileExpress(FunicParser.WhileExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -643,7 +574,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitWhileExpress(FunicParser.WhileExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -652,7 +582,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterIfElseExpress(FunicParser.IfElseExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -661,7 +590,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitIfElseExpress(FunicParser.IfElseExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -670,7 +598,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConditionBlock(FunicParser.ConditionBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -679,7 +606,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConditionBlock(FunicParser.ConditionBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -688,7 +614,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterScriptBlock(FunicParser.ScriptBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -697,7 +622,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitScriptBlock(FunicParser.ScriptBlockContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -706,7 +630,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterCastAsRightPart(FunicParser.CastAsRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -715,7 +638,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitCastAsRightPart(FunicParser.CastAsRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -724,7 +646,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterMapValueExpress(FunicParser.MapValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -733,7 +654,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitMapValueExpress(FunicParser.MapValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -742,7 +662,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterUnpackMapExpress(FunicParser.UnpackMapExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -751,7 +670,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitUnpackMapExpress(FunicParser.UnpackMapExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -760,7 +678,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterKeyValueExpress(FunicParser.KeyValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -769,7 +686,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitKeyValueExpress(FunicParser.KeyValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -778,7 +694,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterThirdOperateRightPart(FunicParser.ThirdOperateRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -787,7 +702,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitThirdOperateRightPart(FunicParser.ThirdOperateRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -796,7 +710,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterInstanceFieldValueRightPart(FunicParser.InstanceFieldValueRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -805,7 +718,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitInstanceFieldValueRightPart(FunicParser.InstanceFieldValueRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -814,7 +726,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterCircleExpress(FunicParser.CircleExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -823,7 +734,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitCircleExpress(FunicParser.CircleExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -832,7 +742,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterNewArrayExpress(FunicParser.NewArrayExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -841,7 +750,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitNewArrayExpress(FunicParser.NewArrayExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -850,7 +758,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterNewInstanceExpress(FunicParser.NewInstanceExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -859,7 +766,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitNewInstanceExpress(FunicParser.NewInstanceExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -868,7 +774,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterInstanceFunctionCallRightPart(FunicParser.InstanceFunctionCallRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -877,7 +782,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitInstanceFunctionCallRightPart(FunicParser.InstanceFunctionCallRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -886,7 +790,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterGlobalFunctionCall(FunicParser.GlobalFunctionCallContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -895,7 +798,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitGlobalFunctionCall(FunicParser.GlobalFunctionCallContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -904,7 +806,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterSquareQuoteRightPart(FunicParser.SquareQuoteRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -913,7 +814,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitSquareQuoteRightPart(FunicParser.SquareQuoteRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -922,7 +822,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFactorPercentRightPart(FunicParser.FactorPercentRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -931,7 +830,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFactorPercentRightPart(FunicParser.FactorPercentRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -940,7 +838,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterIncrDecrAfterRightPart(FunicParser.IncrDecrAfterRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -949,7 +846,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitIncrDecrAfterRightPart(FunicParser.IncrDecrAfterRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -958,7 +854,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterAssignRightPart(FunicParser.AssignRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -967,7 +862,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitAssignRightPart(FunicParser.AssignRightPartContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -976,7 +870,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterStaticFieldValue(FunicParser.StaticFieldValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -985,7 +878,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitStaticFieldValue(FunicParser.StaticFieldValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -994,7 +886,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterStaticFunctionCall(FunicParser.StaticFunctionCallContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1003,7 +894,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitStaticFunctionCall(FunicParser.StaticFunctionCallContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1012,7 +902,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionArguments(FunicParser.FunctionArgumentsContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1021,7 +910,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionArguments(FunicParser.FunctionArgumentsContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1030,7 +918,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFunctionArgument(FunicParser.FunctionArgumentContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1039,7 +926,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFunctionArgument(FunicParser.FunctionArgumentContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1048,7 +934,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterListValueExpress(FunicParser.ListValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1057,7 +942,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitListValueExpress(FunicParser.ListValueExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1066,7 +950,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterUnpackListExpress(FunicParser.UnpackListExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1075,7 +958,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitUnpackListExpress(FunicParser.UnpackListExpressContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1084,7 +966,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterFullName(FunicParser.FullNameContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1093,7 +974,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitFullName(FunicParser.FullNameContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1102,7 +982,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterTypeClass(FunicParser.TypeClassContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1111,7 +990,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitTypeClass(FunicParser.TypeClassContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1120,7 +998,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterTypeReference(FunicParser.TypeReferenceContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1129,7 +1006,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitTypeReference(FunicParser.TypeReferenceContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1138,7 +1014,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterTypeMember(FunicParser.TypeMemberContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1147,7 +1022,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitTypeMember(FunicParser.TypeMemberContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1156,7 +1030,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterValueSegment(FunicParser.ValueSegmentContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1165,7 +1038,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitValueSegment(FunicParser.ValueSegmentContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1174,7 +1046,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterRefValue(FunicParser.RefValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1183,7 +1054,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitRefValue(FunicParser.RefValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1192,7 +1062,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterVariableValue(FunicParser.VariableValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1201,7 +1070,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitVariableValue(FunicParser.VariableValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1210,7 +1078,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstValue(FunicParser.ConstValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1219,7 +1086,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstValue(FunicParser.ConstValueContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1228,7 +1094,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstCharSequence(FunicParser.ConstCharSequenceContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1237,7 +1102,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstCharSequence(FunicParser.ConstCharSequenceContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1246,7 +1110,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstString(FunicParser.ConstStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1255,7 +1118,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstString(FunicParser.ConstStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1264,7 +1126,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstRenderString(FunicParser.ConstRenderStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1273,7 +1134,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstRenderString(FunicParser.ConstRenderStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1282,7 +1142,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstMultiString(FunicParser.ConstMultiStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1291,7 +1150,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstMultiString(FunicParser.ConstMultiStringContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1300,7 +1158,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstNumeric(FunicParser.ConstNumericContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1309,7 +1166,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstNumeric(FunicParser.ConstNumericContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1318,7 +1174,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstNumber(FunicParser.ConstNumberContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1327,7 +1182,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstNumber(FunicParser.ConstNumberContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1336,7 +1190,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstFloat(FunicParser.ConstFloatContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1345,7 +1198,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstFloat(FunicParser.ConstFloatContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1354,7 +1206,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstBoolean(FunicParser.ConstBooleanContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1363,7 +1214,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void exitConstBoolean(FunicParser.ConstBooleanContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
@@ -1372,7 +1222,6 @@ public class FunicBaseListener implements FunicListener {
 	@Override
 	public void enterConstNull(FunicParser.ConstNullContext ctx) {
 	}
-
 	/**
 	 * {@inheritDoc}
 	 *
