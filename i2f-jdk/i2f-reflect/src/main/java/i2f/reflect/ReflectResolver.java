@@ -727,6 +727,16 @@ public class ReflectResolver {
             }
             return true;
         });
+        if(constructors==null || constructors.isEmpty()){
+            try {
+                T ret=getDefaultInstanceForJuc(clazz,args);
+                if(ret!=null){
+                    return ret;
+                }
+            } catch (Exception e) {
+
+            }
+        }
         if (constructors.isEmpty()) {
             throw new IllegalAccessException("constructor not found in class [" + clazz + "] with parameter count equals " + argsLen + " or parameter types matched.");
         }
@@ -740,6 +750,16 @@ public class ReflectResolver {
         } catch (Throwable e) {
             ex = e;
         }
+        if(!success){
+            try {
+                ret=getDefaultInstanceForJuc(clazz,args);
+                if(ret!=null){
+                    return ret;
+                }
+            } catch (Exception e) {
+
+            }
+        }
         if (!success) {
             if (ex instanceof IllegalArgumentException) {
                 throw (IllegalArgumentException) ex;
@@ -750,6 +770,52 @@ public class ReflectResolver {
             }
         }
         return ret;
+    }
+
+    protected static <T> T getDefaultInstanceForJuc(Class<T> clazz,Object ... args){
+        if(Map.class.equals(clazz)){
+            if(args.length==0){
+                return (T)new LinkedHashMap<>();
+            }
+            if(args.length==1){
+                if(args[0] instanceof Map){
+                    return (T)new LinkedHashMap<>((Map)args[0]);
+                }
+                if(args[0] instanceof Integer){
+                    return (T)new HashMap<>((int)args[0]);
+                }
+            }
+        }
+        if(Set.class.equals(clazz)){
+            if(args.length==0){
+                return (T)new LinkedHashSet<>();
+            }
+            if(args.length==1){
+                if(args[0] instanceof Collection){
+                    return (T)new LinkedHashSet<>((Collection)args[0]);
+                }
+                if(args[0] instanceof Integer){
+                    return (T)new HashSet<>((int)args[0]);
+                }
+            }
+            return (T)new HashSet<>(Arrays.asList(args));
+        }
+        if(Collection.class.equals(clazz)
+        ||List.class.equals(clazz)){
+            if(args.length==0){
+                return (T)new ArrayList<>();
+            }
+            if(args.length==1){
+                if(args[0] instanceof Collection){
+                    return (T)new ArrayList<>((Collection)args[0]);
+                }
+                if(args[0] instanceof Integer){
+                    return (T)new ArrayList<>((int)args[0]);
+                }
+            }
+            return (T)new ArrayList<>(Arrays.asList(args));
+        }
+        return null;
     }
 
     public static Set<Field> findField(Class<?> clazz, Predicate<Field> filter) {
