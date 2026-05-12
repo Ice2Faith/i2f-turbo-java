@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.context;
+package i2f.turbo.idea.plugin.funic.lang.live.templates;
 
 import com.intellij.codeInsight.template.TemplateActionContext;
 import com.intellij.codeInsight.template.TemplateContextType;

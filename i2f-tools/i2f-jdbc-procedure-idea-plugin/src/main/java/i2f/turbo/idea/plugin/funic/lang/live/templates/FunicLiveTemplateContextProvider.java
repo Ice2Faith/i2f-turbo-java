@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.context;
+package i2f.turbo.idea.plugin.funic.lang.live.templates;
 
 import com.intellij.codeInsight.template.LiveTemplateContext;
 import com.intellij.codeInsight.template.LiveTemplateContextProvider;
@@ -9,7 +9,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 /**
  * @author Ice2Faith

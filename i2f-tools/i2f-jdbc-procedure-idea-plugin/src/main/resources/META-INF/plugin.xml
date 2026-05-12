@@ -183,7 +183,7 @@
 
         <!-- 注册 Live Templates 上下文类型，使 Funic 在 Live Templates 设置中可选 -->
         <liveTemplateContextProvider
-                implementation="i2f.turbo.idea.plugin.funic.lang.context.FunicLiveTemplateContextProvider"/>
+                implementation="i2f.turbo.idea.plugin.funic.lang.live.templates.FunicLiveTemplateContextProvider"/>
 
         <completion.contributor
                 language="Funic"
