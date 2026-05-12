@@ -144,6 +144,39 @@
                 order="first"
                 implementation="i2f.turbo.idea.plugin.inject.ProjectLanguageTemplateMultiHostInjector"/>
 
+
+        <!-- *************************** funic  begin *************************** -->
+
+        <!-- 注册文件类型 -->
+        <fileType name="Funic"
+                  implementationClass="i2f.turbo.idea.plugin.funic.FunicFileType"
+                  fieldName="INSTANCE"
+                  language="Funic"
+                  extensions="fic"/>
+
+        <!-- 注册语言解析器 -->
+        <lang.parserDefinition
+                language="Funic"
+                implementationClass="i2f.turbo.idea.plugin.funic.lang.FunicParserDefinition"/>
+
+        <!-- 定义语法高亮 -->
+        <lang.syntaxHighlighterFactory
+                language="Funic"
+                implementationClass="i2f.turbo.idea.plugin.funic.lang.highlighter.FunicSyntaxHighlighterFactory"/>
+
+        <!-- 定义颜色配置页 -->
+        <colorSettingsPage
+                implementation="i2f.turbo.idea.plugin.funic.lang.highlighter.FunicColorSettingsPage"/>
+
+        <!-- 注释处理器 -->
+        <lang.commenter language="Funic"
+                        implementationClass="i2f.turbo.idea.plugin.funic.lang.comment.FunicCommenter"/>
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="Funic"
+                           implementationClass="i2f.turbo.idea.plugin.funic.lang.bracket.FunicPairedBraceMatcher"/>
+
+        <!-- *************************** funic  end *************************** -->
     </extensions>
 
 
