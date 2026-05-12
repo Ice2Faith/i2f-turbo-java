@@ -7,6 +7,7 @@ import i2f.invokable.method.IMethod;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -68,4 +69,7 @@ public interface FunicResolver {
 
     void onDebugger(String label, Object value, FunicParser.DebuggerExpressContext ctx, DefaultFunicVisitor visitor);
 
+    void debug(boolean enable);
+
+    void debugLog(Supplier<Object> supplier);
 }

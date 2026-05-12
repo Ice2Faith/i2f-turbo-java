@@ -30,11 +30,14 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -43,11 +46,14 @@ import java.util.stream.Collectors;
  * @desc
  */
 public class DefaultFunicResolver implements FunicResolver {
-    public static final String FIELD_THIS="this";
+    public static final String FIELD_THIS = "this";
     protected MathContext MATH_CONTEXT = new MathContext(32, RoundingMode.HALF_UP);
     protected ConcurrentHashMap<String, PrefixOperatorFunction> prefixOperatorFunctionMap = new ConcurrentHashMap<>();
     protected ConcurrentHashMap<String, SuffixOperatorFunction> suffixOperatorFunctionMap = new ConcurrentHashMap<>();
     protected ConcurrentHashMap<String, DoubleOperatorFunction> doubleOperatorFunctionMap = new ConcurrentHashMap<>();
+
+    protected AtomicBoolean debug = new AtomicBoolean(false);
+    protected DateTimeFormatter logDateFmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
     protected static ThreadLocal<DefaultFunicVisitor> VISITOR = new InheritableThreadLocal<>();
 
@@ -705,7 +711,7 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object getFieldValue(Object target, String fieldName, DefaultFunicVisitor visitor) {
-        if(FIELD_THIS.equals(fieldName)){
+        if (FIELD_THIS.equals(fieldName)) {
             return target;
         }
         if (target instanceof Class) {
@@ -730,8 +736,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public void setFieldValue(Object target, String fieldName, Object value, DefaultFunicVisitor visitor) {
-        if(FIELD_THIS.equals(fieldName)){
-            target=value;
+        if (FIELD_THIS.equals(fieldName)) {
+            target = value;
             return;
         }
         if (target instanceof Class) {
@@ -755,8 +761,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object getSquareFieldValue(Object target, Object squareKey, DefaultFunicVisitor visitor) {
-        if(squareKey instanceof CharSequence){
-            if(FIELD_THIS.equals(String.valueOf(squareKey))){
+        if (squareKey instanceof CharSequence) {
+            if (FIELD_THIS.equals(String.valueOf(squareKey))) {
                 return target;
             }
         }
@@ -820,9 +826,9 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public void setSquareFieldValue(Object target, Object squareKey, Object value, DefaultFunicVisitor visitor) {
-        if(squareKey instanceof CharSequence){
-            if(FIELD_THIS.equals(String.valueOf(squareKey))){
-                target=value;
+        if (squareKey instanceof CharSequence) {
+            if (FIELD_THIS.equals(String.valueOf(squareKey))) {
+                target = value;
                 return;
             }
         }
@@ -1322,5 +1328,17 @@ public class DefaultFunicResolver implements FunicResolver {
     @Override
     public void onDebugger(String label, Object value, FunicParser.DebuggerExpressContext ctx, DefaultFunicVisitor visitor) {
         System.out.println("debugger [" + label + "] triggered!");
+    }
+
+    @Override
+    public void debug(boolean enable) {
+        debug.set(enable);
+    }
+
+    @Override
+    public void debugLog(Supplier<Object> supplier) {
+        if (debug.get()) {
+            System.out.println(String.format("%s [DEBUG] - %s", logDateFmt.format(LocalDateTime.now()), String.valueOf(supplier.get())));
+        }
     }
 }
