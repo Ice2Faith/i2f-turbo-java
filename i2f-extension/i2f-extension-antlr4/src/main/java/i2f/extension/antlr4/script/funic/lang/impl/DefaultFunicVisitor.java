@@ -708,7 +708,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         ParseTree child = null;
         if (count == 2) {
             child = ctx.getChild(1);
-            if (child instanceof TerminalNode) {
+            if (child instanceof FunicParser.FunctionNameContext) {
                 ret.setType(PipelineFunctionFunicValue.Type.GLOBAL);
             } else if (child instanceof FunicParser.StaticFunctionCallContext) {
                 ret.setType(PipelineFunctionFunicValue.Type.STATIC);
@@ -722,11 +722,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             ret.setType(PipelineFunctionFunicValue.Type.INSTANCE);
         }
 
-        if (child instanceof TerminalNode) {
-            TerminalNode terminalCtx = (TerminalNode) child;
-            TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(terminalCtx);
+        if (child instanceof FunicParser.FunctionNameContext) {
+            FunicParser.FunctionNameContext nameCtx = (FunicParser.FunctionNameContext) child;
+            ConstStringFunicValue nameValue = (ConstStringFunicValue) visitFunctionName(nameCtx);
             ret.setClazz(null);
-            ret.setName(terminalValue.getText());
+            ret.setName(nameValue.getText());
             ret.setArgs(new ArrayList<>());
         } else if (child instanceof FunicParser.StaticFunctionCallContext) {
             FunicParser.StaticFunctionCallContext nextCtx = (FunicParser.StaticFunctionCallContext) child;
@@ -1660,8 +1660,8 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
     @Override
     public FunicValue visitInstanceFunctionCallRightPart(FunicParser.InstanceFunctionCallRightPartContext ctx) {
-        TerminalNode nameCtx = (TerminalNode) ctx.getChild(1);
-        TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(nameCtx);
+        FunicParser.FunctionNameContext nameCtx = (FunicParser.FunctionNameContext) ctx.getChild(1);
+        ConstStringFunicValue terminalValue = (ConstStringFunicValue) visitFunctionName(nameCtx);
         String name = terminalValue.getText();
 
         FunicParser.FunctionArgumentsContext argsCtx = (FunicParser.FunctionArgumentsContext) ctx.getChild(2);
@@ -1676,8 +1676,8 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     }
 
     public PipelineFunctionFunicValue getGlobalFunctionCall(FunicParser.GlobalFunctionCallContext ctx) {
-        TerminalNode nameCtx = (TerminalNode) ctx.getChild(0);
-        TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(nameCtx);
+        FunicParser.FunctionNameContext nameCtx = (FunicParser.FunctionNameContext) ctx.getChild(0);
+        ConstStringFunicValue terminalValue = (ConstStringFunicValue) visitFunctionName(nameCtx);
         String name = terminalValue.getText();
 
         FunicParser.FunctionArgumentsContext argsCtx = (FunicParser.FunctionArgumentsContext) ctx.getChild(1);
@@ -1802,8 +1802,8 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         TypeFunicValue memberValue = (TypeFunicValue) visitTypeMember(memberCtx);
         Class<?> type = memberValue.getType();
 
-        TerminalNode nameCtx = (TerminalNode) ctx.getChild(1);
-        TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
+        FunicParser.FunctionNameContext nameCtx = (FunicParser.FunctionNameContext) ctx.getChild(1);
+        ConstStringFunicValue nameValue = (ConstStringFunicValue) visitFunctionName(nameCtx);
         String name = nameValue.getText();
 
         FunicParser.FunctionArgumentsContext argsCtx = (FunicParser.FunctionArgumentsContext) ctx.getChild(2);
@@ -1829,6 +1829,25 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         return DefaultFunicValue.builder()
                 .node(ctx)
                 .value(value)
+                .build();
+    }
+
+    @Override
+    public FunicValue visitFunctionName(FunicParser.FunctionNameContext ctx) {
+        int count = ctx.getChildCount();
+        if(count==3){
+            FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(1);
+            FunicValue nextValue = visitExpress(nextCtx);
+            return ConstStringFunicValue.builder()
+                    .node(ctx)
+                    .value(String.valueOf(nextValue.get()))
+                    .build();
+        }
+        TerminalNode nextCtx = (TerminalNode) ctx.getChild(0);
+        TerminalFunicValue nextValue = (TerminalFunicValue) visitTerminal(nextCtx);
+        return ConstStringFunicValue.builder()
+                .node(ctx)
+                .value(nextValue.getText())
                 .build();
     }
 

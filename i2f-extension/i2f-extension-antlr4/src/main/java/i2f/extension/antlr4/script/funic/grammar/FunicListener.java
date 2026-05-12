@@ -1,6 +1,6 @@
 // Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
-package i2f.extension.antlr4.script.funic.grammar;
+    package i2f.extension.antlr4.script.funic.grammar;
 
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -559,6 +559,16 @@ public interface FunicListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitStaticFunctionCall(FunicParser.StaticFunctionCallContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link FunicParser#functionName}.
+	 * @param ctx the parse tree
+	 */
+	void enterFunctionName(FunicParser.FunctionNameContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link FunicParser#functionName}.
+	 * @param ctx the parse tree
+	 */
+	void exitFunctionName(FunicParser.FunctionNameContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link FunicParser#functionArguments}.
 	 * @param ctx the parse tree

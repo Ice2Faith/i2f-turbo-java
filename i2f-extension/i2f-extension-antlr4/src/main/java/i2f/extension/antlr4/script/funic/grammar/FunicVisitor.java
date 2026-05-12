@@ -1,6 +1,6 @@
 // Generated from /funic/rule/Funic.g4 by ANTLR 4.13.2
 
-package i2f.extension.antlr4.script.funic.grammar;
+    package i2f.extension.antlr4.script.funic.grammar;
 
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -342,6 +342,12 @@ public interface FunicVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitStaticFunctionCall(FunicParser.StaticFunctionCallContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link FunicParser#functionName}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitFunctionName(FunicParser.FunctionNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link FunicParser#functionArguments}.
 	 * @param ctx the parse tree

@@ -278,7 +278,7 @@ prefixOperatorPart:
 // :: 用来访问表示上一个管道传递过来的成员函数
 // 参数，支持使用 $_ 作为占位符表示传递过来的参数作为第几个值(暂未实现)，默认第一个值
 pipelineFunctionExpress:
-   '|>' (staticFunctionCall | staticFieldValue | IDENTIFIER | '::'? (globalFunctionCall|IDENTIFIER)) // 函数链
+   '|>' (staticFunctionCall | staticFieldValue | functionName | '::'? (globalFunctionCall|IDENTIFIER)) // 函数链
 ;
 
 synchronizedExpress:
@@ -427,11 +427,11 @@ newInstanceExpress:
 ;
 
 instanceFunctionCallRightPart:
-    '.'  IDENTIFIER  functionArguments// 实例函数
+    '.'  functionName  functionArguments// 实例函数
     ;
 
 globalFunctionCall:
-    IDENTIFIER functionArguments // 全局函数
+    functionName functionArguments // 全局函数
     ;
 
 // [0],["name"] 这种下标或者属性名访问
@@ -458,7 +458,12 @@ staticFieldValue:
 ;
 
 staticFunctionCall:
-    typeMember IDENTIFIER functionArguments // 静态函数
+    typeMember functionName functionArguments // 静态函数
+;
+
+functionName:
+    '<' express '>' // 函数名支持从变量获取
+    | IDENTIFIER
 ;
 
 functionArguments:

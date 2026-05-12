@@ -591,6 +591,14 @@ String.valueOf(前一个值)
 trim
 ::length
 String::valueOf
+
+// 函数名允许从表达式中获取，这是允许的动态行为
+表达式的值最终转换为一个字符串作为函数名
+<表达式>
+// 例如
+user.<'get'+'Name'>();
+<v_name>();
+::<v_name+v_i>();
 ```
 
 - 管道函数表达式，是一种语法糖，现代编程语言中开始使用
@@ -619,6 +627,10 @@ a |> ::user |> ::name |> trim |> substr(0, 2);
 
 // 结合静态函数
 '123' |> ::trim |> int |> String::valueOf |> ::trim |> ::length
+
+// 结合动态函数名
+v_name='int';
+'123' |> ::trim |> <v_name> |> String::valueOf |> ::trim |> ::length;
 
 // 嵌套管道案例
 // 一般写法
@@ -729,12 +741,22 @@ new String[5]->['1','2','3'];
 函数名(参数列表)
 ```
 
+- 其中函数名，可以是动态的
+- 函数名求值表达式的最终计算结果会被转换为字符串，作为函数名
+- 定义为
+
+```shell
+<函数名求值表达式>(参数列表)
+```
+
+
 - 全局函数定义
   - 全局函数是通过注册方式注册到环境中的
     - 直接通过函数名的方式进行调用，无类名限定
 
 ```shell
 函数名(参数列表)
+<函数名求值表达式>(参数列表)
 ```
 
 - 举例
@@ -742,6 +764,9 @@ new String[5]->['1','2','3'];
 ```shell
 string(1);
 compare("xxx",'yyy');
+
+v_name='string';
+<v_name>(1);
 ```
 
 - 静态函数
@@ -755,6 +780,10 @@ compare("xxx",'yyy');
 @类名.函数名(参数列表)
 类名::函数名(参数列表)
 类名.class.函数名(参数列表)
+
+@类名.<函数名求值表达式>(参数列表)
+类名::<函数名求值表达式>(参数列表)
+类名.class.<函数名求值表达式>(参数列表)
 ```
 
 - 举例
@@ -762,6 +791,9 @@ compare("xxx",'yyy');
 ```shell
 // 通过::进行类名限定
 String::valueOf(1);
+
+v_name='valueOf';
+String::<v_name>(1);
 
 // 通过@进行类名限定
 @org.apache.Test.run("xxx",true);
@@ -776,12 +808,18 @@ Integer.class.parseInt('123');
 
 ```shell
 String.valueOf(1).repeat(2).length();
+
+v_name='repeat';
+String.valueOf(1).<v_name>(2).length();
 ```
 
 - 可以在值上面调用函数
 
 ```shell
 user.getName().length();
+
+v_name='getName';
+user.<v_name>().length();
 ```
 
 - 全局函数的委托使用方式

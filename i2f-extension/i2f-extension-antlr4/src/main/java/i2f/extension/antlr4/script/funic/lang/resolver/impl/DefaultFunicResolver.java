@@ -43,6 +43,7 @@ import java.util.stream.Collectors;
  * @desc
  */
 public class DefaultFunicResolver implements FunicResolver {
+    public static final String FIELD_THIS="this";
     protected MathContext MATH_CONTEXT = new MathContext(32, RoundingMode.HALF_UP);
     protected ConcurrentHashMap<String, PrefixOperatorFunction> prefixOperatorFunctionMap = new ConcurrentHashMap<>();
     protected ConcurrentHashMap<String, SuffixOperatorFunction> suffixOperatorFunctionMap = new ConcurrentHashMap<>();
@@ -704,6 +705,9 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object getFieldValue(Object target, String fieldName, DefaultFunicVisitor visitor) {
+        if(FIELD_THIS.equals(fieldName)){
+            return target;
+        }
         if (target instanceof Class) {
             return getStaticFieldOrEnum((Class) target, fieldName, visitor);
         }
@@ -726,6 +730,10 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public void setFieldValue(Object target, String fieldName, Object value, DefaultFunicVisitor visitor) {
+        if(FIELD_THIS.equals(fieldName)){
+            target=value;
+            return;
+        }
         if (target instanceof Class) {
             setStaticField((Class<?>) target, fieldName, value, visitor);
             return;
@@ -747,6 +755,11 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object getSquareFieldValue(Object target, Object squareKey, DefaultFunicVisitor visitor) {
+        if(squareKey instanceof CharSequence){
+            if(FIELD_THIS.equals(String.valueOf(squareKey))){
+                return target;
+            }
+        }
         if (target == null) {
             return null;
         }
@@ -807,6 +820,12 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public void setSquareFieldValue(Object target, Object squareKey, Object value, DefaultFunicVisitor visitor) {
+        if(squareKey instanceof CharSequence){
+            if(FIELD_THIS.equals(String.valueOf(squareKey))){
+                target=value;
+                return;
+            }
+        }
         if (target == null) {
             throw new NullPointerException("target is null, cannot set value");
         }
