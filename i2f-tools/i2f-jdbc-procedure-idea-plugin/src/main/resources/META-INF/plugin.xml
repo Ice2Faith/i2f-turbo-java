@@ -176,6 +176,15 @@
         <lang.braceMatcher language="Funic"
                            implementationClass="i2f.turbo.idea.plugin.funic.lang.bracket.FunicPairedBraceMatcher"/>
 
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                                      implementation="i2f.turbo.idea.plugin.funic.lang.live.templates.FunicLiveTemplatesProvider"/>
+
+        <completion.contributor
+                language="Funic"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.funic.lang.completion.FunicCompletionContributor"/>
+
         <!-- *************************** funic  end *************************** -->
     </extensions>
 
