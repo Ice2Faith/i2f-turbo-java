@@ -626,7 +626,7 @@ a |> ::user() |> ::name() |> trim() |> substr(0, 2);
 a |> ::user |> ::name |> trim |> substr(0, 2);
 
 // 结合静态函数
-'123' |> ::trim |> int |> String::valueOf |> ::trim |> ::length
+'123' |> ::trim |> int |> String::valueOf |> ::trim |> ::length;
 
 // 结合动态函数名
 v_name='int';
@@ -674,7 +674,7 @@ new 类名(参数列表)->{属性初始化Map}
 - 举例
 
 ```shell
-new User(){
+new User()->{
   name: 'zhang',
   age: 12
 };
@@ -757,6 +757,7 @@ new String[5]->['1','2','3'];
 ```shell
 函数名(参数列表)
 <函数名求值表达式>(参数列表)
+<(函数名求值表达式)>(参数列表) // 这种形式主要是用来兼容IDEA的BNF解析避免二义性的，推荐使用这种方式
 ```
 
 - 举例
@@ -767,6 +768,7 @@ compare("xxx",'yyy');
 
 v_name='string';
 <v_name>(1);
+<(v_name)>(1);
 ```
 
 - 静态函数
@@ -778,10 +780,13 @@ v_name='string';
 
 ```shell
 @类名.函数名(参数列表)
+类名@函数名(参数列表) // 这种形式主要是用来兼容IDEA的BNF解析避免二义性的，推荐使用这种方式
 类名::函数名(参数列表)
 类名.class.函数名(参数列表)
 
 @类名.<函数名求值表达式>(参数列表)
+@类名.<(函数名求值表达式)>(参数列表) // 这种形式主要是用来兼容IDEA的BNF解析避免二义性的，推荐使用这种方式
+类名@<函数名求值表达式>(参数列表) // @在后，这种形式主要是用来兼容IDEA的BNF解析避免二义性的，推荐使用这种方式
 类名::<函数名求值表达式>(参数列表)
 类名.class.<函数名求值表达式>(参数列表)
 ```
@@ -794,9 +799,11 @@ String::valueOf(1);
 
 v_name='valueOf';
 String::<v_name>(1);
+String::<(v_name)>(1);  // 推荐，结合IDEA插件使用
 
 // 通过@进行类名限定
 @org.apache.Test.run("xxx",true);
+org.apache.Test@run("xxx",true); // 推荐，结合IDEA插件使用
 
 // 通过.class进行类型限定
 Integer.class.parseInt('123');
@@ -811,6 +818,7 @@ String.valueOf(1).repeat(2).length();
 
 v_name='repeat';
 String.valueOf(1).<v_name>(2).length();
+String.valueOf(1).<?v_name?>(2).length(); // 推荐，结合IDEA插件使用
 ```
 
 - 可以在值上面调用函数
@@ -820,6 +828,7 @@ user.getName().length();
 
 v_name='getName';
 user.<v_name>().length();
+user.<?v_name?>().length(); // 推荐，结合IDEA插件使用
 ```
 
 - 全局函数的委托使用方式
@@ -933,6 +942,7 @@ age as 1; // 可以直接使用值转换为目标类型
 
 ```shell
 @类名.变量名
+类名@变量名 // 兼容IDEA的BNF文法解析，推荐使用
 类名::变量名
 类名.class.变量名
 ```
@@ -942,9 +952,11 @@ age as 1; // 可以直接使用值转换为目标类型
 ```shell
 // 访问静态变量
 @java.sql.Types.VARCHAR;
+java.sql.Types@VARCHAR;
 java.sql.Types::VARCHAR;
 // 访问枚举值
 @java.sql.JDBCType.VARCHAR;
+java.sql.JDBCType@VARCHAR;
 java.sql.JDBCType::VARCHAR;
 // 赋值静态变量
 // 虽然语法上不限制对枚举值进行赋值，但是这样的操作实际上是不可行的
@@ -1495,7 +1507,7 @@ synchronized(lock) {
 - 举例
 
 ```shell
-render(str: "123",regex:"\\d+",replacement:"true")
+render(str: "123",regex:"\d+",replacement:"true")
 ```
 
 - 这种，一般适用于这样的转换目标函数

@@ -50,6 +50,7 @@ TERM_CONST_STRING_RENDER_SINGLE: R '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 TERM_CONST_STRING: '"' (ESCAPED_CHAR | ~[\\"])* '"';
 TERM_CONST_STRING_SINGLE: '\'' (ESCAPED_CHAR | ~[\\'])* '\'';
 
+// ${} 表达式
 TERM_CONST_VISITOR: '$' ('!')? '{' (~[}])* '}';
 
 // 数值
@@ -118,6 +119,7 @@ KW_CONST_CLASS:
     'class'
     ;
 
+// 关键字
 KW_FUNC: 'func';
 KW_DEF: 'def';
 
@@ -223,7 +225,7 @@ express:
     | express thirdOperateRightPart // 三目运算符
     | express pipelineFunctionExpress+ // 管道函数
     | scriptBlock // 语句块
-    | debuggerExpress
+    | debuggerExpress // 调试表达式
     | KW_DEF extractExpress assignRightPart // 等号赋值表达式
     | extractExpress assignRightPart // 等号赋值表达式
     | KW_DEF express assignRightPart // 等号赋值表达式
@@ -278,7 +280,7 @@ prefixOperatorPart:
 // :: 用来访问表示上一个管道传递过来的成员函数
 // 参数，支持使用 $_ 作为占位符表示传递过来的参数作为第几个值(暂未实现)，默认第一个值
 pipelineFunctionExpress:
-   '|>' (staticFunctionCall | staticFieldValue | functionName | '::'? (globalFunctionCall|IDENTIFIER)) // 函数链
+   '|>' (staticFunctionCall | staticFieldValue | '::'? (globalFunctionCall|functionName) |  functionName) // 函数链
 ;
 
 synchronizedExpress:
@@ -462,7 +464,8 @@ staticFunctionCall:
 ;
 
 functionName:
-    '<' express '>' // 函数名支持从变量获取
+    '<?' express '?>' // 函数名支持从变量获取，这种形式主要是用来兼容IDEA的BNF解析避免二义性的
+    | '<' express '>' // 函数名支持从变量获取
     | IDENTIFIER
 ;
 
@@ -498,6 +501,7 @@ typeReference:
 typeMember:
     typeClass '.'
     | typeReference '.'
+    | fullName '@' // 这种形式主要是用来兼容IDEA的BNF解析避免二义性的
     | fullName '::'
 ;
 
