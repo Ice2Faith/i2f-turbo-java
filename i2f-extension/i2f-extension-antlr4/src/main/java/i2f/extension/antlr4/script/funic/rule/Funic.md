@@ -749,10 +749,9 @@ new String[5]->['1','2','3'];
 <函数名求值表达式>(参数列表)
 ```
 
-
 - 全局函数定义
-  - 全局函数是通过注册方式注册到环境中的
-    - 直接通过函数名的方式进行调用，无类名限定
+    - 全局函数是通过注册方式注册到环境中的
+        - 直接通过函数名的方式进行调用，无类名限定
 
 ```shell
 函数名(参数列表)
@@ -1050,6 +1049,7 @@ import org.apache.commons.lang3;
 - 导入后，对应包下的类就可以直接使用短类名
 - 例如导入 `java.util.*` 后，可以直接写 `ArrayList` 而不需要写 `java.util.ArrayList`
 -
+
 默认已导入的包：java.lang、java.util、java.util.concurrent、java.util.concurrent.atomic、java.time、java.math、java.text、java.sql、javax.sql、java.lang.reflect
 
 ### if-else条件语句
@@ -1531,21 +1531,23 @@ params.put("replacement","true");
 - 核心内建全局函数 `FunicBuiltinFunctions`
 - 内建函数，也就是自带的函数，无需注册直接使用
 
-| 函数签名                                               | 说明                                              |
-|----------------------------------------------------|-------------------------------------------------|
-| `eval(String script)`                              | 将字符串作为 Funic 脚本在当前上下文中执行，返回执行结果                 |
-| `render(String text)`                              | 对字符串进行模板渲染（处理 `${...}` 占位符）                     |
-| `assign(Object target, Object... sources)`         | 将 sources 的内容合并到 target（支持 Collection/Map/Bean） |
-| `compare(Object v1, Object v2)`                    | 比较两个值，返回负数/0/正数                                 |
-| `compare(Object v1, Object v2, boolean forceType)` | 比较两个值，forceType=true 时强制类型匹配                    |
-| `cast(Object value, Class clazz)`                  | 将 value 转换为指定类型                                 |
-| `int(Object value)`                                | 将值转换为 Integer                                   |
-| `string(Object value)`                             | 将值转换为 String                                    |
-| `double(Object value)`                             | 将值转换为 Double                                    |
-| `boolean(Object value)`                            | 将值转换为 boolean                                   |
-| `decimal(Object value)`                            | 将值转换为 BigDecimal                                |
-| `println(Object... args)`                          | 打印参数到标准输出（空格分隔，末尾换行）                            |
-| `printf(String format, Object... args)`            | 格式化打印到标准输出（末尾自动追加换行）                            |
+| 函数签名                                               | 说明                                                   |
+|----------------------------------------------------|------------------------------------------------------|
+| `eval(String script)`                              | 将字符串作为 Funic 脚本在当前上下文中执行，返回执行结果                      |
+| `render(String text)`                              | 对字符串进行模板渲染（处理 `${...}` 占位符）                          |
+| `assign(Object target, Object... sources)`         | 将 sources 的内容合并到 target（支持 Collection/Map/Bean）      |
+| `compare(Object v1, Object v2)`                    | 比较两个值，返回负数/0/正数                                      |
+| `compare(Object v1, Object v2, boolean forceType)` | 比较两个值，forceType=true 时强制类型匹配                         |
+| `cast(Object value, Class clazz)`                  | 将 value 转换为指定类型                                      |
+| `assert(Object condition)`                         | 如果condition的值为假值，则抛出 AssertionError 异常               |
+| `assert(Object condition, Object message)`         | 如果condition的值为假值，则抛出 AssertionError 异常（异常消息为message） |
+| `int(Object value)`                                | 将值转换为 Integer                                        |
+| `string(Object value)`                             | 将值转换为 String                                         |
+| `double(Object value)`                             | 将值转换为 Double                                         |
+| `boolean(Object value)`                            | 将值转换为 boolean                                        |
+| `decimal(Object value)`                            | 将值转换为 BigDecimal                                     |
+| `println(Object... args)`                          | 打印参数到标准输出（空格分隔，末尾换行）                                 |
+| `printf(String format, Object... args)`            | 格式化打印到标准输出（末尾自动追加换行）                                 |
 
 - 举例
 
@@ -1570,8 +1572,8 @@ public class Funic {
 - 你也可以参照此方式注册内建函数
 
 - 除上述内建函数外，引擎默认还向 `Funic.GLOBAL_METHODS` 注册了以下全局函数：
-  - `System.out` 的所有 `print` 相关方法（如 `print`）
-  - `java.lang.Math` 类的全部静态方法（如 `sin`、`cos`、`abs`、`max`、`min`、`pow`、`sqrt`、`floor`、`ceil`、`round`、`random` 等）
+    - `System.out` 的所有 `print` 相关方法（如 `print`）
+    - `java.lang.Math` 类的全部静态方法（如 `sin`、`cos`、`abs`、`max`、`min`、`pow`、`sqrt`、`floor`、`ceil`、`round`、`random` 等）
 
 ### 用户自定义函数
 

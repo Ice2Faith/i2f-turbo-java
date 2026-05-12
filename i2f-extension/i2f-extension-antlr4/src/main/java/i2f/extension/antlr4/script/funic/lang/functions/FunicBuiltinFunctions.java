@@ -113,6 +113,22 @@ public class FunicBuiltinFunctions {
         return visitor.getResolver().convertType(value, clazz, visitor);
     }
 
+    @FunicFunction(value = "assert")
+    public void asserts(Object condition) {
+        asserts(condition, null);
+    }
+
+    @FunicFunction(value = "assert")
+    public void asserts(Object condition, Object message) {
+        boolean ok = visitor.getResolver().toBoolean(condition, visitor);
+        if (!ok) {
+            if (message != null) {
+                throw new AssertionError(message);
+            }
+            throw new AssertionError();
+        }
+    }
+
     @FunicFunction(value = "int")
     public Integer to_int(Object value) {
         return (Integer) cast(value, Integer.class);
@@ -151,11 +167,4 @@ public class FunicBuiltinFunctions {
         System.out.println();
     }
 
-    public String repeat(CharSequence str, int count) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            builder.append(str);
-        }
-        return builder.toString();
-    }
 }
