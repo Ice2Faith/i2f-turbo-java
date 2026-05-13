@@ -3,6 +3,7 @@ package i2f.extension.antlr4.script.funic.lang.resolver.impl;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.funic.lang.context.FunicFunctionCallContext;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicBuiltinFunctions;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
@@ -55,7 +56,6 @@ public class DefaultFunicResolver implements FunicResolver {
     protected AtomicBoolean debug = new AtomicBoolean(false);
     protected DateTimeFormatter logDateFmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
-    protected static ThreadLocal<DefaultFunicVisitor> VISITOR = new InheritableThreadLocal<>();
 
     {
         initPrefixOperatorFunctions();
@@ -917,7 +917,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object invokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
+        Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeInstanceMethod(target, methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeInstanceMethod(target, methodName, args, visitor);
             if (ref != null && ref.hasValue()) {
@@ -943,8 +944,19 @@ public class DefaultFunicResolver implements FunicResolver {
             }
             throw new FunicThrowException(e.getMessage(), e);
         } finally {
-            VISITOR.remove();
+            Funic.FUNCTION_CALL_CONTEXT.remove();
+            Funic.VISITOR.remove();
         }
+    }
+
+    public Object getCallContextOfInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return FunicFunctionCallContext.builder()
+                .visitor(visitor)
+                .type(FunicFunctionCallContext.Type.INSTANCE_METHOD)
+                .invokeTarget(target)
+                .methodName(methodName)
+                .argsList(args)
+                .build();
     }
 
     public Reference<?> beforeInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -977,7 +989,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object invokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
+        Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeGlobalMethod(methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeGlobalMethod(methodName, args, visitor);
             if (ref != null && ref.hasValue()) {
@@ -1005,8 +1018,18 @@ public class DefaultFunicResolver implements FunicResolver {
                 throw new FunicThrowException("not found match method : " + methodName);
             }
         } finally {
-            VISITOR.remove();
+            Funic.FUNCTION_CALL_CONTEXT.remove();
+            Funic.VISITOR.remove();
         }
+    }
+
+    public Object getCallContextOfInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return FunicFunctionCallContext.builder()
+                .visitor(visitor)
+                .type(FunicFunctionCallContext.Type.GLOBAL_METHOD)
+                .methodName(methodName)
+                .argsList(args)
+                .build();
     }
 
     public Reference<?> beforeInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -1037,7 +1060,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object invokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
+        Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeStaticMethod(type, methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeStaticMethod(type, methodName, args, visitor);
             if (ref != null && ref.hasValue()) {
@@ -1052,8 +1076,19 @@ public class DefaultFunicResolver implements FunicResolver {
             }
             throw new FunicThrowException(e.getMessage(), e);
         } finally {
-            VISITOR.remove();
+            Funic.FUNCTION_CALL_CONTEXT.remove();
+            Funic.VISITOR.remove();
         }
+    }
+
+    public Object getCallContextOfInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return FunicFunctionCallContext.builder()
+                .visitor(visitor)
+                .type(FunicFunctionCallContext.Type.STATIC_METHOD)
+                .callClass(type)
+                .methodName(methodName)
+                .argsList(args)
+                .build();
     }
 
     public Reference<?> beforeInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -1062,7 +1097,8 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object newInstance(Class<?> clazz, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
+        Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfNewInstance(clazz, args, visitor));
         try {
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             return doNewInstance(clazz, argsList, visitor);
@@ -1072,8 +1108,18 @@ public class DefaultFunicResolver implements FunicResolver {
             }
             throw new FunicThrowException(e.getMessage(), e);
         } finally {
-            VISITOR.remove();
+            Funic.FUNCTION_CALL_CONTEXT.remove();
+            Funic.VISITOR.remove();
         }
+    }
+
+    public Object getCallContextOfNewInstance(Class<?> clazz, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
+        return FunicFunctionCallContext.builder()
+                .visitor(visitor)
+                .type(FunicFunctionCallContext.Type.NEW_INSTANCE)
+                .callClass(clazz)
+                .argsList(args)
+                .build();
     }
 
     public Object doNewInstance(Class<?> clazz, List<Object> args, DefaultFunicVisitor visitor) throws Exception {
@@ -1082,11 +1128,11 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Object newArray(Class<?> elementType, int count, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
         try {
             return Array.newInstance(elementType, count);
         } finally {
-            VISITOR.remove();
+            Funic.VISITOR.remove();
         }
     }
 
@@ -1224,7 +1270,7 @@ public class DefaultFunicResolver implements FunicResolver {
 
     @Override
     public Class<?> findClass(String className, DefaultFunicVisitor visitor) {
-        VISITOR.set(visitor);
+        Funic.VISITOR.set(visitor);
         try {
             Class<?> clazz = ReflectResolver.loadClass(className);
             if (clazz != null) {
@@ -1245,7 +1291,7 @@ public class DefaultFunicResolver implements FunicResolver {
             }
             return clazz;
         } finally {
-            VISITOR.remove();
+            Funic.VISITOR.remove();
         }
     }
 

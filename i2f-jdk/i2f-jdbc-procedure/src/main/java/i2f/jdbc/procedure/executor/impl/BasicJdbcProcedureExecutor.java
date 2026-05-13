@@ -175,6 +175,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
         ret.add(new LangDoWhileNode());
+        ret.add(new LangEvalFunicNode());
         ret.add(new LangEvalGroovyNode());
         ret.add(new LangEvalJavaNode());
         ret.add(new LangEvalJavascriptNode());
@@ -1318,6 +1319,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return LangEvalGroovyNode.evalGroovyScript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_FUNIC, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalFunicNode.evalFunic(text, context, this);
         });
         registryFeatureFunction(FeatureConsts.CLASS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);

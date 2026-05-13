@@ -13,5 +13,7 @@ public interface LangConsts {
     String TS = "ts";
     String GROOVY = "groovy";
 
+    String FUNIC = "funic";
+
     String XPROC4J = "xproc4j";
 }

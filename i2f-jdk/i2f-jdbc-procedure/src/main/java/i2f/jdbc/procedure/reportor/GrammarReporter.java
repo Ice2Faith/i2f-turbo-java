@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.reportor;
 
 import groovy.lang.GroovyShell;
 import i2f.compiler.MemoryCompiler;
+import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.jdbc.procedure.consts.*;
@@ -503,6 +504,20 @@ public class GrammarReporter {
                     TinyScript.parse(expr);
                 } finally {
                     TinyScript.ERROR_LISTENER.remove(listener);
+                }
+            } else if (FeatureConsts.EVAL_FUNIC.equals(feature)) {
+                ANTLRErrorListener listener = new BaseErrorListener() {
+                    @Override
+                    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+                        String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
+                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + errorMsg);
+                    }
+                };
+                Funic.ERROR_LISTENER.add(listener);
+                try {
+                    Funic.parse(expr);
+                } finally {
+                    Funic.ERROR_LISTENER.remove(listener);
                 }
             } else if (FeatureConsts.STRING.equals(feature)) {
                 if (expr.contains("${")

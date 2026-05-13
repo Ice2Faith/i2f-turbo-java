@@ -55,6 +55,8 @@ public interface TagConsts {
     String LANG_EVAL_TINYSCRIPT = "lang-eval-tinyscript";
     String LANG_EVAL_TS = "lang-eval-ts";
 
+    String LANG_EVAL_FUNIC = "lang-eval-funic";
+
     String LANG_IF = "lang-if";
     String LANG_CHOOSE = "lang-choose";
     String LANG_WHEN = "lang-when";

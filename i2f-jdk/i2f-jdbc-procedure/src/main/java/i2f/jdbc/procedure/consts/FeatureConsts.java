@@ -61,6 +61,7 @@ public interface FeatureConsts {
     String EVAL_TINYSCRIPT = "eval-tinyscript";
     String EVAL_TS = "eval-ts";
     String EVAL_GROOVY = "eval-groovy";
+    String EVAL_FUNIC = "eval-funic";
     String CLASS = "class";
 
     String NOT = "not";

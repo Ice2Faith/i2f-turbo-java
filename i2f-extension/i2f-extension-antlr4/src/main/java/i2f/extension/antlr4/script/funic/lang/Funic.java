@@ -33,6 +33,9 @@ public class Funic {
     public static final CopyOnWriteArrayList<String> IMPORT_PACKAGES = new CopyOnWriteArrayList<>();
     public static final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> GLOBAL_METHODS = new ConcurrentHashMap<>();
 
+    public static final ThreadLocal<DefaultFunicVisitor> VISITOR = new InheritableThreadLocal<>();
+    public static final ThreadLocal<Object> FUNCTION_CALL_CONTEXT = new InheritableThreadLocal<>();
+
     static {
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
 
