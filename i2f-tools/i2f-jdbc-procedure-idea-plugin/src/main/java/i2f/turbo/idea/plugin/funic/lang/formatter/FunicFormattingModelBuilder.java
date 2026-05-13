@@ -314,6 +314,15 @@ public class FunicFormattingModelBuilder implements FormattingModelBuilder {
                 // 函数调用具名参数之间空格
                 .aroundInside(FunicTypes.TERM_COLON, FunicTypes.FUNCTION_ARGUMENT)
                 .spaces(1)
+                // 返回语句换行
+                .before(TokenSet.create(
+                        FunicTypes.KW_RETURN,
+                        FunicTypes.RETURN_EXPRESS,
+                        FunicTypes.KW_CONTINUE,
+                        FunicTypes.CONTINUE_EXPRESS,
+                        FunicTypes.KW_BREAK,
+                        FunicTypes.BREAK_EXPRESS
+                )).lineBreakInCode()
                 ;
     }
 

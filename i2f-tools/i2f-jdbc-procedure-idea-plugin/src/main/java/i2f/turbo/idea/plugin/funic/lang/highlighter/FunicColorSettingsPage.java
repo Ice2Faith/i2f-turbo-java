@@ -19,9 +19,16 @@ public class FunicColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Keywords", FunicSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("String", FunicSyntaxHighlighter.STRING),
             new AttributesDescriptor("Value", FunicSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("Comment", FunicSyntaxHighlighter.LINE_COMMENT),
-            new AttributesDescriptor("Class", FunicSyntaxHighlighter.CLASS_REFERENCE),
+            new AttributesDescriptor("Line Comment", FunicSyntaxHighlighter.LINE_COMMENT),
+            new AttributesDescriptor("Block Comment", FunicSyntaxHighlighter.BLOCK_COMMENT),
+            new AttributesDescriptor("Class Reference", FunicSyntaxHighlighter.CLASS_REFERENCE),
             new AttributesDescriptor("Paren", FunicSyntaxHighlighter.PAREN),
+            new AttributesDescriptor("Curly", FunicSyntaxHighlighter.CURLY),
+            new AttributesDescriptor("Square Bracket", FunicSyntaxHighlighter.BRACKET_SQUARE),
+            new AttributesDescriptor("Operator", FunicSyntaxHighlighter.OPERATOR),
+            new AttributesDescriptor("Comma", FunicSyntaxHighlighter.COMMA),
+            new AttributesDescriptor("Semicolon", FunicSyntaxHighlighter.SEMICOLON),
+            new AttributesDescriptor("Dot", FunicSyntaxHighlighter.DOT),
             new AttributesDescriptor("Bad value", FunicSyntaxHighlighter.BAD_CHARACTER)
     };
 

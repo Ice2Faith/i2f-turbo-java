@@ -248,6 +248,13 @@ public class TinyScriptFormattingModelBuilder implements FormattingModelBuilder 
                 // 函数调用具名参数之间空格
                 .aroundInside(TinyScriptTypes.TERM_COLON, TinyScriptTypes.ARGUMENT)
                 .spaces(1)
+                // 返回语句换行
+                .before(TokenSet.create(
+                        TinyScriptTypes.KEY_RETURN,
+                        TinyScriptTypes.CONTROL_SEGMENT,
+                        TinyScriptTypes.KEY_CONTINUE,
+                        TinyScriptTypes.KEY_BREAK
+                )).lineBreakInCode()
                 ;
     }
 

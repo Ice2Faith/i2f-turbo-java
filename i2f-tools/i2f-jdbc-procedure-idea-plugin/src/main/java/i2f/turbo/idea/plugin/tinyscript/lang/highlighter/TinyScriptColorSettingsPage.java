@@ -19,9 +19,16 @@ public class TinyScriptColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Keywords", TinyScriptSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("String", TinyScriptSyntaxHighlighter.STRING),
             new AttributesDescriptor("Value", TinyScriptSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("Comment", TinyScriptSyntaxHighlighter.LINE_COMMENT),
-            new AttributesDescriptor("Class", TinyScriptSyntaxHighlighter.CLASS_REFERENCE),
+            new AttributesDescriptor("Line Comment", TinyScriptSyntaxHighlighter.LINE_COMMENT),
+            new AttributesDescriptor("Block Comment", TinyScriptSyntaxHighlighter.BLOCK_COMMENT),
+            new AttributesDescriptor("Class Reference", TinyScriptSyntaxHighlighter.CLASS_REFERENCE),
             new AttributesDescriptor("Paren", TinyScriptSyntaxHighlighter.PAREN),
+            new AttributesDescriptor("Curly", TinyScriptSyntaxHighlighter.CURLY),
+            new AttributesDescriptor("Square Bracket", TinyScriptSyntaxHighlighter.BRACKET_SQUARE),
+            new AttributesDescriptor("Operator", TinyScriptSyntaxHighlighter.OPERATOR),
+            new AttributesDescriptor("Comma", TinyScriptSyntaxHighlighter.COMMA),
+            new AttributesDescriptor("Semicolon", TinyScriptSyntaxHighlighter.SEMICOLON),
+            new AttributesDescriptor("Dot", TinyScriptSyntaxHighlighter.DOT),
             new AttributesDescriptor("Bad value", TinyScriptSyntaxHighlighter.BAD_CHARACTER)
     };
 

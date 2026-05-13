@@ -256,5 +256,39 @@
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
             <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
         </action>
+
+        <action
+                id="EditorBasics.XProc4jTestAction"
+                class="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jTestAction"
+                text="Test XProc4J"
+                description="Test XProc4J grammar."
+                icon="/assets/xproc4j/action.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
+        </action>
+
+
+        <action
+                id="EditorBasics.TinyScriptTestAction"
+                class="i2f.turbo.idea.plugin.tinyscript.lang.action.TinyScriptTestAction"
+                text="Test TinyScript"
+                description="Test TinyScript grammar or evaluate express."
+                icon="/assets/tinyscript/tinyscript.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
+        </action>
+
+        <action
+                id="EditorBasics.FunicTestAction"
+                class="i2f.turbo.idea.plugin.funic.lang.action.FunicTestAction"
+                text="Test Funic"
+                description="Test Funic grammar or evaluate express."
+                icon="/assets/funic/funic.svg">
+            <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
+            <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
+        </action>
     </actions>
 </idea-plugin>

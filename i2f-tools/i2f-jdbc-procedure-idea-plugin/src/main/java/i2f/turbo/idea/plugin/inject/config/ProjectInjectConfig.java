@@ -3,10 +3,10 @@ package i2f.turbo.idea.plugin.inject.config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.intellij.lang.Language;
 import com.intellij.openapi.project.Project;
+import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
-import i2f.turbo.idea.plugin.inject.utils.StreamUtil;
 
 import java.io.File;
 import java.util.*;
