@@ -25,7 +25,7 @@ import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-TERM_COMMENT_SINGLE_LINE="//"[^\n]*\n
+TERM_COMMENT_SINGLE_LINE="//"[^\n]*(\n|\$)
 TERM_COMMENT_MULTI_LINE="/"\*([^*]|(\*+([^*/])))*\*+"/"
 TERM_CONST_STRING_MULTILINE=```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)```
 TERM_CONST_STRING_MULTILINE_QUOTE=\"\"\"(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)\"\"\"
@@ -126,9 +126,9 @@ WS=[ \t\r\n]+
   "foreach"                                 { return KEY_FOREACH; }
   "if"                                      { return KEY_IF; }
   "else"                                    { return KEY_ELSE; }
+  "elif"                                    { return KEY_ELIF; }
   "new"                                     { return KEY_NEW; }
   "func"                                    { return KEY_FUNC; }
-  "KEY_ELIF"                                { return KEY_ELIF; }
 
   {TERM_COMMENT_SINGLE_LINE}                { return TERM_COMMENT_SINGLE_LINE; }
   {TERM_COMMENT_MULTI_LINE}                 { return TERM_COMMENT_MULTI_LINE; }

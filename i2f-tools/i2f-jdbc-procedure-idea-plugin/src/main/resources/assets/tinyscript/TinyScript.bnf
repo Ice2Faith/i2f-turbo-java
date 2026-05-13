@@ -32,7 +32,7 @@
   // 定义终结符，这里目前只会使用regexp来进行正则表达式匹配得到终结符
   // 研究不深，还不知道怎么对终结符进行重用，也就是一个终极符分解为多个终结符的语法
   tokens=[
-    TERM_COMMENT_SINGLE_LINE= "regexp://[^\n]*\n"
+    TERM_COMMENT_SINGLE_LINE= "regexp://[^\n]*(\n|$)"
 
     TERM_COMMENT_MULTI_LINE= "regexp:/\*([^*]|(\*+([^*/])))*\*+/";
 
@@ -149,6 +149,7 @@
     KEY_FOREACH='foreach';
     KEY_IF='if';
     KEY_ELSE='else';
+    KEY_ELIF='elif';
     KEY_NEW='new';
     KEY_FUNC='func';
 
@@ -169,6 +170,7 @@ root::=
 script::=
     segment+
     |express (TERM_SEMICOLON)? <<eof>>
+    | commentSegment <<eof>>
     ;
 
 segment::=

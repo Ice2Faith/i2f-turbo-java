@@ -76,7 +76,7 @@ public interface TinyScriptTypes {
     IElementType KEY_CONTINUE = new TinyScriptTokenType("continue");
     IElementType KEY_DEBUGGER = new TinyScriptTokenType("debugger");
     IElementType KEY_DO = new TinyScriptTokenType("do");
-    IElementType KEY_ELIF = new TinyScriptTokenType("KEY_ELIF");
+    IElementType KEY_ELIF = new TinyScriptTokenType("elif");
     IElementType KEY_ELSE = new TinyScriptTokenType("else");
     IElementType KEY_FINALLY = new TinyScriptTokenType("finally");
     IElementType KEY_FOR = new TinyScriptTokenType("for");

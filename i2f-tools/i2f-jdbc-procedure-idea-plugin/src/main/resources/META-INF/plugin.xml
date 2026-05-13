@@ -5,7 +5,7 @@
 
     <!-- Public plugin name should be written in Title Case.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-name -->
-    <name>Jdbc-Procedure</name>
+    <name>XProc4J</name>
 
     <version>1.0</version>
 
@@ -19,7 +19,7 @@
          Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
          Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
     <description><![CDATA[
-    Jdbc Procedure .xml file plugin<br/>
+    XProc4j .xml file plugin<br/>
     provide highlight & completion for sql/java code<br/>
   ]]></description>
 
@@ -89,6 +89,35 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>-->
 
+
+        <!-- 定义引用跳转定义 -->
+        <!--        <psi.referenceContributor language="XML"-->
+        <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
+
+        <!-- 定义查找引用 -->
+        <!--        <lang.findUsagesProvider language="XML"-->
+        <!--                                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>-->
+
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                                      implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jLiveTemplatesProvider"/>
+
+        <!-- 定义XML行的refid跳转标记，点击跳转到定义 -->
+        <dom.fileMetaData rootTagName="procedure"
+                          implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureDomFileDescription"/>
+        <codeInsight.lineMarkerProvider
+                language="XML"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider"/>
+
+        <!-- 注册语言注入器 -->
+        <multiHostInjector
+                order="first"
+                implementation="i2f.turbo.idea.plugin.inject.ProjectLanguageTemplateMultiHostInjector"/>
+
+        <!-- *************************** TinyScript  begin *************************** -->
         <!-- 注册文件类型 -->
         <fileType name="TinyScript"
                   implementationClass="i2f.turbo.idea.plugin.tinyscript.TinyScriptFileType"
@@ -118,32 +147,8 @@
         <lang.braceMatcher language="TinyScript"
                            implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.bracket.TinyScriptPairedBraceMatcher"/>
 
-        <!-- 定义引用跳转定义 -->
-        <!--        <psi.referenceContributor language="XML"-->
-        <!--                                  implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlPsiReferenceContributor"/>-->
 
-        <!-- 定义查找引用 -->
-        <!--        <lang.findUsagesProvider language="XML"-->
-        <!--                                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlFindUsagesProvider"/>-->
-
-        <!-- 定义语句模版 -->
-        <defaultLiveTemplatesProvider order="first"
-                implementation="i2f.turbo.idea.plugin.jdbc.procedure.XProc4jLiveTemplatesProvider"/>
-
-        <!-- 定义XML行的refid跳转标记，点击跳转到定义 -->
-        <dom.fileMetaData rootTagName="procedure"
-                          implementation="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureDomFileDescription"  />
-        <codeInsight.lineMarkerProvider
-                language="XML"
-                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
-        <codeInsight.lineMarkerProvider
-                language="TinyScript"
-                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider" />
-
-        <!-- 注册语言注入器 -->
-        <multiHostInjector
-                order="first"
-                implementation="i2f.turbo.idea.plugin.inject.ProjectLanguageTemplateMultiHostInjector"/>
+        <!-- *************************** TinyScript  begin *************************** -->
 
 
         <!-- *************************** funic  begin *************************** -->
@@ -206,7 +211,7 @@
                 class="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlProcedureJumpSourceFileAction"
                 text="XProc4J Jump Source"
                 description="Jump to source xml file."
-                icon="/assets/action.svg">
+                icon="/assets/xproc4j/action.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
             <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
@@ -218,7 +223,7 @@
                 class="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureFunctionJumpSourceFileAction"
                 text="TinyScript Function Jump Source"
                 description="Jump to TinyScript function source file."
-                icon="/assets/action.svg">
+                icon="/assets/xproc4j/action.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
             <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>
@@ -230,7 +235,7 @@
                 class="i2f.turbo.idea.plugin.jdbc.procedure.Oracle2Xproc4jConvertAction"
                 text="Oracle 2 XProc4J"
                 description="Oracle grammar convert to XProc4J grammar."
-                icon="/assets/action.svg">
+                icon="/assets/xproc4j/action.svg">
             <add-to-group group-id="EditorPopupMenu" anchor="first"/>
             <add-to-group group-id="ConsoleEditorPopupMenu" anchor="first"/>
             <add-to-group group-id="BasicEditorPopupMenu" anchor="first"/>

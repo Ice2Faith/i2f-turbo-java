@@ -14,6 +14,6 @@ public class XProc4jConsts {
     public static final String EXTENSION = "xml";
     public static final String DEFAULT_MIME = "text/xproc4j";
     public static final String[] MIME = {DEFAULT_MIME, "text/jdbc-procedure"};
-    public static final Icon ICON = IconLoader.getIcon("/assets/action.svg", JdbcProcedureXmlCompletionContributor.class);
+    public static final Icon ICON = IconLoader.getIcon("/assets/xproc4j/action.svg", JdbcProcedureXmlCompletionContributor.class);
 
 }

@@ -50,14 +50,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         URL url = null;
         if (url == null) {
             try {
-                url = JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/JsInject.js");
+                url = JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/xproc4j/JsInject.js");
             } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }
         }
         if (url == null) {
             try {
-                url = Thread.currentThread().getContextClassLoader().getResource("/assets/JsInject.js");
+                url = Thread.currentThread().getContextClassLoader().getResource("/assets/xproc4j/JsInject.js");
             } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }
