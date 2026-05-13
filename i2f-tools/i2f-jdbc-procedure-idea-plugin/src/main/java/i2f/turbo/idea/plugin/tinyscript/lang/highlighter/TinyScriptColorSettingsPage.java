@@ -19,7 +19,7 @@ public class TinyScriptColorSettingsPage implements ColorSettingsPage {
             new AttributesDescriptor("Keywords", TinyScriptSyntaxHighlighter.KEYWORD),
             new AttributesDescriptor("String", TinyScriptSyntaxHighlighter.STRING),
             new AttributesDescriptor("Value", TinyScriptSyntaxHighlighter.NUMBER),
-            new AttributesDescriptor("Comment", TinyScriptSyntaxHighlighter.COMMENT),
+            new AttributesDescriptor("Comment", TinyScriptSyntaxHighlighter.LINE_COMMENT),
             new AttributesDescriptor("Class", TinyScriptSyntaxHighlighter.CLASS_REFERENCE),
             new AttributesDescriptor("Paren", TinyScriptSyntaxHighlighter.PAREN),
             new AttributesDescriptor("Bad value", TinyScriptSyntaxHighlighter.BAD_CHARACTER)

@@ -13,27 +13,48 @@ import org.jetbrains.annotations.NotNull;
 
 public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
     public static final TextAttributesKey KEYWORD =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_KEYWORD", DefaultLanguageHighlighterColors.KEYWORD);
     public static final TextAttributesKey STRING =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_STRING", DefaultLanguageHighlighterColors.STRING);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_STRING", DefaultLanguageHighlighterColors.STRING);
     public static final TextAttributesKey NUMBER =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
-    public static final TextAttributesKey COMMENT =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_NUMBER", DefaultLanguageHighlighterColors.NUMBER);
+    public static final TextAttributesKey LINE_COMMENT =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_LINE_COMMENT", DefaultLanguageHighlighterColors.LINE_COMMENT);
+    public static final TextAttributesKey BLOCK_COMMENT =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_BLOCK_COMMENT", DefaultLanguageHighlighterColors.BLOCK_COMMENT);
     public static final TextAttributesKey CLASS_REFERENCE =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_CLASS_REFERENCE", DefaultLanguageHighlighterColors.CLASS_REFERENCE);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_CLASS_REFERENCE", DefaultLanguageHighlighterColors.CLASS_REFERENCE);
     public static final TextAttributesKey PAREN =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT_PAREN", DefaultLanguageHighlighterColors.PARENTHESES);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_PAREN", DefaultLanguageHighlighterColors.PARENTHESES);
+    public static final TextAttributesKey CURLY =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_CURLY", DefaultLanguageHighlighterColors.BRACES);
+    public static final TextAttributesKey BRACKET_SQUARE =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_BRACKET_SQUARE", DefaultLanguageHighlighterColors.BRACKETS);
+    public static final TextAttributesKey OPERATOR =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_OPERATOR", DefaultLanguageHighlighterColors.OPERATION_SIGN);
+    public static final TextAttributesKey COMMA =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_COMMA", DefaultLanguageHighlighterColors.COMMA);
+    public static final TextAttributesKey SEMICOLON =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_SEMICOLON", DefaultLanguageHighlighterColors.SEMICOLON);
+    public static final TextAttributesKey DOT =
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT_DOT", DefaultLanguageHighlighterColors.SEMICOLON);
     public static final TextAttributesKey BAD_CHARACTER =
-            TextAttributesKey.createTextAttributesKey("TINY_SCRIPT__BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
+            TextAttributesKey.createTextAttributesKey("TINYSCRIPT__BAD_CHARACTER", HighlighterColors.BAD_CHARACTER);
 
 
     private static final TextAttributesKey[] KEYWORD_KEYS = new TextAttributesKey[]{KEYWORD};
     private static final TextAttributesKey[] STRING_KEYS = new TextAttributesKey[]{STRING};
     private static final TextAttributesKey[] NUMBER_KEYS = new TextAttributesKey[]{NUMBER};
-    private static final TextAttributesKey[] COMMENT_KEYS = new TextAttributesKey[]{COMMENT};
+    private static final TextAttributesKey[] LINE_COMMENT_KEYS = new TextAttributesKey[]{LINE_COMMENT};
+    private static final TextAttributesKey[] BLOCK_COMMENT_KEYS = new TextAttributesKey[]{BLOCK_COMMENT};
     private static final TextAttributesKey[] CLASS_REFERENCE_KEYS = new TextAttributesKey[]{CLASS_REFERENCE};
     private static final TextAttributesKey[] PAREN_KEYS = new TextAttributesKey[]{PAREN};
+    private static final TextAttributesKey[] CURLY_KEYS = new TextAttributesKey[]{CURLY};
+    private static final TextAttributesKey[] BRACKET_SQUARE_KEYS = new TextAttributesKey[]{BRACKET_SQUARE};
+    private static final TextAttributesKey[] OPERATOR_KEYS = new TextAttributesKey[]{OPERATOR};
+    private static final TextAttributesKey[] COMMA_KEYS = new TextAttributesKey[]{COMMA};
+    private static final TextAttributesKey[] SEMICOLON_KEYS = new TextAttributesKey[]{SEMICOLON};
+    private static final TextAttributesKey[] DOT_KEYS = new TextAttributesKey[]{DOT};
 
     private static final TextAttributesKey[] BAD_CHAR_KEYS = new TextAttributesKey[]{BAD_CHARACTER};
     private static final TextAttributesKey[] EMPTY_KEYS = new TextAttributesKey[0];
@@ -47,7 +68,7 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
     @NotNull
     @Override
     public TextAttributesKey[] getTokenHighlights(IElementType tokenType) {
-        // ID NAMING REF_EXPRESS
+        // ID NAMING
         if (tokenType.equals(TinyScriptTypes.KEY_BREAK)
                 || tokenType.equals(TinyScriptTypes.KEY_CATCH)
                 || tokenType.equals(TinyScriptTypes.KEY_CLASS)
@@ -66,51 +87,73 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.KEY_WHILE)
                 || tokenType.equals(TinyScriptTypes.KEY_DO)
                 || tokenType.equals(TinyScriptTypes.KEY_FUNC)
+
+                || tokenType.equals(TinyScriptTypes.KEY_AND)
+                || tokenType.equals(TinyScriptTypes.KEY_EQ)
+                || tokenType.equals(TinyScriptTypes.KEY_GTE)
+                || tokenType.equals(TinyScriptTypes.KEY_GT)
+                || tokenType.equals(TinyScriptTypes.KEY_LTE)
+                || tokenType.equals(TinyScriptTypes.KEY_LT)
+                || tokenType.equals(TinyScriptTypes.KEY_NEQ)
+                || tokenType.equals(TinyScriptTypes.KEY_NE)
+                || tokenType.equals(TinyScriptTypes.KEY_OR)
+
+                || tokenType.equals(TinyScriptTypes.KEY_AS)
+                || tokenType.equals(TinyScriptTypes.KEY_IN)
+                || tokenType.equals(TinyScriptTypes.KEY_CAST)
+                || tokenType.equals(TinyScriptTypes.KEY_INSTANCE_OF)
+                || tokenType.equals(TinyScriptTypes.KEY_IS)
+                || tokenType.equals(TinyScriptTypes.KEY_NOT)
+                || tokenType.equals(TinyScriptTypes.KEY_NOT_IN)
+                || tokenType.equals(TinyScriptTypes.KEY_TYPE_OF)
+        ) {
+            return KEYWORD_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_COMMA)) {
+            return COMMA_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_SEMICOLON)) {
+            return SEMICOLON_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_DOT)) {
+            return DOT_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_COLON)
+                || tokenType.equals(TinyScriptTypes.TERM_DOLLAR)
+                || tokenType.equals(TinyScriptTypes.TERM_QUESTION)
                 || tokenType.equals(TinyScriptTypes.OP_ADD)
                 || tokenType.equals(TinyScriptTypes.OP_AND)
-                || tokenType.equals(TinyScriptTypes.OP_AND_STR)
-                || tokenType.equals(TinyScriptTypes.OP_AS)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN_ADD)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN_SUB)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN_MUL)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN_DIV)
                 || tokenType.equals(TinyScriptTypes.OP_ASSIGN_MOD)
+                || tokenType.equals(TinyScriptTypes.OP_ASSIGN_IFNULL)
+                || tokenType.equals(TinyScriptTypes.OP_ASSIGN_NOTNULL)
                 || tokenType.equals(TinyScriptTypes.OP_VERTICAL_BAR)
-                || tokenType.equals(TinyScriptTypes.OP_CAST)
                 || tokenType.equals(TinyScriptTypes.OP_DIV)
                 || tokenType.equals(TinyScriptTypes.OP_EQ)
-                || tokenType.equals(TinyScriptTypes.OP_EQ_STR)
                 || tokenType.equals(TinyScriptTypes.OP_EXCLAM)
                 || tokenType.equals(TinyScriptTypes.OP_GT)
                 || tokenType.equals(TinyScriptTypes.OP_GTE)
-                || tokenType.equals(TinyScriptTypes.OP_GTE_STR)
-                || tokenType.equals(TinyScriptTypes.OP_GT_STR)
-                || tokenType.equals(TinyScriptTypes.OP_IN)
-                || tokenType.equals(TinyScriptTypes.OP_INSTANCE_OF)
-                || tokenType.equals(TinyScriptTypes.OP_IS)
                 || tokenType.equals(TinyScriptTypes.OP_LT)
                 || tokenType.equals(TinyScriptTypes.OP_LTE)
-                || tokenType.equals(TinyScriptTypes.OP_LTE_STR)
-                || tokenType.equals(TinyScriptTypes.OP_LT_STR)
                 || tokenType.equals(TinyScriptTypes.OP_MOD)
                 || tokenType.equals(TinyScriptTypes.OP_MUL)
                 || tokenType.equals(TinyScriptTypes.OP_NE)
                 || tokenType.equals(TinyScriptTypes.OP_NEQ)
-                || tokenType.equals(TinyScriptTypes.OP_NEQ_STR)
-                || tokenType.equals(TinyScriptTypes.OP_NE_STR)
-                || tokenType.equals(TinyScriptTypes.OP_NOT)
-                || tokenType.equals(TinyScriptTypes.OP_NOT_IN)
                 || tokenType.equals(TinyScriptTypes.OP_OR)
-                || tokenType.equals(TinyScriptTypes.OP_OR_STR)
                 || tokenType.equals(TinyScriptTypes.OP_SUB)
-                || tokenType.equals(TinyScriptTypes.OP_TYPE_OF)
                 || tokenType.equals(TinyScriptTypes.OP_PIPELINE)
                 || tokenType.equals(TinyScriptTypes.OP_SELF_PIPE)
                 || tokenType.equals(TinyScriptTypes.TERM_SHARP)
-                || tokenType.equals(TinyScriptTypes.TERM_AT)
-        ) {
-            return KEYWORD_KEYS;
+                || tokenType.equals(TinyScriptTypes.TERM_AT)) {
+            return OPERATOR_KEYS;
         }
 
         if (tokenType.equals(TinyScriptTypes.TERM_CONST_NUMBER)
@@ -135,7 +178,6 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
                 || tokenType.equals(TinyScriptTypes.TERM_CONST_STRING_RENDER)
                 || tokenType.equals(TinyScriptTypes.TERM_CONST_STRING_RENDER_SINGLE)
                 || tokenType.equals(TinyScriptTypes.TERM_CONST_STRING_SINGLE)) {
-
             return STRING_KEYS;
         }
 
@@ -143,29 +185,34 @@ public class TinyScriptSyntaxHighlighter extends SyntaxHighlighterBase {
             return CLASS_REFERENCE_KEYS;
         }
 
-        if (tokenType.equals(TinyScriptTypes.TERM_COMMENT_MULTI_LINE)
-                || tokenType.equals(TinyScriptTypes.TERM_COMMENT_SINGLE_LINE)) {
-            return COMMENT_KEYS;
+        if (tokenType.equals(TinyScriptTypes.TERM_COMMENT_SINGLE_LINE)) {
+            return LINE_COMMENT_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_COMMENT_MULTI_LINE)) {
+            return BLOCK_COMMENT_KEYS;
         }
 
         if (tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_L)
                 || tokenType.equals(TinyScriptTypes.TERM_BRACKET_SQUARE_R)
-                || tokenType.equals(TinyScriptTypes.TERM_COLON)
-                || tokenType.equals(TinyScriptTypes.TERM_COMMA)
-                || tokenType.equals(TinyScriptTypes.TERM_CURLY_L)
-                || tokenType.equals(TinyScriptTypes.TERM_CURLY_R)
-                || tokenType.equals(TinyScriptTypes.TERM_DOLLAR)
-                || tokenType.equals(TinyScriptTypes.TERM_DOT)
-                || tokenType.equals(TinyScriptTypes.TERM_PAREN_L)
+        ) {
+            return BRACKET_SQUARE_KEYS;
+        }
+
+        if (tokenType.equals(TinyScriptTypes.TERM_PAREN_L)
                 || tokenType.equals(TinyScriptTypes.TERM_PAREN_R)
-                || tokenType.equals(TinyScriptTypes.TERM_QUESTION)
-                || tokenType.equals(TinyScriptTypes.TERM_SEMICOLON)
         ) {
             return PAREN_KEYS;
         }
 
+        if (tokenType.equals(TinyScriptTypes.TERM_CURLY_L)
+                || tokenType.equals(TinyScriptTypes.TERM_CURLY_R)
+        ) {
+            return CURLY_KEYS;
+        }
 
-        if (tokenType.equals(TokenType.BAD_CHARACTER)) {
+        if (tokenType.equals(TinyScriptTypes.WORD)
+                || tokenType.equals(TokenType.BAD_CHARACTER)) {
             return BAD_CHAR_KEYS;
         }
 

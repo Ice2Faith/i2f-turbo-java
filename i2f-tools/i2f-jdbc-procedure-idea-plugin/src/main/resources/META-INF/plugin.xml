@@ -147,8 +147,24 @@
         <lang.braceMatcher language="TinyScript"
                            implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.bracket.TinyScriptPairedBraceMatcher"/>
 
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                                      implementation="i2f.turbo.idea.plugin.tinyscript.lang.live.templates.TinyScriptLiveTemplatesProvider"/>
 
-        <!-- *************************** TinyScript  begin *************************** -->
+        <!-- 注册 Live Templates 上下文类型，使 Funic 在 Live Templates 设置中可选 -->
+        <liveTemplateContextProvider
+                implementation="i2f.turbo.idea.plugin.tinyscript.lang.live.templates.TinyScriptLiveTemplateContextProvider"/>
+
+        <completion.contributor
+                language="TinyScript"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.completion.TinyScriptCompletionContributor"/>
+
+        <lang.formatter
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.formatter.TinyScriptFormattingModelBuilder"/>
+
+        <!-- *************************** TinyScript  end *************************** -->
 
 
         <!-- *************************** funic  begin *************************** -->

@@ -94,35 +94,35 @@
     OP_MUL='*';
     OP_DIV='/';
     OP_MOD='%';
-    OP_IN='in';
-    OP_NOT_IN='notin';
-    OP_AS='as';
-    OP_CAST='cast';
-    OP_IS='is';
-    OP_INSTANCE_OF='instanceof';
-    OP_TYPE_OF='typeof';
+    KEY_IN='in';
+    KEY_NOT_IN='notin';
+    KEY_AS='as';
+    KEY_CAST='cast';
+    KEY_IS='is';
+    KEY_INSTANCE_OF='instanceof';
+    KEY_TYPE_OF='typeof';
     OP_ADD='+';
     OP_SUB='-';
     OP_GTE='>=';
-    OP_GTE_STR='gte';
+    KEY_GTE='gte';
     OP_LTE='<=';
-    OP_LTE_STR='lte';
+    KEY_LTE='lte';
     OP_NE='!=';
-    OP_NE_STR='ne';
+    KEY_NE='ne';
     OP_NEQ='<>';
-    OP_NEQ_STR='neq';
+    KEY_NEQ='neq';
     OP_EQ='==';
-    OP_EQ_STR='eq';
+    KEY_EQ='eq';
     OP_GT='>';
-    OP_GT_STR='gt';
+    KEY_GT='gt';
     OP_LT='<';
-    OP_LT_STR='lt';
+    KEY_LT='lt';
     OP_AND='&&';
-    OP_AND_STR='and';
+    KEY_AND='and';
     OP_OR='||';
-    OP_OR_STR='or';
+    KEY_OR='or';
     OP_EXCLAM='!';
-    OP_NOT='not';
+    KEY_NOT='not';
 
     OP_ASSIGN='=';
     OP_ASSIGN_ADD="+=";
@@ -130,6 +130,8 @@
     OP_ASSIGN_MUL="*=";
     OP_ASSIGN_DIV="/=";
     OP_ASSIGN_MOD="%=";
+    OP_ASSIGN_IFNULL='?=';
+    OP_ASSIGN_NOTNULL='.=';
     OP_VERTICAL_BAR='|';
     OP_PIPELINE='|>';
     OP_SELF_PIPE='::';
@@ -197,16 +199,48 @@ commentSegment::=
     ;
 
 operatorSegment::=
-     TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
-    | ( OP_AS | OP_CAST  | OP_IS | OP_INSTANCE_OF | OP_TYPE_OF) express
-    |  (OP_MUL | OP_DIV | OP_MOD) express
-    | (OP_ADD | OP_SUB) express
-    | (OP_IN | OP_NOT_IN| OP_GTE | OP_GTE_STR | OP_LTE | OP_LTE_STR | OP_NE | OP_NE_STR | OP_NEQ | OP_NEQ_STR | OP_EQ | OP_EQ_STR | OP_GT | OP_GT_STR | OP_LT | OP_LT_STR) express
-    | (OP_AND | OP_AND_STR | OP_OR | OP_OR_STR) express
-    | OP_MOD
-    | TERM_QUESTION express TERM_COLON express
+    squareQuoteRightPart // 中括号取值表达式
+    | castInstanceOfRightPart // 类型转换/判断类型表达式
+    |  mathMulDivOperatorPart express
+    |  mathAddSubOperatorPart express
+    |  compareOperatorPart express
+    |  logicalLinkOperatorPart express
+    | percentRightPart
+    | thirdOperateRightPart
     | pipelineFunctionSegment +
-        ;
+      ;
+
+squareQuoteRightPart::=
+    TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
+;
+
+castInstanceOfRightPart::=
+    ( KEY_AS | KEY_CAST  | KEY_IS | KEY_INSTANCE_OF | KEY_TYPE_OF) express
+;
+
+mathMulDivOperatorPart::=
+    (OP_MUL | OP_DIV | OP_MOD)
+;
+
+mathAddSubOperatorPart::=
+    (OP_ADD | OP_SUB)
+;
+
+compareOperatorPart::=
+    (KEY_IN | KEY_NOT_IN| OP_GTE | KEY_GTE | OP_LTE | KEY_LTE | OP_NE | KEY_NE | OP_NEQ | KEY_NEQ | OP_EQ | KEY_EQ | OP_GT | KEY_GT | OP_LT | KEY_LT)
+;
+
+logicalLinkOperatorPart::=
+    (OP_AND | KEY_AND | OP_OR | KEY_OR)
+;
+
+percentRightPart::=
+    OP_MOD
+;
+
+thirdOperateRightPart::=
+    TERM_QUESTION express TERM_COLON express
+;
 
 expressSegment::=
         debuggerSegment
@@ -282,7 +316,7 @@ parenSegment::=
     ;
 
 prefixOperatorSegment::=
-    (OP_EXCLAM | OP_NOT) express
+    (OP_EXCLAM | KEY_NOT) express
     ;
 
 controlSegment::=
@@ -326,7 +360,7 @@ scriptBlock::=
 
 
 equalValue::=
-    (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) (OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
+    (ROUTE_NAMING|NAMING|extractExpress|staticEnumValue) (OP_ASSIGN_IFNULL|OP_ASSIGN_NOTNULL|OP_ASSIGN_ADD|OP_ASSIGN_SUB|OP_ASSIGN_MUL|OP_ASSIGN_DIV|OP_ASSIGN_MOD|OP_ASSIGN) express
     ;
 
 extractExpress::=

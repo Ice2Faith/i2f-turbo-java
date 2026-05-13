@@ -1,18 +1,18 @@
 // This is a generated file. Not intended for manual editing.
 package i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.impl;
 
+import java.util.List;
+
+import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptExpress;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptOperatorSegment;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptPipelineFunctionSegment;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptVisitor;
-import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
+import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
+import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
+import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
 
 public class TinyScriptOperatorSegmentImpl extends TinyScriptPsiElement implements TinyScriptOperatorSegment {
 
@@ -32,14 +32,62 @@ public class TinyScriptOperatorSegmentImpl extends TinyScriptPsiElement implemen
 
     @Override
     @Nullable
+    public TinyScriptCastInstanceOfRightPart getCastInstanceOfRightPart() {
+        return findChildByClass(TinyScriptCastInstanceOfRightPart.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptCompareOperatorPart getCompareOperatorPart() {
+        return findChildByClass(TinyScriptCompareOperatorPart.class);
+    }
+
+    @Override
+    @Nullable
     public TinyScriptExpress getExpress() {
         return findChildByClass(TinyScriptExpress.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptLogicalLinkOperatorPart getLogicalLinkOperatorPart() {
+        return findChildByClass(TinyScriptLogicalLinkOperatorPart.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptMathAddSubOperatorPart getMathAddSubOperatorPart() {
+        return findChildByClass(TinyScriptMathAddSubOperatorPart.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptMathMulDivOperatorPart getMathMulDivOperatorPart() {
+        return findChildByClass(TinyScriptMathMulDivOperatorPart.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptPercentRightPart getPercentRightPart() {
+        return findChildByClass(TinyScriptPercentRightPart.class);
     }
 
     @Override
     @NotNull
     public List<TinyScriptPipelineFunctionSegment> getPipelineFunctionSegmentList() {
         return PsiTreeUtil.getChildrenOfTypeAsList(this, TinyScriptPipelineFunctionSegment.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptSquareQuoteRightPart getSquareQuoteRightPart() {
+        return findChildByClass(TinyScriptSquareQuoteRightPart.class);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptThirdOperateRightPart getThirdOperateRightPart() {
+        return findChildByClass(TinyScriptThirdOperateRightPart.class);
     }
 
 }
