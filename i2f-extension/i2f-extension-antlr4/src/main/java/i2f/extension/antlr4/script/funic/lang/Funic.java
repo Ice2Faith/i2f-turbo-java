@@ -74,7 +74,7 @@ public class Funic {
     }
 
     public static void registryMethods(Object target) {
-        registryMethods(target);
+        registryMethods(target,null);
     }
 
     public static void registryMethods(Object target, Predicate<Method> filter) {
