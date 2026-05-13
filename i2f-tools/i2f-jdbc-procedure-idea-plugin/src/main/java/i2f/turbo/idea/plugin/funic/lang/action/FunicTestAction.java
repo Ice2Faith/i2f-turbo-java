@@ -10,6 +10,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
+import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
 import i2f.turbo.idea.plugin.utils.IdeaExceptionUtil;
@@ -26,6 +28,11 @@ import java.util.Map;
 
 public class FunicTestAction extends AnAction {
     public static final Logger log = Logger.getInstance(FunicTestAction.class);
+
+    static {
+        Funic.registryMethods(TinyScriptFunctions.INSTANCE);
+        Funic.registryMethods(ContextFunctions.INSTANCE);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {

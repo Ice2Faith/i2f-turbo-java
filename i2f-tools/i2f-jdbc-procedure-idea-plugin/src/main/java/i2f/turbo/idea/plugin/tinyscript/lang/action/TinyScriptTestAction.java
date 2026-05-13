@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
+import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
 import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import i2f.turbo.idea.plugin.utils.IdeaExceptionUtil;
@@ -26,6 +27,10 @@ import java.util.Map;
 
 public class TinyScriptTestAction extends AnAction {
     public static final Logger log = Logger.getInstance(TinyScriptTestAction.class);
+
+    static {
+        TinyScript.registryBuiltMethodByInstanceMethod(ContextFunctions.INSTANCE);
+    }
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
