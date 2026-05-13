@@ -189,7 +189,7 @@ public class TinyScriptTestAction extends AnAction {
 
                 }
                 try {
-                    result += "\nparams:" + JsonUtils.toPrettyJson(output);
+                    result += "\nparams:" + JsonUtils.toPrettyJson(params);
                 } catch (Exception ex) {
 
                 }
