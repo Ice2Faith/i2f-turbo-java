@@ -1,23 +1,20 @@
 // This is a generated file. Not intended for manual editing.
 package i2f.turbo.idea.plugin.funic.grammar.psi.elements.impl;
 
-import java.util.List;
-
-import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import com.intellij.psi.util.PsiTreeUtil;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicConstNumber;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicVisitor;
+import i2f.turbo.idea.plugin.funic.lang.psi.FunicPsiElement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.*;
 
-import i2f.turbo.idea.plugin.funic.lang.psi.FunicPsiElement;
-import i2f.turbo.idea.plugin.funic.grammar.psi.elements.*;
-import i2f.turbo.idea.plugin.funic.lang.psi.impl.FunicPsiImplUtil;
-
 public class FunicConstNumberImpl extends FunicPsiElement implements FunicConstNumber {
 
-    public FunicConstNumberImpl(ASTNode node) {
+    public FunicConstNumberImpl(@NotNull ASTNode node) {
         super(node);
     }
 

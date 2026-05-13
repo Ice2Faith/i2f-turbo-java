@@ -2,7 +2,6 @@
 package i2f.turbo.idea.plugin.funic.grammar.psi.elements;
 
 import java.util.List;
-
 import org.jetbrains.annotations.*;
 import com.intellij.psi.PsiElement;
 
