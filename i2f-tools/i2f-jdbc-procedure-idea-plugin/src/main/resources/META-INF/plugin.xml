@@ -151,7 +151,7 @@
         <defaultLiveTemplatesProvider order="first"
                                       implementation="i2f.turbo.idea.plugin.tinyscript.lang.live.templates.TinyScriptLiveTemplatesProvider"/>
 
-        <!-- 注册 Live Templates 上下文类型，使 Funic 在 Live Templates 设置中可选 -->
+        <!-- 注册 Live Templates 上下文类型 -->
         <liveTemplateContextProvider
                 implementation="i2f.turbo.idea.plugin.tinyscript.lang.live.templates.TinyScriptLiveTemplateContextProvider"/>
 
