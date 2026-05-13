@@ -108,7 +108,7 @@ public class VelocityGenerator {
      * @return
      * @throws IOException
      */
-    public static String render(String template, Map<String, Object> params) throws IOException {
+    public static String render(String template, Map<String, Object> params) {
         return renderByStringResource(null, template, params);
     }
 
