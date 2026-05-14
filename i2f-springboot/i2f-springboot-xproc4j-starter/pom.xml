@@ -52,7 +52,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdbc-procedure</artifactId>
+            <artifactId>i2f-extension-xproc4j</artifactId>
         </dependency>
 
         <dependency>

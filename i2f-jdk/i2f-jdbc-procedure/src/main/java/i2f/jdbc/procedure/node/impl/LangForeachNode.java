@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
@@ -28,7 +29,7 @@ public class LangForeachNode extends AbstractExecutorNode {
     }
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String collection = node.getTagAttrMap().get(AttrConsts.COLLECTION);
         if (collection == null || collection.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.COLLECTION);

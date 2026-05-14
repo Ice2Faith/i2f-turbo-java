@@ -5,8 +5,12 @@ import i2f.environment.std.IEnvironment;
 import i2f.extension.ognl.OgnlUtil;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.extension.velocity.directives.common.ScriptDirective;
+import i2f.jdbc.procedure.consts.FeatureConsts;
 import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.impl.*;
+import i2f.jdbc.procedure.reportor.impl.DefaultGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
@@ -16,6 +20,7 @@ import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
 import i2f.reflect.ReflectResolver;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -36,6 +41,48 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
     public DefaultJdbcProcedureExecutor(JdbcProcedureContext context, IEnvironment environment, INamingContext namingContext) {
         super(context, environment, namingContext);
     }
+
+    @Override
+    public void afterConstructor() {
+        this.grammarReporter = new DefaultGrammarReporter();
+    }
+
+    @Override
+    public void afterInitExecutorNodes(List<ExecutorNode> ret) {
+        ret.add(new LangEvalFunicNode());
+        ret.add(new LangEvalGroovyNode());
+        ret.add(new LangEvalJavaNode());
+        ret.add(new LangEvalJavascriptNode());
+        ret.add(new LangEvalNode());
+        ret.add(new LangEvalTinyScriptNode());
+    }
+
+    @Override
+    public void afterInitFeatureMap() {
+        registryFeatureFunction(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavaNode.evalJava(context, this, "", "", text);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_JS, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavascriptNode.evalJavascript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
+
+        registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalGroovyNode.evalGroovyScript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_FUNIC, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalFunicNode.evalFunic(text, context, this);
+        });
+    }
+
 
     @Override
     public boolean innerTest(String test, Object params) {

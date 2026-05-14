@@ -5,6 +5,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class ProcedureNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String id = node.getTagAttrMap().get(AttrConsts.ID);
         if (id == null || id.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.ID);

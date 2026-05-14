@@ -1,21 +1,12 @@
-package i2f.jdbc.procedure.reportor;
+package i2f.jdbc.procedure.reporter.impl;
 
-import groovy.lang.GroovyShell;
-import i2f.compiler.MemoryCompiler;
-import i2f.extension.antlr4.script.funic.lang.Funic;
-import i2f.extension.antlr4.script.tiny.impl.TinyScript;
-import i2f.extension.ognl.OgnlUtil;
 import i2f.jdbc.procedure.consts.*;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
-import i2f.jdbc.procedure.node.impl.LangEvalJavaNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.match.regex.RegexPattens;
-import org.antlr.v4.runtime.ANTLRErrorListener;
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -29,28 +20,30 @@ import java.util.function.Consumer;
  * @author Ice2Faith
  * @date 2025/3/6 15:49
  */
-public class GrammarReporter {
+public class BasicGrammarReporter implements IGrammarReporter {
     protected static ExecutorService pool = new ForkJoinPool(Math.min(16, Runtime.getRuntime().availableProcessors()) * 2);
     protected static ExecutorService exprPool = new ForkJoinPool(Math.min(32, Runtime.getRuntime().availableProcessors()) * 2);
 
     // 双单引号('')，可能是错误的转义
-    public static final AtomicBoolean checkDoubleSingleQuote = new AtomicBoolean(false);
+    public final AtomicBoolean checkDoubleSingleQuote = new AtomicBoolean(false);
     // 双管道符(||)，可能是错误使用
-    public static final AtomicBoolean checkDoublePipe = new AtomicBoolean(false);
+    public final AtomicBoolean checkDoublePipe = new AtomicBoolean(false);
     // 括号、引号，占位符的花括号等封闭语义符号是否封闭，没封闭可能是错误
-    public static final AtomicBoolean checkEnclosedChar = new AtomicBoolean(false);
+    public final AtomicBoolean checkEnclosedChar = new AtomicBoolean(false);
     // 对调用其他过程时，未接受返回值的情况，可能导致返回值丢失
-    public static final AtomicBoolean checkCallResult = new AtomicBoolean(false);
+    public final AtomicBoolean checkCallResult = new AtomicBoolean(false);
     // 入参值为空白字符串时，可能是忘记写入参
-    public static final AtomicBoolean checkBlankAttribute = new AtomicBoolean(false);
+    public final AtomicBoolean checkBlankAttribute = new AtomicBoolean(false);
     // 是否允许调用子过程时忽略出参，虽然大多数情况下忽略也可以，但是如果既是入参也是出参的时候，如果忽略可能导致缺少入参
-    public static final AtomicBoolean checkOutputArgument = new AtomicBoolean(false);
+    public final AtomicBoolean checkOutputArgument = new AtomicBoolean(false);
 
-    public static void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
+    @Override
+    public void reportGrammar(JdbcProcedureExecutor executor, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
         reportGrammar(executor, null, metaMap, warnPoster);
     }
 
-    public static void reportGrammar(JdbcProcedureExecutor executor, Set<String> validMetaKeys, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
+    @Override
+    public void reportGrammar(JdbcProcedureExecutor executor, Set<String> validMetaKeys, Map<String, ProcedureMeta> metaMap, Consumer<String> warnPoster) {
         if (metaMap == null) {
             return;
         }
@@ -107,7 +100,8 @@ public class GrammarReporter {
         warnPoster.accept(XProc4jConsts.NAME + " report xml grammar final statistic, issue:" + allReportCount.get() + ", nodes:" + allNodeCount.get() + ", use seconds:" + ((ets - bts) / 1000));
     }
 
-    public static void reportGrammar(XmlNode node,
+    @Override
+    public void reportGrammar(XmlNode node,
                                      Map<String, ProcedureMeta> metaMap,
                                      JdbcProcedureExecutor executor,
                                      Consumer<String> warnPoster,
@@ -122,7 +116,7 @@ public class GrammarReporter {
         ExecutorNode executorNode = executor.getSupportNode(node);
         if (executorNode != null) {
             try {
-                executorNode.reportGrammar(node, (msg) -> {
+                executorNode.reportGrammar(this, node, (msg) -> {
                     if (reportCount != null) {
                         reportCount.incrementAndGet();
                     }
@@ -325,7 +319,7 @@ public class GrammarReporter {
 
     }
 
-    public static void reportEnclosedCharString(String body, XmlNode node, Consumer<String> warnPoster) {
+    public void reportEnclosedCharString(String body, XmlNode node, Consumer<String> warnPoster) {
         if (!checkEnclosedChar.get()) {
             return;
         }
@@ -407,7 +401,8 @@ public class GrammarReporter {
         }
     }
 
-    public static void reportAttributeFeatureGrammar(String attr, XmlNode node, String defaultFeature, Consumer<String> warnPoster) {
+    @Override
+    public void reportAttributeFeatureGrammar(String attr, XmlNode node, String defaultFeature, Consumer<String> warnPoster) {
         String test = node.getTagAttrMap().get(attr);
         if (test == null) {
             return;
@@ -474,52 +469,11 @@ public class GrammarReporter {
         }
     }
 
-    public static void reportExprFeatureGrammar(String expr, String feature, XmlNode node, String location, Consumer<String> warnPoster) {
-        try {
-            if (FeatureConsts.EVAL.equals(feature)) {
-                OgnlUtil.parseExpressionTreeNode(expr);
-            } else if (FeatureConsts.EVAL_GROOVY.equals(feature)) {
-                GroovyShell shell = new GroovyShell();
-                shell.parse(expr);
-            } else if (FeatureConsts.EVAL_JAVA.equals(feature)) {
-                Map.Entry<String, String> codeEntry = LangEvalJavaNode.getFullJavaSourceCode("", "", expr);
-                try {
-                    MemoryCompiler.findCompileClass(codeEntry.getValue(), codeEntry.getKey() + ".java", codeEntry.getKey());
-                } catch (Exception e) {
-                    throw new IllegalArgumentException(e.getMessage() + "\n\tcompile source code:\n" + codeEntry.getValue(), e);
-                }
-            } else if (FeatureConsts.EVAL_JS.equals(feature)) {
 
-            } else if (FeatureConsts.EVAL_TINYSCRIPT.equals(feature)
-                    || FeatureConsts.EVAL_TS.equals(feature)) {
-                ANTLRErrorListener listener = new BaseErrorListener() {
-                    @Override
-                    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                        String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + errorMsg);
-                    }
-                };
-                TinyScript.ERROR_LISTENER.add(listener);
-                try {
-                    TinyScript.parse(expr);
-                } finally {
-                    TinyScript.ERROR_LISTENER.remove(listener);
-                }
-            } else if (FeatureConsts.EVAL_FUNIC.equals(feature)) {
-                ANTLRErrorListener listener = new BaseErrorListener() {
-                    @Override
-                    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-                        String errorMsg = "line " + line + ":" + charPositionInLine + " " + msg;
-                        warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + XmlNode.getNodeLocation(node) + " error: " + errorMsg);
-                    }
-                };
-                Funic.ERROR_LISTENER.add(listener);
-                try {
-                    Funic.parse(expr);
-                } finally {
-                    Funic.ERROR_LISTENER.remove(listener);
-                }
-            } else if (FeatureConsts.STRING.equals(feature)) {
+    @Override
+    public void reportExprFeatureGrammar(String expr, String feature, XmlNode node, String location, Consumer<String> warnPoster) {
+        try {
+            if (FeatureConsts.STRING.equals(feature)) {
                 if (expr.contains("${")
                         || expr.contains("#{")
                         || expr.contains("$!{")

@@ -21,7 +21,8 @@ import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
 import i2f.jdbc.procedure.provider.types.xml.impl.DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
+import i2f.jdbc.procedure.reportor.impl.DefaultGrammarReporter;
 import i2f.resources.ResourceUtil;
 import i2f.spring.core.SpringContext;
 import i2f.spring.enviroment.SpringEnvironment;
@@ -249,6 +250,19 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+    @ConditionalOnMissingBean(IGrammarReporter.class)
+    @Bean
+    public IGrammarReporter grammarReporter() {
+        DefaultGrammarReporter ret = new DefaultGrammarReporter();
+        ret.checkDoubleSingleQuote.set(jdbcProcedureProperties.getReportOptions().isCheckDoubleSingleQuote());
+        ret.checkDoublePipe.set(jdbcProcedureProperties.getReportOptions().isCheckDoublePipe());
+        ret.checkEnclosedChar.set(jdbcProcedureProperties.getReportOptions().isCheckEnclosedChar());
+        ret.checkCallResult.set(jdbcProcedureProperties.getReportOptions().isCheckCallResult());
+        ret.checkBlankAttribute.set(jdbcProcedureProperties.getReportOptions().isCheckBlankAttribute());
+        ret.checkOutputArgument.set(jdbcProcedureProperties.getReportOptions().isCheckOutputArgument());
+        return ret;
+    }
+
     @ConditionalOnExpression("${xproc4j.executor.enable:true}")
     @ConditionalOnMissingBean(JdbcProcedureExecutor.class)
     @Bean
@@ -256,7 +270,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                        IEnvironment iEnvironment,
                                                        INamingContext namingContext,
                                                        @Autowired(required = false) XProc4jEventHandler eventHandler,
-                                                       @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger
+                                                       @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger,
+                                                       @Autowired(required = false) IGrammarReporter grammarReporter
     ) {
         log.info(XProc4jConsts.NAME + " config " + DefaultJdbcProcedureExecutor.class.getSimpleName() + " ...");
         DefaultJdbcProcedureExecutor ret = new DefaultJdbcProcedureExecutor(context, iEnvironment, namingContext);
@@ -266,6 +281,9 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         if (jdbcProcedureLogger != null) {
             ret.setLogger(jdbcProcedureLogger);
             jdbcProcedureLogger.debug(jdbcProcedureProperties.isDebug());
+        }
+        if (grammarReporter != null) {
+            ret.setGrammarReporter(grammarReporter);
         }
         ret.setSlowSqlMinMillsSeconds(jdbcProcedureProperties.getSlowSqlMinMillsSeconds());
         ret.setSlowNodeMillsSeconds(jdbcProcedureProperties.getSlowNodeMillsSeconds());
@@ -305,12 +323,6 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         log.info(XProc4jConsts.NAME + " config " + ProcedureMetaMapGrammarReporterListener.class.getSimpleName() + " ...");
         ProcedureMetaMapGrammarReporterListener ret = new ProcedureMetaMapGrammarReporterListener(executor);
         ret.getReportOnBoot().set(jdbcProcedureProperties.isReportOnBoot());
-        GrammarReporter.checkDoubleSingleQuote.set(jdbcProcedureProperties.getReportOptions().isCheckDoubleSingleQuote());
-        GrammarReporter.checkDoublePipe.set(jdbcProcedureProperties.getReportOptions().isCheckDoublePipe());
-        GrammarReporter.checkEnclosedChar.set(jdbcProcedureProperties.getReportOptions().isCheckEnclosedChar());
-        GrammarReporter.checkCallResult.set(jdbcProcedureProperties.getReportOptions().isCheckCallResult());
-        GrammarReporter.checkBlankAttribute.set(jdbcProcedureProperties.getReportOptions().isCheckBlankAttribute());
-        GrammarReporter.checkOutputArgument.set(jdbcProcedureProperties.getReportOptions().isCheckOutputArgument());
         return ret;
     }
 

@@ -5,7 +5,7 @@ import i2f.jdbc.procedure.context.event.JdbcProcedureMetaMapRefreshedEvent;
 import i2f.jdbc.procedure.event.XProc4jEvent;
 import i2f.jdbc.procedure.event.XProc4jEventListener;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import lombok.Getter;
 
 import java.util.HashMap;
@@ -44,11 +44,15 @@ public class ProcedureMetaMapGrammarReporterListener
     public boolean handle(XProc4jEvent event) {
         JdbcProcedureMetaMapRefreshedEvent evt = (JdbcProcedureMetaMapRefreshedEvent) event;
         Map<String, ProcedureMeta> metaMap = evt.getMetaMap();
+        IGrammarReporter reporter = executor.grammarReporter();
+        if (reporter == null) {
+            return false;
+        }
         if (reportOnBoot.getAndSet(false)) {
-            GrammarReporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+            reporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
         } else {
             reportPool.submit(() -> {
-                GrammarReporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
+                reporter.reportGrammar(executor, evt.getEffectKeys(), new HashMap<>(metaMap), (msg) -> executor.logger().logWarn(msg));
             });
         }
         return false;

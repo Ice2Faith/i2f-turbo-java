@@ -2,6 +2,7 @@ package i2f.jdbc.procedure.node;
 
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.Map;
 import java.util.Objects;
@@ -36,7 +37,7 @@ public interface ExecutorNode {
         return false;
     }
 
-    default void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    default void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
 
     }
 

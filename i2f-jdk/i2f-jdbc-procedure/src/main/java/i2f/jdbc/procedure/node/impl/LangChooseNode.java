@@ -6,7 +6,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.List;
 import java.util.Map;
@@ -26,7 +26,7 @@ public class LangChooseNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> list = node.getChildren();
         if (list == null || list.isEmpty()) {
             return;
@@ -40,7 +40,7 @@ public class LangChooseNode extends AbstractExecutorNode {
                 String test = itemNode.getTagAttrMap().get(AttrConsts.TEST);
                 if (test != null && !test.isEmpty()) {
                     try {
-                        GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
+                        reporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
                     } catch (Exception e) {
                         warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST + "[" + test + "]" + " expression maybe wrong!");
                     }

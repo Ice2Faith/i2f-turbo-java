@@ -47,7 +47,7 @@ import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
 import i2f.jdbc.procedure.provider.types.xml.impl.AbstractJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ListableJdbcProcedureMetaProviderRegistry;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
@@ -102,7 +102,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             .append("import ").append(castAsImportPackageName(JdbcProcedureMetaProvider.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(ListableJdbcProcedureMetaProviderRegistry.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(JdbcProcedureMetaProviderRegistry.class.getName())).append(";").append("\n")
-            .append("import ").append(castAsImportPackageName(GrammarReporter.class.getName())).append(";").append("\n")
+            .append("import ").append(castAsImportPackageName(IGrammarReporter.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(BreakSignalException.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(SignalException.class.getName())).append(";").append("\n")
             .append("import ").append(castAsImportPackageName(EvalScriptProvider.class.getName())).append(";").append("\n")
@@ -327,7 +327,7 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> children = node.getChildren();
         XmlNode importNode = null;
         XmlNode memberNode = null;

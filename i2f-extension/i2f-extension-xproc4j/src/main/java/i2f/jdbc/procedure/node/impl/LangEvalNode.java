@@ -5,7 +5,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 
 import java.util.HashMap;
@@ -36,7 +36,7 @@ public class LangEvalNode extends AbstractExecutorNode implements EvalScriptProv
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String value = node.getTagAttrMap().get(AttrConsts.VALUE);
         String script = node.getTextBody();
         if ((value == null || value.isEmpty()) && (script == null || script.isEmpty())) {
@@ -46,7 +46,7 @@ public class LangEvalNode extends AbstractExecutorNode implements EvalScriptProv
         }
         if (value != null && !value.isEmpty()) {
             try {
-                GrammarReporter.reportExprFeatureGrammar(value, FeatureConsts.EVAL, node, "attribute " + AttrConsts.VALUE, warnPoster);
+                reporter.reportExprFeatureGrammar(value, FeatureConsts.EVAL, node, "attribute " + AttrConsts.VALUE, warnPoster);
             } catch (Exception e) {
                 String errorMsg = "attribute " + AttrConsts.VALUE + " expression error: " + e.getMessage();
                 warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + getNodeLocation(node) + " error: " + errorMsg);
@@ -54,7 +54,7 @@ public class LangEvalNode extends AbstractExecutorNode implements EvalScriptProv
         }
         if (script != null && !script.isEmpty()) {
             try {
-                GrammarReporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL, node, "element body", warnPoster);
+                reporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL, node, "element body", warnPoster);
             } catch (Exception e) {
                 String errorMsg = "element body expression error: " + e.getMessage();
                 warnPoster.accept(XProc4jConsts.NAME + " report xml grammar, at " + getNodeLocation(node) + " error: " + errorMsg);

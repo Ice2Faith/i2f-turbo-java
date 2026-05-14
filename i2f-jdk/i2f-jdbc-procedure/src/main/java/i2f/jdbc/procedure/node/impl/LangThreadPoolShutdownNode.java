@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class LangThreadPoolShutdownNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String name = node.getTagAttrMap().get(AttrConsts.POOL);
         if (name == null || name.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.POOL);

@@ -38,7 +38,8 @@ import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
+import i2f.jdbc.procedure.reporter.impl.BasicGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
@@ -122,6 +123,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
 
+    protected volatile IGrammarReporter grammarReporter = new BasicGrammarReporter();
+
     {
         List<ExecutorNode> list = defaultExecutorNodes();
         for (ExecutorNode node : list) {
@@ -136,6 +139,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryEvalScriptProvider(this);
         initFeatureMap();
         initConstAttrValueOptimizeFeatures();
+
+        afterConstructor();
     }
 
     public BasicJdbcProcedureExecutor() {
@@ -152,9 +157,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         this.namingContext = namingContext;
     }
 
+    public void afterConstructor() {
 
-    public static List<ExecutorNode> defaultExecutorNodes() {
+    }
+
+    public void afterInitExecutorNodes(List<ExecutorNode> nodes) {
+
+    }
+
+    public List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+
         ServiceLoader<ExecutorNode> nodes = ServiceLoader.load(ExecutorNode.class);
         for (ExecutorNode item : nodes) {
             ret.add(item);
@@ -175,12 +188,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
         ret.add(new LangDoWhileNode());
-        ret.add(new LangEvalFunicNode());
-        ret.add(new LangEvalGroovyNode());
-        ret.add(new LangEvalJavaNode());
-        ret.add(new LangEvalJavascriptNode());
-        ret.add(new LangEvalNode());
-        ret.add(new LangEvalTinyScriptNode());
         ret.add(new LangFileDeleteNode());
         ret.add(new LangFileExistsNode());
         ret.add(new LangFileListNode());
@@ -243,8 +250,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new SqlUpdateNode());
         ret.add(new TextNode());
 
+        afterInitExecutorNodes(ret);
 
         return ret;
+    }
+
+    @Override
+    public IGrammarReporter grammarReporter() {
+        return this.grammarReporter;
     }
 
     @Override
@@ -418,22 +431,27 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!", parseEx);
         }
         if (isDebug()) {
-            if (isDebug()) {
-                logger().logDebug("eval script begin report grammar ... ");
-            }
-            Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
-            String validKey = UUID.randomUUID().toString();
-            metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
-            Set<String> validKeySet = new HashSet<>();
-            validKeySet.add(validKey);
-            GrammarReporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+            IGrammarReporter reporter = grammarReporter();
+            if (reporter != null) {
+                if (isDebug()) {
+                    logger().logDebug("eval script begin report grammar ... ");
+                }
 
-            if (isDebug()) {
-                logger().logDebug("eval script begin report grammar finished. ");
+                Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
+                String validKey = UUID.randomUUID().toString();
+                metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
+                Set<String> validKeySet = new HashSet<>();
+                validKeySet.add(validKey);
+                reporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+
+                if (isDebug()) {
+                    logger().logDebug("eval script begin report grammar finished. ");
+                }
             }
         }
         return executor.exec(node, params);
     }
+
 
     @Override
     public JdbcProcedureContext getContext() {
@@ -1302,28 +1320,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryFeatureFunction(FeatureConsts.HASHCODE, (value, node, context) -> {
             return value == null ? 0 : value.hashCode();
         });
-        registryFeatureFunction(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavaNode.evalJava(context, this, "", "", text);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_JS, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavascriptNode.evalJavascript(text, context, this);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
 
-        registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalGroovyNode.evalGroovyScript(text, context, this);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_FUNIC, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalFunicNode.evalFunic(text, context, this);
-        });
         registryFeatureFunction(FeatureConsts.CLASS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
@@ -1388,6 +1385,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryFeatureFunction(FeatureConsts.LOCATION, (value, node, context) -> {
             return XmlNode.getNodeLocation(node);
         });
+
+        afterInitFeatureMap();
+    }
+
+    public void afterInitFeatureMap() {
+
     }
 
     protected void initConstAttrValueOptimizeFeatures() {

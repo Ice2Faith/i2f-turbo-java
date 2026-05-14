@@ -1,4 +1,4 @@
-package i2f.jdbc.procedure.node.impl.tinyscript;
+package i2f.jdbc.procedure.node.impl.funic;
 
 import i2f.extension.antlr4.script.funic.lang.context.FunicFunctionCallContext;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;

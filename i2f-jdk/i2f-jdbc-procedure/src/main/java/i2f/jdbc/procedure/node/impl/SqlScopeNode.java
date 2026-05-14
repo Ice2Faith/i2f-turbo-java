@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 
 import javax.sql.DataSource;
@@ -30,7 +31,7 @@ public class SqlScopeNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String datasources = node.getTagAttrMap().get(AttrConsts.DATASOURCES);
         if (datasources == null || datasources.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.DATASOURCES);

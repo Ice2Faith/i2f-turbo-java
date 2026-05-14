@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.NodeTime;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -26,7 +27,7 @@ public class LangSleepNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String timeout = node.getTagAttrMap().get(AttrConsts.TIMEOUT);
         if (timeout == null || timeout.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TIMEOUT);

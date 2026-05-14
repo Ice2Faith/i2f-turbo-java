@@ -12,7 +12,6 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecutorMethodProvider;
-import i2f.jdbc.procedure.node.impl.tinyscript.ProcedureFunicFunctionCallContext;
 import i2f.jdbc.procedure.node.impl.tinyscript.ProcedureTinyScriptResolver;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.reference.Reference;

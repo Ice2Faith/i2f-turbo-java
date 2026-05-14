@@ -88,9 +88,11 @@
         <module>i2f-extension-verifycode</module>
         <module>i2f-extension-zip4j</module>
         <module>i2f-extension-zookeeper</module>
-        <module>test-extension</module>
-        <module>test-flink</module>
         <module>i2f-extension-freemarker</module>
+        <module>i2f-extension-xproc4j</module>
+
+        <module>test-flink</module>
+        <module>test-extension</module>
     </modules>
 
 
