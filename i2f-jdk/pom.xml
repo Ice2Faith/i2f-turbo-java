@@ -161,6 +161,7 @@
 
         <module>test-features</module>
         <module>i2f-trace-mdc</module>
+        <module>i2f-mixins</module>
     </modules>
 
 
