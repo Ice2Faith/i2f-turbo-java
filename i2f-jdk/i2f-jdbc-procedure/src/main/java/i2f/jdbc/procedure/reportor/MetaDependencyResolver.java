@@ -1,5 +1,7 @@
 package i2f.jdbc.procedure.reportor;
 
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
+import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.io.stream.StreamUtil;
@@ -15,6 +17,7 @@ import i2f.match.regex.data.RegexMatchItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.InputStream;
 import java.util.*;
@@ -246,6 +249,11 @@ public class MetaDependencyResolver {
             String script = node.getTextBody();
             getTinyScriptDependencyMapNext(dependencies, script);
         } else if (Arrays.asList(
+                TagConsts.LANG_EVAL_FUNIC
+        ).contains(tagName)) {
+            String script = node.getTextBody();
+            getFunicDependencyMapNext(dependencies, script);
+        } else if (Arrays.asList(
                 TagConsts.LANG_EVAL_GROOVY,
                 TagConsts.LANG_EVAL_JAVA,
                 TagConsts.LANG_JAVA_IMPORT,
@@ -285,6 +293,8 @@ public class MetaDependencyResolver {
                 if (Arrays.asList(FeatureConsts.EVAL_TINYSCRIPT,
                         FeatureConsts.EVAL_TS).contains(feature)) {
                     getTinyScriptDependencyMapNext(dependencies, value);
+                }if (Arrays.asList(FeatureConsts.EVAL_FUNIC).contains(feature)) {
+                    getFunicDependencyMapNext(dependencies, value);
                 } else if (Arrays.asList(FeatureConsts.EVAL_GROOVY,
                         FeatureConsts.EVAL_JAVA,
                         FeatureConsts.EVAL_JS).contains(feature)) {
@@ -365,6 +375,21 @@ public class MetaDependencyResolver {
         }
     }
 
+    public static void getFunicDependencyMapNext(Set<String> dependencies, String script) {
+        if (script == null) {
+            return;
+        }
+        script = script.trim();
+        if (!script.isEmpty()) {
+            try {
+                ParseTree tree = Funic.parse(script);
+                getDependencyMapNext(tree, dependencies);
+            } catch (Exception e) {
+
+            }
+        }
+    }
+
     public static void getDependencyMapNext(ParseTree tree, Set<String> dependencies) {
         if (tree == null) {
             return;
@@ -374,6 +399,42 @@ public class MetaDependencyResolver {
             String naming = child.getText();
             if (isDependencyNaming(naming)) {
                 dependencies.add(naming);
+            }
+        }
+        if (tree instanceof FunicParser.GlobalFunctionCallContext) {
+            ParseTree child = tree.getChild(0);
+            if(child instanceof FunicParser.FunctionNameContext){
+                child = child.getChild(0);
+                if(child instanceof TerminalNode){
+                    String naming = child.getText();
+                    if (isDependencyNaming(naming)) {
+                        dependencies.add(naming);
+                    }
+                }
+            }
+        }
+        if (tree instanceof FunicParser.StaticFunctionCallContext) {
+            ParseTree child = tree.getChild(1);
+            if(child instanceof FunicParser.FunctionNameContext){
+                child = child.getChild(0);
+                if(child instanceof TerminalNode){
+                    String naming = child.getText();
+                    if (isDependencyNaming(naming)) {
+                        dependencies.add(naming);
+                    }
+                }
+            }
+        }
+        if (tree instanceof FunicParser.InstanceFunctionCallRightPartContext) {
+            ParseTree child = tree.getChild(1);
+            if(child instanceof FunicParser.FunctionNameContext){
+                child = child.getChild(0);
+                if(child instanceof TerminalNode){
+                    String naming = child.getText();
+                    if (isDependencyNaming(naming)) {
+                        dependencies.add(naming);
+                    }
+                }
             }
         }
         int count = tree.getChildCount();

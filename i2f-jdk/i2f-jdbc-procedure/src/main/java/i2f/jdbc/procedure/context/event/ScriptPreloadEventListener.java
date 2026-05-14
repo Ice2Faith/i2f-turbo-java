@@ -1,6 +1,7 @@
 package i2f.jdbc.procedure.context.event;
 
 import i2f.compiler.MemoryCompiler;
+import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.groovy.GroovyScript;
 import i2f.extension.ognl.OgnlUtil;
@@ -128,6 +129,12 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                 } catch (Throwable e) {
                     executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
                 }
+            } else if (TagConsts.LANG_EVAL_FUNIC.equals(tagName)) {
+                try {
+                    Funic.parse(node.getTextBody());
+                } catch (Throwable e) {
+                    executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " body  error :" + e.getMessage(), e);
+                }
             }
         }
 
@@ -163,6 +170,12 @@ public class ScriptPreloadEventListener implements XProc4jEventListener {
                             GroovyScript.parseAsClass(fullSourceCode);
                         } catch (Throwable e) {
                             executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage() + "\n source code:\n" + fullSourceCode, e);
+                        }
+                    } else if (FeatureConsts.EVAL_FUNIC.equals(feature)) {
+                        try {
+                            Funic.parse(node.getTagAttrMap().get(entry.getKey()));
+                        } catch (Throwable e) {
+                            executor.logger().logInfo(() -> "script-preload at " + XmlNode.getNodeLocation(node) + " " + entry.getKey() + " feature error :" + e.getMessage(), e);
                         }
                     }
                 }
