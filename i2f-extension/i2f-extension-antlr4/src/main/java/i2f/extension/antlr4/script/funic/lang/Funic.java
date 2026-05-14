@@ -10,6 +10,8 @@ import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
 import i2f.lru.LruMap;
+import i2f.mixin.MixinProxyFactory;
+import i2f.mixin.all.AllMixins;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -39,6 +41,7 @@ public class Funic {
     static {
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
 
+        registryMethods(MixinProxyFactory.getMixinInstance(AllMixins.class));
         registryMethods(System.out, e -> e.getName().toLowerCase().contains("print"));
         registryMethods(Math.class, e -> !e.getName().toLowerCase().contains("extra"));
     }

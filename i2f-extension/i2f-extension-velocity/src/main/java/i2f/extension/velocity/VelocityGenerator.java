@@ -232,7 +232,7 @@ public class VelocityGenerator {
 
         //创建绑定对象
         VelocityContext ctx = new VelocityContext(params);
-        ctx.put("_vm", new GeneratorTool());
+        ctx.put("_vm", GeneratorTool.INSTANCE);
         try {
 
             //创建写出对象

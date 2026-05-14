@@ -1,7 +1,5 @@
 package i2f.extension.freemarker;
 
-import i2f.extension.freemarker.GeneratorTool;
-import i2f.io.stream.StreamUtil;
 import freemarker.cache.ClassTemplateLoader;
 import freemarker.cache.FileTemplateLoader;
 import freemarker.cache.StringTemplateLoader;
@@ -9,6 +7,7 @@ import freemarker.cache.TemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import i2f.io.stream.StreamUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -153,7 +152,7 @@ public class FreemarkerGenerator {
 
             StringWriter writer = new StringWriter();
 
-            params.put("_vm", new GeneratorTool());
+            params.put("_vm", GeneratorTool.INSTANCE);
             tpl.process(params, writer);
 
             return writer.toString();
@@ -189,7 +188,7 @@ public class FreemarkerGenerator {
 
             StringWriter writer = new StringWriter();
 
-            params.put("_vm", new GeneratorTool());
+            params.put("_vm", GeneratorTool.INSTANCE);
             tpl.process(params, writer);
 
             return writer.toString();

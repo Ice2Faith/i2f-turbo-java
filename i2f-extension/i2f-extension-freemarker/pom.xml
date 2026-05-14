@@ -44,6 +44,11 @@
         </dependency>
 
         <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mixins</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>org.freemarker</groupId>
             <artifactId>freemarker</artifactId>
             <version>2.3.34</version>
