@@ -19,6 +19,7 @@ import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.extension.antlr4.script.funic.lang.value.impl.*;
 import i2f.invokable.method.IMethod;
+import i2f.match.regex.RegexUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -32,6 +33,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
@@ -3036,12 +3038,52 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 {"\\n", "\n"},
                 {"\\r", "\r"},
                 {"\\t", "\t"},
+                {"\\b", "\b"},
+                {"\\0", "\0"},
+                {"\\x"}, // \x36 这种形式的
+                {"\\u"}, // \u0053 这种形式的
                 {"\\\\", "\\"}
         };
         for (String[] pair : escapeArr) {
-            str = str.replace(pair[0], pair[1]);
+            if (pair[0].equals("\\x")) {
+                str = unescapeHexString(str);
+            } else if (pair[0].equals("\\u")) {
+                str = unescapeUnicodeString(str);
+            } else {
+                str = str.replace(pair[0], pair[1]);
+            }
         }
         return str;
+    }
+
+    public String unescapeHexString(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return RegexUtil.regexFindAndReplace(str, "(\\\\[xX][0-9a-fA-F]{1,2})+", s -> {
+            String[] arr = s.split("\\\\[xX]");
+            byte[] buff=new byte[arr.length];
+            for (int i = 0; i < arr.length; i++) {
+                int bt = Integer.parseInt(arr[i], 16);
+                buff[i]=(byte)(bt&0x0ff);
+            }
+            return new String(buff, StandardCharsets.UTF_8);
+        });
+    }
+
+    public String unescapeUnicodeString(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        return RegexUtil.regexFindAndReplace(str, "(\\\\[uU][0-9a-fA-F]{1,4})+", s -> {
+            String[] arr = s.split("\\\\[uU]");
+            char[] buff=new char[arr.length];
+            for (int i = 0; i < arr.length; i++) {
+                int bt = Integer.parseInt(arr[i], 16);
+                buff[i]=(char)bt;
+            }
+            return new String(buff);
+        });
     }
 
     public void debugNode(ParseTree context) {
