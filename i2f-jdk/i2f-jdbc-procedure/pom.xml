@@ -92,7 +92,11 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-form</artifactId>
-            <version>1.0-jdk8</version>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mixins</artifactId>
         </dependency>
 
         <dependency>
