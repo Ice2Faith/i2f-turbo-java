@@ -14,6 +14,7 @@ import i2f.invokable.IInvokable;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.match.regex.RegexUtil;
 import i2f.proxy.std.IProxyInvocationHandler;
+import i2f.proxy.std.impl.MethodHandlesUtil;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
 import lombok.Data;
@@ -63,16 +64,7 @@ public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler {
             // 会导致无限自身递归调用，最终栈溢出
             // Java 8 兼容写法
             // 通过反射获取 MethodHandle
-            MethodHandles.Lookup lookup = MethodHandles.lookup();
-
-            // 获取特殊调用的 MethodHandle (unreflectSpecial)
-            // 这里的关键是指定查找的起点是接口，并且绑定 this 为 proxy
-            MethodHandle mh = lookup.findSpecial(
-                    method.getDeclaringClass(),
-                    method.getName(),
-                    MethodType.methodType(method.getReturnType(), method.getParameterTypes()),
-                    method.getDeclaringClass()
-            );
+            MethodHandle mh = MethodHandlesUtil.getDefaultMethodHandle(method);
 
             // 绑定实例（proxy）并调用
             return mh.bindTo(proxy).invokeWithArguments(args);
