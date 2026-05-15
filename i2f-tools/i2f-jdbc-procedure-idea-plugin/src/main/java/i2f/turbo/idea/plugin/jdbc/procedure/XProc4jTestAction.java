@@ -13,7 +13,7 @@ import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.turbo.idea.plugin.utils.IdeaExceptionUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -196,11 +196,14 @@ public class XProc4jTestAction extends AnAction {
                     buffer.append(str).append("\n");
                 });
 
-                buffer.append("grammar reporting ...").append("\n");
-                GrammarReporter.reportGrammar(node, validMap, executor, (str) -> {
-                    buffer.append(str).append("\n");
-                }, reportCount, nodeCount);
-                buffer.append("found issue statistic, issue:").append(reportCount.get()).append(", nodes:").append(nodeCount.get()).append("\n");
+                IGrammarReporter reporter = executor.grammarReporter();
+                if (reporter != null) {
+                    buffer.append("grammar reporting ...").append("\n");
+                    reporter.reportGrammar(node, validMap, executor, (str) -> {
+                        buffer.append(str).append("\n");
+                    }, reportCount, nodeCount);
+                    buffer.append("found issue statistic, issue:").append(reportCount.get()).append(", nodes:").append(nodeCount.get()).append("\n");
+                }
 
                 buffer.append("\n");
                 buffer.append("finished!").append("\n");
