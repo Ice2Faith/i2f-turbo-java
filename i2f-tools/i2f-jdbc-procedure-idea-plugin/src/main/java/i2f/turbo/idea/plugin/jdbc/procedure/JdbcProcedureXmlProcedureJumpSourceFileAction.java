@@ -68,7 +68,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         SelectionModel selectionModel = editor.getSelectionModel();
         if (selectionModel != null) {
             String selectedText = selectionModel.getSelectedText();
-            Map.Entry<VirtualFile, Integer> file = getProcedureFileByProcedureId(selectedText);
+            Map.Entry<VirtualFile, Integer> file = getProcedureFileByProcedureId(project, selectedText);
             if (file != null) {
                 return file;
             }
@@ -110,10 +110,10 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         }
         XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;
         String value = xmlAttributeValue.getValue();
-        return getProcedureFileByProcedureId(value);
+        return getProcedureFileByProcedureId(xmlAttributeValue.getProject(), value);
     }
 
-    public static Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(String value) {
+    public static Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(Project project, String value) {
         if (value == null) {
             return null;
         }
@@ -130,7 +130,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
             value = value.substring(0, value.length() - ".xml".length());
         }
         //        log.warn("xml-jump-source attr-value: " + value);
-        ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
+        ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(project, value);
 //        log.warn("xml-jump-source attr-meta: " + meta);
         if (meta == null) {
             return null;

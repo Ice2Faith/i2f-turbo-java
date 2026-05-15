@@ -492,7 +492,7 @@ public class CompletionHelper {
             }
         }
 
-        for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+        for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.getProjectMetaMap(project).entrySet()) {
             ProcedureMeta meta = entry.getValue();
             String completion = getProcedureMetaCompletion(meta);
             String signature = getProcedureMetaSignature(meta);

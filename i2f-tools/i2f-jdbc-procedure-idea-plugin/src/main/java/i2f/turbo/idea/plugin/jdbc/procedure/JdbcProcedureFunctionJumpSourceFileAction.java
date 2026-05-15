@@ -80,7 +80,7 @@ public class JdbcProcedureFunctionJumpSourceFileAction extends AnAction {
                 } else if (element instanceof XmlTag) {
                     XmlTag xmlTag = (XmlTag) element;
                     String id = xmlTag.getAttributeValue(AttrConsts.ID);
-                    ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(id);
+                    ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(element.getProject(), id);
                     return CompletionHelper.getProcedureMetaSignature(meta);
                 }
                 return element.getText();

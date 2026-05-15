@@ -214,7 +214,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                             if (refidAttr != null) {
                                 String refid = refidAttr.getValue();
 //                                log.warn("xml-attr completion call-node refid-attribute-id:" + refid);
-                                ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(refid);
+                                ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(refidAttr.getProject(), refid);
 //                                log.warn("xml-attr completion call-node refid-attribute-meta:" + meta);
                                 if (meta != null) {
                                     List<String> arguments = meta.getArguments();
@@ -238,7 +238,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
                         if (Arrays.asList(TagConsts.PROCEDURE, TagConsts.SCRIPT_SEGMENT).contains(tagName)) {
                             Set<String> list = new TreeSet<>();
-                            for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+                            for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.getProjectMetaMap(attribute.getProject()).entrySet()) {
                                 StringBuilder completionAllArgs = new StringBuilder();
                                 ProcedureMeta meta = entry.getValue();
                                 List<String> arguments = meta.getArguments();
@@ -298,7 +298,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         TagConsts.FUNCTION_CALL,
                         TagConsts.SCRIPT_INCLUDE).contains(tagName)) {
                     List<String> completions = new ArrayList<>();
-                    for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+                    for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.getProjectMetaMap(xmlTag.getProject()).entrySet()) {
                         ProcedureMeta value = entry.getValue();
                         completions.add(value.getName());
                     }

@@ -56,7 +56,7 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
             if (value == null || value.isEmpty()) {
                 return PsiReference.EMPTY_ARRAY;
             }
-            ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
+            ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(xmlAttributeValue.getProject(), value);
 //            log.warn("xml-psi-reference attr-value-meta :"+meta);
             if (meta == null) {
                 return PsiReference.EMPTY_ARRAY;

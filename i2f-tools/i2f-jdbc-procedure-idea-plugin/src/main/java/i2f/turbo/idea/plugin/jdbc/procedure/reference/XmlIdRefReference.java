@@ -44,7 +44,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
 
 //        log.warn("xml-id-ref:"+value);
 
-        Map.Entry<VirtualFile, Integer> entry = JdbcProcedureXmlProcedureJumpSourceFileAction.getProcedureFileByProcedureId(value);
+        Map.Entry<VirtualFile, Integer> entry = JdbcProcedureXmlProcedureJumpSourceFileAction.getProcedureFileByProcedureId(xmlAttribute.getProject(), value);
         if (entry == null) {
             return new ResolveResult[0];
         }

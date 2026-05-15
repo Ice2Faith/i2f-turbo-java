@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
 public class JdbcProcedureProjectMetaHolder {
     public static final Logger log = Logger.getInstance(JdbcProcedureProjectMetaHolder.class);
 
-    public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP = new ConcurrentHashMap<>();
-    public static final ConcurrentMap<String, String> XML_FILE_META_KEY_MAP = new ConcurrentHashMap<>();
-    public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
+    // key: projectPath,value:{key:procedureId,value: ProcedureMeta}
+    public static final ConcurrentMap<String, Map<String, VirtualFile>> XML_FILE_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, Map<String, String>> XML_FILE_META_KEY_MAP = new ConcurrentHashMap<>();
+    public static final ConcurrentMap<String, Map<String, ProcedureMeta>> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
     public static final List<String> FEATURES = getFeatures()
             .stream().filter(e -> !e.startsWith("cause"))
             .collect(Collectors.toUnmodifiableList());
@@ -67,6 +68,23 @@ public class JdbcProcedureProjectMetaHolder {
 
     static {
         startRefreshThread();
+    }
+
+    public static Map<String, ProcedureMeta> getProjectMetaMap(Project project) {
+        String projectPath = getProjectPath(project);
+        Map<String, ProcedureMeta> metaMap = PROCEDURE_META_MAP.get(projectPath);
+        if (metaMap == null) {
+            return new HashMap<>();
+        }
+        return metaMap;
+    }
+
+    public static ProcedureMeta getProjectMeta(Project project, String procedureId) {
+        Map<String, ProcedureMeta> metaMap = getProjectMetaMap(project);
+        if (metaMap == null) {
+            return null;
+        }
+        return metaMap.get(procedureId);
     }
 
     public static void startRefreshThread() {
@@ -105,28 +123,35 @@ public class JdbcProcedureProjectMetaHolder {
 
 
     public static void collectProcedureMeta() {
-        for (Map.Entry<String, VirtualFile> entry : XML_FILE_MAP.entrySet()) {
-            File file = new File(entry.getKey());
-            // 文件未发生变动，不重新解析更新
-            String metaKey = file.length() + "#" + file.lastModified();
-            String exKey = XML_FILE_META_KEY_MAP.get(entry.getKey());
-            if (Objects.equals(metaKey, exKey)) {
-                continue;
-            }
-            XML_FILE_META_KEY_MAP.put(entry.getKey(), metaKey);
+        for (Map.Entry<String, Map<String, VirtualFile>> projectEntry : XML_FILE_MAP.entrySet()) {
+            Map<String, VirtualFile> projectXmlFileMap = projectEntry.getValue();
+            Map<String, String> xmlFileMetaKeyMap = XML_FILE_META_KEY_MAP.computeIfAbsent(projectEntry.getKey(), k -> new ConcurrentHashMap<>());
+            for (Map.Entry<String, VirtualFile> entry : projectXmlFileMap.entrySet()) {
+                File file = new File(entry.getKey());
+                // 文件未发生变动，不重新解析更新
+                String metaKey = file.length() + "#" + file.lastModified();
 
-            VirtualFile value = entry.getValue();
-            try (InputStream is = value.getInputStream()) {
-                Xml xml = XmlUtil.parseXmlSax(value.getName(), is);
-                Xml root = XmlUtil.getRootNode(xml);
-                inflateXml2Meta(null, 0, root, value);
-            } catch (Throwable e) {
+                String exKey = xmlFileMetaKeyMap.get(entry.getKey());
+                if (Objects.equals(metaKey, exKey)) {
+                    continue;
+                }
+                xmlFileMetaKeyMap.put(entry.getKey(), metaKey);
 
+                VirtualFile value = entry.getValue();
+                try (InputStream is = value.getInputStream()) {
+                    Xml xml = XmlUtil.parseXmlSax(value.getName(), is);
+                    Xml root = XmlUtil.getRootNode(xml);
+                    inflateXml2Meta(projectEntry.getKey(), null, 0, root, value);
+                } catch (Throwable e) {
+
+                }
             }
         }
+
     }
 
-    public static void inflateXml2Meta(String parentName, int level, Xml root, VirtualFile value) {
+    public static void inflateXml2Meta(String projectPath, String parentName, int level, Xml root, VirtualFile value) {
+        Map<String, ProcedureMeta> procedureMetaMap = PROCEDURE_META_MAP.computeIfAbsent(projectPath, k -> new ConcurrentHashMap<>());
         if (level > 4) {
             return;
         }
@@ -157,9 +182,9 @@ public class JdbcProcedureProjectMetaHolder {
                 meta.setTarget(value);
                 if (meta.getName() != null) {
 //                    log.warn("xml-procedure-meta found:"+meta.getName());
-                    PROCEDURE_META_MAP.put(meta.getName(), meta);
+                    procedureMetaMap.put(meta.getName(), meta);
                     if (parentName != null && !parentName.isEmpty()) {
-                        PROCEDURE_META_MAP.put(parentName + "." + meta.getName(), meta);
+                        procedureMetaMap.put(parentName + "." + meta.getName(), meta);
                     }
                     if (level == 0) {
                         parentName = meta.getName();
@@ -174,9 +199,13 @@ public class JdbcProcedureProjectMetaHolder {
         List<Xml> children = root.getChildren();
         if (children != null) {
             for (Xml item : children) {
-                inflateXml2Meta(parentName, level + 1, item, value);
+                inflateXml2Meta(projectPath, parentName, level + 1, item, value);
             }
         }
+    }
+
+    public static String getProjectPath(Project project) {
+        return project.getProjectFilePath();
     }
 
 
@@ -186,6 +215,7 @@ public class JdbcProcedureProjectMetaHolder {
         ProjectManager projectManager = ProjectManager.getInstance();
         @NotNull Project[] projects = projectManager.getOpenProjects();
         for (Project project : projects) {
+            String projectPath = getProjectPath(project);
             VirtualFile workspaceFile = project.getWorkspaceFile();
             if (workspaceFile == null) {
                 workspaceFile = project.getProjectFile();
@@ -201,12 +231,13 @@ public class JdbcProcedureProjectMetaHolder {
                 continue;
             }
             log.warn("xml-search-dir:" + searchDir.getPath());
-            collectXmlFile(searchDir);
+            collectXmlFile(projectPath, searchDir);
         }
 
     }
 
-    public static void collectXmlFile(VirtualFile projectFile) {
+    public static void collectXmlFile(String projectPath, VirtualFile projectFile) {
+        Map<String, VirtualFile> xmlFileMap = XML_FILE_MAP.computeIfAbsent(projectPath, k -> new ConcurrentHashMap<>());
         if (projectFile == null) {
             return;
         }
@@ -268,7 +299,7 @@ public class JdbcProcedureProjectMetaHolder {
                         path = "/" + path;
                     }
 
-                    XML_FILE_MAP.put(path, file);
+                    xmlFileMap.put(path, file);
 //                    log.warn("xml-search-match:" + file.getName() + "," + file.getPath());
                 }
             }

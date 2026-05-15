@@ -37,8 +37,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.*;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class XProc4jTestAction extends AnAction {
@@ -289,7 +291,7 @@ public class XProc4jTestAction extends AnAction {
                                 "as this report uses a simple default executor for inference and environments may differ.")
                         .append("\n");
 
-                Map<String, ProcedureMeta> validMap = new HashMap<>(JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP);
+                Map<String, ProcedureMeta> validMap = new HashMap<>(JdbcProcedureProjectMetaHolder.getProjectMetaMap(project));
 
                 AtomicInteger reportCount = new AtomicInteger(0);
                 AtomicInteger nodeCount = new AtomicInteger(1);
