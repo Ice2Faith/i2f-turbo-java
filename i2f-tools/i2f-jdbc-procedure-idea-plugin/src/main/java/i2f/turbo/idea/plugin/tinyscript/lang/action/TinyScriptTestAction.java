@@ -12,6 +12,7 @@ import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
@@ -227,7 +228,8 @@ public class TinyScriptTestAction extends AnAction {
 
         public String getEditorText(){
             if(fileEditor!=null){
-                return virtualFile.getContent().toString();
+                Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
+                return document.getText();
             }
             return inputArea.getDocument().getText();
         }
