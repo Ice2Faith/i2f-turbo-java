@@ -38,8 +38,8 @@ public class FunicBlock extends AbstractBlock {
         List<Block> blocks = new ArrayList<>();
         ASTNode child = myNode.getFirstChildNode();
         boolean isScriptBlock = myNode.getElementType() == FunicTypes.SCRIPT_BLOCK
-                || myNode.getElementType()==FunicTypes.MAP_VALUE_EXPRESS
-                || myNode.getElementType()==FunicTypes.LIST_VALUE_EXPRESS;
+                || myNode.getElementType() == FunicTypes.MAP_VALUE_EXPRESS
+                || myNode.getElementType() == FunicTypes.LIST_VALUE_EXPRESS;
         while (child != null) {
             if (child.getElementType() != TokenType.WHITE_SPACE) {
                 Indent childIndent;

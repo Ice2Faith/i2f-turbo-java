@@ -7,8 +7,10 @@ import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.psi.PsiElement;
+import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionScope;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -20,26 +22,6 @@ import java.util.Set;
  */
 public class AnyHelpXmlCompletionContributor extends CompletionContributor {
     public static final Logger log = Logger.getInstance(AnyHelpXmlCompletionContributor.class);
-
-    public static final String[] tinyScriptKeywords = {
-            "null",
-            "true",
-            "false",
-            "new",
-            "class",
-            "as", "cast",
-            "is", "instanceof", "typeof",
-            "in", "notin",
-            "gte", "lte",
-            "ne", "neq", "eq",
-            "gt", "lt",
-            "and", "or",
-            "debugger",
-            "try", "catch", "finally", "throw",
-            "break", "continue", "return",
-            "while", "for", "foreach",
-            "if", "else", "elif"
-    };
 
     public static final String[] sqlKeywords = {
             "select", "distinct", "top", "as",
@@ -150,11 +132,23 @@ public class AnyHelpXmlCompletionContributor extends CompletionContributor {
             }
         }
         if (scopes.contains(CompletionScope.TINY_SCRIPT)) {
-            String[] candidates = tinyScriptKeywords;
+            Set<String> candidates = TinyScriptConsts.KEYWORDS;
             if (candidates != null) {
                 for (String candidate : candidates) {
                     LookupElement item = LookupElementBuilder.create(candidate)
-                            .withTypeText("TinyScript Keywords")
+                            .withTypeText(TinyScriptConsts.LANGUAGE_ID + " Keywords")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
+        }
+        if (scopes.contains(CompletionScope.FUNIC)) {
+            Set<String> candidates = FunicConsts.KEYWORDS;
+            if (candidates != null) {
+                for (String candidate : candidates) {
+                    LookupElement item = LookupElementBuilder.create(candidate)
+                            .withTypeText(FunicConsts.LANGUAGE_ID + " Keywords")
                             .withIcon(XProc4jConsts.ICON)
                             .withItemTextItalic(true);
                     result.addElement(item);

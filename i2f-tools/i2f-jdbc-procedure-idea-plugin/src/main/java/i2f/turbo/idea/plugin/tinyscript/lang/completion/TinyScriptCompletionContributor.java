@@ -10,14 +10,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
-import i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * @author Ice2Faith
@@ -25,6 +21,8 @@ import java.util.TreeSet;
  * @desc
  */
 public class TinyScriptCompletionContributor extends CompletionContributor {
+
+
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {
         Project project = parameters.getOriginalFile().getProject();
@@ -37,23 +35,7 @@ public class TinyScriptCompletionContributor extends CompletionContributor {
         IElementType type = node.getElementType();
 
         if (type instanceof TinyScriptTokenType) {
-            Set<String> completions = new TreeSet<>();
-            completions.addAll(Arrays.asList("null", "true", "false", "class"));
-            Field[] fields = TinyScriptTypes.class.getDeclaredFields();
-            for (Field field : fields) {
-                if (field.getName().startsWith("KEY_")) {
-                    try {
-                        TinyScriptTokenType kwToken = (TinyScriptTokenType) field.get(null);
-                        String debugName = kwToken.getDebugName();
-                        if (debugName.startsWith("KEY_")) {
-                            continue;
-                        }
-                        completions.add(debugName);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
+            Set<String> completions = TinyScriptConsts.KEYWORDS;
             if (completions != null && !completions.isEmpty()) {
                 for (String attr : completions) {
                     LookupElement item = LookupElementBuilder.create(attr)
@@ -66,4 +48,5 @@ public class TinyScriptCompletionContributor extends CompletionContributor {
             }
         }
     }
+
 }

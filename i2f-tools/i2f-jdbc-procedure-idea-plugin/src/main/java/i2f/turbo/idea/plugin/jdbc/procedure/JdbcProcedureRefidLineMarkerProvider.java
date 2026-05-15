@@ -14,7 +14,10 @@ import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.xml.DomFileElement;
 import com.intellij.util.xml.DomService;
 import com.intellij.util.xml.GenericAttributeValue;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.lru.LruMap;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicFunctionName;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptFunctionCall;
 import org.jetbrains.annotations.NotNull;
 
@@ -124,7 +127,7 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
             XmlAttribute xmlAttribute = (XmlAttribute) element;
             String attrName = xmlAttribute.getName();
 //        log.warn("xml-line-marker-attr:" + attrName);
-            if (!"refid".equals(attrName)) {
+            if (!AttrConsts.REFID.equals(attrName)) {
                 return;
             }
 
@@ -135,9 +138,9 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
 
             String name = xmlTag.getName();
             if (!Arrays.asList(
-                    "procedure-call",
-                    "function-call",
-                    "script-include").contains(name)) {
+                    TagConsts.PROCEDURE_CALL,
+                    TagConsts.FUNCTION_CALL,
+                    TagConsts.SCRIPT_INCLUDE).contains(name)) {
                 return;
             }
 
@@ -146,6 +149,12 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
             TinyScriptFunctionCall call = (TinyScriptFunctionCall) element;
             PsiElement naming = call.getNaming();
             refid = naming.getText();
+        } else if (element instanceof FunicFunctionName) {
+            FunicFunctionName call = (FunicFunctionName) element;
+            PsiElement identifier = call.getIdentifier();
+            if (identifier != null) {
+                refid = identifier.getText();
+            }
         }
 
 //        log.warn("xml-line-marker-refid:" + refid);
@@ -208,9 +217,9 @@ public class JdbcProcedureRefidLineMarkerProvider extends RelatedItemLineMarkerP
             }
             XmlTag tag = (XmlTag) item;
             String tagName = tag.getName();
-            if ("script-segment".equals(tagName)
-                    || "procedure".equals(tagName)) {
-                XmlAttribute idAttr = tag.getAttribute("id");
+            if (TagConsts.SCRIPT_SEGMENT.equals(tagName)
+                    || TagConsts.PROCEDURE.equals(tagName)) {
+                XmlAttribute idAttr = tag.getAttribute(AttrConsts.ID);
                 if (idAttr != null) {
                     String id = idAttr.getValue();
                     if (Objects.equals(refid, id)) {

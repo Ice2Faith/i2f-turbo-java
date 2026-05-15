@@ -6,6 +6,9 @@ import com.intellij.openapi.project.ProjectManager;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileVisitor;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.xml.XmlUtil;
 import i2f.xml.data.Xml;
@@ -13,12 +16,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.InputStream;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class JdbcProcedureProjectMetaHolder {
     public static final Logger log = Logger.getInstance(JdbcProcedureProjectMetaHolder.class);
@@ -26,93 +32,36 @@ public class JdbcProcedureProjectMetaHolder {
     public static final ConcurrentMap<String, VirtualFile> XML_FILE_MAP = new ConcurrentHashMap<>();
     public static final ConcurrentMap<String, String> XML_FILE_META_KEY_MAP = new ConcurrentHashMap<>();
     public static final ConcurrentMap<String, ProcedureMeta> PROCEDURE_META_MAP = new ConcurrentHashMap<>();
-    public static final List<String> FEATURES = Arrays.asList(
-            // 进出参
-            "in",
-            "out",
+    public static final List<String> FEATURES = getFeatures()
+            .stream().filter(e -> !e.startsWith("cause"))
+            .collect(Collectors.toUnmodifiableList());
 
-            // 基础类型组
-            "int",
-            "double",
-            "float",
-            "string",
-            "long",
-            "short",
-            "char",
-            "byte",
-            "boolean",
-            "null",
+    public static final List<String> FEATURES_CAUSE = getFeatures()
+            .stream().filter(e -> e.startsWith("cause"))
+            .collect(Collectors.toUnmodifiableList());
 
-            // 复合类型组
-            "date",
+    public static List<String> getFeatures() {
+        List<String> ret = new ArrayList<>();
+        Class<FeatureConsts> clazz = FeatureConsts.class;
+        Field[] fields = clazz.getFields();
+        for (Field field : fields) {
+            if (!String.class.isAssignableFrom(field.getType())) {
+                continue;
+            }
+            if (!Modifier.isStatic(field.getModifiers())) {
+                continue;
+            }
+            try {
+                Object value = field.get(null);
+                if (value != null) {
+                    ret.add(String.valueOf(value));
+                }
+            } catch (Exception e) {
 
-            // 字符串组
-            "render",
-            "trim",
-            "align",
-            "body-text",
-            "body-xml",
-
-            // 节点属性
-            "location-file",
-            "location-line",
-            "location-tag",
-            "location",
-
-            "spacing-left",
-            "spacing-right",
-            "spacing",
-
-            "lower",
-            "upper",
-
-            "hashcode",
-
-            // 处理转换组
-            "visit",
-            "eval",
-            "test",
-
-            "context",
-            "executor",
-            "node",
-
-            "eval-java",
-            "eval-js",
-            "eval-tinyscript",
-            "eval-ts",
-            "eval-groovy",
-            "class",
-
-            "not",
-
-            "dialect",
-
-            // 主要用于test进行判断
-            "is-null",
-            "is-not-null",
-            "is-empty",
-            "is-not-empty",
-
-            // 环境值
-            "date-now",
-            "uuid",
-            "current-time-millis",
-            "snow-uid",
-
-            // 特殊实例
-            "new-map",
-            "new-list",
-            "new-set"
-
-    );
-
-    public static final List<String> FEATURES_CAUSE = Arrays.asList(
-            "cause-first",
-            "cause-last",
-            "cause-raw",
-            "cause-root"
-    );
+            }
+        }
+        return ret;
+    }
 
     public static final AtomicBoolean initRefreshThread = new AtomicBoolean(false);
 
@@ -182,8 +131,8 @@ public class JdbcProcedureProjectMetaHolder {
             return;
         }
         String name = root.getName();
-        if ("procedure".equals(name)
-                || "script-segment".equals(name)) {
+        if (TagConsts.PROCEDURE.equals(name)
+                || TagConsts.SCRIPT_SEGMENT.equals(name)) {
 
             List<Xml> attributes = root.getAttributes();
             if (attributes != null) {
@@ -194,7 +143,7 @@ public class JdbcProcedureProjectMetaHolder {
                 meta.setArgumentFeatures(new LinkedHashMap<>());
                 for (Xml attr : attributes) {
                     String attrName = attr.getName();
-                    if ("id".equals(attrName)) {
+                    if (AttrConsts.ID.equals(attrName)) {
                         meta.setName(attr.getValue());
                         continue;
                     }

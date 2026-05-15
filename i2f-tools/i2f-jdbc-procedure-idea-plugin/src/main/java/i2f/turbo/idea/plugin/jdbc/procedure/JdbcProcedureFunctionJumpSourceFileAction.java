@@ -18,6 +18,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.xml.XmlTag;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -78,7 +79,7 @@ public class JdbcProcedureFunctionJumpSourceFileAction extends AnAction {
                     return CompletionHelper.getPsiMethodSignature(method);
                 } else if (element instanceof XmlTag) {
                     XmlTag xmlTag = (XmlTag) element;
-                    String id = xmlTag.getAttributeValue("id");
+                    String id = xmlTag.getAttributeValue(AttrConsts.ID);
                     ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(id);
                     return CompletionHelper.getProcedureMetaSignature(meta);
                 }

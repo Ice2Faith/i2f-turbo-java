@@ -13,8 +13,13 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.match.regex.RegexUtil;
+import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -123,21 +128,20 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public static final String[] JAVA_LANG_TAGS = {
-            "lang-eval",
-            "lang-eval-java",
-            "lang-java-import",
-            "lang-java-member",
-            "lang-java-body"
+            TagConsts.LANG_EVAL_JAVA,
+            TagConsts.LANG_JAVA_IMPORT,
+            TagConsts.LANG_JAVA_MEMBE,
+            TagConsts.LANG_JAVA_BODY
     };
 
     public static final String[] SQL_LANG_TAGS = {
-            "sql-query-row",
-            "sql-query-list",
-            "sql-query-object",
-            "sql-update",
-            "sql-dialect",
-            "sql-cursor",
-            "sql-etl"
+            TagConsts.SQL_QUERY_ROW,
+            TagConsts.SQL_QUERY_LIST,
+            TagConsts.SQL_QUERY_OBJECT,
+            TagConsts.SQL_UPDATE,
+            TagConsts.SQL_DIALECT,
+            TagConsts.SQL_CURSOR,
+            TagConsts.SQL_ETL
     };
 
     public static final String EVAL_JAVA_IMPORTS_TEMPLATE = "\n" +
@@ -624,10 +628,23 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public Language getPossibleTinyScriptLanguage() {
-        Language lang = Language.findLanguageByID("TinyScript");
+        Language lang = Language.findLanguageByID(TinyScriptConsts.LANGUAGE_ID);
         if (lang != null) {
             return lang;
         }
+        return getPossibleFallbackScriptLanguage();
+    }
+
+    public Language getPossibleFunicLanguage() {
+        Language lang = Language.findLanguageByID(FunicConsts.LANGUAGE_ID);
+        if (lang != null) {
+            return lang;
+        }
+        return getPossibleFallbackScriptLanguage();
+    }
+
+    private static Language getPossibleFallbackScriptLanguage() {
+        Language lang;
         lang = Language.findLanguageByID("Scala");
         if (lang != null) {
             return lang;
@@ -665,13 +682,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         String name = tag.getName();
         if (Arrays.asList(
-                "lang-body",
-                "lang-catch",
-                "lang-finally",
-                "script-segment",
-                "lang-synchronized",
-                "lang-async",
-                "sql-scope"
+                TagConsts.LANG_BODY,
+                TagConsts.LANG_CATCH,
+                TagConsts.LANG_FINALLY,
+                TagConsts.SCRIPT_SEGMENT,
+                TagConsts.LANG_SYNCHRONIZED,
+                TagConsts.LANG_ASYNC,
+                TagConsts.SQL_SCOPE
         ).contains(name)) {
             return null;
         }
@@ -713,15 +730,21 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if (Arrays.asList(SQL_LANG_TAGS).contains(name)) {
             return Language.findLanguageByID("SQL");
         }
-        if (Arrays.asList("lang-eval-ts",
-                "lang-eval-tinyscript").contains(name)) {
+        if (Arrays.asList(TagConsts.LANG_EVAL_TS,
+                TagConsts.LANG_EVAL_TINYSCRIPT).contains(name)) {
             Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 return lang;
             }
         }
+        if (Arrays.asList(TagConsts.LANG_EVAL_FUNIC).contains(name)) {
+            Language lang = getPossibleFunicLanguage();
+            if (lang != null) {
+                return lang;
+            }
+        }
 
-        if (Arrays.asList("lang-eval").contains(name)) {
+        if (Arrays.asList(TagConsts.LANG_EVAL).contains(name)) {
             Language lang = getPossibleEvalLanguage();
             if (lang != null) {
                 return lang;
@@ -744,26 +767,31 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
                 String[] arr = attrName.split("[\\.;:]");
                 Set<String> set = new LinkedHashSet<>(Arrays.asList(arr));
-                if (set.contains("body-xml")
-                        || set.contains("body-text")) {
-                    if (set.contains("eval-java")) {
+                if (set.contains(FeatureConsts.BODY_XML)
+                        || set.contains(FeatureConsts.BODY_TEXT)) {
+                    if (set.contains(FeatureConsts.EVAL_JAVA)) {
                         return Language.findLanguageByID("JAVA");
-                    } else if (set.contains("eval-js")) {
+                    } else if (set.contains(FeatureConsts.EVAL_JS)) {
                         return Language.findLanguageByID("JavaScript");
-                    } else if (set.contains("eval-js")) {
+                    } else if (set.contains(FeatureConsts.EVAL_GROOVY)) {
                         return Language.findLanguageByID("Groovy");
-                    } else if (set.contains("eval-ts")
-                            || set.contains("eval-tinyscript")) {
+                    } else if (set.contains(FeatureConsts.EVAL_TS)
+                            || set.contains(FeatureConsts.EVAL_TINYSCRIPT)) {
                         Language lang = getPossibleTinyScriptLanguage();
                         if (lang != null) {
                             return lang;
                         }
-                    } else if (set.contains("render")) {
+                    } else if (set.contains(FeatureConsts.EVAL_FUNIC)) {
+                        Language lang = getPossibleFunicLanguage();
+                        if (lang != null) {
+                            return lang;
+                        }
+                    } else if (set.contains(FeatureConsts.RENDER)) {
                         Language ret = getPossibleRenderLanguage();
                         if (ret != null) {
                             return ret;
                         }
-                    } else if (set.contains("eval")) {
+                    } else if (set.contains(FeatureConsts.EVAL)) {
                         Language lang = getPossibleEvalLanguage();
                         if (lang != null) {
                             return lang;
@@ -786,11 +814,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             XmlTag xmlTag = (XmlTag) element;
             String name = xmlTag.getName();
             if (!Arrays.asList(
-                    "lang-eval-java",
-                    "lang-java-import",
-                    "lang-java-member",
-                    "lang-java-body",
-                    "lang-eval-groovy"
+                    TagConsts.LANG_EVAL_JAVA,
+                    TagConsts.LANG_JAVA_IMPORT,
+                    TagConsts.LANG_JAVA_MEMBE,
+                    TagConsts.LANG_JAVA_BODY,
+                    TagConsts.LANG_EVAL_GROOVY
             ).contains(name)) {
                 if (bodyRef != null) {
                     String text = xmlTag.getValue().getText();
@@ -800,27 +828,27 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
                 return;
             }
-            if ("lang-eval-java".equals(name)
-                    || "lang-eval-groovy".equals(name)) {
+            if (TagConsts.LANG_EVAL_JAVA.equals(name)
+                    || TagConsts.LANG_EVAL_GROOVY.equals(name)) {
                 XmlTag[] subTags = xmlTag.getSubTags();
                 if (subTags != null && subTags.length > 0) {
                     for (XmlTag subTag : subTags) {
                         String subName = subTag.getName();
-                        if ("lang-java-import".equals(subName)) {
+                        if (TagConsts.LANG_JAVA_IMPORT.equals(subName)) {
                             if (importsRef != null) {
                                 String text = subTag.getValue().getText();
                                 if (text != null && !text.isEmpty()) {
                                     importsRef.set(text);
                                 }
                             }
-                        } else if ("lang-java-member".equals(subName)) {
+                        } else if (TagConsts.LANG_JAVA_MEMBE.equals(subName)) {
                             if (membersRef != null) {
                                 String text = subTag.getValue().getText();
                                 if (text != null && !text.isEmpty()) {
                                     membersRef.set(text);
                                 }
                             }
-                        } else if ("lang-java-body".equals(subName)) {
+                        } else if (TagConsts.LANG_JAVA_BODY.equals(subName)) {
                             if (bodyRef != null) {
                                 String text = subTag.getValue().getText();
                                 if (text != null && !text.isEmpty()) {
@@ -883,14 +911,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 importSegment += "\n" + String.join("\n", additionalImports);
             }
 
-            if ("lang-java-import".equals(tagName)) {
+            if (TagConsts.LANG_JAVA_IMPORT.equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(importSegment + "\n",
                                 "class MyDsl {}",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            } else if ("lang-java-member".equals(tagName)) {
+            } else if (TagConsts.LANG_JAVA_MEMBE.equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(importSegment + "\n"
                                         + "public class MyJavaProcedure { ",
@@ -898,8 +926,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            } else if ("lang-java-body".equals(tagName)
-                    || "lang-eval-java".equals(tagName)) {
+            } else if (TagConsts.LANG_JAVA_BODY.equals(tagName)
+                    || TagConsts.LANG_EVAL_JAVA.equals(tagName)) {
 
                 registrar.startInjecting(targetLang)
                         .addPlace(importSegment + "\n"
@@ -952,7 +980,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 importSegment += "\n" + String.join("\n", additionalImports);
             }
 
-            if ("lang-eval-groovy".equals(tagName)) {
+            if (TagConsts.LANG_EVAL_GROOVY.equals(tagName)) {
                 registrar.startInjecting(targetLang)
                         .addPlace(importSegment + "\n"
                                         + "class MyGroovyProcedure { \n"
@@ -992,8 +1020,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if (attrName == null) {
             attrName = "";
         }
-        if ("lang-set".equals(tagName)) {
-            if ("radix".equals(attrName)) {
+        if (TagConsts.LANG_SET.equals(tagName)) {
+            if (AttrConsts.RADIX.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1005,7 +1033,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-            if ("value".equals(attrName) || attrName.startsWith("value.")) {
+            if (AttrConsts.VALUE.equals(attrName) || attrName.startsWith(AttrConsts.VALUE + ".")) {
                 Language lang = detectXmlTagLangAttribute(tag);
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1017,10 +1045,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-fori".equals(tagName)) {
-            if ("begin".equals(attrName)
-                    || "end".equals(attrName)
-                    || "incr".equals(attrName)) {
+        } else if (TagConsts.LANG_FORI.equals(tagName)) {
+            if (AttrConsts.BEGIN.equals(attrName)
+                    || AttrConsts.END.equals(attrName)
+                    || AttrConsts.INCR.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1032,8 +1060,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-invoke".equals(tagName)) {
-            if ("method".equals(attrName)) {
+        } else if (TagConsts.LANG_INVOKE.equals(tagName)) {
+            if (AttrConsts.METHOD.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1047,9 +1075,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-catch".equals(tagName)
-                || "lang-throw".equals(tagName)) {
-            if ("type".equals(attrName)) {
+        } else if (TagConsts.LANG_CATCH.equals(tagName)
+                || TagConsts.LANG_THROW.equals(tagName)) {
+            if (AttrConsts.TYPE.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1062,7 +1090,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
             }
         } else if (tagName.startsWith("sql-")) {
-            if ("result-type".equals(attrName)) {
+            if (AttrConsts.RESULT_TYPE.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1074,10 +1102,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-async".equals(tagName)
-                || "lang-latch-await".equals(tagName)
-                || "lang-sleep".equalsIgnoreCase(tagName)) {
-            if ("time-unit".equals(attrName)) {
+        } else if (TagConsts.LANG_ASYNC.equals(tagName)
+                || TagConsts.LANG_LATCH_AWAIT.equals(tagName)
+                || TagConsts.LANG_SLEEP.equals(tagName)) {
+            if (AttrConsts.TIME_UNIT.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -1088,14 +1116,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             .doneInjecting();
                     return;
                 }
-            } else if ("delay".equalsIgnoreCase(attrName)
-                    || "timeout".equalsIgnoreCase(attrName)
-                    || "await".equalsIgnoreCase(attrName)
-                    || "read-only".equalsIgnoreCase(attrName)
-                    || "params_share".equalsIgnoreCase(attrName)
-                    || "limited".equalsIgnoreCase(attrName)
-                    || "accept-batch".equalsIgnoreCase(attrName)
-                    || "before-truncate".equalsIgnoreCase(attrName)
+            } else if (AttrConsts.DELAY.equalsIgnoreCase(attrName)
+                    || AttrConsts.TIMEOUT.equalsIgnoreCase(attrName)
+                    || AttrConsts.AWAIT.equalsIgnoreCase(attrName)
+                    || AttrConsts.READ_ONLY.equalsIgnoreCase(attrName)
+                    || AttrConsts.PARAMS_SHARE.equalsIgnoreCase(attrName)
+                    || AttrConsts.LIMITED.equalsIgnoreCase(attrName)
+                    || AttrConsts.ACCEPT_BATCH.equalsIgnoreCase(attrName)
+                    || AttrConsts.BEFORE_TRUNCATE.equalsIgnoreCase(attrName)
             ) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
@@ -1108,7 +1136,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("propagation".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.PROPAGATION.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1120,7 +1148,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        } else if ("isolation".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.ISOLATION.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1133,11 +1161,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 return;
             }
         } else if (
-                "class".equalsIgnoreCase(attrName)
-                        || "type".equalsIgnoreCase(attrName)
-                        || "result-type".equalsIgnoreCase(attrName)
-                        || "rollback-for".equalsIgnoreCase(attrName)
-                        || "no-rollback-for".equalsIgnoreCase(attrName)
+                AttrConsts.CLASS.equalsIgnoreCase(attrName)
+                        || AttrConsts.TYPE.equalsIgnoreCase(attrName)
+                        || AttrConsts.RESULT_TYPE.equalsIgnoreCase(attrName)
+                        || AttrConsts.ROLLBACK_FOR.equalsIgnoreCase(attrName)
+                        || AttrConsts.NO_ROLLBACK_FOR.equalsIgnoreCase(attrName)
                         || "resultType".equalsIgnoreCase(attrName)
                         || "parameterType".equalsIgnoreCase(attrName)
                         || "className".equalsIgnoreCase(attrName)
@@ -1157,7 +1185,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        } else if ("package".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.PACKAGE.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1212,10 +1240,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.equals("test")
-                || attrName.equals("collection")
-                || attrName.contains(".eval.")
-                || attrName.endsWith(".eval")) {
+        if (attrName.equals(AttrConsts.TEST)
+                || attrName.equals(AttrConsts.COLLECTION)
+                || attrName.contains("." + FeatureConsts.EVAL + ".")
+                || attrName.endsWith("." + FeatureConsts.EVAL)) {
             Language lang = getPossibleEvalLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1228,7 +1256,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-java")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_JAVA)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1243,7 +1271,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-js")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_JS)) {
             Language lang = findPossibleLanguage("javascript");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1257,8 +1285,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-ts")
-                || attrName.contains(".eval-tinyscript")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_TS)
+                || attrName.contains("." + FeatureConsts.EVAL_TINYSCRIPT)) {
             Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1271,7 +1299,20 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-groovy")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_FUNIC)) {
+            Language lang = getPossibleFunicLanguage();
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("",
+                                "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if (attrName.contains("." + FeatureConsts.EVAL_GROOVY)) {
             Language lang = findPossibleLanguage("groovy");
             if (lang != null) {
                 registrar.startInjecting(lang)

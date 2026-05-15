@@ -12,15 +12,22 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.xml.*;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecContextMethodProvider;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecutorMethodProvider;
+import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
+import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureProjectMetaHolder;
 import i2f.turbo.idea.plugin.jdbc.procedure.XProc4jConsts;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import i2f.xml.XmlUtil;
 import i2f.xml.data.Xml;
 
@@ -162,7 +169,7 @@ public class CompletionHelper {
                             list.add(method);
                         } else if (psiElem instanceof XmlTag) {
                             XmlTag tag = (XmlTag) psiElem;
-                            String id = tag.getAttributeValue("id");
+                            String id = tag.getAttributeValue(AttrConsts.ID);
                             if (id != null) {
                                 List<PsiElement> list = psiElementMap.computeIfAbsent(id, k -> new LinkedList<>());
                                 list.add(tag);
@@ -336,11 +343,11 @@ public class CompletionHelper {
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         Set<String> classNames = new LinkedHashSet<>(Arrays.asList(
-                "ContextFunctions",
-                "TinyScriptFunctions",
-                "ExecContextMethodProvider",
-                "ExecutorMethodProvider",
-                "JdbcProcedureParser"
+                ContextFunctions.class.getSimpleName(),
+                TinyScriptFunctions.class.getSimpleName(),
+                ExecContextMethodProvider.class.getSimpleName(),
+                ExecutorMethodProvider.class.getSimpleName(),
+                JdbcProcedureParser.class.getSimpleName()
         ));
         PsiClass psiClass = null;
         for (String className : classNames) {
@@ -372,10 +379,10 @@ public class CompletionHelper {
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         Set<String> processClassNameSet = new HashSet<>();
         Set<String> classNames = new LinkedHashSet<>(Arrays.asList(
-                "ContextFunctions",
-                "TinyScriptFunctions",
-                "ExecContextMethodProvider",
-                "ExecutorMethodProvider"
+                ContextFunctions.class.getSimpleName(),
+                TinyScriptFunctions.class.getSimpleName(),
+                ExecContextMethodProvider.class.getSimpleName(),
+                ExecutorMethodProvider.class.getSimpleName()
         ));
         List<Map<String, String>> functions = getProjectConfig(project, "functions");
         for (Map<String, String> map : functions) {
@@ -555,8 +562,8 @@ public class CompletionHelper {
             XmlAttribute attribute = (XmlAttribute) elem;
             String name = attribute.getName();
             // result 出来的变量
-            if (Arrays.asList("result", "item").contains(name)
-                    || (name != null && name.contains("result."))) {
+            if (Arrays.asList(AttrConsts.RESULT, AttrConsts.ITEM).contains(name)
+                    || (name != null && name.contains(AttrConsts.RESULT + "."))) {
                 String value = attribute.getValue();
                 if (value != null && value.matches("[a-zA-Z0-9\\-_\\$\\.]+")) {
                     variables.add(value.trim());
@@ -571,7 +578,7 @@ public class CompletionHelper {
             XmlTag tag = (XmlTag) elem;
             String name = tag.getName();
             // 过程声明的入参
-            if (Arrays.asList("procedure", "script-segment").contains(name)) {
+            if (Arrays.asList(TagConsts.PROCEDURE, TagConsts.SCRIPT_SEGMENT).contains(name)) {
                 XmlAttribute[] attributes = tag.getAttributes();
                 if (attributes != null) {
                     for (XmlAttribute item : attributes) {
@@ -586,7 +593,10 @@ public class CompletionHelper {
                         if (attrName.isEmpty()) {
                             continue;
                         }
-                        if (!Arrays.asList("return", "refid", "id", "param-share").contains(attrName)) {
+                        if (!Arrays.asList(ParamsConsts.RETURN,
+                                AttrConsts.REFID, AttrConsts.ID,
+                                AttrConsts.PARAMS_SHARE
+                        ).contains(attrName)) {
                             if (attrName.matches("[a-zA-Z0-9\\-_\\$\\.]+")) {
                                 variables.add(attrName.trim());
                             }
@@ -610,7 +620,17 @@ public class CompletionHelper {
             getDolarVaraibles(text, variables);
 
             // 处理TS的赋值语句
-            if (Arrays.asList("lang-eval-ts", "lang-eval-tinyscript").contains(name)) {
+            if (Arrays.asList(TagConsts.LANG_EVAL_TS, TagConsts.LANG_EVAL_TINYSCRIPT).contains(name)) {
+                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
+                for (RegexMatchItem item : list) {
+                    String str = item.matchStr;
+                    str = str.substring(0, str.length() - 1);
+                    variables.add(str.trim());
+                }
+            }
+
+            // 处理Funic的赋值语句
+            if (Arrays.asList(TagConsts.LANG_EVAL_FUNIC).contains(name)) {
                 List<RegexMatchItem> list = RegexUtil.regexFinds(text, "[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
                 for (RegexMatchItem item : list) {
                     String str = item.matchStr;
@@ -620,18 +640,18 @@ public class CompletionHelper {
             }
 
             // 处理groovy的赋值语句
-            if (Arrays.asList("lang-eval-groovy").contains(name)) {
-                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "params\\.[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
+            if (Arrays.asList(TagConsts.LANG_EVAL_GROOVY).contains(name)) {
+                List<RegexMatchItem> list = RegexUtil.regexFinds(text, AttrConsts.PARAMS + "\\.[a-zA-Z0-9\\-_\\$\\.]+\\s*=");
                 for (RegexMatchItem item : list) {
                     String str = item.matchStr;
-                    str = str.substring("params.".length(), str.length() - 1);
+                    str = str.substring((AttrConsts.PARAMS + ".").length(), str.length() - 1);
                     variables.add(str.trim());
                 }
             }
 
             // 处理java的赋值语句
-            if (Arrays.asList("lang-eval-java", "lang-java-body").contains(name)) {
-                List<RegexMatchItem> list = RegexUtil.regexFinds(text, "params\\.put\\(\"[a-zA-Z0-9\\-_\\$\\.]+\"\\s*,\\)");
+            if (Arrays.asList(TagConsts.LANG_EVAL_JAVA, TagConsts.LANG_JAVA_BODY).contains(name)) {
+                List<RegexMatchItem> list = RegexUtil.regexFinds(text, AttrConsts.PARAMS + "\\.put\\(\"[a-zA-Z0-9\\-_\\$\\.]+\"\\s*,\\)");
                 for (RegexMatchItem item : list) {
                     String str = item.matchStr;
                     int idx = str.indexOf("\"");
@@ -742,11 +762,20 @@ public class CompletionHelper {
                     String[] arr = name.split("[.:;]");
 //                    log.warn("any-help xml-attr-name-split:" + Arrays.toString(arr));
                     if (arr.length >= 2) {
-                        if (Arrays.asList("eval-ts", "eval-tinyscript").contains(arr[1])) {
+                        if (Arrays.asList(FeatureConsts.EVAL_TS, FeatureConsts.EVAL_TINYSCRIPT).contains(arr[1])) {
                             result.add(CompletionScope.FUNCTIONS);
                             result.add(CompletionScope.SQL_IDENTIFIER);
                             result.add(CompletionScope.VARIABLES);
                             result.add(CompletionScope.TINY_SCRIPT);
+                            result.add(CompletionScope.SQL);
+                            stop.set(true);
+                            return;
+                        }
+                        if (Arrays.asList(FeatureConsts.EVAL_FUNIC).contains(arr[1])) {
+                            result.add(CompletionScope.FUNCTIONS);
+                            result.add(CompletionScope.SQL_IDENTIFIER);
+                            result.add(CompletionScope.VARIABLES);
+                            result.add(CompletionScope.FUNIC);
                             result.add(CompletionScope.SQL);
                             stop.set(true);
                             return;
@@ -821,11 +850,19 @@ public class CompletionHelper {
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 stop.set(true);
                 return;
-            } else if ("TinyScript".equals(language.getID())) {
+            } else if (TinyScriptConsts.LANGUAGE_ID.equals(language.getID())) {
                 result.add(CompletionScope.FUNCTIONS);
                 result.add(CompletionScope.SQL_IDENTIFIER);
                 result.add(CompletionScope.VARIABLES);
                 result.add(CompletionScope.TINY_SCRIPT);
+                result.add(CompletionScope.SQL);
+                stop.set(true);
+                return;
+            } else if (FunicConsts.LANGUAGE_ID.equals(language.getID())) {
+                result.add(CompletionScope.FUNCTIONS);
+                result.add(CompletionScope.SQL_IDENTIFIER);
+                result.add(CompletionScope.VARIABLES);
+                result.add(CompletionScope.FUNIC);
                 result.add(CompletionScope.SQL);
                 stop.set(true);
                 return;
@@ -911,8 +948,8 @@ public class CompletionHelper {
             return true;
         }
 
-        if (name.contains("eval-ts")
-                || name.contains("eval-tinyscript")) {
+        if (name.contains(FeatureConsts.EVAL_TS)
+                || name.contains(FeatureConsts.EVAL_TINYSCRIPT)) {
             result.add(CompletionScope.FUNCTIONS);
             result.add(CompletionScope.SQL_IDENTIFIER);
             result.add(CompletionScope.VARIABLES);
@@ -921,8 +958,17 @@ public class CompletionHelper {
             return true;
         }
 
-        if (name.equals("lang-string")
-                || name.equals("lang-render")) {
+        if (name.contains(FeatureConsts.EVAL_FUNIC)) {
+            result.add(CompletionScope.FUNCTIONS);
+            result.add(CompletionScope.SQL_IDENTIFIER);
+            result.add(CompletionScope.VARIABLES);
+            result.add(CompletionScope.FUNIC);
+            result.add(CompletionScope.SQL);
+            return true;
+        }
+
+        if (name.equals(TagConsts.LANG_STRING)
+                || name.equals(TagConsts.LANG_RENDER)) {
             result.add(CompletionScope.VARIABLES);
             return true;
         }

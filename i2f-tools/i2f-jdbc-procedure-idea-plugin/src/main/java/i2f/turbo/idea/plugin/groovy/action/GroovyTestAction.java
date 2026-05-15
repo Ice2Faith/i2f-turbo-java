@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.jdbc.procedure;
+package i2f.turbo.idea.plugin.groovy.action;
 
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
@@ -8,12 +8,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
-import i2f.jdbc.procedure.consts.AttrConsts;
-import i2f.jdbc.procedure.context.ProcedureMeta;
-import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
-import i2f.jdbc.procedure.parser.JdbcProcedureParser;
-import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reporter.IGrammarReporter;
+import i2f.extension.groovy.GroovyScript;
+import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
 import i2f.turbo.idea.plugin.utils.IdeaExceptionUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,13 +19,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
-public class XProc4jTestAction extends AnAction {
-    public static final Logger log = Logger.getInstance(XProc4jTestAction.class);
+public class GroovyTestAction extends AnAction {
+    public static final Logger log = Logger.getInstance(GroovyTestAction.class);
+
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
@@ -60,11 +55,12 @@ public class XProc4jTestAction extends AnAction {
         private JTextArea inputArea;
         private JTextArea outputArea;
         private JButton parseButton;
+        private JButton evalButton;
 
         public ConvertDialog(Project project, String initialText) {
             super(project);
             init(); // 初始化对话框
-            setTitle(XProc4jConsts.NAME + " Test UI");
+            setTitle("Groovy Test UI");
 
             // 设置初始输入文本
             if (inputArea != null && initialText != null) {
@@ -109,10 +105,12 @@ public class XProc4jTestAction extends AnAction {
 
 
             parseButton = new JButton("Parse");
+            evalButton = new JButton("Eval");
 
             // 布局第二行
             JPanel actionPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
             actionPanel.add(parseButton);
+            actionPanel.add(evalButton);
 
             JPanel actionRow = new JPanel(new BorderLayout(10, 0));
             actionRow.add(actionPanel, BorderLayout.CENTER);
@@ -139,6 +137,7 @@ public class XProc4jTestAction extends AnAction {
 
             // --- 绑定按钮事件 ---
             parseButton.addActionListener(this::onParseClicked);
+            evalButton.addActionListener(this::onEvalClicked);
 
             return mainPanel;
         }
@@ -158,81 +157,49 @@ public class XProc4jTestAction extends AnAction {
                 return;
             }
 
-            StringBuffer buffer = new StringBuffer();
-
-            buffer.append("begin parse xml ...").append("\n");
             try {
-
-                Map<String, XmlNode> ret = new HashMap<>();
-                XmlNode node = null;
-                try {
-                    node = JdbcProcedureParser.parse(sourceText);
-                } catch (Exception ex) {
-                    node = JdbcProcedureParser.parse(
-                            "<procedure id=\"VIRTUAL_" + (UUID.randomUUID().toString().replace("-", "")) + "\">\n" +
-                                    sourceText +
-                                    "\n</procedure>"
-                    );
-                }
-                buffer.append("parse xml success .").append("\n");
-                String id = node.getTagAttrMap().get(AttrConsts.ID);
-                if (id != null) {
-                    buffer.append("xml node found id: ").append(id).append("\n");
-                    ret.put(id, node);
-
-                    Map<String, XmlNode> next = new HashMap<>();
-                    JdbcProcedureParser.resolveEmbedIdNode(node, next);
-                    for (Map.Entry<String, XmlNode> entry : next.entrySet()) {
-                        ret.put(entry.getKey(), entry.getValue());
-                        if (!entry.getKey().equals(id)) {
-                            String childId = id + "." + entry.getKey();
-                            buffer.append("xml node found children id: ").append(childId).append("\n");
-                            ret.put(childId, entry.getValue());
-                        }
-                    }
-                }
-
-                buffer.append("begin report grammar ...").append("\n");
-                buffer.append("[WARN] Grammar reports may produce false positives and are for reference only.\n" +
-                                "Please rely on your actual runtime environment,\n" +
-                                "as this report uses a simple default executor for inference and environments may differ.")
-                        .append("\n");
-
-                Map<String, ProcedureMeta> validMap = new HashMap<>(JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP);
-
-                AtomicInteger reportCount = new AtomicInteger(0);
-                AtomicInteger nodeCount = new AtomicInteger(1);
-
-                buffer.append("init default executor ...").append("\n");
-                DefaultJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
-                executor.debug(true);
-                executor.debugThread(true);
-                executor.applyThreadLogAppender((str) -> {
-                    buffer.append(str).append("\n");
-                });
-
-                IGrammarReporter reporter = executor.grammarReporter();
-                if (reporter != null) {
-                    buffer.append("grammar reporting ...").append("\n");
-                    reporter.reportGrammar(node, validMap, executor, (str) -> {
-                        buffer.append(str).append("\n");
-                    }, reportCount, nodeCount);
-                    buffer.append("found issue statistic, issue:").append(reportCount.get()).append(", nodes:").append(nodeCount.get()).append("\n");
-                }
-
-                buffer.append("\n");
-                buffer.append("finished!").append("\n");
-                outputArea.setText(buffer.toString());
+                Class ctx = GroovyScript.parseAsClass(sourceText);
+                String result = "parse success !";
+                outputArea.setText(result);
             } catch (Throwable ex) {
                 StringWriter writer = new StringWriter();
                 PrintWriter pw = new PrintWriter(writer);
                 pw.println("parse error :\n" + ex.getClass() + " : " + ex.getMessage());
                 pw.println(IdeaExceptionUtil.getThrowableStackTraceText(ex));
                 pw.flush();
+                outputArea.setText(writer.toString());
+            }
+        }
 
-                buffer.append("\n");
-                buffer.append(writer);
-                outputArea.setText(buffer.toString());
+        private void onEvalClicked(ActionEvent e) {
+            String sourceText = inputArea.getText();
+            if (sourceText == null || sourceText.trim().isEmpty()) {
+                outputArea.setText("Please input text!");
+                return;
+            }
+
+            try {
+                Map<String, Object> params = new LinkedHashMap<>();
+                Object output = GroovyScript.evalScript(sourceText, params);
+                String result = "eval success !\nresult type:\n" + (output == null ? null : output.getClass().getSimpleName());
+                try {
+                    result += "\nresult:" + JsonUtils.toPrettyJson(output);
+                } catch (Exception ex) {
+
+                }
+                try {
+                    result += "\nparams:" + JsonUtils.toPrettyJson(params);
+                } catch (Exception ex) {
+
+                }
+                outputArea.setText(result);
+            } catch (Throwable ex) {
+                StringWriter writer = new StringWriter();
+                PrintWriter pw = new PrintWriter(writer);
+                pw.println("eval error :\n" + ex.getClass() + " : " + ex.getMessage());
+                pw.println(IdeaExceptionUtil.getThrowableStackTraceText(ex));
+                pw.flush();
+                outputArea.setText(writer.toString());
             }
         }
 

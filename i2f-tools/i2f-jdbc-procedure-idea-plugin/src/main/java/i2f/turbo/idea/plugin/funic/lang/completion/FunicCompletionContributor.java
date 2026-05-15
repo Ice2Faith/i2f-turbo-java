@@ -10,14 +10,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.funic.FunicConsts;
-import i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes;
 import i2f.turbo.idea.plugin.funic.lang.psi.FunicTokenType;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  * @author Ice2Faith
@@ -37,23 +33,7 @@ public class FunicCompletionContributor extends CompletionContributor {
         IElementType type = node.getElementType();
 
         if (type instanceof FunicTokenType) {
-            Set<String> completions = new TreeSet<>();
-            completions.addAll(Arrays.asList("null","true","false","class"));
-            Field[] fields = FunicTypes.class.getDeclaredFields();
-            for (Field field : fields) {
-                if (field.getName().startsWith("KW_")) {
-                    try {
-                        FunicTokenType kwToken = (FunicTokenType)field.get(null);
-                        String debugName = kwToken.getDebugName();
-                        if(debugName.startsWith("KW_")) {
-                            continue;
-                        }
-                        completions.add(debugName);
-                    } catch (Exception e) {
-
-                    }
-                }
-            }
+            Set<String> completions = FunicConsts.KEYWORDS;
             if (completions != null && !completions.isEmpty()) {
                 for (String attr : completions) {
                     LookupElement item = LookupElementBuilder.create(attr)

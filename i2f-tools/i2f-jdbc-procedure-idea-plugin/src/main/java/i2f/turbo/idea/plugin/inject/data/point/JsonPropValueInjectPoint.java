@@ -1,7 +1,5 @@
 package i2f.turbo.idea.plugin.inject.data.point;
 
-import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
-
 import java.util.List;
 
 /**

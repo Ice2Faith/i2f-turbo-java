@@ -148,6 +148,11 @@ public class TinyScriptTestAction extends AnAction {
             return mainPanel;
         }
 
+        @Override
+        protected @NotNull Action[] createActions() {
+            return new Action[]{this.getOKAction()};
+        }
+
         /**
          * 处理转换按钮点击事件
          */

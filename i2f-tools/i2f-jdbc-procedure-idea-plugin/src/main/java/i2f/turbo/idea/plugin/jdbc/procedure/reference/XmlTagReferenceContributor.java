@@ -6,6 +6,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
+import i2f.jdbc.procedure.consts.TagConsts;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -43,7 +44,7 @@ public class XmlTagReferenceContributor extends PsiReferenceContributor {
                             if (rootTag != null) {
                                 String name = rootTag.getName();
 //                                log.warn("xml-tag-root-name:"+name);
-                                if (!"procedure".equals(name)) {
+                                if (!TagConsts.PROCEDURE.equals(name)) {
                                     isSupport = false;
                                 }
                             }

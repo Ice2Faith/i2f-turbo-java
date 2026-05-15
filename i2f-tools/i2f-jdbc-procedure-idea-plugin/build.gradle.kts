@@ -28,11 +28,11 @@ dependencies {
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5")
     // 本地依赖
 //    implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
-    implementation(":i2f-jdbc-procedure:1.0-jdk8")
+    implementation(":i2f-extension-xproc4j:1.0-jdk8")
     // xproc4j 语法验证依赖
     implementation("ognl:ognl:3.4.11")
-//    implementation("org.apache.groovy:groovy:4.0.18")
-//    implementation("org.openjdk.nashorn:nashorn-core:15.4")
+    implementation("org.apache.groovy:groovy:4.0.18")
+    implementation("org.openjdk.nashorn:nashorn-core:15.4")
 }
 
 tasks.withType<JavaCompile> {

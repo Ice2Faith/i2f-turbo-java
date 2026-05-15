@@ -10,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.ConvertType;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4j;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -102,8 +103,8 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             gbc.gridy = 1;
             gbc.fill = GridBagConstraints.BOTH;
             gbc.weighty = 1.0; // 让输出框占据剩余垂直空间
-            radioOptionXproc4j = new JRadioButton("XProc4J");
-            radioOptionTinyScript = new JRadioButton("TinyScript");
+            radioOptionXproc4j = new JRadioButton(XProc4jConsts.NAME);
+            radioOptionTinyScript = new JRadioButton(TinyScriptConsts.LANGUAGE_ID);
             radioOptionOgnl = new JRadioButton("Ognl");
 
             // 默认选中第一个
@@ -152,6 +153,11 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             return mainPanel;
         }
 
+        @Override
+        protected @NotNull Action[] createActions() {
+            return new Action[]{this.getOKAction()};
+        }
+
         /**
          * 处理转换按钮点击事件
          */
@@ -183,9 +189,15 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
          * 根据单选框状态返回 type 值
          */
         private ConvertType getSelectedType() {
-            if (radioOptionXproc4j.isSelected()) return ConvertType.XPROC4J;
-            if (radioOptionTinyScript.isSelected()) return ConvertType.TINY_SCRIPT;
-            if (radioOptionOgnl.isSelected()) return ConvertType.OGNL;
+            if (radioOptionXproc4j.isSelected()) {
+                return ConvertType.XPROC4J;
+            }
+            if (radioOptionTinyScript.isSelected()) {
+                return ConvertType.TINY_SCRIPT;
+            }
+            if (radioOptionOgnl.isSelected()) {
+                return ConvertType.OGNL;
+            }
             return ConvertType.XPROC4J; // 默认
         }
 

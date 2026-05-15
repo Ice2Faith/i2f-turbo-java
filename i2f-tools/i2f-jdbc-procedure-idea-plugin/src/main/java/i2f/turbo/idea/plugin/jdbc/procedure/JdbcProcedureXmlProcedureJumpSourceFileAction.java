@@ -18,6 +18,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import org.jetbrains.annotations.NotNull;
 
@@ -103,8 +104,8 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         }
         String name = xmlAttribute.getName();
 //        log.warn("xml-jump-source attr-name: " + name);
-        if (!"refid".equals(name)
-                && !"id".equals(name)) {
+        if (!AttrConsts.REFID.equals(name)
+                && !AttrConsts.ID.equals(name)) {
             return null;
         }
         XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;

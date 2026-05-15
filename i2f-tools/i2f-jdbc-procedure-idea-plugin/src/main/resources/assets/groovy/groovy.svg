@@ -1,0 +1,14 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 定义渐变 -->
+    <defs>
+        <linearGradient id="groovyGreen" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4Fe3d8"/>
+            <stop offset="100%" stop-color="#3AA443"/>
+        </linearGradient>
+    </defs>
+
+    <text x="3" y="13" font-size="14" fill="url(#groovyGreen)" font-family="sans-serif">G</text>
+    <text x="8" y="8" font-size="5" fill="url(#groovyGreen)" font-family="sans-serif">o</text>
+    <text x="6.5" y="10.8" font-size="5" fill="url(#groovyGreen)" font-family="sans-serif">y</text>
+
+</svg>

@@ -15,13 +15,13 @@ import java.util.Collections;
  * @date 2026/5/12 21:22
  * @desc
  */
-public class FunicLiveTemplateContextProvider implements LiveTemplateContextProvider{
+public class FunicLiveTemplateContextProvider implements LiveTemplateContextProvider {
     @Override
     public @NotNull Collection<LiveTemplateContext> createContexts() {
         return Collections.singletonList(new FunicLiveTemplateContext());
     }
 
-    public static class FunicLiveTemplateContext implements LiveTemplateContext{
+    public static class FunicLiveTemplateContext implements LiveTemplateContext {
 
         @Override
         public @NotNull String getContextId() {
