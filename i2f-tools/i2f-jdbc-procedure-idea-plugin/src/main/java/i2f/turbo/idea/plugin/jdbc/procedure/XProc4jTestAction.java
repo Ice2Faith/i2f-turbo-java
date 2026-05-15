@@ -158,7 +158,16 @@ public class XProc4jTestAction extends AnAction {
             try {
 
                 Map<String, XmlNode> ret = new HashMap<>();
-                XmlNode node = JdbcProcedureParser.parse(sourceText);
+                XmlNode node = null;
+                try {
+                    node = JdbcProcedureParser.parse(sourceText);
+                } catch (Exception ex) {
+                    node = JdbcProcedureParser.parse(
+                            "<procedure>\n" +
+                                    sourceText +
+                                    "\n</procedure>"
+                    );
+                }
                 buffer.append("parse xml success .").append("\n");
                 String id = node.getTagAttrMap().get(AttrConsts.ID);
                 if (id != null) {
