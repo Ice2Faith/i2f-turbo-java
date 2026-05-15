@@ -37,10 +37,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class XProc4jTestAction extends AnAction {
@@ -90,9 +88,15 @@ public class XProc4jTestAction extends AnAction {
         }
 
         public Language getXmlLanguage(){
-            Language language = Language.findLanguageByID("Xml");
-            if(language==null){
-                language=Language.findLanguageByID("Html");
+            Language language = null;
+            Collection<Language> list = Language.getRegisteredLanguages();
+            for (Language item : list) {
+                if (item.getID().equalsIgnoreCase("xml")) {
+                    return item;
+                }
+                if (item.getID().equalsIgnoreCase("html")) {
+                    language = item;
+                }
             }
             if(language==null){
                 language= PlainTextLanguage.INSTANCE;

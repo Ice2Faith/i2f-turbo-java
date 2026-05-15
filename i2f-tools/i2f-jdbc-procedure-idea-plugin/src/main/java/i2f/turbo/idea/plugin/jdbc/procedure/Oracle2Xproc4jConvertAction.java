@@ -33,9 +33,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.LinkedHashMap;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 public class Oracle2Xproc4jConvertAction extends AnAction {
     public static final Logger log = Logger.getInstance(Oracle2Xproc4jConvertAction.class);
@@ -90,9 +89,15 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
         }
 
         public Language getSqlLanguage(){
-            Language language = Language.findLanguageByID("Oracle");
-            if(language==null){
-                language=Language.findLanguageByID("SQL");
+            Language language = null;
+            Collection<Language> list = Language.getRegisteredLanguages();
+            for (Language item : list) {
+                if (item.getID().equalsIgnoreCase("oracle")) {
+                    return item;
+                }
+                if (item.getID().equalsIgnoreCase("sql")) {
+                    language = item;
+                }
             }
             if(language==null){
                 language= PlainTextLanguage.INSTANCE;
