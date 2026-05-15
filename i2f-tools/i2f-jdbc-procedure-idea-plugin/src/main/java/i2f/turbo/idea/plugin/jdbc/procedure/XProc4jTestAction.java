@@ -25,6 +25,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class XProc4jTestAction extends AnAction {
@@ -163,7 +164,7 @@ public class XProc4jTestAction extends AnAction {
                     node = JdbcProcedureParser.parse(sourceText);
                 } catch (Exception ex) {
                     node = JdbcProcedureParser.parse(
-                            "<procedure>\n" +
+                            "<procedure id=\"VIRTUAL_" + (UUID.randomUUID().toString().replace("-", "")) + "\">\n" +
                                     sourceText +
                                     "\n</procedure>"
                     );
