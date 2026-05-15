@@ -5,7 +5,13 @@ import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
@@ -13,6 +19,8 @@ import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.jdbc.procedure.context.ContextFunctions;
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
 import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptFileType;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptLanguage;
 import i2f.turbo.idea.plugin.utils.IdeaExceptionUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -58,20 +66,19 @@ public class TinyScriptTestAction extends AnAction {
     }
 
     public static class ConvertDialog extends DialogWrapper {
-        private JTextArea inputArea;
+        private Project project;
+        private String initialText;
+        private Editor inputArea;
         private JTextArea outputArea;
         private JButton parseButton;
         private JButton evalButton;
 
         public ConvertDialog(Project project, String initialText) {
             super(project);
+            this.project = project;
+            this.initialText = initialText;
             init(); // 初始化对话框
             setTitle(TinyScriptConsts.LANGUAGE_ID + " Test UI");
-
-            // 设置初始输入文本
-            if (inputArea != null && initialText != null) {
-                inputArea.setText(initialText);
-            }
         }
 
         @Override
@@ -90,15 +97,39 @@ public class TinyScriptTestAction extends AnAction {
             gbc.fill = GridBagConstraints.BOTH;
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
-            inputArea = new JTextArea(5, 20);
-            inputArea.setLineWrap(true);
-            inputArea.setWrapStyleWord(true);
-            inputArea.setEditable(true);
-            inputArea.setBackground(UIManager.getColor("TextField.background")); // 保持背景色一致
 
-            JScrollPane inputScrollPane = new JScrollPane(inputArea);
+            FileType fileType = TinyScriptLanguage.INSTANCE.getAssociatedFileType();
+            if (fileType == null) {
+                fileType = TinyScriptFileType.INSTANCE;
+            }
+
+            // 2. 创建可编辑的 Document 和 Editor
+            // 初始内容设为空字符串，createEditor 的最后一个参数 false 表示【可编辑】
+            Document document = EditorFactory.getInstance().createDocument(initialText == null ? "" : initialText);
+            inputArea = EditorFactory.getInstance().createEditor(document, project, fileType, false);
+
+            // 3. 配置编辑器设置（开启行号、折叠、软换行等）
+            EditorSettings settings = inputArea.getSettings();
+            settings.setLineNumbersShown(true);
+            settings.setFoldingOutlineShown(true);
+            settings.setAdditionalColumnsCount(3);
+            settings.setAdditionalLinesCount(3);
+            settings.setUseSoftWraps(true); // 开启软换行，提升编辑体验
+            settings.setLanguageSupplier(() -> TinyScriptLanguage.INSTANCE);
+            settings.setWheelFontChangeEnabled(true);
+
+            // 4. 显式设置语法高亮（确保高亮与 Language 完美匹配）
+            if (inputArea instanceof EditorEx) {
+                EditorEx editorEx = (EditorEx) inputArea;
+                editorEx.setHighlighter(
+                        EditorHighlighterFactory.getInstance().createEditorHighlighter(project, fileType)
+                );
+            }
+
+            JScrollPane inputScrollPane = new JScrollPane(inputArea.getComponent());
 
             JPanel inputRow = new JPanel(new BorderLayout(5, 0));
+            inputRow.setPreferredSize(new Dimension(720, 480));
             inputRow.add(inputLabel, BorderLayout.NORTH);
             inputRow.add(inputScrollPane, BorderLayout.CENTER);
             mainPanel.add(inputRow, gbc);
@@ -153,11 +184,20 @@ public class TinyScriptTestAction extends AnAction {
             return new Action[]{this.getOKAction()};
         }
 
+        @Override
+        protected void dispose() {
+            if (inputArea != null) {
+                EditorFactory.getInstance().releaseEditor(inputArea);
+                inputArea = null;
+            }
+            super.dispose();
+        }
+
         /**
          * 处理转换按钮点击事件
          */
         private void onParseClicked(ActionEvent e) {
-            String sourceText = inputArea.getText();
+            String sourceText = inputArea.getDocument().getText();
             if (sourceText == null || sourceText.trim().isEmpty()) {
                 outputArea.setText("Please input text!");
                 return;
@@ -178,7 +218,7 @@ public class TinyScriptTestAction extends AnAction {
         }
 
         private void onEvalClicked(ActionEvent e) {
-            String sourceText = inputArea.getText();
+            String sourceText = inputArea.getDocument().getText();
             if (sourceText == null || sourceText.trim().isEmpty()) {
                 outputArea.setText("Please input text!");
                 return;
