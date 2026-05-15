@@ -1,5 +1,6 @@
 package i2f.turbo.idea.plugin.tinyscript.lang.action;
 
+import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -11,9 +12,13 @@ import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.editor.EditorSettings;
 import com.intellij.openapi.editor.ex.EditorEx;
 import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.testFramework.LightVirtualFile;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.jdbc.procedure.context.ContextFunctions;
@@ -31,6 +36,7 @@ import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TinyScriptTestAction extends AnAction {
@@ -68,6 +74,8 @@ public class TinyScriptTestAction extends AnAction {
     public static class ConvertDialog extends DialogWrapper {
         private Project project;
         private String initialText;
+        private LightVirtualFile virtualFile;
+        private FileEditor fileEditor;
         private Editor inputArea;
         private JTextArea outputArea;
         private JButton parseButton;
@@ -98,35 +106,52 @@ public class TinyScriptTestAction extends AnAction {
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
 
-            FileType fileType = TinyScriptLanguage.INSTANCE.getAssociatedFileType();
+            Language language = TinyScriptLanguage.INSTANCE;
+            FileType fileType = language.getAssociatedFileType();
             if (fileType == null) {
                 fileType = TinyScriptFileType.INSTANCE;
             }
 
-            // 2. 创建可编辑的 Document 和 Editor
-            // 初始内容设为空字符串，createEditor 的最后一个参数 false 表示【可编辑】
-            Document document = EditorFactory.getInstance().createDocument(initialText == null ? "" : initialText);
-            inputArea = EditorFactory.getInstance().createEditor(document, project, fileType, false);
+            JComponent editorComponent = null;
 
-            // 3. 配置编辑器设置（开启行号、折叠、软换行等）
-            EditorSettings settings = inputArea.getSettings();
-            settings.setLineNumbersShown(true);
-            settings.setFoldingOutlineShown(true);
-            settings.setAdditionalColumnsCount(3);
-            settings.setAdditionalLinesCount(3);
-            settings.setUseSoftWraps(true); // 开启软换行，提升编辑体验
-            settings.setLanguageSupplier(() -> TinyScriptLanguage.INSTANCE);
-            settings.setWheelFontChangeEnabled(true);
+            virtualFile = new LightVirtualFile("Virtual." + TinyScriptConsts.FILE_EXTENSION, fileType, initialText == null ? "" : initialText);
+            virtualFile.setWritable(true);
 
-            // 4. 显式设置语法高亮（确保高亮与 Language 完美匹配）
-            if (inputArea instanceof EditorEx) {
-                EditorEx editorEx = (EditorEx) inputArea;
-                editorEx.setHighlighter(
-                        EditorHighlighterFactory.getInstance().createEditorHighlighter(project, fileType)
-                );
+            // 2. 找到该文件类型对应的默认 FileEditorProvider (通常是 TextEditorProvider)
+            List<FileEditorProvider> providers = FileEditorProviderManager.getInstance().getProviderList(project, virtualFile);
+
+            if (providers != null && !providers.isEmpty()) {
+                fileEditor = providers.get(0).createEditor(project, virtualFile);
+                editorComponent = fileEditor.getComponent();
+            } else {
+                // 2. 创建可编辑的 Document 和 Editor
+                // 初始内容设为空字符串，createEditor 的最后一个参数 false 表示【可编辑】
+                Document document = EditorFactory.getInstance().createDocument(initialText == null ? "" : initialText);
+                inputArea = EditorFactory.getInstance().createEditor(document, project, fileType, false);
+
+                // 3. 配置编辑器设置（开启行号、折叠、软换行等）
+                EditorSettings settings = inputArea.getSettings();
+                settings.setLineNumbersShown(true);
+                settings.setFoldingOutlineShown(true);
+                settings.setAdditionalColumnsCount(3);
+                settings.setAdditionalLinesCount(3);
+                settings.setUseSoftWraps(true); // 开启软换行，提升编辑体验
+                settings.setLanguageSupplier(() -> language);
+                settings.setWheelFontChangeEnabled(true);
+
+                // 4. 显式设置语法高亮（确保高亮与 Language 完美匹配）
+                if (inputArea instanceof EditorEx) {
+                    EditorEx editorEx = (EditorEx) inputArea;
+                    editorEx.setHighlighter(
+                            EditorHighlighterFactory.getInstance().createEditorHighlighter(project, fileType)
+                    );
+                }
+
+                editorComponent = inputArea.getComponent();
             }
 
-            JScrollPane inputScrollPane = new JScrollPane(inputArea.getComponent());
+
+            JScrollPane inputScrollPane = new JScrollPane(editorComponent);
 
             JPanel inputRow = new JPanel(new BorderLayout(5, 0));
             inputRow.setPreferredSize(new Dimension(720, 480));
@@ -186,6 +211,13 @@ public class TinyScriptTestAction extends AnAction {
 
         @Override
         protected void dispose() {
+            if (fileEditor != null) {
+                fileEditor.dispose();
+                fileEditor = null;
+            }
+            if (virtualFile != null) {
+                virtualFile = null;
+            }
             if (inputArea != null) {
                 EditorFactory.getInstance().releaseEditor(inputArea);
                 inputArea = null;
@@ -193,11 +225,18 @@ public class TinyScriptTestAction extends AnAction {
             super.dispose();
         }
 
+        public String getEditorText(){
+            if(fileEditor!=null){
+                return virtualFile.getContent().toString();
+            }
+            return inputArea.getDocument().getText();
+        }
+
         /**
          * 处理转换按钮点击事件
          */
         private void onParseClicked(ActionEvent e) {
-            String sourceText = inputArea.getDocument().getText();
+            String sourceText = getEditorText();
             if (sourceText == null || sourceText.trim().isEmpty()) {
                 outputArea.setText("Please input text!");
                 return;
@@ -218,7 +257,7 @@ public class TinyScriptTestAction extends AnAction {
         }
 
         private void onEvalClicked(ActionEvent e) {
-            String sourceText = inputArea.getDocument().getText();
+            String sourceText = getEditorText();
             if (sourceText == null || sourceText.trim().isEmpty()) {
                 outputArea.setText("Please input text!");
                 return;
