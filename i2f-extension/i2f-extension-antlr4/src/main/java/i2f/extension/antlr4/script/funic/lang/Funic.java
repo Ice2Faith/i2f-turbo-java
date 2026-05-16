@@ -9,6 +9,7 @@ import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
+import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import i2f.mixin.MixinProxyFactory;
 import i2f.mixin.all.AllMixins;
@@ -16,7 +17,9 @@ import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.io.File;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -46,22 +49,49 @@ public class Funic {
         registryMethods(Math.class, e -> !e.getName().toLowerCase().contains("extra"));
     }
 
+    public static Object script(File scriptFile, Object context) throws Exception {
+        String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
+        return script(formula, context, scriptFile.getName(), null);
+    }
+
+    public static Object script(File scriptFile, Object context, FunicResolver resolver) throws Exception {
+        String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
+        return script(formula, context, scriptFile.getName(), resolver);
+    }
+
 
     public static Object script(String formula, Object context) {
-        return script(formula, context, null);
+        return script(formula, context, null, null);
+    }
+
+    public static Object script(String formula, Object context, String scriptFileName) {
+        return script(formula, context, scriptFileName, null);
     }
 
     public static Object script(String formula, Object context, FunicResolver resolver) {
         FunicParser.RootContext tree = parse(formula);
-        return script(tree, context, resolver);
+        return script(tree, context, null, resolver);
+    }
+
+    public static Object script(String formula, Object context, String scriptFileName, FunicResolver resolver) {
+        FunicParser.RootContext tree = parse(formula);
+        return script(tree, context, scriptFileName, resolver);
     }
 
     public static Object script(FunicParser.RootContext tree, Object context) {
-        return script(tree, context, null);
+        return script(tree, context, null, null);
+    }
+
+    public static Object script(FunicParser.RootContext tree, Object context, String scriptFileName) {
+        return script(tree, context, scriptFileName, null);
     }
 
     public static Object script(FunicParser.RootContext tree, Object context, FunicResolver resolver) {
-        DefaultFunicVisitor visitor = new DefaultFunicVisitor(context, resolver);
+        return script(tree, context, null, resolver);
+    }
+
+    public static Object script(FunicParser.RootContext tree, Object context, String scriptFileName, FunicResolver resolver) {
+        DefaultFunicVisitor visitor = new DefaultFunicVisitor(context, scriptFileName, resolver);
         return script(tree, visitor);
     }
 

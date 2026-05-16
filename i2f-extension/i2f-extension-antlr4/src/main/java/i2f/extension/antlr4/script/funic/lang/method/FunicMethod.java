@@ -77,7 +77,7 @@ public class FunicMethod implements IMethod {
             String name = entry.getValue();
             callContext.put(name, value);
         }
-        DefaultFunicVisitor newVisitor = new DefaultFunicVisitor(callContext, visitor.getResolver());
+        DefaultFunicVisitor newVisitor = new DefaultFunicVisitor(callContext, visitor.getScriptFileName(), visitor.getResolver());
         newVisitor.getImportPackages().addAll(visitor.getImportPackages());
         ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> registryMethods = visitor.getRegistryMethods();
         for (Map.Entry<String, CopyOnWriteArrayList<IMethod>> entry : registryMethods.entrySet()) {

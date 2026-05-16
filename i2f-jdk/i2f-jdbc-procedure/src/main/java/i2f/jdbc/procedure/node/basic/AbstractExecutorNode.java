@@ -4,6 +4,7 @@ import i2f.clock.SystemClock;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
+import i2f.jdbc.procedure.debugger.JdbcProcedureDebugBridgeReporter;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
@@ -118,6 +119,17 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
             } catch (Throwable e) {
                 executor.logger().logWarn(() -> e.getMessage(), e);
             }
+
+            JdbcProcedureDebugBridgeReporter.proxy(node.getLocationFile(),
+                    node.getLocationLineNumber(),
+                    () -> {
+                        Map<String, Object> variableMap = new HashMap<>();
+                        variableMap.put("xmlNode", node);
+                        variableMap.put("root", context);
+                        variableMap.put("executor", executor);
+                        variableMap.put("executorNode", this);
+                        return variableMap;
+                    });
 
             execInner(node, context, executor);
 

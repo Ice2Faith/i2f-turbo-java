@@ -3,6 +3,7 @@ package i2f.extension.antlr4.script.funic.lang.impl;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.grammar.FunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.funic.lang.debugger.FunicDebugBridgeReporter;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicException;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
@@ -51,14 +52,27 @@ import java.util.stream.Collectors;
 @SuperBuilder
 public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     public static final ExecutorService DEFAULT_GO_POOL = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() * 2);
-    protected Object context;
+    protected Object context = new HashMap<>();
+    protected String scriptFileName;
     protected FunicResolver resolver = new DefaultFunicResolver();
     protected CopyOnWriteArrayList<String> importPackages = new CopyOnWriteArrayList<>();
     protected ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> registryMethods = new ConcurrentHashMap<>();
     protected ExecutorService goPool = DEFAULT_GO_POOL;
 
+    public DefaultFunicVisitor(Object context) {
+        this.context = context;
+    }
+
     public DefaultFunicVisitor(Object context, FunicResolver resolver) {
         this.context = context;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
+    }
+
+    public DefaultFunicVisitor(Object context, String scriptFileName, FunicResolver resolver) {
+        this.context = context;
+        this.scriptFileName = scriptFileName;
         if (resolver != null) {
             this.resolver = resolver;
         }
@@ -570,7 +584,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         }
         ListFunicValue extraValue = (ListFunicValue) visitExtractExpress(extraCtx);
         Object value = assignValue.getValue();
-        DefaultFunicVisitor rightVisitor = new DefaultFunicVisitor(value, resolver);
+        DefaultFunicVisitor rightVisitor = new DefaultFunicVisitor(value, scriptFileName, resolver);
 
         List<Object> extraList = extraValue.getList();
         for (Object item : extraList) {
@@ -3087,6 +3101,19 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     }
 
     public void debugNode(ParseTree context) {
+        if (context instanceof ParserRuleContext) {
+            ParserRuleContext ruleContext = (ParserRuleContext) context;
+            Token start = ruleContext.getStart();
+            FunicDebugBridgeReporter.proxy(scriptFileName == null ? "virtual_script.fic" : scriptFileName,
+                    start.getLine(),
+                    () -> {
+                        Map<String, Object> variableMap = new HashMap<>();
+                        variableMap.put("astNode", context);
+                        variableMap.put("root", this.context);
+                        variableMap.put("visitor", this);
+                        return variableMap;
+                    });
+        }
         resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context, null));
     }
 

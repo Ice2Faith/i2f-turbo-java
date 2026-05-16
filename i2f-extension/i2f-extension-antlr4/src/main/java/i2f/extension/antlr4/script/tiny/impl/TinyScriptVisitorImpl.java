@@ -3,6 +3,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.TinyScriptVisitor;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptMethod;
+import i2f.extension.antlr4.script.tiny.impl.debugger.TinyScriptDebugBridgeReporter;
 import i2f.extension.antlr4.script.tiny.impl.exception.TinyScriptException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
@@ -36,6 +37,7 @@ import java.util.function.Supplier;
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     protected Object global = null;
     protected Object context = new HashMap<>();
+    protected String scriptFileName;
     protected ConcurrentHashMap<String, CopyOnWriteArrayList<TinyScriptMethod>> declareFunctionMap = new ConcurrentHashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
 
@@ -46,6 +48,14 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
 
     public TinyScriptVisitorImpl(Object context, TinyScriptResolver resolver) {
         this.context = context;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
+    }
+
+    public TinyScriptVisitorImpl(Object context, String scriptFileName, TinyScriptResolver resolver) {
+        this.context = context;
+        this.scriptFileName = scriptFileName;
         if (resolver != null) {
             this.resolver = resolver;
         }
@@ -111,6 +121,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     }
 
     public void debugNode(ParseTree context) {
+        if (context instanceof ParserRuleContext) {
+            ParserRuleContext ruleContext = (ParserRuleContext) context;
+            Token start = ruleContext.getStart();
+            TinyScriptDebugBridgeReporter.proxy(scriptFileName == null ? "virtual_script.tis" : scriptFileName,
+                    start.getLine(),
+                    () -> {
+                        Map<String, Object> variableMap = new HashMap<>();
+                        variableMap.put("astNode", context);
+                        variableMap.put("root", this.context);
+                        variableMap.put("visitor", this);
+                        return variableMap;
+                    });
+        }
         resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context, null));
     }
 
