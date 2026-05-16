@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.debugger;
+package i2f.turbo.idea.plugin.jdbc.procedure.debugger;
 
 import com.intellij.debugger.PositionManager;
 import com.intellij.debugger.PositionManagerFactory;
@@ -29,15 +29,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2026/5/15
  * @desc
  */
-public class FunicPositionManagerFactory extends PositionManagerFactory {
-    public static final Logger log = Logger.getInstance(FunicPositionManagerFactory.class);
+public class JdbcProcedurePositionManagerFactory extends PositionManagerFactory {
+    public static final Logger log = Logger.getInstance(JdbcProcedurePositionManagerFactory.class);
 
 
     @Nullable
     @Override
     public PositionManager createPositionManager(@NotNull DebugProcess process) {
         // log.warn("createPositionManager,process=" + process);
-        FunicPositionManager manager = new FunicPositionManager(process);
+        JdbcProcedurePositionManager manager = new JdbcProcedurePositionManager(process);
         setupBreakpointBridge(process);
         return manager;
     }
@@ -122,13 +122,13 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
             private boolean resolveReportMethodLocation(Project project) {
                 return ApplicationManager.getApplication().runReadAction(
                         (com.intellij.openapi.util.Computable<Boolean>) () -> {
-                            List<PsiClass> classes = PsiBreakpointUtil.getPsiClass(project, FunicDebugConsts.SIMPLE_CLASS_NAME);
+                            List<PsiClass> classes = PsiBreakpointUtil.getPsiClass(project, JdbcProcedureDebugConsts.SIMPLE_CLASS_NAME);
                             if (classes.isEmpty()) {
                                 return false;
                             }
 
                             for (PsiClass psiClass : classes) {
-                                List<PsiMethod> methods = PsiBreakpointUtil.getPsiMethod(psiClass, FunicDebugConsts.METHOD_NAME, FunicDebugConsts.PARAM_COUNT);
+                                List<PsiMethod> methods = PsiBreakpointUtil.getPsiMethod(psiClass, JdbcProcedureDebugConsts.METHOD_NAME, JdbcProcedureDebugConsts.PARAM_COUNT);
                                 for (PsiMethod method : methods) {
                                     PsiFile file = method.getContainingFile();
                                     if (file == null) {
@@ -243,6 +243,6 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
     }
 
     public static boolean instanceOfHookBreakpointType(XBreakpoint<?> bk) {
-        return bk.getType() instanceof FunicLineBreakpointType;
+        return bk.getType() instanceof JdbcProcedureLineBreakpointType;
     }
 }

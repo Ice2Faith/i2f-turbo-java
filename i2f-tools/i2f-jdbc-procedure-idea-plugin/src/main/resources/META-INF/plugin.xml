@@ -117,6 +117,14 @@
                 order="first"
                 implementation="i2f.turbo.idea.plugin.inject.ProjectLanguageTemplateMultiHostInjector"/>
 
+        <!-- 允许在文件中打断点 -->
+        <xdebugger.breakpointType
+                implementation="i2f.turbo.idea.plugin.jdbc.procedure.debugger.JdbcProcedureLineBreakpointType"/>
+
+        <!-- 注册位置管理器工厂，实现调试时自动暂停与源码导航 -->
+        <debugger.positionManagerFactory
+                implementation="i2f.turbo.idea.plugin.jdbc.procedure.debugger.JdbcProcedurePositionManagerFactory"/>
+
         <!-- *************************** TinyScript  begin *************************** -->
         <!-- 注册文件类型 -->
         <fileType name="TinyScript"
@@ -163,6 +171,14 @@
         <lang.formatter
                 language="TinyScript"
                 implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.formatter.TinyScriptFormattingModelBuilder"/>
+
+        <!-- 允许在文件中打断点 -->
+        <xdebugger.breakpointType
+                implementation="i2f.turbo.idea.plugin.tinyscript.lang.debugger.TinyScriptLineBreakpointType"/>
+
+        <!-- 注册位置管理器工厂，实现调试时自动暂停与源码导航 -->
+        <debugger.positionManagerFactory
+                implementation="i2f.turbo.idea.plugin.tinyscript.lang.debugger.TinyScriptPositionManagerFactory"/>
 
         <!-- *************************** TinyScript  end *************************** -->
 
@@ -215,17 +231,16 @@
                 language="Funic"
                 implementationClass="i2f.turbo.idea.plugin.funic.lang.formatter.FunicFormattingModelBuilder"/>
 
-        <!-- Funic 调试器支持：允许在 .fic 文件中打断点，通过 FunicDebugReporter.report() 钩子暂停执行 -->
-
-        <!-- 注册 Funic 行断点类型，使 .fic 文件边栏可以放置红色断点标记 -->
+        <!-- 允许在文件中打断点 -->
         <xdebugger.breakpointType
                 implementation="i2f.turbo.idea.plugin.funic.lang.debugger.FunicLineBreakpointType"/>
 
-        <!-- 注册位置管理器工厂，将 Funic 源码行映射到 JVM report() 方法位置，实现调试时自动暂停与源码导航 -->
+        <!-- 注册位置管理器工厂，实现调试时自动暂停与源码导航 -->
         <debugger.positionManagerFactory
                 implementation="i2f.turbo.idea.plugin.funic.lang.debugger.FunicPositionManagerFactory"/>
 
         <!-- *************************** funic  end *************************** -->
+
     </extensions>
 
 

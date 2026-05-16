@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.debugger;
+package i2f.turbo.idea.plugin.tinyscript.lang.debugger;
 
 import com.intellij.util.xmlb.XmlSerializerUtil;
 import com.intellij.xdebugger.breakpoints.XBreakpointProperties;
@@ -9,16 +9,16 @@ import org.jetbrains.annotations.Nullable;
  * @date 2026/5/15
  * @desc
  */
-public class FunicBreakpointProperties extends XBreakpointProperties<FunicBreakpointProperties> {
+public class TinyScriptBreakpointProperties extends XBreakpointProperties<TinyScriptBreakpointProperties> {
 
     @Nullable
     @Override
-    public FunicBreakpointProperties getState() {
+    public TinyScriptBreakpointProperties getState() {
         return this;
     }
 
     @Override
-    public void loadState(FunicBreakpointProperties state) {
+    public void loadState(TinyScriptBreakpointProperties state) {
         XmlSerializerUtil.copyBean(state, this);
     }
 }

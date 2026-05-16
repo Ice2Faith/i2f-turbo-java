@@ -1,7 +1,7 @@
 package i2f.test;
 
 import i2f.resources.ResourceUtil;
-import i2f.turbo.idea.plugin.funic.lang.debugger.FunicDebugBridgeReporter;
+import i2f.turbo.idea.plugin.jdbc.procedure.debugger.JdbcProcedureDebugBridgeReporter;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
@@ -13,10 +13,10 @@ import java.util.Map;
  * @date 2026/5/15 21:21
  * @desc
  */
-public class TestFunicDebugger {
+public class TestJdbcProcedureDebugger {
     public static void main(String[] args) throws Exception {
 
-        String resourceFile = "/assets/funic/test.fic";
+        String resourceFile = "/assets/xproc4j/test.xml";
         String script = ResourceUtil.getClasspathResourceAsString(resourceFile, StandardCharsets.UTF_8.name());
         String[] lines = script.split("\n");
         for (int i = 0; i < lines.length; i++) {
@@ -28,7 +28,7 @@ public class TestFunicDebugger {
             variableMap.put("i", i);
             variableMap.put("code", code);
             System.out.println("line:" + lineNumber + ": " + code);
-            FunicDebugBridgeReporter.proxy(new File(resourceFile).getName(), lineNumber, variableMap);
+            JdbcProcedureDebugBridgeReporter.proxy(new File(resourceFile).getName(), lineNumber, variableMap);
             System.out.println("after");
         }
         System.out.println("ok");

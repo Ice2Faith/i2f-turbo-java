@@ -1,15 +1,16 @@
-package i2f.turbo.idea.plugin.funic.lang.debugger;
+package i2f.turbo.idea.plugin.utils;
 
-import com.intellij.debugger.DebuggerManager;
 import com.intellij.debugger.ui.breakpoints.JavaLineBreakpointType;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
-import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.xdebugger.XDebuggerManager;
-import com.intellij.xdebugger.breakpoints.*;
+import com.intellij.xdebugger.breakpoints.SuspendPolicy;
+import com.intellij.xdebugger.breakpoints.XBreakpoint;
+import com.intellij.xdebugger.breakpoints.XBreakpointManager;
+import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointUtil;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaLineBreakpointProperties;
 
@@ -24,7 +25,7 @@ import java.util.List;
  */
 public class PsiBreakpointUtil {
 
-    public static List<PsiClass> getPsiClass(Project project, String shortName){
+    public static List<PsiClass> getPsiClass(Project project, String shortName) {
         //
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
@@ -32,15 +33,15 @@ public class PsiBreakpointUtil {
         return new ArrayList<>(Arrays.asList(psiClassArr));
     }
 
-    public static List<PsiMethod> getPsiMethod(PsiClass psiClass,String methodName,int parameterCount){
-        List<PsiMethod> ret=new ArrayList<>();
+    public static List<PsiMethod> getPsiMethod(PsiClass psiClass, String methodName, int parameterCount) {
+        List<PsiMethod> ret = new ArrayList<>();
         PsiMethod[] allMethods = psiClass.getAllMethods();
         for (PsiMethod item : allMethods) {
             String name = item.getName();
             PsiParameterList parameterList = item.getParameterList();
             PsiParameter[] parameters = parameterList.getParameters();
-            if(name.equals(methodName)){
-                if(parameters.length == parameterCount){
+            if (name.equals(methodName)) {
+                if (parameters.length == parameterCount) {
                     ret.add(item);
                 }
             }
@@ -48,7 +49,7 @@ public class PsiBreakpointUtil {
         return ret;
     }
 
-    public static XBreakpointManager getBreakpointManager(Project project){
+    public static XBreakpointManager getBreakpointManager(Project project) {
         XDebuggerManager debuggerManager = XDebuggerManager.getInstance(project);
         XBreakpointManager breakpointManager = debuggerManager.getBreakpointManager();
         return breakpointManager;
@@ -57,6 +58,7 @@ public class PsiBreakpointUtil {
 
     /**
      * 为指定的 PsiMethod 添加或更新条件断点
+     *
      * @param psiMethod 已经获取到的 PsiMethod 对象
      * @param condition 条件表达式，例如 "userId == 1001"
      */
@@ -65,24 +67,23 @@ public class PsiBreakpointUtil {
 
         // 1. 提取文件 VirtualFile 和起始行号
         PsiFile containingFile = psiMethod.getContainingFile();
-        if (containingFile == null){
+        if (containingFile == null) {
             return;
         }
 
         VirtualFile virtualFile = containingFile.getVirtualFile();
-        if (virtualFile == null){
+        if (virtualFile == null) {
             return;
         }
-
 
 
         // 获取方法的起始行号（IDEA API 行号从 0 开始）
         int startLine = containingFile.getFileDocument().getLineNumber(psiMethod.getTextOffset());
 
         PsiCodeBlock body = psiMethod.getBody();
-        if(body!=null) {
+        if (body != null) {
             PsiStatement[] statements = body.getStatements();
-            if(statements.length>0){
+            if (statements.length > 0) {
                 PsiStatement statement = statements[0];
                 startLine = containingFile.getFileDocument().getLineNumber(statement.getTextOffset());
             }
@@ -92,7 +93,7 @@ public class PsiBreakpointUtil {
         String fileUrl = virtualFile.getUrl();
 
         // 2. 获取断点管理器与 Java 行断点类型
-        XBreakpointManager breakpointManager=getBreakpointManager(project);
+        XBreakpointManager breakpointManager = getBreakpointManager(project);
         JavaLineBreakpointType lineBreakpointType = (JavaLineBreakpointType) XBreakpointUtil.findType("java-line");
 
         // 3. 遍历所有现有断点，判断是否已经在该位置添加过断点

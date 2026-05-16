@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.debugger;
+package i2f.turbo.idea.plugin.tinyscript.lang.debugger;
 
 import com.intellij.debugger.PositionManager;
 import com.intellij.debugger.PositionManagerFactory;
@@ -16,6 +16,9 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.*;
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointUtil;
+import i2f.turbo.idea.plugin.funic.lang.debugger.FunicDebugConsts;
+import i2f.turbo.idea.plugin.funic.lang.debugger.FunicLineBreakpointType;
+import i2f.turbo.idea.plugin.funic.lang.debugger.FunicPositionManager;
 import i2f.turbo.idea.plugin.utils.PsiBreakpointUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,15 +32,15 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2026/5/15
  * @desc
  */
-public class FunicPositionManagerFactory extends PositionManagerFactory {
-    public static final Logger log = Logger.getInstance(FunicPositionManagerFactory.class);
+public class TinyScriptPositionManagerFactory extends PositionManagerFactory {
+    public static final Logger log = Logger.getInstance(TinyScriptPositionManagerFactory.class);
 
 
     @Nullable
     @Override
     public PositionManager createPositionManager(@NotNull DebugProcess process) {
         // log.warn("createPositionManager,process=" + process);
-        FunicPositionManager manager = new FunicPositionManager(process);
+        TinyScriptPositionManager manager = new TinyScriptPositionManager(process);
         setupBreakpointBridge(process);
         return manager;
     }
@@ -122,13 +125,13 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
             private boolean resolveReportMethodLocation(Project project) {
                 return ApplicationManager.getApplication().runReadAction(
                         (com.intellij.openapi.util.Computable<Boolean>) () -> {
-                            List<PsiClass> classes = PsiBreakpointUtil.getPsiClass(project, FunicDebugConsts.SIMPLE_CLASS_NAME);
+                            List<PsiClass> classes = PsiBreakpointUtil.getPsiClass(project, TinyScriptDebugConsts.SIMPLE_CLASS_NAME);
                             if (classes.isEmpty()) {
                                 return false;
                             }
 
                             for (PsiClass psiClass : classes) {
-                                List<PsiMethod> methods = PsiBreakpointUtil.getPsiMethod(psiClass, FunicDebugConsts.METHOD_NAME, FunicDebugConsts.PARAM_COUNT);
+                                List<PsiMethod> methods = PsiBreakpointUtil.getPsiMethod(psiClass, TinyScriptDebugConsts.METHOD_NAME, TinyScriptDebugConsts.PARAM_COUNT);
                                 for (PsiMethod method : methods) {
                                     PsiFile file = method.getContainingFile();
                                     if (file == null) {
@@ -243,6 +246,6 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
     }
 
     public static boolean instanceOfHookBreakpointType(XBreakpoint<?> bk) {
-        return bk.getType() instanceof FunicLineBreakpointType;
+        return bk.getType() instanceof TinyScriptLineBreakpointType;
     }
 }

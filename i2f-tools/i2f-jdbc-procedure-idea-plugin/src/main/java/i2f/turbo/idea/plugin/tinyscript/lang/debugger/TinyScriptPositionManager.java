@@ -1,4 +1,4 @@
-package i2f.turbo.idea.plugin.funic.lang.debugger;
+package i2f.turbo.idea.plugin.tinyscript.lang.debugger;
 
 import com.intellij.debugger.NoDataException;
 import com.intellij.debugger.PositionManager;
@@ -25,6 +25,8 @@ import com.sun.jdi.*;
 import com.sun.jdi.request.ClassPrepareRequest;
 import i2f.lru.LruMap;
 import i2f.turbo.idea.plugin.funic.FunicFileType;
+import i2f.turbo.idea.plugin.funic.lang.debugger.FunicDebugConsts;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,14 +42,14 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2026/5/15
  * @desc
  */
-public class FunicPositionManager implements PositionManager {
+public class TinyScriptPositionManager implements PositionManager {
 
-    private static final Logger log = Logger.getInstance(FunicPositionManager.class);
+    private static final Logger log = Logger.getInstance(TinyScriptPositionManager.class);
 
     private final DebugProcess myDebugProcess;
     private final Project myProject;
 
-    public FunicPositionManager(@NotNull DebugProcess debugProcess) {
+    public TinyScriptPositionManager(@NotNull DebugProcess debugProcess) {
         this.myDebugProcess = debugProcess;
         this.myProject = debugProcess.getProject();
     }
@@ -64,12 +66,12 @@ public class FunicPositionManager implements PositionManager {
         // log.warn("getSourcePosition-1:");
         try {
             Method method = location.method();
-            if (method == null || !FunicDebugConsts.METHOD_NAME.equals(method.name())) {
+            if (method == null || !TinyScriptDebugConsts.METHOD_NAME.equals(method.name())) {
                 throw NoDataException.INSTANCE;
             }
             // log.warn("getSourcePosition-2:");
 
-            if (!FunicDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(location.declaringType().name()))) {
+            if (!TinyScriptDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(location.declaringType().name()))) {
                 throw NoDataException.INSTANCE;
             }
             // log.warn("getSourcePosition-3:");
@@ -81,8 +83,8 @@ public class FunicPositionManager implements PositionManager {
             }
             // log.warn("getSourcePosition-5:");
             ReferenceType thisType = thisObj.referenceType();
-            Field fileNameField = thisType.fieldByName(FunicDebugConsts.FILE_NAME_FIELD_NAME);
-            Field lineNumberField = thisType.fieldByName(FunicDebugConsts.LINE_NUMBER_FIELD_NAME);
+            Field fileNameField = thisType.fieldByName(TinyScriptDebugConsts.FILE_NAME_FIELD_NAME);
+            Field lineNumberField = thisType.fieldByName(TinyScriptDebugConsts.LINE_NUMBER_FIELD_NAME);
             if (fileNameField == null || lineNumberField == null) {
                 throw NoDataException.INSTANCE;
             }
@@ -180,10 +182,10 @@ public class FunicPositionManager implements PositionManager {
                 return false;
             }
             Method m = loc.method();
-            if (m == null || !FunicDebugConsts.METHOD_NAME.equals(m.name())) {
+            if (m == null || !TinyScriptDebugConsts.METHOD_NAME.equals(m.name())) {
                 return false;
             }
-            return FunicDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(loc.declaringType().name()));
+            return TinyScriptDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(loc.declaringType().name()));
         } catch (Exception e) {
             return false;
         }
@@ -242,18 +244,18 @@ public class FunicPositionManager implements PositionManager {
             throw NoDataException.INSTANCE;
         }
         // log.warn("locationsOfLine-1:name=" + referenceType.name());
-        if (!FunicDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(referenceType.name()))) {
+        if (!TinyScriptDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(referenceType.name()))) {
             return Collections.emptyList();
         }
         // log.warn("locationsOfLine-2:");
 
         List<Location> locations = new ArrayList<>();
-        List<Method> methods = referenceType.methodsByName(FunicDebugConsts.METHOD_NAME);
+        List<Method> methods = referenceType.methodsByName(TinyScriptDebugConsts.METHOD_NAME);
         // log.warn("locationsOfLine-3:size=" + methods.size());
         for (Method method : methods) {
             // log.warn("locationsOfLine-4-0:method=" + method);
             try {
-                if (method.argumentTypeNames().size() == FunicDebugConsts.PARAM_COUNT) {
+                if (method.argumentTypeNames().size() == TinyScriptDebugConsts.PARAM_COUNT) {
                     // log.warn("locationsOfLine-4-1:method=" + method);
                     try {
                         List<Location> methodLocations = method.allLineLocations();
@@ -286,7 +288,7 @@ public class FunicPositionManager implements PositionManager {
             throw NoDataException.INSTANCE;
         }
         // log.warn("createPrepareRequest-1:" + sourcePosition);
-        ClassPrepareRequest classPrepareRequest = myDebugProcess.getRequestsManager().createClassPrepareRequest(requestor, FunicDebugConsts.CLASS_PATTERN);
+        ClassPrepareRequest classPrepareRequest = myDebugProcess.getRequestsManager().createClassPrepareRequest(requestor, TinyScriptDebugConsts.CLASS_PATTERN);
         // log.warn("createPrepareRequest-2:" + classPrepareRequest);
         return classPrepareRequest;
     }
@@ -299,7 +301,7 @@ public class FunicPositionManager implements PositionManager {
             List<ReferenceType> result = new ArrayList<>();
             for (ReferenceType rt : vm.allClasses()) {
                 // log.warn("findReportableClasses-2:" + rt);
-                if (FunicDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(rt.name()))) {
+                if (TinyScriptDebugConsts.SIMPLE_CLASS_NAME.equals(getSimpleName(rt.name()))) {
                     // log.warn("findReportableClasses-3:" + rt);
                     result.add(rt);
                 }
@@ -312,7 +314,7 @@ public class FunicPositionManager implements PositionManager {
     }
 
     private FileType getCompareFileType(){
-        return FunicFileType.INSTANCE;
+        return TinyScriptFileType.INSTANCE;
     }
 
     private static String getSimpleName(String fqn) {

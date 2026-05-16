@@ -13,9 +13,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * @author Ice2Faith
  * @date 2026/5/15
- * @desc Funic 脚本行断点类型，允许在 .fic 文件中设置断点。
- *       当调试的 Java 进程调用 FunicDebugReporter.report(fileName, lineNumber, variableMap)
- *       并且 fileName + lineNumber 与本断点匹配时，调试器将暂停执行。
+ * @desc
  */
 public class FunicLineBreakpointType extends XLineBreakpointType<FunicBreakpointProperties> {
 
@@ -26,9 +24,6 @@ public class FunicLineBreakpointType extends XLineBreakpointType<FunicBreakpoint
         super(ID, FunicConsts.LANGUAGE_ID + " Line Breakpoints");
     }
 
-    /**
-     * 只有 .fic 文件才允许打断点
-     */
     @Override
     public boolean canPutAt(@NotNull VirtualFile file, int line, @NotNull Project project) {
         return FunicFileType.INSTANCE.equals(file.getFileType());
