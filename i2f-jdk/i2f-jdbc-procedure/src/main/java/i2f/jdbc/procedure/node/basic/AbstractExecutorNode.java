@@ -124,8 +124,8 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                     node.getLocationLineNumber(),
                     () -> {
                         Map<String, Object> variableMap = new HashMap<>();
-                        variableMap.put("xmlNode", node);
-                        variableMap.put("root", context);
+                        variableMap.put("node", node);
+                        variableMap.put("context", context);
                         variableMap.put("executor", executor);
                         variableMap.put("executorNode", this);
                         return variableMap;
