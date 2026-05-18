@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
@@ -49,8 +50,15 @@ public class LangEvalFunicNode extends AbstractExecutorNode implements EvalScrip
         Object obj = null;
 
         try {
+            FunicParser.RootContext tree = Funic.parse(script);
             FunicResolver resolver = new ProcedureFunicResolver(executor, node);
-            obj = Funic.script(script, context, resolver);
+            String scriptFileName = null;
+            int scriptLineOffset = 0;
+            if (node != null) {
+                scriptFileName = node.getLocationFile();
+                scriptLineOffset = node.getLocationLineNumber();
+            }
+            obj = Funic.script(tree, context, scriptFileName, scriptLineOffset, resolver);
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
@@ -80,7 +88,7 @@ public class LangEvalFunicNode extends AbstractExecutorNode implements EvalScrip
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
-        Object obj = evalFunic(script, context, executor);
+        Object obj = evalFunic(node, script, context, executor);
 
         if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

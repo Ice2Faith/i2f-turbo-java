@@ -3,7 +3,6 @@ package i2f.extension.antlr4.script.funic.lang.impl;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.grammar.FunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.Funic;
-import i2f.extension.antlr4.script.funic.lang.debugger.FunicDebugBridgeReporter;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicException;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
@@ -20,6 +19,7 @@ import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.extension.antlr4.script.funic.lang.value.impl.*;
 import i2f.invokable.method.IMethod;
+import i2f.jvm.JvmUtil;
 import i2f.match.regex.RegexUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,6 +54,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     public static final ExecutorService DEFAULT_GO_POOL = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() * 2);
     protected Object context = new HashMap<>();
     protected String scriptFileName;
+    protected int scriptLineOffset = 0;
     protected FunicResolver resolver = new DefaultFunicResolver();
     protected CopyOnWriteArrayList<String> importPackages = new CopyOnWriteArrayList<>();
     protected ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> registryMethods = new ConcurrentHashMap<>();
@@ -73,6 +74,15 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     public DefaultFunicVisitor(Object context, String scriptFileName, FunicResolver resolver) {
         this.context = context;
         this.scriptFileName = scriptFileName;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
+    }
+
+    public DefaultFunicVisitor(Object context, String scriptFileName, int scriptLineOffset, FunicResolver resolver) {
+        this.context = context;
+        this.scriptFileName = scriptFileName;
+        this.scriptLineOffset = scriptLineOffset;
         if (resolver != null) {
             this.resolver = resolver;
         }
@@ -584,7 +594,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         }
         ListFunicValue extraValue = (ListFunicValue) visitExtractExpress(extraCtx);
         Object value = assignValue.getValue();
-        DefaultFunicVisitor rightVisitor = new DefaultFunicVisitor(value, scriptFileName, resolver);
+        DefaultFunicVisitor rightVisitor = new DefaultFunicVisitor(value, scriptFileName, scriptLineOffset, resolver);
 
         List<Object> extraList = extraValue.getList();
         for (Object item : extraList) {
@@ -3076,10 +3086,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         }
         return RegexUtil.regexFindAndReplace(str, "(\\\\[xX][0-9a-fA-F]{1,2})+", s -> {
             String[] arr = s.split("\\\\[xX]");
-            byte[] buff=new byte[arr.length];
+            byte[] buff = new byte[arr.length];
             for (int i = 0; i < arr.length; i++) {
                 int bt = Integer.parseInt(arr[i], 16);
-                buff[i]=(byte)(bt&0x0ff);
+                buff[i] = (byte) (bt & 0x0ff);
             }
             return new String(buff, StandardCharsets.UTF_8);
         });
@@ -3091,28 +3101,46 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         }
         return RegexUtil.regexFindAndReplace(str, "(\\\\[uU][0-9a-fA-F]{1,4})+", s -> {
             String[] arr = s.split("\\\\[uU]");
-            char[] buff=new char[arr.length];
+            char[] buff = new char[arr.length];
             for (int i = 0; i < arr.length; i++) {
                 int bt = Integer.parseInt(arr[i], 16);
-                buff[i]=(char)bt;
+                buff[i] = (char) bt;
             }
             return new String(buff);
         });
     }
 
     public void debugNode(ParseTree context) {
-        if (context instanceof ParserRuleContext) {
-            ParserRuleContext ruleContext = (ParserRuleContext) context;
-            Token start = ruleContext.getStart();
-            FunicDebugBridgeReporter.proxy(scriptFileName == null ? "virtual_script.fic" : scriptFileName,
-                    start.getLine(),
-                    () -> {
-                        Map<String, Object> variableMap = new HashMap<>();
-                        variableMap.put("astNode", context);
-                        variableMap.put("root", this.context);
-                        variableMap.put("visitor", this);
-                        return variableMap;
-                    });
+        if (JvmUtil.isDebug()) {
+            if (context instanceof ParserRuleContext) {
+                ParserRuleContext ruleContext = (ParserRuleContext) context;
+                Token start = ruleContext.getStart();
+                if (start == null) {
+                    int count = 3;
+                    do {
+                        ParserRuleContext parent = ruleContext.getParent();
+                        if (parent != null) {
+                            ruleContext = parent;
+                            start = ruleContext.getStart();
+                        }
+                        if (start == null) {
+                            break;
+                        }
+                        count--;
+                    } while (count >= 0);
+                }
+                if (start != null) {
+                    resolver.debugBridge(scriptFileName == null ? "virtual_script.fic" : scriptFileName,
+                            scriptLineOffset + start.getLine(),
+                            () -> {
+                                Map<String, Object> variableMap = new HashMap<>();
+                                variableMap.put("astNode", context);
+                                variableMap.put("root", this.context);
+                                variableMap.put("visitor", this);
+                                return variableMap;
+                            });
+                }
+            }
         }
         resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context, null));
     }

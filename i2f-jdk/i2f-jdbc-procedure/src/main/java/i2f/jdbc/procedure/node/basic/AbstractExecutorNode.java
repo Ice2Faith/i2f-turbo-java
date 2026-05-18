@@ -14,6 +14,7 @@ import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ReturnSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.jvm.JvmUtil;
 
 import java.lang.ref.WeakReference;
 import java.util.*;
@@ -120,16 +121,18 @@ public abstract class AbstractExecutorNode implements ExecutorNode {
                 executor.logger().logWarn(() -> e.getMessage(), e);
             }
 
-            JdbcProcedureDebugBridgeReporter.proxy(node.getLocationFile(),
-                    node.getLocationLineNumber(),
-                    () -> {
-                        Map<String, Object> variableMap = new HashMap<>();
-                        variableMap.put("node", node);
-                        variableMap.put("context", context);
-                        variableMap.put("executor", executor);
-                        variableMap.put("executorNode", this);
-                        return variableMap;
-                    });
+            if (JvmUtil.isDebug()) {
+                JdbcProcedureDebugBridgeReporter.proxy(node.getLocationFile(),
+                        node.getLocationLineNumber(),
+                        () -> {
+                            Map<String, Object> variableMap = new HashMap<>();
+                            variableMap.put("node", node);
+                            variableMap.put("context", context);
+                            variableMap.put("executor", executor);
+                            variableMap.put("executorNode", this);
+                            return variableMap;
+                        });
+            }
 
             execInner(node, context, executor);
 

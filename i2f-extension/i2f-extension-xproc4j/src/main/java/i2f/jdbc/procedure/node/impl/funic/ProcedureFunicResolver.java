@@ -10,6 +10,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.debugger.JdbcProcedureDebugBridgeReporter;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecutorMethodProvider;
 import i2f.jdbc.procedure.node.impl.tinyscript.ProcedureTinyScriptResolver;
@@ -45,6 +46,11 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
 //            if(executor.isDebug()) {
 //                executor.logger().logDebug(() -> "funic:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
 //            }
+    }
+
+    @Override
+    public void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
+        JdbcProcedureDebugBridgeReporter.proxy(fileName, lineNumber, variableMapSupplier);
     }
 
     @Override

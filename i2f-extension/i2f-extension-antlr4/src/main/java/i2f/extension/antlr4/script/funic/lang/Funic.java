@@ -51,47 +51,51 @@ public class Funic {
 
     public static Object script(File scriptFile, Object context) throws Exception {
         String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
-        return script(formula, context, scriptFile.getName(), null);
+        return script(formula, context, scriptFile.getName(), 0, null);
     }
 
     public static Object script(File scriptFile, Object context, FunicResolver resolver) throws Exception {
         String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
-        return script(formula, context, scriptFile.getName(), resolver);
+        return script(formula, context, scriptFile.getName(), 0, resolver);
     }
 
 
     public static Object script(String formula, Object context) {
-        return script(formula, context, null, null);
+        return script(formula, context, null, 0, null);
     }
 
     public static Object script(String formula, Object context, String scriptFileName) {
-        return script(formula, context, scriptFileName, null);
+        return script(formula, context, scriptFileName, 0, null);
     }
 
     public static Object script(String formula, Object context, FunicResolver resolver) {
         FunicParser.RootContext tree = parse(formula);
-        return script(tree, context, null, resolver);
+        return script(tree, context, null, 0, resolver);
     }
 
-    public static Object script(String formula, Object context, String scriptFileName, FunicResolver resolver) {
+    public static Object script(String formula, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                FunicResolver resolver) {
         FunicParser.RootContext tree = parse(formula);
-        return script(tree, context, scriptFileName, resolver);
+        return script(tree, context, scriptFileName, scriptLineOffset, resolver);
     }
 
     public static Object script(FunicParser.RootContext tree, Object context) {
-        return script(tree, context, null, null);
+        return script(tree, context, null, 0, null);
     }
 
     public static Object script(FunicParser.RootContext tree, Object context, String scriptFileName) {
-        return script(tree, context, scriptFileName, null);
+        return script(tree, context, scriptFileName, 0, null);
     }
 
     public static Object script(FunicParser.RootContext tree, Object context, FunicResolver resolver) {
-        return script(tree, context, null, resolver);
+        return script(tree, context, null, 0, resolver);
     }
 
-    public static Object script(FunicParser.RootContext tree, Object context, String scriptFileName, FunicResolver resolver) {
-        DefaultFunicVisitor visitor = new DefaultFunicVisitor(context, scriptFileName, resolver);
+    public static Object script(FunicParser.RootContext tree, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                FunicResolver resolver) {
+        DefaultFunicVisitor visitor = new DefaultFunicVisitor(context, scriptFileName, scriptLineOffset, resolver);
         return script(tree, visitor);
     }
 

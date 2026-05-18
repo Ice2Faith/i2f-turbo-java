@@ -37,7 +37,7 @@ public class FunicLambda {
             }
             callContext.put(name, entry.getValue());
         }
-        DefaultFunicVisitor newVisitor = new DefaultFunicVisitor(callContext, visitor.getScriptFileName(), visitor.getResolver());
+        DefaultFunicVisitor newVisitor = new DefaultFunicVisitor(callContext, visitor.getScriptFileName(), visitor.getScriptLineOffset(), visitor.getResolver());
         newVisitor.getImportPackages().addAll(visitor.getImportPackages());
         ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> registryMethods = visitor.getRegistryMethods();
         for (Map.Entry<String, CopyOnWriteArrayList<IMethod>> entry : registryMethods.entrySet()) {

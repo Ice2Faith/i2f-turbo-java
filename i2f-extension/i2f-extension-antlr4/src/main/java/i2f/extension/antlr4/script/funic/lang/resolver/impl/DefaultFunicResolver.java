@@ -4,6 +4,7 @@ import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.context.FunicFunctionCallContext;
+import i2f.extension.antlr4.script.funic.lang.debugger.FunicDebugBridgeReporter;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicThrowException;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicBuiltinFunctions;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
@@ -1386,5 +1387,10 @@ public class DefaultFunicResolver implements FunicResolver {
         if (debug.get()) {
             System.out.println(String.format("%s [DEBUG] - %s", logDateFmt.format(LocalDateTime.now()), String.valueOf(supplier.get())));
         }
+    }
+
+    @Override
+    public void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
+        FunicDebugBridgeReporter.proxy(fileName, lineNumber, variableMapSupplier);
     }
 }

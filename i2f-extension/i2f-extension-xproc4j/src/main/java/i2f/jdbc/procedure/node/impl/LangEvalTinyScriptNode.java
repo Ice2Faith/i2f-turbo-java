@@ -1,5 +1,6 @@
 package i2f.jdbc.procedure.node.impl;
 
+import i2f.extension.antlr4.script.tiny.TinyScriptParser;
 import i2f.extension.antlr4.script.tiny.impl.TinyScript;
 import i2f.extension.antlr4.script.tiny.impl.TinyScriptResolver;
 import i2f.jdbc.procedure.consts.AttrConsts;
@@ -47,8 +48,15 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
         Object obj = null;
 
         try {
+            TinyScriptParser.ScriptContext tree = TinyScript.parse(script);
             TinyScriptResolver resolver = new ProcedureTinyScriptResolver(executor, node);
-            obj = TinyScript.script(script, context, resolver);
+            String scriptFileName = null;
+            int scriptLineOffset = 0;
+            if (node != null) {
+                scriptFileName = node.getLocationFile();
+                scriptLineOffset = node.getLocationLineNumber();
+            }
+            obj = TinyScript.script(tree, context, scriptFileName, scriptLineOffset, resolver);
         } catch (Exception e) {
             if (e instanceof SignalException) {
                 throw (SignalException) e;
@@ -82,7 +90,7 @@ public class LangEvalTinyScriptNode extends AbstractExecutorNode implements Eval
     public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
         String script = node.getTextBody();
-        Object obj = evalTinyScript(script, context, executor);
+        Object obj = evalTinyScript(node, script, context, executor);
 
         if (result != null) {
             obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);

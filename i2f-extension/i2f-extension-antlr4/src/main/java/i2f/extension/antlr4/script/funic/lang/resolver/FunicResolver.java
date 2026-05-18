@@ -72,4 +72,6 @@ public interface FunicResolver {
     void debug(boolean enable);
 
     void debugLog(Supplier<Object> supplier);
+
+    void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier);
 }

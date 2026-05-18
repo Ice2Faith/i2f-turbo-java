@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.tiny.impl.context.DefaultFunctionCallContext;
+import i2f.extension.antlr4.script.tiny.impl.debugger.TinyScriptDebugBridgeReporter;
 import i2f.invokable.method.IMethod;
 import i2f.match.regex.RegexUtil;
 import i2f.reference.Reference;
@@ -299,6 +300,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     String.valueOf(supplier.get())
             ));
         }
+    }
+
+    @Override
+    public void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
+        TinyScriptDebugBridgeReporter.proxy(fileName, lineNumber, variableMapSupplier);
     }
 
     @Override

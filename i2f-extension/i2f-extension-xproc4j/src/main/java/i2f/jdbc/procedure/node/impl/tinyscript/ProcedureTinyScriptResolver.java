@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.debugger.JdbcProcedureDebugBridgeReporter;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -85,6 +86,11 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
 //            if(executor.isDebug()) {
 //                executor.logger().logDebug(() -> "tiny-script:" + supplier.get() + " , at " + ContextHolder.TRACE_LOCATION.get() + ":" + ContextHolder.TRACE_LINE.get());
 //            }
+    }
+
+    @Override
+    public void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
+        JdbcProcedureDebugBridgeReporter.proxy(fileName, lineNumber, variableMapSupplier);
     }
 
     @Override

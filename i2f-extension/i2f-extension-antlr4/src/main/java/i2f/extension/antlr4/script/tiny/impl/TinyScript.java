@@ -91,45 +91,49 @@ public class TinyScript {
 
     public static Object script(File scriptFile, Object context) throws Exception {
         String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
-        return script(formula, context, scriptFile.getName(), null);
+        return script(formula, context, scriptFile.getName(), 0, null);
     }
 
     public static Object script(File scriptFile, Object context, TinyScriptResolver resolver) throws Exception {
         String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
-        return script(formula, context, scriptFile.getName(), resolver);
+        return script(formula, context, scriptFile.getName(), 0, resolver);
     }
 
     public static Object script(String formula, Object context) {
-        return script(formula, context, null, null);
+        return script(formula, context, null, 0, null);
     }
 
     public static Object script(String formula, Object context, String scriptFileName) {
-        return script(formula, context, scriptFileName, null);
+        return script(formula, context, scriptFileName, 0, null);
     }
 
     public static Object script(String formula, Object context, TinyScriptResolver resolver) {
-        return script(formula, context, null, resolver);
+        return script(formula, context, null, 0, resolver);
     }
 
-    public static Object script(String formula, Object context, String scriptFileName, TinyScriptResolver resolver) {
+    public static Object script(String formula, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                TinyScriptResolver resolver) {
         TinyScriptParser.ScriptContext tree = parse(formula);
-        return script(tree, context, scriptFileName, resolver);
+        return script(tree, context, scriptFileName, scriptLineOffset, resolver);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context) {
-        return script(tree, context, null, null);
+        return script(tree, context, null, 0, null);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context, String scriptFileName) {
-        return script(tree, context, scriptFileName, null);
+        return script(tree, context, scriptFileName, 0, null);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context, TinyScriptResolver resolver) {
-        return script(tree, context, null, resolver);
+        return script(tree, context, null, 0, resolver);
     }
 
-    public static Object script(TinyScriptParser.ScriptContext tree, Object context, String scriptFileName, TinyScriptResolver resolver) {
-        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context, scriptFileName, resolver);
+    public static Object script(TinyScriptParser.ScriptContext tree, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                TinyScriptResolver resolver) {
+        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context, scriptFileName, scriptLineOffset, resolver);
         Object ret = visitor.visit(tree);
         return ret;
     }
