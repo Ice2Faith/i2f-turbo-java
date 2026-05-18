@@ -39,7 +39,18 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     }
 
     public Logger getLogger() {
-        return getLogger(ContextHolder.TRACE_FILE.get());
+        String name = ContextHolder.TRACE_LOCATION.get();
+        if (name != null) {
+            int idx = name.lastIndexOf(":");
+            if (idx > 0) {
+                name = name.substring(0, idx);
+            }
+        }
+        if (name == null || name.isEmpty()) {
+            return log;
+        }
+        name = "xproc4j." + name;
+        return getLogger(name);
     }
 
     @Override
@@ -63,9 +74,9 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
             String msg = "near " + location + ", msg: " + supplier.get();
             if (e != null) {
                 JdbcProcedureUtil.purifyStackTrace(e, true);
-                getLogger().debug(msg, e);
+                getLogger().info(msg, e);
             } else {
-                getLogger().debug(msg);
+                getLogger().info(msg);
             }
         }
     }
