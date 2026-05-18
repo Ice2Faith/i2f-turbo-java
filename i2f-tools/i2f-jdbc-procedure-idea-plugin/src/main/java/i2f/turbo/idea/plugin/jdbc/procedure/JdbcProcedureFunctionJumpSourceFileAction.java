@@ -104,6 +104,12 @@ public class JdbcProcedureFunctionJumpSourceFileAction extends AnAction {
         VirtualFile virtualFile = event.getData(CommonDataKeys.VIRTUAL_FILE);
 //        PsiElement element = event.getData(CommonDataKeys.PSI_ELEMENT);
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
+        if (editor == null) {
+            return null;
+        }
+        if (psiFile == null) {
+            return null;
+        }
 
         SelectionModel selectionModel = editor.getSelectionModel();
         if (selectionModel != null) {

@@ -12,6 +12,7 @@ import com.intellij.xdebugger.breakpoints.XBreakpoint;
 import com.intellij.xdebugger.breakpoints.XBreakpointManager;
 import com.intellij.xdebugger.breakpoints.XLineBreakpoint;
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointUtil;
+import i2f.lru.LruMap;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaLineBreakpointProperties;
 
 import java.util.ArrayList;
@@ -24,13 +25,21 @@ import java.util.List;
  * @desc
  */
 public class PsiBreakpointUtil {
+    protected static LruMap<String, List<PsiClass>> cacheClass = new LruMap<>(1024);
 
     public static List<PsiClass> getPsiClass(Project project, String shortName) {
+        String cacheKey = project.getProjectFilePath() + "#" + shortName;
+        List<PsiClass> ret = cacheClass.get(cacheKey);
+        if (ret != null) {
+            return new ArrayList<>(ret);
+        }
         //
         GlobalSearchScope searchScope = GlobalSearchScope.everythingScope(project);
         PsiShortNamesCache shortNamesCache = PsiShortNamesCache.getInstance(project);
         PsiClass[] psiClassArr = shortNamesCache.getClassesByName(shortName, searchScope);
-        return new ArrayList<>(Arrays.asList(psiClassArr));
+        ret = new ArrayList<>(Arrays.asList(psiClassArr));
+        cacheClass.put(cacheKey, new ArrayList<>(ret));
+        return ret;
     }
 
     public static List<PsiMethod> getPsiMethod(PsiClass psiClass, String methodName, int parameterCount) {
