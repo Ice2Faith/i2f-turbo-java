@@ -1,6 +1,9 @@
 package i2f.turbo.idea.plugin.utils;
 
 import com.intellij.debugger.ui.breakpoints.JavaLineBreakpointType;
+import com.intellij.openapi.editor.*;
+import com.intellij.openapi.fileEditor.FileEditorManager;
+import com.intellij.openapi.fileEditor.OpenFileDescriptor;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -64,6 +67,43 @@ public class PsiBreakpointUtil {
         return breakpointManager;
     }
 
+    public static void openFileInEditor(Project project, VirtualFile virtualFile, int lineNumber) {
+        // 1. 获取文档管理器，通过 VirtualFile 拿到对应的 Document
+
+        // 2. 使用 FileEditorManager 打开文件，并使其成为当前选中的编辑器
+        // openFile 方法会自动处理文件是否已经打开的情况，如果已打开则直接激活该标签页
+        FileEditorManager.getInstance(project).openFile(virtualFile, true);
+
+        // 3. 获取刚刚打开的文件的编辑器实例
+        Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
+        if (editor != null) {
+            // 4. 获取文档对象，用于计算文本偏移量(offset)
+            var document = editor.getDocument();
+
+            // 5. 将传入的行号转换为编辑器内部的偏移量
+            // 注意：IDEA API 中行号是从 0 开始的。如果你的 lineNumber 是从 1 开始计数的，请改为 (lineNumber - 1)
+            int lineOffset = document.getLineStartOffset(lineNumber);
+            int lineEndOffset = document.getLineEndOffset(lineNumber);
+
+            // 6. 设置光标位置并选中整行
+            // 移除之前的所有选择区域（如果有），保证只选中目标行
+            // 选中从行首到行尾的文本
+            SelectionModel selectionModel = editor.getSelectionModel();
+            selectionModel.removeSelection(true);
+            selectionModel.setSelection(lineOffset, lineEndOffset);
+
+            CaretModel caretModel = editor.getCaretModel();
+            caretModel.moveToOffset(lineOffset);
+
+            // 7. 滚动编辑器视图，确保选中的行出现在可见区域内
+            ScrollingModel scrollingModel = editor.getScrollingModel();
+            // scrollTo 会平滑滚动，caretModel.scrollTo 也可以直接使用
+            scrollingModel.scrollTo(caretModel.getLogicalPosition(), ScrollType.CENTER);
+        } else {
+            new OpenFileDescriptor(project, virtualFile, lineNumber, 0)
+                    .navigate(true);
+        }
+    }
 
     /**
      * 为指定的 PsiMethod 添加或更新条件断点

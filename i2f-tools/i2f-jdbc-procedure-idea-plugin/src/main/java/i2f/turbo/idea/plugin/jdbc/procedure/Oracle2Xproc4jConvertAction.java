@@ -88,7 +88,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
 
         }
 
-        public Language getSqlLanguage(){
+        public Language getSqlLanguage() {
             Language language = null;
             Collection<Language> list = Language.getRegisteredLanguages();
             for (Language item : list) {
@@ -99,8 +99,8 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
                     language = item;
                 }
             }
-            if(language==null){
-                language= PlainTextLanguage.INSTANCE;
+            if (language == null) {
+                language = PlainTextLanguage.INSTANCE;
             }
             return language;
         }
@@ -122,7 +122,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
 
-            Language language=getSqlLanguage();
+            Language language = getSqlLanguage();
             FileType fileType = language.getAssociatedFileType();
             if (fileType == null) {
                 fileType = PlainTextFileType.INSTANCE;
@@ -251,8 +251,8 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             super.dispose();
         }
 
-        public String getEditorText(){
-            if(fileEditor!=null){
+        public String getEditorText() {
+            if (fileEditor != null) {
                 Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
                 return document.getText();
             }

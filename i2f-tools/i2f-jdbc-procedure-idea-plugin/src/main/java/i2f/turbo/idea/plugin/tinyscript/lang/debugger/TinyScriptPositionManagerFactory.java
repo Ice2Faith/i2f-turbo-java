@@ -16,9 +16,6 @@ import com.intellij.util.messages.MessageBusConnection;
 import com.intellij.xdebugger.XDebuggerManager;
 import com.intellij.xdebugger.breakpoints.*;
 import com.intellij.xdebugger.impl.breakpoints.XBreakpointUtil;
-import i2f.turbo.idea.plugin.funic.lang.debugger.FunicDebugConsts;
-import i2f.turbo.idea.plugin.funic.lang.debugger.FunicLineBreakpointType;
-import i2f.turbo.idea.plugin.funic.lang.debugger.FunicPositionManager;
 import i2f.turbo.idea.plugin.utils.PsiBreakpointUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -62,12 +59,12 @@ public class TinyScriptPositionManagerFactory extends PositionManagerFactory {
 
             @Override
             public void processAttached(@NotNull DebugProcess dp) {
+                if (!resolveReportMethodLocation(project)) {
+                    // log.warn("BreakpointBridge: Bridge.report() not found, bridge disabled");
+                    return;
+                }
                 // log.warn("BreakpointBridge: processAttached");
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    if (!resolveReportMethodLocation(project)) {
-                        // log.warn("BreakpointBridge: Bridge.report() not found, bridge disabled");
-                        return;
-                    }
 
                     refreshManagedBreakpoint(project);
 

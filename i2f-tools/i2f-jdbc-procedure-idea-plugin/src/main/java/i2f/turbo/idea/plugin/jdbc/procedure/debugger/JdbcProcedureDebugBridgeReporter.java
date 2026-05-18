@@ -15,11 +15,11 @@ public final class JdbcProcedureDebugBridgeReporter {
     protected int lineNumber;
     protected Map<String, Object> variableMap;
 
-    public static void proxy(String fileName, int lineNumber, Supplier<Map<String,Object>> variableMapSupplier) {
+    public static void proxy(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
         if (!JvmUtil.isDebug()) {
             return;
         }
-        proxy(fileName,lineNumber,variableMapSupplier.get());
+        proxy(fileName, lineNumber, variableMapSupplier.get());
     }
 
     public static void proxy(String fileName, int lineNumber, Map<String, Object> variableMap) {
@@ -34,13 +34,13 @@ public final class JdbcProcedureDebugBridgeReporter {
     }
 
     public static String fileNameOnly(String fileName) {
-        if(fileName==null){
+        if (fileName == null) {
             return null;
         }
         fileName = fileName.replace("\\", "/");
-        int idx=fileName.lastIndexOf('/');
-        if(idx>=0){
-            fileName = fileName.substring(idx+1);
+        int idx = fileName.lastIndexOf('/');
+        if (idx >= 0) {
+            fileName = fileName.substring(idx + 1);
         }
         return fileName;
     }

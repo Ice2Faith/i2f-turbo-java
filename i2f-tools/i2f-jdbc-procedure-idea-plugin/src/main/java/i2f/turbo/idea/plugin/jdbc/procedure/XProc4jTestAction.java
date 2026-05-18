@@ -87,7 +87,7 @@ public class XProc4jTestAction extends AnAction {
             setTitle(XProc4jConsts.NAME + " Test UI");
         }
 
-        public Language getXmlLanguage(){
+        public Language getXmlLanguage() {
             Language language = null;
             Collection<Language> list = Language.getRegisteredLanguages();
             for (Language item : list) {
@@ -98,8 +98,8 @@ public class XProc4jTestAction extends AnAction {
                     language = item;
                 }
             }
-            if(language==null){
-                language= PlainTextLanguage.INSTANCE;
+            if (language == null) {
+                language = PlainTextLanguage.INSTANCE;
             }
             return language;
         }
@@ -121,7 +121,7 @@ public class XProc4jTestAction extends AnAction {
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
 
-            Language language=getXmlLanguage();
+            Language language = getXmlLanguage();
             FileType fileType = language.getAssociatedFileType();
             if (fileType == null) {
                 fileType = PlainTextFileType.INSTANCE;
@@ -237,8 +237,8 @@ public class XProc4jTestAction extends AnAction {
             super.dispose();
         }
 
-        public String getEditorText(){
-            if(fileEditor!=null){
+        public String getEditorText() {
+            if (fileEditor != null) {
                 Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
                 return document.getText();
             }

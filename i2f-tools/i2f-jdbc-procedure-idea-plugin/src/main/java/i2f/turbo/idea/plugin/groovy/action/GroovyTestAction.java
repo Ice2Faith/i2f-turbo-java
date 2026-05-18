@@ -84,13 +84,13 @@ public class GroovyTestAction extends AnAction {
             setTitle("Groovy Test UI");
         }
 
-        public Language getGroovyLanguage(){
+        public Language getGroovyLanguage() {
             Language language = Language.findLanguageByID("Groovy");
-            if(language==null){
-                language=Language.findLanguageByID("Java");
+            if (language == null) {
+                language = Language.findLanguageByID("Java");
             }
-            if(language==null){
-                language= PlainTextLanguage.INSTANCE;
+            if (language == null) {
+                language = PlainTextLanguage.INSTANCE;
             }
             return language;
         }
@@ -112,7 +112,7 @@ public class GroovyTestAction extends AnAction {
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
 
-            Language language=getGroovyLanguage();
+            Language language = getGroovyLanguage();
             FileType fileType = language.getAssociatedFileType();
             if (fileType == null) {
                 fileType = PlainTextFileType.INSTANCE;
@@ -231,8 +231,8 @@ public class GroovyTestAction extends AnAction {
             super.dispose();
         }
 
-        public String getEditorText(){
-            if(fileEditor!=null){
+        public String getEditorText() {
+            if (fileEditor != null) {
                 Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
                 return document.getText();
             }

@@ -60,11 +60,11 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
             @Override
             public void processAttached(@NotNull DebugProcess dp) {
                 // log.warn("BreakpointBridge: processAttached");
+                if (!resolveReportMethodLocation(project)) {
+                    // log.warn("BreakpointBridge: Bridge.report() not found, bridge disabled");
+                    return;
+                }
                 ApplicationManager.getApplication().invokeLater(() -> {
-                    if (!resolveReportMethodLocation(project)) {
-                        // log.warn("BreakpointBridge: Bridge.report() not found, bridge disabled");
-                        return;
-                    }
 
                     refreshManagedBreakpoint(project);
 

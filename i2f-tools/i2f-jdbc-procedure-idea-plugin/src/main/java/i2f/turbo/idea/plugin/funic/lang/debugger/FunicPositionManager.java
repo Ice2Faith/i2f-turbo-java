@@ -5,6 +5,7 @@ import com.intellij.debugger.PositionManager;
 import com.intellij.debugger.SourcePosition;
 import com.intellij.debugger.engine.DebugProcess;
 import com.intellij.debugger.engine.DebugProcessImpl;
+import com.intellij.debugger.engine.SuspendContext;
 import com.intellij.debugger.engine.SuspendContextImpl;
 import com.intellij.debugger.engine.evaluation.EvaluateException;
 import com.intellij.debugger.jdi.StackFrameProxyImpl;
@@ -118,8 +119,26 @@ public class FunicPositionManager implements PositionManager {
         }
     }
 
+    public ObjectReference getThisObject(SuspendContext suspendContext) throws EvaluateException {
+        ThreadReferenceProxyImpl thread = (ThreadReferenceProxyImpl) suspendContext.getThread();
+        // log.warn("resolveThisObject-2:thread=" + thread);
+        if (thread == null) {
+            return null;
+        }
+        StackFrameProxyImpl frame = thread.frame(0);
+        // log.warn("resolveThisObject-3:frame=" + frame);
+        if (frame != null && isInReportMethod(frame)) {
+            ObjectReference thisObj = frame.thisObject();
+            // log.warn("resolveThisObject-4:thisObj=" + thisObj);
+            if (thisObj != null) {
+                return thisObj;
+            }
+        }
+        return null;
+    }
+
     @Nullable
-    private ObjectReference resolveThisObject(Location location) {
+    public ObjectReference resolveThisObject(Location location) {
         DebugProcessImpl processImpl = (DebugProcessImpl) myDebugProcess;
 
         // 策略1：通过 pausedContext 获取
@@ -127,18 +146,9 @@ public class FunicPositionManager implements PositionManager {
             SuspendContextImpl suspendContext = processImpl.getSuspendManager().getPausedContext();
             // log.warn("resolveThisObject-1:ctx=" + suspendContext);
             if (suspendContext != null) {
-                ThreadReferenceProxyImpl thread = suspendContext.getThread();
-                // log.warn("resolveThisObject-2:thread=" + thread);
-                if (thread != null) {
-                    StackFrameProxyImpl frame = thread.frame(0);
-                    // log.warn("resolveThisObject-3:frame=" + frame);
-                    if (frame != null && isInReportMethod(frame)) {
-                        ObjectReference thisObj = frame.thisObject();
-                        // log.warn("resolveThisObject-4:thisObj=" + thisObj);
-                        if (thisObj != null) {
-                            return thisObj;
-                        }
-                    }
+                ObjectReference thisObj = getThisObject(suspendContext);
+                if (thisObj != null) {
+                    return thisObj;
                 }
             }
         } catch (Exception e) {
@@ -173,7 +183,7 @@ public class FunicPositionManager implements PositionManager {
         return null;
     }
 
-    private boolean isInReportMethod(StackFrameProxyImpl frame) {
+    public boolean isInReportMethod(StackFrameProxyImpl frame) {
         try {
             Location loc = frame.location();
             if (loc == null) {
@@ -311,7 +321,7 @@ public class FunicPositionManager implements PositionManager {
         }
     }
 
-    private FileType getCompareFileType(){
+    public FileType getCompareFileType() {
         return FunicFileType.INSTANCE;
     }
 
@@ -326,7 +336,7 @@ public class FunicPositionManager implements PositionManager {
     protected LruMap<String, VirtualFile> virtualFileMap = new LruMap<>(512);
 
     @Nullable
-    private VirtualFile findVirtualFile(@Nullable String fileName) {
+    public VirtualFile findVirtualFile(@Nullable String fileName) {
         // log.warn("findVirtualFile-0:" + fileName);
         if (fileName == null || fileName.isEmpty()) {
             return null;

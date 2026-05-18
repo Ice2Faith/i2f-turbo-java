@@ -226,8 +226,8 @@ public class TinyScriptTestAction extends AnAction {
             super.dispose();
         }
 
-        public String getEditorText(){
-            if(fileEditor!=null){
+        public String getEditorText() {
+            if (fileEditor != null) {
                 Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
                 return document.getText();
             }
