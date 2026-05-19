@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.java.debugger.breakpoints.properties.JavaMethodBreakpointProperties;
 
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -199,8 +199,9 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
             @Nullable
             private String buildConditionFromHookBreakpoints(Project project) {
                 XBreakpointManager bpManager = XDebuggerManager.getInstance(project).getBreakpointManager();
-                StringBuilder sb = new StringBuilder();
 
+
+                Map<String, Set<Integer>> breakpointMap = new HashMap<>();
                 for (XBreakpoint<?> bp : bpManager.getAllBreakpoints()) {
                     if (!instanceOfHookBreakpointType(bp)) {
                         continue;
@@ -222,15 +223,33 @@ public class FunicPositionManagerFactory extends PositionManagerFactory {
                         fileName = fileUrl.substring(lastSlash + 1);
                     }
 
+                    Set<Integer> set = breakpointMap.computeIfAbsent(fileName, k -> new HashSet<>());
+                    set.add(line);
+                }
+
+                StringBuilder sb = new StringBuilder();
+
+                for (Map.Entry<String, Set<Integer>> entry : breakpointMap.entrySet()) {
+                    String fileName = entry.getKey();
+                    Set<Integer> lines = entry.getValue();
                     if (sb.length() > 0) {
                         sb.append("\n || ");
                     }
 
-                    sb.append("(\"")
-                            .append(escapeJava(fileName))
-                            .append("\".equals(this.fileName) && this.lineNumber == ")
-                            .append(line)
-                            .append(")");
+                    sb.append("isFireBreakpoint(")
+                            .append("\"").append(escapeJava(fileName)).append("\"")
+                            .append(",");
+
+                    boolean isFirst = true;
+                    for (Integer line : lines) {
+                        if (!isFirst) {
+                            sb.append(",");
+                        }
+                        sb.append(line);
+                        isFirst = false;
+                    }
+                    ;
+                    sb.append(")");
                 }
 
                 return sb.length() > 0 ? sb.toString() : null;

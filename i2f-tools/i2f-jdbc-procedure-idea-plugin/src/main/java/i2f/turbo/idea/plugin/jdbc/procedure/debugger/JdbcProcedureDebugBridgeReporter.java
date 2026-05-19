@@ -3,6 +3,7 @@ package i2f.turbo.idea.plugin.jdbc.procedure.debugger;
 import i2f.jvm.JvmUtil;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
@@ -45,6 +46,17 @@ public final class JdbcProcedureDebugBridgeReporter {
         return fileName;
     }
 
+    public boolean isFireBreakpoint(String exprFileName, int... exprLines) {
+        for (int exprLine : exprLines) {
+            if (exprLine == this.lineNumber) {
+                if (Objects.equals(exprFileName, this.fileName)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     public void report() {
         if (fileName == null && lineNumber < 0) {
