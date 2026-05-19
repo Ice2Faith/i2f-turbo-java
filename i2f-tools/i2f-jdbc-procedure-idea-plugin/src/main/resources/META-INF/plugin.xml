@@ -75,6 +75,11 @@
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
 
         <completion.contributor
+                language="Funic"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+
+        <completion.contributor
                 language="SQL"
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
@@ -110,6 +115,9 @@
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider
                 language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider"/>
+        <codeInsight.lineMarkerProvider
+                language="Funic"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureRefidLineMarkerProvider"/>
 
         <!-- 注册语言注入器 -->
