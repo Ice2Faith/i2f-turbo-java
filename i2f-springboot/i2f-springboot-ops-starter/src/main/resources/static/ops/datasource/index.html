@@ -138,6 +138,7 @@
                     </el-form-item>
                 </template>
                 <template v-else>
+                    <el-divider direction="vertical"></el-divider>
                     <el-form-item label="数据源">
                         <el-select clearable filterable v-model="form.datasource" placeholder="数据源">
                             <el-option
@@ -2981,28 +2982,34 @@
                             label: `建表 DDL`,
                             icon: 'el-icon-view',
                             onClick: () => {
-                                let columnSql=''
-                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
-                                    let meta=this.metas.resultColumns[i];
-                                    if(i>0){
-                                        columnSql+=',\n'
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let columnSql = ''
+                                    for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                        let meta = this.metas.resultColumns[i];
+                                        if (i > 0) {
+                                            columnSql += ',\n'
+                                        }
+                                        let columnType = meta.typeName || 'varchar';
+                                        if (meta.precision > 0 && meta.scale > 0) {
+                                            columnType += '(' + meta.precision + ',' + meta.scale + ')';
+                                        } else if (meta.precision > 0) {
+                                            columnType += '(' + meta.precision + ',' + meta.scale + ')';
+                                        }
+                                        columnSql += '\t' + meta.label + ' ' + columnType;
+                                        if (meta.autoIncrement === true) {
+                                            columnSql += ' auto_increment';
+                                        }
+                                        if (meta.nullable === false) {
+                                            columnSql += ' not null';
+                                        }
                                     }
-                                    let columnType=meta.typeName || 'varchar';
-                                    if(meta.precision>0 && meta.scale>0){
-                                        columnType+='('+meta.precision+','+meta.scale+')';
-                                    }else if(meta.precision>0){
-                                        columnType+='('+meta.precision+','+meta.scale+')';
-                                    }
-                                    columnSql+='\t'+meta.label+' '+columnType;
-                                    if(meta.autoIncrement===true){
-                                        columnSql+=' auto_increment';
-                                    }
-                                    if(meta.nullable===false){
-                                        columnSql+=' not null';
-                                    }
-                                }
-                                let sql='create table t_xxx (\n'+columnSql+'\n);';
-                                this.onViewText(sql,'DDL语句','sql')
+                                    let sql = 'create table ' + value + ' (\n' + columnSql + '\n);';
+                                    this.onViewText(sql, 'DDL语句', 'sql')
+                                })
+
                             }
                         },
                         {label: '', divided: true}, // 分割线
@@ -3010,39 +3017,54 @@
                             label: 'Insert SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let sql = '';
-                                for (let i = 0; i < this.metas.resultList.length; i++) {
-                                    let row = this.metas.resultList[i]
-                                    sql += this.convertRowAsInsertSql(row);
-                                    sql += '\n';
-                                }
-                                this.onViewText(sql, 'SQL语句', 'sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsInsertSql(row, value);
+                                        sql += '\n';
+                                    }
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Update SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let sql = '';
-                                for (let i = 0; i < this.metas.resultList.length; i++) {
-                                    let row = this.metas.resultList[i]
-                                    sql += this.convertRowAsUpdateSql(row);
-                                    sql += '\n';
-                                }
-                                this.onViewText(sql, 'SQL语句', 'sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsUpdateSql(row, value);
+                                        sql += '\n';
+                                    }
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Delete SQL',
                             icon: 'el-icon-delete',
                             onClick: () => {
-                                let sql = '';
-                                for (let i = 0; i < this.metas.resultList.length; i++) {
-                                    let row = this.metas.resultList[i]
-                                    sql += this.convertRowAsDeleteSql(row);
-                                    sql += '\n';
-                                }
-                                this.onViewText(sql, 'SQL语句', 'sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsDeleteSql(row, value);
+                                        sql += '\n';
+                                    }
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {label: '', divided: true}, // 分割线
@@ -3179,24 +3201,39 @@
                             label: 'Insert SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let sql = this.convertRowAsInsertSql(row)
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsInsertSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Update SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let sql = this.convertRowAsUpdateSql(row)
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsUpdateSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Delete SQL',
                             icon: 'el-icon-delete',
                             onClick: () => {
-                                let sql = this.convertRowAsDeleteSql(row)
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsDeleteSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         }
                     ],
