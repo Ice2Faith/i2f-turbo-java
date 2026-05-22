@@ -1579,6 +1579,32 @@
                                 })
                             }
                         }]),
+                        {
+                            label: `oracle ddl`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return "select dbms_metadata.get_ddl('TABLE','" + s + "') as ddl from dual";
+                                })
+                            }
+                        },
+                        {
+                            label: `mysql ddl`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return "show create table " + s;
+                                })
+                            }
+                        }
                     ]
                 }
                 let menus = [...presetMenusMap.text]
