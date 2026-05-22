@@ -86,6 +86,22 @@
     <el-form inline label-position="left" label-width="80px">
       <el-button size="medium" @click="doResetData">重置</el-button>
       <el-divider direction="vertical"></el-divider>
+      <el-checkbox v-model="form.meta.useCustom">自定义连接</el-checkbox>
+      <template v-if="form.meta.useCustom">
+        <el-form-item label="主机">
+          <el-input clearable v-model="form.meta.host" placeholder="localhost"></el-input>
+        </el-form-item>
+        <el-form-item label="端口">
+          <el-input clearable v-model="form.meta.port" placeholder="6379"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input clearable v-model="form.meta.password" placeholder="123456"></el-input>
+        </el-form-item>
+        <el-form-item label="数据库">
+          <el-input-number clearable v-model="form.meta.database" :min="-1" :max="1024"></el-input-number>
+        </el-form-item>
+      </template>
+      <el-divider direction="vertical"></el-divider>
       <el-form-item>
         <el-popover
                 placement="top-start"
@@ -280,6 +296,13 @@
             }
           },
           form: {
+            meta: {
+              useCustom: false,
+              host: 'localhost',
+              port: 6379,
+              password: '',
+              database: -1
+            },
             useScanKeys: true,
             pattern: "*",
             key: '',
@@ -800,13 +823,17 @@
           this.initTextViewerEditor()
         },200)
       },
+      assignRedisMeta(req) {
+        req.meta = this.form.meta;
+        return req;
+      },
       doRefreshKeys(){
         this.metas.keyListLoading = true;
         try {
           let useScanKeys=this.form.useScanKeys;
-          let req = {
+          let req = this.assignRedisMeta({
             pattern: this.form.pattern,
-          }
+          })
 
 
           this.$axios({
@@ -939,9 +966,9 @@
       doDeleteKey(keys){
         this.metas.deleteLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             keys: keys,
-          }
+          })
           this.$axios({
             url: '/delete',
             method: 'post',
@@ -975,9 +1002,9 @@
       onViewKey(){
         this.metas.getLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
-          }
+          })
           this.$axios({
             url: '/get',
             method: 'post',
@@ -1022,11 +1049,11 @@
       doSetKey(){
         this.metas.setLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
             ttl: this.form.ttl,
             value: this.form.value,
-          }
+          })
           this.$axios({
             url: '/set',
             method: 'post',
@@ -1069,10 +1096,10 @@
       doUpdateTtl(){
         this.metas.ttlLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
             ttl: this.form.ttl
-          }
+          })
           this.$axios({
             url: '/ttl',
             method: 'post',
