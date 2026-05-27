@@ -160,6 +160,7 @@
         <module>i2f-verifycode</module>
         <module>i2f-workflow</module>
         <module>i2f-xml</module>
+        <module>i2f-design-pattern</module>
 
         <module>test-features</module>
     </modules>
