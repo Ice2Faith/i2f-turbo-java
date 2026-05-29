@@ -2,10 +2,10 @@
 
 ## 依赖库与使用环境
 
-- 请先查看项目根目录的 `pom.xml` 文件确定使用的依赖库版本
+- 请先查看项目根目录的 `pom.xml`/`build.gradle`/`build.gradle.kts`/`package.json` 文件确定使用的依赖库版本
 - 以及现有的依赖管理，现有导入的依赖
 - 针对具体模块时，需要额外查看模块自身的 `pom.xml` 依赖信息，以及其引用的其他模块的依赖配置信息
-- 确定运行环境（`JAVA`版本要求）
+- 确定运行环境（`JAVA`/`NODE-JS`版本要求）
 
 ## 依赖的添加与决策
 
@@ -15,6 +15,7 @@
 - 如果没有可以直接使用的情况下
 - 需要先查看现有的依赖库与运行环境（`Java`版本等）信息
 - 选择一个不与现有依赖或者环境冲突的依赖库进行引入，而且必须是广泛使用经过验证的
+- [强制]java项目最低支持为jdk8, web项目最低支持es5
 
 ## 代码编写
 
@@ -22,6 +23,7 @@
 - 然后结合现有项目分析实现方式
 - 接着结合项目依赖于现有功能考虑功能复用
 - 保持代码风格
+- 选取合适的设计模式实现编码
 - 完成编码后进行代码检查
 - 然后检查安全与性能要求
 - 最后需要进行代码测试
@@ -50,11 +52,17 @@
     - 包结构为
         - `modules/user/controller/UserController`
         - `modules/user/service/UserService`
-        - `modules/user/service/UserServiceImpl`
+        - `modules/user/service/impl/UserServiceImpl`
         - `modules/user/mapper/UserMapper`
         - `modules/user/data/entity/User`
         - `modules/user/data/dto/UserDto`
 - 项目内只要没有特殊要求，一律使用 `UTF-8` 编码
+- 接口类或抽象类，对应的实现类，应该额外加一个 `impl` 包存放具体实现，不要将接口类和实现类放在同一个包下
+    - 正确的划分如下：
+    - 包结构为：
+        - `api/RoleApi`
+        - `api/impl/RoleApiImpl`
+- 相同或相似功能的类，应该划分在同一个包下面
 - 尽量使用"卫语句"提前检查参数合法性，不合法的提前返回或者抛出异常，而不是进行深层次的`if`嵌套
     - 循环中也是尽量使用"卫语句"进行判断，提前判断，进行`continue`或者`break`，而不是`if`嵌套
 - 每个函数体的语句行数不要超过100行，循环体内和if语句体内同样如此，应该拆分提取为函数调用，保证单个函数内逻辑清晰简洁
@@ -74,9 +82,53 @@
     - 优先考虑`spring-gateway,nacos,sentinel,openfeign`
     - 针对`springboot3`及以上版本的项目，优先使用 `httpexchange` 替换 `openfeign`
 
+## 代码设计
+
+- 优先选择合适的设计模式（标准23种设计模式）进行代码设计
+    - 一、创建型模式（Creational Patterns）
+        - 1.1 单例模式（Singleton）
+        - 1.2 工厂方法模式（Factory Method）
+        - 1.3 抽象工厂模式（Abstract Factory）
+        - 1.4 建造者模式（Builder）
+        - 1.5 原型模式（Prototype）
+    - 二、结构型模式（Structural Patterns）
+        - 2.1 适配器模式（Adapter）
+        - 2.2 桥接模式（Bridge）
+        - 2.3 组合模式（Composite）
+        - 2.4 装饰器模式（Decorator）
+        - 2.5 外观模式（Facade）
+        - 2.6 享元模式（Flyweight）
+        - 2.7 代理模式（Proxy）
+    - 三、行为型模式（Behavioral Patterns）
+        - 3.1 责任链模式（Chain of Responsibility）
+        - 3.2 命令模式（Command）
+        - 3.3 解释器模式（Interpreter）
+        - 3.4 迭代器模式（Iterator）
+        - 3.5 中介者模式（Mediator）
+        - 3.6 备忘录模式（Memento）
+        - 3.7 观察者模式（Observer）
+        - 3.8 状态模式（State）
+        - 3.9 策略模式（Strategy）
+        - 3.10 模板方法模式（Template Method）
+        - 3.11 访问者模式（Visitor）
+- 使用单一设计模式或者组合使用多个设计模式编写代码
+- 保证代码具有良好的可拓展性、可编辑性
+- 遵守设计模式6大原则
+    - 单一职责原则
+    - 开闭原则
+    - 里氏替换原则
+    - 接口隔离原则
+    - 依赖倒置原则
+    - 迪米特法则
+- [建议]当使用了设计模式时，对于类名的定义上，应该结合实际功能与设计模式名称，综合考虑合适的命名
+    - 既能表示大致功能，也能表示大致的设计模式
+- [建议]如果功能简单、逻辑单一，则直接实现即可，不用使用设计模式
+- [重要]某些情况下，设计模式并不是万能的/最适用的，根据实际情况，可以不使用设计模式
+
 ## Springboot 项目风格
 
-- 工具类的使用，优先使用项目内现有的工具类，其次使用`springboot`提供/默认集成的依赖（例如`StringUtils`,`BeanUtils`,`ObjectMapper`）
+- 工具类的使用，优先使用项目内现有的工具类，其次使用`springboot`提供/默认集成的依赖（例如`StringUtils`,`BeanUtils`,
+  `ObjectMapper`）
 - 项目中引入了`mybatis/mybatis-plus/mybatis-flex`体系框架的情况下，优先使用`Mybatis`体系框架，而不是`JdbcTemplate`
     - 如果使用的是`mybatis-plus/mybatis-flex`等增强`mybatis`的框架，严禁滥用提供的构造器构造复杂SQL，而是应该是在XML文件中编写
     - `mybatis`严禁使用`@Select`/`@Update`/`@Delete`等注解在接口方法上编写复杂的语句，而是应该在XML文件中编写
@@ -86,7 +138,7 @@
 - springboot-web项目默认都是REST接口，没有视图页面参与，纯粹的API接口，除非有特殊要求
 - 默认国际化特征都是中国，东八区时区，除非有特殊需求
 - AOP事务，当需要调用的目标方法上有事务注解时，应该使用对应的代理对象进行调用，而不是直接调用，避免直接使用出现事务失效
-  - 事务注解只能添加在 `public` 公开方法上，严禁加到 `private`/`protected` 等方法上
+    - 事务注解只能添加在 `public` 公开方法上，严禁加到 `private`/`protected` 等方法上
 
 ## 代码安全
 
