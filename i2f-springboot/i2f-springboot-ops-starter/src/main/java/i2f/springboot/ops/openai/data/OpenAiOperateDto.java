@@ -14,4 +14,5 @@ public class OpenAiOperateDto {
     protected OpenAiMeta meta;
     protected OpenAiCompletionDto completion;
     protected boolean encryptOutput=false;
+    protected boolean enableTools = false;
 }

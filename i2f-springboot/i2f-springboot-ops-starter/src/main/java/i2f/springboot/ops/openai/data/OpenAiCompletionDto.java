@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -16,4 +17,5 @@ public class OpenAiCompletionDto {
     protected String model;
     protected boolean stream;
     protected List<OpenAiMessageDto> messages;
+    protected List<Map<String, Object>> tools;
 }

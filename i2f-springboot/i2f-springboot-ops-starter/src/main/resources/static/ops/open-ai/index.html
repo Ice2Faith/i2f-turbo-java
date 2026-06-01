@@ -217,6 +217,7 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
+                    <el-checkbox v-model="form.enableTools">工具调用</el-checkbox>
                     <el-checkbox v-model="form.encryptOutput">输出加密</el-checkbox>
                     <el-select v-model="form.messageType"
                                placeholder="发送消息类型"
@@ -606,7 +607,8 @@
                         messageList: [],
                         inputText: '',
                         messageType: 'user',
-                        encryptOutput: false
+                        encryptOutput: false,
+                        enableTools: false,
                     }
                 }
             },
@@ -929,6 +931,7 @@
                         }
                     });
                     req.encryptOutput=encryptOutput;
+                    req.enableTools = this.form.enableTools;
                     req=this.transferSend(req);
 
                     // 原生 fetch + ReadableStream 解析 SSE

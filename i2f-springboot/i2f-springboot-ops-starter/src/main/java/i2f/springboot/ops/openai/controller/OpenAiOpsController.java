@@ -1,11 +1,15 @@
 package i2f.springboot.ops.openai.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.tool.ToolRawDefinitionsProvider;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
+import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
+import i2f.springboot.ops.openai.data.OpenAiMessageDto;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +38,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -72,6 +77,9 @@ public class OpenAiOpsController  implements IOpsProvider {
     private RestTemplate restTemplate=createRestTemplate();
 
     private ExecutorService pool= Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors()*4+2);
+
+    @Autowired(required = false)
+    private ToolRawDefinitionsProvider toolDefinitionProvider;
 
     private RestTemplate createRestTemplate(){
         return new RestTemplateBuilder()
@@ -112,18 +120,42 @@ public class OpenAiOpsController  implements IOpsProvider {
 
             CompletableFuture.runAsync(() -> {
                 try {
+                    OpenAiCompletionDto completion = req.getCompletion();
+                    if (req.isEnableTools()) {
+                        if (toolDefinitionProvider != null) {
+                            List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                            if (tools != null) {
+                                if (completion.getTools() == null) {
+                                    completion.setTools(new ArrayList<>());
+                                }
+                                for (ToolRawDefinition tool : tools) {
+                                    completion.getTools().add(tool.getJsonSchema());
+                                }
+                            }
+                        }
+
+                        List<OpenAiMessageDto> messages = completion.getMessages();
+                        if (messages != null && !messages.isEmpty()) {
+                            OpenAiMessageDto lastMsg = messages.get(messages.size() - 1);
+                            // TODO 处理 tools-call-request, 最后一条是工具调用，或者是授权调用
+                            String role = lastMsg.getRole();
+
+                        }
+                    }
+
+
                     restTemplate.execute(req.getMeta().getBaseUrl(), HttpMethod.POST, request->{
                         request.getHeaders().add("Authorization","Bearer "+req.getMeta().getApiKey());
                         request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
                         OutputStream body = request.getBody();
-                        objectMapper.writeValue(body,req.getCompletion());
+                        objectMapper.writeValue(body, completion);
                         body.close();
                     }, new ResponseExtractor<Void>() {
                         @Override
                         public Void extractData(ClientHttpResponse response) throws IOException {
                             try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-                                String line;
+                                String line = null;
                                 while ((line = reader.readLine()) != null) {
                                     if (line.startsWith("data:")) {
                                         String data = line.substring(5).trim();
