@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.filesystem.minio.MinioFileSystem;
 import i2f.io.filesystem.IFile;
 import i2f.io.stream.StreamUtil;
+import i2f.match.impl.SimpleMatcher;
 import i2f.springboot.ops.common.OpsException;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
@@ -96,14 +97,29 @@ public class MinioOpsController implements IOpsProvider {
             MinioOperateDto req = transfer.recv(reqDto, MinioOperateDto.class);
             MinioFileSystem fs = new MinioFileSystem(req.getMeta());
             String workdir = req.getWorkdir();
+            String pattern = req.getPattern();
+
             IFile dir = fs.getFile(workdir);
             List<HostFileItemDto> resp = new ArrayList<>();
             List<HostFileItemDto> dirList = new ArrayList<>();
             List<HostFileItemDto> fileList = new ArrayList<>();
             if (dir.isExists()) {
                 List<IFile> files = dir.listFiles();
+                SimpleMatcher matcher = new SimpleMatcher();
                 if (files != null) {
                     for (IFile file : files) {
+                        String name = file.getName();
+                        if (pattern != null && !pattern.isEmpty()) {
+                            if (!pattern.contains("*")) {
+                                if (!name.contains(pattern)) {
+                                    continue;
+                                }
+                            } else {
+                                if (!matcher.matches(name, pattern)) {
+                                    continue;
+                                }
+                            }
+                        }
                         HostFileItemDto item = new HostFileItemDto();
                         item.setName(file.getName());
                         item.setPath(file.getAbsolutePath());

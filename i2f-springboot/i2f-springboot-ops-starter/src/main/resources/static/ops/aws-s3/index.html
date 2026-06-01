@@ -896,7 +896,8 @@
                 this.metas.fileList.filesLoading = true;
                 try {
                     let req = this.assignAwsS3Meta({
-                        workdir: this.form.workdir
+                        workdir: this.form.workdir,
+                        pattern: this.metas.fileList.filterFile
                     });
                     this.$axios({
                         url: '/file-list',

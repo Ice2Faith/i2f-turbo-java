@@ -16,6 +16,8 @@ public class AwsS3OperateDto {
     protected String workdir;
     protected String path;
 
+    protected String pattern;
+
     protected boolean inline;
 
     protected String md5;

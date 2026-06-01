@@ -16,6 +16,8 @@ public class HostOperateDto extends OpsHostIdDto {
     protected String workdir;
     protected String path;
 
+    protected String pattern;
+
     protected boolean inline;
 
     protected String md5;

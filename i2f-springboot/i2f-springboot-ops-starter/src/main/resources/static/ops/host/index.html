@@ -1267,7 +1267,8 @@
                 this.drawer.fileList.filesLoading = true;
                 try {
                     let req = this.assignHostId({
-                        workdir: this.form.workdir
+                        workdir: this.form.workdir,
+                        pattern: this.drawer.fileList.filterFile
                     });
                     this.$axios({
                         url: '/file-list',

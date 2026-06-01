@@ -15,6 +15,7 @@ public class MinioOperateDto {
 
     protected String workdir;
     protected String path;
+    protected String pattern;
 
     protected boolean inline;
 

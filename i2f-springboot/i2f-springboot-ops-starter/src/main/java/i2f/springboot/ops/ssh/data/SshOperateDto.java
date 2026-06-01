@@ -17,6 +17,8 @@ public class SshOperateDto {
     protected String workdir;
     protected String path;
 
+    protected String pattern;
+
     protected boolean inline;
 
     protected String md5;

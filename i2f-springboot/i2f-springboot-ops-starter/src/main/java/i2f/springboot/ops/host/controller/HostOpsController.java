@@ -1,5 +1,6 @@
 package i2f.springboot.ops.host.controller;
 
+import i2f.match.impl.SimpleMatcher;
 import i2f.os.OsUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
@@ -121,14 +122,29 @@ public class HostOpsController implements IOpsProvider {
             }
             assertHostId(req);
             String workdir = req.getWorkdir();
+            String pattern = req.getPattern();
+
             File dir = new File(workdir);
             List<HostFileItemDto> resp = new ArrayList<>();
             List<HostFileItemDto> dirList = new ArrayList<>();
             List<HostFileItemDto> fileList = new ArrayList<>();
             if (dir.exists()) {
                 File[] files = dir.listFiles();
+                SimpleMatcher matcher = new SimpleMatcher();
                 if (files != null) {
                     for (File file : files) {
+                        String name = file.getName();
+                        if (pattern != null && !pattern.isEmpty()) {
+                            if (!pattern.contains("*")) {
+                                if (!name.contains(pattern)) {
+                                    continue;
+                                }
+                            } else {
+                                if (!matcher.matches(name, pattern)) {
+                                    continue;
+                                }
+                            }
+                        }
                         HostFileItemDto item = new HostFileItemDto();
                         item.setName(file.getName());
                         item.setPath(file.getAbsolutePath());

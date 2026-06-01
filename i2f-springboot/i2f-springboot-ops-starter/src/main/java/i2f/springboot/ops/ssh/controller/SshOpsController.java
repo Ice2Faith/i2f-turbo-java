@@ -88,12 +88,21 @@ public class SshOpsController implements IOpsProvider {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
             try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String workdir = req.getWorkdir();
+                String pattern = req.getPattern();
+
                 String dir = util.realpath(workdir);
                 List<HostFileItemDto> resp = new ArrayList<>();
                 List<HostFileItemDto> dirList = new ArrayList<>();
                 List<HostFileItemDto> fileList = new ArrayList<>();
                 if (util.existDir(dir)) {
-                    Vector<ChannelSftp.LsEntry> files = util.listFiles(dir);
+                    String searchPattern = dir;
+                    if (pattern != null && !pattern.isEmpty()) {
+                        if (!pattern.contains("*")) {
+                            pattern = "*" + pattern + "*";
+                        }
+                        searchPattern = searchPattern + "/" + pattern;
+                    }
+                    Vector<ChannelSftp.LsEntry> files = util.listFiles(searchPattern);
                     if (files != null) {
                         for (ChannelSftp.LsEntry file : files) {
                             HostFileItemDto item = new HostFileItemDto();
