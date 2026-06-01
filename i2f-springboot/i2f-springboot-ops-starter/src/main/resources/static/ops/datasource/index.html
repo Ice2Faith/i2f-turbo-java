@@ -2953,7 +2953,7 @@
                     "CLOB","NCLOB","BLOB",
                     "ROWID","SQLXML",
                 ].includes(jdbcType)){
-                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                    itemValue = "'" + (itemValue + '').replaceAll("'", "''") + "'";
                 }else if([
                     "INT","TINYINT","SMALLINT","BIGINT","INTEGER",
                     "NUMERIC",
@@ -2965,7 +2965,7 @@
                     "DATE","TIME","TIMESTAMP",
                     "TIME_WITH_TIMEZONE","TIMESTAMP_WITH_TIMEZONE"
                 ].includes(jdbcType)){
-                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                    itemValue = "'" + (itemValue + '').replaceAll("'", "''") + "'";
                 }
                 return itemValue
             },
