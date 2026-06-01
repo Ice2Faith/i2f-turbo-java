@@ -142,7 +142,29 @@
             </el-row>
             <el-row type="flex" justify="center">
                 <el-form-item>
-                    <el-checkbox v-model="form.runAsFile">以文件执行</el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                执行SFTP命令，使用SFTP通道<br/>
+                                因此只允许执行SFTP命令，不允许使用SHELL命令<br/>
+                                用于在限制只允许SFTP登录的场景下使用
+                            </span>
+                        <el-checkbox slot="reference" v-model="form.sftpCmd">SFTP命令</el-checkbox>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                把脚本生成一个shell脚本文件之后进行执行<br/>
+                                好处是，某些命令，直接执行可能有问题，例如管道重定向等<br/>
+                                生成临时脚本文件之后执行，则不存在这样的问题
+                            </span>
+                        <el-checkbox slot="reference" v-if="!form.sftpCmd" v-model="form.runAsFile">以文件执行
+                        </el-checkbox>
+                    </el-popover>
                     <el-button v-loading="metas.resultLoading" size="medium"
                                type="primary"
                                @click="onExecute">
@@ -429,6 +451,7 @@
                         },
                         workdir: '',
                         cmd: '',
+                        sftpCmd: false,
                         runAsFile: false,
                         waitForSeconds: 120,
                         inline: false,
@@ -1166,6 +1189,7 @@
                     let req = this.assignSshMeta({
                         workdir: this.form.workdir,
                         cmd: cmd,
+                        sftpCmd: this.form.sftpCmd,
                         runAsFile: this.form.runAsFile,
                         waitForSeconds: this.form.waitForSeconds,
                     });

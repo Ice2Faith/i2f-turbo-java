@@ -26,6 +26,7 @@ public class SshOperateDto {
     protected String cmd;
     protected boolean runAsFile;
     protected long waitForSeconds;
+    protected boolean sftpCmd;
 
     protected int lineCount;
 }
