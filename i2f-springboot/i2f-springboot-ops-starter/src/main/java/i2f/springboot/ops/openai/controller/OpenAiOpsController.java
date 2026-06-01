@@ -1,15 +1,16 @@
 package i2f.springboot.ops.openai.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawDefinitionsProvider;
+import i2f.ai.std.tool.ToolRawHelper;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
-import i2f.springboot.ops.openai.data.OpenAiMessageDto;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -38,9 +40,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @NoArgsConstructor
 @Controller
 @RequestMapping("/ops/open-ai")
-public class OpenAiOpsController  implements IOpsProvider {
+public class OpenAiOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
 
@@ -80,6 +80,8 @@ public class OpenAiOpsController  implements IOpsProvider {
 
     @Autowired(required = false)
     private ToolRawDefinitionsProvider toolDefinitionProvider;
+    @Autowired
+    private RouterFunctionMapping routerFunctionMapping;
 
     private RestTemplate createRestTemplate(){
         return new RestTemplateBuilder()
@@ -129,17 +131,66 @@ public class OpenAiOpsController  implements IOpsProvider {
                                     completion.setTools(new ArrayList<>());
                                 }
                                 for (ToolRawDefinition tool : tools) {
-                                    completion.getTools().add(tool.getJsonSchema());
+                                    Map<String, Object> function = new HashMap<>();
+                                    function.put("type", "function");
+                                    function.put("function", tool.getJsonSchema());
+                                    completion.getTools().add(function);
                                 }
                             }
                         }
 
-                        List<OpenAiMessageDto> messages = completion.getMessages();
+                        List<Map<String, Object>> messages = completion.getMessages();
                         if (messages != null && !messages.isEmpty()) {
-                            OpenAiMessageDto lastMsg = messages.get(messages.size() - 1);
+                            Map<String, Object> lastMsg = messages.get(messages.size() - 1);
                             // TODO 处理 tools-call-request, 最后一条是工具调用，或者是授权调用
-                            String role = lastMsg.getRole();
+                            if (Objects.equals("assistant", lastMsg.get("role"))) {
+                                List<Map<String, Object>> calls = (List<Map<String, Object>>) lastMsg.get("tool_calls");
+                                if (calls != null && !calls.isEmpty()) {
+                                    List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                                    Map<String, ToolRawDefinition> definitionMap = new HashMap<>();
+                                    for (ToolRawDefinition tool : tools) {
+                                        definitionMap.put(tool.getName(), tool);
+                                    }
+                                    for (Map<String, Object> call : calls) {
+                                        String id = (String) call.get("id");
+                                        Map<String, Object> funcMap = (Map<String, Object>) call.get("function");
+                                        String name = (String) funcMap.get("name");
+                                        String arguments = (String) funcMap.get("arguments");
+                                        ToolRawDefinition definition = definitionMap.get(name);
+                                        Map<String, Object> argumentsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
+                                        });
+                                        Object callRet = null;
+                                        try {
+                                            callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
+                                        } catch (Throwable e) {
+                                            callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
+                                        }
+                                        if (callRet instanceof CharSequence) {
+                                            callRet = String.valueOf(callRet);
+                                        } else {
+                                            callRet = objectMapper.writeValueAsString(callRet);
+                                        }
+                                        Map<String, Object> toolMsg = new HashMap<>();
+                                        toolMsg.put("role", "tool");
+                                        toolMsg.put("tool_call_id", id);
+                                        toolMsg.put("content", callRet);
 
+                                        Map<String, Object> emitToolMsgMap = new HashMap<>(toolMsg);
+                                        emitToolMsgMap.put("function", funcMap);
+                                        String emitToolMsg = objectMapper.writeValueAsString(emitToolMsgMap);
+                                        OpsSecureReturn<?> resp = null;
+                                        if (req.isEncryptOutput()) {
+                                            resp = transfer.success(emitToolMsg);
+                                        } else {
+                                            resp = OpsSecureReturn.success(emitToolMsg);
+                                        }
+                                        String respJson = objectMapper.writeValueAsString(resp);
+                                        emitter.send(respJson);
+
+                                        messages.add(toolMsg);
+                                    }
+                                }
+                            }
                         }
                     }
 
@@ -157,6 +208,7 @@ public class OpenAiOpsController  implements IOpsProvider {
                             try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
                                 String line = null;
                                 while ((line = reader.readLine()) != null) {
+                                    System.out.println("line==>" + line);
                                     if (line.startsWith("data:")) {
                                         String data = line.substring(5).trim();
                                         OpsSecureReturn<?> resp = null;

@@ -851,14 +851,7 @@
                     return content;
                 }
             },
-
-            // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
-            async sendMessage() {
-                let text = (this.form.inputText || '').trim();
-                if (!text) {
-                    return;
-                }
-
+            getActiveMessages() {
                 // 确保有活跃会话
                 if (!this.metas.activeSessionId) {
                     this.createSession();
@@ -868,18 +861,48 @@
                     this.$set(this.metas.historyMessageMap, sid, []);
                 }
                 let messages = this.metas.historyMessageMap[sid];
-
-                // 用第一条用户消息作为会话标题
-                let session = this.metas.sessionList.find(s => s.sessionId === sid);
-                if (session && (!session.title || session.title === '新对话')) {
-                    session.title = text.length > 20 ? text.substring(0, 20) + '...' : text;
+                return messages;
+            },
+            async sendMessage() {
+                let text = (this.form.inputText || '').trim();
+                if (!text) {
+                    return;
                 }
+
+                let sid = this.metas.activeSessionId;
+                let messages = this.getActiveMessages();
 
                 // 追加用户消息，构建 API 请求消息列表
                 messages.push({role: this.form.messageType, content: text});
                 this.form.inputText = '';
+
+                this.directSendMessage();
+            },
+            // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
+            async directSendMessage() {
+
+                let sid = this.metas.activeSessionId;
+                let messages = this.getActiveMessages();
+
+                // 用第一条用户消息作为会话标题
+                let session = this.metas.sessionList.find(s => s.sessionId === sid);
+                if (session && (!session.title || session.title === '新对话')) {
+                    let text = messages[messages.length - 1].content;
+                    session.title = text.length > 20 ? text.substring(0, 20) + '...' : text;
+                }
+
                 // 快照当前历史消息作为请求内容（不包括将要添加的助手占位）
-                let apiMessages = messages.map(m => ({role: m.role, content: m.content}));
+                let apiMessages = [];
+                messages.forEach(m => {
+                    let item = {
+                        role: m.role,
+                        content: m.content
+                    }
+                    if (m.tool_calls && m.tool_calls.length > 0) {
+                        item.tool_calls = m.tool_calls;
+                    }
+                    apiMessages.push(item)
+                })
                 this.$nextTick(() => this.scrollToBottom());
 
                 this.metas.sending = true;
@@ -889,17 +912,35 @@
                 messages.push({role: 'assistant', content: ''});
                 let assistantIdx = messages.length - 1;
 
+                let demoCallsMap = {
+                    0: {
+                        index: 0,
+                        id: "call_01f11a665a3e4b8195a289",
+                        type: "function",
+                        function: {
+                            name: "get_current_datetime",
+                            arguments: "{}"
+                        }
+                    }
+                }
+                let toolCallsMap = {}
+
                 let _this = this;
                 let encryptOutput=this.form.encryptOutput;
                 // SSE 消息处理：逐步写入助手消息内容，实现打字机效果
                 function handleChunk(raw) {
-                    if (!raw || raw === '[DONE]') {
-                        return;
-                    }
                     try {
                         let json = JSON.parse(raw);
                         if (json.code == 200) {
-                            //console.log(res.data)
+                            //console.log(json.data)
+                            if (!json.data || json.data === '[DONE]') {
+                                Object.keys(toolCallsMap).forEach(k => {
+                                    let item = toolCallsMap[k];
+                                    messages[assistantIdx].content += 'tool call:' + item.function.name;
+                                })
+                                _this.$nextTick(() => _this.scrollToBottom());
+                                return;
+                            }
                             if(encryptOutput){
                                 json = _this.transferRecv(json.data) || null
                                 json=JSON.parse(json)
@@ -909,7 +950,50 @@
                         } else {
                             _this.messageError(json.msg,300)
                         }
+                        if (json.role && json.role == 'tool') {
+                            if (!_this.metas.streamingStarted) {
+                                _this.metas.streamingStarted = true;
+                            }
+                            messages.push({role: 'tool', content: json.content});
+                            return;
+                        }
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
+                        if (delta && delta.tool_calls && delta.tool_calls.length > 0) {
+                            if (!_this.metas.streamingStarted) {
+                                _this.metas.streamingStarted = true;
+                            }
+
+                            let calls = delta.tool_calls || [];
+                            for (let i = 0; i < calls.length; i++) {
+                                let item = calls[i];
+                                let index = item.index;
+                                if (index != null && index != undefined) {
+                                    if (!toolCallsMap[index]) {
+                                        toolCallsMap[index] = {
+                                            index: index,
+                                            id: '',
+                                            type: 'function',
+                                            function: {
+                                                name: '',
+                                                arguments: ''
+                                            }
+                                        }
+                                    }
+                                    if (item.id && item.id != '') {
+                                        toolCallsMap[index].id += item.id;
+                                    }
+                                    if (item.function) {
+                                        if (item.function.name && item.function.name != '') {
+                                            toolCallsMap[index].function.name += item.function.name;
+                                        }
+                                        if (item.function.arguments && item.function.arguments != '') {
+                                            toolCallsMap[index].function.arguments += item.function.arguments;
+                                        }
+                                    }
+                                }
+                            }
+                            return;
+                        }
                         let content = (delta && delta.content) ? delta.content : '';
                         if (content) {
                             if (!_this.metas.streamingStarted) {
@@ -972,9 +1056,25 @@
                         }
                     }
 
-
                     if (!messages[assistantIdx].content) {
                         messages[assistantIdx].content = '[未收到任何内容]';
+                    }
+
+                    if (Object.keys(toolCallsMap).length > 0) {
+                        messages[assistantIdx].tool_calls = []
+                        Object.keys(toolCallsMap).forEach(k => {
+                            let item = toolCallsMap[k];
+                            messages[assistantIdx].tool_calls.push({
+                                id: item.id,
+                                type: item.type,
+                                function: item.function
+                            })
+                        })
+                        this.$confirm('是否允许进行工具调用？', '提示', {type: 'warning'})
+                            .then(() => {
+                                this.directSendMessage()
+                            }).catch(() => {
+                        });
                     }
                 } catch (e) {
                     let errMsg = '请求失败';

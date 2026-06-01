@@ -16,6 +16,6 @@ import java.util.Map;
 public class OpenAiCompletionDto {
     protected String model;
     protected boolean stream;
-    protected List<OpenAiMessageDto> messages;
+    protected List<Map<String, Object>> messages;
     protected List<Map<String, Object>> tools;
 }
