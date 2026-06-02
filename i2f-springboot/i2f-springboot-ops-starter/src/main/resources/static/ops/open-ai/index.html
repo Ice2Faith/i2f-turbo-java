@@ -186,6 +186,7 @@
                 >
                     <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
                         <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
+                        <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
                         <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
                         <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
                         <i v-else class="el-icon-cpu"></i>
