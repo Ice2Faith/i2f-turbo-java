@@ -208,9 +208,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 .message(toolMsg)
                                                 .function(function)
                                                 .build();
+                                        toolEchoMsg.createContent();
                                         OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
                                                 .type(OpenAiConsts.ECHO_TOOL)
-                                                .echoTool(toolEchoMsg)
+                                                .echo_tool(toolEchoMsg)
                                                 .build();
                                         String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                         OpsSecureReturn<?> resp = null;

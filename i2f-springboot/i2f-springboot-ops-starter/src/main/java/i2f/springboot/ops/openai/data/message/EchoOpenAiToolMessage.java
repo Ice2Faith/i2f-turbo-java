@@ -16,10 +16,12 @@ public class EchoOpenAiToolMessage implements OpenAiMessage {
     protected final String role = OpenAiConsts.ECHO_TOOL;
     protected OpenAiToolMessage message;
     protected OpenAiToolCallFunction function;
+    protected String content;
 
     public EchoOpenAiToolMessage(OpenAiToolMessage message, OpenAiToolCallFunction function) {
         this.message = message;
         this.function = function;
+        this.content = createContent();
     }
 
     @Override
@@ -27,10 +29,15 @@ public class EchoOpenAiToolMessage implements OpenAiMessage {
         return role;
     }
 
+    public String createContent() {
+        this.content = "call_id=" + message.getTool_call_id() + "\n"
+                + "function_name=" + function.getName() + "\n"
+                + "call_result=" + message.getContent();
+        return this.content;
+    }
+
     @Override
     public String content() {
-        return "call_id=" + message.getTool_call_id() + "\n"
-                + "function_name=:" + function.getName() + "\n"
-                + "call_result=" + message.getContent();
+        return createContent();
     }
 }

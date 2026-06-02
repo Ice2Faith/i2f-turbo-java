@@ -23,7 +23,7 @@ public class DatetimeTools {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
         return "datetime:" + now.format(formatter) + "\n"
-                + "week:" + now.getDayOfWeek()
+                + "week:" + now.getDayOfWeek() + "\n"
                 + "utc timestamp(s):" + now.toEpochSecond(ZoneOffset.UTC);
     }
 

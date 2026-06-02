@@ -179,7 +179,7 @@
                         :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
                 >
                     <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
-                        <i :class="msg.type==='user' ? 'el-icon-user-solid' : 'el-icon-cpu'"></i>
+                        <i :class="msg.type==='user' ? 'el-icon-user-solid' : (msg.type.indexOf('tool')>=0?'el-icon-setting': 'el-icon-cpu')"></i>
                     </div>
                     <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
                         <div class="message-role-label">
@@ -591,6 +591,7 @@
                             {label: '助手', value: 'assistant'},
                             {label: '系统', value: 'system'},
                             {label: '工具', value: 'tool'},
+                            {label: '工具结果', value: 'echo_tool'},
                         ],
                     },
                     drawer: {},
@@ -894,7 +895,8 @@
                 // 用第一条用户消息作为会话标题
                 let session = this.metas.sessionList.find(s => s.sessionId === sid);
                 if (session && (!session.title || session.title === '新对话')) {
-                    let text = messages[messages.length - 1].content;
+                    let lastMsg = messages[messages.length - 1];
+                    let text = lastMsg[lastMsg.type].content;
                     session.title = text.length > 20 ? text.substring(0, 20) + '...' : text;
                 }
 
@@ -942,7 +944,7 @@
                             if (!json.data || json.data === '[DONE]') {
                                 Object.keys(toolCallsMap).forEach(k => {
                                     let item = toolCallsMap[k];
-                                    messages[assistantIdx].assistant.content += 'tool call:' + item.function.name;
+                                    messages[assistantIdx].assistant.content += '\ntool call:' + item.function.name;
                                 })
                                 _this.$nextTick(() => _this.scrollToBottom());
                                 return;
