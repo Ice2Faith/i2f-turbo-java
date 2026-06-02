@@ -73,18 +73,26 @@ public class DatabaseMetadataTools {
         }
     }
 
+    @Tool(tags = {AiTags.READONLY_VALUE}, description = "list databases of a given datasource")
+    public List<String> get_datasource_database_list(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName) throws Exception {
+        if (datasourceName == null || datasourceName.isEmpty()) {
+            datasourceName = datasourceProvider.getDefaultDataSourceName();
+        }
+        DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        try (Connection conn = datasource.getConnection()) {
+            DatabaseMetadataProvider provider = DatabaseMetadataProviders.getProvider(conn);
+            List<String> ret = provider.getDatabases(conn);
+            return ret;
+        }
+    }
+
     @Tool(
             tags = {
                     AiTags.READONLY_VALUE
             },
             description = "list tables of a given table pattern"
     )
-    public List<Map<String, Object>> get_tables_of_datasource(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave")
-                                                              String datasourceName,
-                                                              @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db")
-                                                              String database,
-                                                              @ToolParam(description = "the table pattern name, cloud be null means all tables, for example sys_user or sys_% or %user")
-                                                              String tablePattern
+    public List<Map<String, Object>> get_datasource_table_list(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName, @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db") String database, @ToolParam(description = "the table pattern name, cloud be null means all tables, for example sys_user or sys_% or %user") String tablePattern
     ) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
@@ -111,12 +119,7 @@ public class DatabaseMetadataTools {
             },
             description = "get table structure info of a given table name"
     )
-    public TableMeta get_table_structure_of_datasource(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave")
-                                                       String datasourceName,
-                                                       @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db")
-                                                       String database,
-                                                       @ToolParam(description = "the table name, required, for example sys_user or sys_role")
-                                                       String tableName
+    public TableMeta get_datasource_table_info(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName, @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db") String database, @ToolParam(description = "the table name, required, for example sys_user or sys_role") String tableName
     ) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
