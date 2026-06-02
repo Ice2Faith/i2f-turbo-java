@@ -74,7 +74,7 @@ public class LocalFileTools {
         StringBuilder builder = new StringBuilder();
         BufferedReader reader = new BufferedReader(new FileReader(file));
         int lineNumber = 1;
-        String line = "";
+        String line = null;
         while ((line = reader.readLine()) != null) {
             if (lineNumber >= endLine) {
                 break;
@@ -88,7 +88,7 @@ public class LocalFileTools {
         ret.put("realizeStartLine", Math.min(startLine, lineNumber));
         ret.put("realizeEndLine", Math.min(endLine, lineNumber));
         ret.put("textContent", builder.toString());
-        ret.put("hasMoreLine", (line == null));
+        ret.put("hasMoreLine", (line != null));
         return ret;
     }
 
