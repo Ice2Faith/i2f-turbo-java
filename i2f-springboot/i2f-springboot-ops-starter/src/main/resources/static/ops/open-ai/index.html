@@ -329,8 +329,8 @@
             </el-form>
         </el-card>
         <el-row type="flex" justify="end" style="margin-top: 15px;">
-            <el-button size="small">取消</el-button>
-            <el-button type="primary" size="small" @click="directSendMessage">执行</el-button>
+            <el-button size="small" @click="dialog.toolApproval.show=false">取消</el-button>
+            <el-button type="primary" size="small" @click="continueExecuteWithToolApproval">执行</el-button>
         </el-row>
     </el-dialog>
 </div>
@@ -1267,11 +1267,7 @@
 
                         if (toolApprovalList.length > 0) {
                             // 弹窗确认工具是否需要允许执行
-                            this.$confirm('是否允许进行工具调用？', '提示', {type: 'warning'})
-                                .then(() => {
-                                    this.directSendMessage()
-                                }).catch(() => {
-                            });
+                            this.dialog.toolApproval.show = true;
                         } else {
                             this.directSendMessage()
                         }
@@ -1317,6 +1313,10 @@
                     this.metas.streamingStarted = false;
                     this.$nextTick(() => this.scrollToBottom());
                 }
+            },
+            async continueExecuteWithToolApproval() {
+                this.dialog.toolApproval.show = false;
+                this.directSendMessage()
             },
             removeSelectMessage(index){
                 let sid = this.metas.activeSessionId;
