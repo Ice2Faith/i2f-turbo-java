@@ -10,10 +10,7 @@ import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
-import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
-import i2f.springboot.ops.openai.data.OpenAiCompletionVo;
-import i2f.springboot.ops.openai.data.OpenAiMessageVo;
-import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -127,6 +124,7 @@ public class OpenAiOpsController implements IOpsProvider {
                 try {
                     OpenAiCompletionVo vo = req.getCompletion();
                     OpenAiCompletionDto completion = new OpenAiCompletionDto();
+                    List<OpenAiToolApprovalDto> toolApprovalList = req.getToolApprovalList();
 
                     completion.setModel(vo.getModel());
                     completion.setStream(vo.isStream());
@@ -155,6 +153,28 @@ public class OpenAiOpsController implements IOpsProvider {
                                     completion.setTools(new ArrayList<>());
                                 }
                                 for (ToolRawDefinition tool : tools) {
+                                    OpenAiToolDefinitionDto dto = new OpenAiToolDefinitionDto();
+                                    dto.setName(tool.getName());
+                                    dto.setDescription(tool.getDescription());
+                                    dto.setParameterNames(tool.getParameterNames());
+                                    dto.setTags(tool.getTags());
+                                    if (tool.getBindClass() != null) {
+                                        dto.setBindClass(tool.getBindClass().getSimpleName());
+                                    }
+                                    if (tool.getBindMethod() != null) {
+                                        dto.setBindMethod(tool.getBindMethod().getName());
+                                    }
+                                    String defToolMsg = objectMapper.writeValueAsString(dto);
+                                    OpsSecureReturn<?> resp = null;
+                                    if (req.isEncryptOutput()) {
+                                        resp = transfer.success(defToolMsg);
+                                    } else {
+                                        resp = OpsSecureReturn.success(defToolMsg);
+                                    }
+                                    resp.withAttr("type", OpenAiConsts.DEFINITION_TOOL);
+                                    String respJson = objectMapper.writeValueAsString(resp);
+                                    emitter.send(respJson);
+
                                     completion.getTools().add(new OpenAiToolsDefinition(tool.getJsonSchema()));
                                 }
                             }
@@ -163,7 +183,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         List<OpenAiMessage> messages = completion.getMessages();
                         if (messages != null && !messages.isEmpty()) {
                             OpenAiMessage lastMsg = messages.get(messages.size() - 1);
-                            // TODO 处理 tools-call-request, 最后一条是工具调用，或者是授权调用
+                            // 处理 tools-call-request, 最后一条是工具调用，需要判断授权
                             if (lastMsg instanceof OpenAiAssistantMessage) {
                                 OpenAiAssistantMessage assistantMessage = (OpenAiAssistantMessage) lastMsg;
                                 List<OpenAiToolCall> calls = assistantMessage.getTool_calls();
@@ -176,6 +196,12 @@ public class OpenAiOpsController implements IOpsProvider {
                                             definitionMap.put(tool.getName(), tool);
                                         }
                                     }
+                                    Map<String, OpenAiToolApprovalDto> approvalMap = new HashMap<>();
+                                    if (toolApprovalList != null) {
+                                        for (OpenAiToolApprovalDto item : toolApprovalList) {
+                                            approvalMap.put(item.getTool_call_id(), item);
+                                        }
+                                    }
                                     for (OpenAiToolCall call : calls) {
                                         String id = call.getId();
                                         OpenAiToolCallFunction function = call.getFunction();
@@ -186,11 +212,22 @@ public class OpenAiOpsController implements IOpsProvider {
                                         });
                                         Object callRet = null;
                                         try {
+                                            OpenAiToolApprovalDto approvalDto = approvalMap.get(id);
+                                            if (approvalDto != null) {
+                                                if (approvalDto.isReject()) {
+                                                    String rejectReason = approvalDto.getRejectReason();
+                                                    if (rejectReason == null) {
+                                                        rejectReason = "";
+                                                    } else {
+                                                        rejectReason = ", reason is : " + rejectReason;
+                                                    }
+                                                    throw new IllegalStateException("user reject tool execute" + rejectReason);
+                                                }
+                                            }
                                             if (definition == null) {
                                                 throw new IllegalArgumentException("cannot found tool definition: " + name);
-                                            } else {
-                                                callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
                                             }
+                                            callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
                                         } catch (Throwable e) {
                                             callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                         }
@@ -220,6 +257,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                         } else {
                                             resp = OpsSecureReturn.success(emitToolMsg);
                                         }
+                                        resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
                                         String respJson = objectMapper.writeValueAsString(resp);
                                         emitter.send(respJson);
 
@@ -253,6 +291,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                         } else {
                                             resp = OpsSecureReturn.success(data);
                                         }
+                                        resp.withAttr("type", OpenAiConsts.ASSISTANT);
                                         String respJson = objectMapper.writeValueAsString(resp);
                                         emitter.send(respJson);
                                     }

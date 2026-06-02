@@ -141,6 +141,11 @@
                 <span>会话列表</span>
                 <el-button type="primary" size="mini" icon="el-icon-plus" @click="createSession">新建</el-button>
             </div>
+    <div class="sidebar-header">
+        <el-checkbox v-model="metas.checkAllSession" style="margin-right: 5px;">全选</el-checkbox>
+        <el-button type="success" size="mini" icon="el-icon-guide" @click="toggleSessionChecked"></el-button>
+        <el-button type="danger" size="mini" icon="el-icon-delete" @click="deleteCheckedSession"></el-button>
+    </div>
             <div class="session-list">
                 <div v-if="!metas.sessionList || metas.sessionList.length===0" class="session-empty">
                     暂无会话，点击"新建"开始
@@ -152,6 +157,7 @@
                         :class="{ 'session-item-active': session.sessionId === metas.activeSessionId }"
                         @click="selectSession(session.sessionId)"
                 >
+                    <el-checkbox v-model="session.checked" style="margin-right: 5px;"></el-checkbox>
                     <div class="session-title">{{ session.title || '新对话' }}</div>
                     <el-button
                             class="session-delete-btn"
@@ -182,9 +188,12 @@
                         <i :class="msg.type==='user' ? 'el-icon-user-solid' : (msg.type.indexOf('tool')>=0?'el-icon-setting': 'el-icon-cpu')"></i>
                     </div>
                     <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
-                        <div class="message-role-label">
+                        <div class="message-role-label hover-show-parent">
                             {{ roleLabel(msg.type) }}
-                            <i @click="removeSelectMessage(idx)" style="color:red;" class="el-icon-circle-close"></i>
+                            <i @click="removeSelectMessage(idx)" style="color:red;font-size: 14px;"
+                               class="el-icon-circle-close hover-show-child"></i>
+                            <i @click="redoSelectMessage(idx)" style="color: green;font-size: 14px;"
+                               class="el-icon-refresh hover-show-child"></i>
                         </div>
                         <div class="message-content"
                              :class="{'streaming-cursor': metas.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
@@ -217,6 +226,39 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            重做，也就是将历史消息直接发送给AI，而不用输入新的用户信息的手段。<br/>
+                            当AI的答复不满意时，可以选择删除AI的回答，直接进行重做。
+                        </p>
+                        <el-button slot="reference"
+                                   v-if="currentMessages && currentMessages.length>0"
+                                   type="success"
+                                   size="small"
+                                   @click="directSendMessage">重做
+                        </el-button>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            回话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
+                            带来的问题是，Token费用的消耗变高，上下文也可能太长而被LLM大模型丢失。<br/>
+                            因此，回话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
+                        </p>
+                        <el-button slot="reference"
+                                   v-if="currentMessages && currentMessages.length>0"
+                                   type="success"
+                                   size="small"
+                                   @click="summarySessionHistory">回话总结
+                        </el-button>
+                    </el-popover>
                     <el-checkbox v-model="form.enableTools">工具调用</el-checkbox>
                     <el-checkbox v-model="form.encryptOutput">输出加密</el-checkbox>
                     <el-select v-model="form.messageType"
@@ -241,6 +283,56 @@
             </div>
         </div>
     </div>
+
+    <el-dialog
+            :title="dialog.toolApproval.title"
+            :visible.sync="dialog.toolApproval.show"
+            :v-if="dialog.toolApproval.show"
+            top="5vh"
+            width="80%">
+        <el-card shadow="never" style="max-height: 70vh;overflow: auto;">
+            <el-form inline>
+                <el-row v-for="(item,index) in form.toolApprovalList">
+                    <el-divider v-if="index>0"></el-divider>
+                    <el-row>
+                        <el-col :span="8">
+                            <el-form-item>
+                                <el-switch
+                                        v-model="item.reject"
+                                        active-color="#ff4949"
+                                        inactive-color="#13ce66"
+                                        active-text="拒绝执行"
+                                        inactive-text="允许执行">
+                                </el-switch>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="16">
+                            <el-form-item v-if="item.reject" class="form-item-full-width">
+                                <el-input v-model="item.rejectReason" clearable
+                                          placeholder="拒绝执行原因，提供给AI的拒绝信息，可不填"></el-input>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                    <el-row>
+                        <el-descriptions>
+                            <el-descriptions-item label="名称">{{item.functionName}}</el-descriptions-item>
+                            <el-descriptions-item label="调用ID">{{item.tool_call_id}}</el-descriptions-item>
+                            <el-descriptions-item label="参数列表">{{item.definition?.parameterNames}}
+                            </el-descriptions-item>
+                            <el-descriptions-item label="标签列表">{{item.definition?.tags}}</el-descriptions-item>
+                            <el-descriptions-item label="绑定类">{{item.definition?.bindClass}}</el-descriptions-item>
+                            <el-descriptions-item label="绑定方法">{{item.definition?.bindMethod}}
+                            </el-descriptions-item>
+                        </el-descriptions>
+                    </el-row>
+                </el-row>
+            </el-form>
+        </el-card>
+        <el-row type="flex" justify="end" style="margin-top: 15px;">
+            <el-button size="small">取消</el-button>
+            <el-button type="primary" size="small" @click="directSendMessage">执行</el-button>
+        </el-row>
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -262,7 +354,14 @@
                 handler: function (newVal, oldVal) {
                     this.$nextTick(() => this.scrollToBottom());
                 }
-            }
+            },
+            'metas.checkAllSession': {
+                handler: function (newVal, oldVal) {
+                    this.metas.sessionList.forEach(e => {
+                        e.checked = newVal;
+                    })
+                }
+            },
         },
         computed: {
             currentMessages() {
@@ -310,6 +409,7 @@
                     storage: {},
                     metas: {
                         cert: '',
+                        checkAllSession: false,
                         activeSessionId: null, // 当前活跃的会话ID
                         sessionList: [],        // 会话列表 [{sessionId, title}]
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
@@ -596,7 +696,10 @@
                     },
                     drawer: {},
                     dialog: {
-
+                        toolApproval: {
+                            title: '工具调用授权',
+                            show: false,
+                        }
                     },
                     form: {
                         meta: {
@@ -610,6 +713,7 @@
                         messageType: 'user',
                         encryptOutput: false,
                         enableTools: false,
+                        toolApprovalList: []
                     }
                 }
             },
@@ -785,7 +889,11 @@
             },
             createSession() {
                 let sessionId = this.genId();
-                this.metas.sessionList.unshift({sessionId, title: '新对话'});
+                this.metas.sessionList.unshift({
+                    sessionId,
+                    title: '新对话',
+                    checked: false,
+                });
                 this.$set(this.metas.historyMessageMap, sessionId, []);
                 this.metas.activeSessionId = sessionId;
                 this.$nextTick(() => this.scrollToBottom());
@@ -806,6 +914,35 @@
                                 this.metas.activeSessionId = this.metas.sessionList[0].sessionId;
                             } else {
                                 this.createSession();
+                            }
+                        }
+                    }).catch(() => {
+                });
+            },
+            toggleSessionChecked() {
+                this.metas.sessionList.forEach(e => {
+                    e.checked = !e.checked;
+                })
+            },
+            deleteCheckedSession() {
+                this.$confirm('确认删除勾选的回话？', '提示', {type: 'warning'})
+                    .then(() => {
+                        let hasActiveSession = false;
+                        let resultList = []
+                        this.metas.sessionList.forEach(e => {
+                            if (!e.checked) {
+                                resultList.push(e)
+                                if (e.sessionId == this.metas.activeSessionId) {
+                                    hasActiveSession = true;
+                                }
+                            }
+                        })
+                        this.metas.sessionList = resultList;
+                        if (resultList.length == 0) {
+                            this.createSession();
+                        } else {
+                            if (!hasActiveSession) {
+                                this.metas.activeSessionId = resultList[0].sessionId;
                             }
                         }
                     }).catch(() => {
@@ -887,10 +1024,14 @@
                 this.directSendMessage();
             },
             // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
-            async directSendMessage() {
+            async directSendMessage(action) {
 
                 let sid = this.metas.activeSessionId;
                 let messages = this.getActiveMessages();
+                if (messages.length == 0) {
+                    this.$message.error('没有任何历史消息，操作失败')
+                    return
+                }
 
                 // 用第一条用户消息作为会话标题
                 let session = this.metas.sessionList.find(s => s.sessionId === sid);
@@ -911,14 +1052,14 @@
                 this.metas.streamingStarted = false;
 
                 // 添加助手消息占位，用于流式内容逐步填充
-                messages.push({
+                let assistantMsg = {
                     type: 'assistant',
                     assistant: {
                         role: 'assistant',
                         content: ''
                     }
-                });
-                let assistantIdx = messages.length - 1;
+                }
+                messages.push(assistantMsg);
 
                 let demoCallsMap = {
                     0: {
@@ -933,38 +1074,59 @@
                 }
                 let toolCallsMap = {}
 
+                let toolDefinitionList = []
+
                 let _this = this;
                 let encryptOutput=this.form.encryptOutput;
+
+                function insertBeforeLast(arr, item) {
+                    // 如果数组为空，插入到首位；否则插入到倒数第二位
+                    const targetIndex = arr.length === 0 ? 0 : arr.length - 1;
+                    arr.splice(targetIndex, 0, item);
+                    return arr;
+                }
                 // SSE 消息处理：逐步写入助手消息内容，实现打字机效果
                 function handleChunk(raw) {
                     try {
-                        let json = JSON.parse(raw);
-                        if (json.code == 200) {
+                        let resp = JSON.parse(raw);
+                        if (resp.code == 200) {
                             //console.log(json.data)
-                            if (!json.data || json.data === '[DONE]') {
+                            if (!resp.data || resp.data === '[DONE]') {
                                 Object.keys(toolCallsMap).forEach(k => {
                                     let item = toolCallsMap[k];
-                                    messages[assistantIdx].assistant.content += '\ntool call:' + item.function.name;
+                                    let toolCallContent = 'tool call:\n' +
+                                        'call_id=' + item.id + '\n' +
+                                        'function_name=' + item.function.name + '\n' +
+                                        'arguments=' + item.function.arguments;
+                                    assistantMsg.assistant.content += '\n' + toolCallContent;
                                 })
                                 _this.$nextTick(() => _this.scrollToBottom());
                                 return;
                             }
                             if(encryptOutput){
-                                json = _this.transferRecv(json.data) || null
-                                json=JSON.parse(json)
+                                resp.data = _this.transferRecv(resp.data) || null
+                                resp.data = JSON.parse(resp.data)
                             }else{
-                                json=JSON.parse(json.data);
+                                resp.data = JSON.parse(resp.data);
                             }
                         } else {
-                            _this.messageError(json.msg,300)
+                            _this.messageError(resp.msg, 300)
                         }
-                        if (json.type && json.type == 'echo_tool') {
+                        let json = resp.data;
+
+                        if (resp.attrs && resp.attrs.type == 'echo_tool') {
                             if (!_this.metas.streamingStarted) {
                                 _this.metas.streamingStarted = true;
                             }
-                            messages.push(json);
+                            insertBeforeLast(messages, json);
+                            // messages.push(json);
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'definition_tool') {
+                            toolDefinitionList.push(json);
+                            return;
+                        }
+
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
                         if (delta && delta.tool_calls && delta.tool_calls.length > 0) {
                             if (!_this.metas.streamingStarted) {
@@ -1007,7 +1169,7 @@
                             if (!_this.metas.streamingStarted) {
                                 _this.metas.streamingStarted = true;
                             }
-                            messages[assistantIdx].assistant.content += content;
+                            assistantMsg.assistant.content += content;
                             _this.$nextTick(() => _this.scrollToBottom());
                         }
                     } catch (e) { /* 忽略解析错误 */
@@ -1024,6 +1186,7 @@
                     });
                     req.encryptOutput=encryptOutput;
                     req.enableTools = this.form.enableTools;
+                    req.toolApprovalList = this.form.toolApprovalList;
                     req=this.transferSend(req);
 
                     // 原生 fetch + ReadableStream 解析 SSE
@@ -1064,25 +1227,78 @@
                         }
                     }
 
-                    if (!messages[assistantIdx].assistant.content) {
-                        messages[assistantIdx].assistant.content = '[未收到任何内容]';
+                    if (!assistantMsg.assistant.content) {
+                        assistantMsg.assistant.content = '[未收到任何内容]';
                     }
 
                     if (Object.keys(toolCallsMap).length > 0) {
-                        messages[assistantIdx].assistant.tool_calls = []
+                        let toolApprovalList = []
+
+                        let toolDefinitionMap = {}
+                        for (let i = 0; i < toolDefinitionList.length; i++) {
+                            let item = toolDefinitionList[i];
+                            toolDefinitionMap[item.name] = item;
+                        }
+
+                        assistantMsg.assistant.tool_calls = []
                         Object.keys(toolCallsMap).forEach(k => {
                             let item = toolCallsMap[k];
-                            messages[assistantIdx].assistant.tool_calls.push({
+                            assistantMsg.assistant.tool_calls.push({
                                 id: item.id,
                                 type: item.type,
                                 function: item.function
                             })
+
+                            let definition = toolDefinitionMap[item.function.name]
+                            if (definition && definition.tags) {
+                                if (!definition.tags.includes('auto')) {
+                                    toolApprovalList.push({
+                                        tool_call_id: item.id,
+                                        functionName: item.function.name,
+                                        reject: false,
+                                        rejectReason: '',
+                                        definition: definition
+                                    })
+                                }
+                            }
                         })
-                        this.$confirm('是否允许进行工具调用？', '提示', {type: 'warning'})
-                            .then(() => {
-                                this.directSendMessage()
-                            }).catch(() => {
-                        });
+
+                        this.form.toolApprovalList = toolApprovalList;
+
+                        if (toolApprovalList.length > 0) {
+                            // 弹窗确认工具是否需要允许执行
+                            this.$confirm('是否允许进行工具调用？', '提示', {type: 'warning'})
+                                .then(() => {
+                                    this.directSendMessage()
+                                }).catch(() => {
+                            });
+                        } else {
+                            this.directSendMessage()
+                        }
+
+
+                    }
+
+                    if (action == 'summary-history') {
+                        let oldList = [...messages]
+                        messages.splice(0, messages.length);
+
+                        let firstUserIndex = 0;
+                        for (let i = 0; i < oldList.length; i++) {
+                            let item = oldList[i];
+                            messages.push(item);
+                            firstUserIndex = i;
+                            if (item.type == 'user') {
+                                break;
+                            }
+                        }
+                        if (firstUserIndex + 1 < oldList.length) {
+                            let item = oldList[firstUserIndex + 1];
+                            if (item.type == 'system') {
+                                messages.push(item);
+                            }
+                        }
+                        messages.push(assistantMsg);
                     }
                 } catch (e) {
                     let errMsg = '请求失败';
@@ -1093,8 +1309,8 @@
                         errMsg = e.message;
                     }
                     this.messageError(errMsg, 300);
-                    if (messages[assistantIdx] !== undefined) {
-                        messages[assistantIdx].assistant.content = messages[assistantIdx].assistant.content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
+                    if (assistantMsg !== undefined) {
+                        assistantMsg.assistant.content = assistantMsg.assistant.content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
                     }
                 } finally {
                     this.metas.sending = false;
@@ -1113,6 +1329,39 @@
                 }
                 list.splice(index,1)
                 this.$set(this.metas.historyMessageMap,sid,list)
+            },
+            redoSelectMessage(index) {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+                this.$confirm('确认重做该消息，后续消息将会被删除？', '提示', {type: 'warning'})
+                    .then(() => {
+                        list.splice(index + 1, list.length - index)
+                        this.$set(this.metas.historyMessageMap, sid, list)
+                        this.directSendMessage()
+                    }).catch(() => {
+                });
+            },
+            summarySessionHistory() {
+                this.$confirm('确认进行回话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
+                    .then(() => {
+                        let item = {
+                            type: 'user',
+                            user: {
+                                role: 'user',
+                                content: 'Summarize all previous conversations.response with before user question language.'
+                            }
+                        }
+                        let messages = this.getActiveMessages();
+                        messages.push(item);
+                        this.directSendMessage('summary-history')
+                    }).catch(() => {
+                });
             }
         }
     });
@@ -1653,6 +1902,26 @@
 
     .el-table__cell:hover .table-cell-hidden {
         display: inline-block;
+    }
+
+    .form-item-full-width {
+        width: 100%;
+    }
+
+    .form-item-full-width .el-form-item__content {
+        width: 100%;
+    }
+
+    .form-item-full-width .el-form-item__content > * {
+        width: 100%;
+    }
+
+    .hover-show-child {
+        display: none;
+    }
+
+    .hover-show-parent:hover .hover-show-child {
+        display: unset;
     }
 
     .scroller {

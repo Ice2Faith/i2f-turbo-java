@@ -18,4 +18,6 @@ public interface OpenAiConsts {
     String FUNCTION = "function";
 
     String ECHO_TOOL = "echo_tool";
+
+    String DEFINITION_TOOL = "definition_tool";
 }
