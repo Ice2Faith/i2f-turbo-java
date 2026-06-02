@@ -241,25 +241,44 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 .content(String.valueOf(callRet))
                                                 .build();
 
-                                        EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
-                                                .message(toolMsg)
-                                                .function(function)
-                                                .build();
-                                        toolEchoMsg.createContent();
-                                        OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                .type(OpenAiConsts.ECHO_TOOL)
-                                                .echo_tool(toolEchoMsg)
-                                                .build();
-                                        String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
-                                        OpsSecureReturn<?> resp = null;
-                                        if (req.isEncryptOutput()) {
-                                            resp = transfer.success(emitToolMsg);
-                                        } else {
-                                            resp = OpsSecureReturn.success(emitToolMsg);
+                                        if (toolMsg != null) {
+                                            EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
+                                                    .message(toolMsg)
+                                                    .function(function)
+                                                    .build();
+                                            toolEchoMsg.createContent();
+                                            OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
+                                                    .type(OpenAiConsts.ECHO_TOOL)
+                                                    .echo_tool(toolEchoMsg)
+                                                    .build();
+                                            String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
+                                            OpsSecureReturn<?> resp = null;
+                                            if (req.isEncryptOutput()) {
+                                                resp = transfer.success(emitToolMsg);
+                                            } else {
+                                                resp = OpsSecureReturn.success(emitToolMsg);
+                                            }
+                                            resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
+                                            String respJson = objectMapper.writeValueAsString(resp);
+                                            emitter.send(respJson);
                                         }
-                                        resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
-                                        String respJson = objectMapper.writeValueAsString(resp);
-                                        emitter.send(respJson);
+                                        if (toolMsg != null) {
+                                            OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
+                                                    .type(OpenAiConsts.TOOL)
+                                                    .tool(toolMsg)
+                                                    .build();
+                                            String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
+                                            OpsSecureReturn<?> resp = null;
+                                            if (req.isEncryptOutput()) {
+                                                resp = transfer.success(emitToolMsg);
+                                            } else {
+                                                resp = OpsSecureReturn.success(emitToolMsg);
+                                            }
+                                            resp.withAttr("type", OpenAiConsts.TOOL);
+                                            String respJson = objectMapper.writeValueAsString(resp);
+                                            emitter.send(respJson);
+                                        }
+
 
                                         messages.add(toolMsg);
                                     }

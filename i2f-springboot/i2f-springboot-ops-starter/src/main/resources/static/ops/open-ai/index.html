@@ -185,7 +185,10 @@
                         :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
                 >
                     <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
-                        <i :class="msg.type==='user' ? 'el-icon-user-solid' : (msg.type.indexOf('tool')>=0?'el-icon-setting': 'el-icon-cpu')"></i>
+                        <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
+                        <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
+                        <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
+                        <i v-else class="el-icon-cpu"></i>
                     </div>
                     <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
                         <div class="message-role-label hover-show-parent">
@@ -323,6 +326,7 @@
                             <el-descriptions-item label="绑定类">{{item.definition?.bindClass}}</el-descriptions-item>
                             <el-descriptions-item label="绑定方法">{{item.definition?.bindMethod}}
                             </el-descriptions-item>
+                            <el-descriptions-item label="调用参数">{{item.function?.arguments}}</el-descriptions-item>
                         </el-descriptions>
                     </el-row>
                 </el-row>
@@ -1106,7 +1110,7 @@
                                             content: toolCallContent
                                         }
                                     }
-                                    insertBeforeLast(messages, requestToolMsg)
+                                    messages.push(requestToolMsg)
                                 })
                                 _this.$nextTick(() => _this.scrollToBottom());
                                 return;
@@ -1123,6 +1127,14 @@
                         let json = resp.data;
 
                         if (resp.attrs && resp.attrs.type == 'echo_tool') {
+                            if (!_this.metas.streamingStarted) {
+                                _this.metas.streamingStarted = true;
+                            }
+                            insertBeforeLast(messages, json);
+                            // messages.push(json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'tool') {
                             if (!_this.metas.streamingStarted) {
                                 _this.metas.streamingStarted = true;
                             }
@@ -1265,6 +1277,7 @@
                                         functionName: item.function.name,
                                         reject: false,
                                         rejectReason: '',
+                                        function: item.function,
                                         definition: definition
                                     })
                                 }
