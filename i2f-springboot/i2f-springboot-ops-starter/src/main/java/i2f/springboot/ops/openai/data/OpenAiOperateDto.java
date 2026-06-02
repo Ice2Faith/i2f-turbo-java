@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class OpenAiOperateDto {
     protected OpenAiMeta meta;
-    protected OpenAiCompletionDto completion;
-    protected boolean encryptOutput=false;
+    protected OpenAiCompletionVo completion;
+    protected boolean encryptOutput = false;
     protected boolean enableTools = false;
 }

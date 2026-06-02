@@ -1,6 +1,5 @@
 package i2f.springboot.ops.openai.data;
 
-import i2f.springboot.ops.openai.data.message.OpenAiMessage;
 import i2f.springboot.ops.openai.data.message.OpenAiToolsDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,9 +15,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class OpenAiCompletionDto {
+public class OpenAiCompletionVo {
     protected String model;
     protected boolean stream;
-    protected List<OpenAiMessage> messages;
+    protected List<OpenAiMessageVo> messages;
     protected List<OpenAiToolsDefinition> tools;
 }

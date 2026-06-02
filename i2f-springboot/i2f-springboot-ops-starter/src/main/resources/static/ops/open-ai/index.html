@@ -176,19 +176,19 @@
                         v-for="(msg, idx) in currentMessages"
                         :key="idx"
                         class="message-row"
-                        :class="msg.role==='user' ? 'message-row-right' : 'message-row-left'"
+                        :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
                 >
-                    <div class="message-avatar" :class="msg.role==='user' ? 'avatar-user' : 'avatar-ai'">
-                        <i :class="msg.role==='user' ? 'el-icon-user-solid' : 'el-icon-cpu'"></i>
+                    <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
+                        <i :class="msg.type==='user' ? 'el-icon-user-solid' : 'el-icon-cpu'"></i>
                     </div>
-                    <div class="message-bubble" :class="msg.role==='user' ? 'bubble-user' : 'bubble-ai'">
+                    <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
                         <div class="message-role-label">
-                            {{ roleLabel(msg.role) }}
+                            {{ roleLabel(msg.type) }}
                             <i @click="removeSelectMessage(idx)" style="color:red;" class="el-icon-circle-close"></i>
                         </div>
                         <div class="message-content"
-                             :class="{'streaming-cursor': metas.streamingStarted && msg.role==='assistant' && idx===currentMessages.length-1}"
-                             v-html="renderMarkdown(msg.content)"></div>
+                             :class="{'streaming-cursor': metas.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
+                             v-html="renderMarkdown(msg[msg.type].content)"></div>
                     </div>
                 </div>
                 <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
@@ -599,10 +599,10 @@
                     },
                     form: {
                         meta: {
-                            baseUrl: '', // open-ai 兼容的地址
+                            baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', // open-ai 兼容的地址
                             apiKey: '',  // open-ai 兼容的秘钥
                         },
-                        presetBaseUrl: '',   // 当前选中的预设地址（仅用于 select 绑定）
+                        presetBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',   // 当前选中的预设地址（仅用于 select 绑定）
                         modelName: 'qwen-plus',
                         messageList: [],
                         inputText: '',
@@ -873,7 +873,14 @@
                 let messages = this.getActiveMessages();
 
                 // 追加用户消息，构建 API 请求消息列表
-                messages.push({role: this.form.messageType, content: text});
+                let item = {
+                    type: this.form.messageType
+                }
+                item[this.form.messageType] = {
+                    role: this.form.messageType,
+                    content: text
+                }
+                messages.push(item);
                 this.form.inputText = '';
 
                 this.directSendMessage();
@@ -893,15 +900,8 @@
 
                 // 快照当前历史消息作为请求内容（不包括将要添加的助手占位）
                 let apiMessages = [];
-                messages.forEach(m => {
-                    let item = {
-                        role: m.role,
-                        content: m.content
-                    }
-                    if (m.tool_calls && m.tool_calls.length > 0) {
-                        item.tool_calls = m.tool_calls;
-                    }
-                    apiMessages.push(item)
+                messages.forEach(e => {
+                    apiMessages.push(e)
                 })
                 this.$nextTick(() => this.scrollToBottom());
 
@@ -909,7 +909,13 @@
                 this.metas.streamingStarted = false;
 
                 // 添加助手消息占位，用于流式内容逐步填充
-                messages.push({role: 'assistant', content: ''});
+                messages.push({
+                    type: 'assistant',
+                    assistant: {
+                        role: 'assistant',
+                        content: ''
+                    }
+                });
                 let assistantIdx = messages.length - 1;
 
                 let demoCallsMap = {
@@ -936,7 +942,7 @@
                             if (!json.data || json.data === '[DONE]') {
                                 Object.keys(toolCallsMap).forEach(k => {
                                     let item = toolCallsMap[k];
-                                    messages[assistantIdx].content += 'tool call:' + item.function.name;
+                                    messages[assistantIdx].assistant.content += 'tool call:' + item.function.name;
                                 })
                                 _this.$nextTick(() => _this.scrollToBottom());
                                 return;
@@ -950,11 +956,11 @@
                         } else {
                             _this.messageError(json.msg,300)
                         }
-                        if (json.role && json.role == 'tool') {
+                        if (json.type && json.type == 'echo_tool') {
                             if (!_this.metas.streamingStarted) {
                                 _this.metas.streamingStarted = true;
                             }
-                            messages.push({role: 'tool', content: json.content});
+                            messages.push(json);
                             return;
                         }
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
@@ -999,7 +1005,7 @@
                             if (!_this.metas.streamingStarted) {
                                 _this.metas.streamingStarted = true;
                             }
-                            messages[assistantIdx].content += content;
+                            messages[assistantIdx].assistant.content += content;
                             _this.$nextTick(() => _this.scrollToBottom());
                         }
                     } catch (e) { /* 忽略解析错误 */
@@ -1056,15 +1062,15 @@
                         }
                     }
 
-                    if (!messages[assistantIdx].content) {
-                        messages[assistantIdx].content = '[未收到任何内容]';
+                    if (!messages[assistantIdx].assistant.content) {
+                        messages[assistantIdx].assistant.content = '[未收到任何内容]';
                     }
 
                     if (Object.keys(toolCallsMap).length > 0) {
-                        messages[assistantIdx].tool_calls = []
+                        messages[assistantIdx].assistant.tool_calls = []
                         Object.keys(toolCallsMap).forEach(k => {
                             let item = toolCallsMap[k];
-                            messages[assistantIdx].tool_calls.push({
+                            messages[assistantIdx].assistant.tool_calls.push({
                                 id: item.id,
                                 type: item.type,
                                 function: item.function
@@ -1086,7 +1092,7 @@
                     }
                     this.messageError(errMsg, 300);
                     if (messages[assistantIdx] !== undefined) {
-                        messages[assistantIdx].content = messages[assistantIdx].content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
+                        messages[assistantIdx].assistant.content = messages[assistantIdx].assistant.content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
                     }
                 } finally {
                     this.metas.sending = false;

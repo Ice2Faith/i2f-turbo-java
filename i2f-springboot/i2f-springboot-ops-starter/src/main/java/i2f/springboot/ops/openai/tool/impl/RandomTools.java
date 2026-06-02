@@ -17,18 +17,18 @@ public class RandomTools {
 
     private SecureRandom random = new SecureRandom();
 
-    @Tool(description = "get an random integer number.")
-    public int get_random_int_number() {
+    @Tool(description = "generate an random integer number.")
+    public int generate_random_int_number() {
         return random.nextInt();
     }
 
-    @Tool(description = "get an random float number,  value between [0.0~1.0].")
-    public double get_random_float_number() {
+    @Tool(description = "generate an random float number,  value between [0.0~1.0].")
+    public double generate_random_float_number() {
         return random.nextDouble();
     }
 
-    @Tool(description = "get an random boolean value.")
-    public boolean get_random_boolean() {
+    @Tool(description = "generate an random boolean value.")
+    public boolean generate_random_boolean() {
         return random.nextBoolean();
     }
 

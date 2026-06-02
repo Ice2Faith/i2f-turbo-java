@@ -11,7 +11,10 @@ import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
+import i2f.springboot.ops.openai.data.OpenAiCompletionVo;
+import i2f.springboot.ops.openai.data.OpenAiMessageVo;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.data.message.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -74,16 +77,16 @@ public class OpenAiOpsController implements IOpsProvider {
     @Autowired
     private HostIdProxyHelper hostIdProxyHelper;
 
-    private RestTemplate restTemplate=createRestTemplate();
+    private RestTemplate restTemplate = createRestTemplate();
 
-    private ExecutorService pool= Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors()*4+2);
+    private ExecutorService pool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() * 4 + 2);
 
     @Autowired(required = false)
     private ToolRawDefinitionsProvider toolDefinitionProvider;
     @Autowired
     private RouterFunctionMapping routerFunctionMapping;
 
-    private RestTemplate createRestTemplate(){
+    private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(30))
                 .setReadTimeout(Duration.ofMinutes(5))
@@ -115,14 +118,35 @@ public class OpenAiOpsController implements IOpsProvider {
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
-        AtomicReference<OpenAiOperateDto> reqRef=new AtomicReference<>();
+        AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
 
             CompletableFuture.runAsync(() -> {
                 try {
-                    OpenAiCompletionDto completion = req.getCompletion();
+                    OpenAiCompletionVo vo = req.getCompletion();
+                    OpenAiCompletionDto completion = new OpenAiCompletionDto();
+
+                    completion.setModel(vo.getModel());
+                    completion.setStream(vo.isStream());
+                    completion.setMessages(new ArrayList<>());
+                    List<OpenAiMessageVo> voMsgList = vo.getMessages();
+                    if (voMsgList != null) {
+                        for (OpenAiMessageVo item : voMsgList) {
+                            if (OpenAiConsts.USER.equals(item.getType())) {
+                                completion.getMessages().add(item.getUser());
+                            } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
+                                completion.getMessages().add(item.getSystem());
+                            } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
+                                completion.getMessages().add(item.getAssistant());
+                            } else if (OpenAiConsts.TOOL.equals(item.getType())) {
+                                completion.getMessages().add(item.getTool());
+                            }
+                        }
+                    }
+                    completion.setTools(vo.getTools());
+
                     if (req.isEnableTools()) {
                         if (toolDefinitionProvider != null) {
                             List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
@@ -131,37 +155,42 @@ public class OpenAiOpsController implements IOpsProvider {
                                     completion.setTools(new ArrayList<>());
                                 }
                                 for (ToolRawDefinition tool : tools) {
-                                    Map<String, Object> function = new HashMap<>();
-                                    function.put("type", "function");
-                                    function.put("function", tool.getJsonSchema());
-                                    completion.getTools().add(function);
+                                    completion.getTools().add(new OpenAiToolsDefinition(tool.getJsonSchema()));
                                 }
                             }
                         }
 
-                        List<Map<String, Object>> messages = completion.getMessages();
+                        List<OpenAiMessage> messages = completion.getMessages();
                         if (messages != null && !messages.isEmpty()) {
-                            Map<String, Object> lastMsg = messages.get(messages.size() - 1);
+                            OpenAiMessage lastMsg = messages.get(messages.size() - 1);
                             // TODO 处理 tools-call-request, 最后一条是工具调用，或者是授权调用
-                            if (Objects.equals("assistant", lastMsg.get("role"))) {
-                                List<Map<String, Object>> calls = (List<Map<String, Object>>) lastMsg.get("tool_calls");
+                            if (lastMsg instanceof OpenAiAssistantMessage) {
+                                OpenAiAssistantMessage assistantMessage = (OpenAiAssistantMessage) lastMsg;
+                                List<OpenAiToolCall> calls = assistantMessage.getTool_calls();
+
                                 if (calls != null && !calls.isEmpty()) {
-                                    List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
                                     Map<String, ToolRawDefinition> definitionMap = new HashMap<>();
-                                    for (ToolRawDefinition tool : tools) {
-                                        definitionMap.put(tool.getName(), tool);
+                                    if (toolDefinitionProvider != null) {
+                                        List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                                        for (ToolRawDefinition tool : tools) {
+                                            definitionMap.put(tool.getName(), tool);
+                                        }
                                     }
-                                    for (Map<String, Object> call : calls) {
-                                        String id = (String) call.get("id");
-                                        Map<String, Object> funcMap = (Map<String, Object>) call.get("function");
-                                        String name = (String) funcMap.get("name");
-                                        String arguments = (String) funcMap.get("arguments");
+                                    for (OpenAiToolCall call : calls) {
+                                        String id = call.getId();
+                                        OpenAiToolCallFunction function = call.getFunction();
+                                        String name = function.getName();
+                                        String arguments = function.getArguments();
                                         ToolRawDefinition definition = definitionMap.get(name);
                                         Map<String, Object> argumentsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
                                         });
                                         Object callRet = null;
                                         try {
-                                            callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
+                                            if (definition == null) {
+                                                throw new IllegalArgumentException("cannot found tool definition: " + name);
+                                            } else {
+                                                callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
+                                            }
                                         } catch (Throwable e) {
                                             callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                         }
@@ -170,14 +199,20 @@ public class OpenAiOpsController implements IOpsProvider {
                                         } else {
                                             callRet = objectMapper.writeValueAsString(callRet);
                                         }
-                                        Map<String, Object> toolMsg = new HashMap<>();
-                                        toolMsg.put("role", "tool");
-                                        toolMsg.put("tool_call_id", id);
-                                        toolMsg.put("content", callRet);
+                                        OpenAiToolMessage toolMsg = OpenAiToolMessage.builder()
+                                                .tool_call_id(id)
+                                                .content(String.valueOf(callRet))
+                                                .build();
 
-                                        Map<String, Object> emitToolMsgMap = new HashMap<>(toolMsg);
-                                        emitToolMsgMap.put("function", funcMap);
-                                        String emitToolMsg = objectMapper.writeValueAsString(emitToolMsgMap);
+                                        EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
+                                                .message(toolMsg)
+                                                .function(function)
+                                                .build();
+                                        OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
+                                                .type(OpenAiConsts.ECHO_TOOL)
+                                                .echoTool(toolEchoMsg)
+                                                .build();
+                                        String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                         OpsSecureReturn<?> resp = null;
                                         if (req.isEncryptOutput()) {
                                             resp = transfer.success(emitToolMsg);
@@ -195,8 +230,8 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
 
-                    restTemplate.execute(req.getMeta().getBaseUrl(), HttpMethod.POST, request->{
-                        request.getHeaders().add("Authorization","Bearer "+req.getMeta().getApiKey());
+                    restTemplate.execute(req.getMeta().getBaseUrl(), HttpMethod.POST, request -> {
+                        request.getHeaders().add("Authorization", "Bearer " + req.getMeta().getApiKey());
                         request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
 
                         OutputStream body = request.getBody();
@@ -212,10 +247,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                     if (line.startsWith("data:")) {
                                         String data = line.substring(5).trim();
                                         OpsSecureReturn<?> resp = null;
-                                        if(req.isEncryptOutput()){
-                                            resp=transfer.success(data);
-                                        }else{
-                                            resp=OpsSecureReturn.success(data);
+                                        if (req.isEncryptOutput()) {
+                                            resp = transfer.success(data);
+                                        } else {
+                                            resp = OpsSecureReturn.success(data);
                                         }
                                         String respJson = objectMapper.writeValueAsString(resp);
                                         emitter.send(respJson);
@@ -224,10 +259,10 @@ public class OpenAiOpsController implements IOpsProvider {
                             } catch (Exception e) {
                                 try {
                                     OpsSecureReturn<?> resp = null;
-                                    if(req.isEncryptOutput()) {
-                                        resp=transfer.error(e);
-                                    }else{
-                                        resp=OpsSecureReturn.error(e);
+                                    if (req.isEncryptOutput()) {
+                                        resp = transfer.error(e);
+                                    } else {
+                                        resp = OpsSecureReturn.error(e);
                                     }
                                     String respJson = objectMapper.writeValueAsString(resp);
                                     emitter.send(respJson);
@@ -243,10 +278,10 @@ public class OpenAiOpsController implements IOpsProvider {
                 } catch (Exception e) {
                     try {
                         OpsSecureReturn<?> resp = null;
-                        if(req.isEncryptOutput()) {
-                            resp=transfer.error(e);
-                        }else{
-                            resp=OpsSecureReturn.error(e);
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.error(e);
+                        } else {
+                            resp = OpsSecureReturn.error(e);
                         }
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
@@ -255,7 +290,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.completeWithError(ex);
                     }
                 }
-            },pool);
+            }, pool);
 
 //            emitter.onCompletion(() -> System.out.println("前端 SSE 连接已正常关闭"));
             emitter.onTimeout(() -> System.out.println("前端 SSE 连接超时"));
@@ -265,10 +300,10 @@ public class OpenAiOpsController implements IOpsProvider {
             log.warn(e.getMessage(), e);
             OpsSecureReturn<?> resp = null;
             OpenAiOperateDto req = reqRef.get();
-            if(req!=null && req.isEncryptOutput()) {
-                resp=transfer.error(e);
-            }else{
-                resp=OpsSecureReturn.error(e);
+            if (req != null && req.isEncryptOutput()) {
+                resp = transfer.error(e);
+            } else {
+                resp = OpsSecureReturn.error(e);
             }
             String respJson = objectMapper.writeValueAsString(resp);
             emitter.send(respJson);
