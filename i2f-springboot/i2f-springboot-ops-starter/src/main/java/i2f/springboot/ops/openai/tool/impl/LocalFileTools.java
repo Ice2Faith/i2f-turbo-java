@@ -8,6 +8,7 @@ import i2f.match.impl.AntMatcher;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
@@ -24,6 +25,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
+@ConditionalOnExpression("${ai.tools.file.enable:true}")
 @Data
 @NoArgsConstructor
 @Component
