@@ -692,6 +692,7 @@
                             {label: '系统', value: 'system'},
                             {label: '工具', value: 'tool'},
                             {label: '工具结果', value: 'echo_tool'},
+                            {label: '工具请求', value: 'request_tool'},
                         ],
                     },
                     drawer: {},
@@ -1094,11 +1095,18 @@
                             if (!resp.data || resp.data === '[DONE]') {
                                 Object.keys(toolCallsMap).forEach(k => {
                                     let item = toolCallsMap[k];
-                                    let toolCallContent = 'tool call:\n' +
-                                        'call_id=' + item.id + '\n' +
+                                    let toolCallContent = 'call_id=' + item.id + '\n' +
                                         'function_name=' + item.function.name + '\n' +
                                         'arguments=' + item.function.arguments;
-                                    assistantMsg.assistant.content += '\n' + toolCallContent;
+                                    let requestToolMsg = {
+                                        type: 'request_tool',
+                                        request_tool: {
+                                            call: item,
+                                            role: 'request_tool',
+                                            content: toolCallContent
+                                        }
+                                    }
+                                    insertBeforeLast(messages, requestToolMsg)
                                 })
                                 _this.$nextTick(() => _this.scrollToBottom());
                                 return;

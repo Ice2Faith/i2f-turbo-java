@@ -19,5 +19,7 @@ public interface OpenAiConsts {
 
     String ECHO_TOOL = "echo_tool";
 
+    String REQUEST_TOOL = "request_tool";
+
     String DEFINITION_TOOL = "definition_tool";
 }

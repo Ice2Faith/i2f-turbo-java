@@ -20,5 +20,6 @@ public class OpenAiMessageVo {
     protected OpenAiAssistantMessage assistant;
     protected OpenAiToolMessage tool;
     protected EchoOpenAiToolMessage echo_tool;
+    protected RequestOpenAiToolMessage request_tool;
 
 }
