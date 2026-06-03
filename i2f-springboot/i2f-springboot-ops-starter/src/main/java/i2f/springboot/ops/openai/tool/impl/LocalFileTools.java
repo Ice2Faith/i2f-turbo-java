@@ -5,6 +5,7 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.match.impl.AntMatcher;
+import i2f.springboot.ops.util.HumanUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,24 +43,19 @@ public class LocalFileTools {
             },
             description = "search files by ant pattern"
     )
-    public List<String> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
-                                     String startPath,
-                                     @ToolParam(value = "pattern", description = "match pattern, ant match style, for example /**/*.java or /**/*user*")
-                                     String pattern,
-                                     @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, for example 3 or 10")
-                                     int maxDeep) {
-        List<String> ret = new ArrayList<>();
+    public List<Map<String, Object>> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
+                                                  String startPath,
+                                                  @ToolParam(value = "pattern", description = "match pattern, ant match style, for example /**/*.java or /**/*user*")
+                                                  String pattern,
+                                                  @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, for example 3 or 10")
+                                                  int maxDeep) {
+        List<Map<String, Object>> ret = new ArrayList<>();
 
         File rootFile = getRootFile();
-        String absRootPath = rootFile.getAbsolutePath();
-        absRootPath = absRootPath.replace("\\", "/");
-        if (!absRootPath.endsWith("/")) {
-            absRootPath = absRootPath + "/";
-        }
 
         File startFile = getFile(startPath);
 
-        search_files_next(ret, startFile, pattern, maxDeep, absRootPath);
+        search_files_next(ret, startFile, pattern, maxDeep, rootFile);
         return ret;
     }
 
@@ -106,6 +102,12 @@ public class LocalFileTools {
 
     public File getFile(String startPath) {
         File rootFile = getRootFile();
+        return getSubFile(startPath, rootFile);
+    }
+
+    public File getSubFile(String startPath, File rootFile) {
+        rootFile = new File(rootFile.getAbsolutePath());
+
         String absRootPath = rootFile.getAbsolutePath();
         absRootPath = absRootPath.replace("\\", "/");
         if (!absRootPath.endsWith("/")) {
@@ -131,7 +133,7 @@ public class LocalFileTools {
         return startFile;
     }
 
-    public void search_files_next(List<String> ret, File startFile, String pattern, int maxDeep, String absRootPath) {
+    public void search_files_next(List<Map<String, Object>> ret, File startFile, String pattern, int maxDeep, File rootFile) {
         if (maxDeep == 0) {
             return;
         }
@@ -142,13 +144,13 @@ public class LocalFileTools {
             return;
         }
         if (startFile.isFile()) {
-            acceptFile(startFile, ret, pattern, absRootPath);
+            acceptFile(startFile, ret, pattern, rootFile);
         } else if (startFile.isDirectory()) {
             try {
                 File[] files = startFile.listFiles();
                 if (files != null) {
                     for (File file : files) {
-                        search_files_next(ret, file, pattern, maxDeep - 1, absRootPath);
+                        search_files_next(ret, file, pattern, maxDeep - 1, rootFile);
                     }
                 }
             } catch (Exception e) {
@@ -157,27 +159,53 @@ public class LocalFileTools {
         }
     }
 
-    public void acceptFile(File startFile, List<String> ret, String pattern, String absRootPath) {
-        if (startFile == null) {
-            return;
+    public String getSubPath(File file) {
+        return getSubPath(file, getRootFile());
+    }
+
+    public String getSubPath(File file, File rootFile) {
+        file = new File(file.getAbsolutePath());
+        rootFile = new File(rootFile.getAbsolutePath());
+
+        String absRootPath = rootFile.getAbsolutePath();
+        absRootPath = absRootPath.replace("\\", "/");
+        if (!absRootPath.endsWith("/")) {
+            absRootPath = absRootPath + "/";
         }
-        File file = new File(startFile.getAbsolutePath());
+
         String absolutePath = file.getAbsolutePath();
         absolutePath = absolutePath.replace("\\", "/");
         if (!absolutePath.startsWith(absRootPath)) {
-            return;
+            return null;
         }
         absolutePath = absolutePath.substring(absRootPath.length());
         if (!absolutePath.startsWith("/")) {
             absolutePath = "/" + absolutePath;
         }
+        return absolutePath;
+    }
+
+    public void acceptFile(File startFile, List<Map<String, Object>> ret, String pattern, File rootFile) {
+        if (startFile == null) {
+            return;
+        }
+        File file = new File(startFile.getAbsolutePath());
+        String absolutePath = getSubPath(file, rootFile);
         if (pattern == null || pattern.isEmpty()) {
-            ret.add(absolutePath);
+            Map<String, Object> item = new HashMap<>();
+            item.put("file", absolutePath);
+            item.put("byteSize", file.length());
+            item.put("humanSize", HumanUtil.humanFileSize(file.length()));
+            ret.add(item);
             return;
         }
 
         if (matcher.matches(absolutePath, pattern)) {
-            ret.add(absolutePath);
+            Map<String, Object> item = new HashMap<>();
+            item.put("file", absolutePath);
+            item.put("byteSize", file.length());
+            item.put("humanSize", HumanUtil.humanFileSize(file.length()));
+            ret.add(item);
         }
     }
 }
