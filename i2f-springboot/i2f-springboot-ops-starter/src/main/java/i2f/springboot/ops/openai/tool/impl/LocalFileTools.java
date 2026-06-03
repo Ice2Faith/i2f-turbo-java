@@ -12,10 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -91,6 +88,79 @@ public class LocalFileTools {
         ret.put("realizeEndLine", Math.min(endLine, lineNumber));
         ret.put("textContent", builder.toString());
         ret.put("hasMoreLine", (line != null));
+        return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "replace file lines in range [startLine,endLine) with new content"
+    )
+    public Map<String, Object> replace_file_lines(@ToolParam(value = "filePath", description = "file path, for example / or /user")
+                                                  String filePath,
+                                                  @ToolParam(value = "startLine", description = "start line number, value in [1,...], for example 1 or 100")
+                                                  int startLine,
+                                                  @ToolParam(value = "endLine", description = "end line number, value in [1,...], for example 1 or 100")
+                                                  int endLine,
+                                                  @ToolParam(value = "content", description = "new content to replace, cloud be multi-line string")
+                                                  String content) throws IOException {
+        File file = getFile(filePath);
+
+        // 读取所有行
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
+
+        int totalLines = lines.size();
+        int realizeStartLine = Math.max(1, startLine);
+        int realizeEndLine = Math.min(endLine, totalLines + 1);
+
+        String[] contentLines = content.split("\n");
+
+        // 如果 startLine 大于文件总行数，则在末尾追加
+        if (realizeStartLine > totalLines) {
+            // 将 content 按行分割后追加到文件末尾
+            for (String contentLine : contentLines) {
+                lines.add(contentLine);
+            }
+        } else {
+            // 删除 [realizeStartLine, realizeEndLine) 范围内的行
+            int deleteCount = realizeEndLine - realizeStartLine;
+            for (int i = 0; i < deleteCount; i++) {
+                if (realizeStartLine - 1 < lines.size()) {
+                    lines.remove(realizeStartLine - 1);
+                }
+            }
+
+            // 在 realizeStartLine - 1 位置插入新内容
+            int insertIndex = realizeStartLine - 1;
+            for (int i = contentLines.length - 1; i >= 0; i--) {
+                lines.add(insertIndex, contentLines[i]);
+            }
+        }
+
+        // 写回文件
+        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
+        for (int i = 0; i < lines.size(); i++) {
+            writer.write(lines.get(i));
+            if (i < lines.size() - 1) {
+                writer.newLine();
+            }
+        }
+        writer.close();
+
+        // 返回结果
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("realizeStartLine", realizeStartLine);
+        ret.put("realizeEndLine", realizeEndLine);
+        ret.put("replacedLineCount", Math.max(0, realizeEndLine - realizeStartLine));
+        ret.put("newLineCount", contentLines.length);
+        ret.put("totalLinesAfter", lines.size());
         return ret;
     }
 
