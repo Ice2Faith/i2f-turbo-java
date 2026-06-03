@@ -43,7 +43,11 @@
     <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
 
     <script src="../lib/markdown-it@14.1.1/dist/markdown-it.min.js"></script>
-</head>
+
+    <!-- highlight.js 核心高亮库 -->
+    <script src="../lib/highlight.js/11.11.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="../lib/highlight.js/11.11.1/styles/github.min.css"/>
+
 <body>
 <div id="app">
     <!-- 顶部配置栏：鼠标悬浮展开，离开折叠 -->
@@ -191,17 +195,44 @@
                         <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
                         <i v-else class="el-icon-cpu"></i>
                     </div>
-                    <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
-                        <div class="message-role-label hover-show-parent">
+                    <div class="message-bubble hover-show-parent" style="position: relative;"
+                         :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
+                        <div class="message-role-label ">
                             {{ roleLabel(msg.type) }}
-                            <i @click="removeSelectMessage(idx)" style="color:red;font-size: 14px;"
-                               class="el-icon-circle-close hover-show-child"></i>
-                            <i @click="redoSelectMessage(idx)" style="color: green;font-size: 14px;"
-                               class="el-icon-refresh hover-show-child"></i>
                         </div>
                         <div class="message-content"
                              :class="{'streaming-cursor': metas.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
                              v-html="renderMarkdown(msg[msg.type].content)"></div>
+                        <div class="bubble-actions">
+                            <el-popover
+                                    v-if="msg.usage && msg.usage.total_tokens>=0"
+                                    placement="top-start"
+                                    title="说明"
+                                    width="200"
+                                    trigger="hover">
+                                <p>
+                                    tokens:<br/>
+                                    prompt: {{msg.usage.prompt_tokens}}<br/>
+                                    completion: {{msg.usage.completion_tokens}}<br/>
+                                    total: {{msg.usage.total_tokens}}<br/>
+                                </p>
+                                <span slot="reference" v-if="msg.usage && msg.usage.total_tokens>=0">
+                                    tokens:
+                                    {{msg.usage.prompt_tokens}} /
+                                    {{msg.usage.completion_tokens}} /
+                                    {{msg.usage.total_tokens}}
+                                </span>
+                            </el-popover>
+                            <span class="hover-show-child">
+                                <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                                   class="el-icon-circle-close "></i>
+                                <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                                   class="el-icon-refresh"></i>
+                                <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                                   class="el-icon-copy-document"></i>
+                            </span>
+
+                        </div>
                     </div>
                 </div>
                 <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
@@ -230,6 +261,25 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
+                    <span>
+                        最大会话次数：
+                        <el-input-number v-model="metas.maxHistoryCount" size="mini" :min="-1"
+                                         :max="999"></el-input-number>
+                    </span>
+                    <span>
+                        <el-popover
+                                placement="top-start"
+                                title="说明"
+                                width="200"
+                                trigger="hover">
+                            <p>
+                                截断会话，也就是如果当前的会话次数超过了设置的最大次数限制。<br/>
+                                将会丢弃早期的会话历史记录，保持会话次数小等于设定值。
+                            </p>
+                            <el-checkbox slot="reference"
+                                         v-model="metas.enableTruncOverflowHistory">截断会话</el-checkbox>
+                        </el-popover>
+                    </span>
                     <el-popover
                             placement="top-start"
                             title="说明"
@@ -263,18 +313,80 @@
                                    @click="summarySessionHistory">回话总结
                         </el-button>
                     </el-popover>
-                    <el-checkbox v-model="form.enableTools">工具调用</el-checkbox>
-                    <el-checkbox v-model="form.encryptOutput">输出加密</el-checkbox>
-                    <el-select v-model="form.messageType"
-                               placeholder="发送消息类型"
-                               style="width:160px;">
-                        <el-option
-                                v-for="item in metas.roleList"
-                                :key="item.value"
-                                :label="item.label"
-                                :value="item.value">
-                        </el-option>
-                    </el-select>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
+                            如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
+                            如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
+                        </p>
+                        <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            输出加密，是否将模型的输出结果进行加密传输。<br/>
+                            如果启用，那将会对模型的响应结果进行加密后返回，但是因为模型输出内容较多较频繁，也会拖慢模型输出速度。<br/>
+                            如果不器用，则不会进行加密，不会拖慢模型输出速度，大多数情况下，不启用即可。<br/>
+                        </p>
+                        <el-checkbox slot="reference" v-model="form.encryptOutput">输出加密</el-checkbox>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="960"
+                            trigger="hover">
+                        <p style="font-size: 12px;">
+                            消息类型，也就是在与大模型交互是使用的消息类型。<br/>
+                            用户消息(user)，也叫用户提示词，一般情况下，用户发送的都是用户消息。<br/>
+                            系统消息(system)，也叫系统提示词，一般是设计师提前制定的，用于限定大模型的角色，职责范围的或者推理约束的。<br/>
+                            助手消息(assistant)，也就是大模型答复的消息内容，其中有一个特例，包含工具调用契约(tool_calls)。<br/>
+                            工具消息(tool)，这是一个比较特殊的消息，助手消息可能返回一个工具调用契约，调用方需要根据这个契约，调用执行工具，并且返回调用结果。<br/>
+                            <br/>
+                            在多轮对话中，模型会重新读取一遍整个对话列表，重新理解角色设定、用户提问、回答内容等，这也就是模型具有记忆的最初形式。<br/>
+                            也就是说，大模型本身不具有记忆能力，更像是一个转换器，将一堆不同角色的对话历史作为输入，根据这个输入推理出结果。<br/>
+                            后来的，例如 Tools/Function-Calling/MCP/RAG/Skills 等都是在维护这个对话列表，还有包括上下文压缩、最大消息数量等等。
+                            <br/>
+                            接着，到目前为止的，ReAct/Agent/Hermes 等等，都是围绕这份消息列表展开的。<br/>
+                            那么，大模型自身真正的能力，包括：对话理解，文本生成，图像理解，图像生成，语音生成，视频生成等，能力范围也在不断扩大。<br/>
+                            其中，文本生成有一个特例，就是工具调用契约生成，这就是 Tools/Function-Calling/MCP
+                            的基石，让大模型生成调用工具所需要的参数。<br/>
+                            调用大模型的调用方，根据这个契约，调用执行真正的工具，然后将执行的结果作为一个 工具消息
+                            加入到消息列表中，让大模型继续推理。<br/>
+                            简单的ReAct流程：用户发送消息[1u]--注入工具声明信息[1u]--大模型推理[1u]--返回调用契约[2ac]--调用方解析契约并调用执行工具--反馈工具调用结果[3t]--大模型继续推理[1u,2ac,3t]--最终归纳答复[4a]。<br/>
+                            这个流程中，我们使用[1u]形式表示每一步参与的消息内容。<br/>
+                            1u表示第一条用户消息，2ac表示第二条助手消息(c表示带有工具调用契约)，3t表示第三条工具消息，4a表示第四条助手消息。<br/>
+                            可以看到，这个流程中，大模型调用发生了两轮，第一轮只携带一条消息[1u]，由用户触发，第二轮则携带三条消息[1u,2ac,3t]，由调用的客户端自动触发。<br/>
+                            从这里就可以知道，调用的客户端，需要维护复杂的状态，处理工具调用，维护消息历史，还有包括skills,rag等等功能<br/>
+                            因此就是需要一个胖客户端，因此才有了各种CLI工具，或者本地客户端，极少有瘦客户端胖服务端的情况（因为意味着要维护状态同步、双端协调等变得更加复杂）<br/>
+                            当然胖客户端的前提是要求HITL(Human In The
+                            Loop)用户参与的情况（例如：工具调用授权，危险操作把关等），如果是全自动化场景，那胖服务器就是必然。<br/>
+                            胖客户端案例：各类智能编码辅助工具，各类桌面辅助工具（和本地环境紧相关）。<br/>
+                            胖服务器案例：Dify,ComfyUI等自动化工具，或者定时的流程自动化工具（和本地环境关系不大）。<br/>
+                            <br/>
+                            举个例子说明：<br/>
+                            因此，大模型就像是一个CPU，Agent等就像是程序计数器+程序控制块，负责准备输入，处理输出，维护消息循环，决定如何执行下一步。<br/>
+                            换个例子说明：<br/>
+                            因此，大模型就像是一个大脑，Agent等就像是身体血肉与四肢，负责准备所见所得，处理大脑指令并反馈，维护行为连贯性，决定如何执行下一步。<br/>
+                        </p>
+                        <el-select slot="reference"
+                                   v-model="form.messageType"
+                                   placeholder="发送消息类型"
+                                   style="width:160px;">
+                            <el-option
+                                    v-for="item in stdRoleList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-popover>
                     <el-button size="small" plain type="warning" @click="clearCurrentSession" :disabled="metas.sending">
                         <i class="el-icon-delete"></i> 清空会话
                     </el-button>
@@ -284,6 +396,51 @@
                         发送 <i class="el-icon-s-promotion"></i>
                     </el-button>
                 </div>
+    <div class="input-status-bar">
+        <el-popover
+                v-if="sessionUsages"
+                placement="top-start"
+                title="说明"
+                width="200"
+                trigger="hover">
+            <p>
+                session total tokens:<br/>
+                prompt: {{sessionUsages.prompt_tokens}}<br/>
+                completion: {{sessionUsages.completion_tokens}}<br/>
+                total: {{sessionUsages.total_tokens}}<br/>
+            </p>
+            <span slot="reference" v-if="sessionUsages">
+                            total: [
+                                    {{sessionUsages.prompt_tokens}} /
+                                    {{sessionUsages.completion_tokens}} /
+                                    {{sessionUsages.total_tokens}}
+                            ]
+                        </span>
+        </el-popover>
+        <el-popover
+                v-if="currentSessionUsages"
+                placement="top-start"
+                title="说明"
+                width="200"
+                trigger="hover">
+            <p>
+                session visible tokens:<br/>
+                prompt: {{currentSessionUsages.prompt_tokens}}<br/>
+                completion: {{currentSessionUsages.completion_tokens}}<br/>
+                total: {{currentSessionUsages.total_tokens}}<br/>
+            </p>
+            <span slot="reference" v-if="currentSessionUsages">
+                            visible: [
+                                {{currentSessionUsages.prompt_tokens}} /
+                                {{currentSessionUsages.completion_tokens}} /
+                                {{currentSessionUsages.total_tokens}}
+                            ]
+                        </span>
+        </el-popover>
+        <span>
+                        会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
+                    </span>
+    </div>
             </div>
         </div>
     </div>
@@ -367,6 +524,11 @@
                     })
                 }
             },
+            'currentHistoryCount': {
+                handler: function (newVal, oldVal) {
+                    this.truncOverflowHistory();
+                }
+            }
         },
         computed: {
             currentMessages() {
@@ -375,6 +537,50 @@
                     return [];
                 }
                 return this.metas.historyMessageMap[sid] || [];
+            },
+            sessionUsages() {
+                let ret = {
+                    prompt_tokens: -1,
+                    completion_tokens: -1,
+                    total_tokens: -1
+                }
+
+                let sid = this.metas.activeSessionId;
+                let session = this.metas.sessionList.filter(e => e.sessionId == sid)[0] || {}
+                if (session.usage) {
+                    return session.usage;
+                }
+                return ret;
+            },
+            currentSessionUsages() {
+                let ret = {
+                    prompt_tokens: -1,
+                    completion_tokens: -1,
+                    total_tokens: -1
+                }
+                let list = this.currentMessages
+                list.forEach(e => {
+                    if (e.usage && e.usage.total_tokens >= 0) {
+                        ret.prompt_tokens += e.usage.prompt_tokens;
+                        ret.completion_tokens += e.usage.completion_tokens;
+                        ret.total_tokens += e.usage.total_tokens;
+                    }
+                })
+                return ret;
+            },
+            currentHistoryCount() {
+                let ret = 0;
+                let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                let list = this.currentMessages;
+                list.forEach(e => {
+                    if (stdRoleTypeList.includes(e.type)) {
+                        ret++;
+                    }
+                })
+                return ret;
+            },
+            stdRoleList() {
+                return this.metas.roleList.filter(e => e.std !== false)
             },
             currentPresetBaseUrlItem(){
                 return this.metas.presetBaseUrlList.filter(e=>e.value==this.form.meta.baseUrl)[0]
@@ -418,6 +624,8 @@
                         activeSessionId: null, // 当前活跃的会话ID
                         sessionList: [],        // 会话列表 [{sessionId, title}]
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
+                        maxHistoryCount: 20,
+                        enableTruncOverflowHistory: true,
                         showConfig: false,
                         sending: false,
                         streamingStarted: false, // 是否已收到首个流式 token
@@ -441,6 +649,8 @@
                                     tips: '登录之后，添加一个 API Key，复制 API Key，形如：sk-********'
                                 },
                                 models:[
+                                    {label: "千问-Qwen3.7-Max", value: "qwen3.7-max"},
+                                    {label: "千问-Qwen3.7-Plus", value: "qwen3.7-plus"},
                                     {label: "千问-Qwen3.6-Plus", value: "qwen3.6-plus"},
                                     {label: "千问-Qwen3.6-Max", value: "qwen3.6-max-preview"},
                                     {label: "千问-Qwen3.6-Flash", value: "qwen3.6-flash"},
@@ -692,12 +902,12 @@
                             {label: 'Text', value: 'text'},
                         ],
                         roleList: [
-                            {label: '用户', value: 'user'},
-                            {label: '助手', value: 'assistant'},
-                            {label: '系统', value: 'system'},
-                            {label: '工具', value: 'tool'},
-                            {label: '工具结果', value: 'echo_tool'},
-                            {label: '工具请求', value: 'request_tool'},
+                            {label: '用户', value: 'user', std: true},
+                            {label: '助手', value: 'assistant', std: true},
+                            {label: '系统', value: 'system', std: true},
+                            {label: '工具', value: 'tool', std: true},
+                            {label: '工具结果', value: 'echo_tool', std: false},
+                            {label: '工具请求', value: 'request_tool', std: false},
                         ],
                     },
                     drawer: {},
@@ -899,6 +1109,11 @@
                     sessionId,
                     title: '新对话',
                     checked: false,
+                    usage: {
+                        prompt_tokens: -1,
+                        completion_tokens: -1,
+                        total_tokens: -1
+                    }
                 });
                 this.$set(this.metas.historyMessageMap, sessionId, []);
                 this.metas.activeSessionId = sessionId;
@@ -1007,11 +1222,48 @@
                 let messages = this.metas.historyMessageMap[sid];
                 return messages;
             },
+            truncOverflowHistory() {
+                if (!this.metas.enableTruncOverflowHistory) {
+                    return;
+                }
+                if (this.currentHistoryCount <= this.metas.maxHistoryCount) {
+                    let diff = this.metas.maxHistoryCount - this.currentHistoryCount;
+                    if (diff == 3) {
+                        this.$message.warning('即将达到最大会话次数限制，请注意，历史会话即将被截断，可以选择[会话总结]');
+                    }
+                    return;
+                }
+                let messages = this.getActiveMessages();
+                let list = [...messages]
+                messages.splice(0, messages.length);
+
+                let stack = []
+
+                let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                let count = 0;
+                for (let i = list.length - 1; i >= 0; i--) {
+                    let item = list[i];
+                    if (stdRoleTypeList.includes(item.type)) {
+                        count++;
+                    }
+                    if (count > this.metas.maxHistoryCount) {
+                        break;
+                    }
+                    stack.push(item)
+                }
+
+                for (let i = stack.length - 1; i >= 0; i--) {
+                    let item = stack[i];
+                    messages.push(item)
+                }
+            },
             async sendMessage() {
                 let text = (this.form.inputText || '').trim();
                 if (!text) {
                     return;
                 }
+
+                this.truncOverflowHistory();
 
                 let sid = this.metas.activeSessionId;
                 let messages = this.getActiveMessages();
@@ -1027,7 +1279,17 @@
                 messages.push(item);
                 this.form.inputText = '';
 
-                this.directSendMessage();
+                if (item.type == 'user') {
+                    this.directSendMessage();
+                } else {
+                    this.$confirm('非用户消息，是否需要发送请求到模型？', '提示', {type: 'warning'})
+                        .then(() => {
+                            this.directSendMessage()
+                        }).catch(() => {
+                        this.$message.info('请求未发送，你可以继续编辑')
+                    });
+                }
+
             },
             // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
             async directSendMessage(action) {
@@ -1063,6 +1325,11 @@
                     assistant: {
                         role: 'assistant',
                         content: ''
+                    },
+                    usage: {
+                        prompt_tokens: -1,
+                        completion_tokens: -1,
+                        total_tokens: -1
                     }
                 }
                 messages.push(assistantMsg);
@@ -1148,6 +1415,11 @@
                             return;
                         }
 
+                        if (json.usage) {
+                            // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
+                            assistantMsg.usage = json.usage
+                        }
+
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
                         if (delta && delta.tool_calls && delta.tool_calls.length > 0) {
                             if (!_this.metas.streamingStarted) {
@@ -1203,6 +1475,9 @@
                             model: this.form.modelName,
                             messages: apiMessages,
                             stream: true,
+                            stream_options: {
+                                include_usage: true
+                            }
                         }
                     });
                     req.encryptOutput=encryptOutput;
@@ -1369,6 +1644,19 @@
                     }).catch(() => {
                 });
             },
+            copySelectMessage(index) {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+                let item = list[index];
+                let content = item[item.type].content;
+                copy2clipboard(content);
+            },
             summarySessionHistory() {
                 this.$confirm('确认进行回话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
                     .then(() => {
@@ -1400,9 +1688,85 @@
         linkify: true,      // 自动识别 URL
         typographer: true,  // 智能标点替换
         breaks: true,       // \n 转为 <br>
+        highlight: function (str, lang) {
+            let innerHtml = null
+
+            // 检查语言是否受支持
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    innerHtml = hljs.highlight(str, {language: lang}).value;
+                } catch (__) {
+                }
+            } else {
+                innerHtml = md.utils.escapeHtml(str);
+            }
+            // 如果未指定语言或解析出错，返回转义后的纯文本
+            /*language=html*/
+            let text = `
+                <div class="markdown-code-block">
+                    <div class="markdown-code-header">
+                        <span class="markdown-header-lang">{{lang}}</span>
+                        <span class="markdown-header-actions">
+                                <i class="el-icon-copy-document" onclick="onCopyMarkdownCodeBlock(event)"></i>
+                            </span>
+                    </div>
+                    <pre class="hljs markdown-code-body">
+                            <code>
+                                {{innerHtml}}
+                            </code>
+                        </pre>
+                </div>`;
+            text = text.replaceAll(/\s*\n\s*/g, '');
+            text = text.replaceAll('{{lang}}', lang);
+            text = text.replaceAll('{{innerHtml}}', innerHtml);
+            return text;
+        }
     }) : null;
     window.app.$md = md;
     window.app.$mount('#app');
+
+    function onCopyMarkdownCodeBlock(event) {
+        console.log(event)
+        let searchDom = event.target;
+        let findDom = null;
+        let level = 10;
+        while (searchDom) {
+            if (level <= 0) {
+                break;
+            }
+            findDom = searchDom.querySelector('.markdown-code-body');
+            if (findDom) {
+                break;
+            }
+            searchDom = searchDom.parentElement;
+            level--;
+        }
+        if (!findDom) {
+            app.$message.error('未找到代码块，复制失败')
+            return
+        }
+        let text = findDom.innerText;
+        copy2clipboard(text);
+    }
+
+    function copy2clipboard(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        // 将元素移出可视区域，避免页面闪烁或滚动
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+
+        textarea.select();
+        try {
+            document.execCommand("copy");
+            app.$message.success('复制成功')
+        } catch (err) {
+            app.$message.success('复制失败')
+        } finally {
+            document.body.removeChild(textarea); // 清理临时元素
+        }
+    }
 </script>
 <style>
     * {
@@ -1699,8 +2063,6 @@
 
     /* 代码块 */
     .message-content pre {
-        background: #1e1e2e;
-        color: #cdd6f4;
         border-radius: 8px;
         padding: 12px 14px;
         overflow-x: auto;
@@ -1718,8 +2080,7 @@
     }
 
     .bubble-user .message-content pre {
-        background: rgba(0, 0, 0, 0.28);
-        color: #e0e0e0;
+
     }
 
     /* 列表 */
@@ -1873,6 +2234,19 @@
         gap: 8px;
     }
 
+    .input-status-bar {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        background: #eee;
+        margin-bottom: -8px;
+        margin-left: -18px;
+        margin-right: -18px;
+        padding: 0px 8px;
+    }
+
     /* ===== 滚动条美化 ===== */
     .message-list::-webkit-scrollbar,
     .session-list::-webkit-scrollbar {
@@ -1946,6 +2320,19 @@
         display: unset;
     }
 
+    .bubble-actions {
+        position: absolute;
+        bottom: -20px;
+        width: 100%;
+        text-align: right;
+        right: 5px;
+        min-width: 100px;
+    }
+
+    .bubble-actions > * {
+        margin-left: 8px;
+    }
+
     .scroller {
         height: calc(100vh - 200px);
     }
@@ -1967,6 +2354,40 @@
         width: 260px;
         height: 260px;
         line-height: 260px;
+    }
+
+    .markdown-code-block {
+
+    }
+
+    .markdown-code-block .markdown-code-header {
+        background: #ccc;
+        color: white;
+        border-radius: 8px 8px 0px 0px;
+        padding: 2px 8px;
+        clear: both;
+        position: relative;
+    }
+
+    .markdown-code-block .markdown-header-lang {
+
+    }
+
+    .markdown-code-block .markdown-header-actions {
+        float: right;
+    }
+
+    .markdown-code-block .markdown-header-actions > * {
+        margin-left: 8px;
+    }
+
+    .markdown-code-block .markdown-header-actions > *:hover {
+        color: deepskyblue;
+    }
+
+    .markdown-code-block .markdown-code-body {
+        margin-top: 0px;
+        border-radius: 0px 0px 8px 8px;
     }
 </style>
 </html>

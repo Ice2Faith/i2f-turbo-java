@@ -128,6 +128,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     completion.setModel(vo.getModel());
                     completion.setStream(vo.isStream());
+                    completion.setStream_options(vo.getStream_options());
                     completion.setMessages(new ArrayList<>());
                     List<OpenAiMessageVo> voMsgList = vo.getMessages();
                     if (voMsgList != null) {
