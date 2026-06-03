@@ -43,7 +43,11 @@
     <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
 
     <script src="../lib/markdown-it@14.1.1/dist/markdown-it.min.js"></script>
-</head>
+
+    <!-- highlight.js 核心高亮库 -->
+    <script src="../lib/highlight.js/11.11.1/highlight.min.js"></script>
+    <link rel="stylesheet" href="../lib/highlight.js/11.11.1/styles/github.min.css"/>
+
 <body>
 <div id="app">
     <!-- 顶部配置栏：鼠标悬浮展开，离开折叠 -->
@@ -191,17 +195,22 @@
                         <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
                         <i v-else class="el-icon-cpu"></i>
                     </div>
-                    <div class="message-bubble" :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
-                        <div class="message-role-label hover-show-parent">
+                    <div class="message-bubble hover-show-parent" style="position: relative;"
+                         :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
+                        <div class="message-role-label ">
                             {{ roleLabel(msg.type) }}
-                            <i @click="removeSelectMessage(idx)" style="color:red;font-size: 14px;"
-                               class="el-icon-circle-close hover-show-child"></i>
-                            <i @click="redoSelectMessage(idx)" style="color: green;font-size: 14px;"
-                               class="el-icon-refresh hover-show-child"></i>
                         </div>
                         <div class="message-content"
                              :class="{'streaming-cursor': metas.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
                              v-html="renderMarkdown(msg[msg.type].content)"></div>
+                        <div class="hover-show-child bubble-actions">
+                            <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                               class="el-icon-circle-close "></i>
+                            <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                               class="el-icon-refresh"></i>
+                            <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                               class="el-icon-copy-document"></i>
+                        </div>
                     </div>
                 </div>
                 <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
@@ -1369,6 +1378,19 @@
                     }).catch(() => {
                 });
             },
+            copySelectMessage(index) {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+                let item = list[index];
+                let content = item[item.type].content;
+                copy2clipboard(content);
+            },
             summarySessionHistory() {
                 this.$confirm('确认进行回话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
                     .then(() => {
@@ -1400,9 +1422,85 @@
         linkify: true,      // 自动识别 URL
         typographer: true,  // 智能标点替换
         breaks: true,       // \n 转为 <br>
+        highlight: function (str, lang) {
+            let innerHtml = null
+
+            // 检查语言是否受支持
+            if (lang && hljs.getLanguage(lang)) {
+                try {
+                    innerHtml = hljs.highlight(str, {language: lang}).value;
+                } catch (__) {
+                }
+            } else {
+                innerHtml = md.utils.escapeHtml(str);
+            }
+            // 如果未指定语言或解析出错，返回转义后的纯文本
+            /*language=html*/
+            let text = `
+                <div class="markdown-code-block">
+                    <div class="markdown-code-header">
+                        <span class="markdown-header-lang">{{lang}}</span>
+                        <span class="markdown-header-actions">
+                                <i class="el-icon-copy-document" onclick="onCopyMarkdownCodeBlock(event)"></i>
+                            </span>
+                    </div>
+                    <pre class="hljs markdown-code-body">
+                            <code>
+                                {{innerHtml}}
+                            </code>
+                        </pre>
+                </div>`;
+            text = text.replaceAll(/\s*\n\s*/g, '');
+            text = text.replaceAll('{{lang}}', lang);
+            text = text.replaceAll('{{innerHtml}}', innerHtml);
+            return text;
+        }
     }) : null;
     window.app.$md = md;
     window.app.$mount('#app');
+
+    function onCopyMarkdownCodeBlock(event) {
+        console.log(event)
+        let searchDom = event.target;
+        let findDom = null;
+        let level = 10;
+        while (searchDom) {
+            if (level <= 0) {
+                break;
+            }
+            findDom = searchDom.querySelector('.markdown-code-body');
+            if (findDom) {
+                break;
+            }
+            searchDom = searchDom.parentElement;
+            level--;
+        }
+        if (!findDom) {
+            app.$message.error('未找到代码块，复制失败')
+            return
+        }
+        let text = findDom.innerText;
+        copy2clipboard(text);
+    }
+
+    function copy2clipboard(text) {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        // 将元素移出可视区域，避免页面闪烁或滚动
+        textarea.style.position = "fixed";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+
+        textarea.select();
+        try {
+            document.execCommand("copy");
+            app.$message.success('复制成功')
+        } catch (err) {
+            app.$message.success('复制失败')
+        } finally {
+            document.body.removeChild(textarea); // 清理临时元素
+        }
+    }
 </script>
 <style>
     * {
@@ -1699,8 +1797,6 @@
 
     /* 代码块 */
     .message-content pre {
-        background: #1e1e2e;
-        color: #cdd6f4;
         border-radius: 8px;
         padding: 12px 14px;
         overflow-x: auto;
@@ -1718,8 +1814,7 @@
     }
 
     .bubble-user .message-content pre {
-        background: rgba(0, 0, 0, 0.28);
-        color: #e0e0e0;
+
     }
 
     /* 列表 */
@@ -1946,6 +2041,19 @@
         display: unset;
     }
 
+    .bubble-actions {
+        position: absolute;
+        bottom: -20px;
+        width: 100%;
+        text-align: right;
+        right: 5px;
+        min-width: 100px;
+    }
+
+    .bubble-actions > * {
+        margin-left: 8px;
+    }
+
     .scroller {
         height: calc(100vh - 200px);
     }
@@ -1967,6 +2075,40 @@
         width: 260px;
         height: 260px;
         line-height: 260px;
+    }
+
+    .markdown-code-block {
+
+    }
+
+    .markdown-code-block .markdown-code-header {
+        background: #ccc;
+        color: white;
+        border-radius: 8px 8px 0px 0px;
+        padding: 2px 8px;
+        clear: both;
+        position: relative;
+    }
+
+    .markdown-code-block .markdown-header-lang {
+
+    }
+
+    .markdown-code-block .markdown-header-actions {
+        float: right;
+    }
+
+    .markdown-code-block .markdown-header-actions > * {
+        margin-left: 8px;
+    }
+
+    .markdown-code-block .markdown-header-actions > *:hover {
+        color: deepskyblue;
+    }
+
+    .markdown-code-block .markdown-code-body {
+        margin-top: 0px;
+        border-radius: 0px 0px 8px 8px;
     }
 </style>
 </html>
