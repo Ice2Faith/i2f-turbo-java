@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -21,4 +22,5 @@ public class OpenAiCompletionDto {
     protected boolean stream;
     protected List<OpenAiMessage> messages;
     protected List<OpenAiToolsDefinition> tools;
+    protected Map<String, Object> stream_options;
 }
