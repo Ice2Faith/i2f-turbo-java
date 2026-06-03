@@ -96,8 +96,13 @@ public class LocalFileTools {
 
     public File getRootFile() {
         File rootFile = new File(this.rootPath);
-        rootFile = new File(rootFile.getAbsolutePath());
+        rootFile = normalizeFile(rootFile);
         return rootFile;
+    }
+
+    public File normalizeFile(File file) {
+        file = new File(file.getAbsolutePath());
+        return file;
     }
 
     public File getFile(String startPath) {
@@ -106,7 +111,7 @@ public class LocalFileTools {
     }
 
     public File getSubFile(String startPath, File rootFile) {
-        rootFile = new File(rootFile.getAbsolutePath());
+        rootFile = normalizeFile(rootFile);
 
         String absRootPath = rootFile.getAbsolutePath();
         absRootPath = absRootPath.replace("\\", "/");
@@ -117,7 +122,7 @@ public class LocalFileTools {
         File startFile = rootFile;
         if (startPath != null && !startPath.isEmpty()) {
             startFile = new File(rootFile, startPath);
-            startFile = new File(startFile.getAbsolutePath());
+            startFile = normalizeFile(startFile);
         }
         String absStartPath = startFile.getAbsolutePath();
         absStartPath = absStartPath.replace("\\", "/");
@@ -164,8 +169,8 @@ public class LocalFileTools {
     }
 
     public String getSubPath(File file, File rootFile) {
-        file = new File(file.getAbsolutePath());
-        rootFile = new File(rootFile.getAbsolutePath());
+        file = normalizeFile(file);
+        rootFile = normalizeFile(rootFile);
 
         String absRootPath = rootFile.getAbsolutePath();
         absRootPath = absRootPath.replace("\\", "/");
