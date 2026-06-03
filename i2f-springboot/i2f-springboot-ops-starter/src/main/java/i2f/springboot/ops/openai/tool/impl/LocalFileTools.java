@@ -42,9 +42,12 @@ public class LocalFileTools {
             },
             description = "search files by ant pattern"
     )
-    public List<String> search_files(@ToolParam(description = "start search path, cloud be null means from root, for example / or /user") String startPath,
-                                     @ToolParam(description = "match pattern, ant match style, for example /**/*.java or /**/*user*") String pattern,
-                                     @ToolParam(description = "max search deep, -1 means unlimited, for example 3 or 10") int maxDeep) {
+    public List<String> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
+                                     String startPath,
+                                     @ToolParam(value = "pattern", description = "match pattern, ant match style, for example /**/*.java or /**/*user*")
+                                     String pattern,
+                                     @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, for example 3 or 10")
+                                     int maxDeep) {
         List<String> ret = new ArrayList<>();
 
         File rootFile = getRootFile();
@@ -66,9 +69,12 @@ public class LocalFileTools {
             },
             description = "read text file content by line range [startLine,endLine)"
     )
-    public Map<String, Object> read_text_file_range(@ToolParam(description = "file path, for example / or /user") String filePath,
-                                                    @ToolParam(description = "start line number, value in [1,...], for example 1 or 100") int startLine,
-                                                    @ToolParam(description = "end line number, value in [1,...], for example 1 or 100") int endLine
+    public Map<String, Object> read_text_file_range(@ToolParam(value = "filePath", description = "file path, for example / or /user")
+                                                    String filePath,
+                                                    @ToolParam(value = "startLine", description = "start line number, value in [1,...], for example 1 or 100")
+                                                    int startLine,
+                                                    @ToolParam(value = "endLine", description = "end line number, value in [1,...], for example 1 or 100")
+                                                    int endLine
     ) throws IOException {
         File file = getFile(filePath);
         StringBuilder builder = new StringBuilder();

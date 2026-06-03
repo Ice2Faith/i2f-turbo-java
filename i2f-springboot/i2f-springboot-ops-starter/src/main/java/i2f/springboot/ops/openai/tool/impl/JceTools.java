@@ -24,9 +24,12 @@ public class JceTools {
             },
             description = "message digest on jce platform"
     )
-    public String message_digest_jce(@ToolParam(description = "the text") String text,
-                                     @ToolParam(description = "the algorithm for jce, for example: MD5 or SHA-256") String algorithm,
-                                     @ToolParam(description = "the provider for jce, cloud be null, or other provider name") String provider) throws Throwable {
+    public String message_digest_jce(@ToolParam(value = "text", description = "the text")
+                                     String text,
+                                     @ToolParam(value = "algorithm", description = "the algorithm for jce, for example: MD5 or SHA-256")
+                                     String algorithm,
+                                     @ToolParam(value = "provider", description = "the provider for jce, cloud be null, or other provider name")
+                                     String provider) throws Throwable {
         MessageDigest digest = null;
         if (provider == null || provider.isEmpty()) {
             digest = MessageDigest.getInstance(algorithm);

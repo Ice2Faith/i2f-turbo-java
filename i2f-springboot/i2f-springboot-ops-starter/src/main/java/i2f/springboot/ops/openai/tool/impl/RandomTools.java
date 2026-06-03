@@ -35,7 +35,8 @@ public class RandomTools {
             },
             description = "generate an random integer number between [0~max)."
     )
-    public int generate_random_int_number_max(@ToolParam(value = "max", description = "max integer value, for example: 100 or 12") int max) {
+    public int generate_random_int_number_max(@ToolParam(value = "max", description = "max integer value, for example: 100 or 12")
+                                              int max) {
         return Math.abs(random.nextInt()) % max;
     }
 
@@ -45,8 +46,10 @@ public class RandomTools {
             },
             description = "generate an random integer number between [min~max)."
     )
-    public int generate_random_int_number_between(@ToolParam(value = "min", description = "max integer value, for example: 8 or 12") int min,
-                                                  @ToolParam(value = "max", description = "max integer value, for example: 24 or 100") int max) {
+    public int generate_random_int_number_between(@ToolParam(value = "min", description = "max integer value, for example: 8 or 12")
+                                                  int min,
+                                                  @ToolParam(value = "max", description = "max integer value, for example: 24 or 100")
+                                                  int max) {
         return Math.abs(random.nextInt()) % (max - min) + min;
     }
 

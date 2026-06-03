@@ -182,48 +182,53 @@
                     <i class="el-icon-chat-dot-round"></i>
                     <p>发送消息，开始对话</p>
                 </div>
-                <div
-                        v-for="(msg, idx) in currentMessages"
-                        :key="idx"
-                        class="message-row"
-                        :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
-                >
-                    <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
-                        <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
-                        <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
-                        <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
-                        <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
-                        <i v-else class="el-icon-cpu"></i>
-                    </div>
-                    <div class="message-bubble hover-show-parent" style="position: relative;"
-                         :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
-                        <div class="message-role-label ">
-                            {{ roleLabel(msg.type) }}
-                        </div>
-                        <div class="message-content"
-                             :class="{'streaming-cursor': metas.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
-                             v-html="renderMarkdown(msg[msg.type].content)"></div>
-                        <div class="bubble-actions">
-                            <el-popover
-                                    v-if="msg.usage && msg.usage.total_tokens>=0"
-                                    placement="top-start"
-                                    title="说明"
-                                    width="200"
-                                    trigger="hover">
-                                <p>
-                                    tokens:<br/>
-                                    prompt: {{msg.usage.prompt_tokens}}<br/>
-                                    completion: {{msg.usage.completion_tokens}}<br/>
-                                    total: {{msg.usage.total_tokens}}<br/>
-                                </p>
-                                <span slot="reference" v-if="msg.usage && msg.usage.total_tokens>=0">
+
+    <div v-for="(msg, idx) in currentMessages"
+         :key="idx">
+        <el-divider v-if="!msg.hidden && (idx>1 && currentMessages[idx-1].hidden)">
+            截断会话历史线
+        </el-divider>
+
+        <div
+                class="message-row"
+                :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
+        >
+            <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
+                <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
+                <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
+                <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
+                <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
+                <i v-else class="el-icon-cpu"></i>
+            </div>
+            <div class="message-bubble hover-show-parent" style="position: relative;"
+                 :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
+                <div class="message-role-label ">
+                    {{ roleLabel(msg.type) }}
+                </div>
+                <div class="message-content"
+                     :class="{'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
+                     v-html="renderMarkdown(msg[msg.type].content)"></div>
+                <div class="bubble-actions">
+                    <el-popover
+                            v-if="msg.usage && msg.usage.total_tokens>=0"
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            tokens:<br/>
+                            prompt: {{msg.usage.prompt_tokens}}<br/>
+                            completion: {{msg.usage.completion_tokens}}<br/>
+                            total: {{msg.usage.total_tokens}}<br/>
+                        </p>
+                        <span slot="reference" v-if="msg.usage && msg.usage.total_tokens>=0">
                                     tokens:
                                     {{msg.usage.prompt_tokens}} /
                                     {{msg.usage.completion_tokens}} /
                                     {{msg.usage.total_tokens}}
                                 </span>
-                            </el-popover>
-                            <span class="hover-show-child">
+                    </el-popover>
+                    <span class="hover-show-child">
                                 <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
                                    class="el-icon-circle-close "></i>
                                 <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
@@ -232,11 +237,13 @@
                                    class="el-icon-copy-document"></i>
                             </span>
 
-                        </div>
-                    </div>
                 </div>
-                <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
-                <div v-if="metas.sending && !metas.streamingStarted" class="message-row message-row-left">
+            </div>
+        </div>
+    </div>
+
+    <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
+    <div v-if="currentSession?.sending && !currentSession?.streamingStarted" class="message-row message-row-left">
                     <div class="message-avatar avatar-ai">
                         <i class="el-icon-cpu"></i>
                     </div>
@@ -257,7 +264,7 @@
                         :autosize="{ minRows: 2, maxRows: 6 }"
                         placeholder="输入消息，Ctrl+Enter 快速发送"
                         @keydown.ctrl.enter.native="sendMessage"
-                        :disabled="metas.sending"
+                        :disabled="currentSession?.sending"
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
@@ -270,20 +277,28 @@
                         <el-popover
                                 placement="top-start"
                                 title="说明"
-                                width="200"
+                                width="320"
                                 trigger="hover">
                             <p>
                                 截断会话，也就是如果当前的会话次数超过了设置的最大次数限制。<br/>
-                                将会丢弃早期的会话历史记录，保持会话次数小等于设定值。
+                                将会丢弃早期的会话历史记录，保持会话次数小等于设定值。<br/>
+                                不过本页面，将会保留被丢弃的历史消息，会显示截断分割线<br/>
+                                如果需要同步清除本页面的被丢弃的消息，点击此按钮：
+                                <el-button type="warning"
+                                           size="mini"
+                                           icon="el-icon-circle-close"
+                                           circle
+                                           @click="truncOverflowHistory"></el-button>
                             </p>
-                            <el-checkbox slot="reference"
-                                         v-model="metas.enableTruncOverflowHistory">截断会话</el-checkbox>
+                            <span slot="reference">
+                                <el-checkbox v-model="metas.enableTruncOverflowHistory">截断会话</el-checkbox>
+                            </span>
                         </el-popover>
                     </span>
                     <el-popover
                             placement="top-start"
                             title="说明"
-                            width="200"
+                            width="320"
                             trigger="hover">
                         <p>
                             重做，也就是将历史消息直接发送给AI，而不用输入新的用户信息的手段。<br/>
@@ -299,7 +314,7 @@
                     <el-popover
                             placement="top-start"
                             title="说明"
-                            width="200"
+                            width="360"
                             trigger="hover">
                         <p>
                             回话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
@@ -316,7 +331,7 @@
                     <el-popover
                             placement="top-start"
                             title="说明"
-                            width="200"
+                            width="320"
                             trigger="hover">
                         <p>
                             工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
@@ -328,7 +343,7 @@
                     <el-popover
                             placement="top-start"
                             title="说明"
-                            width="200"
+                            width="320"
                             trigger="hover">
                         <p>
                             输出加密，是否将模型的输出结果进行加密传输。<br/>
@@ -387,53 +402,54 @@
                             </el-option>
                         </el-select>
                     </el-popover>
-                    <el-button size="small" plain type="warning" @click="clearCurrentSession" :disabled="metas.sending">
+                    <el-button size="small" plain type="warning" @click="clearCurrentSession"
+                               :disabled="currentSession?.sending">
                         <i class="el-icon-delete"></i> 清空会话
                     </el-button>
                     <el-button type="primary" size="small" @click="sendMessage"
-                               :loading="metas.sending"
+                               :loading="currentSession?.sending"
                                :disabled="!form.inputText || !form.inputText.trim()">
                         发送 <i class="el-icon-s-promotion"></i>
                     </el-button>
                 </div>
     <div class="input-status-bar">
         <el-popover
-                v-if="sessionUsages"
+                v-if="currentSessionTotalUsages"
                 placement="top-start"
                 title="说明"
                 width="200"
                 trigger="hover">
             <p>
                 session total tokens:<br/>
-                prompt: {{sessionUsages.prompt_tokens}}<br/>
-                completion: {{sessionUsages.completion_tokens}}<br/>
-                total: {{sessionUsages.total_tokens}}<br/>
+                prompt: {{currentSessionTotalUsages.prompt_tokens}}<br/>
+                completion: {{currentSessionTotalUsages.completion_tokens}}<br/>
+                total: {{currentSessionTotalUsages.total_tokens}}<br/>
             </p>
-            <span slot="reference" v-if="sessionUsages">
+            <span slot="reference" v-if="currentSessionTotalUsages">
                             total: [
-                                    {{sessionUsages.prompt_tokens}} /
-                                    {{sessionUsages.completion_tokens}} /
-                                    {{sessionUsages.total_tokens}}
+                                    {{currentSessionTotalUsages.prompt_tokens}} /
+                                    {{currentSessionTotalUsages.completion_tokens}} /
+                                    {{currentSessionTotalUsages.total_tokens}}
                             ]
                         </span>
         </el-popover>
         <el-popover
-                v-if="currentSessionUsages"
+                v-if="currentSessionVisibleUsages"
                 placement="top-start"
                 title="说明"
                 width="200"
                 trigger="hover">
             <p>
                 session visible tokens:<br/>
-                prompt: {{currentSessionUsages.prompt_tokens}}<br/>
-                completion: {{currentSessionUsages.completion_tokens}}<br/>
-                total: {{currentSessionUsages.total_tokens}}<br/>
+                prompt: {{currentSessionVisibleUsages.prompt_tokens}}<br/>
+                completion: {{currentSessionVisibleUsages.completion_tokens}}<br/>
+                total: {{currentSessionVisibleUsages.total_tokens}}<br/>
             </p>
-            <span slot="reference" v-if="currentSessionUsages">
+            <span slot="reference" v-if="currentSessionVisibleUsages">
                             visible: [
-                                {{currentSessionUsages.prompt_tokens}} /
-                                {{currentSessionUsages.completion_tokens}} /
-                                {{currentSessionUsages.total_tokens}}
+                                {{currentSessionVisibleUsages.prompt_tokens}} /
+                                {{currentSessionVisibleUsages.completion_tokens}} /
+                                {{currentSessionVisibleUsages.total_tokens}}
                             ]
                         </span>
         </el-popover>
@@ -526,7 +542,34 @@
             },
             'currentHistoryCount': {
                 handler: function (newVal, oldVal) {
-                    this.truncOverflowHistory();
+                    if (!this.metas.enableTruncOverflowHistory) {
+                        return;
+                    }
+                    if (this.currentHistoryCount <= this.metas.maxHistoryCount) {
+                        let diff = this.metas.maxHistoryCount - this.currentHistoryCount;
+                        if (diff == 3) {
+                            this.$message.warning('即将达到最大会话次数限制，请注意，历史会话即将被截断，可以选择[会话总结]');
+                        }
+                    }
+                }
+            },
+            'currentMessages': {
+                handler: function (newVal, oldVal) {
+                    let messages = this.currentMessages;
+
+                    let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                    let count = 0;
+                    for (let i = messages.length - 1; i >= 0; i--) {
+                        let item = messages[i];
+                        if (stdRoleTypeList.includes(item.type)) {
+                            count++;
+                        }
+                        if (count > this.metas.maxHistoryCount) {
+                            item.hidden = true;
+                        } else {
+                            item.hidden = false;
+                        }
+                    }
                 }
             }
         },
@@ -538,7 +581,12 @@
                 }
                 return this.metas.historyMessageMap[sid] || [];
             },
-            sessionUsages() {
+            currentSession() {
+                let sid = this.metas.activeSessionId;
+                let session = this.metas.sessionList.filter(e => e.sessionId == sid)[0]
+                return session;
+            },
+            currentSessionTotalUsages() {
                 let ret = {
                     prompt_tokens: -1,
                     completion_tokens: -1,
@@ -546,13 +594,13 @@
                 }
 
                 let sid = this.metas.activeSessionId;
-                let session = this.metas.sessionList.filter(e => e.sessionId == sid)[0] || {}
-                if (session.usage) {
+                let session = this.currentSession;
+                if (session && session.usage) {
                     return session.usage;
                 }
                 return ret;
             },
-            currentSessionUsages() {
+            currentSessionVisibleUsages() {
                 let ret = {
                     prompt_tokens: -1,
                     completion_tokens: -1,
@@ -627,8 +675,6 @@
                         maxHistoryCount: 20,
                         enableTruncOverflowHistory: true,
                         showConfig: false,
-                        sending: false,
-                        streamingStarted: false, // 是否已收到首个流式 token
                         presetBaseUrlList: [
                             {
                                 label: 'OpenAI 官方',
@@ -1113,7 +1159,9 @@
                         prompt_tokens: -1,
                         completion_tokens: -1,
                         total_tokens: -1
-                    }
+                    },
+                    sending: false,
+                    streamingStarted: false,
                 });
                 this.$set(this.metas.historyMessageMap, sessionId, []);
                 this.metas.activeSessionId = sessionId;
@@ -1156,6 +1204,8 @@
                                 if (e.sessionId == this.metas.activeSessionId) {
                                     hasActiveSession = true;
                                 }
+                            } else {
+                                this.$set(this.metas.historyMessageMap, e.sessionId, []);
                             }
                         })
                         this.metas.sessionList = resultList;
@@ -1177,7 +1227,7 @@
                 this.$confirm('确认清空当前会话的所有消息？', '提示', {type: 'warning'})
                     .then(() => {
                         this.$set(this.metas.historyMessageMap, sid, []);
-                        let session = this.metas.sessionList.find(s => s.sessionId === sid);
+                        let session = this.currentSession;
                         if (session) {
                             session.title = '新对话';
                         }
@@ -1263,14 +1313,13 @@
                     return;
                 }
 
-                this.truncOverflowHistory();
-
                 let sid = this.metas.activeSessionId;
                 let messages = this.getActiveMessages();
 
                 // 追加用户消息，构建 API 请求消息列表
                 let item = {
-                    type: this.form.messageType
+                    type: this.form.messageType,
+                    hidden: false,
                 }
                 item[this.form.messageType] = {
                     role: this.form.messageType,
@@ -1302,7 +1351,7 @@
                 }
 
                 // 用第一条用户消息作为会话标题
-                let session = this.metas.sessionList.find(s => s.sessionId === sid);
+                let session = this.currentSession;
                 if (session && (!session.title || session.title === '新对话')) {
                     let lastMsg = messages[messages.length - 1];
                     let text = lastMsg[lastMsg.type].content;
@@ -1311,17 +1360,43 @@
 
                 // 快照当前历史消息作为请求内容（不包括将要添加的助手占位）
                 let apiMessages = [];
-                messages.forEach(e => {
-                    apiMessages.push(e)
-                })
+                // 开启截断的情况下，发送给LLM的消息进行截断，本地消息依旧保留
+                if (this.metas.enableTruncOverflowHistory) {
+                    let stack = []
+
+                    let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                    let count = 0;
+                    for (let i = messages.length - 1; i >= 0; i--) {
+                        let item = messages[i];
+                        if (stdRoleTypeList.includes(item.type)) {
+                            count++;
+                        }
+                        if (count > this.metas.maxHistoryCount) {
+                            break;
+                        }
+                        stack.push(item)
+                    }
+
+                    for (let i = stack.length - 1; i >= 0; i--) {
+                        let item = stack[i];
+                        apiMessages.push(item)
+                    }
+                } else {
+                    messages.forEach(e => {
+                        apiMessages.push(e)
+                    })
+                }
+
                 this.$nextTick(() => this.scrollToBottom());
 
-                this.metas.sending = true;
-                this.metas.streamingStarted = false;
+
+                session.sending = true;
+                session.streamingStarted = false;
 
                 // 添加助手消息占位，用于流式内容逐步填充
                 let assistantMsg = {
                     type: 'assistant',
+                    hidden: false,
                     assistant: {
                         role: 'assistant',
                         content: ''
@@ -1372,6 +1447,7 @@
                                         'arguments=' + item.function.arguments;
                                     let requestToolMsg = {
                                         type: 'request_tool',
+                                        hidden: false,
                                         request_tool: {
                                             call: item,
                                             role: 'request_tool',
@@ -1395,17 +1471,19 @@
                         let json = resp.data;
 
                         if (resp.attrs && resp.attrs.type == 'echo_tool') {
-                            if (!_this.metas.streamingStarted) {
-                                _this.metas.streamingStarted = true;
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
                             }
+                            json.hidden = false;
                             insertBeforeLast(messages, json);
                             // messages.push(json);
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'tool') {
-                            if (!_this.metas.streamingStarted) {
-                                _this.metas.streamingStarted = true;
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
                             }
+                            json.hidden = false;
                             insertBeforeLast(messages, json);
                             // messages.push(json);
                             return;
@@ -1418,12 +1496,18 @@
                         if (json.usage) {
                             // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
                             assistantMsg.usage = json.usage
+                            try {
+                                _this.currentSessionTotalUsages.prompt_tokens += json.usage.prompt_tokens;
+                                _this.currentSessionTotalUsages.completion_tokens += json.usage.completion_tokens;
+                                _this.currentSessionTotalUsages.total_tokens += json.usage.total_tokens;
+                            } catch (e) {
+                            }
                         }
 
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
                         if (delta && delta.tool_calls && delta.tool_calls.length > 0) {
-                            if (!_this.metas.streamingStarted) {
-                                _this.metas.streamingStarted = true;
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
                             }
 
                             let calls = delta.tool_calls || [];
@@ -1459,8 +1543,8 @@
                         }
                         let content = (delta && delta.content) ? delta.content : '';
                         if (content) {
-                            if (!_this.metas.streamingStarted) {
-                                _this.metas.streamingStarted = true;
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
                             }
                             assistantMsg.assistant.content += content;
                             _this.$nextTick(() => _this.scrollToBottom());
@@ -1606,8 +1690,8 @@
                         assistantMsg.assistant.content = assistantMsg.assistant.content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
                     }
                 } finally {
-                    this.metas.sending = false;
-                    this.metas.streamingStarted = false;
+                    session.sending = false;
+                    session.streamingStarted = false;
                     this.$nextTick(() => this.scrollToBottom());
                 }
             },
@@ -1662,6 +1746,7 @@
                     .then(() => {
                         let item = {
                             type: 'user',
+                            hidden: false,
                             user: {
                                 role: 'user',
                                 content: 'Summarize all previous conversations.response with before user question language.'

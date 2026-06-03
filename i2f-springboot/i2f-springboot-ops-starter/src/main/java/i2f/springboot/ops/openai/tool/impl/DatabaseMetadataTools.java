@@ -61,7 +61,7 @@ public class DatabaseMetadataTools {
             },
             description = "detect a given datasource real database type"
     )
-    public String get_datasource_database_type(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave")
+    public String get_datasource_database_type(@ToolParam(value = "datasourceName", description = "the datasource name, cloud be null means default, for example primary or slave")
                                                String datasourceName) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
@@ -74,7 +74,8 @@ public class DatabaseMetadataTools {
     }
 
     @Tool(tags = {AiTags.READONLY_VALUE}, description = "list databases of a given datasource")
-    public List<String> get_datasource_database_list(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName) throws Exception {
+    public List<String> get_datasource_database_list(@ToolParam(value = "datasourceName", description = "the datasource name, cloud be null means default, for example primary or slave")
+                                                     String datasourceName) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
@@ -92,8 +93,12 @@ public class DatabaseMetadataTools {
             },
             description = "list tables of a given table pattern"
     )
-    public List<Map<String, Object>> get_datasource_table_list(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName, @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db") String database, @ToolParam(description = "the table pattern name, cloud be null means all tables, for example sys_user or sys_% or %user") String tablePattern
-    ) throws Exception {
+    public List<Map<String, Object>> get_datasource_table_list(@ToolParam(value = "datasourceName", description = "the datasource name, cloud be null means default, for example primary or slave")
+                                                               String datasourceName,
+                                                               @ToolParam(value = "database", description = "the database name, cloud be null means default database schema, for example test_db or user_db")
+                                                               String database,
+                                                               @ToolParam(value = "tablePattern", description = "the table pattern name, cloud be null means all tables, for example sys_user or sys_% or %user")
+                                                               String tablePattern) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
@@ -119,7 +124,12 @@ public class DatabaseMetadataTools {
             },
             description = "get table structure info of a given table name"
     )
-    public TableMeta get_datasource_table_info(@ToolParam(description = "the datasource name, cloud be null means default, for example primary or slave") String datasourceName, @ToolParam(description = "the database name, cloud be null means default database schema, for example test_db or user_db") String database, @ToolParam(description = "the table name, required, for example sys_user or sys_role") String tableName
+    public TableMeta get_datasource_table_info(@ToolParam(value = "datasourceName", description = "the datasource name, cloud be null means default, for example primary or slave")
+                                               String datasourceName,
+                                               @ToolParam(value = "database", description = "the database name, cloud be null means default database schema, for example test_db or user_db")
+                                               String database,
+                                               @ToolParam(value = "tableName", description = "the table name, required, for example sys_user or sys_role")
+                                               String tableName
     ) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();

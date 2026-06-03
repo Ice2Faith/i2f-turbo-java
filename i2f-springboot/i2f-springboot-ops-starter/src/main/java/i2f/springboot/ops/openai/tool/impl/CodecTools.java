@@ -26,7 +26,8 @@ public class CodecTools {
             },
             description = "encode text as base64"
     )
-    public String encode_base64(@ToolParam(description = "the text") String text) {
+    public String encode_base64(@ToolParam(value = "text", description = "the text")
+                                String text) {
         return Base64.getEncoder().encodeToString(text.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -36,7 +37,8 @@ public class CodecTools {
             },
             description = "decode base64 as text"
     )
-    public String decode_base64(@ToolParam(description = "the base64") String base64) {
+    public String decode_base64(@ToolParam(value = "base64", description = "the base64")
+                                String base64) {
         return new String(Base64.getDecoder().decode(base64), StandardCharsets.UTF_8);
     }
 
@@ -46,7 +48,8 @@ public class CodecTools {
             },
             description = "encode text as urlencoded"
     )
-    public String encode_url(@ToolParam(description = "the text") String text) throws Exception {
+    public String encode_url(@ToolParam(value = "text", description = "the text")
+                             String text) throws Exception {
         return URLEncoder.encode(text, StandardCharsets.UTF_8.name());
     }
 
@@ -56,7 +59,8 @@ public class CodecTools {
             },
             description = "decode urlencoded as text"
     )
-    public String decode_url(@ToolParam(description = "the urlencoded") String urlencoded) throws Exception {
+    public String decode_url(@ToolParam(value = "urlencoded", description = "the urlencoded")
+                             String urlencoded) throws Exception {
         return URLDecoder.decode(urlencoded, StandardCharsets.UTF_8.name());
     }
 

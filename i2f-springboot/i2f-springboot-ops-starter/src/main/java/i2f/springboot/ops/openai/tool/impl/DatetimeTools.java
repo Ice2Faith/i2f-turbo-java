@@ -39,7 +39,8 @@ public class DatetimeTools {
             },
             description = "determine if a given year is a leap year"
     )
-    public boolean is_leap_year(@ToolParam(description = "the year to be checked, for example: 2016 or 1998") int year) {
+    public boolean is_leap_year(@ToolParam(value = "year", description = "the year to be checked, for example: 2016 or 1998")
+                                int year) {
         return (year % 4 == 0 && year % 100 != 0) || year % 400 == 0;
     }
 
@@ -49,7 +50,8 @@ public class DatetimeTools {
             },
             description = "calculate a given year total days in year"
     )
-    public int get_year_total_days(@ToolParam(description = "the year to be calculate, for example: 2016 or 1998") int year) {
+    public int get_year_total_days(@ToolParam(value = "year", description = "the year to be calculate, for example: 2016 or 1998")
+                                   int year) {
         return is_leap_year(year) ? 366 : 365;
     }
 
@@ -59,8 +61,10 @@ public class DatetimeTools {
             },
             description = "calculate a given month total days in month"
     )
-    public int get_month_total_days(@ToolParam(description = "the year of the month, for example: 2016 or 1998") int year,
-                                    @ToolParam(description = "the month to be calculate, value range in [1,12], for example: 1 or 12") int month) {
+    public int get_month_total_days(@ToolParam(value = "year", description = "the year of the month, for example: 2016 or 1998")
+                                    int year,
+                                    @ToolParam(value = "month", description = "the month to be calculate, value range in [1,12], for example: 1 or 12")
+                                    int month) {
         switch (month) {
             case 1:
             case 3:
