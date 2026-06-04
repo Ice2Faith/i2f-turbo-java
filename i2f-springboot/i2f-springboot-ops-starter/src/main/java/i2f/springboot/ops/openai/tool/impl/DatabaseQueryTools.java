@@ -12,9 +12,11 @@ import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.datasource.provider.impl.DefaultDatasourceProvider;
 import i2f.springboot.ops.openai.tool.impl.sql.OpsSqlValidator;
 import i2f.springboot.ops.openai.tool.impl.sql.OpsSqlValidators;
+import i2f.springboot.ops.openai.tool.impl.sql.impl.OpsSimpleRegexSqlValidator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
@@ -43,6 +45,9 @@ public class DatabaseQueryTools {
 
     @Autowired
     private DatasourceProvider datasourceProvider;
+
+    @Value("${ai.tools.database.query.validator.allow-fallback-simple.enable:true}")
+    protected boolean allowFallbackSimpleValidator = true;
 
     @Tool(
             tags = {
@@ -77,7 +82,23 @@ public class DatabaseQueryTools {
         }
         // 校验SQL
         OpsSqlValidator sqlValidator = OpsSqlValidators.getSqlValidator();
-        sqlValidator.validateQuery(sql);
+        try {
+            sqlValidator.validateQuery(sql);
+        } catch (Throwable e) {
+            boolean needThrow = true;
+            if (allowFallbackSimpleValidator) {
+                // 如果遇到解析器不支持的语法，则使用简单正则校验器检查，检查通过则放行
+                try {
+                    OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
+                    needThrow = false;
+                } catch (Throwable ex) {
+
+                }
+            }
+            if (needThrow) {
+                throw e;
+            }
+        }
 
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
         if (datasource == null) {
