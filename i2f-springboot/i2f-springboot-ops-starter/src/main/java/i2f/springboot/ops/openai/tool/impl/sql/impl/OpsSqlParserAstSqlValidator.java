@@ -34,7 +34,7 @@ public class OpsSqlParserAstSqlValidator implements OpsSqlValidator {
         try {
             statement = CCJSqlParserUtil.parse(sql);
         } catch (JSQLParserException e) {
-            throw new IllegalArgumentException("illegal sql grammar : " + e.getMessage());
+            throw new IllegalArgumentException("sql validator cannot recognize this grammar! but you may still attempt to run it manually.");
         }
 
         // 白名单校验：仅允许 SELECT, EXPLAIN, ANALYZE, SHOW, DESCRIBE
