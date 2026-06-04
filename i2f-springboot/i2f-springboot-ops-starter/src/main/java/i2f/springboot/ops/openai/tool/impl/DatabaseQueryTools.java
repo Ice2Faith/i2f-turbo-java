@@ -64,7 +64,7 @@ public class DatabaseQueryTools {
                                                     Integer offset,
                                                     @ToolParam(value = "limit", description = "result set limit, cloud be null, default is 30, range in [0,100], for example 10 or 100")
                                                     Integer limit
-    ) throws Exception {
+    ) throws Throwable {
         if (datasourceName == null || datasourceName.isEmpty()) {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
@@ -85,6 +85,7 @@ public class DatabaseQueryTools {
         try {
             sqlValidator.validateQuery(sql);
         } catch (Throwable e) {
+            Throwable reThr = e;
             boolean needThrow = true;
             if (allowFallbackSimpleValidator) {
                 // 如果遇到解析器不支持的语法，则使用简单正则校验器检查，检查通过则放行
@@ -92,11 +93,12 @@ public class DatabaseQueryTools {
                     OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
                     needThrow = false;
                 } catch (Throwable ex) {
-
+                    ex.addSuppressed(e);
+                    reThr = ex;
                 }
             }
             if (needThrow) {
-                throw e;
+                throw reThr;
             }
         }
 
