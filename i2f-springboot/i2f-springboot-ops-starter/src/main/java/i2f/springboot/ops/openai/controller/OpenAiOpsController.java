@@ -29,7 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.servlet.function.support.RouterFunctionMapping;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -80,8 +79,6 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private ToolRawDefinitionsProvider toolDefinitionProvider;
-    @Autowired
-    private RouterFunctionMapping routerFunctionMapping;
 
     private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()

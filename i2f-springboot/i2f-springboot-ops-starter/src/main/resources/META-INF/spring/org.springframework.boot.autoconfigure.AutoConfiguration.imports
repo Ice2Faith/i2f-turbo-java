@@ -31,6 +31,7 @@ i2f.springboot.ops.openai.tool.impl.UidTools
 i2f.springboot.ops.openai.tool.impl.JceTools
 i2f.springboot.ops.openai.tool.impl.CodecTools
 i2f.springboot.ops.openai.tool.impl.DatabaseMetadataTools
+i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools
 i2f.springboot.ops.openai.tool.impl.LocalFileTools
 i2f.springboot.ops.openai.tool.SpringContextToolDefinitionProvider
 i2f.springboot.ops.openai.controller.OpenAiOpsController

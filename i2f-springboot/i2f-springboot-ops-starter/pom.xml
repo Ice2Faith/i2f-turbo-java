@@ -116,6 +116,15 @@
             <artifactId>i2f-uid-impl</artifactId>
         </dependency>
 
+        <!-- 4.9版本是适用于jdk8的最后一个版本 -->
+        <dependency>
+            <groupId>com.github.jsqlparser</groupId>
+            <artifactId>jsqlparser</artifactId>
+            <version>4.9</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jdbc</artifactId>
