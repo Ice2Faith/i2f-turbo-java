@@ -30,11 +30,19 @@ public class OpsSqlParserAstSqlValidator implements OpsSqlValidator {
             return sql;
         }
 
+
         Statement statement;
         try {
             statement = CCJSqlParserUtil.parse(sql);
         } catch (JSQLParserException e) {
-            throw new IllegalArgumentException("sql validator cannot recognize this grammar! but you may still attempt to run it manually.");
+            // 如果遇到解析器不支持的语法，则使用简单正则校验器检查，检查通过则放行
+            try {
+                OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
+                return sql;
+            } catch (Throwable ex) {
+
+            }
+            throw new IllegalArgumentException("sql validator cannot recognize this grammar! maybe contains keywords or current validator not support, but you may still attempt to run it manually.");
         }
 
         // 白名单校验：仅允许 SELECT, EXPLAIN, ANALYZE, SHOW, DESCRIBE
