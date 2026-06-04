@@ -320,15 +320,15 @@
                             width="360"
                             trigger="hover">
                         <p>
-                            回话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
+                            会话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
                             带来的问题是，Token费用的消耗变高，上下文也可能太长而被LLM大模型丢失。<br/>
-                            因此，回话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
+                            因此，会话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
                         </p>
                         <el-button slot="reference"
                                    v-if="currentMessages && currentMessages.length>0"
                                    type="success"
                                    size="small"
-                                   @click="summarySessionHistory">回话总结
+                                   @click="summarySessionHistory">会话总结
                         </el-button>
                     </el-popover>
                     <el-popover
@@ -1197,7 +1197,7 @@
                 })
             },
             deleteCheckedSession() {
-                this.$confirm('确认删除勾选的回话？', '提示', {type: 'warning'})
+                this.$confirm('确认删除勾选的会话？', '提示', {type: 'warning'})
                     .then(() => {
                         let hasActiveSession = false;
                         let resultList = []
@@ -1745,7 +1745,7 @@
                 copy2clipboard(content);
             },
             summarySessionHistory() {
-                this.$confirm('确认进行回话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
+                this.$confirm('确认进行会话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
                     .then(() => {
                         let item = {
                             type: 'user',
