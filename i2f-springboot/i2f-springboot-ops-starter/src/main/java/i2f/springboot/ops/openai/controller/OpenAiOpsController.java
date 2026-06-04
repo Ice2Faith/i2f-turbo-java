@@ -40,10 +40,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -75,7 +72,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     private RestTemplate restTemplate = createRestTemplate();
 
-    private ExecutorService pool = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() * 4 + 2);
+    private ExecutorService pool = Executors.newWorkStealingPool(Math.min(Math.max(Runtime.getRuntime().availableProcessors() * 4 + 2, 16), 512));
+
+    private ExecutorService toolPool = Executors.newWorkStealingPool(Math.min(Math.max(Runtime.getRuntime().availableProcessors() * 4 + 2, 16), 512));
 
     @Autowired(required = false)
     private ToolRawDefinitionsProvider toolDefinitionProvider;
@@ -200,86 +199,97 @@ public class OpenAiOpsController implements IOpsProvider {
                                             approvalMap.put(item.getTool_call_id(), item);
                                         }
                                     }
+                                    CountDownLatch latch = new CountDownLatch(calls.size());
                                     for (OpenAiToolCall call : calls) {
-                                        String id = call.getId();
-                                        OpenAiToolCallFunction function = call.getFunction();
-                                        String name = function.getName();
-                                        String arguments = function.getArguments();
-                                        ToolRawDefinition definition = definitionMap.get(name);
-                                        Map<String, Object> argumentsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
-                                        });
-                                        Object callRet = null;
-                                        try {
-                                            OpenAiToolApprovalDto approvalDto = approvalMap.get(id);
-                                            if (approvalDto != null) {
-                                                if (approvalDto.isReject()) {
-                                                    String rejectReason = approvalDto.getRejectReason();
-                                                    if (rejectReason == null) {
-                                                        rejectReason = "";
-                                                    } else {
-                                                        rejectReason = ", reason is : " + rejectReason;
+                                        Runnable toolTask = () -> {
+                                            try {
+                                                String id = call.getId();
+                                                OpenAiToolCallFunction function = call.getFunction();
+                                                String name = function.getName();
+                                                String arguments = function.getArguments();
+                                                ToolRawDefinition definition = definitionMap.get(name);
+                                                Map<String, Object> argumentsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
+                                                });
+                                                Object callRet = null;
+                                                try {
+                                                    OpenAiToolApprovalDto approvalDto = approvalMap.get(id);
+                                                    if (approvalDto != null) {
+                                                        if (approvalDto.isReject()) {
+                                                            String rejectReason = approvalDto.getRejectReason();
+                                                            if (rejectReason == null) {
+                                                                rejectReason = "";
+                                                            } else {
+                                                                rejectReason = ", reason is : " + rejectReason;
+                                                            }
+                                                            throw new IllegalStateException("user reject tool execute" + rejectReason);
+                                                        }
                                                     }
-                                                    throw new IllegalStateException("user reject tool execute" + rejectReason);
+                                                    if (definition == null) {
+                                                        throw new IllegalArgumentException("cannot found tool definition: " + name);
+                                                    }
+                                                    callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
+                                                } catch (Throwable e) {
+                                                    callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                                 }
-                                            }
-                                            if (definition == null) {
-                                                throw new IllegalArgumentException("cannot found tool definition: " + name);
-                                            }
-                                            callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
-                                        } catch (Throwable e) {
-                                            callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
-                                        }
-                                        if (callRet instanceof CharSequence) {
-                                            callRet = String.valueOf(callRet);
-                                        } else {
-                                            callRet = objectMapper.writeValueAsString(callRet);
-                                        }
-                                        OpenAiToolMessage toolMsg = OpenAiToolMessage.builder()
-                                                .tool_call_id(id)
-                                                .content(String.valueOf(callRet))
-                                                .build();
+                                                if (callRet instanceof CharSequence) {
+                                                    callRet = String.valueOf(callRet);
+                                                } else {
+                                                    callRet = objectMapper.writeValueAsString(callRet);
+                                                }
+                                                OpenAiToolMessage toolMsg = OpenAiToolMessage.builder()
+                                                        .tool_call_id(id)
+                                                        .content(String.valueOf(callRet))
+                                                        .build();
 
-                                        if (toolMsg != null) {
-                                            EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
-                                                    .message(toolMsg)
-                                                    .function(function)
-                                                    .build();
-                                            toolEchoMsg.createContent();
-                                            OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                    .type(OpenAiConsts.ECHO_TOOL)
-                                                    .echo_tool(toolEchoMsg)
-                                                    .build();
-                                            String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
-                                            OpsSecureReturn<?> resp = null;
-                                            if (req.isEncryptOutput()) {
-                                                resp = transfer.success(emitToolMsg);
-                                            } else {
-                                                resp = OpsSecureReturn.success(emitToolMsg);
-                                            }
-                                            resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
-                                            String respJson = objectMapper.writeValueAsString(resp);
-                                            emitter.send(respJson);
-                                        }
-                                        if (toolMsg != null) {
-                                            OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                    .type(OpenAiConsts.TOOL)
-                                                    .tool(toolMsg)
-                                                    .build();
-                                            String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
-                                            OpsSecureReturn<?> resp = null;
-                                            if (req.isEncryptOutput()) {
-                                                resp = transfer.success(emitToolMsg);
-                                            } else {
-                                                resp = OpsSecureReturn.success(emitToolMsg);
-                                            }
-                                            resp.withAttr("type", OpenAiConsts.TOOL);
-                                            String respJson = objectMapper.writeValueAsString(resp);
-                                            emitter.send(respJson);
-                                        }
+                                                if (toolMsg != null) {
+                                                    EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
+                                                            .message(toolMsg)
+                                                            .function(function)
+                                                            .build();
+                                                    toolEchoMsg.createContent();
+                                                    OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
+                                                            .type(OpenAiConsts.ECHO_TOOL)
+                                                            .echo_tool(toolEchoMsg)
+                                                            .build();
+                                                    String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
+                                                    OpsSecureReturn<?> resp = null;
+                                                    if (req.isEncryptOutput()) {
+                                                        resp = transfer.success(emitToolMsg);
+                                                    } else {
+                                                        resp = OpsSecureReturn.success(emitToolMsg);
+                                                    }
+                                                    resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
+                                                    String respJson = objectMapper.writeValueAsString(resp);
+                                                    emitter.send(respJson);
+                                                }
+                                                if (toolMsg != null) {
+                                                    OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
+                                                            .type(OpenAiConsts.TOOL)
+                                                            .tool(toolMsg)
+                                                            .build();
+                                                    String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
+                                                    OpsSecureReturn<?> resp = null;
+                                                    if (req.isEncryptOutput()) {
+                                                        resp = transfer.success(emitToolMsg);
+                                                    } else {
+                                                        resp = OpsSecureReturn.success(emitToolMsg);
+                                                    }
+                                                    resp.withAttr("type", OpenAiConsts.TOOL);
+                                                    String respJson = objectMapper.writeValueAsString(resp);
+                                                    emitter.send(respJson);
+                                                }
 
-
-                                        messages.add(toolMsg);
+                                                messages.add(toolMsg);
+                                            } catch (Exception e) {
+                                                log.warn(e.getMessage(), e);
+                                            } finally {
+                                                latch.countDown();
+                                            }
+                                        };
+                                        toolPool.submit(toolTask);
                                     }
+
+                                    latch.await();
                                 }
                             }
                         }
@@ -299,7 +309,6 @@ public class OpenAiOpsController implements IOpsProvider {
                             try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
                                 String line = null;
                                 while ((line = reader.readLine()) != null) {
-                                    System.out.println("line==>" + line);
                                     if (line.startsWith("data:")) {
                                         String data = line.substring(5).trim();
                                         OpsSecureReturn<?> resp = null;

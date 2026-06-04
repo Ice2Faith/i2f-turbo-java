@@ -206,7 +206,10 @@
                     {{ roleLabel(msg.type) }}
                 </div>
                 <div class="message-content"
-                     :class="{'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1}"
+                     :class="{
+                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
+                            'tool-message-content':  msg.type.indexOf('tool') >=0
+                            }"
                      v-html="renderMarkdown(msg[msg.type].content)"></div>
                 <div class="bubble-actions">
                     <el-popover
@@ -2395,6 +2398,16 @@
 
     .form-item-full-width .el-form-item__content > * {
         width: 100%;
+    }
+
+    .tool-message-content {
+        height: 75px;
+        overflow: auto;
+    }
+
+    .tool-message-content:hover {
+        height: unset;
+        overflow: unset;
     }
 
     .hover-show-child {
