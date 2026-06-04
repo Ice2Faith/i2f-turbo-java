@@ -4,7 +4,10 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.io.stream.StreamUtil;
 import i2f.match.impl.AntMatcher;
+import i2f.match.regex.RegexUtil;
+import i2f.match.regex.data.RegexMatchItem;
 import i2f.springboot.ops.util.HumanUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,10 +16,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -29,10 +31,15 @@ import java.util.Map;
 @Component
 @Tools
 public class LocalFileTools {
-    private AntMatcher matcher = new AntMatcher("/");
+    public static final DateTimeFormatter BACKUP_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
+    private static final AntMatcher matcher = new AntMatcher("/");
 
     @Value("${ai.tools.file.root-path:./ai-root}")
     protected String rootPath = "./ai-root";
+
+    @Value("${ai.tools.file.backup-file:true}")
+    protected boolean backupFile = true;
 
     @Tool(
             tags = {
@@ -91,6 +98,35 @@ public class LocalFileTools {
         return ret;
     }
 
+
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "search keyword by regex in file, response line range in [1,...]."
+    )
+    public List<Map<String, Object>> regex_search_text_file(
+            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+            String filePath,
+            @ToolParam(value = "pattern", description = "the regex pattern, java standard.")
+            String pattern) throws Exception {
+        File saveFile = getFile(filePath);
+        String content = StreamUtil.readString(saveFile);
+        List<RegexMatchItem> list = RegexUtil.regexFinds(content, pattern);
+
+        List<Map<String, Object>> ret = new ArrayList<>();
+        for (RegexMatchItem item : list) {
+            Map<String, Object> map = new HashMap<>();
+            map.put("matchedText", item.getMatchStr());
+            map.put("startOffset", item.getIdxStart());
+            map.put("endOffset", item.getIdxEnd());
+            map.put("startLineNumber", findLineNumberByOffset(content, item.getIdxStart()));
+            map.put("endLineNumber", findLineNumberByOffset(content, item.getIdxEnd()));
+            ret.add(map);
+        }
+        return ret;
+    }
+
     @Tool(
             tags = {
                     AiTags.WRITABLE_VALUE
@@ -106,15 +142,15 @@ public class LocalFileTools {
                                                   @ToolParam(value = "content", description = "new content to replace, cloud be multi-line string")
                                                   String content) throws IOException {
         File file = getFile(filePath);
+        // 如果开启了备份，那就一定要先备份
+        if (backupFile) {
+            backupFile(file);
+        }
 
         // 读取所有行
         List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-            String line = null;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-        }
+        String text = StreamUtil.readString(file);
+        lines.addAll(Arrays.asList(text.split("\n")));
 
         int totalLines = lines.size();
         int realizeStartLine = Math.max(1, startLine);
@@ -145,14 +181,8 @@ public class LocalFileTools {
         }
 
         // 写回文件
-        BufferedWriter writer = new BufferedWriter(new FileWriter(file));
-        for (int i = 0; i < lines.size(); i++) {
-            writer.write(lines.get(i));
-            if (i < lines.size() - 1) {
-                writer.newLine();
-            }
-        }
-        writer.close();
+        String writeText = String.join("\n", lines);
+        StreamUtil.writeString(writeText, file);
 
         // 返回结果
         Map<String, Object> ret = new HashMap<>();
@@ -162,6 +192,98 @@ public class LocalFileTools {
         ret.put("newLineCount", contentLines.length);
         ret.put("totalLinesAfter", lines.size());
         return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "write text content to file, if the path not exists will auto created."
+    )
+    public boolean write_text_file(
+            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+            String filePath,
+            @ToolParam(value = "content", description = "the text content")
+            String content,
+            @ToolParam(value = "append", description = "append mode if is true, cloud be null means cover or create new")
+            Boolean append
+    ) throws Exception {
+        File saveFile = getFile(filePath);
+        // 如果开启了备份，那就一定要先备份
+        if (backupFile) {
+            backupFile(saveFile);
+        }
+        File dir = saveFile.getParentFile();
+        if (dir != null && !dir.exists()) {
+            dir.mkdirs();
+        }
+        try (FileWriter writer = new FileWriter(saveFile, append != null && append)) {
+            writer.write(content);
+            return true;
+        }
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "replace keyword by regex in file, use String.replaceAll(...) implements, response line range in [1,...]."
+    )
+    public boolean regex_replace_text_file(
+            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+            String filePath,
+            @ToolParam(value = "pattern", description = "the regex pattern, java standard.")
+            String pattern,
+            @ToolParam(value = "replacement", description = "the replace text, java standard.")
+            String replacement) throws Exception {
+        File saveFile = getFile(filePath);
+        if (backupFile) {
+            backupFile(saveFile);
+        }
+
+
+        String content = StreamUtil.readString(saveFile);
+        content = content.replaceAll(pattern, replacement);
+
+        StreamUtil.writeString(content, saveFile);
+
+        return true;
+    }
+
+    public void backupFile(File saveFile) throws IOException {
+        File dir = saveFile.getParentFile();
+        if (saveFile.exists()) {
+            String name = saveFile.getName();
+            int idx = name.lastIndexOf(".");
+            String suffix = "";
+            if (idx >= 0) {
+                suffix = name.substring(idx);
+                name = name.substring(0, idx);
+            }
+            File bakFile = new File(dir, name + ".bak" + BACKUP_TIMESTAMP_FORMATTER.format(LocalDateTime.now()) + suffix);
+            try (FileInputStream fis = new FileInputStream(saveFile);
+                 FileOutputStream fos = new FileOutputStream(bakFile)) {
+                StreamUtil.streamCopy(fis, fos, true);
+            }
+        }
+    }
+
+    public int findLineNumberByOffset(String content, int offset) {
+        if (content == null) {
+            return -1;
+        }
+        int line = 0;
+        int len = content.length();
+        for (int i = 0; i < len; i++) {
+            char ch = content.charAt(i);
+            if (ch == '\n') {
+                line++;
+            }
+            if (i == offset) {
+                return line + 1;
+            }
+        }
+        return -1;
     }
 
     public File getRootFile() {

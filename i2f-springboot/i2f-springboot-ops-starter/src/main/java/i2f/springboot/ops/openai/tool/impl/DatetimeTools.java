@@ -4,6 +4,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/1 19:13
  * @desc
  */
+@ConditionalOnExpression("${ai.tools.datetime.enable:true}")
 @Component
 @Tools
 public class DatetimeTools {
