@@ -80,6 +80,9 @@ public class DatabaseQueryTools {
         sqlValidator.validateQuery(sql);
 
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        if (datasource == null) {
+            throw new IllegalStateException("datasource not exists!");
+        }
         try (Connection conn = datasource.getConnection()) {
             Page<Map<String, Object>> page = JdbcResolver.page(conn, new BindSql(sql), new ApiOffsetSize(offset, limit));
             Map<String, Object> map = new HashMap<>();

@@ -67,6 +67,9 @@ public class DatabaseMetadataTools {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        if (datasource == null) {
+            throw new IllegalStateException("datasource not exists!");
+        }
         try (Connection conn = datasource.getConnection()) {
             DatabaseType type = DatabaseType.typeOfConnection(conn);
             return type.db() + ":" + type.desc();
@@ -80,6 +83,9 @@ public class DatabaseMetadataTools {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        if (datasource == null) {
+            throw new IllegalStateException("datasource not exists!");
+        }
         try (Connection conn = datasource.getConnection()) {
             DatabaseMetadataProvider provider = DatabaseMetadataProviders.getProvider(conn);
             List<String> ret = provider.getDatabases(conn);
@@ -103,6 +109,9 @@ public class DatabaseMetadataTools {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        if (datasource == null) {
+            throw new IllegalStateException("datasource not exists!");
+        }
         try (Connection conn = datasource.getConnection()) {
             DatabaseMetadataProvider provider = DatabaseMetadataProviders.getProvider(conn);
             List<TableMeta> tables = provider.getTables(conn, database, tablePattern);
@@ -135,6 +144,9 @@ public class DatabaseMetadataTools {
             datasourceName = datasourceProvider.getDefaultDataSourceName();
         }
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
+        if (datasource == null) {
+            throw new IllegalStateException("datasource not exists!");
+        }
         try (Connection conn = datasource.getConnection()) {
             DatabaseMetadataProvider provider = DatabaseMetadataProviders.getProvider(conn);
             TableMeta ret = provider.getTableInfo(conn, database, tableName);
