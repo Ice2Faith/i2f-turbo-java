@@ -43,12 +43,12 @@ public class BindSqlStringifiers {
     };
 
     public static BindSqlStringifier of(Connection conn) throws SQLException {
-        DatabaseType type = DIALECT_MAPPING.dialectOf(conn);
+        DatabaseType type = DatabaseType.dialectOfConnection(conn);
         return of(type);
     }
 
     public static BindSqlStringifier of(String jdbcUrl) {
-        DatabaseType type = DIALECT_MAPPING.dialectOf(jdbcUrl);
+        DatabaseType type = DatabaseType.dialectOfJdbcUrl(jdbcUrl);
         return of(type);
     }
 

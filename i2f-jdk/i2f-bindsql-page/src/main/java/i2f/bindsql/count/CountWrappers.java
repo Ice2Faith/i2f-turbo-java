@@ -28,7 +28,7 @@ public class CountWrappers {
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DatabaseType.typeOfConnection(conn);
+        DatabaseType type = DatabaseType.dialectOfConnection(conn);
         return wrapper(type);
     }
 
@@ -37,7 +37,7 @@ public class CountWrappers {
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DatabaseType.typeOfJdbcUrl(jdbcUrl);
+        DatabaseType type = DatabaseType.dialectOfJdbcUrl(jdbcUrl);
         return wrapper(type);
     }
 

@@ -72,7 +72,12 @@ public class DatabaseMetadataTools {
         }
         try (Connection conn = datasource.getConnection()) {
             DatabaseType type = DatabaseType.typeOfConnection(conn);
-            return type.db() + ":" + type.desc();
+            DatabaseType dialect = DatabaseType.dialectOfConnection(conn);
+            String ret = type.db() + ":" + type.desc();
+            if (type != dialect) {
+                ret += ", dialect adapt to " + dialect.db() + ":" + dialect.desc();
+            }
+            return ret;
         }
     }
 

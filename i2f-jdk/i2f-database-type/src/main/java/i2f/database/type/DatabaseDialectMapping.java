@@ -49,7 +49,8 @@ public class DatabaseDialectMapping {
     }
 
     public DatabaseType dialectOf(Connection conn) throws SQLException {
-        return dialectOf(urlOf(conn));
+        DatabaseType type = DatabaseType.dialectOfConnection(conn);
+        return dialectOf(type);
     }
 
     public DatabaseType dialectOf(String url) {
@@ -57,7 +58,7 @@ public class DatabaseDialectMapping {
         if (DatabaseType.isValid(urlType)) {
             return urlType;
         }
-        DatabaseType type = DatabaseType.typeOfJdbcUrl(url);
+        DatabaseType type = DatabaseType.dialectOfJdbcUrl(url);
         return dialectOf(type);
     }
 

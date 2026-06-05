@@ -96,6 +96,10 @@ public class ProxyRenderSqlHandler implements IProxyInvocationHandler {
                 DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
                 params.put("databaseType", databaseType);
             }
+            if (params.get("dialectType") == null) {
+                DatabaseType dialectType = DatabaseType.dialectOfConnection(conn);
+                params.put("dialectType", dialectType);
+            }
             if (params.get("connection") == null) {
                 params.put("connection", conn);
             }

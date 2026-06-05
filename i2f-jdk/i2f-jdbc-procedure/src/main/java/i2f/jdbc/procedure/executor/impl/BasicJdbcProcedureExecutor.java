@@ -1430,7 +1430,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             return false;
         }
         Connection conn = getConnection(datasource, params);
-        List<String> databaseNames = detectDatabaseType(conn);
+        List<String> databaseNames = detectDatabaseDialectType(conn);
         String[] arr = databases.split(",");
         for (String item : arr) {
             for (String databaseName : databaseNames) {
@@ -1442,9 +1442,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return false;
     }
 
-    public List<String> detectDatabaseType(Connection conn) throws Exception {
+    public List<String> detectDatabaseType(DatabaseType databaseType) throws Exception {
         List<String> ret = new ArrayList<>();
-        DatabaseType databaseType = getDatabaseType(conn);
         if (databaseType == null) {
             return ret;
         }
@@ -1453,6 +1452,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(name.toLowerCase());
         ret.add(enumName.toLowerCase());
         return ret;
+    }
+
+    public List<String> detectDatabaseType(Connection conn) throws Exception {
+        DatabaseType databaseType = getDatabaseType(conn);
+        return detectDatabaseType(databaseType);
+    }
+
+    public List<String> detectDatabaseDialectType(Connection conn) throws Exception {
+        DatabaseType databaseType = getDatabaseDialectType(conn);
+        return detectDatabaseType(databaseType);
     }
 
     @Override
@@ -2132,6 +2141,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return DatabaseType.typeOfConnection(conn);
     }
 
+    public DatabaseType getDatabaseDialectType(Connection conn) throws SQLException {
+        return DatabaseType.dialectOfConnection(conn);
+    }
 
     @Override
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
@@ -2173,6 +2185,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public void fillDatabaseDialectType(Map<String, Object> params, Connection conn) throws SQLException {
         DatabaseType databaseType = getDatabaseType(conn);
         visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+        DatabaseType dialectType = getDatabaseDialectType(conn);
+        visitSet(params, MybatisMapperInflater.DIALECT_TYPE, dialectType);
     }
 
     @Override
@@ -2311,7 +2325,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Connection conn = connEntry.getKey();
             datasource = connEntry.getValue();
 
-            List<String> databaseNames = detectDatabaseType(conn);
+            List<String> databaseNames = detectDatabaseDialectType(conn);
             String[] arr = key.split(",");
             for (String item : arr) {
                 for (String databaseName : databaseNames) {
@@ -2397,7 +2411,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
             }
             if (key != null) {
-                List<String> databaseNames = detectDatabaseType(conn);
+                List<String> databaseNames = detectDatabaseDialectType(conn);
                 String[] arr = key.split(",");
                 for (String item : arr) {
                     for (String databaseName : databaseNames) {

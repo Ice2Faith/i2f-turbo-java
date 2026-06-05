@@ -1,12 +1,15 @@
 package i2f.database.type;
 
 
+import i2f.database.driver.ProxyDialectConnectionFeature;
+import i2f.database.driver.ProxyDialectJdbcDriver;
+import i2f.database.driver.ProxyDialectJdbcUrlMeta;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.regex.Pattern;
 
@@ -185,10 +188,6 @@ public enum DatabaseType {
      */
     private final String desc;
 
-    public static final String DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX = "database-type-mapping-url-";
-
-    public static final ConcurrentHashMap<String, DatabaseType> JDBC_URL_TYPE_MAPPING = new ConcurrentHashMap<>();
-
     public String db() {
         return this.db;
     }
@@ -203,11 +202,16 @@ public enum DatabaseType {
     }
 
     public static final CopyOnWriteArraySet<DatabaseTypeDetector> DETECTORS = new CopyOnWriteArraySet<>();
+    public static final CopyOnWriteArraySet<DatabaseDialectTypeDetector> DIALECT_DETECTORS = new CopyOnWriteArraySet<>();
 
     static {
         ServiceLoader<DatabaseTypeDetector> list = ServiceLoader.load(DatabaseTypeDetector.class);
         for (DatabaseTypeDetector item : list) {
             DETECTORS.add(item);
+        }
+        ServiceLoader<DatabaseDialectTypeDetector> dialectList = ServiceLoader.load(DatabaseDialectTypeDetector.class);
+        for (DatabaseDialectTypeDetector item : dialectList) {
+            DIALECT_DETECTORS.add(item);
         }
     }
 
@@ -273,6 +277,63 @@ public enum DatabaseType {
         return typeOfJdbcUrl(jdbcUrl, true);
     }
 
+    protected static final Map<Connection, DatabaseType> DIALECT_MAP = new WeakHashMap<>();
+
+    public static DatabaseType dialectOfConnection(Connection conn) throws SQLException {
+        DatabaseType type = DIALECT_MAP.get(conn);
+        if (type != null) {
+            return type;
+        }
+        synchronized (DIALECT_MAP) {
+            type = DIALECT_MAP.get(conn);
+            if (type != null) {
+                return type;
+            }
+            for (DatabaseDialectTypeDetector detector : DIALECT_DETECTORS) {
+                type = detector.detect(conn);
+                if (isValid(type)) {
+                    break;
+                }
+            }
+            if (!isValid(type)) {
+                if (conn instanceof ProxyDialectConnectionFeature) {
+                    ProxyDialectConnectionFeature feature = (ProxyDialectConnectionFeature) conn;
+                    String dialectType = feature.getProxyDialect();
+                    type = typeOfName(dialectType);
+                }
+            }
+            if (!isValid(type)) {
+                type = dialectOfJdbcUrl(conn.getMetaData().getURL(), false);
+            }
+            TYPE_MAP.put(conn, type);
+            return type;
+        }
+    }
+
+    /**
+     * 根据连接地址判断数据库使用的方言类型
+     *
+     * @param jdbcUrl 连接地址
+     * @return ignore
+     */
+    public static DatabaseType dialectOfJdbcUrl(String jdbcUrl) {
+        return dialectOfJdbcUrl(jdbcUrl, true);
+    }
+
+    protected static DatabaseType dialectOfJdbcUrl(String jdbcUrl, boolean spi) {
+        ProxyDialectJdbcUrlMeta meta = ProxyDialectJdbcDriver.parseProxyMeta(jdbcUrl);
+        if (meta != null) {
+            String dialectType = meta.getDialectType();
+            DatabaseType type = typeOfName(dialectType);
+            if (!isValid(type)) {
+                return type;
+            }
+            throw new IllegalArgumentException("detect dialect by proxy url error, not found suitable database type: " + dialectType);
+        }
+        return typeOfJdbcUrl(jdbcUrl, spi);
+    }
+
+
     protected static DatabaseType typeOfJdbcUrl(String jdbcUrl, boolean spi) {
         if (jdbcUrl == null || jdbcUrl.trim().isEmpty()) {
             //"Error: The jdbcUrl is Null, Cannot read database type"
@@ -289,20 +350,10 @@ public enum DatabaseType {
                 }
             }
         }
-        if (jdbcUrl != null) {
-            DatabaseType type = JDBC_URL_TYPE_MAPPING.get(jdbcUrl);
-            if (isValid(type)) {
-                return type;
-            }
-        }
-        if (jdbcUrl != null) {
-            String prop = System.getProperty(DATABASE_TYPE_MAPPING_URL_PROPERTIES_PREFIX + jdbcUrl);
-            if (prop != null) {
-                DatabaseType databaseType = DatabaseType.typeOfName(prop);
-                if (isValid(databaseType)) {
-                    return databaseType;
-                }
-            }
+        ProxyDialectJdbcUrlMeta meta = ProxyDialectJdbcDriver.parseProxyMeta(jdbcUrl);
+        if (meta != null) {
+            String realJdbcUrl = meta.getRealJdbcUrl();
+            return typeOfJdbcUrl(realJdbcUrl, spi);
         }
         String url = jdbcUrl.toLowerCase();
         if (url.contains(":mysql:") || url.contains(":cobar:")) {
