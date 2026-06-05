@@ -1804,69 +1804,65 @@
                 }
             },
             onContextMenuMoreSendOptions() {
+                let loadSystemRoleByMarkdownUrl = (url) => {
+                    fetch(url)
+                        .then(res => res.text())
+                        .then(text => {
+                            let messages = this.getActiveMessages();
+                            let type = 'system';
+                            let item = {
+                                type: type,
+                                hidden: false,
+                            }
+                            item[type] = {
+                                role: type,
+                                content: text
+                            }
+                            messages.push(item);
+                        })
+                }
                 this.$contextmenu({
                     items: [
                         {
                             label: `默认角色`,
                             icon: 'el-icon-odometer',
                             onClick: () => {
-                                fetch('./role-default.md')
-                                    .then(res => res.text())
-                                    .then(text => {
-                                        let messages = this.getActiveMessages();
-                                        let type = 'system';
-                                        let item = {
-                                            type: type,
-                                            hidden: false,
-                                        }
-                                        item[type] = {
-                                            role: type,
-                                            content: text
-                                        }
-                                        messages.push(item);
-                                    })
+                                loadSystemRoleByMarkdownUrl('./role-default.md')
                             }
                         },
                         {
                             label: `中外语翻译官`,
                             icon: 'el-icon-microphone',
                             onClick: () => {
-                                fetch('./role-translator.md')
-                                    .then(res => res.text())
-                                    .then(text => {
-                                        let messages = this.getActiveMessages();
-                                        let type = 'system';
-                                        let item = {
-                                            type: type,
-                                            hidden: false,
-                                        }
-                                        item[type] = {
-                                            role: type,
-                                            content: text
-                                        }
-                                        messages.push(item);
-                                    })
+                                loadSystemRoleByMarkdownUrl('./role-translator.md')
                             }
                         },
                         {
                             label: `资深开发工程师`,
                             icon: 'el-icon-mouse',
                             onClick: () => {
-                                fetch('./role-developer.md')
-                                    .then(res => res.text())
-                                    .then(text => {
-                                        let messages = this.getActiveMessages();
-                                        let type = 'system';
-                                        let item = {
-                                            type: type,
-                                            hidden: false,
-                                        }
-                                        item[type] = {
-                                            role: type,
-                                            content: text
-                                        }
-                                        messages.push(item);
-                                    })
+                                loadSystemRoleByMarkdownUrl('./role-developer.md')
+                            }
+                        },
+                        {
+                            label: `Emoji表情大师`,
+                            icon: 'el-icon-mouse',
+                            onClick: () => {
+                                loadSystemRoleByMarkdownUrl('./role-unicode-emoji.md')
+                            }
+                        },
+                        {
+                            label: `易学命理大师`,
+                            icon: 'el-icon-discover',
+                            onClick: () => {
+                                loadSystemRoleByMarkdownUrl('./role-sizubazi.md')
+                            }
+                        },
+                        {
+                            label: `文学泰斗`,
+                            icon: 'el-icon-collection',
+                            onClick: () => {
+                                loadSystemRoleByMarkdownUrl('./role-poetry.md')
                             }
                         }
                     ],
@@ -3025,7 +3021,7 @@
         width: 100%;
         text-align: right;
         right: 5px;
-        min-width: 100px;
+        white-space: nowrap;
     }
 
     .bubble-actions > * {
