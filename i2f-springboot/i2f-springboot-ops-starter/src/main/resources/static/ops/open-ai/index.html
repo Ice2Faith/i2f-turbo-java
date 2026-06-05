@@ -24,6 +24,7 @@
     <script src="../common/OpsSecureDto.js"></script>
     <script src="../common/OpsSecureHelper.js"></script>
     <script src="../common/OpsSecureTransfer.js"></script>
+    <script src="../lib/vue-contextmenujs-1.4.11/contextmenu.umd.js"></script>
     <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
     <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
@@ -41,6 +42,35 @@
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
     <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/yaml/yaml-lint.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/javascript/javascript.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/javascript/javascript-hint.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/lint/javascript/javascript-lint.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/sql/sql.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/sql/sql-hint.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/xml/xml.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/xml/xml-fold.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/xml/xml-hint.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/addon/lint/html/html-lint.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/hint/html/html-hint.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/mode/htmlmixed/htmlmixed.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/markdown/markdown.min.js"></script>
+    <script src="../lib/codemirror-6.65.7/addon/fold/markdown/markdown-fold.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/groovy/groovy.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js"></script>
+
+    <script src="../lib/codemirror-6.65.7/mode/python/python.min.js"></script>
 
     <script src="../lib/markdown-it@14.1.1/dist/markdown-it.min.js"></script>
 
@@ -177,13 +207,14 @@
         <!-- 中间聊天区 -->
         <div class="chat-container">
             <!-- 消息列表 -->
-            <div class="message-list" ref="messageList">
-                <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
+    <div class="message-list center-message-list" ref="messageList">
+        <el-backtop target=".center-message-list" :bottom="180"></el-backtop>
+        <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
                     <i class="el-icon-chat-dot-round"></i>
                     <p>发送消息，开始对话</p>
                 </div>
 
-    <div v-for="(msg, idx) in currentMessages"
+        <div v-for="(msg, idx) in currentMessages"
          :key="idx">
         <el-divider v-if="!msg.hidden && (idx>1 && currentMessages[idx-1].hidden)">
             截断会话历史线
@@ -234,6 +265,8 @@
                     <span class="hover-show-child">
                                 <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
                                    class="el-icon-circle-close "></i>
+                                <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
+                                   class="el-icon-edit"></i>
                                 <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
                                    class="el-icon-refresh"></i>
                                 <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
@@ -245,8 +278,8 @@
         </div>
     </div>
 
-    <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
-    <div v-if="currentSession?.sending && !currentSession?.streamingStarted" class="message-row message-row-left">
+        <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
+        <div v-if="currentSession?.sending && !currentSession?.streamingStarted" class="message-row message-row-left">
                     <div class="message-avatar avatar-ai">
                         <i class="el-icon-cpu"></i>
                     </div>
@@ -470,8 +503,35 @@
             :v-if="dialog.toolApproval.show"
             top="5vh"
             width="80%">
-        <el-card shadow="never" style="max-height: 70vh;overflow: auto;">
+        <el-card shadow="never" style="max-height: 70vh;overflow: auto;" class="tool-approval-card">
             <el-form inline>
+                <el-backtop target=".tool-approval-card"></el-backtop>
+                <el-row style="background: rgb(238, 238, 238); height: 50px; padding: 5px;">
+                    <el-col :span="8">
+                        <el-form-item>
+                            <el-switch
+                                    v-model="dialog.toolApproval.rejectAll"
+                                    active-color="#ff4949"
+                                    inactive-color="#13ce66"
+                                    active-text="拒绝执行"
+                                    inactive-text="允许执行">
+                            </el-switch>
+                            <el-button type="success" style="margin-left: 15px;" size="mini" icon="el-icon-guide"
+                                       @click="toggleAllToolApprovalChecked"></el-button>
+                        </el-form-item>
+                    </el-col>
+                    <el-col :span="16">
+                        <el-form-item class="form-item-full-width">
+                            <el-input v-model="dialog.toolApproval.rejectAllReason" clearable
+                                      placeholder="拒绝执行原因，提供给AI的拒绝信息，可不填">
+                                <i slot="suffix" class="el-input__icon el-icon-brush"
+                                   @click="fillAllToolApprovalReason"></i>
+                            </el-input>
+                        </el-form-item>
+
+                    </el-col>
+                </el-row>
+                <el-divider></el-divider>
                 <el-row v-for="(item,index) in form.toolApprovalList">
                     <el-divider v-if="index>0"></el-divider>
                     <el-row>
@@ -514,6 +574,33 @@
             <el-button type="primary" size="small" @click="continueExecuteWithToolApproval">执行</el-button>
         </el-row>
     </el-dialog>
+
+    <el-dialog
+            :title="dialog.messageEditor.title"
+            :visible.sync="dialog.messageEditor.show"
+            width="80%">
+        <el-row type="flex" justify="end">
+            <el-button size="mini" type="primary" @click="onSubmitEditMessage">保存</el-button>
+        </el-row>
+        <el-card shadow="never">
+            <el-form inline label-position="left" label-width="100px">
+                <el-form-item label="语言类型">
+                    <el-select clearable filterable v-model="dialog.messageEditor.lang" placeholder="语言类型"
+                               @change="onMessageEditorLangChange">
+                        <el-option
+                                v-for="item in metas.langList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
+                </el-form-item>
+            </el-form>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.messageEditor)">
+                <textarea ref="refMessageEditor"></textarea>
+            </div>
+        </el-card>
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -529,6 +616,7 @@
         },
         mounted() {
             this.initDefaultSessionView()
+            this.initMessageEditor();
         },
         watch: {
             'metas.activeSessionId': {
@@ -540,6 +628,13 @@
                 handler: function (newVal, oldVal) {
                     this.metas.sessionList.forEach(e => {
                         e.checked = newVal;
+                    })
+                }
+            },
+            'dialog.toolApproval.rejectAll': {
+                handler: function (newVal, oldVal) {
+                    this.form.toolApprovalList.forEach(e => {
+                        e.reject = newVal;
                     })
                 }
             },
@@ -666,7 +761,9 @@
             getDefaultData() {
                 return {
                     opsBroadcastChannel: null,
-                    langEditors: {},
+                    langEditors: {
+                        messageEditor: null,
+                    },
                     completions: [],
                     storage: {},
                     metas: {
@@ -949,6 +1046,16 @@
                         ],
                         langList: [
                             {label: 'Text', value: 'text'},
+                            {label: 'Yaml', value: 'yaml'},
+                            {label: 'Json', value: 'javascript'},
+                            {label: 'SQL', value: 'sql'},
+                            {label: 'Shell', value: 'shell'},
+                            {label: 'Xml', value: 'xml'},
+                            {label: 'Html', value: 'htmlmixed'},
+                            {label: 'Markdown', value: 'markdown'},
+                            {label: 'Groovy', value: 'groovy'},
+                            {label: 'Nginx', value: 'nginx'},
+                            {label: 'Python', value: 'python'},
                         ],
                         roleList: [
                             {label: '用户', value: 'user', std: true},
@@ -964,7 +1071,17 @@
                         toolApproval: {
                             title: '工具调用授权',
                             show: false,
-                        }
+                            rejectAll: false,
+                            rejectAllReason: '',
+                        },
+                        messageEditor: {
+                            show: false,
+                            title: '消息编辑器',
+                            text: '',
+                            lang: 'markdown',
+                            saveLoading: false,
+                            messageIndex: 0
+                        },
                     },
                     form: {
                         meta: {
@@ -1046,6 +1163,369 @@
                     this.metas.activeSessionId = this.metas.sessionList[0].sessionId;
                 }
                 this.$nextTick(() => this.scrollToBottom());
+            },
+            onEditorContextmenu(editor, categoryList) {
+                let _this = this
+                let convertText = function (convertor) {
+                    try {
+                        let text = editor.getSelection();
+                        if (!text || text == '') {
+                            text = editor.getValue()
+                            text = convertor(text);
+                            editor.setValue(text)
+                        } else {
+                            text = convertor(text);
+                            editor.replaceSelection(text)
+                        }
+                    } catch (e) {
+                        _this.$message.error('操作失败')
+                    }
+                }
+
+                let presetMenusMap = {
+                    text: [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `upper`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toUpperCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `lower`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toLowerCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的字符串', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(searchText, replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: `regexp_replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的正则', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(new RegExp(searchText, 'g'), replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `encode_base64`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return btoa(s);
+                                })
+                            }
+                        },
+                        {
+                            label: `decode_base64`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return atob(s);
+                                })
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `escape_sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return "'" + s.replaceAll("'", "''") + "'";
+                                })
+                            }
+                        },
+                        {
+                            label: `unescape_sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    if (s.startsWith("'")) {
+                                        s = s.substring(1);
+                                    }
+                                    if (s.endsWith("'")) {
+                                        s = s.substring(0, s.length - 1);
+                                    }
+                                    return s.replaceAll("''", "'");
+                                })
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `to_json`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return JSON.stringify(s);
+                                })
+                            }
+                        },
+                        {
+                            label: `parse_json`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    let obj = JSON.parse(s);
+                                    if (typeof obj == 'string') {
+                                        return obj + '';
+                                    }
+                                    return JSON.stringify(obj, null, '    ')
+                                })
+                            }
+                        },
+                        {
+                            label: `format_json`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    let obj = JSON.parse(s);
+                                    return JSON.stringify(obj, null, '    ')
+                                })
+                            }
+                        },
+                    ],
+                    sql: [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `count(1)`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                                })
+                            }
+                        },
+                        {
+                            label: `select`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                                })
+                            }
+                        },
+                        {
+                            label: `update`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return 'update ' + s + '\n set \n\nwhere  \n';
+                                })
+                            }
+                        },
+                        {
+                            label: `delete`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return 'delete from ' + s + '\nwhere  \n';
+                                })
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        ...((typeof sqlFormatter != 'object') ? [] : [{
+                            label: `format sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return _this.formatSql(s);
+                                })
+                            }
+                        }]),
+                    ]
+                }
+                let menus = [...presetMenusMap.text]
+                categoryList = categoryList || []
+                if (categoryList && categoryList.length > 0) {
+                    for (let i = 0; i < categoryList.length; i++) {
+                        let category = categoryList[i];
+                        if (category == 'text') {
+                            continue;
+                        }
+                        menus.push(...presetMenusMap[category])
+                    }
+                }
+                this.$contextmenu({
+                    items: menus,
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
+            initLangEditor(editorProp, editorRef, editorLang, afterCallback) {
+                let bts = new Date().getTime()
+                let initEditorTask = () => {
+                    if (this.langEditors[editorProp]) {
+                        try {
+                            this.langEditors[editorProp].toTextArea()
+                        } catch (e) {
+
+                        }
+                    }
+                    this.langEditors[editorProp] = null;
+
+                    let dom = this.$refs[editorRef];
+                    if (!dom) {
+                        let cts = new Date().getTime();
+                        if (cts - bts < 3000) {
+                            setTimeout(initEditorTask, 30);
+                        }
+                        return
+                    }
+                    this.langEditors[editorProp] = CodeMirror.fromTextArea(dom, {  // 标识到textarea
+                        value: "",  // 文本域默认显示的文本
+                        mode: editorLang || '',  // 模式
+                        theme: "idea",  // CSS样式选择
+                        indentUnit: 2,  // 缩进单位，默认2
+                        smartIndent: true,  // 是否智能缩进
+                        tabSize: 4,  // Tab缩进，默认4
+                        readOnly: false,  // 是否只读，默认false
+                        showCursorWhenSelecting: true,
+                        hintOptions: {
+                            completeSingle: false,
+                        },
+                        lineNumbers: true  // 是否显示行号
+                        // .. 还有好多，翻译不完。需要的去看http://codemirror.net/doc/manual.html#config
+                    });
+                    this.langEditors[editorProp].on("keypress", () => {
+                        //编译器内容更改事件
+                        this.langEditors[editorProp].showHint();
+                    });
+                    if (afterCallback) {
+                        afterCallback(this.langEditors[editorProp], dom)
+                    }
+                }
+
+                initEditorTask()
+            },
+            initMessageEditor() {
+                this.initLangEditor('messageEditor', 'refMessageEditor', this.dialog.messageEditor.lang, (editor, dom) => {
+                    editor.display.wrapper.style.height = Math.max(Math.round(window.innerHeight * 0.85 - 270), 320) + 'px';
+                    editor.setValue(this.dialog.messageEditor.text || '');
+                    editor.on('change', () => {
+                        this.dialog.messageEditor.text = editor.getValue();
+                    });
+
+                })
+            },
+            onMessageEditorLangChange() {
+                this.initMessageEditor()
+            },
+            onSubmitEditMessage() {
+                this.dialog.messageEditor.show = false;
+
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+
+                let index = this.dialog.messageEditor.messageIndex;
+                let content = this.dialog.messageEditor.text;
+
+
+                let item = list[index];
+                item[item.type].content = content;
+
             },
             initStoreData() {
                 let reset = new URL(window.location.href).searchParams.get('reset');
@@ -1334,6 +1814,8 @@
                 if (item.type == 'user') {
                     this.directSendMessage();
                 } else {
+                    this.form.messageType = 'user';
+
                     this.$confirm('非用户消息，是否需要发送请求到模型？', '提示', {type: 'warning'})
                         .then(() => {
                             this.directSendMessage()
@@ -1698,6 +2180,20 @@
                     this.$nextTick(() => this.scrollToBottom());
                 }
             },
+            toggleAllToolApprovalChecked() {
+                this.form.toolApprovalList.forEach(item => {
+                    item.reject = !item.reject;
+                })
+            },
+            fillAllToolApprovalReason() {
+                this.form.toolApprovalList.forEach(item => {
+                    if (item.reject) {
+                        item.rejectReason = this.dialog.toolApproval.rejectAllReason;
+                    } else {
+                        item.rejectReason = '';
+                    }
+                })
+            },
             async continueExecuteWithToolApproval() {
                 this.dialog.toolApproval.show = false;
                 this.directSendMessage()
@@ -1743,6 +2239,25 @@
                 let item = list[index];
                 let content = item[item.type].content;
                 copy2clipboard(content);
+            },
+            editSelectMessage(index) {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+                let item = list[index];
+                let content = item[item.type].content;
+
+                this.dialog.messageEditor.messageIndex = index;
+                this.dialog.messageEditor.text = content;
+                this.dialog.messageEditor.show = true;
+                setTimeout(() => {
+                    this.initMessageEditor();
+                }, 200)
             },
             summarySessionHistory() {
                 this.$confirm('确认进行会话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})

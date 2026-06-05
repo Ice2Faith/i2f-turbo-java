@@ -46,8 +46,11 @@ public class DatabaseQueryTools {
     @Autowired
     private DatasourceProvider datasourceProvider;
 
-    @Value("${ai.tools.database.query.validator.allow-fallback-simple.enable:true}")
+    @Value("${ai.tools.database.query.validator.allow-fallback-simple:true}")
     protected boolean allowFallbackSimpleValidator = true;
+
+    @Value("${ai.tools.database.query.validator.always-use-simple:true}")
+    protected boolean alwaysUseSimpleValidator = true;
 
     @Tool(
             tags = {
@@ -80,27 +83,8 @@ public class DatabaseQueryTools {
         if (sql == null || sql.isEmpty()) {
             throw new IllegalArgumentException("sql is required, and not empty");
         }
-        // 校验SQL
-        OpsSqlValidator sqlValidator = OpsSqlValidators.getSqlValidator();
-        try {
-            sqlValidator.validateQuery(sql);
-        } catch (Throwable e) {
-            Throwable reThr = e;
-            boolean needThrow = true;
-            if (allowFallbackSimpleValidator) {
-                // 如果遇到解析器不支持的语法，则使用简单正则校验器检查，检查通过则放行
-                try {
-                    OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
-                    needThrow = false;
-                } catch (Throwable ex) {
-                    ex.addSuppressed(e);
-                    reThr = ex;
-                }
-            }
-            if (needThrow) {
-                throw reThr;
-            }
-        }
+
+        assertQuerySql(sql);
 
         DataSource datasource = datasourceProvider.getDatasource(datasourceName);
         if (datasource == null) {
@@ -118,5 +102,40 @@ public class DatabaseQueryTools {
         }
     }
 
+    public void assertQuerySql(String sql) throws Throwable {
+        // 校验SQL
+        OpsSqlValidator sqlValidator = OpsSqlValidators.getSqlValidator();
+        // 是否始终启用简单校验器，可能有较高的误杀率
+        if (alwaysUseSimpleValidator) {
+            if (!OpsSimpleRegexSqlValidator.class.equals(sqlValidator.getClass())) {
+                try {
+                    OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
+                } catch (Throwable ex) {
+                    throw new IllegalArgumentException(ex.getMessage() + ", maybe contains keywords or current validator not support, but you may still attempt to run it manually.", ex);
+                }
+            }
+        }
+        try {
+            sqlValidator.validateQuery(sql);
+        } catch (Throwable e) {
+            Throwable reThr = e;
+            boolean needThrow = true;
+            // 如果遇到解析器不支持的语法，则使用简单正则校验器检查，检查通过则放行
+            if (allowFallbackSimpleValidator) {
+                if (!OpsSimpleRegexSqlValidator.class.equals(sqlValidator.getClass())) {
+                    try {
+                        OpsSimpleRegexSqlValidator.INSTANCE.validateQuery(sql);
+                        needThrow = false;
+                    } catch (Throwable ex) {
+                        reThr = new IllegalArgumentException(ex.getMessage() + ", maybe contains keywords or current validator not support, but you may still attempt to run it manually.", ex);
+                        reThr.addSuppressed(e);
+                    }
+                }
+            }
+            if (needThrow) {
+                throw reThr;
+            }
+        }
+    }
 
 }

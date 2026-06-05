@@ -3,11 +3,15 @@ package i2f.springboot.ops.openai.tool.impl.sql.impl;
 import i2f.springboot.ops.openai.tool.impl.sql.OpsSqlValidator;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.*;
 import net.sf.jsqlparser.statement.analyze.Analyze;
+import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.show.ShowIndexStatement;
 import net.sf.jsqlparser.statement.show.ShowTablesStatement;
+
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -52,6 +56,29 @@ public class OpsSqlParserAstSqlValidator implements OpsSqlValidator {
             throw new IllegalArgumentException("only support [select,explain,analyze,show,describe] sql statement");
         }
 
+        if (statement instanceof Select) {
+            Select select = (Select) statement;
+            verifySelectStatement(select);
+        }
+
         return sql;
+    }
+
+    public static void verifySelectStatement(Select select) {
+        if (!(select instanceof PlainSelect)) {
+            return;
+        }
+        PlainSelect plainSelect = (PlainSelect) select;
+        List<Table> intoTables = plainSelect.getIntoTables();
+        if (intoTables != null && !intoTables.isEmpty()) {
+            throw new IllegalArgumentException("only support normal select, not support select ... into ...");
+        }
+
+        Table intoTempTable = plainSelect.getIntoTempTable();
+        if (intoTempTable != null) {
+            throw new IllegalArgumentException("only support normal select, not support select ... into ...");
+        }
+
+
     }
 }

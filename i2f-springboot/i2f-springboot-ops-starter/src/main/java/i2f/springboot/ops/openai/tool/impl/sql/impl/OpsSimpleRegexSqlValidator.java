@@ -77,10 +77,17 @@ public class OpsSimpleRegexSqlValidator implements OpsSqlValidator {
                 "call",
                 "exec",
                 "copy", "load", "save",
+                "duplicate", "infile", "outfile", "dumpfile",
+                "conflict", "returning", "prepare",
+                "dblink_exec", "parse", "getxml", "request", "create_policy",
         };
 
         for (String item : badKeywords) {
             if (!RegexUtil.regexFinds(sql, "(?s)(^|\\s+)" + item + "($|\\s+)").isEmpty()) {
+                throw new IllegalArgumentException("query sql cannot contains : " + item);
+            }
+            // \b 正则中的单词定界标志，用于单词边界，零宽断言，所在位置需要时分割单词的字符，也就是非单词，可以是空白符或者符号
+            if (!RegexUtil.regexFinds(sql, "(?s)(^|\\b)" + item + "($|\\b)").isEmpty()) {
                 throw new IllegalArgumentException("query sql cannot contains : " + item);
             }
         }
