@@ -1864,6 +1864,13 @@
                             onClick: () => {
                                 loadSystemRoleByMarkdownUrl('./role-poetry.md')
                             }
+                        },
+                        {
+                            label: `Api聊天女友`,
+                            icon: 'el-icon-chat-line-round',
+                            onClick: () => {
+                                loadSystemRoleByMarkdownUrl('./role-api-girlfirend.md')
+                            }
                         }
                     ],
                     event, // 必须传入 event 以确定位置
@@ -1941,6 +1948,22 @@
                             break;
                         }
                         stack.push(item)
+                    }
+
+                    // 查找第一条系统消息，这个一般是AI的人设
+                    let roleMsg = null;
+                    for (let i = 0; i < messages.length; i++) {
+                        let item = messages[i];
+                        if (item.type == 'system') {
+                            roleMsg = item;
+                            break;
+                        }
+                    }
+
+                    // 如果有第一条系统消息，添加到接口消息
+                    if (roleMsg && roleMsg.type == 'system') {
+                        apiMessages.push(roleMsg);
+                        stack.splice(0, 1);
                     }
 
                     for (let i = stack.length - 1; i >= 0; i--) {
