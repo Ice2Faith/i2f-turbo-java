@@ -2115,9 +2115,10 @@
                         if (content) {
                             if (!session.streamingStarted) {
                                 session.streamingStarted = true;
+                                _this.$nextTick(() => _this.scrollToBottom());
                             }
                             assistantMsg.assistant.content += content;
-                            _this.$nextTick(() => _this.scrollToBottom());
+
                         }
                     } catch (e) { /* 忽略解析错误 */
                     }
