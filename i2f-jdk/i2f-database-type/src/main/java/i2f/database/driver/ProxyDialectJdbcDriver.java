@@ -60,7 +60,7 @@ public class ProxyDialectJdbcDriver implements Driver {
             throw new IllegalArgumentException("invalid proxy url: " + url);
         }
         Driver driver = DriverManager.getDriver(meta.getRealJdbcUrl());
-        Connection connection = driver.connect(url, info);
+        Connection connection = driver.connect(meta.getRealJdbcUrl(), info);
         InvocationHandler handler = new ProxyDialectConnectionInvocationHandler(connection, driver, meta);
         Connection ret = (Connection) Proxy.newProxyInstance(this.getClass().getClassLoader(),
                 new Class[]{ProxyDialectConnection.class},
