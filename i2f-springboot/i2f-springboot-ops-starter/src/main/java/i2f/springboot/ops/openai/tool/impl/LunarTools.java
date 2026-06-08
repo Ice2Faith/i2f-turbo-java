@@ -31,18 +31,37 @@ public class LunarTools {
             tags = {
                     AiTags.AUTO_VALUE
             },
-            description = "获取指定日期的农历、四柱八字、纳音、五行等信息"
+            description = "获取指定公历日期的农历、四柱八字、纳音、五行等信息"
     )
-    public Map<String, Object> extra_lunar_metadata(@ToolParam(value = "date", description = "the date, use java date pattern 'yyyy-MM-dd HH:mm', for example: '2016-01-01 00:00' or '1998-11-23 14:54'")
-                                                    String date) throws Exception {
+    public Map<String, Object> extra_date_lunar_metadata(@ToolParam(value = "date", description = "the date, use java date pattern 'yyyy-MM-dd HH:mm', for example: '2016-01-01 00:00' or '1998-11-23 14:54'")
+                                                         String date) throws Exception {
         SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         Date d = fmt.parse(date);
         Solar solar = Solar.fromDate(d);
         Lunar lunar = solar.getLunar();
+        return getLunarMetadata(lunar);
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.AUTO_VALUE
+            },
+            description = "获取指定农历日期的四柱八字、纳音、五行等信息"
+    )
+    public Map<String, Object> extra_lunar_metadata(@ToolParam(value = "year", description = "the year, for example: 1996 or 2004")
+                                                    int year,
+                                                    @ToolParam(value = "month", description = "the month, for example: 1 or 12")
+                                                    int month,
+                                                    @ToolParam(value = "day", description = "the day, for example: 1 or 21")
+                                                    int day,
+                                                    @ToolParam(value = "hour", description = "the hour, for example: 0 or 23")
+                                                    int hour) throws Exception {
+        return getLunarMetadata(new Lunar(year, month, day, hour, 0, 0));
+    }
+
+    public Map<String, Object> getLunarMetadata(Lunar lunar) {
         EightChar eightChar = lunar.getEightChar();
         Map<String, Object> map = new HashMap<>();
-        map.put("日期", fmt.format(d));
-
         map.put("农历", lunar.toFullString());
 
         map.put("年柱", eightChar.getYear());
