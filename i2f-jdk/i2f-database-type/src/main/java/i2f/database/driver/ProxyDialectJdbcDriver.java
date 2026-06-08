@@ -62,7 +62,7 @@ public class ProxyDialectJdbcDriver implements Driver {
         Driver driver = DriverManager.getDriver(meta.getRealJdbcUrl());
         Connection connection = driver.connect(meta.getRealJdbcUrl(), info);
         InvocationHandler handler = new ProxyDialectConnectionInvocationHandler(connection, driver, meta);
-        Connection ret = (Connection) Proxy.newProxyInstance(this.getClass().getClassLoader(),
+        Connection ret = (Connection) Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(),
                 new Class[]{ProxyDialectConnection.class},
                 handler);
         return ret;
@@ -76,8 +76,12 @@ public class ProxyDialectJdbcDriver implements Driver {
 
     @Override
     public DriverPropertyInfo[] getPropertyInfo(String url, Properties info) throws SQLException {
+        ProxyDialectJdbcUrlMeta meta = parseProxyMeta(url);
+        if (meta == null) {
+            return new DriverPropertyInfo[0];
+        }
         Driver driver = getRealDriver(url);
-        return driver.getPropertyInfo(url, info);
+        return driver.getPropertyInfo(meta.getRealJdbcUrl(), info);
     }
 
     @Override
