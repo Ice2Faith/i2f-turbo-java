@@ -81,7 +81,7 @@ APP_JAVA_HOME=
 
 # JVM 常见配置区
 # JVM 启动参数定义，此参数不受 ENABLE_JVM_CFG 控制
-JVM_OPTS=
+JVM_OPTS="-Dfile.encoding=UTF-8"
 # 是否开启Jvm配置
 # 必须是定义的BOOL常量
 ENABLE_JVM_CFG=$BOOL_FALSE
@@ -645,7 +645,15 @@ function findLogFile() {
       # this rule only support 1 level dir find
       # _p_log_file=`ls -t ${LOG_DIR} | grep .log | grep -v grep | grep ${AppName} | head -n 1`
       # this rule support multi level dir find
-      _p_log_file=`find ${LOG_DIR} -type f -name '*.log' -exec ls -t {} + | grep -v grep | grep ${AppName} | head -n 1`
+      _p_log_file=`find ${LOG_DIR} -type f -name 'text*.log' -exec ls -t {} + | grep -v grep | grep ${AppName} | head -n 1`
+      if [[ "${_p_log_file}" = "" ]]; then
+        echo -e "\033[0;31m not found ${AppName}*.log , try find most newest log file... \033[0m"
+        _p_log_file=`find ${LOG_DIR} -type f -name 'text*.log' -exec ls -t {} + | grep -v grep | head -n 1`
+      fi
+      if [[ "${_p_log_file}" = "" ]]; then
+        echo -e "\033[0;31m not found ${AppName}*.log , try find most newest log file... \033[0m"
+        _p_log_file=`find ${LOG_DIR} -type f -name '*.log' -exec ls -t {} + | grep -v grep | grep ${AppName} | head -n 1`
+      fi
       if [[ "${_p_log_file}" = "" ]]; then
         echo -e "\033[0;31m not found ${AppName}*.log , try find most newest log file... \033[0m"
         _p_log_file=`find ${LOG_DIR} -type f -name '*.log' -exec ls -t {} + | grep -v grep | head -n 1`

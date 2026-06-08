@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: i2f-tools-ops
   servlet:
     multipart:
       max-file-size: 20MB
