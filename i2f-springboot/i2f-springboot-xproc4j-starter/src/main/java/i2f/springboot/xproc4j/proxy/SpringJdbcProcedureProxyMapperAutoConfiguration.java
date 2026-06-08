@@ -48,6 +48,9 @@ public class SpringJdbcProcedureProxyMapperAutoConfiguration implements Applicat
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             List<String> packages = new ArrayList<>();
+            if(jdbcProcedureProperties==null){
+                jdbcProcedureProperties=applicationContext.getBean(SpringJdbcProcedureProperties.class);
+            }
             List<String> mapperPackages = jdbcProcedureProperties.getMapperPackages();
             if (mapperPackages != null) {
                 packages.addAll(mapperPackages);
@@ -113,7 +116,7 @@ public class SpringJdbcProcedureProxyMapperAutoConfiguration implements Applicat
     }
 
     @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
 
     }
 }
