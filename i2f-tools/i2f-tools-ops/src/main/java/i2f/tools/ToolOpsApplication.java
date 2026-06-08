@@ -1,7 +1,6 @@
 package i2f.tools;
 
 import i2f.tools.application.WarBootApplication;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 /**
@@ -11,7 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 public class ToolOpsApplication extends WarBootApplication {
-    public static void main(String[] args){
-        startup(ToolOpsApplication.class,args);
+    public static void main(String[] args) {
+        startup(ToolOpsApplication.class, args);
     }
 }
