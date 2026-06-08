@@ -1,1 +1,0 @@
-java -jar -Dfile.encoding=UTF-8 i2f-tools-ops.jar
