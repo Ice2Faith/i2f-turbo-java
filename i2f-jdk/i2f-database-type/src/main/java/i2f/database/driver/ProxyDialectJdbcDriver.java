@@ -41,7 +41,7 @@ public class ProxyDialectJdbcDriver implements Driver {
         if (arr.length != 2) {
             return null;
         }
-        return new ProxyDialectJdbcUrlMeta(arr[0], arr[1]);
+        return new ProxyDialectJdbcUrlMeta(arr[0], "jdbc:" + arr[1]);
     }
 
     public Driver getRealDriver(String url) throws SQLException {
