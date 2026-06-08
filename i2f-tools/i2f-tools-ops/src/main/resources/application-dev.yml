@@ -1,0 +1,45 @@
+server:
+  port: 8080
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+  jackson:
+    locale: zh_CN
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss.SSS
+
+logging:
+  level:
+    root: info
+
+# ops 操作面板
+i2f:
+  springboot:
+    ops:
+      secure:
+#         cert:
+      datasource:
+#        datasourceMap:
+#          sample:
+#            driver: com.mysql.cj.jdbc.Driver
+#            url: jdbc:mysql://localhost:3306/test_db
+#            username: root
+#            password: xxxxxxx
+    ssh:
+      tunnel:
+        servers:
+#          - name: jump-server
+#            ssh:
+#              host: 10.1.x.101
+#              port: 22
+#              username: app
+#              password: 123xxxx
+#            tunnels:
+#              - name: mysql
+#                localPort: 3306
+#                remoteHost: 10.5.x.102
+#                remotePort: 3306
+#                # jdbc:mysql://localhost:3306/test_db
