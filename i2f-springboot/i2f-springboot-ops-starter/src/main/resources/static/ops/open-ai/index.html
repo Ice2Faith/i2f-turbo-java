@@ -208,7 +208,8 @@
         <!-- 中间聊天区 -->
         <div class="chat-container">
             <!-- 消息列表 -->
-    <div class="message-list center-message-list" ref="messageList">
+    <div class="message-list center-message-list" ref="messageList"
+         @contextmenu.prevent="onContextMenuMessageListPanel">
         <el-backtop target=".center-message-list" :bottom="180"></el-backtop>
         <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
                     <i class="el-icon-chat-dot-round"></i>
@@ -602,7 +603,7 @@
             :title="dialog.messageEditor.title"
             :visible.sync="dialog.messageEditor.show"
             width="80%">
-        <el-row type="flex" justify="end">
+        <el-row type="flex" justify="end" v-if="dialog.messageEditor.type!='view'">
             <el-button size="mini" type="primary" @click="onSubmitEditMessage">保存</el-button>
         </el-row>
         <el-card shadow="never">
@@ -636,6 +637,7 @@
         created() {
             this.initStoreData();
             this.initBroadcast();
+            this.loadMoreSendMenus();
         },
         mounted() {
             this.initDefaultSessionView()
@@ -801,6 +803,7 @@
                         showConfig: false,
                         supportTts: false,
                         ttsPlaying: false,
+                        moreSendMenus: [],
                         presetBaseUrlList: [
                             {
                                 label: 'OpenAI 官方',
@@ -1102,6 +1105,7 @@
                         },
                         messageEditor: {
                             show: false,
+                            type: 'edit-message',
                             title: '消息编辑器',
                             text: '',
                             lang: 'markdown',
@@ -1542,21 +1546,59 @@
             onSubmitEditMessage() {
                 this.dialog.messageEditor.show = false;
 
-                let sid = this.metas.activeSessionId;
-                if (!sid) {
-                    return
+                if (this.dialog.messageEditor.type == 'view') {
+                    return;
                 }
-                let list = this.metas.historyMessageMap[sid]
-                if (!list) {
-                    return
+                if (this.dialog.messageEditor.type == 'edit-message') {
+                    let sid = this.metas.activeSessionId;
+                    if (!sid) {
+                        return
+                    }
+                    let list = this.metas.historyMessageMap[sid]
+                    if (!list) {
+                        return
+                    }
+
+                    let index = this.dialog.messageEditor.messageIndex;
+                    let content = this.dialog.messageEditor.text;
+
+
+                    let item = list[index];
+                    item[item.type].content = content;
+                } else if (this.dialog.messageEditor.type == 'import-message-history') {
+                    let content = this.dialog.messageEditor.text;
+                    try {
+                        let list = JSON.parse(content);
+                        let ok = false;
+                        if (list.length && list.length > 0) {
+                            let item = list[0];
+                            if (item && item.type && item[item.type] && item[item.type].content) {
+                                let session = this.createSession();
+                                let sessionId = session.sessionId;
+                                this.$set(this.metas.historyMessageMap, sessionId, [...list]);
+                                this.metas.activeSessionId = sessionId;
+                                this.$nextTick(() => this.scrollToBottom());
+                                for (let i = 0; i < list.length; i++) {
+                                    let msg = list[i];
+                                    if (msg.type == 'user') {
+                                        let title = msg[msg.type].content
+                                        if (title && title.length > 20) {
+                                            title = title.substring(0, 17) + '...'
+                                        }
+                                        session.title = title || '新对话'
+                                        break;
+                                    }
+                                }
+                                ok = true;
+                            }
+                        }
+                        if (!ok) {
+                            this.$message.error('导入失败，请检查格式！')
+                        }
+                    } catch (e) {
+                        this.$message.error('导入失败，其他问题' + (e.msg || e.message || e.errorMessage))
+                    }
                 }
-
-                let index = this.dialog.messageEditor.messageIndex;
-                let content = this.dialog.messageEditor.text;
-
-
-                let item = list[index];
-                item[item.type].content = content;
 
             },
             initStoreData() {
@@ -1666,7 +1708,7 @@
             },
             createSession() {
                 let sessionId = this.genId();
-                this.metas.sessionList.unshift({
+                let item = {
                     sessionId,
                     title: '新对话',
                     checked: false,
@@ -1677,10 +1719,12 @@
                     },
                     sending: false,
                     streamingStarted: false,
-                });
+                }
+                this.metas.sessionList.unshift(item);
                 this.$set(this.metas.historyMessageMap, sessionId, []);
                 this.metas.activeSessionId = sessionId;
                 this.$nextTick(() => this.scrollToBottom());
+                return item;
             },
             selectSession(sessionId) {
                 this.metas.activeSessionId = sessionId;
@@ -1822,6 +1866,19 @@
                     messages.push(item)
                 }
             },
+            loadMoreSendMenus() {
+                fetch('./role-config.json')
+                    .then(res => res.text())
+                    .then(json => {
+                        let ret = []
+                        try {
+                            ret = JSON.parse(json);
+                        } catch (e) {
+
+                        }
+                        this.metas.moreSendMenus = ret || [];
+                    })
+            },
             onContextMenuMoreSendOptions() {
                 let loadSystemRoleByMarkdownUrl = (url) => {
                     fetch(url)
@@ -1840,57 +1897,100 @@
                             messages.push(item);
                         })
                 }
+                let defaultMenus = [
+                    {
+                        "label": "默认角色",
+                        "icon": "el-icon-odometer",
+                        "url": "./role-default.md"
+                    },
+                    {"label": "", "divided": true},
+                    {
+                        "label": "中外语翻译官",
+                        "icon": "el-icon-microphone",
+                        "url": "./role-translator.md"
+                    },
+                    {
+                        "label": "资深开发工程师",
+                        "icon": "el-icon-mouse",
+                        "url": "./role-developer.md"
+                    },
+                    {
+                        "label": "Emoji表情大师",
+                        "icon": "el-icon-mouse",
+                        "url": "./role-unicode-emoji.md"
+                    },
+                    {
+                        "label": "易学命理大师",
+                        "icon": "el-icon-discover",
+                        "url": "./role-sizubazi.md"
+                    },
+                    {
+                        "label": "文学泰斗",
+                        "icon": "el-icon-collection",
+                        "url": "./role-poetry.md"
+                    },
+                    {
+                        "label": "Api聊天女友",
+                        "icon": "el-icon-chat-line-round",
+                        "url": "./role-api-girlfirend.md"
+                    }
+                ]
+                let menus = this.metas.moreSendMenus;
+                if (!menus || menus.length == 0) {
+                    menus = defaultMenus;
+                }
+                let list = []
+                menus.forEach(e => {
+                    let item = {
+                        ...e
+                    }
+                    if (item.url) {
+                        item.onClick = () => {
+                            loadSystemRoleByMarkdownUrl(item.url)
+                        }
+                    }
+                    list.push(item)
+                })
+
+                this.$contextmenu({
+                    items: list,
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
+            onContextMenuMessageListPanel() {
                 this.$contextmenu({
                     items: [
                         {
-                            label: `默认角色`,
-                            icon: 'el-icon-odometer',
+                            label: `导出历史`,
+                            icon: 'el-icon-download',
                             onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-default.md')
+                                let list = this.currentMessages;
+                                let text = JSON.stringify(list, null, '    ');
+
+                                this.dialog.messageEditor.type = 'view';
+                                this.dialog.messageEditor.text = text;
+                                this.dialog.messageEditor.lang = 'javascript';
+                                this.dialog.messageEditor.show = true;
+                                setTimeout(() => {
+                                    this.initMessageEditor();
+                                }, 200)
                             }
                         },
                         {
-                            label: `中外语翻译官`,
-                            icon: 'el-icon-microphone',
+                            label: `导入历史`,
+                            icon: 'el-icon-upload2',
                             onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-translator.md')
+                                this.dialog.messageEditor.type = 'import-message-history';
+                                this.dialog.messageEditor.text = '';
+                                this.dialog.messageEditor.lang = 'javascript';
+                                this.dialog.messageEditor.show = true;
+                                setTimeout(() => {
+                                    this.initMessageEditor();
+                                }, 200)
                             }
                         },
-                        {
-                            label: `资深开发工程师`,
-                            icon: 'el-icon-mouse',
-                            onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-developer.md')
-                            }
-                        },
-                        {
-                            label: `Emoji表情大师`,
-                            icon: 'el-icon-mouse',
-                            onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-unicode-emoji.md')
-                            }
-                        },
-                        {
-                            label: `易学命理大师`,
-                            icon: 'el-icon-discover',
-                            onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-sizubazi.md')
-                            }
-                        },
-                        {
-                            label: `文学泰斗`,
-                            icon: 'el-icon-collection',
-                            onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-poetry.md')
-                            }
-                        },
-                        {
-                            label: `Api聊天女友`,
-                            icon: 'el-icon-chat-line-round',
-                            onClick: () => {
-                                loadSystemRoleByMarkdownUrl('./role-api-girlfirend.md')
-                            }
-                        }
                     ],
                     event, // 必须传入 event 以确定位置
                     zIndex: 3000,
@@ -2376,8 +2476,10 @@
                 let item = list[index];
                 let content = item[item.type].content;
 
+                this.dialog.messageEditor.type = 'edit-message';
                 this.dialog.messageEditor.messageIndex = index;
                 this.dialog.messageEditor.text = content;
+                this.dialog.messageEditor.lang = 'markdown';
                 this.dialog.messageEditor.show = true;
                 setTimeout(() => {
                     this.initMessageEditor();
