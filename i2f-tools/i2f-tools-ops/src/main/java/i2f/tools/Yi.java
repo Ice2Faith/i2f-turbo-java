@@ -78,7 +78,7 @@ public class Yi {
      * 偏印，又叫倒食、枭神
      */
     public static final String[] WU_XING_SHI_SHEN_YIN = {
-            "劫财", "枭神", "七杀", "枭神", "偏财"
+            "劫财", "枭神", "七杀", "食神", "偏财"
     };
 
     public static final Set<String> SHI_SHEN = Collections.unmodifiableSet(new LinkedHashSet<String>() {
