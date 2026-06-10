@@ -1,4 +1,4 @@
-package i2f.tools;
+package i2f.tools.yi;
 
 import java.util.*;
 
@@ -702,4 +702,63 @@ public class Yi {
         }
     }
 
+    /**
+     * 获取胎元的干支
+     * 胎元，受胎之月
+     * ---------------------------
+     * 八字命理中，胎元（又称胎月）代表人受胎的月份。它的推算口诀是：“胎元干支，月柱顺推”。
+     * 具体步骤如下：
+     * 天干：在月柱天干的基础上顺推一位。
+     * 地支：在月柱地支的基础上顺推三位。
+     *
+     * @param date 需要的是月柱
+     * @return
+     */
+    public static String getTaiYuanGanZhi(GanZhiDate date){
+        String[] arr = date.getMonth().split("");
+        String monthGan=arr[0];
+        String monthZhi=arr[1];
+        int monthGanOffset = getStringOffset(monthGan, GAN);
+        int monthZhiOffset = getStringOffset(monthZhi, ZHI);
+        return GAN[(monthGanOffset + 1) % 12] + ZHI[(monthZhiOffset + 3) % 12];
+    }
+
+    /**
+     * 获取身宫的干支
+     * -------------------------------
+     * 身宫代表一个人中晚年的运势走向、后天追求以及最终的归宿。它的推算方法需要结合“月支”和“时支”来查。
+     * 身宫的推算规则
+     * 口诀是：“身宫地支，月时相求”。具体是将“月支”和“时支”相加（按照十二地支的排序：子1、丑2、...、亥12）。
+     * 如果相加的数字 ≤ 12，该数字即为身宫地支。
+     * 如果相加的数字 > 12，则减去 12，得出的余数即为身宫地支。
+     * 确定地支后，再根据“五虎遁”（年上起月法）来推算对应的天干。
+     * 因为寅月为1月，所以偏移个数就很明确了
+     *
+     * @param date 八字
+     * @return
+     */
+    public static String getShenGongGanZhi(GanZhiDate date){
+        String monthZhi = date.getMonth().substring(1);
+        String hourZhi = date.getHour().substring(1);
+        int monthZhiOffset = getStringOffset(monthZhi, ZHI);
+        int hourZhiOffset = getStringOffset(hourZhi, ZHI);
+        int sumNum = (monthZhiOffset + 1) + (hourZhiOffset + 1);
+        if(sumNum<=12){
+            // do nothing
+        }else{
+            sumNum=sumNum-12;
+        }
+        int zhiOffset=sumNum-1;
+        int ganOffset=0;
+        String year = date.getYear();
+        String yearGan=year.substring(0,1);
+        for (Map.Entry<String, String> entry : WU_HU_DUN_MONTH_OF_YEAR_RULE.entrySet()) {
+            if(yearGan.equals(entry.getKey())){
+                String startGan = entry.getValue();
+                ganOffset = getStringOffset(startGan, GAN);
+            }
+        }
+        ganOffset=(ganOffset+10+(zhiOffset-2))%10;
+        return GAN[ganOffset]+ZHI[zhiOffset];
+    }
 }
