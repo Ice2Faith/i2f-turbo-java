@@ -78,6 +78,7 @@
     <script src="../lib/highlight.js/11.11.1/highlight.min.js"></script>
     <link rel="stylesheet" href="../lib/highlight.js/11.11.1/styles/github.min.css"/>
 
+    <script src="../lib/common/TextToSpeech.js"></script>
 <body>
 <div id="app">
     <!-- 顶部配置栏：鼠标悬浮展开，离开折叠 -->
@@ -271,6 +272,10 @@
                                    class="el-icon-refresh"></i>
                                 <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
                                    class="el-icon-copy-document"></i>
+                                <i class="el-icon-microphone"
+                                   v-if="metas.supportTts"
+                                   style="color: orangered;font-size: 14px;"
+                                   @click="onTts(msg)"></i>
                             </span>
 
                 </div>
@@ -304,6 +309,11 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
+                    <span v-if="metas.ttsPlaying">
+                        <i class="el-icon-turn-off-microphone"
+                           style="font-size: 18px; color: dodgerblue;"
+                           @click="stopTts"></i>
+                    </span>
                     <span>
                         最大会话次数：
                         <el-input-number v-model="metas.maxHistoryCount" size="mini" :min="-1"
@@ -630,6 +640,7 @@
         mounted() {
             this.initDefaultSessionView()
             this.initMessageEditor();
+            this.initTts();
         },
         watch: {
             'metas.activeSessionId': {
@@ -788,6 +799,8 @@
                         maxHistoryCount: 20,
                         enableTruncOverflowHistory: true,
                         showConfig: false,
+                        supportTts: false,
+                        ttsPlaying: false,
                         presetBaseUrlList: [
                             {
                                 label: 'OpenAI 官方',
@@ -1111,6 +1124,12 @@
                         toolApprovalList: []
                     }
                 }
+            },
+            initTts() {
+                this.metas.supportTts = this.$tts.isSupported();
+                setInterval(() => {
+                    this.metas.ttsPlaying = this.$tts.isPlaying();
+                }, 1000);
             },
             initBroadcast(){
                 this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
@@ -2380,6 +2399,17 @@
                         this.directSendMessage('summary-history')
                     }).catch(() => {
                 });
+            },
+            onTts(msg) {
+                let content = msg[msg.type].content;
+                if (content && content != '') {
+                    this.$tts.speak(content, {
+                        voiceName: 'Yaoyao'
+                    })
+                }
+            },
+            stopTts() {
+                this.$tts.stop()
             }
         }
     });
@@ -2390,6 +2420,7 @@
     };
     let request = axios.create(defaultConfig);
     window.app.$axios = request;
+    window.app.$tts = new TextToSpeech();
     // 初始化 markdown-it
     let md = (typeof markdownit === 'function') ? markdownit({
         html: false,        // 禁止原始 HTML 防止 XSS
