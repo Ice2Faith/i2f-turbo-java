@@ -6,12 +6,15 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.servlet.WebMvcAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +26,14 @@ import java.util.List;
 @ConditionalOnExpression("${i2f.springboot.ssh.tunnel.enable:true}")
 @Slf4j
 @Data
-@AutoConfigureBefore({WebMvcAutoConfiguration.class, DataSourceAutoConfiguration.class})
+@AutoConfigureOrder(Ordered.HIGHEST_PRECEDENCE)
+@AutoConfigureBefore(value = {
+        WebMvcAutoConfiguration.class,
+        DataSourceAutoConfiguration.class,
+},
+        name = {
+                "com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration"
+        })
 @Configuration
 @EnableConfigurationProperties(TunnelProperties.class)
 public class TunnelAutoConfiguration {
@@ -36,6 +46,7 @@ public class TunnelAutoConfiguration {
         public static List<SshTunnelUtil> servers = new ArrayList<>();
     }
 
+    @Order(Ordered.HIGHEST_PRECEDENCE)
     @Bean
     public SshTunnelManager sshTunnelManager() throws Exception {
         SshTunnelManager manager = new SshTunnelManager();
