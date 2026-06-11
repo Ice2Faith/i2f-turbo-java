@@ -6,6 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.tools.yi.BaZi;
 import i2f.tools.yi.GanZhiDate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
  * @date 2026/6/10 15:18
  * @desc
  */
+@ConditionalOnExpression("${i2f.tools.ba-zi.enable:true}")
 @Component
 @Tools
 public class BaZiTools {

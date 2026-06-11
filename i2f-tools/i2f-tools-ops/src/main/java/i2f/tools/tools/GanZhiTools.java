@@ -5,6 +5,7 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.tools.yi.GanZhiDate;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/10 15:42
  * @desc
  */
+@ConditionalOnExpression("${i2f.tools.gan-zhi.enable:true}")
 @Component
 @Tools
 public class GanZhiTools {
