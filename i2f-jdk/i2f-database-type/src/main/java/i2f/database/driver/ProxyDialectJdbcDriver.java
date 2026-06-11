@@ -57,7 +57,10 @@ public class ProxyDialectJdbcDriver implements Driver {
     public Connection connect(String url, Properties info) throws SQLException {
         ProxyDialectJdbcUrlMeta meta = parseProxyMeta(url);
         if (meta == null) {
-            throw new IllegalArgumentException("invalid proxy url: " + url);
+            // 根据 JDBC 的 DriverManager 规范，这里应该要返回 null 或者一个 SQLException
+            // 因为 DriverManager.connect 时，实际上是轮询每个驱动，找到第一个成功返回连接的驱动
+            // 推荐返回 null
+            return null;
         }
         Driver driver = DriverManager.getDriver(meta.getRealJdbcUrl());
         Connection connection = driver.connect(meta.getRealJdbcUrl(), info);
@@ -101,6 +104,6 @@ public class ProxyDialectJdbcDriver implements Driver {
 
     @Override
     public Logger getParentLogger() throws SQLFeatureNotSupportedException {
-        return Logger.getGlobal();
+        return Logger.getLogger(ProxyDialectJdbcDriver.class.getName());
     }
 }
