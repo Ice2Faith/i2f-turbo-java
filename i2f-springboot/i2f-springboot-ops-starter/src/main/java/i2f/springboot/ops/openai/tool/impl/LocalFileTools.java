@@ -67,7 +67,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "read text file content by line range [startLine,endLine)"
+            description = "Reads text file content by line range [startLine, endLine). " +
+                    "Return field `textContent` format is `<line_number> | <text_content>` of every line." +
+                    "CRITICAL: The `<line_number> |` prefix is for visual positioning only. " +
+                    "When extracting text for editing, you MUST strictly preserve ALL original whitespace and indentation immediately following the `|` separator."
     )
     public Map<String, Object> read_text_file_range(@ToolParam(value = "filePath", description = "file path, for example / or /user")
                                                     String filePath,
@@ -78,24 +81,25 @@ public class LocalFileTools {
     ) throws IOException {
         File file = getFile(filePath);
         StringBuilder builder = new StringBuilder();
-        BufferedReader reader = new BufferedReader(new FileReader(file));
-        int lineNumber = 1;
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            if (lineNumber >= endLine) {
-                break;
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            int lineNumber = 1;
+            String line = null;
+            while ((line = reader.readLine()) != null) {
+                if (lineNumber >= endLine) {
+                    break;
+                }
+                if (lineNumber >= startLine) {
+                    builder.append(lineNumber).append(" |").append(line).append("\n");
+                }
+                lineNumber++;
             }
-            if (lineNumber >= startLine) {
-                builder.append(line).append("\n");
-            }
-            lineNumber++;
+            Map<String, Object> ret = new HashMap<>();
+            ret.put("realizeStartLine", Math.min(startLine, lineNumber));
+            ret.put("realizeEndLine", Math.min(endLine, lineNumber));
+            ret.put("textContent", builder.toString());
+            ret.put("hasMoreLine", (reader.readLine() != null));
+            return ret;
         }
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("realizeStartLine", Math.min(startLine, lineNumber));
-        ret.put("realizeEndLine", Math.min(endLine, lineNumber));
-        ret.put("textContent", builder.toString());
-        ret.put("hasMoreLine", (line != null));
-        return ret;
     }
 
 
