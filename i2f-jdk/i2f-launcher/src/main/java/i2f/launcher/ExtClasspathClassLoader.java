@@ -84,6 +84,7 @@ public class ExtClasspathClassLoader extends URLClassLoader {
             }
             // jdk 部分就直接使用默认逻辑即可
             if (name.startsWith("java.")
+                    || name.startsWith("jdk.")
                     || name.startsWith("sun.")
                     || name.startsWith("com.sun.")
                     || name.startsWith("javax.")
