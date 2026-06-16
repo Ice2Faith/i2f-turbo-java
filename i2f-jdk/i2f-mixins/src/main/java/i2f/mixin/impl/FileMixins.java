@@ -17,6 +17,9 @@ import java.util.List;
  */
 public interface FileMixins {
     default long length(File file) {
+        if (file == null) {
+            return -1;
+        }
         return file.length();
     }
 

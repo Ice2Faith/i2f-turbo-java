@@ -129,7 +129,7 @@ public class Funic {
         for (IMethod item : iterable) {
             String name = item.getName();
             CopyOnWriteArrayList<IMethod> list = GLOBAL_METHODS.computeIfAbsent(name, key -> new CopyOnWriteArrayList<>());
-            list.add(item);
+            list.add(0, item);
         }
     }
 

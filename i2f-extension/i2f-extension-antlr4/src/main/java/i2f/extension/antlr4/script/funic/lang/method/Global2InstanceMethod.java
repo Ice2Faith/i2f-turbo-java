@@ -8,11 +8,16 @@ import java.lang.reflect.Modifier;
 /**
  * @author Ice2Faith
  * @date 2026/5/11 14:41
- * @desc
+ * @desc OOP(面向对象编程)->FP(函数式编程)
+ * 属于，统一函数调用语法（Uniform Function Call Syntax, 简称 UFCS）
+ * 允许像使用面向对象编程一样使用函数式函数
+ * 当调用对象的函数时，可以拓展查找全局的函数式函数，作为实例函数一样使用
+ * 规则：arg0.name(...args) -> name(arg0,...args)
+ * 因此，这是一种无侵入式的对象行为拓展
  */
-public class GlobalMoveInstanceMethod extends MethodWrapper {
+public class Global2InstanceMethod extends MethodWrapper {
 
-    public GlobalMoveInstanceMethod(IMethod method) {
+    public Global2InstanceMethod(IMethod method) {
         super(method);
     }
 

@@ -10,7 +10,8 @@ import i2f.extension.antlr4.script.funic.lang.functions.FunicBuiltinFunctions;
 import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.method.FunicMethod;
-import i2f.extension.antlr4.script.funic.lang.method.GlobalMoveInstanceMethod;
+import i2f.extension.antlr4.script.funic.lang.method.Global2InstanceMethod;
+import i2f.extension.antlr4.script.funic.lang.method.Instance2GlobalMethod;
 import i2f.extension.antlr4.script.funic.lang.operator.DoubleOperatorFunction;
 import i2f.extension.antlr4.script.funic.lang.operator.PrefixOperatorFunction;
 import i2f.extension.antlr4.script.funic.lang.operator.SuffixOperatorFunction;
@@ -922,20 +923,20 @@ public class DefaultFunicResolver implements FunicResolver {
         Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeInstanceMethod(target, methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeInstanceMethod(target, methodName, args, visitor);
-            if (ref != null && ref.hasValue()) {
+            if (ref != null && ref.isValue()) {
                 return ref.get();
             }
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             List<IMethod> list = new ArrayList<>();
-            List<IMethod> expandList = getExpandInstanceMethod(target, methodName, visitor);
-            if (expandList != null) {
-                list.addAll(expandList);
-            }
             Map<Method, Class<?>> methodsMap = ReflectResolver.getMethodsByName(target.getClass(), methodName);
             if (methodsMap != null) {
                 for (Map.Entry<Method, Class<?>> entry : methodsMap.entrySet()) {
                     list.addAll(FunicFunctionHelper.ofInstanceAsStaticMethod(target, entry.getKey()));
                 }
+            }
+            List<IMethod> expandList = getExpandInstanceMethod(target, methodName, visitor);
+            if (expandList != null) {
+                list.addAll(expandList);
             }
             IMethod method = ReflectResolver.matchExecMethod(list, argsList);
             return doExecMethod(target, method, argsList, visitor);
@@ -978,7 +979,7 @@ public class DefaultFunicResolver implements FunicResolver {
             }
             Class<?> firstType = parameterTypes[0];
             if (TypeOf.typeOfAny(targetType, firstType)) {
-                ret.add(new GlobalMoveInstanceMethod(item));
+                ret.add(new Global2InstanceMethod(item));
             }
         }
         return ret;
@@ -994,10 +995,24 @@ public class DefaultFunicResolver implements FunicResolver {
         Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeGlobalMethod(methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeGlobalMethod(methodName, args, visitor);
-            if (ref != null && ref.hasValue()) {
+            if (ref != null && ref.isValue()) {
                 return ref.get();
             }
             List<IMethod> methods = searchGlobalMethod(methodName, visitor);
+            if (!args.isEmpty()) {
+                // 允许像使用函数式变成一样使用对象的实例函数
+                Map.Entry<String, Object> callEntry = args.get(0);
+                Object callObject = callEntry.getValue();
+                if (callObject != null) {
+                    Class<?> callClass = callObject.getClass();
+                    Map<Method, Class<?>> callMethods = ReflectResolver.getMethodsByName(callClass, methodName);
+                    for (Map.Entry<Method, Class<?>> callMethodEntry : callMethods.entrySet()) {
+                        Method method = callMethodEntry.getKey();
+                        JdkMethod jdkMethod = new JdkMethod(method);
+                        methods.add(new Instance2GlobalMethod(jdkMethod));
+                    }
+                }
+            }
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());
             IMethod method = ReflectResolver.matchExecMethod(methods, argsList);
             if (method != null) {
@@ -1065,7 +1080,7 @@ public class DefaultFunicResolver implements FunicResolver {
         Funic.FUNCTION_CALL_CONTEXT.set(getCallContextOfInvokeStaticMethod(type, methodName, args, visitor));
         try {
             Reference<?> ref = beforeInvokeStaticMethod(type, methodName, args, visitor);
-            if (ref != null && ref.hasValue()) {
+            if (ref != null && ref.isValue()) {
                 return ref.get();
             }
             List<Object> argsList = args.stream().map(e -> e.getValue()).collect(Collectors.toList());

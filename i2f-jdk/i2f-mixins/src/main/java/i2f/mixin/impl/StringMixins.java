@@ -74,6 +74,9 @@ public interface StringMixins {
     }
 
     default int length(CharSequence sequence) {
+        if (sequence == null) {
+            return -1;
+        }
         return sequence.length();
     }
 

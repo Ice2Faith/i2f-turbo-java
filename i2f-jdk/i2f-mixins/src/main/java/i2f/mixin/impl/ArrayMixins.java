@@ -26,6 +26,9 @@ public interface ArrayMixins {
     }
 
     default int arr_len(Object arr) {
+        if (arr == null) {
+            return -1;
+        }
         if (!is_array(arr)) {
             throw new IllegalArgumentException("expect array type,but found:" + (arr == null ? arr : arr.getClass()));
         }

@@ -38,6 +38,9 @@ public interface MapMixins {
     }
 
     default int length(Map map) {
+        if (map == null) {
+            return -1;
+        }
         return map.size();
     }
 

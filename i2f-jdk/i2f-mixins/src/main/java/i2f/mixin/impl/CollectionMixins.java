@@ -32,6 +32,9 @@ public interface CollectionMixins {
     }
 
     default boolean collection_contains(Collection collection, Object elem) {
+        if (collection == null) {
+            return false;
+        }
         return collection.contains(elem);
     }
 
@@ -44,6 +47,9 @@ public interface CollectionMixins {
     }
 
     default boolean iterator_has(Iterator iterator) {
+        if (iterator == null) {
+            return false;
+        }
         return iterator.hasNext();
     }
 
@@ -52,6 +58,9 @@ public interface CollectionMixins {
     }
 
     default boolean enumeration_has(Enumeration enumeration) {
+        if (enumeration == null) {
+            return false;
+        }
         return enumeration.hasMoreElements();
     }
 
@@ -67,6 +76,9 @@ public interface CollectionMixins {
     }
 
     default int length(Collection collection) {
+        if (collection == null) {
+            return -1;
+        }
         return collection.size();
     }
 

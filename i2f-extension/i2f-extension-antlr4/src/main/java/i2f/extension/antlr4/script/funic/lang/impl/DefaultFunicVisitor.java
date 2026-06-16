@@ -958,7 +958,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             String packageName = nextValue.getName();
             boolean ok = resolver.onPreRegistryContextImportPackage(packageName, this);
             if (ok) {
-                importPackages.add(packageName);
+                importPackages.add(0, packageName);
             }
             return DefaultFunicValue.builder()
                     .node(ctx)
