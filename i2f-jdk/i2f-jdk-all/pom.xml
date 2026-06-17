@@ -12,11 +12,6 @@
     <artifactId>i2f-jdk-all</artifactId>
 
     <dependencies>
-        <!-- <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdk-all</artifactId>
-        </dependency> -->
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-agent</artifactId>
@@ -207,6 +202,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-design-pattern</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-detegate</artifactId>
         </dependency>
         <dependency>
@@ -345,6 +344,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdbc-std</artifactId>
         </dependency>
+        <!--<dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jdk-all</artifactId>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jvm</artifactId>
@@ -593,6 +596,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-xml</artifactId>
         </dependency>
+
 
     </dependencies>
 
