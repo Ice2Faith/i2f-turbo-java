@@ -1,10 +1,15 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.data.message.OpenAiSystemMessage;
+import i2f.springboot.ops.openai.data.message.OpenAiUserMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -22,6 +27,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -67,9 +75,68 @@ public class AgentTools {
                         builder.append(line).append("\n");
                     }
                 }
-                return builder.toString();
+                String json = builder.toString();
+                Map<String, Object> jsonObject = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
+                });
+                List<Map<String, Object>> choices = (List<Map<String, Object>>) jsonObject.get("choices");
+                if (choices == null || choices.isEmpty()) {
+                    return "";
+                }
+                Map<String, Object> choice = choices.get(0);
+                Map<String, Object> message = (Map<String, Object>) choice.get("message");
+                if (message == null) {
+                    return "";
+                }
+                Object content = message.get("content");
+                if (content == null) {
+                    return "";
+                }
+                return String.valueOf(content);
             }
         });
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "判断SQL语句是否符合安全要求"
+    )
+    public String safe_sql_detect(String sql) {
+        String system = "# 判断用户的SQL语句是否安全\n" +
+                "\n" +
+                "## 判断标准\n" +
+                "\n" +
+                "- 要求不存在危险操作，例如删库、删表、操作数据库用户、更改权限、授权、清空表、dump数据库、执行危险命令等\n" +
+                "- 要求更新类语句(insert,update,delete等)必须要包含有效的where过滤条件，必须包含有效的过滤条件，1=1 这种永真条件属于无效条件\n" +
+                "- 要求不存在SQL注入问题，包括注释逃逸、永真永假逃逸、union注入、order注入等注入情况\n" +
+                "- 要求查询类语句，不包括敏感字段，例如password密码、idcard身份证号等\n" +
+                "\n" +
+                "## 输出要求\n" +
+                "\n" +
+                "- 输出内容必须是JSON对象\n" +
+                "- 不要包含除了标准JSON格式之外的任何多余描述\n" +
+                "- 不要包含markdown的标记符号\n" +
+                "- 其中，`pass` 表示是否通过安全判断，通过为 `true`，不通过为 `false`\n" +
+                "- `errorMessage` 表示不通过的原因描述，如果通过，则值为 `校验通过`\n" +
+                "- JSON格式如下：\n" +
+                "\n" +
+                "{\n" +
+                "    \"pass\": false,\n" +
+                "    \"errorMessage\": \"无有效的更新条件\"\n" +
+                "}";
+
+        OpenAiOperateDto req = REQUEST_HOLDER.get();
+
+        OpenAiCompletionDto completion = new OpenAiCompletionDto();
+        completion.setModel(req.getCompletion().getModel());
+        completion.setStream(false);
+        completion.setStream_options(req.getCompletion().getStream_options());
+
+        completion.setMessages(new ArrayList<>());
+        completion.getMessages().add(new OpenAiSystemMessage(system));
+        completion.getMessages().add(new OpenAiUserMessage(sql));
+        return generate(req.getMeta(), completion);
     }
 
 
