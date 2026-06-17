@@ -4,6 +4,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 /**
@@ -23,17 +24,37 @@ public final class MethodHandlesUtil {
     // 缓存 JDK 8 的 Lookup 私有构造器
     private static final Constructor<MethodHandles.Lookup> LOOKUP_CONSTRUCTOR;
 
+    private static final Method PRIVATE_LOOKUP_IN_METHOD;
+    private static final Field IMPL_LOOKUP_FIELD;
+
+
     static {
         Constructor<MethodHandles.Lookup> constructor = null;
+        Field implLookupField = null;
+        Method privateLookupInMethod = null;
         try {
+            // jdk8 获取是有构造
             // 获取 MethodHandles.Lookup 的私有构造器：Lookup(Class<?> lookupClass, int allowedModes)
             constructor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
             // 暴力反射，打破封装
             constructor.setAccessible(true);
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException("current JDK version un-support got MethodHandles.Lookup private constructor", e);
+        } catch (ReflectiveOperationException e) {
+            // JDK 9+ 没有该构造器，尝试获取 IMPL_LOOKUP 字段
+            try {
+                privateLookupInMethod = MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
+
+                implLookupField = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+                implLookupField.setAccessible(true);
+            } catch (ReflectiveOperationException ex) {
+                throw new IllegalStateException("Cannot find Lookup constructor or IMPL_LOOKUP field in current JDK version", ex);
+            }
+            if (implLookupField == null) {
+                throw new IllegalStateException("current JDK version un-support got MethodHandles.Lookup private constructor", e);
+            }
         }
         LOOKUP_CONSTRUCTOR = constructor;
+        PRIVATE_LOOKUP_IN_METHOD = privateLookupInMethod;
+        IMPL_LOOKUP_FIELD = implLookupField;
     }
 
     /**
@@ -41,8 +62,20 @@ public final class MethodHandlesUtil {
      */
     public static MethodHandles.Lookup getLookup(Class<?> declaringClass) {
         try {
-            // 通过反射创建 Lookup 实例，传入声明该方法的接口类和允许的模式
-            return LOOKUP_CONSTRUCTOR.newInstance(declaringClass, ALLOWED_MODES);
+            // jdk8 使用是有构造
+            if (LOOKUP_CONSTRUCTOR != null) {
+                // 通过反射创建 Lookup 实例，传入声明该方法的接口类和允许的模式
+                return LOOKUP_CONSTRUCTOR.newInstance(declaringClass, ALLOWED_MODES);
+            }
+
+            // jdk9+ 使用 privateLookupIn
+            if (PRIVATE_LOOKUP_IN_METHOD != null && IMPL_LOOKUP_FIELD != null) {
+                MethodHandles.Lookup baseLookup = (MethodHandles.Lookup) IMPL_LOOKUP_FIELD.get(null);
+                // 将 IMPL_LOOKUP 的权限降级到目标类，并赋予全部模式
+                return (MethodHandles.Lookup) PRIVATE_LOOKUP_IN_METHOD.invoke(null, declaringClass, baseLookup);
+            }
+
+            throw new IllegalStateException("No available method to create Lookup instance");
         } catch (Exception e) {
             throw new RuntimeException("got MethodHandles.Lookup failure", e);
         }
