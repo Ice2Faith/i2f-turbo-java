@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "i2f.springboot.ssh.tunnel")
+@ConfigurationProperties(prefix = TunnelHolder.CONFIG_PREFIX)
 public class TunnelProperties {
 
     protected List<Server> servers = new ArrayList<>();

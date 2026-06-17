@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+  i2f.springboot.ssh.tunnel.TunnelSetupConfiguration,\
   i2f.springboot.ssh.tunnel.TunnelAutoConfiguration
