@@ -149,7 +149,7 @@ public class AgentTools {
 
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
-        completion.getMessages().add(new OpenAiUserMessage(sql));
+        completion.getMessages().add(new OpenAiUserMessage("<sql_input>" + sql + "</sql_input>"));
         return generate(req.getMeta(), completion);
     }
 
