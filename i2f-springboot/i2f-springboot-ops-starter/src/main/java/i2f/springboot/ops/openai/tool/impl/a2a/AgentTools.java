@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
+import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
@@ -102,7 +103,8 @@ public class AgentTools {
             },
             description = "判断SQL语句是否符合安全要求"
     )
-    public String safe_sql_detect(String sql) {
+    public String safe_sql_detect(@ToolParam(value = "sql", description = "要判断的sql语句")
+                                  String sql) {
         String system = "# 判断用户的SQL语句是否安全\n" +
                 "\n" +
                 "## 判断标准\n" +
