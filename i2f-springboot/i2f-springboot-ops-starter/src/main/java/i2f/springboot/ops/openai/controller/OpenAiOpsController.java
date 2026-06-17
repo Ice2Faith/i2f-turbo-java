@@ -12,6 +12,7 @@ import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.*;
+import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -115,8 +116,10 @@ public class OpenAiOpsController implements IOpsProvider {
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
+            AgentTools.REQUEST_HOLDER.set(req);
 
             CompletableFuture.runAsync(() -> {
+                AgentTools.REQUEST_HOLDER.set(req);
                 try {
                     OpenAiCompletionVo vo = req.getCompletion();
                     OpenAiCompletionDto completion = new OpenAiCompletionDto();
@@ -202,6 +205,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     CountDownLatch latch = new CountDownLatch(calls.size());
                                     for (OpenAiToolCall call : calls) {
                                         Runnable toolTask = () -> {
+                                            AgentTools.REQUEST_HOLDER.set(req);
                                             try {
                                                 String id = call.getId();
                                                 OpenAiToolCallFunction function = call.getFunction();
@@ -283,6 +287,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                             } catch (Exception e) {
                                                 log.warn(e.getMessage(), e);
                                             } finally {
+                                                AgentTools.REQUEST_HOLDER.remove();
                                                 latch.countDown();
                                             }
                                         };
@@ -290,6 +295,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
 
                                     latch.await();
+                                    AgentTools.REQUEST_HOLDER.set(req);
                                 }
                             }
                         }
@@ -358,9 +364,18 @@ public class OpenAiOpsController implements IOpsProvider {
                 }
             }, pool);
 
-//            emitter.onCompletion(() -> System.out.println("前端 SSE 连接已正常关闭"));
-            emitter.onTimeout(() -> System.out.println("前端 SSE 连接超时"));
-            emitter.onError((ex) -> System.err.println("前端 SSE 发生错误: " + ex.getMessage()));
+            emitter.onCompletion(() -> {
+                AgentTools.REQUEST_HOLDER.remove();
+                // System.out.println("前端 SSE 连接已正常关闭");
+            });
+            emitter.onTimeout(() -> {
+                AgentTools.REQUEST_HOLDER.remove();
+                System.out.println("前端 SSE 连接超时");
+            });
+            emitter.onError((ex) -> {
+                AgentTools.REQUEST_HOLDER.remove();
+                System.err.println("前端 SSE 发生错误: " + ex.getMessage());
+            });
 
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
