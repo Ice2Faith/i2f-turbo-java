@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.data;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import i2f.springboot.ops.openai.data.message.OpenAiMessage;
 import i2f.springboot.ops.openai.data.message.OpenAiToolsDefinition;
 import lombok.Data;
@@ -14,12 +15,13 @@ import java.util.Map;
  * @date 2026/4/30 20:38
  * @desc
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
 @SuperBuilder
 public class OpenAiCompletionDto {
     protected String model;
-    protected boolean stream;
+    protected Boolean stream;
     protected List<OpenAiMessage> messages;
     protected List<OpenAiToolsDefinition> tools;
     protected Map<String, Object> stream_options;
