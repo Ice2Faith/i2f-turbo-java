@@ -57,7 +57,7 @@ public class AgentTools {
 
     public String generate(OpenAiMeta meta, OpenAiCompletionDto completion) {
         // 强制关闭流式输出
-        completion.setStream(false);
+        completion.setStream(null);
         completion.setStream_options(null);
 
         return restTemplate.execute(meta.getBaseUrl(), HttpMethod.POST, request -> {
