@@ -58,6 +58,7 @@ public class AgentTools {
     public String generate(OpenAiMeta meta, OpenAiCompletionDto completion) {
         // 强制关闭流式输出
         completion.setStream(false);
+        completion.setStream_options(null);
 
         return restTemplate.execute(meta.getBaseUrl(), HttpMethod.POST, request -> {
             request.getHeaders().add("Authorization", "Bearer " + meta.getApiKey());
@@ -144,8 +145,6 @@ public class AgentTools {
 
         OpenAiCompletionDto completion = new OpenAiCompletionDto();
         completion.setModel(req.getCompletion().getModel());
-        completion.setStream(false);
-        completion.setStream_options(req.getCompletion().getStream_options());
 
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
