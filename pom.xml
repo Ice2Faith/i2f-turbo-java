@@ -120,726 +120,871 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-agent</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-ai-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-algo</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations-api</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations-core</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations-db</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-annotations-ext</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-array</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-atomic</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-authentication</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bindsql</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bindsql-page</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bindsql-stringify</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bql</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bytes</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-cache</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-cache-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-check</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-check-filter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-clock-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-clock-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-code</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-codec-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-codec-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-color</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-comparator</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-compiler</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-compress-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-compress-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-console-color</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-container</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-container-builder</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-context-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-context-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-convert</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-crypto-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-crypto-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-data-processor</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-dialect</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-metadata-bean</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-metadata-data</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-metadata-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-metadata-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-database-type</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-datetime</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-detegate</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-dict</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-enums</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-environment-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-environment-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-event</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-exception</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-features</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-firewall</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-form</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-form-url-encoded</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-functional</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-functional-lambda</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-geo</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-graphics</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-graphics-2d</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-graphics-3d</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-hash</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-http-proxy</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-i18n</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-image-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-image-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-invokable</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-io-file</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-io-filesystem</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-io-stream</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-iterator</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-javacode-graph</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-bql</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-data</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-procedure</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-proxy</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-proxy-xml</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdbc-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdk-all</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jvm</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lambda</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-launcher</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lifecycle</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-limit</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lock</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-log</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-log-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lru-cache</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-lru-map</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-match</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-mixins</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-match-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-math</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-native-core</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-native-windows</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-native-windows-easyx</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-network</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-number-idcard</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-os</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-otpauth</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-packet</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-page</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-pool</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-properties</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-proxy</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-proxy-handlers</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-proxy-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-reference</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-reflect</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-resources</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-resp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-robot</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-rowset</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-script</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-search</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-serialize-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-serialize-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-sm-crypto</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-sm-crypto-swl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spi</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-std-const</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-streaming</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-swl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-swl-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-template-render</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-text</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-thread</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-trace</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-trace-mdc</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-translate</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-translate-en2zh</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-translate-zh2pinyin</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-tuple-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-tuple-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-typeof</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-uid-impl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-uid-std</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-unsafe</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-verifycode</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-workflow</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-xml</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
 
             <!-- ############################################################ -->
@@ -847,16 +992,19 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdk-ext-all</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdk-ext-swl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-jdk-ext-web</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
 
 
@@ -865,376 +1013,451 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-7zip</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-agent-javassist</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ai-dashscope</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ai-langchain4j8</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ai-openai</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-all</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-antlr4</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-aspectj</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-asr-vosk</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-browser-selenium</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-canal</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-cglib</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-compress</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-cron</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-document</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-easyexcel</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-elasticsearch</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-email</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-fastexcel</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-fastjson</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-fastjson2</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-ftp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-hdfs</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-minio</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-oss-aliyun</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-oss-aws-s3</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-filesystem-sftp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ftp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-gif</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-groovy</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-gson</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-hazelcast</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-hdfs</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-httpclient</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-image-metadata</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jackson</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-javassist</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jce-bc</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jce-sm-antherd</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jdbc-procedure-datax</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jdbc-procedure-flink</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-jedis</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-log-slf4j</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-minio</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-mongodb</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-mybatis</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-netty</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ocr-tesseract</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-ognl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-opencv</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-opencv-data</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-opencv-javacv</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-oss-aliyun</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-oss-aws-s3</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-qrcode</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-quartz</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-redis-api</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-redis-cache</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-reverse-engineer-generator</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-sftp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-slf4j</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-slf4j-log</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-swl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tokenlization-ansj</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tokenlization-hanlp</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tokenlization-jcseg</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tokenlization-jieba</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tts-espeak</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-tts-jacob</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-velocity</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-velocity-bindsql</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-verifycode</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-xproc4j</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-zip4j</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-zookeeper</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
 
             <!-- ############################################################ -->
@@ -1242,41 +1465,49 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-all</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-authentication</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-core</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-mvc-metadata</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-redis</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-security</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-swl</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-spring-web</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
 
             <!-- ############################################################ -->
@@ -1284,141 +1515,169 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-activity-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-dubbo-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-dynamic-datasource-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-encrypt-property-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-http-proxy-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-jackson-sensible-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-jdbc-bql-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-kafka-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-limit-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-mybatis-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-nginx-rtmp-auth-server-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-ops-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-oss-minio-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-quartz-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-rabbitmq-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-redis-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-redisson-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-security-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-shiro-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-spring-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-ssh-tunnel-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-swagger2-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-swl-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-totp-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-trace-mdc-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-websocket-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-xxl-job-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springboot-zookeeper-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
 
 
@@ -1427,111 +1686,133 @@
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-actuator-admin-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-actuator-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-alibaba-nacos-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-alibaba-seata-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-alibaba-sentinel-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-config-client-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-config-server-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-consul-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-discovery-server-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-discovery-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-gateway-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-gateway-swl-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-loadbalancer-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-eureka-client-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-eureka-server-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-hystrix-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-openfeign-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-ribbon-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-netflix-zuul-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-refresh-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-sleuth-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-springcloud-zipkin-starter</artifactId>
                 <version>${i2f.version}</version>
+                <optional>true</optional>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,9 +1,10 @@
 @echo off
+chcp 65001 > nul
 title run jar
 
 set MAX_JAR=
 
-set JVM_OPTS=-Dfile.encoding=UTF-8 -Dlogback.app.env=test
+set JVM_OPTS=-Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -Dlogback.app.env=test
 set JAVA_APP=java
 
 :: search the max jar file ...
@@ -22,4 +23,4 @@ exit
 title %MAX_JAR%
 
 @echo on 
-%JAVA_APP% -jar  %JVM_OPTS% %MAX_JAR%
+%JAVA_APP%  %JVM_OPTS%  -jar %MAX_JAR%
