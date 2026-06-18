@@ -511,154 +511,180 @@
 
                             }
                         },
-                        {label: '', divided: true}, // 分割线
                         {
-                            label: `encode_base64`,
+                            label: 'encode/decode',
                             icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `encode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return btoa(s);
+                                        })
                                     }
-                                    return btoa(s);
-                                })
-                            }
+                                },
+                                {
+                                    label: `decode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return atob(s);
+                                        })
+                                    }
+                                },
+
+                            ]
                         },
                         {
-                            label: `decode_base64`,
+                            label: 'SQL escape',
                             icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `escape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return "'" + s.replaceAll("'", "''") + "'";
+                                        })
                                     }
-                                    return atob(s);
-                                })
-                            }
-                        },
-                        {label: '', divided: true}, // 分割线
-                        {
-                            label: `escape_sql`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                                },
+                                {
+                                    label: `unescape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            if (s.startsWith("'")) {
+                                                s = s.substring(1);
+                                            }
+                                            if (s.endsWith("'")) {
+                                                s = s.substring(0, s.length - 1);
+                                            }
+                                            return s.replaceAll("''", "'");
+                                        })
                                     }
-                                    return "'" + s.replaceAll("'", "''") + "'";
-                                })
-                            }
-                        },
-                        {
-                            label: `unescape_sql`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
-                                    }
-                                    if (s.startsWith("'")) {
-                                        s = s.substring(1);
-                                    }
-                                    if (s.endsWith("'")) {
-                                        s = s.substring(0, s.length - 1);
-                                    }
-                                    return s.replaceAll("''", "'");
-                                })
-                            }
-                        },
-                        {label: '', divided: true}, // 分割线
-                        {
-                            label: `to_json`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
-                                    }
-                                    return JSON.stringify(s);
-                                })
-                            }
+                                },
+                            ]
                         },
                         {
-                            label: `parse_json`,
+                            label: 'Json Convert',
                             icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `to_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return JSON.stringify(s);
+                                        })
                                     }
-                                    let obj = JSON.parse(s);
-                                    if (typeof obj == 'string') {
-                                        return obj + '';
+                                },
+                                {
+                                    label: `parse_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            if (typeof obj == 'string') {
+                                                return obj + '';
+                                            }
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
                                     }
-                                    return JSON.stringify(obj, null, '    ')
-                                })
-                            }
+                                },
+                                {
+                                    label: `format_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                            ]
                         },
-                        {
-                            label: `format_json`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
-                                    }
-                                    let obj = JSON.parse(s);
-                                    return JSON.stringify(obj, null, '    ')
-                                })
-                            }
-                        },
+
                     ],
                     sql: [
-                        {label: '', divided: true}, // 分割线
                         {
-                            label: `count(1)`,
+                            label: 'SQL segments',
                             icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `count(1)`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
                                     }
-                                    return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
-                                })
-                            }
-                        },
-                        {
-                            label: `select`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                                },
+                                {
+                                    label: `select`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
                                     }
-                                    return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
-                                })
-                            }
-                        },
-                        {
-                            label: `update`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                                },
+                                {
+                                    label: `update`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'update ' + s + '\n set \n\nwhere  \n';
+                                        })
                                     }
-                                    return 'update ' + s + '\n set \n\nwhere  \n';
-                                })
-                            }
-                        },
-                        {
-                            label: `delete`,
-                            icon: 'el-icon-magic-stick',
-                            onClick: () => {
-                                convertText(function (s) {
-                                    if (!s) {
-                                        return s;
+                                },
+                                {
+                                    label: `delete`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'delete from ' + s + '\nwhere  \n';
+                                        })
                                     }
-                                    return 'delete from ' + s + '\nwhere  \n';
-                                })
-                            }
+                                },
+                            ]
                         },
                         {label: '', divided: true}, // 分割线
                         ...((typeof sqlFormatter != 'object') ? [] : [{
@@ -674,6 +700,20 @@
                                 })
                             }
                         }]),
+                    ],
+                    'json-editor': [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `Json Editor`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let text = editor.getValue();
+                                this.showJsonEditor(text, (res) => {
+                                    editor.setValue(res);
+                                });
+
+                            }
+                        },
                     ]
                 }
                 let menus = [...presetMenusMap.text]
