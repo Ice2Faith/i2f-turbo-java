@@ -19,6 +19,7 @@ public class DynamicRedisUtil {
     // 定义两种客户端在类路径中的全限定名
     private static final String LETTUCE_CLIENT_CLASS = "io.lettuce.core.RedisClient";
     private static final String JEDIS_CLIENT_CLASS = "redis.clients.jedis.Jedis";
+    private static final String REDISSON_CLIENT_CLASS = "org.redisson.api.RedissonClient";
 
     /**
      * 根据传入的 Redis 地址信息，自动识别并创建一个 RedisTemplate
@@ -41,12 +42,15 @@ public class DynamicRedisUtil {
         // 核心逻辑：自动检测类路径中存在的客户端
         if (ClassUtils.isPresent(LETTUCE_CLIENT_CLASS, null)) {
             // 如果存在 Lettuce，优先使用 Lettuce（线程安全，非阻塞）
-            template.setConnectionFactory(LettuceFactoryResolver.createLettuceFactory(redisConfig));
+            template.setConnectionFactory(LettuceFactoryResolver.createFactory(redisConfig));
         } else if (ClassUtils.isPresent(JEDIS_CLIENT_CLASS, null)) {
-            // 如果没有 Lettuce 但有 Jedis，则使用 Jedis
-            template.setConnectionFactory(JedisFactoryResolver.createJedisFactory(redisConfig));
+            // 有 Jedis，则使用 Jedis
+            template.setConnectionFactory(JedisFactoryResolver.createFactory(redisConfig));
+        } else if (ClassUtils.isPresent(REDISSON_CLIENT_CLASS, null)) {
+            // 有 Redisson，则使用 Redisson
+            template.setConnectionFactory(RedissonFactoryResolver.createFactory(redisConfig));
         } else {
-            throw new IllegalStateException("未找到可用的 Redis 客户端！请引入 lettuce-core 或 jedis 依赖。");
+            throw new IllegalStateException("未找到可用的 Redis 客户端！请引入 lettuce-core / jedis / redisson 依赖。");
         }
 
         // 统一设置序列化方式
@@ -68,6 +72,7 @@ public class DynamicRedisUtil {
         }
         LettuceFactoryResolver.closeFactory(factory);
         JedisFactoryResolver.closeFactory(factory);
+        RedissonFactoryResolver.closeFactory(factory);
     }
 
 

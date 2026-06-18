@@ -18,7 +18,7 @@ public class JedisFactoryResolver {
     /**
      * 创建 Jedis 连接工厂（自带连接池配置）
      */
-    public static JedisConnectionFactory createJedisFactory(RedisStandaloneConfiguration config) {
+    public static JedisConnectionFactory createFactory(RedisStandaloneConfiguration config) {
         // Jedis 必须配置连接池以保证线程安全和性能
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setMaxTotal(5);

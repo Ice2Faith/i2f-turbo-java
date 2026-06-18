@@ -13,7 +13,7 @@ public class LettuceFactoryResolver {
     /**
      * 创建 Lettuce 连接工厂
      */
-    public static LettuceConnectionFactory createLettuceFactory(RedisStandaloneConfiguration config) {
+    public static LettuceConnectionFactory createFactory(RedisStandaloneConfiguration config) {
         LettuceConnectionFactory factory = new LettuceConnectionFactory(config);
         factory.afterPropertiesSet();
         return factory;
