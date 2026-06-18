@@ -173,60 +173,82 @@ public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
             return mybatisMapperInflater;
         }
         synchronized (this) {
-            JdbcProcedureExecutor executor = this;
-            mybatisMapperInflater = new OgnlMybatisMapperInflater() {
-                @Override
-                public Object runScript(String script, String lang, Map<String, Object> params, MybatisMapperNode node) {
-                    if ("ognl".equalsIgnoreCase(lang)) {
-                        try {
-                            Object obj = OgnlUtil.evaluateExpression(script, params);
-                            return obj;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    if ("visit".equalsIgnoreCase(lang)) {
-                        try {
-                            Object obj = executor.visit(script, params);
-                            return obj;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    if ("test".equalsIgnoreCase(lang)) {
-                        try {
-                            Object obj = executor.test(script, params);
-                            return obj;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    if ("render".equalsIgnoreCase(lang)) {
-                        try {
-                            Object obj = executor.render(script, params);
-                            return obj;
-                        } catch (Exception e) {
-
-                        }
-                    }
-                    EvalScriptProvider provider = null;
-                    CopyOnWriteArrayList<EvalScriptProvider> list = executor.getEvalScriptProviders();
-                    for (EvalScriptProvider item : list) {
-                        if (item.support(lang)) {
-                            provider = item;
-                            break;
-                        }
-                    }
-                    if (provider == null) {
-                        throw new ThrowSignalException("eval script provider not found for lang=" + lang);
-                    }
-                    executor.prepareParams(params);
-                    Object ret = provider.eval(script, params, executor);
-                    return ret;
-                }
-            };
+            mybatisMapperInflater = createNewMybatisMapperInflater();
         }
         return mybatisMapperInflater;
+    }
+
+    public MybatisMapperInflater createNewMybatisMapperInflater() {
+        JdbcProcedureExecutor executor = this;
+        return new OgnlMybatisMapperInflater() {
+            @Override
+            public boolean testExpression(String expression, Object params) {
+                return executor.test(expression, params);
+            }
+
+            @Override
+            public Object evalExpression(String expression, Object params) {
+                return executor.eval(expression, params);
+            }
+
+            @Override
+            public Object runScript(String script, String lang, Map<String, Object> params, MybatisMapperNode node) {
+                if ("eval".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.eval(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("ognl".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = OgnlUtil.evaluateExpression(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("visit".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.visit(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("test".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.test(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("render".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.render(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                EvalScriptProvider provider = null;
+                CopyOnWriteArrayList<EvalScriptProvider> list = executor.getEvalScriptProviders();
+                for (EvalScriptProvider item : list) {
+                    if (item.support(lang)) {
+                        provider = item;
+                        break;
+                    }
+                }
+                if (provider == null) {
+                    throw new ThrowSignalException("eval script provider not found for lang=" + lang);
+                }
+                executor.prepareParams(params);
+                Object ret = provider.eval(script, params, executor);
+                return ret;
+            }
+        };
     }
 
 }

@@ -23,6 +23,8 @@ public class SpringJdbcProcedureProperties {
 
     protected boolean debug = false;
 
+    protected boolean enableFunic = false;
+
     protected boolean reportOnBoot = true;
 
     protected ReportOptions reportOptions = new ReportOptions();

@@ -12,6 +12,7 @@ import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
+import i2f.jdbc.procedure.executor.impl.FunicJdbcProcedureExecutor;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.event.XmlNodeExecInvokeLogListener;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -273,8 +274,13 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
                                                        @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger,
                                                        @Autowired(required = false) IGrammarReporter grammarReporter
     ) {
-        log.info(XProc4jConsts.NAME + " config " + DefaultJdbcProcedureExecutor.class.getSimpleName() + " ...");
-        DefaultJdbcProcedureExecutor ret = new DefaultJdbcProcedureExecutor(context, iEnvironment, namingContext);
+        DefaultJdbcProcedureExecutor ret = null;
+        if (jdbcProcedureProperties.isEnableFunic()) {
+            ret = new FunicJdbcProcedureExecutor(context, iEnvironment, namingContext);
+        } else {
+            ret = new DefaultJdbcProcedureExecutor(context, iEnvironment, namingContext);
+        }
+        log.info(XProc4jConsts.NAME + " config " + ret.getClass().getSimpleName() + " ...");
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
         }
