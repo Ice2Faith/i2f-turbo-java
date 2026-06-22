@@ -79,6 +79,6 @@ public class WebDownloadTools {
             StreamUtil.streamCopy(is, fos, true);
         }
         String ret = localFileTools.getSubPath(saveFile);
-        return ret;
+        return "file save to: " + ret;
     }
 }
