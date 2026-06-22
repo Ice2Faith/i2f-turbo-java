@@ -2351,8 +2351,25 @@
                                 session.streamingStarted = true;
                             }
                             json.hidden = false;
-                            insertBeforeLast(messages, json);
-                            // messages.push(json);
+
+                            let needAppend = true;
+                            let len = messages.length;
+                            let cnt = this.metas.maxHistoryCount;
+                            for (let i = len.length - 1; i >= 0; i--) {
+                                if (cnt <= 0) {
+                                    break;
+                                }
+                                let msg = messages[i]
+                                if (msg[msg.type]?.content == json[json.type]?.content) {
+                                    needAppend = false;
+                                    break;
+                                }
+                                cnt--;
+                            }
+                            if (needAppend) {
+                                insertBeforeLast(messages, json);
+                                // messages.push(json);
+                            }
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'tool') {
