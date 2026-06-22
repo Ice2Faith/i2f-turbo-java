@@ -110,12 +110,29 @@ public class OpenAiOpsController implements IOpsProvider {
         request.getRequestDispatcher("./index.html").forward(request, response);
     }
 
+    public String extraStandardBaseUrl(String url) {
+        if (url == null) {
+            return null;
+        }
+        String completionsSuffix = "/chat/completions";
+        if (url.endsWith(completionsSuffix)) {
+            url = url.substring(0, url.length() - completionsSuffix.length());
+        }
+        if (url.endsWith("/")) {
+            url = url.substring(0, url.length() - 1);
+        }
+        return url;
+    }
+
     @PostMapping("/models")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> models(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
-            String json = restTemplate.execute(req.getMeta().getBaseUrl(), HttpMethod.GET, request -> {
+            String url = req.getMeta().getBaseUrl();
+            url = extraStandardBaseUrl(url);
+            url = url + "/models";
+            String json = restTemplate.execute(url, HttpMethod.GET, request -> {
                 request.getHeaders().add("Authorization", "Bearer " + req.getMeta().getApiKey());
                 request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
             }, new ResponseExtractor<String>() {
