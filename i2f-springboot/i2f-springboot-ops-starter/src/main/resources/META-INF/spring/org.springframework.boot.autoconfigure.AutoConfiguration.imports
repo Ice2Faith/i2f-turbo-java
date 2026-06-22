@@ -34,6 +34,7 @@ i2f.springboot.ops.openai.tool.impl.CodecTools
 i2f.springboot.ops.openai.tool.impl.DatabaseMetadataTools
 i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools
 i2f.springboot.ops.openai.tool.impl.LocalFileTools
+i2f.springboot.ops.openai.tool.impl.CommandTools
 i2f.springboot.ops.openai.tool.impl.LunarTools
 i2f.springboot.ops.openai.tool.impl.a2a.AgentTools
 i2f.springboot.ops.openai.tool.SpringContextToolDefinitionProvider
