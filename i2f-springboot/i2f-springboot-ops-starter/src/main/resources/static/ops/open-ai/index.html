@@ -781,7 +781,8 @@
               return item.models || []
             },
             currentLoadModelList() {
-                let ret = this.metas.loadModels[this.form.meta.baseUrl] || []
+                let url = this.standardCompletionUrl(this.form.meta.baseUrl)
+                let ret = this.metas.loadModels[url] || []
                 return ret;
             },
             currentPresetModelItem(){
@@ -1794,14 +1795,21 @@
                 if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key');
                 }
-                let baseUrl = req.meta.baseUrl.trim();
-                if(baseUrl.endsWith('/')){
-                    baseUrl=baseUrl.substring(0,baseUrl.length-1);
-                }
-                baseUrl = baseUrl + '/chat/completions';
+                let baseUrl = this.standardCompletionUrl(req.meta.baseUrl);
                 req.meta.baseUrl=baseUrl;
 
                 return req;
+            },
+            standardCompletionUrl(baseUrl) {
+                if (!baseUrl) {
+                    return baseUrl;
+                }
+                baseUrl = baseUrl.trim();
+                if (baseUrl.endsWith('/')) {
+                    baseUrl = baseUrl.substring(0, baseUrl.length - 1);
+                }
+                baseUrl = baseUrl + '/chat/completions';
+                return baseUrl;
             },
             doLoadModelList() {
                 this.metas.loadModelsLoading = true;
