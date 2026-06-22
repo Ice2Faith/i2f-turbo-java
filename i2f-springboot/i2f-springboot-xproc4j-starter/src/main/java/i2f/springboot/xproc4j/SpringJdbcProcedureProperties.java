@@ -14,8 +14,9 @@ import java.util.concurrent.TimeUnit;
  * @desc
  */
 @Data
-@ConfigurationProperties(prefix = "xproc4j")
+@ConfigurationProperties(prefix = SpringJdbcProcedureProperties.CONFIG_PREFIX)
 public class SpringJdbcProcedureProperties {
+    public static final String CONFIG_PREFIX = "xproc4j";
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
     public static final String DEFAULT_WATCHING_DIRECTORIES = "classpath*:procedure/;classpath*:com/";
 
