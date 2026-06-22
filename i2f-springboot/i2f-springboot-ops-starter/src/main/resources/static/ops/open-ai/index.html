@@ -249,7 +249,7 @@
                 <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
                 <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
                 <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
-                <i v-else-if="msg.type.indexOf('tool')>=0" class="el-icon-news"></i>
+                <i v-else-if="msg.type.indexOf('tool')>=0 || msg.type.indexOf('echo')>=0" class="el-icon-news"></i>
                 <i v-else class="el-icon-cpu"></i>
             </div>
             <div class="message-bubble hover-show-parent" style="position: relative;"
@@ -260,7 +260,7 @@
                 <div class="message-content"
                      :class="{
                             'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
-                            'tool-message-content':  msg.type.indexOf('tool') >=0
+                            'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
                             }"
                      v-html="renderMarkdown(msg[msg.type].content)"></div>
                 <div class="bubble-actions">
@@ -403,21 +403,25 @@
                             技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
                             如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
                             如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
+                            注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
+                            注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
                             技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
                             文件的内容格式要求如下，案例为：<br/>
-                        <pre>
-                                ---
-                                name: weather_analysis_skill
-                                description: 获取指定城市天气并分析是否适合户外运动
-                                tags: [ weather, sports, analysis ]
-                                version: 1.0.0
-                                author: your_name
-                                ---
-
-                                # 第一步：...
-                            </pre>
+                            <br/>
+                            --- <br/>
+                            name: weather_analysis_skill <br/>
+                            description: 获取指定城市天气并分析是否适合户外运动 <br/>
+                            tags: [ weather, sports, analysis ] <br/>
+                            version: 1.0.0 <br/>
+                            author: your_name <br/>
+                            --- <br/>
+                            <br/>
+                            # 第一步：... <br/>
+                            <br/>
                         </p>
-                        <el-checkbox slot="reference" v-model="form.enableSkills">技能调用</el-checkbox>
+                        <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
+                            技能调用
+                        </el-checkbox>
                     </el-popover>
                     <el-popover
                             placement="top-start"
@@ -1181,6 +1185,7 @@
                             {label: '工具', value: 'tool', std: true},
                             {label: '工具结果', value: 'echo_tool', std: false},
                             {label: '工具请求', value: 'request_tool', std: false},
+                            {label: '技能注入', value: 'echo_skill', std: false},
                         ],
                     },
                     drawer: {},
@@ -2360,6 +2365,15 @@
                         }
                         if (resp.attrs && resp.attrs.type == 'definition_tool') {
                             toolDefinitionList.push(json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_skill') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            // messages.push(json);
                             return;
                         }
 

@@ -185,7 +185,6 @@ public class OpenAiOpsController implements IOpsProvider {
                     completion.setStream_options(vo.getStream_options());
                     completion.setMessages(new ArrayList<>());
 
-
                     List<OpenAiMessageVo> voMsgList = vo.getMessages();
                     if (voMsgList != null) {
                         for (OpenAiMessageVo item : voMsgList) {
@@ -203,7 +202,24 @@ public class OpenAiOpsController implements IOpsProvider {
                     completion.setTools(vo.getTools());
 
                     if (req.isEnableSkills()) {
-                        completion.getMessages().add(new OpenAiSystemMessage(SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap)));
+                        String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap);
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                        completion.getMessages().add(0, system);
+
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpenAiConsts.ECHO_SKILL);
+                        dto.setEcho_skill(system);
+
+                        String defSkillMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpenAiConsts.ECHO_SKILL);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (req.isEnableTools()) {
