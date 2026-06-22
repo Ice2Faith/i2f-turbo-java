@@ -26,7 +26,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.elasticsearch.controller.ElasticSearchOpsController,\
     i2f.springboot.ops.xproc4j.controller.XProc4jOpsController,\
     i2f.springboot.ops.xproc4j.helper.XProc4jHelper,\
-  i2f.springboot.ops.openai.skill.SkillAutoConfiguration,\
+    i2f.springboot.ops.openai.skill.SkillAutoConfiguration,\
     i2f.springboot.ops.openai.tool.impl.DatetimeTools,\
     i2f.springboot.ops.openai.tool.impl.RandomTools,\
     i2f.springboot.ops.openai.tool.impl.UidTools,\
@@ -36,6 +36,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools,\
     i2f.springboot.ops.openai.tool.impl.LocalFileTools,\
     i2f.springboot.ops.openai.tool.impl.CommandTools,\
+    i2f.springboot.ops.openai.tool.impl.WebDownloadTools,\
     i2f.springboot.ops.openai.tool.impl.LunarTools,\
     i2f.springboot.ops.openai.tool.impl.a2a.AgentTools,\
     i2f.springboot.ops.openai.tool.SpringContextToolDefinitionProvider,\
