@@ -111,6 +111,7 @@
                         <el-select v-model="form.presetBaseUrl"
                                    placeholder="选择预设 Base URL"
                                    style="width:220px;"
+                                   filterable
                                    @change="onSelectPresetBaseUrl"
                                    clearable>
                             <el-option
@@ -149,6 +150,7 @@
                         <el-select v-model="form.modelName"
                                    placeholder="选择预设 Model"
                                    style="width:220px;"
+                                   filterable
                                    clearable>
                             <el-option
                                     v-for="item in currentPresetModelList"
@@ -162,6 +164,23 @@
                         <el-input v-model="form.modelName"
                                   placeholder="qwen-plus"
                                   style="width:180px;"></el-input>
+                    </el-form-item>
+                    <el-form-item label="提供模型">
+                        <el-button size="mini"
+                                   icon="el-icon-refresh"
+                                   v-loading="metas.loadModelsLoading"
+                                   @click="doLoadModelList"></el-button>
+                        <el-select v-model="form.modelName"
+                                   placeholder="选择提供模型"
+                                   filterable
+                                   clearable>
+                            <el-option
+                                    v-for="item in currentLoadModelList"
+                                    :key="item.id"
+                                    :label="item.id"
+                                    :value="item.id">
+                            </el-option>
+                        </el-select>
                     </el-form-item>
                 </el-form>
             </el-card>
@@ -761,6 +780,10 @@
                 let item=this.currentPresetBaseUrlItem || {}
               return item.models || []
             },
+            currentLoadModelList() {
+                let ret = this.metas.loadModels[this.form.meta.baseUrl] || []
+                return ret;
+            },
             currentPresetModelItem(){
               let item=this.currentPresetBaseUrlItem || {};
               let models=item.models || [];
@@ -804,6 +827,18 @@
                         supportTts: false,
                         ttsPlaying: false,
                         moreSendMenus: [],
+                        loadModelsLoading: false,
+                        loadModels: {
+                            // 已加载的模型列表，key=baseUrl,value=模型列表
+                            demo: [
+                                {
+                                    "id": "qwen3.7-max",
+                                    "object": "model",
+                                    "created": 1781685634,
+                                    "owned_by": "system"
+                                }
+                            ]
+                        },
                         presetBaseUrlList: [
                             {
                                 label: 'OpenAI 官方',
@@ -1071,6 +1106,33 @@
                                 models:[
 
                                 ]
+                            },
+                            {
+                                label: 'Ollama',
+                                value: 'http://localhost:11434/v1',
+                                apiKey: {
+                                    url: '',
+                                    tips: ''
+                                },
+                                models: []
+                            },
+                            {
+                                label: 'vLLM',
+                                value: 'http://localhost:8000/v1',
+                                apiKey: {
+                                    url: '',
+                                    tips: ''
+                                },
+                                models: []
+                            },
+                            {
+                                label: 'LocalAI',
+                                value: 'http://localhost:8080/v1',
+                                apiKey: {
+                                    url: '',
+                                    tips: ''
+                                },
+                                models: []
                             },
                         ],
                         langList: [
@@ -1741,7 +1803,33 @@
 
                 return req;
             },
-
+            doLoadModelList() {
+                this.metas.loadModelsLoading = true;
+                try {
+                    let req = this.assignOpenAiMeta({})
+                    this.$axios({
+                        url: '/models',
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data) || []
+                            //console.log(resp)
+                            this.$set(this.metas.loadModels, req.meta.baseUrl, resp);
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.loadModelsLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.loadModelsLoading = false;
+                }
+            },
             // ---- 会话管理 ----
             genId() {
                 return 'sid_' + new Date().getTime() + '_' + Math.random().toString(36).substr(2, 8);

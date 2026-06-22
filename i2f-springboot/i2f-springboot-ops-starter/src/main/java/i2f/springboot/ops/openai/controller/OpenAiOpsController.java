@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -107,6 +108,37 @@ public class OpenAiOpsController implements IOpsProvider {
     @RequestMapping("/")
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.getRequestDispatcher("./index.html").forward(request, response);
+    }
+
+    @PostMapping("/models")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> models(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
+            String json = restTemplate.execute(req.getMeta().getBaseUrl(), HttpMethod.GET, request -> {
+                request.getHeaders().add("Authorization", "Bearer " + req.getMeta().getApiKey());
+                request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+            }, new ResponseExtractor<String>() {
+                @Override
+                public String extractData(ClientHttpResponse response) throws IOException {
+                    StringBuilder builder = new StringBuilder();
+                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
+                        String line = null;
+                        while ((line = reader.readLine()) != null) {
+                            builder.append(line).append("\n");
+                        }
+                    }
+                    return builder.toString();
+                }
+            });
+            Map<String, Object> map = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
+            });
+            List<Map<String, Object>> list = (List<Map<String, Object>>) map.get("data");
+            return transfer.success(list);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e);
+        }
     }
 
     @PostMapping("/stream")
