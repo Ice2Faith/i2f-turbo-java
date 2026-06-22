@@ -44,6 +44,8 @@ public class SpringJdbcProcedureProperties {
 
     protected long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
 
+    protected List<String> primaryDatasourceNames = new ArrayList<>();
+
     protected List<String> invokeLogPredicateRegexes = new ArrayList<>();
 
     protected List<String> mapperPackages = new ArrayList<>();

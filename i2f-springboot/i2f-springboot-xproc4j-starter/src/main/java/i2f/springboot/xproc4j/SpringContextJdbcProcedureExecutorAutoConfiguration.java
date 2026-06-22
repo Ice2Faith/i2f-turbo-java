@@ -280,6 +280,9 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         } else {
             ret = new DefaultJdbcProcedureExecutor(context, iEnvironment, namingContext);
         }
+        if (jdbcProcedureProperties.getPrimaryDatasourceNames() != null) {
+            ret.getPrimaryDatasourceNames().addAll(jdbcProcedureProperties.getPrimaryDatasourceNames());
+        }
         log.info(XProc4jConsts.NAME + " config " + ret.getClass().getSimpleName() + " ...");
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);

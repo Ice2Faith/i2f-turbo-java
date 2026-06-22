@@ -104,6 +104,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
     protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
     protected final ConcurrentHashMap<String, ILockProvider> lockProviders = new ConcurrentHashMap<>();
+    protected final CopyOnWriteArrayList<String> primaryDatasourceNames = new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
     private final JdbcProcedureLogger threadAppenderLogger = new ThreadAppenderJdbcProcedureLogger();
@@ -798,7 +799,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
         DataSource primary = ret.get(ParamsConsts.DEFAULT_DATASOURCE);
         if (primary == null) {
-            List<String> defaultNames = Arrays.asList("primary", "master", "main", "default", "leader");
+            List<String> defaultNames = new ArrayList<>();
+            defaultNames.addAll(primaryDatasourceNames);
+            defaultNames.addAll(Arrays.asList("primary", "master", "main", "default", "leader"));
             for (Map.Entry<String, DataSource> entry : ret.entrySet()) {
                 String name = entry.getKey();
                 if (defaultNames.contains(name)) {
