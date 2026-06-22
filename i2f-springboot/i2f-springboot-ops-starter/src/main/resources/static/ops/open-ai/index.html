@@ -629,6 +629,7 @@
                         <el-descriptions>
                             <el-descriptions-item label="名称">{{item.functionName}}</el-descriptions-item>
                             <el-descriptions-item label="调用ID">{{item.tool_call_id}}</el-descriptions-item>
+                            <el-descriptions-item label="描述">{{item.definition?.description}}</el-descriptions-item>
                             <el-descriptions-item label="参数列表">{{item.definition?.parameterNames}}
                             </el-descriptions-item>
                             <el-descriptions-item label="标签列表">{{item.definition?.tags}}</el-descriptions-item>
