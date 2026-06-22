@@ -18,4 +18,5 @@ public class OpenAiOperateDto {
     protected List<OpenAiToolApprovalDto> toolApprovalList;
     protected boolean encryptOutput = false;
     protected boolean enableTools = false;
+    protected boolean enableSkills = false;
 }

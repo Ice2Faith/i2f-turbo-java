@@ -400,6 +400,31 @@
                             width="320"
                             trigger="hover">
                         <p>
+                            技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
+                            如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
+                            如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
+                            技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
+                            文件的内容格式要求如下，案例为：<br/>
+                        <pre>
+                                ---
+                                name: weather_analysis_skill
+                                description: 获取指定城市天气并分析是否适合户外运动
+                                tags: [ weather, sports, analysis ]
+                                version: 1.0.0
+                                author: your_name
+                                ---
+
+                                # 第一步：...
+                            </pre>
+                        </p>
+                        <el-checkbox slot="reference" v-model="form.enableSkills">技能调用</el-checkbox>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="320"
+                            trigger="hover">
+                        <p>
                             工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
                             如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
                             如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
@@ -1188,6 +1213,7 @@
                         messageType: 'user',
                         encryptOutput: false,
                         enableTools: false,
+                        enableSkills: false,
                         toolApprovalList: []
                     }
                 }
@@ -2411,6 +2437,7 @@
                     });
                     req.encryptOutput=encryptOutput;
                     req.enableTools = this.form.enableTools;
+                    req.enableSkills = this.form.enableSkills;
                     req.toolApprovalList = this.form.toolApprovalList;
                     req=this.transferSend(req);
 

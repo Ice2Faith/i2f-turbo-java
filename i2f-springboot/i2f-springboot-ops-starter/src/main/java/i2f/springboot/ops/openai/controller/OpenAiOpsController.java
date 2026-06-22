@@ -2,6 +2,8 @@ package i2f.springboot.ops.openai.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.skill.SkillsHelper;
+import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawDefinitionsProvider;
 import i2f.ai.std.tool.ToolRawHelper;
@@ -12,6 +14,7 @@ import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.*;
+import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,6 +47,7 @@ import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -80,6 +84,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private ToolRawDefinitionsProvider toolDefinitionProvider;
+    @Autowired
+    private SkillsTools skillsTools;
 
     private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()
@@ -178,6 +184,8 @@ public class OpenAiOpsController implements IOpsProvider {
                     completion.setStream(vo.isStream());
                     completion.setStream_options(vo.getStream_options());
                     completion.setMessages(new ArrayList<>());
+
+
                     List<OpenAiMessageVo> voMsgList = vo.getMessages();
                     if (voMsgList != null) {
                         for (OpenAiMessageVo item : voMsgList) {
@@ -194,10 +202,19 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
                     completion.setTools(vo.getTools());
 
+                    if (req.isEnableSkills()) {
+                        completion.getMessages().add(new OpenAiSystemMessage(SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap)));
+                    }
+
                     if (req.isEnableTools()) {
                         if (toolDefinitionProvider != null) {
                             List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
                             if (tools != null) {
+                                if (!req.isEnableSkills()) {
+                                    tools = tools.stream()
+                                            .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                            .collect(Collectors.toList());
+                                }
                                 if (completion.getTools() == null) {
                                     completion.setTools(new ArrayList<>());
                                 }
@@ -241,6 +258,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                     Map<String, ToolRawDefinition> definitionMap = new HashMap<>();
                                     if (toolDefinitionProvider != null) {
                                         List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                                        if (!req.isEnableSkills()) {
+                                            tools = tools.stream()
+                                                    .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                                    .collect(Collectors.toList());
+                                        }
                                         for (ToolRawDefinition tool : tools) {
                                             definitionMap.put(tool.getName(), tool);
                                         }

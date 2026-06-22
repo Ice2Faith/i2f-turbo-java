@@ -25,6 +25,7 @@ i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper
 i2f.springboot.ops.elasticsearch.controller.ElasticSearchOpsController
 i2f.springboot.ops.xproc4j.controller.XProc4jOpsController
 i2f.springboot.ops.xproc4j.helper.XProc4jHelper
+i2f.springboot.ops.openai.skill.SkillAutoConfiguration
 i2f.springboot.ops.openai.tool.impl.DatetimeTools
 i2f.springboot.ops.openai.tool.impl.RandomTools
 i2f.springboot.ops.openai.tool.impl.UidTools
