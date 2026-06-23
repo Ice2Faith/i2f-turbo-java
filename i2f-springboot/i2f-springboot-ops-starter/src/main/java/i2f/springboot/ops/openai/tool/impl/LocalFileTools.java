@@ -143,7 +143,7 @@ public class LocalFileTools {
                                                   int startLine,
                                                   @ToolParam(value = "endLine", description = "end line number, value in [1,...], for example 1 or 100")
                                                   int endLine,
-                                                  @ToolParam(value = "content", description = "new content to replace, cloud be multi-line string")
+                                                  @ToolParam(value = "content", description = "new content to replace, cloud be multi-line string, cloud be null means delete this line")
                                                   String content) throws IOException {
         File file = getFile(filePath);
         // 如果开启了备份，那就一定要先备份
@@ -160,32 +160,31 @@ public class LocalFileTools {
         int realizeStartLine = Math.max(1, startLine);
         int realizeEndLine = Math.min(endLine, totalLines + 1);
 
-        String[] contentLines = content.split("\n");
+        List<String> prefixLines = new ArrayList<>();
+        List<String> suffixLines = new ArrayList<>();
 
-        // 如果 startLine 大于文件总行数，则在末尾追加
-        if (realizeStartLine > totalLines) {
-            // 将 content 按行分割后追加到文件末尾
-            for (String contentLine : contentLines) {
-                lines.add(contentLine);
+        for (int i = 1; i < totalLines + 1; i++) {
+            if (i >= realizeStartLine && i < realizeEndLine) {
+                continue;
             }
-        } else {
-            // 删除 [realizeStartLine, realizeEndLine) 范围内的行
-            int deleteCount = realizeEndLine - realizeStartLine;
-            for (int i = 0; i < deleteCount; i++) {
-                if (realizeStartLine - 1 < lines.size()) {
-                    lines.remove(realizeStartLine - 1);
-                }
-            }
-
-            // 在 realizeStartLine - 1 位置插入新内容
-            int insertIndex = realizeStartLine - 1;
-            for (int i = contentLines.length - 1; i >= 0; i--) {
-                lines.add(insertIndex, contentLines[i]);
+            if (i < realizeStartLine) {
+                prefixLines.add(lines.get(i - 1));
+            } else if (i >= realizeEndLine) {
+                suffixLines.add(lines.get(i - 1));
             }
         }
 
-        // 写回文件
-        String writeText = String.join("\n", lines);
+        int newLineCount = 0;
+        List<String> saveLines = new ArrayList<>();
+        saveLines.addAll(prefixLines);
+        if (content != null) {
+            String[] contentLines = content.split("\n");
+            newLineCount = contentLines.length;
+            saveLines.addAll(Arrays.asList(contentLines));
+        }
+        saveLines.addAll(suffixLines);
+
+        String writeText = String.join("\n", saveLines);
         StreamUtil.writeString(writeText, file);
 
         // 返回结果
@@ -193,8 +192,8 @@ public class LocalFileTools {
         ret.put("realizeStartLine", realizeStartLine);
         ret.put("realizeEndLine", realizeEndLine);
         ret.put("replacedLineCount", Math.max(0, realizeEndLine - realizeStartLine));
-        ret.put("newLineCount", contentLines.length);
-        ret.put("totalLinesAfter", lines.size());
+        ret.put("newLineCount", newLineCount);
+        ret.put("totalLinesAfter", saveLines.size());
         return ret;
     }
 
