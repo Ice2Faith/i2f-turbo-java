@@ -1,6 +1,6 @@
 package i2f.springboot.security.def.token;
 
-import i2f.net.http.HttpStatus;
+import i2f.net.http.HttpStatusConstants;
 import i2f.resp.ApiResp;
 import i2f.springboot.security.exception.BoostAuthenticationException;
 import i2f.springboot.security.impl.JsonSupportUsernamePasswordAuthenticationFilter;
@@ -36,7 +36,7 @@ public class DefaultAuthenticationFailureHandler implements AuthenticationFailur
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException ex) throws IOException, ServletException {
         log.info("--------------unauthorized-----------");
         String requestUri = request.getRequestURI();
-        onUnAuthoried(HttpStatus.UNAUTHORIZED, requestUri, request, response, ex);
+        onUnAuthoried(HttpStatusConstants.UNAUTHORIZED, requestUri, request, response, ex);
     }
 
     public void onUnAuthoried(int statusCode, String requestUri, HttpServletRequest request, HttpServletResponse response, AuthenticationException ex) throws IOException, ServletException {

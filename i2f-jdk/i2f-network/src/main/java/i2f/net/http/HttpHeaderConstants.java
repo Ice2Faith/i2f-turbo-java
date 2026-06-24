@@ -5,7 +5,7 @@ package i2f.net.http;
  * @date 2022/5/20 11:29
  * @desc
  */
-public interface HttpHeaders {
+public interface HttpHeaderConstants {
     String ContentType = "Content-Type";
     String ContentDisposition = "Content-Disposition";
     String ContentLength = "Content-Length";

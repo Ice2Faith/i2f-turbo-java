@@ -4,7 +4,7 @@ package i2f.net.http;
  * @author Ice2Faith
  * @date 2021/8/31
  */
-public interface HttpStatus {
+public interface HttpStatusConstants {
     /**
      * 操作成功
      */

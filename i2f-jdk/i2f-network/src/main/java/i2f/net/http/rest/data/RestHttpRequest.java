@@ -1,4 +1,4 @@
-package i2f.ai.rest.rest.data;
+package i2f.net.http.rest.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

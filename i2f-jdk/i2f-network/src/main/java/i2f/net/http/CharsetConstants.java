@@ -5,7 +5,7 @@ package i2f.net.http;
  * @date 2022/5/20 13:53
  * @desc
  */
-public interface Charsets {
+public interface CharsetConstants {
     String Charset = "charset";
 
     String Utf8 = "UTF-8";

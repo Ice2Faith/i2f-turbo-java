@@ -1,10 +1,6 @@
 package i2f.ai.rest.openai.model;
 
 import i2f.ai.rest.openai.model.data.*;
-import i2f.ai.rest.rest.IRestClient;
-import i2f.ai.rest.rest.data.HttpHeaders;
-import i2f.ai.rest.rest.data.RestHttpRequest;
-import i2f.ai.rest.rest.data.RestHttpResponse;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
 import i2f.ai.std.model.message.AiMessage;
@@ -14,6 +10,10 @@ import i2f.ai.std.model.message.impl.ToolMessage;
 import i2f.ai.std.model.message.impl.UserMessage;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.net.http.rest.IRestClient;
+import i2f.net.http.rest.data.HttpHeaders;
+import i2f.net.http.rest.data.RestHttpRequest;
+import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
 import lombok.NoArgsConstructor;

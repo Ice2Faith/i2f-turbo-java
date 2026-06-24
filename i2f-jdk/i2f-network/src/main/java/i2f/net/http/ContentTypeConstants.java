@@ -5,7 +5,7 @@ package i2f.net.http;
  * @date 2022/5/20 11:30
  * @desc
  */
-public interface ContentTypes {
+public interface ContentTypeConstants {
     String Json = "application/json";
     String Xml = "text/xml";
 

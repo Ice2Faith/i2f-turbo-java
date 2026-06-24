@@ -1,7 +1,7 @@
-package i2f.ai.rest.rest;
+package i2f.net.http.rest;
 
-import i2f.ai.rest.rest.data.RestHttpRequest;
-import i2f.ai.rest.rest.data.RestHttpResponse;
+import i2f.net.http.rest.data.RestHttpRequest;
+import i2f.net.http.rest.data.RestHttpResponse;
 
 import java.io.IOException;
 

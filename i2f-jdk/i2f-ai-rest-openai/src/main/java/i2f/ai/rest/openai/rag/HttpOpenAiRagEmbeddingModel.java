@@ -2,12 +2,12 @@ package i2f.ai.rest.openai.rag;
 
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
-import i2f.ai.rest.rest.IRestClient;
-import i2f.ai.rest.rest.data.HttpHeaders;
-import i2f.ai.rest.rest.data.RestHttpRequest;
-import i2f.ai.rest.rest.data.RestHttpResponse;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
+import i2f.net.http.rest.IRestClient;
+import i2f.net.http.rest.data.HttpHeaders;
+import i2f.net.http.rest.data.RestHttpRequest;
+import i2f.net.http.rest.data.RestHttpResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
