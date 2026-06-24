@@ -1,6 +1,6 @@
 package i2f.springboot.security.def.token;
 
-import i2f.net.http.HttpStatusConstants;
+import i2f.net.http.consts.HttpStatusConstants;
 import i2f.resp.ApiResp;
 import i2f.springboot.security.exception.BoostAuthenticationException;
 import i2f.springboot.security.impl.JsonSupportUsernamePasswordAuthenticationFilter;

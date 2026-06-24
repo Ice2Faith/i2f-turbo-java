@@ -1,7 +1,7 @@
 package i2f.spring.web.rest;
 
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
-import i2f.net.http.rest.data.HttpHeaders;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.url.FormUrlEncodedEncoder;

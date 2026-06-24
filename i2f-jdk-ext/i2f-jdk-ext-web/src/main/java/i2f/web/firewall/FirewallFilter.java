@@ -2,7 +2,7 @@ package i2f.web.firewall;
 
 
 import i2f.firewall.exception.FirewallException;
-import i2f.net.http.HttpStatusConstants;
+import i2f.net.http.consts.HttpStatusConstants;
 import i2f.web.firewall.wrapper.FirewallHttpServletRequestWrapper;
 import i2f.web.firewall.wrapper.FirewallHttpServletResponseWrapper;
 import lombok.Data;

@@ -3,6 +3,8 @@ package i2f.extension.httpclient.impl;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
+import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
@@ -15,7 +17,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -45,28 +48,35 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
 
         HttpUriRequest req = null;
 
-        for (Map.Entry<String, Object> item : request.getHeader().entrySet()) {
-            String val = item.getValue() == null ? "" : String.valueOf(item.getValue());
-            req.addHeader(item.getKey(), val);
+        for (Map.Entry<String, ArrayList<String>> item : request.getHeader().entrySet()) {
+            ArrayList<String> value = item.getValue();
+            if (value == null) {
+                value = new ArrayList<>();
+                value.add(null);
+            }
+            for (String v : value) {
+                String val = v == null ? "" : v;
+                req.addHeader(item.getKey(), val);
+            }
         }
 
         String method = request.getMethod();
-        if (HttpRequest.GET.equals(method)) {
+        if (HttpMethodConstants.GET.equals(method)) {
             HttpGet httpGet = new HttpGet(reqUrl);
             req = httpGet;
             httpGet.setConfig(config);
 
-        } else if (HttpRequest.POST.equals(method)) {
+        } else if (HttpMethodConstants.POST.equals(method)) {
             HttpPost httpPost = new HttpPost(reqUrl);
             req = httpPost;
             httpPost.setConfig(config);
             handler.writeBody(request.getData(), request, httpPost, httpClient);
-        } else if (HttpRequest.PUT.equals(method)) {
+        } else if (HttpMethodConstants.PUT.equals(method)) {
             HttpPut httpPut = new HttpPut(reqUrl);
             req = httpPut;
             httpPut.setConfig(config);
             handler.writeBody(request.getData(), request, httpPut, httpClient);
-        } else if (HttpRequest.DELETE.equals(method)) {
+        } else if (HttpMethodConstants.DELETE.equals(method)) {
             HttpDelete httpDelete = new HttpDelete(reqUrl);
             req = httpDelete;
             httpDelete.setConfig(config);
@@ -81,12 +91,12 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             response.setResponseCode(resp.getStatusLine().getStatusCode());
             response.setResponseMessage(resp.getStatusLine().getReasonPhrase());
 
-            Map<String, List<String>> respHeader = new HashMap<>();
+            HttpHeaders respHeader = new HttpHeaders();
             Header[] headers = resp.getAllHeaders();
             for (Header item : headers) {
                 String name = item.getName();
                 String value = item.getValue();
-                respHeader.put(name, new ArrayList<>(Collections.singletonList(value)));
+                respHeader.add(name, value);
             }
             response.setHeader(respHeader);
 

@@ -1,5 +1,8 @@
 package i2f.net.http.data;
 
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.impl.HttpFormUrlEncodedRequestBodyHandler;
 import i2f.net.http.impl.HttpJsonRequestBodyHandler;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
@@ -13,9 +16,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -25,21 +28,12 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class HttpRequest {
-    public static final String GET = "GET";
-    public static final String POST = "POST";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
-
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String CONTENT_FORM_URLENCODE = "application/x-www-form-urlencoded";
-    public static final String CONTENT_JSON = "application/json";
-
 
     private String url;
-    private String method;
+    private String method = HttpMethodConstants.GET;
     private Object params;
     private Object data;
-    private Map<String, Object> header;
+    private HttpHeaders header;
     private List<MultipartFile> files;
 
     private int connectTimeout = 30 * 1000;
@@ -52,7 +46,7 @@ public class HttpRequest {
 
     public static HttpRequest doGet() {
         return new HttpRequest()
-                .setMethod(GET);
+                .setMethod(HttpMethodConstants.GET);
     }
 
     public static HttpRequest doGet(String url) {
@@ -65,7 +59,7 @@ public class HttpRequest {
 
     public static HttpRequest doPost() {
         return new HttpRequest()
-                .setMethod(POST);
+                .setMethod(HttpMethodConstants.POST);
     }
 
     public static HttpRequest doPost(String url) {
@@ -74,7 +68,7 @@ public class HttpRequest {
 
     public static HttpRequest doPut() {
         return new HttpRequest()
-                .setMethod(PUT);
+                .setMethod(HttpMethodConstants.PUT);
     }
 
     public static HttpRequest doPut(String url) {
@@ -83,7 +77,7 @@ public class HttpRequest {
 
     public static HttpRequest doDelete() {
         return new HttpRequest()
-                .setMethod(DELETE);
+                .setMethod(HttpMethodConstants.DELETE);
     }
 
     public static HttpRequest doDelete(String url) {
@@ -91,19 +85,19 @@ public class HttpRequest {
     }
 
     public HttpRequest form() {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE);
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form);
         this.setRequestBodyHandler(new HttpFormUrlEncodedRequestBodyHandler());
         return this;
     }
 
     public HttpRequest json() {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON);
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
         this.setRequestBodyHandler(new HttpJsonRequestBodyHandler());
         return this;
     }
 
     public HttpRequest json(IJsonSerializer processor) {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON);
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
         this.setRequestBodyHandler(new HttpJsonRequestBodyHandler(processor));
         return this;
     }
@@ -144,9 +138,25 @@ public class HttpRequest {
 
     public HttpRequest addHeader(String key, Object value) {
         if (header == null) {
-            header = new HashMap<>();
+            header = new HttpHeaders();
         }
-        header.put(key, value);
+        header.add(key, value);
+        return this;
+    }
+
+    public HttpRequest addAllHeader(Map<String, ?> map) {
+        if (header == null) {
+            header = new HttpHeaders();
+        }
+        header.addAll(map);
+        return this;
+    }
+
+    public HttpRequest applyHeader(Consumer<HttpHeaders> consumer) {
+        if (header == null) {
+            header = new HttpHeaders();
+        }
+        header.apply(consumer);
         return this;
     }
 
@@ -172,7 +182,7 @@ public class HttpRequest {
         return params;
     }
 
-    public HttpRequest setParams(Map<String, Object> params) {
+    public HttpRequest setParams(Object params) {
         this.params = params;
         return this;
     }
@@ -181,17 +191,18 @@ public class HttpRequest {
         return data;
     }
 
-    public HttpRequest setData(Map<String, Object> data) {
+    public HttpRequest setData(Object data) {
         this.data = data;
         return this;
     }
 
-    public Map<String, Object> getHeader() {
+    public HttpHeaders getHeader() {
         return header;
     }
 
-    public HttpRequest setHeader(Map<String, Object> header) {
-        this.header = header;
+    public HttpRequest setHeader(Map<String, ?> header) {
+        this.header = new HttpHeaders();
+        this.header.addAll(header);
         return this;
     }
 

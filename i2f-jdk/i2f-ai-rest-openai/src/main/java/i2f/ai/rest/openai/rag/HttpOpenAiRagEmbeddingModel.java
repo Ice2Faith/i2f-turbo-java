@@ -4,8 +4,9 @@ import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
+import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
-import i2f.net.http.rest.data.HttpHeaders;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
 import lombok.Data;
@@ -78,7 +79,7 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
         try {
             RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getEmbeddingUrl())
-                            .method(RestHttpRequest.POST)
+                            .method(HttpMethodConstants.POST)
                             .headers(HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {

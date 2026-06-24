@@ -1,6 +1,7 @@
 package i2f.net.http;
 
 
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.impl.BasicHttpProcessorProvider;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
@@ -9,6 +10,7 @@ import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.url.FormUrlEncodedEncoder;
 
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.Map;
 
 /**
@@ -26,18 +28,20 @@ public class HttpUtil {
 
 
     public static void setHttpHeaders(HttpURLConnection conn, HttpRequest request) {
-        Map<String, Object> header = request.getHeader();
+        HttpHeaders header = request.getHeader();
         if (header == null || header.isEmpty()) {
             return;
         }
-        for (Map.Entry<String, Object> item : header.entrySet()) {
-            String name = item.getKey();
-            Object value = item.getValue();
+        for (Map.Entry<String, ArrayList<String>> item : header.entrySet()) {
+            ArrayList<String> value = item.getValue();
             if (value == null) {
-                value = "";
+                value = new ArrayList<>();
+                value.add(null);
             }
-            String str = String.valueOf(value);
-            conn.setRequestProperty(name, str);
+            for (String v : value) {
+                String val = v == null ? "" : v;
+                conn.setRequestProperty(item.getKey(), val);
+            }
         }
     }
 

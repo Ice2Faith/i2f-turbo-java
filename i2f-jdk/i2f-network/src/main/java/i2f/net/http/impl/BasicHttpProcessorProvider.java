@@ -1,6 +1,9 @@
 package i2f.net.http.impl;
 
 
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.HttpProcessorProvider;
@@ -28,8 +31,8 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public <T> T postFormForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -37,8 +40,8 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public String postFormForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -46,16 +49,16 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public HttpResponse postForm(HttpRequest request) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor);
     }
 
     @Override
     public <T> T postJsonForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer jsonProcessor) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(jsonProcessor, clazz, charset);
@@ -63,8 +66,8 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public String postJsonForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -72,8 +75,8 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public HttpResponse postJson(HttpRequest request) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -83,7 +86,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -94,7 +97,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -106,7 +109,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -116,7 +119,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -128,7 +131,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -141,7 +144,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -152,7 +155,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -164,7 +167,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -177,7 +180,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .setRequestBodyHandler(jsonRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -188,7 +191,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -199,7 +202,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -211,7 +214,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor);
     }
@@ -221,7 +224,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -233,7 +236,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -246,7 +249,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsString(charset);
@@ -257,7 +260,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -269,7 +272,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
@@ -282,7 +285,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .setRequestBodyHandler(formRequestBodyHandler)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);

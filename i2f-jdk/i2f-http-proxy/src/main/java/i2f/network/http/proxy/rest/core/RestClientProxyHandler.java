@@ -3,6 +3,7 @@ package i2f.network.http.proxy.rest.core;
 
 import i2f.annotations.core.naming.Name;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.data.MultipartFile;
@@ -53,7 +54,7 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
         String url = joinUrlPath(client.url(), client.path());
 
         String path = "";
-        String urlMethod = HttpRequest.GET;
+        String urlMethod = HttpMethodConstants.GET;
         RestMapping mapping = ReflectResolver.getAnnotation(method, RestMapping.class);
         if (mapping != null) {
             path = mapping.value();
@@ -62,28 +63,28 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
         RestGetMapping getMapping = ReflectResolver.getAnnotation(method, RestGetMapping.class);
         if (getMapping != null) {
             path = getMapping.value();
-            urlMethod = HttpRequest.GET;
+            urlMethod = HttpMethodConstants.GET;
         }
         RestPostMapping postMapping = ReflectResolver.getAnnotation(method, RestPostMapping.class);
         if (postMapping != null) {
             path = postMapping.value();
-            urlMethod = HttpRequest.POST;
+            urlMethod = HttpMethodConstants.POST;
         }
         RestPutMapping putMapping = ReflectResolver.getAnnotation(method, RestPutMapping.class);
         if (putMapping != null) {
             path = putMapping.value();
-            urlMethod = HttpRequest.PUT;
+            urlMethod = HttpMethodConstants.PUT;
         }
         RestDeleteMapping deleteMapping = ReflectResolver.getAnnotation(method, RestDeleteMapping.class);
         if (deleteMapping != null) {
             path = deleteMapping.value();
-            urlMethod = HttpRequest.DELETE;
+            urlMethod = HttpMethodConstants.DELETE;
         }
 
         url = joinUrlPath(url, path);
 
         if ("".equals(urlMethod)) {
-            urlMethod = HttpRequest.GET;
+            urlMethod = HttpMethodConstants.GET;
         }
         request.setUrl(url);
         request.setMethod(urlMethod);

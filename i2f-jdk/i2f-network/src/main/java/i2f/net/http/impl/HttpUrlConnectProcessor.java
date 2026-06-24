@@ -3,6 +3,8 @@ package i2f.net.http.impl;
 
 import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
+import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
@@ -45,8 +47,8 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
             conn.setRequestMethod(method);
             method = method.trim().toUpperCase();
             conn.setDoInput(true);
-            if (HttpRequest.POST.equals(method)
-                    || HttpRequest.PUT.equals(method)) {
+            if (HttpMethodConstants.POST.equals(method)
+                    || HttpMethodConstants.PUT.equals(method)) {
                 conn.setDoOutput(true);
 
                 os = conn.getOutputStream();
@@ -60,7 +62,10 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
             response.setResponseMessage(conn.getResponseMessage());
 
             Map<String, List<String>> headers = conn.getHeaderFields();
-            response.setHeader(headers);
+
+            HttpHeaders respHeaders = new HttpHeaders();
+            respHeaders.addAll(headers);
+            response.setHeader(respHeaders);
 
             long contentLength = conn.getContentLengthLong();
             response.setContentLength(contentLength);

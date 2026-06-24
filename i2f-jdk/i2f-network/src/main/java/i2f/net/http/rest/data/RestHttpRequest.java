@@ -1,5 +1,7 @@
 package i2f.net.http.rest.data;
 
+import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -13,10 +15,6 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class RestHttpRequest {
-    public static final String GET = "GET";
-    public static final String POST = "POST";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
     /**
      * 请求URL
      */
@@ -24,7 +22,7 @@ public class RestHttpRequest {
     /**
      * 请求方式
      */
-    protected String method;
+    protected String method = HttpMethodConstants.GET;
     /**
      * URL参数
      */

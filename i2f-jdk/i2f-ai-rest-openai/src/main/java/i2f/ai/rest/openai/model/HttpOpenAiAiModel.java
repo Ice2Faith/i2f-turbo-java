@@ -10,8 +10,9 @@ import i2f.ai.std.model.message.impl.ToolMessage;
 import i2f.ai.std.model.message.impl.UserMessage;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
-import i2f.net.http.rest.data.HttpHeaders;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.reflect.ReflectResolver;
@@ -157,7 +158,7 @@ public class HttpOpenAiAiModel implements AiModel {
             }
             RestHttpResponse<OpenAiCompletionRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getChatCompletionsUrl())
-                            .method(RestHttpRequest.POST)
+                            .method(HttpMethodConstants.POST)
                             .headers(HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {

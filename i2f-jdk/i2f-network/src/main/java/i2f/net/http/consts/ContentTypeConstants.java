@@ -1,4 +1,4 @@
-package i2f.net.http;
+package i2f.net.http.consts;
 
 /**
  * @author Ice2Faith
@@ -8,6 +8,7 @@ package i2f.net.http;
 public interface ContentTypeConstants {
     String Json = "application/json";
     String Xml = "text/xml";
+    String Form = "application/x-www-form-urlencoded";
 
     String Text = "text/plain";
 

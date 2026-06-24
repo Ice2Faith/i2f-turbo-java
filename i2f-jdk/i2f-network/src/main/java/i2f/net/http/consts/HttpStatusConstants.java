@@ -1,4 +1,4 @@
-package i2f.net.http;
+package i2f.net.http.consts;
 
 /**
  * @author Ice2Faith

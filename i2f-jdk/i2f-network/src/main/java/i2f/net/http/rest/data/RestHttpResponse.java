@@ -1,5 +1,6 @@
 package i2f.net.http.rest.data;
 
+import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

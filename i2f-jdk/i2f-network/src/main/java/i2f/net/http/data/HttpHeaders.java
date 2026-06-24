@@ -1,4 +1,4 @@
-package i2f.net.http.rest.data;
+package i2f.net.http.data;
 
 import java.util.ArrayList;
 import java.util.Collection;

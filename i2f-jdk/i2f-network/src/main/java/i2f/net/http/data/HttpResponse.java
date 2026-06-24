@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -21,7 +19,7 @@ public class HttpResponse implements Closeable {
     private int responseCode;
     private String responseMessage;
     private long contentLength;
-    private Map<String, List<String>> header;
+    private HttpHeaders header;
 
     private boolean parsedContentBytes;
     private InputStream inputStream;
