@@ -81,7 +81,9 @@ APP_JAVA_HOME=
 
 # JVM 常见配置区
 # JVM 启动参数定义，此参数不受 ENABLE_JVM_CFG 控制
-JVM_OPTS="-Dfile.encoding=UTF-8"
+JVM_OPTS=
+# 是否强制使用UTF-8输出
+ENABLE_UTF8_ENCODING=$BOOL_FALSE
 # 是否开启Jvm配置
 # 必须是定义的BOOL常量
 ENABLE_JVM_CFG=$BOOL_FALSE
@@ -363,6 +365,12 @@ BACKUP_DIR=
 # 回滚路径
 ROLLBACK_DIR=
 
+# 获取java的主版本号
+function getJavaMajorVersion(){
+  _p_ver=`$JAVA_PATH -version 2>&1 | head -n 1 | sed -nE 's/.*"1\.([0-9]+).*/\1/p; s/.*"([0-9]+).*/\1/p'`
+  _func_ret=$_p_ver
+}
+
 # 准备Spring的启动参数
 function prepareSpringCfg(){
     if [[ -n "${SPRING_APPLICATION_NAME}" ]]; then
@@ -500,6 +508,31 @@ function prepareSkywalkingCfg(){
   JVM_OPTS="${JVM_OPTS} ${_p_skywalking_args}"
 }
 
+# 不同java版本的差异化配置
+function prepareJavaVersionCfg(){
+  mkdir -p lib-unload
+
+  cleanFuncParams
+  _func_ret=
+  getJavaMajorVersion
+  _java_major=$_func_ret
+  if [ -n "$_java_major" ] && [ "$_java_major" -ge 9 ]; then
+    echo "java9+(${_java_major}) enable modules reflect opts ..."
+    JVM_OPTS="${JVM_OPTS} --add-opens java.base/java.lang.invoke=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED"
+
+    echo "java9+ add nashorn engine ..."
+    mv -f lib-unload/nashorn*.jar lib
+  else
+    echo "java8- remove nashorn engine ..."
+    mv -f lib/nashorn*.jar lib-unload
+  fi
+}
+
+# 配置输出编码配置，主要用于控制台输出
+function prepareUtf8EncodingCfg(){
+  JVM_OPTS="${JVM_OPTS} -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8"
+}
+
 # 准备JVM的所有启动参数
 function prepareJvmOpts() {
     JVM_OPTS="${JVM_OPTS} -Djar.name=$JarName"
@@ -516,6 +549,10 @@ function prepareJvmOpts() {
       prepareJvmCfg
     fi
 
+    if [ $ENABLE_UTF8_ENCODING == $BOOL_TRUE ];then
+      prepareUtf8EncodingCfg
+    fi
+
     if [ $ENABLE_JMX_CFG == $BOOL_TRUE ];then
        prepareJmxCfg
     fi
@@ -527,6 +564,8 @@ function prepareJvmOpts() {
     if [ $ENABLE_XREBEL == $BOOL_TRUE ];then
       prepareXrebelCfg
     fi
+
+    prepareJavaVersionCfg
 }
 
 # 启动jar
@@ -566,16 +605,16 @@ function start() {
 
   if [ $ENABLE_LOGBACK_CFG == $BOOL_TRUE ];then
     if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
-      nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
+      nohup $JAVA_PATH $JVM_OPTS  -jar $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
     else
-      $JAVA_PATH -jar  $JVM_OPTS $JarName > /dev/null 2>&1 echo $! > $PID_FILE
+      $JAVA_PATH $JVM_OPTS -jar $JarName > /dev/null 2>&1 echo $! > $PID_FILE
     fi
     echo -e "\033[0;34m logback \033[0m start ..."
   else
     if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
-      nohup $JAVA_PATH -jar  $JVM_OPTS $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
+      nohup $JAVA_PATH  $JVM_OPTS -jar $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
     else
-      $JAVA_PATH -jar  $JVM_OPTS $JarName > $LOG_FILE 2>&1 echo $! > $PID_FILE
+      $JAVA_PATH  $JVM_OPTS -jar $JarName > $LOG_FILE 2>&1 echo $! > $PID_FILE
     fi
     echo -e "\033[0;34m sysout \033[0m start ..."
   fi

@@ -505,10 +505,12 @@ public class CompletionHelper {
             XmlTag rootTag = null;
             try {
                 VirtualFile file = (VirtualFile) meta.getTarget();
-                PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
-                if (psiFile instanceof XmlFile) {
-                    XmlFile xmlFile = (XmlFile) psiFile;
-                    rootTag = xmlFile.getRootTag();
+                if(file!=null && file.isValid()) {
+                    PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
+                    if (psiFile instanceof XmlFile) {
+                        XmlFile xmlFile = (XmlFile) psiFile;
+                        rootTag = xmlFile.getRootTag();
+                    }
                 }
             } catch (Throwable e) {
 
