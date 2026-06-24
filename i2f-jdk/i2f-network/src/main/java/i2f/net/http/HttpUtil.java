@@ -6,9 +6,9 @@ import i2f.net.http.impl.BasicHttpProcessorProvider;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.url.FormUrlEncodedEncoder;
 
 import java.net.HttpURLConnection;
-import java.net.URLEncoder;
 import java.util.Map;
 
 /**
@@ -42,13 +42,19 @@ public class HttpUtil {
     }
 
     public static String generateUrl(HttpRequest request) {
-        Map<String, Object> params = request.getParams();
+        Object params = request.getParams();
         String url = request.getUrl();
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "http://" + url;
         }
-        if (params == null || params.isEmpty()) {
+        if (params == null) {
             return url;
+        }
+        if (params instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) params;
+            if (map.isEmpty()) {
+                return url;
+            }
         }
         StringBuilder builder = new StringBuilder();
         builder.append(url);
@@ -63,23 +69,9 @@ public class HttpUtil {
         return builder.toString();
     }
 
-    public static StringBuilder generateUrlEncodeString(Map<String, Object> params, StringBuilder builder) {
-        boolean isFirst = true;
-        for (Map.Entry<String, Object> item : params.entrySet()) {
-            String name = item.getKey();
-            Object value = item.getValue();
-            if (value == null) {
-                value = "";
-            }
-            String str = URLEncoder.encode(String.valueOf(value));
-            if (!isFirst) {
-                builder.append("&");
-            }
-            builder.append(name);
-            builder.append("=");
-            builder.append(str);
-            isFirst = false;
-        }
+    public static StringBuilder generateUrlEncodeString(Object params, StringBuilder builder) {
+        String form = FormUrlEncodedEncoder.toForm(params);
+        builder.append(form);
         return builder;
     }
 }
