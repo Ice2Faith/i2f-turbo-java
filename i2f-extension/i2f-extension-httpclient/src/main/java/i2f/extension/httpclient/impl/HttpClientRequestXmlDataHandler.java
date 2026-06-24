@@ -8,7 +8,6 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.StringEntity;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -23,7 +22,7 @@ public class HttpClientRequestXmlDataHandler implements IHttpRequestBodyHandler 
     }
 
     @Override
-    public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
         HttpEntityEnclosingRequestBase httpContext = (HttpEntityEnclosingRequestBase) output;
 
         String content = xmlProcessor.serialize(data);

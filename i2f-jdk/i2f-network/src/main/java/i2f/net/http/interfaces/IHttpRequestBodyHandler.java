@@ -4,7 +4,6 @@ package i2f.net.http.interfaces;
 import i2f.net.http.data.HttpRequest;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -12,5 +11,5 @@ import java.util.Map;
  * @desc
  */
 public interface IHttpRequestBodyHandler {
-    void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException;
+    void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException;
 }

@@ -38,7 +38,7 @@ public class HttpRequest {
     private String url;
     private String method;
     private Object params;
-    private Map<String, Object> data;
+    private Object data;
     private Map<String, Object> header;
     private List<MultipartFile> files;
 
@@ -142,14 +142,6 @@ public class HttpRequest {
         return this;
     }
 
-    public HttpRequest addData(String key, Object value) {
-        if (data == null) {
-            data = new HashMap<>();
-        }
-        data.put(key, value);
-        return this;
-    }
-
     public HttpRequest addHeader(String key, Object value) {
         if (header == null) {
             header = new HashMap<>();
@@ -185,7 +177,7 @@ public class HttpRequest {
         return this;
     }
 
-    public Map<String, Object> getData() {
+    public Object getData() {
         return data;
     }
 

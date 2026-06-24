@@ -9,7 +9,6 @@ import i2f.net.http.interfaces.IHttpRequestBodyHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -18,7 +17,7 @@ import java.util.Map;
  */
 public class HttpFormUrlEncodedRequestBodyHandler implements IHttpRequestBodyHandler {
     @Override
-    public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
         List<MultipartFile> files = request.getFiles();
         if (files != null && !files.isEmpty()) {
             new HttpMultipartFormDataRequestBodyHandler().writeBody(data, request, output, args);

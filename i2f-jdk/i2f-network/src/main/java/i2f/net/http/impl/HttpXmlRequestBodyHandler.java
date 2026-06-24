@@ -8,7 +8,6 @@ import i2f.serialize.str.xml.impl.Xml2Serializer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -27,7 +26,7 @@ public class HttpXmlRequestBodyHandler implements IHttpRequestBodyHandler {
     }
 
     @Override
-    public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
         OutputStream tos = (OutputStream) output;
         String json = processor.serialize(data);
         tos.write(json.getBytes());

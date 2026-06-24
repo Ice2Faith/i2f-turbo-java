@@ -4,6 +4,7 @@ package i2f.extension.httpclient.impl;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.MultipartFile;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.reflect.ReflectResolver;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.ContentType;
@@ -11,6 +12,7 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +23,7 @@ import java.util.Map;
  */
 public class HttpClientRequestMultipartFormDataHandler implements IHttpRequestBodyHandler {
     @Override
-    public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
         List<MultipartFile> files = request.getFiles();
         if (files == null || files.isEmpty()) {
             new HttpClientRequestFormDataHandler().writeBody(data, request, output, args);
@@ -36,7 +38,16 @@ public class HttpClientRequestMultipartFormDataHandler implements IHttpRequestBo
 
         // 普通表单字段
         ContentType contentType = ContentType.create("text/plain", "UTF-8");
-        for (Map.Entry<String, Object> item : data.entrySet()) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (data instanceof Map) {
+            Map<?, ?> dataMap = (Map<?, ?>) data;
+            for (Map.Entry<?, ?> entry : dataMap.entrySet()) {
+                map.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        } else {
+            ReflectResolver.bean2map(data, map);
+        }
+        for (Map.Entry<String, Object> item : map.entrySet()) {
             String val = item.getValue() == null ? "" : String.valueOf(item.getValue());
             builder.addTextBody(item.getKey(), val, contentType);
         }

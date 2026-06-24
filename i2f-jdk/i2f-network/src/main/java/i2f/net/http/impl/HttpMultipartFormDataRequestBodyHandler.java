@@ -5,10 +5,12 @@ import i2f.io.stream.StreamUtil;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.MultipartFile;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.reflect.ReflectResolver;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -20,7 +22,7 @@ import java.util.UUID;
  */
 public class HttpMultipartFormDataRequestBodyHandler implements IHttpRequestBodyHandler {
     @Override
-    public void writeBody(Map<String, Object> data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
         List<MultipartFile> files = request.getFiles();
         if (files == null || files.isEmpty()) {
             new HttpFormUrlEncodedRequestBodyHandler().writeBody(data, request, output, args);
@@ -36,7 +38,16 @@ public class HttpMultipartFormDataRequestBodyHandler implements IHttpRequestBody
 
         // 表单参数
         StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, Object> item : data.entrySet()) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (data instanceof Map) {
+            Map<?, ?> dataMap = (Map<?, ?>) data;
+            for (Map.Entry<?, ?> entry : dataMap.entrySet()) {
+                map.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        } else {
+            ReflectResolver.bean2map(data, map);
+        }
+        for (Map.Entry<String, Object> item : map.entrySet()) {
             builder.append(boundaryLine);
             builder.append("Content-Disposition:form-data;name=\"").append(item.getKey()).append("\"");
             builder.append("\r\n\r\n");
