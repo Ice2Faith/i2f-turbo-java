@@ -82,7 +82,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data) throws IOException {
+    public HttpResponse postJson(String url, Object data) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -92,7 +92,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params) throws IOException {
+    public HttpResponse postJson(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -103,7 +103,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse postJson(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -115,7 +115,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -126,7 +126,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -138,7 +138,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -151,7 +151,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -162,7 +162,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -174,7 +174,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -187,7 +187,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data) throws IOException {
+    public HttpResponse postForm(String url, Object data) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -197,7 +197,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params) throws IOException {
+    public HttpResponse postForm(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -208,7 +208,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse postForm(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -220,7 +220,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, String charset) throws IOException {
+    public String postFormForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -231,7 +231,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException {
+    public String postFormForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -243,7 +243,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String postFormForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -256,7 +256,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -267,7 +267,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -279,7 +279,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
@@ -299,7 +299,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse get(String url, Map<String, Object> params) throws IOException {
+    public HttpResponse get(String url, Object params) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -307,7 +307,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse get(String url, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse get(String url, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -324,7 +324,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String getForString(String url, Map<String, Object> params, String charset) throws IOException {
+    public String getForString(String url, Object params, String charset) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -333,7 +333,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String getForString(String url, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String getForString(String url, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -351,7 +351,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T getForObject(String url, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T getForObject(String url, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -360,7 +360,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T getForObject(String url, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T getForObject(String url, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
