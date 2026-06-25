@@ -10,6 +10,6 @@ import java.io.IOException;
  * @date 2022/3/24 14:21
  * @desc
  */
-public interface IHttpRequestBodyHandler {
-    void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException;
+public interface IHttpRequestBodyHandler<T> {
+    void writeBody(Object data, HttpRequest request, T output, Object... args) throws IOException;
 }

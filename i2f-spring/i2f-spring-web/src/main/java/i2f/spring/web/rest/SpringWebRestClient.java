@@ -38,7 +38,11 @@ public class SpringWebRestClient implements IRestClient {
         if (rawParams != null) {
             String form = FormUrlEncodedEncoder.toForm(rawParams);
             if (url.contains("?")) {
-                url = url + "&" + form;
+                if (url.endsWith("&")) {
+                    url = url + form;
+                } else {
+                    url = url + "&" + form;
+                }
             } else {
                 url = url + "?" + form;
             }
@@ -49,7 +53,10 @@ public class SpringWebRestClient implements IRestClient {
             reqHeaders.addAll(entry.getKey(), entry.getValue());
         }
         HttpEntity<Object> reqEntity = new HttpEntity<>(request.getBody(), reqHeaders);
-        ResponseEntity<T> respEntity = restTemplate.exchange(url, HttpMethod.resolve(rawMethod), reqEntity, responseType);
+        ResponseEntity<T> respEntity = restTemplate.exchange(url,
+                HttpMethod.resolve(rawMethod.toUpperCase()),
+                reqEntity,
+                responseType);
 
         return (RestHttpResponse<T>) RestHttpResponse.builder()
                 .statusCode(respEntity.getStatusCodeValue())

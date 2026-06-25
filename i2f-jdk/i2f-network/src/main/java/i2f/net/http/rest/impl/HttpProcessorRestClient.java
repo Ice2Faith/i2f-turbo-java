@@ -1,7 +1,6 @@
 package i2f.net.http.rest.impl;
 
 import i2f.net.http.consts.CharsetConstants;
-import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
@@ -10,6 +9,7 @@ import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -26,7 +26,7 @@ import java.io.IOException;
 @SuperBuilder
 public class HttpProcessorRestClient implements IRestClient {
     protected IHttpProcessor httpProcessor;
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
@@ -36,7 +36,7 @@ public class HttpProcessorRestClient implements IRestClient {
         req.setParams(request.getParams());
         req.setHeader(request.getHeaders());
         req.setData(request.getBody());
-        req.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
+        req.json(jsonSerializer);
         req.addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8);
 
         HttpResponse resp = httpProcessor.doHttp(req);

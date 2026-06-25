@@ -3,11 +3,8 @@ package i2f.net.http.data;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
-import i2f.net.http.impl.HttpFormUrlEncodedRequestBodyHandler;
-import i2f.net.http.impl.HttpJsonRequestBodyHandler;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
-import i2f.net.http.interfaces.IHttpRequestBodyHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,7 +30,7 @@ public class HttpRequest {
     private String method = HttpMethodConstants.GET;
     private Object params;
     private Object data;
-    private HttpHeaders header;
+    private HttpHeaders header = new HttpHeaders();
     private List<MultipartFile> files;
 
     private int connectTimeout = 30 * 1000;
@@ -41,8 +38,6 @@ public class HttpRequest {
     private String charset = "UTF-8";
     private boolean allowRedirect = true;
     private boolean cloudAcceptByteArray = false;
-
-    private IHttpRequestBodyHandler requestBodyHandler;
 
     public static HttpRequest doGet() {
         return new HttpRequest()
@@ -86,19 +81,16 @@ public class HttpRequest {
 
     public HttpRequest form() {
         this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form);
-        this.setRequestBodyHandler(new HttpFormUrlEncodedRequestBodyHandler());
         return this;
     }
 
     public HttpRequest json() {
         this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
-        this.setRequestBodyHandler(new HttpJsonRequestBodyHandler());
         return this;
     }
 
     public HttpRequest json(IJsonSerializer processor) {
         this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
-        this.setRequestBodyHandler(new HttpJsonRequestBodyHandler(processor));
         return this;
     }
 
@@ -260,12 +252,4 @@ public class HttpRequest {
         return this;
     }
 
-    public IHttpRequestBodyHandler getRequestBodyHandler() {
-        return requestBodyHandler;
-    }
-
-    public HttpRequest setRequestBodyHandler(IHttpRequestBodyHandler requestBodyHandler) {
-        this.requestBodyHandler = requestBodyHandler;
-        return this;
-    }
 }

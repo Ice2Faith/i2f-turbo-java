@@ -3,6 +3,8 @@ package i2f.net.http.impl;
 
 import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
@@ -24,10 +26,20 @@ import java.util.Map;
 public class HttpUrlConnectProcessor implements IHttpProcessor {
     @Override
     public HttpResponse doHttp(HttpRequest request) throws IOException {
-        IHttpRequestBodyHandler handler = request.getRequestBodyHandler();
-        if (handler == null) {
+        IHttpRequestBodyHandler<OutputStream> handler = new HttpFormUrlEncodedRequestBodyHandler();
+
+        String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
+        if (contentType.contains(ContentTypeConstants.Json)) {
+            handler = new HttpJsonRequestBodyHandler();
+        } else if (contentType.contains(ContentTypeConstants.Xml)) {
+            handler = new HttpXmlRequestBodyHandler();
+        } else if (contentType.contains(ContentTypeConstants.Form)) {
             handler = new HttpFormUrlEncodedRequestBodyHandler();
+        } else if (contentType.contains(ContentTypeConstants.Multipart)) {
+            handler = new HttpMultipartFormDataRequestBodyHandler();
         }
+
+
         HttpURLConnection conn = null;
         InputStream is = null;
         OutputStream os = null;
@@ -47,12 +59,21 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
             conn.setRequestMethod(method);
             method = method.trim().toUpperCase();
             conn.setDoInput(true);
-            if (HttpMethodConstants.POST.equals(method)
-                    || HttpMethodConstants.PUT.equals(method)) {
-                conn.setDoOutput(true);
 
-                os = conn.getOutputStream();
-                handler.writeBody(request.getData(), request, os, conn);
+            Object data = request.getData();
+            if (data != null) {
+                if (HttpMethodConstants.POST.equals(method)
+                        || HttpMethodConstants.PUT.equals(method)) {
+                    conn.setDoOutput(true);
+
+                    os = conn.getOutputStream();
+                    if (data instanceof byte[]) {
+                        handler = new HttpRawBytesRequestBodyHandler();
+                    } else if (data instanceof InputStream) {
+                        handler = new HttpRawInputStreamRequestBodyHandler();
+                    }
+                    handler.writeBody(request.getData(), request, os, conn);
+                }
             }
 
             conn.connect();

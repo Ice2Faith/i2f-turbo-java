@@ -3,12 +3,16 @@ package i2f.extension.httpclient.impl;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.serialize.str.xml.impl.Xml2Serializer;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -28,9 +32,17 @@ import java.util.Map;
 public class HttpClientHttpProcessor implements IHttpProcessor {
     @Override
     public HttpResponse doHttp(HttpRequest request) throws IOException {
-        IHttpRequestBodyHandler handler = request.getRequestBodyHandler();
-        if (handler == null) {
-            handler = new HttpClientRequestFormDataHandler();
+        IHttpRequestBodyHandler<HttpEntityEnclosingRequestBase> handler = new HttpClientFormRequestBodyHandler();
+
+        String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
+        if (contentType.contains(ContentTypeConstants.Json)) {
+            handler = new HttpClientJsonRequestBodyHandler(new Json2Serializer());
+        } else if (contentType.contains(ContentTypeConstants.Xml)) {
+            handler = new HttpClientXmlRequestBodyHandler(new Xml2Serializer());
+        } else if (contentType.contains(ContentTypeConstants.Form)) {
+            handler = new HttpClientFormRequestBodyHandler();
+        } else if (contentType.contains(ContentTypeConstants.Multipart)) {
+            handler = new HttpClientMultipartFormRequestBodyHandler();
         }
 
         CloseableHttpClient httpClient = HttpClientBuilder.create()
@@ -60,6 +72,15 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             }
         }
 
+        Object data = request.getData();
+        if (data != null) {
+            if (data instanceof byte[]) {
+                handler = new HttpClientRawBytesRequestBodyHandler();
+            } else if (data instanceof InputStream) {
+                handler = new HttpClientRawInputStreamRequestBodyHandler();
+            }
+        }
+
         String method = request.getMethod();
         if (HttpMethodConstants.GET.equals(method)) {
             HttpGet httpGet = new HttpGet(reqUrl);
@@ -70,12 +91,18 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             HttpPost httpPost = new HttpPost(reqUrl);
             req = httpPost;
             httpPost.setConfig(config);
-            handler.writeBody(request.getData(), request, httpPost, httpClient);
+
+            if (data != null) {
+                handler.writeBody(data, request, httpPost, httpClient);
+            }
         } else if (HttpMethodConstants.PUT.equals(method)) {
             HttpPut httpPut = new HttpPut(reqUrl);
             req = httpPut;
             httpPut.setConfig(config);
-            handler.writeBody(request.getData(), request, httpPut, httpClient);
+
+            if (data != null) {
+                handler.writeBody(data, request, httpPut, httpClient);
+            }
         } else if (HttpMethodConstants.DELETE.equals(method)) {
             HttpDelete httpDelete = new HttpDelete(reqUrl);
             req = httpDelete;

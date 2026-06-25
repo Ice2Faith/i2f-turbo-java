@@ -2,7 +2,6 @@ package i2f.extension.httpclient.impl;
 
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.MultipartFile;
-import i2f.net.http.interfaces.IHttpRequestBodyHandler;
 import i2f.reflect.ReflectResolver;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -10,6 +9,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -20,16 +20,27 @@ import java.util.Map;
  * @date 2022/3/26 20:42
  * @desc
  */
-public class HttpClientRequestFormDataHandler implements IHttpRequestBodyHandler {
+public class HttpClientFormRequestBodyHandler implements IHttpClientHttpRequestBodyHandler {
     @Override
-    public void writeBody(Object data, HttpRequest request, Object output, Object... args) throws IOException {
+    public void writeBody(Object data, HttpRequest request, HttpEntityEnclosingRequestBase output, Object... args) throws IOException {
         List<MultipartFile> files = request.getFiles();
         if (files != null && !files.isEmpty()) {
-            new HttpClientRequestMultipartFormDataHandler().writeBody(data, request, output, args);
+            new HttpClientMultipartFormRequestBodyHandler().writeBody(data, request, output, args);
+            return;
+        }
+        if (data == null) {
+            return;
+        }
+        if (data instanceof byte[]) {
+            new HttpClientRawBytesRequestBodyHandler().writeBody(data, request, output, args);
+            return;
+        }
+        if (data instanceof InputStream) {
+            new HttpClientRawInputStreamRequestBodyHandler().writeBody(data, request, output, args);
             return;
         }
 
-        HttpEntityEnclosingRequestBase httpContext = (HttpEntityEnclosingRequestBase) output;
+        HttpEntityEnclosingRequestBase httpContext = output;
 
         List<NameValuePair> paramsList = new ArrayList<>();
 

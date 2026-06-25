@@ -9,6 +9,7 @@ public interface ContentTypeConstants {
     String Json = "application/json";
     String Xml = "text/xml";
     String Form = "application/x-www-form-urlencoded";
+    String Multipart = "multipart/form-data";
 
     String Text = "text/plain";
 
