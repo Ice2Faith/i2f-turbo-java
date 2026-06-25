@@ -18,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 public class SimpleRecursiveRagTextSplitter implements RagTextSplitter {
 
-    public int maxSegmentSizeInChars = 128;
+    public int maxSegmentSizeInChars = 512;
     public double maxOverlapRate = 0.15;
     public String[] separatorsRegex = {
             "(\\s*\n){2,}",
