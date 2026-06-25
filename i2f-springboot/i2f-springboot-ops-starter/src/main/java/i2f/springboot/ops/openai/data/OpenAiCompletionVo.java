@@ -1,6 +1,6 @@
 package i2f.springboot.ops.openai.data;
 
-import i2f.springboot.ops.openai.data.message.OpenAiToolsDefinition;
+import i2f.ai.rest.openai.model.data.OpenAiToolsDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

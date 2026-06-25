@@ -1,4 +1,4 @@
-package i2f.springboot.ops.util;
+package i2f.net;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -11,6 +11,14 @@ import java.util.*;
  * @desc
  */
 public class NetworkUtil {
+    public static Map.Entry<InetAddress, NetworkInterface> getFirstUsefulAddress() {
+        List<Map.Entry<InetAddress, NetworkInterface>> list = getUsefulAddresses();
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
+    }
+
     public static List<Map.Entry<InetAddress, NetworkInterface>> getUsefulAddresses() {
         List<Map.Entry<InetAddress, NetworkInterface>> ret = new ArrayList<>();
         try {

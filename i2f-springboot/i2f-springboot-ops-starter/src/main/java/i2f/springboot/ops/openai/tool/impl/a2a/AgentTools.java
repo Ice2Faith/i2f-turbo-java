@@ -2,6 +2,8 @@ package i2f.springboot.ops.openai.tool.impl.a2a;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
+import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -9,8 +11,6 @@ import i2f.ai.std.tool.annotations.Tools;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
-import i2f.springboot.ops.openai.data.message.OpenAiSystemMessage;
-import i2f.springboot.ops.openai.data.message.OpenAiUserMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;

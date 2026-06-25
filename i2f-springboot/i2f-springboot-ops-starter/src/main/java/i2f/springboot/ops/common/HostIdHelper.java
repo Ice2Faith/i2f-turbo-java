@@ -1,13 +1,11 @@
 package i2f.springboot.ops.common;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.springboot.ops.util.NetworkUtil;
+import i2f.net.NetworkUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;

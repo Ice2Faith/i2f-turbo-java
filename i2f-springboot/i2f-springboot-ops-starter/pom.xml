@@ -73,6 +73,11 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-network</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdk-ext-web</artifactId>
         </dependency>
 
@@ -109,6 +114,16 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-ai-std</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-ai-rest-openai</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spring-web</artifactId>
         </dependency>
 
         <dependency>

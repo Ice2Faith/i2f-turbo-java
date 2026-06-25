@@ -1,5 +1,8 @@
 package i2f.springboot.ops.openai.data.message;
 
+import i2f.ai.rest.openai.model.data.OpenAiMessage;
+import i2f.ai.rest.openai.model.data.OpenAiToolCallFunction;
+import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -13,7 +16,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class EchoOpenAiToolMessage implements OpenAiMessage {
-    protected final String role = OpenAiConsts.ECHO_TOOL;
+    protected final String role = OpsOpenAiConsts.ECHO_TOOL;
     protected OpenAiToolMessage message;
     protected OpenAiToolCallFunction function;
     protected String content;

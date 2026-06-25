@@ -2,6 +2,7 @@ package i2f.springboot.ops.openai.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolRawDefinition;
@@ -13,7 +14,8 @@ import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.*;
-import i2f.springboot.ops.openai.data.message.*;
+import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
+import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
@@ -207,7 +209,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         completion.getMessages().add(0, system);
 
                         OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpenAiConsts.ECHO_SKILL);
+                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
                         dto.setEcho_skill(system);
 
                         String defSkillMsg = objectMapper.writeValueAsString(dto);
@@ -217,7 +219,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         } else {
                             resp = OpsSecureReturn.success(defSkillMsg);
                         }
-                        resp.withAttr("type", OpenAiConsts.ECHO_SKILL);
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                     }
@@ -253,7 +255,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     } else {
                                         resp = OpsSecureReturn.success(defToolMsg);
                                     }
-                                    resp.withAttr("type", OpenAiConsts.DEFINITION_TOOL);
+                                    resp.withAttr("type", OpsOpenAiConsts.DEFINITION_TOOL);
                                     String respJson = objectMapper.writeValueAsString(resp);
                                     emitter.send(respJson);
 
@@ -339,7 +341,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                                             .build();
                                                     toolEchoMsg.createContent();
                                                     OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                            .type(OpenAiConsts.ECHO_TOOL)
+                                                            .type(OpsOpenAiConsts.ECHO_TOOL)
                                                             .echo_tool(toolEchoMsg)
                                                             .build();
                                                     String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
@@ -349,7 +351,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     } else {
                                                         resp = OpsSecureReturn.success(emitToolMsg);
                                                     }
-                                                    resp.withAttr("type", OpenAiConsts.ECHO_TOOL);
+                                                    resp.withAttr("type", OpsOpenAiConsts.ECHO_TOOL);
                                                     String respJson = objectMapper.writeValueAsString(resp);
                                                     emitter.send(respJson);
                                                 }
