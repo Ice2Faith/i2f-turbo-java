@@ -36,7 +36,7 @@ public class HttpProcessorRestClient implements IRestClient {
         req.setParams(request.getParams());
         req.setHeader(request.getHeaders());
         req.setData(request.getBody());
-        req.json(jsonSerializer);
+        req.json();
         req.addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8);
 
         HttpResponse resp = httpProcessor.http(req);

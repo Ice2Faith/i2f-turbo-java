@@ -46,7 +46,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
@@ -434,51 +433,6 @@ public class OpenAiOpsController implements IOpsProvider {
                                         return null;
                                     });
 
-
-                    restTemplate.execute(url, HttpMethod.POST, request -> {
-                        request.getHeaders().add("Authorization", "Bearer " + req.getMeta().getApiKey());
-                        request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-
-                        OutputStream body = request.getBody();
-                        objectMapper.writeValue(body, completion);
-                        body.close();
-                    }, new ResponseExtractor<Void>() {
-                        @Override
-                        public Void extractData(ClientHttpResponse response) throws IOException {
-                            try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-                                String line = null;
-                                while ((line = reader.readLine()) != null) {
-                                    if (line.startsWith("data:")) {
-                                        String data = line.substring(5).trim();
-                                        OpsSecureReturn<?> resp = null;
-                                        if (req.isEncryptOutput()) {
-                                            resp = transfer.success(data);
-                                        } else {
-                                            resp = OpsSecureReturn.success(data);
-                                        }
-                                        resp.withAttr("type", OpenAiConsts.ASSISTANT);
-                                        String respJson = objectMapper.writeValueAsString(resp);
-                                        emitter.send(respJson);
-                                    }
-                                }
-                            } catch (Exception e) {
-                                try {
-                                    OpsSecureReturn<?> resp = null;
-                                    if (req.isEncryptOutput()) {
-                                        resp = transfer.error(e);
-                                    } else {
-                                        resp = OpsSecureReturn.error(e);
-                                    }
-                                    String respJson = objectMapper.writeValueAsString(resp);
-                                    emitter.send(respJson);
-                                    emitter.complete();
-                                } catch (Exception ex) {
-                                    emitter.completeWithError(ex);
-                                }
-                            }
-                            return null;
-                        }
-                    });
                     emitter.complete();
                 } catch (Exception e) {
                     try {
