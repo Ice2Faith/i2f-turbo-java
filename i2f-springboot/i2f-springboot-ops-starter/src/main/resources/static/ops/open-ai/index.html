@@ -811,7 +811,7 @@
               return item.models || []
             },
             currentLoadModelList() {
-                let url = this.standardCompletionUrl(this.form.meta.baseUrl)
+                let url = this.extraStandardBaseUrl(this.form.meta.baseUrl)
                 let ret = this.metas.loadModels[url] || []
                 return ret;
             },
@@ -1827,12 +1827,12 @@
                 if (!req.meta.apiKey) {
                     throw new Error('请先填写 Api Key');
                 }
-                let baseUrl = this.standardCompletionUrl(req.meta.baseUrl);
+                let baseUrl = this.extraStandardBaseUrl(req.meta.baseUrl);
                 req.meta.baseUrl=baseUrl;
 
                 return req;
             },
-            standardCompletionUrl(baseUrl) {
+            extraStandardBaseUrl(baseUrl) {
                 if (!baseUrl) {
                     return baseUrl;
                 }
@@ -1840,7 +1840,6 @@
                 if (baseUrl.endsWith('/')) {
                     baseUrl = baseUrl.substring(0, baseUrl.length - 1);
                 }
-                baseUrl = baseUrl + '/chat/completions';
                 return baseUrl;
             },
             doLoadModelList() {
