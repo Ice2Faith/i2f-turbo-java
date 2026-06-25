@@ -24,20 +24,20 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-public class HttpRequest {
+public class HttpRequest implements HttpMethodConstants {
 
-    private String url;
-    private String method = HttpMethodConstants.GET;
-    private Object params;
-    private Object data;
-    private HttpHeaders header = new HttpHeaders();
-    private List<MultipartFile> files;
+    protected String url;
+    protected String method = HttpMethodConstants.GET;
+    protected Object params;
+    protected Object data;
+    protected HttpHeaders header = new HttpHeaders();
+    protected List<MultipartFile> files;
 
-    private int connectTimeout = 30 * 1000;
-    private int readTimeout = 30 * 1000;
-    private String charset = "UTF-8";
-    private boolean allowRedirect = true;
-    private boolean cloudAcceptByteArray = false;
+    protected int connectTimeout = 30 * 1000;
+    protected int readTimeout = 30 * 1000;
+    protected String charset = "UTF-8";
+    protected boolean allowRedirect = true;
+    protected boolean cloudAcceptByteArray = false;
 
     public static HttpRequest doGet() {
         return new HttpRequest()
@@ -99,7 +99,7 @@ public class HttpRequest {
     }
 
     public HttpResponse send(IHttpProcessor processor) throws IOException {
-        return processor.doHttp(this);
+        return processor.http(this);
     }
 
     public HttpRequest addFile(File file) throws FileNotFoundException {

@@ -8,6 +8,7 @@ import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.HttpProcessorProvider;
 import i2f.net.http.interfaces.IHttpProcessor;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.io.IOException;
@@ -342,7 +343,12 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse doHttp(HttpRequest request) throws IOException {
-        return httpProcessor.doHttp(request);
+    public HttpResponse http(HttpRequest request) throws IOException {
+        return httpProcessor.http(request);
+    }
+
+    @Override
+    public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
+        return httpProcessor.http(request, extractor);
     }
 }

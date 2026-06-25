@@ -1,14 +1,20 @@
 package i2f.net.http;
 
 
+import i2f.io.stream.StreamUtil;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
+import i2f.net.http.data.HttpResponse;
 import i2f.net.http.impl.BasicHttpProcessorProvider;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.url.FormUrlEncodedEncoder;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
 import java.util.Map;
@@ -77,5 +83,33 @@ public class HttpUtil {
         String form = FormUrlEncodedEncoder.toForm(params);
         builder.append(form);
         return builder;
+    }
+
+    public static HttpResponse localStoredResponse(HttpRequest request, HttpResponse response) throws IOException {
+        int code = response.getStatusCode();
+        long contentLength = response.getContentLength();
+        InputStream is = response.getInputStream();
+
+        if (request.isCloudAcceptByteArray() || contentLength > 0 && contentLength < Integer.MAX_VALUE) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream((int) contentLength);
+            StreamUtil.streamCopy(is, bos, false);
+            bos.close();
+            ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
+            response.setInputStream(bis);
+        } else { // unknown length(-1) or gather byte array max length
+            is = StreamUtil.localStream(is);
+            response.setInputStream(is);
+        }
+
+        if (code != 200) {
+            InputStream err = response.getErrorStream();
+            if (err != null) {
+                InputStream erris = StreamUtil.localStream(err);
+                response.setErrorStream(erris);
+                err.close();
+            }
+        }
+
+        return response;
     }
 }

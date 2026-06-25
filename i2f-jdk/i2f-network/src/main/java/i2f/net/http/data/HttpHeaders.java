@@ -1,5 +1,9 @@
 package i2f.net.http.data;
 
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
+
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -8,7 +12,7 @@ import java.util.function.Consumer;
  * @date 2026/6/24 19:53
  * @desc
  */
-public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
+public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> implements HttpHeaderConstants, ContentTypeConstants {
     public HttpHeaders(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }
@@ -30,6 +34,28 @@ public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
 
     public static HttpHeaders create() {
         return new HttpHeaders();
+    }
+
+    public HttpHeaders contentType(String value) {
+        return set(HttpHeaderConstants.ContentType, value);
+    }
+
+    public HttpHeaders contentLength(Number number) {
+        return set(HttpHeaderConstants.ContentLength, number);
+    }
+
+    public String getContentType() {
+        return getFirstHeader(HttpHeaderConstants.ContentType);
+    }
+
+    public long getContentLength() {
+        String header = getFirstHeader(HttpHeaderConstants.ContentLength);
+        try {
+            return new BigDecimal(header).longValue();
+        } catch (Exception e) {
+
+        }
+        return -1;
     }
 
     public HttpHeaders addAll(Map<String, ?> map) {

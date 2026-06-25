@@ -194,7 +194,7 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
         Object ret = null;
         try {
 
-            HttpResponse response = http.doHttp(request);
+            HttpResponse response = http.http(request);
 
             String content = response.getContentAsString("UTF-8");
 

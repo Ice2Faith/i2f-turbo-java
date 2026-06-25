@@ -1,7 +1,5 @@
 package i2f.extension.httpclient.impl;
 
-import i2f.io.file.FileUtil;
-import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
@@ -11,6 +9,7 @@ import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 import org.apache.http.Header;
@@ -20,7 +19,8 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -30,8 +30,9 @@ import java.util.Map;
  * @desc
  */
 public class HttpClientHttpProcessor implements IHttpProcessor {
+
     @Override
-    public HttpResponse doHttp(HttpRequest request) throws IOException {
+    public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<HttpEntityEnclosingRequestBase> handler = new HttpClientFormRequestBodyHandler();
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
@@ -115,8 +116,8 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
         try {
             resp = httpClient.execute(req);
 
-            response.setResponseCode(resp.getStatusLine().getStatusCode());
-            response.setResponseMessage(resp.getStatusLine().getReasonPhrase());
+            response.setStatusCode(resp.getStatusLine().getStatusCode());
+            response.setStatusMessage(resp.getStatusLine().getReasonPhrase());
 
             HttpHeaders respHeader = new HttpHeaders();
             Header[] headers = resp.getAllHeaders();
@@ -130,40 +131,11 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             HttpEntity entity = resp.getEntity();
             long contentLength = entity.getContentLength();
             response.setContentLength(contentLength);
-            if (request.isCloudAcceptByteArray() || contentLength > 0 && contentLength < Integer.MAX_VALUE) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) contentLength);
-                entity.writeTo(bos);
-                byte[] bts = bos.toByteArray();
-                response.setParsedContentBytes(true);
-                response.setContentBytes(bts);
-                ByteArrayInputStream bis = new ByteArrayInputStream(bts);
-                response.setInputStream(bis);
-            } else { // unknown length(-1) or gather byte array max length
-                File pfile = FileUtil.getTempFile();
-                FileOutputStream pfos = new FileOutputStream(pfile);
-                entity.writeTo(pfos);
-                pfos.close();
-                FileInputStream pfis = new FileInputStream(pfile);
-                InputStream is = StreamUtil.localStream(pfis);
-                pfis.close();
-                pfile.delete();
-                if (is instanceof ByteArrayInputStream) {
-                    ByteArrayInputStream tbis = (ByteArrayInputStream) is;
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    StreamUtil.streamCopy(tbis, bos, false);
-                    bos.close();
-                    byte[] bts = bos.toByteArray();
-                    response.setParsedContentBytes(true);
-                    response.setContentBytes(bts);
-                    ByteArrayInputStream bis = new ByteArrayInputStream(bts);
-                    response.setInputStream(bis);
-                } else {
-                    response.setParsedContentBytes(false);
-                    response.setInputStream(is);
-                }
-            }
 
-            return response;
+            InputStream is = entity.getContent();
+            response.setInputStream(is);
+
+            return extractor.extract(response);
         } catch (IOException e) {
             throw e;
         } finally {

@@ -1,7 +1,6 @@
 package i2f.net.http.impl;
 
 
-import i2f.io.stream.StreamUtil;
 import i2f.net.http.HttpUtil;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
@@ -11,8 +10,11 @@ import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.List;
@@ -24,8 +26,9 @@ import java.util.Map;
  * @desc
  */
 public class HttpUrlConnectProcessor implements IHttpProcessor {
+
     @Override
-    public HttpResponse doHttp(HttpRequest request) throws IOException {
+    public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<OutputStream> handler = new HttpFormUrlEncodedRequestBodyHandler();
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
@@ -79,8 +82,8 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
             conn.connect();
 
             int code = conn.getResponseCode();
-            response.setResponseCode(code);
-            response.setResponseMessage(conn.getResponseMessage());
+            response.setStatusCode(code);
+            response.setStatusMessage(conn.getResponseMessage());
 
             Map<String, List<String>> headers = conn.getHeaderFields();
 
@@ -92,45 +95,13 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
             response.setContentLength(contentLength);
 
             is = conn.getInputStream();
-            if (request.isCloudAcceptByteArray() || contentLength > 0 && contentLength < Integer.MAX_VALUE) {
-                ByteArrayOutputStream bos = new ByteArrayOutputStream((int) contentLength);
-                StreamUtil.streamCopy(is, bos, false);
-                bos.close();
-                byte[] bts = bos.toByteArray();
-                response.setParsedContentBytes(true);
-                response.setContentBytes(bts);
-                ByteArrayInputStream bis = new ByteArrayInputStream(bts);
-                response.setInputStream(bis);
-            } else { // unknown length(-1) or gather byte array max length
-                is = StreamUtil.localStream(is);
-                if (is instanceof ByteArrayInputStream) {
-                    ByteArrayInputStream tbis = (ByteArrayInputStream) is;
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    StreamUtil.streamCopy(tbis, bos, false);
-                    bos.close();
-                    byte[] bts = bos.toByteArray();
-                    response.setParsedContentBytes(true);
-                    response.setContentBytes(bts);
-                    ByteArrayInputStream bis = new ByteArrayInputStream(bts);
-                    response.setInputStream(bis);
-                } else {
-                    response.setParsedContentBytes(false);
-                    response.setInputStream(is);
-                }
-            }
-
+            response.setInputStream(is);
             if (code != 200) {
                 InputStream err = conn.getErrorStream();
-                ByteArrayOutputStream erros = new ByteArrayOutputStream();
-                StreamUtil.streamCopy(err, erros, false);
-                erros.close();
-                byte[] errbts = erros.toByteArray();
-                response.setErrorBytes(errbts);
-                ByteArrayInputStream erris = new ByteArrayInputStream(errbts);
-                response.setErrorStream(erris);
-                err.close();
+                response.setErrorStream(err);
             }
 
+            return extractor.extract(response);
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         } finally {
@@ -144,6 +115,5 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
                 conn.disconnect();
             }
         }
-        return response;
     }
 }

@@ -36,4 +36,6 @@ public interface HttpHeaderConstants {
     String Cookie = "Cookie";
     String Host = "Host";
 
+    String Authorization = "Authorization";
+    String Bearer = "Bearer";
 }
