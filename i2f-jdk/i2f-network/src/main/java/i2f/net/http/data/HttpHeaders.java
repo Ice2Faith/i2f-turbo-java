@@ -119,7 +119,10 @@ public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
         List<String> ret = new ArrayList<>();
         Set<String> keys = keySet();
         for (String item : keys) {
-            if (name.equalsIgnoreCase(item)) {
+            if (name == item
+                    || (name != null && name.equalsIgnoreCase(item))
+                    || (item != null && item.equalsIgnoreCase(name))
+            ) {
                 ret.add(item);
             }
         }
