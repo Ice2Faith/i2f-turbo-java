@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +43,12 @@ public class RagWorker {
         String sid = store.store(embedding);
         embedding.setId(sid);
         return embedding;
+    }
+
+    public List<RagEmbedding> storeAll(Collection<String> contents) {
+        List<RagEmbedding> embeddings = model.embedAll(contents);
+        List<RagEmbedding> ret = store.storeAll(embeddings);
+        return ret;
     }
 
     public RagEmbedding store(String id, String content) {

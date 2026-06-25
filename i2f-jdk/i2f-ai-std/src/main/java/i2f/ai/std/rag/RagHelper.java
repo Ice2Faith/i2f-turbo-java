@@ -69,10 +69,10 @@ public class RagHelper {
             if (textFileFilter.test(path)) {
                 String text = StreamUtil.readString(path);
                 List<String> list = splitter.split(text);
-                for (String item : list) {
-                    RagEmbedding embedding = worker.store(item);
-                    if (listener != null) {
-                        listener.accept(embedding);
+                List<RagEmbedding> embeddings = worker.storeAll(list);
+                if (listener != null) {
+                    for (RagEmbedding item : embeddings) {
+                        listener.accept(item);
                     }
                 }
             }
