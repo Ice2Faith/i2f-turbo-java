@@ -1,7 +1,6 @@
 package i2f.ai.rest.openai.metadata.model;
 
-import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
-import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
+import i2f.ai.rest.openai.metadata.model.data.OpenAiModelsRespDto;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -35,11 +34,11 @@ public class HttpOpenAiModelsApi {
     }
 
 
-    public HttpOpenAiEmbeddingRespDto doHttpPost(HttpOpenAiEmbeddingReqDto req) {
+    public OpenAiModelsRespDto doHttpPost() {
         try {
-            RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(RestHttpRequest.builder()
+            RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getModelsUrl())
-                            .method(HttpMethodConstants.POST)
+                            .method(HttpMethodConstants.GET)
                             .headers(HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {
@@ -47,10 +46,9 @@ public class HttpOpenAiModelsApi {
                                         }
                                     })
                             )
-                            .body(req)
                             .build(),
-                    HttpOpenAiEmbeddingRespDto.class);
-            HttpOpenAiEmbeddingRespDto ret = resp.getBody();
+                    OpenAiModelsRespDto.class);
+            OpenAiModelsRespDto ret = resp.getBody();
             return ret;
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
