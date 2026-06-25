@@ -22,4 +22,12 @@ public class OpenAiCompletionRespDto {
     protected List<OpenAiCompletionChoice> choices;
     protected OpenAiCompletionUsage usage;
     protected String system_fingerprint;
+
+    public OpenAiAssistantMessage getFirstMessage() {
+        if (choices == null || choices.isEmpty()) {
+            return null;
+        }
+        OpenAiCompletionChoice choice = choices.get(0);
+        return choice.getMessage();
+    }
 }

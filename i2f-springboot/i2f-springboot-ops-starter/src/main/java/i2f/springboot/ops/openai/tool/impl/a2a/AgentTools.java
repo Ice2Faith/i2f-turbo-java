@@ -1,36 +1,27 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
+import i2f.ai.rest.openai.model.data.OpenAiAssistantMessage;
+import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.spring.web.rest.SpringWebRestClient;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -60,42 +51,21 @@ public class AgentTools {
         completion.setStream(null);
         completion.setStream_options(null);
 
-        return restTemplate.execute(meta.getBaseUrl(), HttpMethod.POST, request -> {
-            request.getHeaders().add("Authorization", "Bearer " + meta.getApiKey());
-            request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        HttpOpenAiAiModel aiModel = HttpOpenAiAiModel.builder()
+                .restClient(SpringWebRestClient.builder()
+                        .restTemplate(restTemplate)
+                        .build())
+                .baseUrl(meta.getBaseUrl())
+                .apiKey(meta.getApiKey())
+                .model(completion.getModel())
+                .build();
 
-            OutputStream body = request.getBody();
-            objectMapper.writeValue(body, completion);
-            body.close();
-        }, new ResponseExtractor<String>() {
-            @Override
-            public String extractData(ClientHttpResponse response) throws IOException {
-                StringBuilder builder = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getBody(), StandardCharsets.UTF_8))) {
-                    String line = null;
-                    while ((line = reader.readLine()) != null) {
-                        builder.append(line).append("\n");
-                    }
-                }
-                String json = builder.toString();
-                Map<String, Object> jsonObject = objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {
-                });
-                List<Map<String, Object>> choices = (List<Map<String, Object>>) jsonObject.get("choices");
-                if (choices == null || choices.isEmpty()) {
-                    return "";
-                }
-                Map<String, Object> choice = choices.get(0);
-                Map<String, Object> message = (Map<String, Object>) choice.get("message");
-                if (message == null) {
-                    return "";
-                }
-                Object content = message.get("content");
-                if (content == null) {
-                    return "";
-                }
-                return String.valueOf(content);
-            }
-        });
+        OpenAiCompletionRespDto resp = aiModel.doPostHttp(completion);
+        OpenAiAssistantMessage msg = resp.getFirstMessage();
+        if (msg == null) {
+            return "";
+        }
+        return msg.getContent();
     }
 
     @Tool(
