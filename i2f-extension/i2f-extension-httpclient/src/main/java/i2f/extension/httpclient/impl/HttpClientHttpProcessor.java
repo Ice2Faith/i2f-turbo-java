@@ -10,8 +10,13 @@ import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.interfaces.IHttpRequestBodyHandler;
 import i2f.net.http.interfaces.IHttpResponseExtractor;
+import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.std.str.xml.IXmlSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -29,7 +34,12 @@ import java.util.Map;
  * @date 2022/3/26 20:23
  * @desc
  */
+@Data
+@NoArgsConstructor
+@SuperBuilder
 public class HttpClientHttpProcessor implements IHttpProcessor {
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
+    protected IXmlSerializer xmlSerializer = new Xml2Serializer();
 
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
@@ -37,9 +47,9 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
         if (contentType.contains(ContentTypeConstants.Json)) {
-            handler = new HttpClientJsonRequestBodyHandler(new Json2Serializer());
+            handler = new HttpClientJsonRequestBodyHandler(jsonSerializer);
         } else if (contentType.contains(ContentTypeConstants.Xml)) {
-            handler = new HttpClientXmlRequestBodyHandler(new Xml2Serializer());
+            handler = new HttpClientXmlRequestBodyHandler(xmlSerializer);
         } else if (contentType.contains(ContentTypeConstants.Form)) {
             handler = new HttpClientFormRequestBodyHandler();
         } else if (contentType.contains(ContentTypeConstants.Multipart)) {

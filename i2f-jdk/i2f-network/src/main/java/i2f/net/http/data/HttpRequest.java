@@ -5,7 +5,7 @@ import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
-import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-public class HttpRequest implements HttpMethodConstants {
+public class HttpRequest {
 
     protected String url;
     protected String method = HttpMethodConstants.GET;
@@ -48,7 +48,7 @@ public class HttpRequest implements HttpMethodConstants {
         return doGet().setUrl(url);
     }
 
-    public static HttpRequest doGet(String url, Map<String, Object> params) {
+    public static HttpRequest doGet(String url, Object params) {
         return doGet(url).setParams(params);
     }
 
@@ -89,8 +89,13 @@ public class HttpRequest implements HttpMethodConstants {
         return this;
     }
 
-    public HttpRequest json(IJsonSerializer processor) {
-        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
+    public HttpRequest multipart() {
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Multipart);
+        return this;
+    }
+
+    public HttpRequest xml() {
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Xml);
         return this;
     }
 
@@ -98,8 +103,16 @@ public class HttpRequest implements HttpMethodConstants {
         return send(new HttpUrlConnectProcessor());
     }
 
+    public <T> T send(IHttpResponseExtractor<T> extractor) throws IOException {
+        return send(new HttpUrlConnectProcessor(), extractor);
+    }
+
     public HttpResponse send(IHttpProcessor processor) throws IOException {
         return processor.http(this);
+    }
+
+    public <T> T send(IHttpProcessor processor, IHttpResponseExtractor<T> extractor) throws IOException {
+        return processor.http(this, extractor);
     }
 
     public HttpRequest addFile(File file) throws FileNotFoundException {

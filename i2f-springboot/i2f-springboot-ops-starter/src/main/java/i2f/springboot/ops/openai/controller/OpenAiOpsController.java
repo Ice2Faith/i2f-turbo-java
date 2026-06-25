@@ -8,6 +8,9 @@ import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawDefinitionsProvider;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.data.HttpRequest;
+import i2f.spring.web.rest.SpringWebHttpProcessor;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
@@ -390,6 +393,48 @@ public class OpenAiOpsController implements IOpsProvider {
                     String url = req.getMeta().getBaseUrl();
                     url = extraStandardBaseUrl(url);
                     url = url + "/chat/completions";
+
+                    HttpRequest.doPost(url)
+                            .json()
+                            .addHeader(HttpHeaderConstants.Authorization, HttpHeaderConstants.Bearer + " " + req.getMeta().getApiKey())
+                            .setData(completion)
+                            .send(new SpringWebHttpProcessor(restTemplate),
+                                    response -> {
+                                        try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
+                                            String line = null;
+                                            while ((line = reader.readLine()) != null) {
+                                                if (line.startsWith("data:")) {
+                                                    String data = line.substring(5).trim();
+                                                    OpsSecureReturn<?> resp = null;
+                                                    if (req.isEncryptOutput()) {
+                                                        resp = transfer.success(data);
+                                                    } else {
+                                                        resp = OpsSecureReturn.success(data);
+                                                    }
+                                                    resp.withAttr("type", OpenAiConsts.ASSISTANT);
+                                                    String respJson = objectMapper.writeValueAsString(resp);
+                                                    emitter.send(respJson);
+                                                }
+                                            }
+                                        } catch (Exception e) {
+                                            try {
+                                                OpsSecureReturn<?> resp = null;
+                                                if (req.isEncryptOutput()) {
+                                                    resp = transfer.error(e);
+                                                } else {
+                                                    resp = OpsSecureReturn.error(e);
+                                                }
+                                                String respJson = objectMapper.writeValueAsString(resp);
+                                                emitter.send(respJson);
+                                                emitter.complete();
+                                            } catch (Exception ex) {
+                                                emitter.completeWithError(ex);
+                                            }
+                                        }
+                                        return null;
+                                    });
+
+
                     restTemplate.execute(url, HttpMethod.POST, request -> {
                         request.getHeaders().add("Authorization", "Bearer " + req.getMeta().getApiKey());
                         request.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
