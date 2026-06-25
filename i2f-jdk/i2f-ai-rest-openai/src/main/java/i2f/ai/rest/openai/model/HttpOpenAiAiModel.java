@@ -3,12 +3,7 @@ package i2f.ai.rest.openai.model;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
-import i2f.ai.std.model.message.AiMessage;
 import i2f.ai.std.model.message.impl.AssistantMessage;
-import i2f.ai.std.model.message.impl.SystemMessage;
-import i2f.ai.std.model.message.impl.ToolMessage;
-import i2f.ai.std.model.message.impl.UserMessage;
-import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
@@ -45,6 +40,7 @@ public class HttpOpenAiAiModel implements AiModel {
         return ret + "/chat/completions";
     }
 
+
     @Override
     public AssistantMessage generate(AiRequest req) {
 
@@ -65,69 +61,15 @@ public class HttpOpenAiAiModel implements AiModel {
             }
         }
 
-        List<AiMessage> messageList = req.getMessageList();
-        if (messageList != null) {
-            for (AiMessage item : messageList) {
-                if (item instanceof UserMessage) {
-                    UserMessage msg = (UserMessage) item;
-                    reqDto.getMessages().add(new OpenAiUserMessage(msg.getText()));
-                } else if (item instanceof SystemMessage) {
-                    SystemMessage msg = (SystemMessage) item;
-                    reqDto.getMessages().add(new OpenAiSystemMessage(msg.getText()));
-                } else if (item instanceof AssistantMessage) {
-                    AssistantMessage msg = (AssistantMessage) item;
-                    OpenAiAssistantMessage dto = new OpenAiAssistantMessage(msg.getText());
-                    dto.setTool_calls(new ArrayList<>());
-
-                    List<ToolCallRequest> toolCallRequestList = msg.getToolCallRequestList();
-                    if (toolCallRequestList != null) {
-                        for (ToolCallRequest toolCallRequest : toolCallRequestList) {
-                            OpenAiToolCall toolCall = new OpenAiToolCall();
-                            toolCall.setId(toolCallRequest.getId());
-                            toolCall.setFunction(new OpenAiToolCallFunction(toolCallRequest.getName(), toolCallRequest.getArguments()));
-                            dto.getTool_calls().add(toolCall);
-                        }
-                    }
-
-                    reqDto.getMessages().add(dto);
-                } else if (item instanceof ToolMessage) {
-                    ToolMessage msg = (ToolMessage) item;
-                    reqDto.getMessages().add(new OpenAiToolMessage(msg.getId(), msg.getText()));
-                }
-            }
-        }
+        reqDto.getMessages().addAll(OpenAiMessageHelper.toOpenAiMessages(req.getMessageList()));
 
         OpenAiCompletionRespDto resp = doPostHttp(reqDto);
 
         List<OpenAiCompletionChoice> choiceList = resp.getChoices();
         OpenAiCompletionChoice choice = choiceList.get(0);
 
-        AssistantMessage ret = new AssistantMessage();
-        ret.setFinishReason(AssistantMessage.FinishReason.STOP);
-        String finishReason = choice.getFinish_reason();
-        if (OpenAiConsts.TOOL_CALLS.equalsIgnoreCase(finishReason)) {
-            ret.setFinishReason(AssistantMessage.FinishReason.TOOL_CALL);
-        }
-
         OpenAiAssistantMessage message = choice.getMessage();
-        ret.setText(message.getContent());
-        ret.setToolCallRequestList(new ArrayList<>());
-
-        List<OpenAiToolCall> toolCalls = message.getTool_calls();
-        if (toolCalls != null && !toolCalls.isEmpty()) {
-            ret.setFinishReason(AssistantMessage.FinishReason.TOOL_CALL);
-
-            for (OpenAiToolCall item : toolCalls) {
-                OpenAiToolCallFunction func = item.getFunction();
-
-                ToolCallRequest dto = new ToolCallRequest();
-                dto.setId(item.getId());
-                dto.setName(func.getName());
-                dto.setArguments(func.getArguments());
-                ret.getToolCallRequestList().add(dto);
-            }
-        }
-
+        AssistantMessage ret = OpenAiMessageHelper.fromOpenAiAssistantMessage(message);
         return ret;
     }
 
