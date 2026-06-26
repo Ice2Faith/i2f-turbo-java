@@ -68,7 +68,7 @@ public class HttpOpenAiAiModel implements AiModel {
         List<OpenAiCompletionChoice> choiceList = resp.getChoices();
         OpenAiCompletionChoice choice = choiceList.get(0);
 
-        OpenAiAssistantMessage message = choice.getMessage();
+        OpenAiAssistantMessageRespDto message = choice.getMessage();
         AssistantMessage ret = OpenAiMessageHelper.fromOpenAiAssistantMessage(message);
         return ret;
     }

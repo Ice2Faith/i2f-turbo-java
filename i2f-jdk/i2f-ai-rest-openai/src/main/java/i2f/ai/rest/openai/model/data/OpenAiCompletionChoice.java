@@ -14,7 +14,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class OpenAiCompletionChoice {
     protected Integer index;
-    protected OpenAiAssistantMessage message;
+    protected OpenAiAssistantMessageRespDto message;
     protected Object logprobs;
     protected String finish_reason;
 }

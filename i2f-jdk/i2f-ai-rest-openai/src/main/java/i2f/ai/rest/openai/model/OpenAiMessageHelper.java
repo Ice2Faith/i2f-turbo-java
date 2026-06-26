@@ -110,6 +110,9 @@ public class OpenAiMessageHelper {
             } else if (item instanceof OpenAiToolMessage) {
                 OpenAiToolMessage msg = (OpenAiToolMessage) item;
                 ret.add(fromOpenAiToolMessage(msg));
+            } else if (item instanceof OpenAiAssistantMessageRespDto) {
+                OpenAiAssistantMessageRespDto msg = (OpenAiAssistantMessageRespDto) item;
+                ret.add(fromOpenAiAssistantMessage(msg));
             }
         }
 
@@ -151,6 +154,29 @@ public class OpenAiMessageHelper {
 
     public static AssistantMessage fromOpenAiAssistantMessage(OpenAiAssistantMessage msg) {
         AssistantMessage dto = new AssistantMessage(msg.getContent());
+        dto.setRawMessage(msg);
+        dto.setFinishReason(AssistantMessage.FinishReason.STOP);
+        dto.setToolCallRequestList(new ArrayList<>());
+
+        List<OpenAiToolCall> toolCallRequestList = msg.getTool_calls();
+        if (toolCallRequestList != null && !toolCallRequestList.isEmpty()) {
+            dto.setFinishReason(AssistantMessage.FinishReason.TOOL_CALL);
+
+            for (OpenAiToolCall toolCallRequest : toolCallRequestList) {
+                ToolCallRequest toolCall = new ToolCallRequest();
+                toolCall.setId(toolCallRequest.getId());
+                toolCall.setName(toolCallRequest.getFunction().getName());
+                toolCall.setArguments(toolCallRequest.getFunction().getArguments());
+                toolCall.setRawRequest(toolCallRequest);
+                dto.getToolCallRequestList().add(toolCall);
+            }
+        }
+        return dto;
+    }
+
+    public static AssistantMessage fromOpenAiAssistantMessage(OpenAiAssistantMessageRespDto msg) {
+        AssistantMessage dto = new AssistantMessage(msg.getContent());
+        dto.setThinking(msg.getReasoning_content());
         dto.setRawMessage(msg);
         dto.setFinishReason(AssistantMessage.FinishReason.STOP);
         dto.setToolCallRequestList(new ArrayList<>());

@@ -16,6 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 public class AssistantMessage implements AiMessage {
     protected String text;
+    protected String thinking;
     protected FinishReason finishReason;
     protected List<ToolCallRequest> toolCallRequestList;
     protected transient Object rawMessage;
