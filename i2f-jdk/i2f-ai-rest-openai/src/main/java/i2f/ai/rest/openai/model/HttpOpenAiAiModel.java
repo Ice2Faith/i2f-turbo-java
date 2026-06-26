@@ -63,7 +63,7 @@ public class HttpOpenAiAiModel implements AiModel {
 
         reqDto.getMessages().addAll(OpenAiMessageHelper.toOpenAiMessages(req.getMessageList()));
 
-        OpenAiCompletionRespDto resp = doPostHttp(reqDto);
+        OpenAiCompletionRespDto resp = completion(reqDto);
 
         List<OpenAiCompletionChoice> choiceList = resp.getChoices();
         OpenAiCompletionChoice choice = choiceList.get(0);
@@ -73,8 +73,11 @@ public class HttpOpenAiAiModel implements AiModel {
         return ret;
     }
 
-    public OpenAiCompletionRespDto doPostHttp(OpenAiCompletionReqDto req) {
+    public OpenAiCompletionRespDto completion(OpenAiCompletionReqDto req) {
         try {
+            // 不开启流
+            req.setStream(null);
+            req.setStream_options(null);
             // openai 标准有强制的字段校验，因此空字段需要移除掉
             Map<String, Object> reqMap = new HashMap<>();
             ReflectResolver.bean2map(req, reqMap);

@@ -60,7 +60,7 @@ public class AgentTools {
                 .model(completion.getModel())
                 .build();
 
-        OpenAiCompletionRespDto resp = aiModel.doPostHttp(completion);
+        OpenAiCompletionRespDto resp = aiModel.completion(completion);
         OpenAiAssistantMessageRespDto msg = resp.getFirstMessage();
         if (msg == null) {
             return "";

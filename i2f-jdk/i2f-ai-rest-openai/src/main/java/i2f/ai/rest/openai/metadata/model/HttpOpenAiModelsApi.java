@@ -34,7 +34,7 @@ public class HttpOpenAiModelsApi {
     }
 
 
-    public OpenAiModelsRespDto doHttpPost() {
+    public OpenAiModelsRespDto models() {
         try {
             RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getModelsUrl())

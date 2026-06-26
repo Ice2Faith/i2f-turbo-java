@@ -50,7 +50,7 @@ public class HttpOpenAiRagRerankModel implements RagRerankModel {
         req.setReturn_documents(false);
         req.setTop_n(topN);
 
-        HttpOpenAiRerankRespDto resp = doHttpPost(req);
+        HttpOpenAiRerankRespDto resp = rerank(req);
         if (resp == null) {
             throw new IllegalStateException("not rerank data found!");
         }
@@ -80,7 +80,7 @@ public class HttpOpenAiRagRerankModel implements RagRerankModel {
         return ret;
     }
 
-    public HttpOpenAiRerankRespDto doHttpPost(HttpOpenAiRerankReqDto req) {
+    public HttpOpenAiRerankRespDto rerank(HttpOpenAiRerankReqDto req) {
         try {
             RestHttpResponse<HttpOpenAiRerankRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getRerankUrl())

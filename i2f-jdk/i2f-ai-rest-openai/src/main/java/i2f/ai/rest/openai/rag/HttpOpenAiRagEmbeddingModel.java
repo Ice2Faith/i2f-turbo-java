@@ -50,7 +50,7 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
         req.setModel(model);
         req.setInput(new ArrayList<>(content));
 
-        HttpOpenAiEmbeddingRespDto resp = doHttpPost(req);
+        HttpOpenAiEmbeddingRespDto resp = embedding(req);
         if (resp == null) {
             throw new IllegalStateException("not embedding data found!");
         }
@@ -75,7 +75,7 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
         return ret;
     }
 
-    public HttpOpenAiEmbeddingRespDto doHttpPost(HttpOpenAiEmbeddingReqDto req) {
+    public HttpOpenAiEmbeddingRespDto embedding(HttpOpenAiEmbeddingReqDto req) {
         try {
             RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(RestHttpRequest.builder()
                             .url(getEmbeddingUrl())
