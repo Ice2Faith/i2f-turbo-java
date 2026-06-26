@@ -2,6 +2,7 @@ package i2f.serialize.str.json.impl;
 
 import i2f.match.regex.RegexPattens;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -137,7 +138,12 @@ public class JsonParser {
                 } else if ("null".equals(v)) {
                     ret.put(k, null);
                 } else {
-                    throw new IllegalArgumentException("un-support parse value: " + v + " of key: " + k);
+                    try {
+                        BigDecimal num = new BigDecimal(v);
+                        ret.put(k, num);
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("un-support parse value: " + v + " of key: " + k);
+                    }
                 }
             }
 
@@ -214,7 +220,12 @@ public class JsonParser {
                 } else if ("null".equals(v)) {
                     ret.add(null);
                 } else {
-                    throw new IllegalArgumentException("un-support parse value: " + v);
+                    try {
+                        BigDecimal num = new BigDecimal(v);
+                        ret.add(num);
+                    } catch (Exception e) {
+                        throw new IllegalArgumentException("un-support parse value: " + v);
+                    }
                 }
             }
 
@@ -247,7 +258,7 @@ public class JsonParser {
         }
         char ch = str.charAt(index.get());
         if (ch == '"') {
-            Pattern pattern = Pattern.compile(RegexPattens.QUOTE_STRING_REGEX);
+            Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
             Matcher matcher = pattern.matcher(str);
             if (matcher.find(index.get())) {
                 MatchResult result = matcher.toMatchResult();
@@ -258,7 +269,7 @@ public class JsonParser {
                 return part;
             }
         } else if (ch == '\'') {
-            Pattern pattern = Pattern.compile(RegexPattens.SINGLE_QUOTE_STRING_REGEX);
+            Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
             Matcher matcher = pattern.matcher(str);
             if (matcher.find(index.get())) {
                 MatchResult result = matcher.toMatchResult();
@@ -281,7 +292,7 @@ public class JsonParser {
             if (index.get() + 1 < str.length()) {
                 char nch = str.charAt(index.get() + 1);
                 if (nch == '/') {
-                    Pattern pattern = Pattern.compile(RegexPattens.SINGLE_LINE_COMMENT_REGEX);
+                    Pattern pattern = RegexPattens.SINGLE_LINE_COMMENT_PATTERN;
                     Matcher matcher = pattern.matcher(str);
                     if (matcher.find(index.get())) {
                         MatchResult result = matcher.toMatchResult();
@@ -295,7 +306,7 @@ public class JsonParser {
                         return ch + "";
                     }
                 } else if (nch == '*') {
-                    Pattern pattern = Pattern.compile(RegexPattens.MULTI_LINE_COMMENT_REGEX);
+                    Pattern pattern = RegexPattens.MULTI_LINE_COMMENT_PATTERN;
                     Matcher matcher = pattern.matcher(str);
                     if (matcher.find(index.get())) {
                         MatchResult result = matcher.toMatchResult();
@@ -369,7 +380,7 @@ public class JsonParser {
                     return ret;
                 }
             } else if (ch == '"') {
-                Pattern pattern = Pattern.compile(RegexPattens.QUOTE_STRING_REGEX);
+                Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
                 Matcher matcher = pattern.matcher(expression);
                 if (matcher.find(index.get())) {
                     MatchResult result = matcher.toMatchResult();
@@ -381,7 +392,7 @@ public class JsonParser {
                     continue;
                 }
             } else if (ch == '\'') {
-                Pattern pattern = Pattern.compile(RegexPattens.SINGLE_QUOTE_STRING_REGEX);
+                Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
                 Matcher matcher = pattern.matcher(expression);
                 if (matcher.find(index.get())) {
                     MatchResult result = matcher.toMatchResult();
