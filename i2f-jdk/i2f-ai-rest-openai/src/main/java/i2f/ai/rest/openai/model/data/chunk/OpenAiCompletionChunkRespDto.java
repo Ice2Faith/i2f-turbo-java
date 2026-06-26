@@ -1,7 +1,5 @@
 package i2f.ai.rest.openai.model.data.chunk;
 
-import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
-import i2f.ai.rest.openai.model.data.OpenAiCompletionChoice;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionUsage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,15 +20,7 @@ public class OpenAiCompletionChunkRespDto {
     protected String object;
     protected Long created;
     protected String model;
-    protected List<OpenAiCompletionChoice> choices;
+    protected List<OpenAiCompletionChoiceChunk> choices;
     protected OpenAiCompletionUsage usage;
     protected String system_fingerprint;
-
-    public OpenAiAssistantMessageRespDto getFirstMessage() {
-        if (choices == null || choices.isEmpty()) {
-            return null;
-        }
-        OpenAiCompletionChoice choice = choices.get(0);
-        return choice.getMessage();
-    }
 }

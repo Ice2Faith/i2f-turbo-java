@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 public class OpenAiToolCall {
+    protected Integer index;
     protected String id;
     protected String type = OpenAiConsts.FUNCTION;
     protected OpenAiToolCallFunction function;
