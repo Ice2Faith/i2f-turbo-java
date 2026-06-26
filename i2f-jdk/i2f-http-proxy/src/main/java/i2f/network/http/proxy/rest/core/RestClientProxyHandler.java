@@ -3,9 +3,11 @@ package i2f.network.http.proxy.rest.core;
 
 import i2f.annotations.core.naming.Name;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.environment.std.IEnvironment;
 import i2f.invokable.IInvokable;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.io.stream.StreamUtil;
+import i2f.match.regex.RegexUtil;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
@@ -36,9 +38,45 @@ import java.util.Map;
  */
 public class RestClientProxyHandler implements IProxyInvocationHandler {
     protected IStringObjectSerializer processor;
+    protected IEnvironment environment;
 
     public RestClientProxyHandler(IStringObjectSerializer processor) {
         this.processor = processor;
+    }
+
+    public RestClientProxyHandler(IStringObjectSerializer processor, IEnvironment environment) {
+        this.processor = processor;
+        this.environment = environment;
+    }
+
+    public String replaceWithEnv(String str) {
+        if (environment != null) {
+            str = RegexUtil.regexFindAndReplace(str, "\\$(!)?\\{[^}]+\\}", s -> {
+                String prop = s;
+                boolean null2empty = false;
+                if (s.startsWith("$!")) {
+                    null2empty = true;
+                    prop = s.substring(2, s.length() - 1);
+                } else {
+                    prop = s.substring(1, s.length() - 1);
+                }
+                prop = prop.trim();
+                String defaultVal = null;
+                int idx = prop.lastIndexOf(":");
+                if (idx >= 0) {
+                    defaultVal = prop.substring(idx + 1).trim();
+                    prop = prop.substring(0, idx).trim();
+                }
+                String val = environment.getProperty(prop, defaultVal);
+                if (val == null) {
+                    if (null2empty) {
+                        val = "";
+                    }
+                }
+                return String.valueOf(val);
+            });
+        }
+        return str;
     }
 
     @Override
@@ -51,10 +89,22 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
 
         HttpRequest request = new HttpRequest();
         Class<?> clazz = method.getDeclaringClass();
-        Parameter[] parameters = method.getParameters();
         RestClient client = ReflectResolver.getAnnotation(clazz, RestClient.class);
         if (client == null) {
             throw new IllegalStateException("interface not an RestClient interface");
+        }
+        Parameter[] parameters = method.getParameters();
+        String[] parameterNames = new String[parameters.length];
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter item = parameters[i];
+            parameterNames[i] = item.getName();
+            Name annName = ReflectResolver.getAnnotation(item, Name.class);
+            if (annName != null) {
+                String value = annName.value();
+                if (value != null && !value.isEmpty()) {
+                    parameterNames[i] = value;
+                }
+            }
         }
 
         IHttpProcessor http = null;
@@ -105,6 +155,9 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
             urlMethod = HttpMethodConstants.DELETE;
         }
 
+        url = replaceWithEnv(url);
+        path = replaceWithEnv(path);
+
         url = joinUrlPath(url, path);
 
         if (urlMethod == null || urlMethod.isEmpty()) {
@@ -131,6 +184,7 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
                 }
                 if (item.param() == null || item.param().isEmpty()) {
                     String val = item.value();
+                    val = replaceWithEnv(val);
                     headers.add(name, val);
                 } else {
                     Object paramObj = null;
@@ -143,18 +197,13 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
                     } else {
                         String paramName = param;
                         for (int i = 0; i < parameters.length; i += 1) {
-                            Parameter pm = parameters[i];
-                            if (pm.getName().equals(paramName)) {
+                            String currName = parameterNames[i];
+
+                            if (currName.equals(paramName)) {
                                 paramObj = args[i];
                                 break;
                             }
-                            Name aname = ReflectResolver.getAnnotation(pm, Name.class);
-                            if (aname != null) {
-                                if (aname.value().equals(paramName)) {
-                                    paramObj = args[i];
-                                    break;
-                                }
-                            }
+
                         }
                     }
                     if (item.attr() == null || item.attr().isEmpty()) {
@@ -169,7 +218,7 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
 
         for (int i = 0; i < parameters.length; i++) {
             Parameter item = parameters[i];
-            String name = item.getName();
+            String name = parameterNames[i];
             Object val = args[i];
             if (val instanceof MultipartFile) {
                 request.addFile((MultipartFile) val);
@@ -193,10 +242,11 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
             }
             RestHeader annHeader = ReflectResolver.getAnnotation(item, RestHeader.class);
             if (annHeader != null) {
+                String headerName = annHeader.name();
                 if (annHeader.name() != null && !annHeader.name().isEmpty()) {
                     name = annHeader.name();
                 }
-                if (name == null || name.isEmpty()) {
+                if (headerName == null || headerName.isEmpty()) {
                     Map<String, Object> map = new HashMap<>();
                     if (val instanceof Map) {
                         Map<?, ?> valMap = (Map<?, ?>) val;
@@ -215,11 +265,12 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
             }
             RestBody annBody = ReflectResolver.getAnnotation(item, RestBody.class);
             if (annBody != null) {
+                String bodyName = annBody.value();
                 if (annBody.value() != null && !annBody.value().isEmpty()) {
                     name = annBody.value();
                 }
                 if (datas == null) {
-                    if (name == null || name.isEmpty()) {
+                    if (bodyName == null || bodyName.isEmpty()) {
                         datas = val;
                     } else {
                         Map<String, Object> map = new HashMap<>();
@@ -235,6 +286,16 @@ public class RestClientProxyHandler implements IProxyInvocationHandler {
                     Map<String, Object> map = (Map<String, Object>) datas;
                     map.put(name, val);
                 }
+                continue;
+            }
+            RestPathVariable annPathVariable = ReflectResolver.getAnnotation(item, RestPathVariable.class);
+            if (annPathVariable != null) {
+                if (annPathVariable.value() != null && !annPathVariable.value().isEmpty()) {
+                    name = annPathVariable.value();
+                }
+                String requestUrl = request.getUrl();
+                requestUrl = requestUrl.replace("{" + name + "}", String.valueOf(val));
+                request.setUrl(requestUrl);
                 continue;
             }
             RestParam annParam = ReflectResolver.getAnnotation(item, RestParam.class);
