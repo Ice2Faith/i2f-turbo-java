@@ -3,31 +3,38 @@ package i2f.network.http.proxy.rest.core;
 
 import i2f.annotations.core.naming.Name;
 import i2f.convert.obj.ObjectConvertor;
+import i2f.invokable.IInvokable;
+import i2f.invokable.method.impl.jdk.JdkMethod;
+import i2f.io.stream.StreamUtil;
 import i2f.net.http.consts.HttpMethodConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.data.MultipartFile;
 import i2f.net.http.interfaces.IHttpProcessor;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
+import i2f.network.http.proxy.rest.HttpProcessorSupplier;
+import i2f.network.http.proxy.rest.IHttpRequestCustomizer;
 import i2f.network.http.proxy.rest.annotations.*;
-import i2f.proxy.impl.interfaces.BasicDynamicProxyHandler;
+import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.serialize.std.str.IStringObjectSerializer;
 import i2f.typeof.TypeOf;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
  * @date 2022/5/18 9:52
  * @desc
  */
-public class RestClientProxyHandler extends BasicDynamicProxyHandler {
+public class RestClientProxyHandler implements IProxyInvocationHandler {
     protected IStringObjectSerializer processor;
 
     public RestClientProxyHandler(IStringObjectSerializer processor) {
@@ -35,7 +42,13 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
     }
 
     @Override
-    public AtomicReference<Object> resolve(Object context, Object ivkObj, Method method, Object... args) {
+    public Object invoke(Object ivkObj, IInvokable invokable, Object... args) throws Throwable {
+        if (!(invokable instanceof JdkMethod)) {
+            throw new IllegalArgumentException("un-support invocable type: " + invokable.getClass());
+        }
+        JdkMethod jdkMethod = (JdkMethod) invokable;
+        Method method = jdkMethod.getMethod();
+
         HttpRequest request = new HttpRequest();
         Class<?> clazz = method.getDeclaringClass();
         Parameter[] parameters = method.getParameters();
@@ -45,10 +58,21 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
         }
 
         IHttpProcessor http = null;
-        try {
-            http = ReflectResolver.getInstance(client.http());
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage(), e);
+        Class<? extends HttpProcessorSupplier> httpSupplier = client.httpSupplier();
+        if (httpSupplier != null && !HttpProcessorSupplier.class.equals(httpSupplier)) {
+            try {
+                HttpProcessorSupplier supplier = ReflectResolver.getInstance(httpSupplier);
+                http = supplier.get();
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+        if (http == null) {
+            try {
+                http = ReflectResolver.getInstance(client.http());
+            } catch (Exception e) {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
         }
 
         String url = joinUrlPath(client.url(), client.path());
@@ -83,29 +107,31 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
 
         url = joinUrlPath(url, path);
 
-        if ("".equals(urlMethod)) {
+        if (urlMethod == null || urlMethod.isEmpty()) {
             urlMethod = HttpMethodConstants.GET;
         }
         request.setUrl(url);
         request.setMethod(urlMethod);
 
-        Map<String, Object> headers = new HashMap<>();
+        HttpHeaders headers = new HttpHeaders();
 
-        Map<String, Object> params = new HashMap<>();
+        Object params = null;
 
-        int datasCount = 0;
-        Map<String, Object> datas = new HashMap<>();
+        Object datas = null;
+
+        IHttpRequestCustomizer customizer = null;
+        IHttpResponseExtractor<?> extractor = null;
 
         RestHeaders annHeaders = ReflectResolver.getAnnotation(method, RestHeaders.class);
         if (annHeaders != null) {
             for (RestHeader item : annHeaders.value()) {
                 String name = item.name();
-                if ("".equals(name)) {
+                if (name == null || name.isEmpty()) {
                     continue;
                 }
-                if ("".equals(item.param())) {
+                if (item.param() == null || item.param().isEmpty()) {
                     String val = item.value();
-                    headers.put(name, val);
+                    headers.add(name, val);
                 } else {
                     Object paramObj = null;
                     String param = item.param();
@@ -131,11 +157,11 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
                             }
                         }
                     }
-                    if ("".equals(item.attr())) {
-                        headers.put(name, paramObj);
+                    if (item.attr() == null || item.attr().isEmpty()) {
+                        headers.add(name, paramObj);
                     } else {
                         Object val = Visitor.visit(item.attr(), paramObj).get();
-                        headers.put(name, val);
+                        headers.add(name, val);
                     }
                 }
             }
@@ -157,30 +183,83 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
                 }
                 continue;
             }
+            if (val instanceof IHttpRequestCustomizer) {
+                customizer = (IHttpRequestCustomizer) val;
+                continue;
+            }
+            if (val instanceof IHttpResponseExtractor) {
+                extractor = (IHttpResponseExtractor<?>) val;
+                continue;
+            }
             RestHeader annHeader = ReflectResolver.getAnnotation(item, RestHeader.class);
             if (annHeader != null) {
-                if (!"".equals(annHeader.name())) {
+                if (annHeader.name() != null && !annHeader.name().isEmpty()) {
                     name = annHeader.name();
                 }
-                headers.put(name, val);
+                if (name == null || name.isEmpty()) {
+                    Map<String, Object> map = new HashMap<>();
+                    if (val instanceof Map) {
+                        Map<?, ?> valMap = (Map<?, ?>) val;
+                        for (Map.Entry<?, ?> entry : valMap.entrySet()) {
+                            Object key = entry.getKey();
+                            map.put(key == null ? null : String.valueOf(key), entry.getValue());
+                        }
+                    } else {
+                        ReflectResolver.bean2map(val, map);
+                    }
+                    headers.addAll(map);
+                } else {
+                    headers.add(name, val);
+                }
                 continue;
             }
             RestBody annBody = ReflectResolver.getAnnotation(item, RestBody.class);
             if (annBody != null) {
-                if (!"".equals(annBody.value())) {
+                if (annBody.value() != null && !annBody.value().isEmpty()) {
                     name = annBody.value();
                 }
-                datas.put(name, val);
-                datasCount++;
+                if (datas == null) {
+                    if (name == null || name.isEmpty()) {
+                        datas = val;
+                    } else {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put(name, val);
+                        datas = map;
+                    }
+                } else {
+                    if (!(datas instanceof Map)) {
+                        Map<String, Object> map = new HashMap<>();
+                        ReflectResolver.bean2map(datas, map);
+                        datas = map;
+                    }
+                    Map<String, Object> map = (Map<String, Object>) datas;
+                    map.put(name, val);
+                }
                 continue;
             }
             RestParam annParam = ReflectResolver.getAnnotation(item, RestParam.class);
             if (annParam != null) {
-                if (!"".equals(annParam.value())) {
+                if (annParam.value() != null && !annParam.value().isEmpty()) {
                     name = annParam.value();
                 }
             }
-            params.put(name, val);
+            if (params == null) {
+                if (name == null || name.isEmpty()) {
+                    params = val;
+                } else {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put(name, val);
+                    params = map;
+                }
+            } else {
+                if (!(params instanceof Map)) {
+                    Map<String, Object> map = new HashMap<>();
+                    ReflectResolver.bean2map(params, map);
+                    params = map;
+                }
+                Map<String, Object> map = (Map<String, Object>) params;
+                map.put(name, val);
+            }
         }
 
 
@@ -194,24 +273,45 @@ public class RestClientProxyHandler extends BasicDynamicProxyHandler {
         Object ret = null;
         try {
 
-            HttpResponse response = http.http(request);
+            if (customizer != null) {
+                customizer.customizer(request);
+            }
 
-            String content = response.getContentAsString("UTF-8");
+            if (extractor == null) {
+                ret = http.http(request, response -> {
+                    if (TypeOf.typeOf(retType, HttpResponse.class)) {
+                        return response;
+                    }
+                    if (TypeOf.typeOf(retType, byte[].class)) {
+                        return response.getContentAsBytes();
+                    }
+                    if (TypeOf.typeOf(retType, InputStream.class)) {
+                        return StreamUtil.localStream(response.getInputStream());
+                    }
+                    String content = response.getContentAsString("UTF-8");
+                    if (TypeOf.typeOf(retType, String.class)) {
+                        return content;
+                    }
 
-            ret = ObjectConvertor.tryConvertAsType(content, retType);
-            if (!TypeOf.instanceOf(ret, retType)) {
-                ret = processor.deserialize(content, retType);
+                    Object obj = ObjectConvertor.tryConvertAsType(content, retType);
+                    if (!TypeOf.instanceOf(obj, retType)) {
+                        obj = processor.deserialize(content, retType);
+                    }
+                    return obj;
+                });
+            } else {
+                ret = http.http(request, extractor);
+                ret = ObjectConvertor.tryConvertAsType(ret, retType);
             }
         } catch (Exception e) {
-
             throw new IllegalStateException(e.getMessage(), e);
         }
 
-        return new AtomicReference<>(ret);
+        return ret;
     }
 
     public static String joinUrlPath(String basePath, String subPath) {
-        if (!"".equals(subPath)) {
+        if (subPath != null && !subPath.isEmpty()) {
             if (basePath.endsWith("/")) {
                 if (subPath.startsWith("/")) {
                     basePath = basePath + subPath.substring(1);
