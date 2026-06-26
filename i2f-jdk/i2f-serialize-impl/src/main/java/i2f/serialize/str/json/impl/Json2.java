@@ -2,23 +2,38 @@ package i2f.serialize.str.json.impl;
 
 import i2f.check.Predicates;
 import i2f.reflect.ReflectResolver;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
+@Data
+@NoArgsConstructor
+@SuperBuilder
 public class Json2 {
-    public static boolean nullExclude = false;
-    public static String sep = ",";
-    public static String quote = "\"";
-    public static String null2 = "null";
-    public static SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
+    public static final Json2 INSTANCE = new Json2();
+    public static final Json2 NOT_NULL = Json2.builder().nullExclude(true).build();
 
-    public static String toJson(Object obj) {
+    public boolean nullExclude = false;
+    public String sep = ",";
+    public String quote = "\"";
+    public String null2 = "null";
+    public String datePattern = "yyyy-MM-dd HH:mm:ss.SSS";
+    public ThreadLocal<SimpleDateFormat> fmt = ThreadLocal.withInitial(() -> new SimpleDateFormat(datePattern));
+    public ThreadLocal<DateTimeFormatter> formatter = ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern(datePattern));
+
+    public String toJson(Object obj) {
         if (Predicates.isNull(obj)) {
             return whenNull(obj);
         }
@@ -33,6 +48,12 @@ public class Json2 {
         }
         if (obj instanceof Date) {
             return whenDate((Date) obj);
+        }
+        if (obj instanceof LocalDateTime) {
+            return whenDate((LocalDateTime) obj);
+        }
+        if (obj instanceof LocalDate) {
+            return whenDate((LocalDate) obj);
         }
         if (obj.getClass().isArray()) {
             return whenArray(obj);
@@ -50,19 +71,19 @@ public class Json2 {
         return whenBean(obj);
     }
 
-    private static String whenEnum(Enum obj) {
+    private String whenEnum(Enum obj) {
         return quote + obj.name() + quote;
     }
 
-    private static String whenNull(Object obj) {
+    private String whenNull(Object obj) {
         return null2;
     }
 
-    private static String whenBoolean(Boolean obj) {
+    private String whenBoolean(Boolean obj) {
         return String.valueOf(obj);
     }
 
-    private static String whenString(String str) {
+    private String whenString(String str) {
         StringBuffer buffer = new StringBuffer();
         buffer.append(quote);
         char[] bufs = str.toCharArray();
@@ -91,15 +112,24 @@ public class Json2 {
         return buffer.toString();
     }
 
-    private static String whenNumber(Number num) {
+    private String whenNumber(Number num) {
         return num.toString();
     }
 
-    private static String whenDate(Date date) {
-        return quote + fmt.format(date) + quote;
+    private String whenDate(Date date) {
+        return quote + fmt.get().format(date) + quote;
     }
 
-    private static String whenCollection(Collection col) {
+    private String whenDate(LocalDateTime date) {
+        return quote + formatter.get().format(date) + quote;
+    }
+
+    private String whenDate(LocalDate date) {
+        LocalDateTime ldate = LocalDateTime.of(date, LocalTime.of(0, 0, 0, 0));
+        return whenDate(ldate);
+    }
+
+    private String whenCollection(Collection col) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("[");
         if (Predicates.nonNull(col)) {
@@ -119,7 +149,7 @@ public class Json2 {
         return buffer.toString();
     }
 
-    private static String whenArray(Object arr) {
+    private String whenArray(Object arr) {
         if (Predicates.nonNull(arr) && !Predicates.isArrayType(arr)) {
             return toJson(arr);
         }
@@ -144,7 +174,7 @@ public class Json2 {
         return buffer.toString();
     }
 
-    private static String whenMap(Map map) {
+    private String whenMap(Map map) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{");
         if (Predicates.nonNull(map)) {
@@ -165,7 +195,7 @@ public class Json2 {
         return buffer.toString();
     }
 
-    private static String whenBean(Object obj) {
+    private String whenBean(Object obj) {
         StringBuffer buffer = new StringBuffer();
         buffer.append("{");
         if (Predicates.nonNull(obj)) {

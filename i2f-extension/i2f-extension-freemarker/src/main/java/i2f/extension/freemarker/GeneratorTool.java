@@ -182,7 +182,7 @@ public class GeneratorTool implements AllMixins {
     }
 
     public String toJsonString(Object obj) {
-        return Json2.toJson(obj);
+        return Json2.INSTANCE.toJson(obj);
     }
 
     public String[] split(String str, boolean trimBefore, String regex, int limit, boolean removeEmpty) {

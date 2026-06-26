@@ -10,6 +10,7 @@ import java.util.Map;
  * @desc
  */
 public class Json2Serializer implements IJsonSerializer {
+    private Json2 json2 = new Json2();
 
     @Override
     public Map<String, Object> bean2Map(Object obj) {
@@ -18,7 +19,7 @@ public class Json2Serializer implements IJsonSerializer {
 
     @Override
     public String serialize(Object obj) {
-        return Json2.toJson(obj);
+        return json2.toJson(obj);
     }
 
     @Override
