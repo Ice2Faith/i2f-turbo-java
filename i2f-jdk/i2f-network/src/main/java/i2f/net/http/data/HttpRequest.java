@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -33,8 +34,8 @@ public class HttpRequest {
     protected HttpHeaders header = new HttpHeaders();
     protected List<MultipartFile> files;
 
-    protected int connectTimeout = 30 * 1000;
-    protected int readTimeout = 30 * 1000;
+    protected int connectTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+    protected int readTimeout = (int) TimeUnit.MINUTES.toMillis(5);
     protected String charset = "UTF-8";
     protected boolean allowRedirect = true;
     protected boolean cloudAcceptByteArray = false;

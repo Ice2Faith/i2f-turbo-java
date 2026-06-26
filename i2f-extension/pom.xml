@@ -93,6 +93,7 @@
 
         <module>test-flink</module>
         <module>test-extension</module>
+        <module>i2f-extension-okhttp</module>
     </modules>
 
 

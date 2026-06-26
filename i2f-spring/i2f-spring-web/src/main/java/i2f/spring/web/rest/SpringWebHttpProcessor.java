@@ -43,6 +43,11 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
 
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
+        RestTemplate restTemplate = getRestTemplate();
+        if (restTemplate == null) {
+            restTemplate = new RestTemplate();
+        }
+
         IHttpRequestBodyHandler<ClientHttpRequest> handler = new SpringWebAutoHttpRequestBodyHandler(restTemplate);
 
         String reqUrl = HttpUtil.generateUrl(request);

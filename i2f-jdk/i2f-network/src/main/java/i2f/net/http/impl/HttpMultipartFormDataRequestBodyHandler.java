@@ -63,16 +63,18 @@ public class HttpMultipartFormDataRequestBodyHandler implements IOutputStreamHtt
 
         //文件参数
         List<MultipartFile> files = request.getFiles();
-        for (MultipartFile item : files) {
-            builder.setLength(0);
-            builder.append(boundaryLine);
-            builder.append("Content-Disposition:form-data;Content-Type:application/octet-stream;name=\"").append(item.getName()).append("\";filename=\"").append(item.getFileName()).append("\"");
-            builder.append("\r\n\r\n");
-            os.write(builder.toString().getBytes());
+        if (files != null) {
+            for (MultipartFile item : files) {
+                builder.setLength(0);
+                builder.append(boundaryLine);
+                builder.append("Content-Disposition:form-data;Content-Type:application/octet-stream;name=\"").append(item.getName()).append("\";filename=\"").append(item.getFileName()).append("\"");
+                builder.append("\r\n\r\n");
+                os.write(builder.toString().getBytes());
 
-            StreamUtil.streamCopy(item.getInputStream(), os, false, true);
+                StreamUtil.streamCopy(item.getInputStream(), os, false, true);
 
-            os.write("\r\n\r\n".getBytes());
+                os.write("\r\n\r\n".getBytes());
+            }
         }
 
         os.write(boundaryEndLine.getBytes());

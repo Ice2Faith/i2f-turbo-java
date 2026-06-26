@@ -93,7 +93,7 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             }
         }
 
-        String method = request.getMethod();
+        String method = request.getMethod().toUpperCase();
         if (HttpMethodConstants.GET.equals(method)) {
             HttpGet httpGet = new HttpGet(reqUrl);
             req = httpGet;

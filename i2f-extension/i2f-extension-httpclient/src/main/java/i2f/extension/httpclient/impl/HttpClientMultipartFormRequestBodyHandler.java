@@ -59,8 +59,10 @@ public class HttpClientMultipartFormRequestBodyHandler implements IHttpClientHtt
 
         // 文件字段
         List<MultipartFile> files = request.getFiles();
-        for (MultipartFile item : files) {
-            builder.addBinaryBody(item.getName(), item.getInputStream(), ContentType.MULTIPART_FORM_DATA, item.getFileName());
+        if (files != null) {
+            for (MultipartFile item : files) {
+                builder.addBinaryBody(item.getName(), item.getInputStream(), ContentType.MULTIPART_FORM_DATA, item.getFileName());
+            }
         }
 
         HttpEntity entity = builder.build();
