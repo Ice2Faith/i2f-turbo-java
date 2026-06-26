@@ -262,7 +262,7 @@
                      :class="{
                             'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
                             }"
-                     :style="idx==currentMessages.length-1 && currentSession?.streamingStarted?'max-height: unset;':''"
+                     :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && msg[msg.type].content ? 'max-height: unset;' : ''"
                      v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
 
                 </div>
