@@ -2190,7 +2190,9 @@
                 item[this.form.messageType] = {
                     role: this.form.messageType,
                     content: text,
-                    reasoning_content: '- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n- xxxxxxxxxxxxxxxxxxxxx\n\n- xxx\n\n- xxx'
+                }
+                if (this.form.messageType == 'assistant') {
+                    item[this.form.messageType].reasoning_content = '';
                 }
                 messages.push(item);
                 this.form.inputText = '';
