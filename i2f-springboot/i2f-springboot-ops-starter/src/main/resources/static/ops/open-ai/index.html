@@ -2461,6 +2461,9 @@
                                 session.streamingStarted = true;
                                 _this.$nextTick(() => _this.scrollToBottom());
                             }
+                            if (!assistantMsg.assistant.content) {
+                                _this.$nextTick(() => _this.scrollToBottom());
+                            }
                             assistantMsg.assistant.content += content;
 
                         }
