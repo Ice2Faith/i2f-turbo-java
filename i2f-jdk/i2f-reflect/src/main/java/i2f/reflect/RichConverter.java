@@ -88,15 +88,27 @@ public class RichConverter {
     }
 
     public static <T> T convert(Object obj, Class<T> clazz) {
-        return convert2Type(obj, clazz);
+        return convert2Type(obj, clazz, null, false);
+    }
+
+    public static <T> T convert(Object obj, Class<T> clazz, boolean weakMatchField) {
+        return convert2Type(obj, clazz, null, weakMatchField);
     }
 
     public static <T> T convert(Object obj, TypeToken<T> token) {
-        return convert2Type(obj, token.type());
+        return convert2Type(obj, token.type(), null, false);
+    }
+
+    public static <T> T convert(Object obj, TypeToken<T> token, boolean weakMatchField) {
+        return convert2Type(obj, token.type(), null, weakMatchField);
     }
 
     public static <T> T convert2Type(Object obj, Type type) {
-        return convert2Type(obj, type, null);
+        return convert2Type(obj, type, null, false);
+    }
+
+    public static <T> T convert2Type(Object obj, Type type, boolean weakMatchField) {
+        return convert2Type(obj, type, null, weakMatchField);
     }
 
     /**
@@ -123,7 +135,7 @@ public class RichConverter {
      * @param <T>
      * @return
      */
-    public static <T> T convert2Type(Object obj, Type type, Type[] relTypes) {
+    public static <T> T convert2Type(Object obj, Type type, Type[] relTypes, boolean weakMatchField) {
         if (obj == null) {
             return null;
         }
@@ -132,9 +144,9 @@ public class RichConverter {
         }
         if (type instanceof TypeVariable) {
             if (relTypes != null) {
-                return convert2Type(obj, relTypes[0], null);
+                return convert2Type(obj, relTypes[0], null, weakMatchField);
             } else {
-                return convert2Type(obj, Object.class, null);
+                return convert2Type(obj, Object.class, null, weakMatchField);
             }
         }
 
@@ -182,12 +194,17 @@ public class RichConverter {
         }
 
         // 目标类型为String，直接转换
-        Object cvt = ObjectConvertor.tryConvertAsType(obj, targetClass);
-        if (cvt != null && targetArgumentTypes == null) {
-            Class<?> cvtClass = cvt.getClass();
-            if (TypeOf.typeOf(cvtClass, targetClass)) {
-                return (T) cvt;
+        Object cvt = obj;
+        try {
+            cvt = ObjectConvertor.tryConvertAsType(obj, targetClass);
+            if (cvt != null && targetArgumentTypes == null) {
+                Class<?> cvtClass = cvt.getClass();
+                if (TypeOf.typeOf(cvtClass, targetClass)) {
+                    return (T) cvt;
+                }
             }
+        } catch (Exception e) {
+            // ignore
         }
 
         // 主要分为Collection,Map,Bean三种，前两种需要默认实现，因为入参可能为interface或者abstract类型，无法实例化
@@ -245,14 +262,14 @@ public class RichConverter {
                 int len = Array.getLength(obj);
                 for (int i = 0; i < len; i++) {
                     Object item = Array.get(obj, i);
-                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes, weakMatchField);
                     col.add(elem);
                 }
             } else if (Iterable.class.isAssignableFrom(objClass)) {
                 // 源类型为Iterable
                 Iterable iter = (Iterable) obj;
                 for (Object item : iter) {
-                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes, weakMatchField);
                     col.add(elem);
                 }
             } else if (Iterator.class.isAssignableFrom(objClass)) {
@@ -260,7 +277,7 @@ public class RichConverter {
                 Iterator iterator = (Iterator) obj;
                 while (iterator.hasNext()) {
                     Object item = iterator.hasNext();
-                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes, weakMatchField);
                     col.add(elem);
                 }
             } else if (Enumeration.class.isAssignableFrom(objClass)) {
@@ -268,7 +285,7 @@ public class RichConverter {
                 Enumeration enumeration = (Enumeration) obj;
                 while (enumeration.hasMoreElements()) {
                     Object item = enumeration.nextElement();
-                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes);
+                    Object elem = convert2Type(item, elementType, useRelTypes ? null : relTypes, weakMatchField);
                     col.add(elem);
                 }
             } else {
@@ -298,8 +315,8 @@ public class RichConverter {
                         }
                     }
 
-                    Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes);
-                    Object value = convert2Type(entry.getValue(), valType, useRelTypes ? null : relTypes);
+                    Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes, weakMatchField);
+                    Object value = convert2Type(entry.getValue(), valType, useRelTypes ? null : relTypes, weakMatchField);
                     map.put(key, value);
                 }
             } else {
@@ -333,8 +350,8 @@ public class RichConverter {
                                 useRelTypes = true;
                             }
                         }
-                        Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes);
-                        value = convert2Type(value, valType, useRelTypes ? null : relTypes);
+                        Object key = convert2Type(entry.getKey(), keyType, useRelTypes ? null : relTypes, weakMatchField);
+                        value = convert2Type(value, valType, useRelTypes ? null : relTypes, weakMatchField);
                         map.put(key, value);
                     } catch (Exception e) {
                         // 处理异常
@@ -347,15 +364,24 @@ public class RichConverter {
             if (Map.class.isAssignableFrom(objClass)) {
                 Map<Field, Class<?>> dstFields = ReflectResolver.getFields(targetClass);
                 Map<String, Field> dstFieldsMap = new LinkedHashMap<>();
+                Map<String, Field> dstWeakFieldsMap = new LinkedHashMap<>();
                 for (Field field : dstFields.keySet()) {
                     dstFieldsMap.put(field.getName(), field);
+                    if (weakMatchField) {
+                        dstWeakFieldsMap.put(weakName(field.getName()), field);
+                    }
                 }
 
                 Map<?, ?> map = (Map<?, ?>) obj;
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                     Object key = entry.getKey();
-                    String keyName = convert2Type(key, String.class, null);
+                    String keyName = convert2Type(key, String.class, null, weakMatchField);
                     Field field = dstFieldsMap.get(keyName);
+                    if (weakMatchField) {
+                        if (field == null) {
+                            field = dstWeakFieldsMap.get(weakName(keyName));
+                        }
+                    }
                     if (field == null) {
                         continue;
                     }
@@ -392,7 +418,7 @@ public class RichConverter {
                         }
                     }
                     try {
-                        Object value = convert2Type(entry.getValue(), fieldType, useRelTypes ? null : relTypes);
+                        Object value = convert2Type(entry.getValue(), fieldType, useRelTypes ? null : relTypes, weakMatchField);
                         ReflectResolver.valueSet(ret, field, value);
                     } catch (Exception e) {
 
@@ -410,18 +436,26 @@ public class RichConverter {
 
                 Map<Field, Class<?>> dstFields = ReflectResolver.getFields(targetClass);
                 Map<String, Field> dstFieldsMap = new LinkedHashMap<>();
+                Map<String, Field> dstWeakFieldsMap = new LinkedHashMap<>();
                 for (Field field : dstFields.keySet()) {
                     dstFieldsMap.put(field.getName(), field);
+                    if (weakMatchField) {
+                        dstWeakFieldsMap.put(weakName(field.getName()), field);
+                    }
                 }
 
                 // 对同名字段进行复制
 
                 for (Map.Entry<String, Field> entry : srcFieldsMap.entrySet()) {
-                    if (!dstFieldsMap.containsKey(entry.getKey())) {
-                        continue;
-                    }
                     Field srcField = entry.getValue();
                     Field dstField = dstFieldsMap.get(entry.getKey());
+                    if (weakMatchField) {
+                        dstField = dstWeakFieldsMap.get(entry.getKey());
+                    }
+                    if (dstField == null) {
+                        continue;
+                    }
+
                     try {
                         Object value = ReflectResolver.valueGet(obj, srcField);
 
@@ -457,7 +491,7 @@ public class RichConverter {
                                 fieldType = targetArgumentTypes == null ? Object.class : targetArgumentTypes[i];
                             }
                         }
-                        value = convert2Type(value, fieldType, useRelTypes ? null : relTypes);
+                        value = convert2Type(value, fieldType, useRelTypes ? null : relTypes, weakMatchField);
                         ReflectResolver.valueSet(ret, dstField, value);
                     } catch (Exception e) {
                         // 处理异常
@@ -482,6 +516,10 @@ public class RichConverter {
         }
 
         return (T) ret;
+    }
+
+    public static String weakName(String name) {
+        return name.replaceAll("[\\-\\_\\$]", "").toLowerCase();
     }
 
     /**

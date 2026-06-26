@@ -855,6 +855,9 @@ public class ObjectConvertor {
                 Object ret = Array.newInstance(elemType, list.size());
                 int idx = 0;
                 for (Object item : list) {
+                    if (!TypeOf.instanceOf(item, elemType)) {
+                        item = tryConvertAsType(item, elemType);
+                    }
                     Array.set(ret, idx, item);
                     idx++;
                 }

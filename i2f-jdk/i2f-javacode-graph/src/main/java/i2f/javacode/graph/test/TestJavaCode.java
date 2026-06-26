@@ -26,7 +26,7 @@ public class TestJavaCode {
 
         System.out.println("====================");
         JavaCodeEchartsGraph echarts = JavaCodeRelationEchartsGraphConverter.convert(map);
-        System.out.println(Json2.INSTANCE.toJson(echarts));
+        System.out.println(Json2.toJson(echarts));
         // 此结果，可使用这个页面进行预览：i2f-turbo-web/tools/echarts/echarts-graph.html
     }
 }
