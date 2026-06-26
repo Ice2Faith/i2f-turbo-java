@@ -39,15 +39,18 @@ public class HttpProcessorRestClient implements IRestClient {
         req.json();
         req.addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8);
 
-        try (HttpResponse resp = httpProcessor.http(req)) {
+        RestHttpResponse<T> ret = httpProcessor.http(req, response -> {
+            try (HttpResponse resp = response) {
+                T obj = resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
+                return (RestHttpResponse<T>) RestHttpResponse.builder()
+                        .statusCode(resp.getStatusCode())
+                        .statusMessage(resp.getStatusMessage())
+                        .headers(resp.getHeader())
+                        .body(obj)
+                        .build();
+            }
+        });
 
-            T obj = resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
-            return (RestHttpResponse<T>) RestHttpResponse.builder()
-                    .statusCode(resp.getStatusCode())
-                    .statusMessage(resp.getStatusMessage())
-                    .headers(resp.getHeader())
-                    .body(obj)
-                    .build();
-        }
+        return ret;
     }
 }
