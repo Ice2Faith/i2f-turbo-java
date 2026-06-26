@@ -19,6 +19,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -58,6 +59,7 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
         InputStream is = null;
         OutputStream os = null;
         HttpResponse response = new HttpResponse();
+        boolean autoCloseResource = true;
         try {
             String urlString = HttpUtil.generateUrl(request);
             URL url = new URL(urlString);
@@ -112,18 +114,54 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
                 response.setErrorStream(err);
             }
 
-            return extractor.extract(response);
+            T ret = extractor.extract(response);
+            if (ret instanceof HttpResponse) {
+                HttpResponse retResp = (HttpResponse) ret;
+                retResp.setCloser(new HttpUrlConnectCloser(is, os, conn));
+                autoCloseResource = false;
+            }
+            return ret;
         } catch (Exception e) {
             throw new IOException(e.getMessage(), e);
         } finally {
+            if (autoCloseResource) {
+                if (is != null) {
+                    is.close();
+                }
+                if (os != null) {
+                    os.close();
+                }
+                if (conn != null) {
+                    conn.disconnect();
+                }
+            }
+        }
+    }
+
+    private static class HttpUrlConnectCloser implements Closeable {
+        private InputStream is;
+        private OutputStream os;
+        private HttpURLConnection conn;
+
+        public HttpUrlConnectCloser(InputStream is, OutputStream os, HttpURLConnection conn) {
+            this.is = is;
+            this.os = os;
+            this.conn = conn;
+        }
+
+        @Override
+        public void close() throws IOException {
             if (is != null) {
                 is.close();
+                is = null;
             }
             if (os != null) {
                 os.close();
+                os = null;
             }
             if (conn != null) {
                 conn.disconnect();
+                conn = null;
             }
         }
     }

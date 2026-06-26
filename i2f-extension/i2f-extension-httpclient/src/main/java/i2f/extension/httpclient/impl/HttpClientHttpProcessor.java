@@ -24,6 +24,7 @@ import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -122,7 +123,7 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
 
         CloseableHttpResponse resp = null;
         HttpResponse response = new HttpResponse();
-
+        boolean autoCloseResource = true;
         try {
             resp = httpClient.execute(req);
 
@@ -145,15 +146,36 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
             InputStream is = entity.getContent();
             response.setInputStream(is);
 
-            return extractor.extract(response);
+            T ret = extractor.extract(response);
+            if (ret instanceof HttpResponse) {
+                HttpResponse retResp = (HttpResponse) ret;
+                retResp.setCloser(new HttpClientCloser(httpClient));
+                autoCloseResource = false;
+            }
+            return ret;
         } catch (IOException e) {
             throw e;
         } finally {
+            if (autoCloseResource) {
+                if (httpClient != null) {
+                    httpClient.close();
+                }
+            }
+        }
+    }
+
+    private static class HttpClientCloser implements Closeable {
+        private CloseableHttpClient httpClient;
+
+        public HttpClientCloser(CloseableHttpClient httpClient) {
+            this.httpClient = httpClient;
+        }
+
+        @Override
+        public void close() throws IOException {
             if (httpClient != null) {
                 httpClient.close();
-            }
-            if (response != null) {
-                response.close();
+                httpClient = null;
             }
         }
     }

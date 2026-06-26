@@ -35,6 +35,13 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
     }
 
     @Override
+    public HttpResponse http(HttpRequest request) throws IOException {
+        return http(request, response -> {
+            return HttpUtil.localStoredResponse(request, response);
+        });
+    }
+
+    @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<ClientHttpRequest> handler = new SpringWebAutoHttpRequestBodyHandler(restTemplate);
 

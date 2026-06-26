@@ -26,14 +26,29 @@ public class HttpResponse implements Closeable {
 
     private InputStream errorStream;
 
+    /**
+     * 用于释放底层的资源使用
+     */
+    private Closeable closer;
+
     @Override
     public void close() throws IOException {
         if (inputStream != null) {
             inputStream.close();
+            inputStream = null;
         }
         if (errorStream != null) {
             errorStream.close();
+            errorStream = null;
         }
+        if (closer != null) {
+            closer.close();
+            closer = null;
+        }
+    }
+
+    public boolean isSuccess() {
+        return statusCode >= 200 && statusCode < 300;
     }
 
     public byte[] getContentAsBytes() throws IOException {
@@ -41,7 +56,7 @@ public class HttpResponse implements Closeable {
             throw new IOException("body has been read or not body!");
         }
         byte[] ret = StreamUtil.readBytes(inputStream, true);
-        inputStream = null;
+        close();
         return ret;
     }
 
@@ -54,7 +69,7 @@ public class HttpResponse implements Closeable {
             throw new IOException("body has been read or not body!");
         }
         String ret = StreamUtil.readString(inputStream, charset, true);
-        inputStream = null;
+        close();
         return ret;
     }
 
@@ -84,7 +99,18 @@ public class HttpResponse implements Closeable {
         }
         FileOutputStream fos = new FileOutputStream(file);
         StreamUtil.streamCopy(inputStream, fos, true);
+        close();
         return file;
+    }
+
+    public OutputStream transferTo(OutputStream os) throws IOException {
+        if (inputStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
+        StreamUtil.streamCopy(inputStream, os, false, true);
+        os.flush();
+        close();
+        return os;
     }
 
     public byte[] getErrorAsBytes() throws IOException {
@@ -92,7 +118,7 @@ public class HttpResponse implements Closeable {
             throw new IOException("body has been read or not body!");
         }
         byte[] ret = StreamUtil.readBytes(errorStream, true);
-        errorStream = null;
+        close();
         return ret;
     }
 
@@ -105,7 +131,7 @@ public class HttpResponse implements Closeable {
             throw new IOException("body has been read or not body!");
         }
         String ret = StreamUtil.readString(errorStream, charset, true);
-        errorStream = null;
+        close();
         return ret;
     }
 }
