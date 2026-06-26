@@ -86,11 +86,11 @@ public class JsonParser {
                 try {
                     BigDecimal num = new BigDecimal(v);
                     double dv = num.doubleValue();
-//                    if (Double.isInfinite(dv)) {
-                    return num;
-//                    } else {
-//                        return dv;
-//                    }
+                    if (Double.isInfinite(dv)) {
+                        return num;
+                    } else {
+                        return dv;
+                    }
                 } catch (Exception e) {
                     throw new IllegalArgumentException("un-support parse value: " + v + " of path: " + parentKey + " content: " + v);
                 }
