@@ -257,6 +257,15 @@
                 <div class="message-role-label ">
                     {{ roleLabel(msg.type) }}
                 </div>
+                <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
+                     class="thinking-content"
+                     :class="{
+                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
+                            }"
+                     :style="idx==currentMessages.length-1 && currentSession?.streamingStarted?'max-height: unset;':''"
+                     v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
+
+                </div>
                 <div class="message-content"
                      :class="{
                             'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
@@ -2180,7 +2189,8 @@
                 }
                 item[this.form.messageType] = {
                     role: this.form.messageType,
-                    content: text
+                    content: text,
+                    reasoning_content: '- xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n\n- xxxxxxxxxxxxxxxxxxxxx\n\n- xxx\n\n- xxx'
                 }
                 messages.push(item);
                 this.form.inputText = '';
@@ -2274,7 +2284,8 @@
                     hidden: false,
                     assistant: {
                         role: 'assistant',
-                        content: ''
+                        content: '',
+                        reasoning_content: '',
                     },
                     usage: {
                         prompt_tokens: -1,
@@ -2450,6 +2461,14 @@
                             }
                             assistantMsg.assistant.content += content;
 
+                        }
+                        let reasoning_content = (delta && delta.reasoning_content) ? delta.reasoning_content : '';
+                        if (reasoning_content) {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                                _this.$nextTick(() => _this.scrollToBottom());
+                            }
+                            assistantMsg.assistant.reasoning_content += reasoning_content;
                         }
                     } catch (e) { /* 忽略解析错误 */
                     }
@@ -3251,6 +3270,16 @@
             transform: scale(1);
             opacity: 1;
         }
+    }
+
+    .thinking-content {
+        background: #eee;
+        max-height: 48px;
+        overflow: hidden;
+    }
+
+    .thinking-content:hover {
+        max-height: unset;
     }
 
     /* ===== 底部输入区 ===== */
