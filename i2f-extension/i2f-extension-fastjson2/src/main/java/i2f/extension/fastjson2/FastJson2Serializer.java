@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import i2f.serialize.std.str.json.IJsonSerializer;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -31,10 +32,19 @@ public class FastJson2Serializer implements IJsonSerializer {
 
     @Override
     public Object deserialize(String text, Object typeToken) {
-        return deserialize(text, (TypeReference) typeToken);
+        if (typeToken instanceof Type) {
+            return deserialize(text, (Type) typeToken);
+        } else if (typeToken instanceof TypeReference) {
+            return deserialize(text, (TypeReference) typeToken);
+        }
+        throw new UnsupportedOperationException("FastJson2 un-support parseText.");
     }
 
     public <T> T deserialize(String text, TypeReference<T> typeToken) {
+        return JSON.parseObject(text, typeToken);
+    }
+
+    public <T> T deserialize(String text, Type typeToken) {
         return JSON.parseObject(text, typeToken);
     }
 

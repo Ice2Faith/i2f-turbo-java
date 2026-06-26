@@ -37,6 +37,11 @@
             <artifactId>i2f-serialize-std</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-jackson</artifactId>
+        </dependency>
+
 
         <dependency>
             <groupId>com.openai</groupId>

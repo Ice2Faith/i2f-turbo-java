@@ -8,8 +8,8 @@ import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.ai.std.tool.test.TestToolComponent;
 import i2f.extension.ai.openai.impl.OpenAiAi;
-import i2f.extension.ai.openai.model.OpenAiJsonSerializer;
 import i2f.extension.ai.openai.model.OpenAiModel;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 
 /**
  * @author Ice2Faith
@@ -24,7 +24,7 @@ public class TestOpenAiAgent {
                         .apiKey(System.getenv("DASHSCOPE_AI_API_KEY"))
                         .model(OpenAiAi.DEFAULT_MODEL)
                         .build())
-                .jsonSerializer(OpenAiJsonSerializer.INSTANCE);
+                .jsonSerializer(JacksonJsonSerializer.INSTANCE);
 
         AiAgentResponse resp = agent.generate(new AiRequest()
                         .user("北京的今天的天气怎么样，并且给出今天的日期，最后告诉我历史上的今天发生了什么")

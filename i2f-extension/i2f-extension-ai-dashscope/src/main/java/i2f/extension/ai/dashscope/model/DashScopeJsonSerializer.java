@@ -38,7 +38,12 @@ public class DashScopeJsonSerializer implements IJsonSerializer {
 
     @Override
     public Object deserialize(String enc, Object type) {
-        return JsonUtils.fromJson(enc, (Type) type);
+        if (type instanceof Type) {
+            return JsonUtils.fromJson(enc, (Type) type);
+        } else if (type instanceof TypeToken) {
+            return JsonUtils.fromJson(enc, ((TypeToken) type).getType());
+        }
+        throw new UnsupportedOperationException("DashScope un-support parseText.");
     }
 
 }

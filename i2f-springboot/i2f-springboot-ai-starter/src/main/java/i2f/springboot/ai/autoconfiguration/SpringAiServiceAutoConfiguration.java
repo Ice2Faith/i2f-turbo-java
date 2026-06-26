@@ -6,8 +6,8 @@ import i2f.ai.std.model.AiModel;
 import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.extension.ai.dashscope.model.DashScopeModel;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.springboot.ai.json.JacksonAiJsonSerializer;
 import i2f.springboot.ai.properties.SpringAiModelDashScopeProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -50,7 +50,7 @@ public class SpringAiServiceAutoConfiguration implements ApplicationContextAware
     @ConditionalOnMissingBean(IJsonSerializer.class)
     @Bean
     public IJsonSerializer jsonSerializer(@Autowired ObjectMapper objectMapper) {
-        return new JacksonAiJsonSerializer(objectMapper);
+        return new JacksonJsonSerializer(objectMapper);
     }
 
     @ConditionalOnExpression("${i2f.springboot.ai.json-schema-annotation-resolver.enable:true}")
