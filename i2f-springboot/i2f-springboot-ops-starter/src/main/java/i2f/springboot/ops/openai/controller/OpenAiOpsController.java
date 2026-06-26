@@ -413,8 +413,12 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     resp.withAttr("type", OpenAiConsts.ASSISTANT);
                                                     String respJson = objectMapper.writeValueAsString(resp);
                                                     emitter.send(respJson);
+                                                } else if ("[DONE]".equals(line.trim())) {
+                                                    break;
                                                 }
                                             }
+                                            String respJson = objectMapper.writeValueAsString(OpsSecureReturn.success("[DONE]"));
+                                            emitter.send(respJson);
                                         } catch (Exception e) {
                                             try {
                                                 OpsSecureReturn<?> resp = null;

@@ -2,7 +2,7 @@ package i2f.springboot.ops.openai.tool.impl.a2a;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
-import i2f.ai.rest.openai.model.data.OpenAiAssistantMessage;
+import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
@@ -61,7 +61,7 @@ public class AgentTools {
                 .build();
 
         OpenAiCompletionRespDto resp = aiModel.doPostHttp(completion);
-        OpenAiAssistantMessage msg = resp.getFirstMessage();
+        OpenAiAssistantMessageRespDto msg = resp.getFirstMessage();
         if (msg == null) {
             return "";
         }

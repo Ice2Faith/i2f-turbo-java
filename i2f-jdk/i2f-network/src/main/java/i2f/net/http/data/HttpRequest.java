@@ -206,6 +206,11 @@ public class HttpRequest {
         return header;
     }
 
+    public HttpRequest setHeader(HttpHeaders header) {
+        this.header = header;
+        return this;
+    }
+
     public HttpRequest setHeader(Map<String, ?> header) {
         this.header = new HttpHeaders();
         this.header.addAll(header);

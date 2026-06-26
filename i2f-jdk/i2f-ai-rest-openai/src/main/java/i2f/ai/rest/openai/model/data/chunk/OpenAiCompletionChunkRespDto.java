@@ -1,5 +1,8 @@
-package i2f.ai.rest.openai.model.data;
+package i2f.ai.rest.openai.model.data.chunk;
 
+import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
+import i2f.ai.rest.openai.model.data.OpenAiCompletionChoice;
+import i2f.ai.rest.openai.model.data.OpenAiCompletionUsage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -14,7 +17,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public class OpenAiCompletionRespDto {
+public class OpenAiCompletionChunkRespDto {
     protected String id;
     protected String object;
     protected Long created;
