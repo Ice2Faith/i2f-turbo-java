@@ -3,7 +3,9 @@ package i2f.spring.ai.model;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -13,7 +15,7 @@ import java.util.Map;
  */
 public class SpringAiJsonSerializer implements IJsonSerializer {
     public static final SpringAiJsonSerializer INSTANCE = new SpringAiJsonSerializer();
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = JsonMapper.builder().defaultLocale(Locale.getDefault()).build();
 
     @Override
     public Map<String, Object> deserializeAsMap(String enc) {

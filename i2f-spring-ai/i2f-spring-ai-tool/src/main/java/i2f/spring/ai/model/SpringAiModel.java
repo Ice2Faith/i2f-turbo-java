@@ -150,7 +150,6 @@ public class SpringAiModel implements AiModel {
                 .messages(messageList)
                 .chatOptions(ToolCallingChatOptions.builder()
                         .toolCallbacks(SpringAiToolHelper.convertTools(toolMap))
-                        .internalToolExecutionEnabled(false)
                         .model(model)
                         .build())
                 .build());

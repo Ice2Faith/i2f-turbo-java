@@ -3,7 +3,6 @@ package i2f.spring.ai.model;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 
 /**
  * @author Ice2Faith
@@ -42,24 +41,22 @@ public class SpringAiOpenAiModel extends SpringAiModel {
 
 
         public SpringAiModel build() {
-            OpenAiApi.Builder apiBuilder = OpenAiApi.builder();
+            OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder();
+
             if (baseUrl != null && !baseUrl.isEmpty()) {
-                apiBuilder.baseUrl(baseUrl);
+                optionsBuilder.baseUrl(baseUrl);
             }
             if (apiKey != null && !apiKey.isEmpty()) {
-                apiBuilder.apiKey(apiKey);
+                optionsBuilder.apiKey(apiKey);
             }
-            ;
-            OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder()
-                    .N(1)
-                    .internalToolExecutionEnabled(false);
+
+            optionsBuilder.n(1);
             if (model != null && !model.isEmpty()) {
                 optionsBuilder.model(model);
             }
 
             OpenAiChatModel chatModel = OpenAiChatModel.builder()
-                    .openAiApi(apiBuilder.build())
-                    .defaultOptions(optionsBuilder.build())
+                    .options(optionsBuilder.build())
                     .build();
             return new SpringAiOpenAiModel(chatModel);
         }
