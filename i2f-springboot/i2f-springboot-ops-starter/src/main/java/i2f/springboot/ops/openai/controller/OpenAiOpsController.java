@@ -21,6 +21,8 @@ import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,8 +43,6 @@ import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

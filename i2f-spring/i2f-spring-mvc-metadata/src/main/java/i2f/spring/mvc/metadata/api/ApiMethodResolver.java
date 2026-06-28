@@ -45,6 +45,7 @@ public class ApiMethodResolver {
     public String[] excludeParseTypeNamePrefixArray = {
             "java.",
             "javax.",
+            "jakarta.",
             "javafx.",
             "jdk.",
             "sun.",
