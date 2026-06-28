@@ -6,12 +6,12 @@
     <!--<parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-tools</artifactId>
-        <version>1.0-jdk8</version>
+        <version>1.0-jdk17</version>
     </parent>-->
 
     <groupId>i2f.turbo</groupId>
     <artifactId>i2f-tools-ops</artifactId>
-    <version>1.0-jdk8</version>
+    <version>1.0-jdk17</version>
 
     <packaging>jar</packaging>
 
@@ -75,7 +75,7 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-launcher</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
         </dependency>
 
         <dependency>
@@ -97,13 +97,13 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ops-starter</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ssh-tunnel-starter</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
         </dependency>
 
         <dependency>
@@ -230,7 +230,7 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-xproc4j-starter</artifactId>
-            <version>1.0-jdk8</version>
+            <version>1.0-jdk17</version>
         </dependency>
 
         <dependency>
