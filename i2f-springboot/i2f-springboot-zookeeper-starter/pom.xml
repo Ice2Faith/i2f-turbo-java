@@ -6,7 +6,7 @@
     <parent>
         <groupId>i2f.turbo</groupId>
         <artifactId>i2f-springboot</artifactId>
-        <version>1.0-jdk17</version>
+        <version>1.0-jdk21</version>
     </parent>
 
     <artifactId>i2f-springboot-zookeeper-starter</artifactId>
@@ -31,7 +31,7 @@
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
+            <artifactId>spring-boot-starter-aspectj</artifactId>
             <scope>provided</scope>
         </dependency>
 

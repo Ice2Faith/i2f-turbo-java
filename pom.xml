@@ -6,7 +6,7 @@
 
     <groupId>i2f.turbo</groupId>
     <artifactId>i2f-turbo-java</artifactId>
-    <version>1.0-jdk17</version>
+    <version>1.0-jdk21</version>
 
     <packaging>pom</packaging>
 
@@ -22,7 +22,7 @@
     </modules>
 
     <properties>
-        <i2f.version>1.0-jdk17</i2f.version>
+        <i2f.version>1.0-jdk21</i2f.version>
 
         <root.maven.group>i2f.turbo</root.maven.group>
         <root.maven.artifact>i2f-turbo-java</root.maven.artifact>
@@ -33,11 +33,11 @@
         <root.link.gitee>https://gitee.com/Ice2Faith/i2f-turbo-java</root.link.gitee>
         <root.link.email>ugex_savelar@163.com</root.link.email>
 
-        <java.version>17</java.version>
-        <java.source.version>17</java.source.version>
-        <java.target.version>17</java.target.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>21</java.version>
+        <java.source.version>21</java.source.version>
+        <java.target.version>21</java.target.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
@@ -46,10 +46,10 @@
 
         <!-- spring 体系 -->
         <spring.version>6.2.19</spring.version>
-        <spring.security.version>6.5.11</spring.security.version>
-        <spring-boot.version>3.5.16</spring-boot.version>
-        <spring-cloud.version>2025.0.3</spring-cloud.version>
-        <spring-cloud-alibaba.version>2025.0.0.0</spring-cloud-alibaba.version>
+        <spring.security.version>7.0.5</spring.security.version>
+        <spring-boot.version>4.0.6</spring-boot.version>
+        <spring-cloud.version>2025.1.0</spring-cloud.version>
+        <spring-cloud-alibaba.version>2025.1.0.0</spring-cloud-alibaba.version>
 
         <jackson.version>2.21.4</jackson.version>
         <slf4j.version>2.0.18</slf4j.version>
