@@ -9,11 +9,12 @@ import i2f.extension.jackson.types.JacksonLong2StringSerializer;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 import tools.jackson.databind.ser.std.ToStringSerializer;
 
 import java.text.SimpleDateFormat;
@@ -44,40 +45,44 @@ public class SpringObjectMapperCustomizerConfiguration {
     private String localTimeFormat;
 
     @Bean
-    public Jackson2ObjectMapperBuilderCustomizer jackson2ObjectMapperBuilderCustomizer() {
-        return new Jackson2ObjectMapperBuilderCustomizer() {
+    public JsonMapperBuilderCustomizer jsonMapperBuilderCustomizer() {
+        return new JsonMapperBuilderCustomizer() {
             @Override
-            public void customize(Jackson2ObjectMapperBuilder builder) {
+            public void customize(JsonMapper.Builder builder) {
+                SimpleModule simpleModule = new SimpleModule();
+
                 if (enableLongToString) {
                     if (enableGlobalLong2String) {
-                        builder.serializerByType(Long.class, ToStringSerializer.instance);
-                        builder.serializerByType(Long.TYPE, ToStringSerializer.instance);
-                        builder.serializerByType(long.class, ToStringSerializer.instance);
+                        simpleModule.addSerializer(Long.class, ToStringSerializer.instance);
+                        simpleModule.addSerializer(Long.TYPE, ToStringSerializer.instance);
+                        simpleModule.addSerializer(long.class, ToStringSerializer.instance);
                     } else {
-                        builder.serializerByType(Long.class, new JacksonLong2StringSerializer());
-                        builder.serializerByType(Long.TYPE, new JacksonLong2StringSerializer());
-                        builder.serializerByType(long.class, new JacksonLong2StringSerializer());
+                        simpleModule.addSerializer(Long.class, new JacksonLong2StringSerializer());
+                        simpleModule.addSerializer(Long.TYPE, new JacksonLong2StringSerializer());
+                        simpleModule.addSerializer(long.class, new JacksonLong2StringSerializer());
                     }
                 }
                 if (!StringUtils.isEmpty(dateFormat)) {
                     SimpleDateFormat formatter = new SimpleDateFormat(dateFormat);
-                    builder.deserializerByType(Date.class, new JacksonDateDeserializer(formatter));
+                    simpleModule.addDeserializer(Date.class, new JacksonDateDeserializer(formatter));
                 }
                 if (!StringUtils.isEmpty(dateFormat)) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
-                    builder.serializerByType(LocalDateTime.class, new JacksonTemporalSerializer<LocalDateTime>(formatter));
-                    builder.deserializerByType(LocalDateTime.class, new JacksonLocalDateTimeDeserializer(formatter));
+                    simpleModule.addSerializer(LocalDateTime.class, new JacksonTemporalSerializer<LocalDateTime>(formatter));
+                    simpleModule.addDeserializer(LocalDateTime.class, new JacksonLocalDateTimeDeserializer(formatter));
                 }
                 if (!StringUtils.isEmpty(localDateFormat)) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(localDateFormat);
-                    builder.serializerByType(LocalDate.class, new JacksonTemporalSerializer<LocalDate>(formatter));
-                    builder.deserializerByType(LocalDate.class, new JacksonLocalDateDeserializer(formatter));
+                    simpleModule.addSerializer(LocalDate.class, new JacksonTemporalSerializer<LocalDate>(formatter));
+                    simpleModule.addDeserializer(LocalDate.class, new JacksonLocalDateDeserializer(formatter));
                 }
                 if (!StringUtils.isEmpty(localTimeFormat)) {
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern(localTimeFormat);
-                    builder.serializerByType(LocalTime.class, new JacksonTemporalSerializer<LocalTime>(formatter));
-                    builder.deserializerByType(LocalTime.class, new JacksonLocalTimeDeserializer(formatter));
+                    simpleModule.addSerializer(LocalTime.class, new JacksonTemporalSerializer<LocalTime>(formatter));
+                    simpleModule.addDeserializer(LocalTime.class, new JacksonLocalTimeDeserializer(formatter));
                 }
+
+                builder.addModule(simpleModule);
             }
         };
     }

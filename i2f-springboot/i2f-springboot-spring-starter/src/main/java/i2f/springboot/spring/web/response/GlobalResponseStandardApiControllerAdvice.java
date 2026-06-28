@@ -12,7 +12,7 @@ import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Method;
@@ -99,7 +99,7 @@ public class GlobalResponseStandardApiControllerAdvice implements ResponseBodyAd
         if (isStringReturn) {
             try {
                 object = objectMapper.writeValueAsString(object);
-            } catch (JsonProcessingException e) {
+            } catch (JacksonException e) {
                 log.warn(e.getMessage(), e);
             }
         }

@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -19,7 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class SpringJacksonMvcConfigurer {
 
     @Autowired
-    private MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter;
+    private JacksonJsonHttpMessageConverter mappingJackson2HttpMessageConverter;
 
     @Bean
     public SpringMvcJacksonConverterConfigurer springMvcJacksonConverterConfigurer() {

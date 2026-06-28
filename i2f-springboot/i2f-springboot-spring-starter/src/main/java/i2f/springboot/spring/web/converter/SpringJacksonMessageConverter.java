@@ -5,15 +5,16 @@ import lombok.Data;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.http.converter.json.JacksonJsonHttpMessageConverter;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 /**
  * @author Ice2Faith
  * @date 2023/6/16 22:26
  * @desc
  */
-@ConditionalOnClass(MappingJackson2HttpMessageConverter.class)
+@ConditionalOnClass(JacksonJsonHttpMessageConverter.class)
 @ConditionalOnExpression("${i2f.spring.jackson.enable:true}")
 @Data
 public class SpringJacksonMessageConverter {
@@ -25,9 +26,8 @@ public class SpringJacksonMessageConverter {
     }
 
     @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter(ObjectMapper objectMapper) {
-        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        converter.setObjectMapper(objectMapper);
+    public JacksonJsonHttpMessageConverter mappingJackson2HttpMessageConverter(JsonMapper jsonMapper) {
+        JacksonJsonHttpMessageConverter converter = new JacksonJsonHttpMessageConverter(jsonMapper);
         return converter;
     }
 }
