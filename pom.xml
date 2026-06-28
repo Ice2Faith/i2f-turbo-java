@@ -1406,6 +1406,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-sqlparser</artifactId>
+                <version>${i2f.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-swl</artifactId>
                 <version>${i2f.version}</version>
                 <optional>true</optional>

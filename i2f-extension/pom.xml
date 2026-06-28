@@ -76,6 +76,7 @@
         <module>i2f-extension-sftp</module>
         <module>i2f-extension-slf4j</module>
         <module>i2f-extension-slf4j-log</module>
+        <module>i2f-extension-sqlparser</module>
         <module>i2f-extension-swl</module>
         <module>i2f-extension-tokenlization-ansj</module>
         <module>i2f-extension-tokenlization-hanlp</module>
