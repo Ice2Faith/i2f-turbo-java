@@ -74,13 +74,14 @@ public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
 
     public HttpHeaders add(String key, Object value) {
         ArrayList<String> list = computeIfAbsent(key, k -> new ArrayList<>());
-        if (value instanceof Collection) {
-            Collection<?> col = (Collection<?>) value;
+        if (value instanceof Iterable) {
+            Iterable<?> col = (Iterable<?>) value;
             for (Object item : col) {
                 list.add(valueToString(item));
             }
+        } else {
+            list.add(valueToString(value));
         }
-        list.add(valueToString(value));
         mergeNames(key);
         return this;
     }
