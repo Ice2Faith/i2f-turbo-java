@@ -15,7 +15,6 @@ import org.springframework.ai.content.Media;
 import org.springframework.ai.model.tool.ToolCallingChatOptions;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -77,24 +76,22 @@ public class SpringAiAi {
     }
 
     protected OpenAiChatModel getModel() {
-        OpenAiApi.Builder apiBuilder = OpenAiApi.builder();
+        OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder();
+
         if (baseUrl != null && !baseUrl.isEmpty()) {
-            apiBuilder.baseUrl(baseUrl);
+            optionsBuilder.baseUrl(baseUrl);
         }
         if (apiKey != null && !apiKey.isEmpty()) {
-            apiBuilder.apiKey(apiKey);
+            optionsBuilder.apiKey(apiKey);
         }
-        ;
-        OpenAiChatOptions.Builder optionsBuilder = OpenAiChatOptions.builder()
-                .N(1)
-                .internalToolExecutionEnabled(false);
+
+        optionsBuilder.n(1);
         if (model != null && !model.isEmpty()) {
             optionsBuilder.model(model);
         }
 
         OpenAiChatModel chatModel = OpenAiChatModel.builder()
-                .openAiApi(apiBuilder.build())
-                .defaultOptions(optionsBuilder.build())
+                .options(optionsBuilder.build())
                 .build();
         return chatModel;
     }
@@ -131,7 +128,6 @@ public class SpringAiAi {
                         .messages(historyMessageList)
                         .chatOptions(ToolCallingChatOptions.builder()
                                 .toolCallbacks(SpringAiToolHelper.convertTools(toolMap))
-                                .internalToolExecutionEnabled(false)
                                 .model(model)
                                 .build())
                         .build());
