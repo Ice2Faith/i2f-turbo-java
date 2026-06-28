@@ -53,7 +53,7 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
         String reqUrl = HttpUtil.generateUrl(request);
 
         return restTemplate.execute(reqUrl,
-                HttpMethod.resolve(request.getMethod().toUpperCase()),
+                HttpMethod.valueOf(request.getMethod().toUpperCase()),
                 new RequestCallback() {
                     @Override
                     public void doWithRequest(ClientHttpRequest req) throws IOException {
@@ -78,7 +78,7 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
                     @Override
                     public T extractData(ClientHttpResponse resp) throws IOException {
                         HttpResponse ret = new HttpResponse();
-                        ret.setStatusCode(resp.getRawStatusCode());
+                        ret.setStatusCode(resp.getStatusCode().value());
                         ret.setStatusMessage(resp.getStatusText());
 
                         org.springframework.http.HttpHeaders headers = resp.getHeaders();

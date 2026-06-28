@@ -54,13 +54,13 @@ public class SpringWebRestClient implements IRestClient {
         }
         HttpEntity<Object> reqEntity = new HttpEntity<>(request.getBody(), reqHeaders);
         ResponseEntity<T> respEntity = restTemplate.exchange(url,
-                HttpMethod.resolve(rawMethod.toUpperCase()),
+                HttpMethod.valueOf(rawMethod.toUpperCase()),
                 reqEntity,
                 responseType);
 
         return (RestHttpResponse<T>) RestHttpResponse.builder()
                 .statusCode(respEntity.getStatusCodeValue())
-                .statusMessage(respEntity.getStatusCode().getReasonPhrase())
+                .statusMessage(String.valueOf(respEntity.getStatusCode()))
                 .headers(HttpHeaders.create()
                         .addAll(respEntity.getHeaders())
                 )
