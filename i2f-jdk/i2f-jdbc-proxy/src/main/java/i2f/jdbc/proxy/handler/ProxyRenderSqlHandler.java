@@ -133,7 +133,7 @@ public class ProxyRenderSqlHandler implements IProxyInvocationHandler {
                 return ObjectConvertor.tryConvertAsType(val, returnClass);
             } else if (type == BindSql.Type.CALL) {
                 Map<String, Object> val = JdbcResolver.callNaming(conn, sql);
-                return RichConverter.convert2Type(val, returnType, relTypes);
+                return RichConverter.convert2Type(val, returnType, relTypes, false);
             } else {
                 // 原始包装类型
                 if (TypeOf.typeOf(returnClass, QueryResult.class)) {
@@ -168,11 +168,11 @@ public class ProxyRenderSqlHandler implements IProxyInvocationHandler {
                 if (enablePage) {
                     if (TypeOf.typeOf(returnClass, Page.class)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
-                        return RichConverter.convert2Type(val, returnType, relTypes);
+                        return RichConverter.convert2Type(val, returnType, relTypes, false);
                     } else if (TypeOf.typeOf(returnClass, Collection.class)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
                         List<Map<String, Object>> list = val.getList();
-                        return RichConverter.convert2Type(list, returnType, relTypes);
+                        return RichConverter.convert2Type(list, returnType, relTypes, false);
                     } else if (TypeOf.isBaseType(returnClass)) {
                         Page<Map<String, Object>> val = JdbcResolver.page(conn, sql, page);
                         return ObjectConvertor.tryConvertAsType(val.getTotal(), returnClass);
@@ -188,25 +188,25 @@ public class ProxyRenderSqlHandler implements IProxyInvocationHandler {
                         if (list.isEmpty()) {
                             return null;
                         }
-                        return RichConverter.convert2Type(list.get(0), returnType, relTypes);
+                        return RichConverter.convert2Type(list.get(0), returnType, relTypes, false);
                     }
                 }
 
                 // 列表处理
                 if (TypeOf.typeOf(returnClass, Collection.class)) {
                     List<Map<String, Object>> val = JdbcResolver.list(conn, sql);
-                    return RichConverter.convert2Type(val, returnType, relTypes);
+                    return RichConverter.convert2Type(val, returnType, relTypes, false);
                 }
 
                 // 数组处理
                 if (returnClass.isArray()) {
                     List<Map<String, Object>> val = JdbcResolver.list(conn, sql);
-                    return RichConverter.convert2Type(val, returnType, relTypes);
+                    return RichConverter.convert2Type(val, returnType, relTypes, false);
                 }
 
                 // 其他就是单一对象处理
                 Map<String, Object> val = JdbcResolver.find(conn, sql);
-                return RichConverter.convert2Type(val, returnType, relTypes);
+                return RichConverter.convert2Type(val, returnType, relTypes, false);
             }
         } finally {
             contextProvider.endContextInner(context, conn);
