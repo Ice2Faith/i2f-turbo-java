@@ -1,5 +1,7 @@
 package i2f.extension.ai.langchain4j.impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.agent.tool.ToolExecutionRequest;
 import dev.langchain4j.data.message.*;
 import dev.langchain4j.model.chat.request.ChatRequest;
@@ -12,8 +14,6 @@ import i2f.extension.ai.langchain4j.tool.Langchain4jToolDefinition;
 import i2f.extension.ai.langchain4j.tool.Langchain4jToolHelper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;

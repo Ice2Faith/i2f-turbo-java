@@ -1,8 +1,8 @@
 package i2f.extension.ai.langchain4j.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import tools.jackson.core.type.TypeReference;
-import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 

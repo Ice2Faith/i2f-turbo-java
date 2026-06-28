@@ -11,13 +11,13 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -47,7 +47,7 @@ public class SpringWebRestClient implements IRestClient {
                 url = url + "?" + form;
             }
         }
-        MultiValueMap<String, String> reqHeaders = new LinkedMultiValueMap<>();
+        org.springframework.http.HttpHeaders reqHeaders = new org.springframework.http.HttpHeaders();
         HttpHeaders rawHeaders = request.getHeaders();
         for (Map.Entry<String, ArrayList<String>> entry : rawHeaders.entrySet()) {
             reqHeaders.addAll(entry.getKey(), entry.getValue());
@@ -59,10 +59,17 @@ public class SpringWebRestClient implements IRestClient {
                 responseType);
 
         return (RestHttpResponse<T>) RestHttpResponse.builder()
-                .statusCode(respEntity.getStatusCodeValue())
+                .statusCode(respEntity.getStatusCode().value())
                 .statusMessage(String.valueOf(respEntity.getStatusCode()))
                 .headers(HttpHeaders.create()
-                        .addAll(respEntity.getHeaders())
+                        .apply(headers -> {
+                            org.springframework.http.HttpHeaders respHeaders = respEntity.getHeaders();
+                            Set<String> names = respHeaders.headerNames();
+                            for (String name : names) {
+                                List<String> list = respHeaders.get(name);
+                                headers.add(name, list);
+                            }
+                        })
                 )
                 .body(respEntity.getBody())
                 .build();

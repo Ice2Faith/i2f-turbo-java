@@ -18,7 +18,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -81,8 +83,14 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
                         ret.setStatusCode(resp.getStatusCode().value());
                         ret.setStatusMessage(resp.getStatusText());
 
-                        org.springframework.http.HttpHeaders headers = resp.getHeaders();
-                        ret.setHeader(HttpHeaders.create().addAll(headers));
+                        ret.setHeader(HttpHeaders.create().apply(headers -> {
+                            org.springframework.http.HttpHeaders respHeaders = resp.getHeaders();
+                            Set<String> names = respHeaders.headerNames();
+                            for (String name : names) {
+                                List<String> list = respHeaders.get(name);
+                                headers.add(name, list);
+                            }
+                        }));
 
                         long contentLength = resp.getHeaders().getContentLength();
                         ret.setContentLength(contentLength);
