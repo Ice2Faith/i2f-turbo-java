@@ -13,7 +13,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
@@ -177,7 +177,7 @@ public class LimitManager implements ApplicationRunner {
                     String json = objectMapper.writeValueAsString(rule);
                     rawValue = json.getBytes(StandardCharsets.UTF_8);
                     conn.set(rawKey, rawValue);
-                } catch (JsonProcessingException e) {
+                } catch (JacksonException e) {
                     throw new IllegalArgumentException(e.getMessage(), e);
                 }
             }

@@ -1,17 +1,17 @@
 package i2f.springboot.redis;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.text.SimpleDateFormat;
+import java.util.Locale;
 
 /**
  * @author Ice2Faith
@@ -26,15 +26,14 @@ public class RedisAutoConfiguration {
 
     String dateFormat = "yyyy-MM-dd HH:mm:ss SSS";
 
-    @ConditionalOnMissingBean(Jackson2JsonRedisSerializer.class)
+    @ConditionalOnMissingBean(JacksonJsonRedisSerializer.class)
     @Bean
-    public Jackson2JsonRedisSerializer<Object> getRedisSerializer() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setDateFormat(new SimpleDateFormat(dateFormat));
-        Jackson2JsonRedisSerializer<Object> jackson2JsonRedisSerializer = new Jackson2JsonRedisSerializer<>(Object.class);
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
-        jackson2JsonRedisSerializer.setObjectMapper(objectMapper);
+    public JacksonJsonRedisSerializer<Object> getRedisSerializer() {
+        ObjectMapper objectMapper = JsonMapper.builder()
+                .defaultLocale(Locale.getDefault())
+                .defaultDateFormat(new SimpleDateFormat(dateFormat))
+                .build();
+        JacksonJsonRedisSerializer<Object> jackson2JsonRedisSerializer = new JacksonJsonRedisSerializer<>(objectMapper, Object.class);
         log.info("Jackson2JsonRedisSerializer config done.");
         return jackson2JsonRedisSerializer;
     }

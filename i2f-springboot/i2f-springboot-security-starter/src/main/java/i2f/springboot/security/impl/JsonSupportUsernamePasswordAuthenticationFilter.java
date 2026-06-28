@@ -4,6 +4,7 @@ import i2f.authentication.password.LoginPasswordDecoder;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.ApplicationContext;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -14,7 +15,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 
@@ -70,7 +71,7 @@ public class JsonSupportUsernamePasswordAuthenticationFilter extends UsernamePas
     }
 
     public JsonSupportUsernamePasswordAuthenticationFilter buildLoginPath(String path) {
-        super.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(path, "POST"));
+        super.setRequiresAuthenticationRequestMatcher(PathPatternRequestMatcher.pathPattern(HttpMethod.POST, path));
         return this;
     }
 

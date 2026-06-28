@@ -3,7 +3,7 @@ package i2f.springboot.ops.common;
 import i2f.rowset.impl.json.AbsJsonArrayMapRowSetWriter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import tools.jackson.core.JsonProcessingException;
+import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
@@ -26,7 +26,7 @@ public class JacksonJsonArrayCollectionMapRowSetWriter<M extends Map<String, Obj
     public String toJson(Object obj) {
         try {
             return mapper.writeValueAsString(obj);
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
     }

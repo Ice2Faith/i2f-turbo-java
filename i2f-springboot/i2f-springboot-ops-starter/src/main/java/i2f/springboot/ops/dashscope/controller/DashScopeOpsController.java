@@ -11,14 +11,12 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.ObjectMapper;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 
@@ -46,10 +44,7 @@ public class DashScopeOpsController implements IOpsProvider {
     private RestTemplate restTemplate = createRestTemplate();
 
     public RestTemplate createRestTemplate() {
-        return new RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(30))
-                .setReadTimeout(Duration.ofMinutes(15))
-                .build();
+        return new RestTemplate();
     }
 
     @Override

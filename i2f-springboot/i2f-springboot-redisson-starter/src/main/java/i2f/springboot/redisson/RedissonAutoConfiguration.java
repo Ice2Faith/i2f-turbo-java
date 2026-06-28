@@ -9,8 +9,8 @@ import org.redisson.config.ClusterServersConfig;
 import org.redisson.config.Config;
 import org.redisson.config.SentinelServersConfig;
 import org.redisson.config.SingleServerConfig;
-import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.data.redis.autoconfigure.DataRedisProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.util.StringUtils;
@@ -43,10 +43,10 @@ public class RedissonAutoConfiguration {
     private int pingConnectionInterval = 3000;
 
     @Bean
-    public RedissonClient redissonClient(RedisProperties redisProperties) {
+    public RedissonClient redissonClient(DataRedisProperties redisProperties) {
         Config config = new Config();
-        RedisProperties.Sentinel sentinel = redisProperties.getSentinel();
-        RedisProperties.Cluster redisPropertiesCluster = redisProperties.getCluster();
+        DataRedisProperties.Sentinel sentinel = redisProperties.getSentinel();
+        DataRedisProperties.Cluster redisPropertiesCluster = redisProperties.getCluster();
         if (redisPropertiesCluster != null) {
             //集群redis
             ClusterServersConfig clusterServersConfig = config.useClusterServers();
