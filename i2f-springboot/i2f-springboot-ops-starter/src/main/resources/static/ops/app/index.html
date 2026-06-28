@@ -5,6 +5,7 @@
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - App</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
     <script src="../lib/vue/vue-2.js"></script>
     <script src="../lib/moment/moment-2.24.0.js"></script>
     <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -23,6 +24,7 @@
     <script src="../common/OpsSecureDto.js"></script>
     <script src="../common/OpsSecureHelper.js"></script>
     <script src="../common/OpsSecureTransfer.js"></script>
+    <script src="../lib/vue-contextmenujs-1.4.11/contextmenu.umd.js"></script>
     <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
     <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
@@ -69,6 +71,9 @@
     <script src="../lib/codemirror-6.65.7/mode/nginx/nginx.min.js" ></script>
 
     <script src="../lib/codemirror-6.65.7/mode/python/python.min.js" ></script>
+
+    <link rel="stylesheet" href="../lib/jsoneditor/10.4.1/jsoneditor.min.css"/>
+    <script src="../lib/jsoneditor/10.4.1/jsoneditor.min.js"></script>
 </head>
 <body>
 <div id="app">
@@ -86,7 +91,11 @@
     <el-divider>App操作</el-divider>
     <el-card shadow="never">
         <span>Groovy语法脚本</span>
-        <textarea ref="refEditor"></textarea>
+        <div :class="'expand-main-editor'+(expandMainEditor?' expand-main-editor__expand':'')"
+             @contextmenu.prevent="onEditorContextmenu(editor)">
+            <textarea ref="refEditor"></textarea>
+        </div>
+        <span class="el-icon-full-screen expand-main-editor__badge" @click="expandMainEditor=!expandMainEditor"></span>
     </el-card>
 
     <el-row>
@@ -202,7 +211,10 @@
                 </el-select>
             </el-form-item>
         </el-form>
-        <textarea ref="refResultEditor"></textarea>
+        <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor,['json-editor'])">
+            <textarea ref="refResultEditor"></textarea>
+        </div>
+
     </el-card>
 
     <el-drawer
@@ -589,11 +601,24 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <textarea ref="refTextViewerEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor,['json-editor'])">
+                <textarea ref="refTextViewerEditor"></textarea>
+            </div>
+
         </el-card>
     </el-dialog>
 
-
+    <el-dialog
+            :title="dialog.jsonEditor.title"
+            :visible.sync="dialog.jsonEditor.show"
+            top="5vh"
+            width="90%">
+        <div ref="refJsonEditor" style="width: 100%; height: 70vh;"></div>
+        <el-row type="flex" justify="end" style="margin-top: 5px;">
+            <el-button size="mini" @click="dialog.jsonEditor.show=false;">取消</el-button>
+            <el-button type="primary" size="mini" @click="onSaveJsonEditorContent">保存</el-button>
+        </el-row>
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -657,11 +682,13 @@
         methods: {
             getDefaultData() {
                 return {
+                    expandMainEditor: false,
                     editor: null,
                     opsBroadcastChannel: null,
                     langEditors: {
                         resultEditor: null,
                         textViewerEditor: null,
+                        jsonEditor: null,
                     },
                     completions: [],
                     storage: {},
@@ -732,6 +759,13 @@
                             title: '文本浏览',
                             text: '',
                             lang: 'text'
+                        },
+                        jsonEditor: {
+                            show: false,
+                            title: 'JSON编辑器',
+                            text: '',
+                            // function(text)
+                            saveCallback: null,
                         },
                     },
                     form: {
@@ -870,6 +904,345 @@
                     }
                 }
                 return ret;
+            },
+            onEditorContextmenu(editor, categoryList) {
+                let _this = this
+                let convertText = function (convertor) {
+                    try {
+                        let text = editor.getSelection();
+                        if (!text || text == '') {
+                            text = editor.getValue()
+                            text = convertor(text);
+                            editor.setValue(text)
+                        } else {
+                            text = convertor(text);
+                            editor.replaceSelection(text)
+                        }
+                    } catch (e) {
+                        _this.$message.error('操作失败')
+                    }
+                }
+
+                let presetMenusMap = {
+                    text: [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `upper`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toUpperCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `lower`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toLowerCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的字符串', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(searchText, replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: `regexp_replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的正则', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(new RegExp(searchText, 'g'), replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: 'encode/decode',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `encode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return btoa(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `decode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return atob(s);
+                                        })
+                                    }
+                                },
+
+                            ]
+                        },
+                        {
+                            label: 'SQL escape',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `escape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return "'" + s.replaceAll("'", "''") + "'";
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `unescape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            if (s.startsWith("'")) {
+                                                s = s.substring(1);
+                                            }
+                                            if (s.endsWith("'")) {
+                                                s = s.substring(0, s.length - 1);
+                                            }
+                                            return s.replaceAll("''", "'");
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            label: 'Json Convert',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `to_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return JSON.stringify(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `parse_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            if (typeof obj == 'string') {
+                                                return obj + '';
+                                            }
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `format_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+
+                    ],
+                    sql: [
+                        {
+                            label: 'SQL segments',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `count(1)`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `select`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `update`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'update ' + s + '\n set \n\nwhere  \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `delete`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'delete from ' + s + '\nwhere  \n';
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {label: '', divided: true}, // 分割线
+                        ...((typeof sqlFormatter != 'object') ? [] : [{
+                            label: `format sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return _this.formatSql(s);
+                                })
+                            }
+                        }]),
+                    ],
+                    'json-editor': [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `Json Editor`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let text = editor.getValue();
+                                this.showJsonEditor(text, (res) => {
+                                    editor.setValue(res);
+                                });
+
+                            }
+                        },
+                    ]
+                }
+                let menus = [...presetMenusMap.text]
+                categoryList = categoryList || []
+                if (categoryList && categoryList.length > 0) {
+                    for (let i = 0; i < categoryList.length; i++) {
+                        let category = categoryList[i];
+                        if (category == 'text') {
+                            continue;
+                        }
+                        menus.push(...presetMenusMap[category])
+                    }
+                }
+                this.$contextmenu({
+                    items: menus,
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
+            formatSql(sql) {
+                if (!sql) {
+                    return sql;
+                }
+
+                // 设置选项
+                const options = {
+                    keywordCase: 'lower',
+                    indent: '\t'
+                };
+
+                // 格式化SQL
+                const formatted = sqlFormatter.format(sql, options);
+                return formatted;
             },
             initEditor() {
                 if(this.editor){
@@ -1038,6 +1411,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1068,15 +1469,14 @@
                     let req = {
 
                     }
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/hostId',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || ''
+                            let resp = this.transferRecv(res.data.data) || ''
                             //console.log(resp)
                             let list=[...this.metas.hostIdList];
                             if(resp && resp!='') {
@@ -1139,15 +1539,14 @@
                         script: script,
                         waitForSeconds: this.form.waitForSeconds,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/eval`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = resp || '';
                             try {
@@ -1202,15 +1601,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/system-properties`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.systemProperties.items = resp || [];
                         } else {
@@ -1236,15 +1634,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/system-env`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.systemEnv.items = resp || [];
                         } else {
@@ -1270,15 +1667,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/input-arguments`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.inputArguments.items = resp || [];
                         } else {
@@ -1304,15 +1700,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/beans`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.beans.items = resp || [];
                         } else {
@@ -1338,15 +1733,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/service-instances`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.serviceInstances.items = resp || [];
                         } else {
@@ -1372,15 +1766,14 @@
                     let req = this.assignHostId({
 
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/locked-threads`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.lockedThreads.items = resp || [];
                         } else {
@@ -1396,6 +1789,61 @@
                     this.drawer.lockedThreads.refreshLoading = false;
                 }
             },
+            showJsonEditor(text, callback) {
+                try {
+                    JSON.parse(text)
+                } catch (e) {
+                    this.$message.warning('JSON可能不正确，编辑器可能无法正常工作')
+                }
+                this.dialog.jsonEditor.text = text;
+                this.dialog.jsonEditor.saveCallback = callback;
+                this.dialog.jsonEditor.show = true;
+
+                let _this = this;
+                setTimeout(() => {
+                    // create the editor
+                    let container = this.$refs.refJsonEditor;
+
+
+                    //  mode: 'tree' (default), 'view', 'form', 'code', 'text', 'preview',
+                    // editor.getTextSelection()
+                    // editor.set(initialJson)
+                    // editor.getText()
+                    // editor.setText(jsonString)
+                    if (!this.langEditors.jsonEditor || !this.langEditors.jsonEditor.getText) {
+                        const options = {
+                            mode: 'tree', // default mode
+                            modes: ['tree', 'code', 'form', 'text', 'view', 'preview'], // all support change ode
+                            mainMenuBar: true,
+                            navigationBar: true,
+                            statusBar: true,
+                            onChangeText: function (text) { // content change callback
+                                _this.dialog.jsonEditor.text = text;
+                            }
+                        }
+                        this.langEditors.jsonEditor = new JSONEditor(container, options)
+                    }
+
+                    // set json
+                    try {
+                        this.langEditors.jsonEditor.setText(this.dialog.jsonEditor.text);
+                    } catch (e) {
+                        this.$message.warning('JSON可能不正确，编辑器可能无法正常工作')
+                    }
+                }, 300)
+            },
+            onSaveJsonEditorContent() {
+                if (!this.langEditors.jsonEditor) {
+                    this.dialog.jsonEditor.show = false;
+                    return
+                }
+                let content = this.langEditors.jsonEditor.getText()
+                let callback = this.dialog.jsonEditor.saveCallback;
+                if (callback) {
+                    callback(content)
+                }
+                this.dialog.jsonEditor.show = false;
+            }
 
         }
     })
@@ -1435,6 +1883,22 @@
 
     .checked-item {
         background: darkorange;
+    }
+
+    .expand-main-editor {
+
+    }
+
+    .expand-main-editor__expand .CodeMirror {
+        height: calc(100vh - 160px);
+    }
+
+    .expand-main-editor__badge {
+        float: right;
+        position: relative;
+        bottom: 0px;
+        right: -15px;
+        z-index: 2000;
     }
 
     .el-table__cell .table-cell-hidden{

@@ -5,6 +5,7 @@
   <!-- 1小时缓存过期 -->
   <meta http-equiv="Cache-Control" content="max-age=3600, public">
   <title>Ops - Redis</title>
+  <link rel="icon" type="image/png" href="../favicon.png">
   <script src="../lib/vue/vue-2.js"></script>
   <script src="../lib/moment/moment-2.24.0.js"></script>
   <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -23,7 +24,7 @@
   <script src="../common/OpsSecureDto.js"></script>
   <script src="../common/OpsSecureHelper.js"></script>
   <script src="../common/OpsSecureTransfer.js"></script>
-
+  <script src="../lib/vue-contextmenujs-1.4.11/contextmenu.umd.js"></script>
   <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
   <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
   <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
@@ -84,6 +85,22 @@
   <el-row>
     <el-form inline label-position="left" label-width="80px">
       <el-button size="medium" @click="doResetData">重置</el-button>
+      <el-divider direction="vertical"></el-divider>
+      <el-checkbox v-model="form.meta.useCustom">自定义连接</el-checkbox>
+      <template v-if="form.meta.useCustom">
+        <el-form-item label="主机">
+          <el-input clearable v-model="form.meta.host" placeholder="localhost"></el-input>
+        </el-form-item>
+        <el-form-item label="端口">
+          <el-input clearable v-model="form.meta.port" placeholder="6379"></el-input>
+        </el-form-item>
+        <el-form-item label="密码">
+          <el-input clearable v-model="form.meta.password" placeholder="123456"></el-input>
+        </el-form-item>
+        <el-form-item label="数据库">
+          <el-input-number clearable v-model="form.meta.database" :min="-1" :max="1024"></el-input-number>
+        </el-form-item>
+      </template>
       <el-divider direction="vertical"></el-divider>
       <el-form-item>
         <el-popover
@@ -206,7 +223,9 @@
           </el-select>
         </el-form-item>
       </el-form>
-      <textarea ref="refTextViewerEditor"></textarea>
+      <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor)">
+        <textarea ref="refTextViewerEditor"></textarea>
+      </div>
     </el-card>
   </el-dialog>
 </div>
@@ -277,6 +296,13 @@
             }
           },
           form: {
+            meta: {
+              useCustom: false,
+              host: 'localhost',
+              port: 6379,
+              password: '',
+              database: -1
+            },
             useScanKeys: true,
             pattern: "*",
             key: '',
@@ -380,6 +406,34 @@
         }
         throw ex;
       },
+      transferSend(req){
+        let ex=null;
+        for (let i = 0; i < 5; i++) {
+          try{
+            let transfer = this.getTransfer();
+            return transfer.send(req);
+          }catch (e){
+            ex=e;
+          }
+        }
+        if(ex!=null){
+          throw ex;
+        }
+      },
+      transferRecv(req){
+        let ex=null;
+        for (let i = 0; i < 5; i++) {
+          try{
+            let transfer = this.getTransfer();
+            return transfer.recv(req);
+          }catch (e){
+            ex=e;
+          }
+        }
+        if(ex!=null){
+          throw ex;
+        }
+      },
       messageError(msg,limit){
         window._lastError=msg;
         if(limit && limit>=0) {
@@ -391,6 +445,345 @@
       },
       onCertChange() {
 
+      },
+      onEditorContextmenu(editor, categoryList) {
+        let _this = this
+        let convertText = function (convertor) {
+          try {
+            let text = editor.getSelection();
+            if (!text || text == '') {
+              text = editor.getValue()
+              text = convertor(text);
+              editor.setValue(text)
+            } else {
+              text = convertor(text);
+              editor.replaceSelection(text)
+            }
+          } catch (e) {
+            _this.$message.error('操作失败')
+          }
+        }
+
+        let presetMenusMap = {
+          text: [
+            {label: '', divided: true}, // 分割线
+            {
+              label: `upper`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                convertText(function (s) {
+                  if (!s) {
+                    return s;
+                  }
+                  return s.toUpperCase();
+                })
+              }
+            },
+            {
+              label: `lower`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                convertText(function (s) {
+                  if (!s) {
+                    return s;
+                  }
+                  return s.toLowerCase();
+                })
+              }
+            },
+            {
+              label: `replace`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                let searchText = '';
+                let replaceText = '';
+                this.$prompt('请输入要查找的字符串', '输入框', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                }).then(({value}) => {
+                  searchText = value;
+                  this.$prompt('请输入要替换为的字符串', '输入框', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                  }).then(({value}) => {
+                    replaceText = value;
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return s.replaceAll(searchText, replaceText);
+                    })
+                  })
+                })
+
+
+              }
+            },
+            {
+              label: `regexp_replace`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                let searchText = '';
+                let replaceText = '';
+                this.$prompt('请输入要查找的正则', '输入框', {
+                  confirmButtonText: '确定',
+                  cancelButtonText: '取消',
+                }).then(({value}) => {
+                  searchText = value;
+                  this.$prompt('请输入要替换为的字符串', '输入框', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                  }).then(({value}) => {
+                    replaceText = value;
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return s.replaceAll(new RegExp(searchText, 'g'), replaceText);
+                    })
+                  })
+                })
+
+
+              }
+            },
+            {
+              label: 'encode/decode',
+              icon: 'el-icon-magic-stick',
+              children: [
+                {label: '', divided: true}, // 分割线
+                {
+                  label: `encode_base64`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return btoa(s);
+                    })
+                  }
+                },
+                {
+                  label: `decode_base64`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return atob(s);
+                    })
+                  }
+                },
+
+              ]
+            },
+            {
+              label: 'SQL escape',
+              icon: 'el-icon-magic-stick',
+              children: [
+                {label: '', divided: true}, // 分割线
+                {
+                  label: `escape_sql`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return "'" + s.replaceAll("'", "''") + "'";
+                    })
+                  }
+                },
+                {
+                  label: `unescape_sql`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      if (s.startsWith("'")) {
+                        s = s.substring(1);
+                      }
+                      if (s.endsWith("'")) {
+                        s = s.substring(0, s.length - 1);
+                      }
+                      return s.replaceAll("''", "'");
+                    })
+                  }
+                },
+              ]
+            },
+            {
+              label: 'Json Convert',
+              icon: 'el-icon-magic-stick',
+              children: [
+                {label: '', divided: true}, // 分割线
+                {
+                  label: `to_json`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return JSON.stringify(s);
+                    })
+                  }
+                },
+                {
+                  label: `parse_json`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      let obj = JSON.parse(s);
+                      if (typeof obj == 'string') {
+                        return obj + '';
+                      }
+                      return JSON.stringify(obj, null, '    ')
+                    })
+                  }
+                },
+                {
+                  label: `format_json`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      let obj = JSON.parse(s);
+                      return JSON.stringify(obj, null, '    ')
+                    })
+                  }
+                },
+              ]
+            },
+
+          ],
+          sql: [
+            {
+              label: 'SQL segments',
+              icon: 'el-icon-magic-stick',
+              children: [
+                {label: '', divided: true}, // 分割线
+                {
+                  label: `count(1)`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                    })
+                  }
+                },
+                {
+                  label: `select`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                    })
+                  }
+                },
+                {
+                  label: `update`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return 'update ' + s + '\n set \n\nwhere  \n';
+                    })
+                  }
+                },
+                {
+                  label: `delete`,
+                  icon: 'el-icon-magic-stick',
+                  onClick: () => {
+                    convertText(function (s) {
+                      if (!s) {
+                        return s;
+                      }
+                      return 'delete from ' + s + '\nwhere  \n';
+                    })
+                  }
+                },
+              ]
+            },
+            {label: '', divided: true}, // 分割线
+            ...((typeof sqlFormatter != 'object') ? [] : [{
+              label: `format sql`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                let _this = this;
+                convertText(function (s) {
+                  if (!s) {
+                    return s;
+                  }
+                  return _this.formatSql(s);
+                })
+              }
+            }]),
+          ],
+          'json-editor': [
+            {label: '', divided: true}, // 分割线
+            {
+              label: `Json Editor`,
+              icon: 'el-icon-magic-stick',
+              onClick: () => {
+                let text = editor.getValue();
+                this.showJsonEditor(text, (res) => {
+                  editor.setValue(res);
+                });
+
+              }
+            },
+          ]
+        }
+        let menus = [...presetMenusMap.text]
+        categoryList = categoryList || []
+        if (categoryList && categoryList.length > 0) {
+          for (let i = 0; i < categoryList.length; i++) {
+            let category = categoryList[i];
+            if (category == 'text') {
+              continue;
+            }
+            menus.push(...presetMenusMap[category])
+          }
+        }
+        this.$contextmenu({
+          items: menus,
+          event, // 必须传入 event 以确定位置
+          zIndex: 3000,
+          minWidth: 180
+        });
+      },
+      formatSql(sql) {
+        if (!sql) {
+          return sql;
+        }
+
+        // 设置选项
+        const options = {
+          keywordCase: 'lower',
+          indent: '\t'
+        };
+
+        // 格式化SQL
+        const formatted = sqlFormatter.format(sql, options);
+        return formatted;
       },
       initLangEditor(editorProp,editorRef,editorLang,afterCallback){
         let bts=new Date().getTime()
@@ -470,24 +863,27 @@
           this.initTextViewerEditor()
         },200)
       },
+      assignRedisMeta(req) {
+        req.meta = this.form.meta;
+        return req;
+      },
       doRefreshKeys(){
         this.metas.keyListLoading = true;
         try {
           let useScanKeys=this.form.useScanKeys;
-          let req = {
+          let req = this.assignRedisMeta({
             pattern: this.form.pattern,
-          }
+          })
 
 
-          let transfer = this.getTransfer();
           this.$axios({
             url: '/'+(useScanKeys?'scan':'keys'),
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.metas.keyList = resp;
               let tree=this.rebuildKeyTree(resp);
@@ -610,18 +1006,17 @@
       doDeleteKey(keys){
         this.metas.deleteLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             keys: keys,
-          }
-          let transfer = this.getTransfer();
+          })
           this.$axios({
             url: '/delete',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
@@ -647,18 +1042,17 @@
       onViewKey(){
         this.metas.getLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
-          }
-          let transfer = this.getTransfer();
+          })
           this.$axios({
             url: '/get',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.form.key=resp.key;
               this.form.ttl=resp.ttl || -1;
@@ -695,20 +1089,19 @@
       doSetKey(){
         this.metas.setLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
             ttl: this.form.ttl,
             value: this.form.value,
-          }
-          let transfer = this.getTransfer();
+          })
           this.$axios({
             url: '/set',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {
@@ -743,19 +1136,18 @@
       doUpdateTtl(){
         this.metas.ttlLoading = true;
         try {
-          let req = {
+          let req = this.assignRedisMeta({
             key: this.form.key,
             ttl: this.form.ttl
-          }
-          let transfer = this.getTransfer();
+          })
           this.$axios({
             url: '/ttl',
             method: 'post',
-            data: transfer.send(req)
+            data: this.transferSend(req)
           }).then(res => {
             if (res.data.code == 200) {
               //console.log(res.data)
-              let resp = transfer.recv(res.data.data)
+              let resp = this.transferRecv(res.data.data)
               //console.log(resp)
               this.$message.success('操作成功')
             } else {

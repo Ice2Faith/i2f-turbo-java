@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 import i2f.reflect.ReflectResolver;
@@ -33,7 +34,7 @@ public class LangInvokeNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String method = node.getTagAttrMap().get(AttrConsts.METHOD);
         if (method == null || method.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.METHOD);

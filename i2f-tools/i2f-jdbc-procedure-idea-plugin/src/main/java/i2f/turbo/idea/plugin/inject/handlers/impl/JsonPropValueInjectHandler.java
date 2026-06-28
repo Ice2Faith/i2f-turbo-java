@@ -11,7 +11,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
+import i2f.extension.velocity.VelocityGenerator;
 import i2f.match.impl.SimpleMatcher;
+import i2f.text.StringUtils;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
@@ -19,8 +21,6 @@ import i2f.turbo.idea.plugin.inject.data.point.JsonPropValueInjectPoint;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
 import i2f.turbo.idea.plugin.inject.metadata.JsonMetadataResolver;
-import i2f.turbo.idea.plugin.inject.utils.StringUtils;
-import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;

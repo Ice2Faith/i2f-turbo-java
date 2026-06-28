@@ -23,7 +23,7 @@
 - Menu Bar->File->Setting->Plugins->Setting(little icon)->Install Plugin from Disk...->Choice this jar file->finish
 
 ```shell
-jdbc-procedure-plugin-2021.1-211.jar
+jdbc-procedure-plugin-2021.1-211.zip
 ```
 
 ### 检查 (Check)

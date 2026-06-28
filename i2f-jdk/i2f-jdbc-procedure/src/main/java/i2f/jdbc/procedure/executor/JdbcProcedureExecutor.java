@@ -16,6 +16,7 @@ import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.log.JdbcProcedureLogger;
 import i2f.jdbc.procedure.node.ExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
@@ -52,6 +53,8 @@ public interface JdbcProcedureExecutor {
         }
         return false;
     }
+
+    IGrammarReporter grammarReporter();
 
     void registryExecutorNode(ExecutorNode node);
 

@@ -1,0 +1,41 @@
+[
+  {
+    "label": "默认角色",
+    "icon": "el-icon-odometer",
+    "url": "./role-default.md"
+  },
+  {
+    "label": "",
+    "divided": true
+  },
+  {
+    "label": "中外语翻译官",
+    "icon": "el-icon-microphone",
+    "url": "./role-translator.md"
+  },
+  {
+    "label": "资深开发工程师",
+    "icon": "el-icon-mouse",
+    "url": "./role-developer.md"
+  },
+  {
+    "label": "Emoji表情大师",
+    "icon": "el-icon-mouse",
+    "url": "./role-unicode-emoji.md"
+  },
+  {
+    "label": "易学命理大师",
+    "icon": "el-icon-discover",
+    "url": "./role-sizubazi.md"
+  },
+  {
+    "label": "文学泰斗",
+    "icon": "el-icon-collection",
+    "url": "./role-poetry.md"
+  },
+  {
+    "label": "Api聊天女友",
+    "icon": "el-icon-chat-line-round",
+    "url": "./role-api-girlfirend.md"
+  }
+]

@@ -18,6 +18,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.xml.XmlTag;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import org.jetbrains.annotations.NotNull;
@@ -78,8 +79,8 @@ public class JdbcProcedureFunctionJumpSourceFileAction extends AnAction {
                     return CompletionHelper.getPsiMethodSignature(method);
                 } else if (element instanceof XmlTag) {
                     XmlTag xmlTag = (XmlTag) element;
-                    String id = xmlTag.getAttributeValue("id");
-                    ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(id);
+                    String id = xmlTag.getAttributeValue(AttrConsts.ID);
+                    ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(element.getProject(), id);
                     return CompletionHelper.getProcedureMetaSignature(meta);
                 }
                 return element.getText();
@@ -103,6 +104,12 @@ public class JdbcProcedureFunctionJumpSourceFileAction extends AnAction {
         VirtualFile virtualFile = event.getData(CommonDataKeys.VIRTUAL_FILE);
 //        PsiElement element = event.getData(CommonDataKeys.PSI_ELEMENT);
         PsiFile psiFile = event.getData(CommonDataKeys.PSI_FILE);
+        if (editor == null) {
+            return null;
+        }
+        if (psiFile == null) {
+            return null;
+        }
 
         SelectionModel selectionModel = editor.getSelectionModel();
         if (selectionModel != null) {

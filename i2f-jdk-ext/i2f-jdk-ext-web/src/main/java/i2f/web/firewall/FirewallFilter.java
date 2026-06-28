@@ -2,7 +2,7 @@ package i2f.web.firewall;
 
 
 import i2f.firewall.exception.FirewallException;
-import i2f.net.http.HttpStatus;
+import i2f.net.http.consts.HttpStatusConstants;
 import i2f.web.firewall.wrapper.FirewallHttpServletRequestWrapper;
 import i2f.web.firewall.wrapper.FirewallHttpServletResponseWrapper;
 import jakarta.servlet.*;
@@ -51,7 +51,7 @@ public class FirewallFilter implements Filter {
         try {
             doInnerFilter(httpRequest, httpResponse, chain);
         } catch (FirewallException e) {
-            httpResponse.setStatus(HttpStatus.BAD_REQUEST);
+            httpResponse.setStatus(HttpStatusConstants.BAD_REQUEST);
             httpResponse.setContentType("text/plain;charset=UTF-8");
             httpResponse.getWriter().write(e.getMessage());
         }

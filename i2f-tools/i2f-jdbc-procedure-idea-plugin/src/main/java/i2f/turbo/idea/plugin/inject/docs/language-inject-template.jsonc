@@ -214,7 +214,6 @@
           "select",
           "update"
         ]
-
       }
     ],
     // 允许关联的Java元数据

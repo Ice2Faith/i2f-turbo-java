@@ -7,6 +7,7 @@ import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String refid = node.getTagAttrMap().get(AttrConsts.REFID);
         if (refid == null || refid.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.REFID);

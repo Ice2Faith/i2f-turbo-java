@@ -16,6 +16,7 @@
 
     <modules>
         <module>i2f-agent</module>
+        <module>i2f-ai-rest-openai</module>
         <module>i2f-ai-std</module>
         <module>i2f-algo</module>
         <module>i2f-annotations</module>
@@ -111,6 +112,7 @@
         <module>i2f-match</module>
         <module>i2f-match-std</module>
         <module>i2f-math</module>
+        <module>i2f-mixins</module>
         <module>i2f-native-core</module>
         <module>i2f-native-windows</module>
         <module>i2f-native-windows-easyx</module>
@@ -146,6 +148,7 @@
         <module>i2f-text</module>
         <module>i2f-thread</module>
         <module>i2f-trace</module>
+        <module>i2f-trace-mdc</module>
         <module>i2f-translate</module>
         <module>i2f-translate-en2zh</module>
         <module>i2f-translate-zh2pinyin</module>
@@ -158,9 +161,9 @@
         <module>i2f-verifycode</module>
         <module>i2f-workflow</module>
         <module>i2f-xml</module>
+        <module>i2f-design-pattern</module>
 
         <module>test-features</module>
-        <module>i2f-trace-mdc</module>
     </modules>
 
 

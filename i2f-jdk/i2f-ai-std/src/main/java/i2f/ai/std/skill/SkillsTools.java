@@ -1,5 +1,6 @@
 package i2f.ai.std.skill;
 
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
@@ -20,8 +21,13 @@ import java.util.concurrent.TimeUnit;
 @Tools
 public class SkillsTools {
 
-    @Tool(description = "获取技能(skill)的详细教程")
-    public String getSkillDocument(@ToolParam(description = "技能名称，例如：search_website") String skillName) throws Exception {
+    @Tool(
+            tags = {
+                    AiTags.AUTO_VALUE,
+                    AiTags.READONLY_VALUE,
+            },
+            description = "获取技能(skill)的文档")
+    public String get_skill_document(@ToolParam(description = "技能名称，例如：search_website") String skillName) throws Exception {
         if (skillName == null || !skillName.matches("^[a-zA-Z0-9\\-_\\.]+$")) {
             throw new IllegalArgumentException("bad skillName accept");
         }
@@ -45,9 +51,13 @@ public class SkillsTools {
         return text;
     }
 
-    @Tool(description = "获取技能(skill)中的其他资源文件")
-    public String getSkillAsset(@ToolParam(description = "技能名称，例如：search_website") String skillName,
-                                @ToolParam(description = "资源路径，例如：script/test.py") String resourcePath) throws Exception {
+    @Tool(
+            tags = {
+                    AiTags.AUTO_VALUE,
+                    AiTags.READONLY_VALUE,
+            }, description = "获取技能(skill)中的资源或者脚本")
+    public String get_skill_resource(@ToolParam(description = "技能名称，例如：search_website") String skillName,
+                                     @ToolParam(description = "资源路径，例如：script/test.py") String resourcePath) throws Exception {
         if (skillName == null || !skillName.matches("^[a-zA-Z0-9\\-_\\.]+$")) {
             throw new IllegalArgumentException("bad skillName accept");
         }
@@ -69,10 +79,15 @@ public class SkillsTools {
         return StreamUtil.readString(url);
     }
 
-    @Tool(description = "执行技能(skill)中的命令行脚本")
-    public String runSkillCommand(@ToolParam(description = "技能名称，例如：search_website") String skillName,
-                                  @ToolParam(description = "脚本路径，例如：script/test.py") String scriptPath,
-                                  @ToolParam(description = "脚本的命令行参数，例如：-o -l test.txt") List<String> commandArguments) throws Exception {
+    @Tool(
+            tags = {
+                    AiTags.EXECUTABLE_VALUE,
+                    AiTags.HUMAN_VALUE
+            }, description = "执行技能(skill)中的命令行脚本"
+    )
+    public String run_skill_script(@ToolParam(description = "技能名称，例如：search_website") String skillName,
+                                   @ToolParam(description = "脚本路径，例如：script/test.py") String scriptPath,
+                                   @ToolParam(description = "脚本的命令行参数，例如：-o -l test.txt") List<String> commandArguments) throws Exception {
         if (skillName == null || !skillName.matches("^[a-zA-Z0-9\\-_\\.]+$")) {
             throw new IllegalArgumentException("bad skillName accept");
         }

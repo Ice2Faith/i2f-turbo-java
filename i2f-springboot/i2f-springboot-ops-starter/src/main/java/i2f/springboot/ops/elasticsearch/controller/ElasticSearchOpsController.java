@@ -8,6 +8,7 @@ import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.elasticsearch.data.ElasticSearchOperateDto;
 import i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -53,6 +54,7 @@ public class ElasticSearchOpsController implements IOpsProvider {
                 .subTitle("ElasticSearch 搜索引擎管理")
                 .icon("el-icon-search")
                 .href("./elasticsearch/index.html")
+                .group(OpsHomeMenuGroup.NoSQL)
                 .disabled(true)
         );
     }

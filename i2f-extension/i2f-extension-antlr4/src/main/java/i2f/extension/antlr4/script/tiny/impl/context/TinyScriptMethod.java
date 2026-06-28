@@ -81,7 +81,7 @@ public class TinyScriptMethod implements IMethod {
             callContext.put(parameters.get(i), args[i]);
         }
 
-        TinyScriptVisitorImpl nextVisitor = new TinyScriptVisitorImpl(callContext, resolver);
+        TinyScriptVisitorImpl nextVisitor = new TinyScriptVisitorImpl(callContext, visitor.getScriptFileName(), visitor.getScriptLineOffset(), resolver);
         nextVisitor.setDeclareFunctionMap(declareFunctionMap);
         nextVisitor.setGlobal(global);
         try {

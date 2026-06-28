@@ -7,8 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.*;
-import java.util.List;
-import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author Ice2Faith
@@ -18,40 +17,75 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class HttpResponse implements Closeable {
-    private int responseCode;
-    private String responseMessage;
+    private int statusCode;
+    private String statusMessage;
     private long contentLength;
-    private Map<String, List<String>> header;
+    private HttpHeaders header;
 
-    private boolean parsedContentBytes;
     private InputStream inputStream;
-    private byte[] contentBytes;
 
-    private byte[] errorBytes;
     private InputStream errorStream;
 
+    /**
+     * 用于释放底层的资源使用
+     */
+    private Closeable closer;
 
     @Override
     public void close() throws IOException {
         if (inputStream != null) {
             inputStream.close();
+            inputStream = null;
         }
         if (errorStream != null) {
             errorStream.close();
+            errorStream = null;
+        }
+        if (closer != null) {
+            closer.close();
+            closer = null;
         }
     }
 
-    public String getContentAsString(String charset) throws UnsupportedEncodingException {
-        if (parsedContentBytes) {
-            return new String(contentBytes, charset);
-        } else {
-            throw new NegativeArraySizeException("content out of size for type String.");
+    public boolean isSuccess() {
+        return statusCode >= 200 && statusCode < 300;
+    }
+
+    public byte[] getContentAsBytes() throws IOException {
+        if (inputStream == null) {
+            throw new IOException("body has been read or not body!");
         }
+        byte[] ret = StreamUtil.readBytes(inputStream, true);
+        close();
+        return ret;
+    }
+
+    public String getContentAsString() throws IOException {
+        return getContentAsString(StandardCharsets.UTF_8.name());
+    }
+
+    public String getContentAsString(String charset) throws IOException {
+        if (inputStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
+        String ret = StreamUtil.readString(inputStream, charset, true);
+        close();
+        return ret;
+    }
+
+    public <T> T getContentAsObject(IStringObjectSerializer processor, Class<T> clazz) throws IOException {
+        String json = getContentAsString();
+        return (T) processor.deserialize(json, clazz);
     }
 
     public <T> T getContentAsObject(IStringObjectSerializer processor, Class<T> clazz, String charset) throws IOException {
         String json = getContentAsString(charset);
         return (T) processor.deserialize(json, clazz);
+    }
+
+    public <T> T getContentAsRef(IStringObjectSerializer processor, Object refToken) throws IOException {
+        String json = getContentAsString();
+        return (T) processor.deserialize(json, refToken);
     }
 
     public <T> T getContentAsRef(IStringObjectSerializer processor, Object refToken, String charset) throws IOException {
@@ -60,8 +94,44 @@ public class HttpResponse implements Closeable {
     }
 
     public File saveAsFile(File file) throws IOException {
+        if (inputStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
         FileOutputStream fos = new FileOutputStream(file);
         StreamUtil.streamCopy(inputStream, fos, true);
+        close();
         return file;
+    }
+
+    public OutputStream transferTo(OutputStream os) throws IOException {
+        if (inputStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
+        StreamUtil.streamCopy(inputStream, os, false, true);
+        os.flush();
+        close();
+        return os;
+    }
+
+    public byte[] getErrorAsBytes() throws IOException {
+        if (errorStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
+        byte[] ret = StreamUtil.readBytes(errorStream, true);
+        close();
+        return ret;
+    }
+
+    public String getErrorAsString() throws IOException {
+        return getErrorAsString(StandardCharsets.UTF_8.name());
+    }
+
+    public String getErrorAsString(String charset) throws IOException {
+        if (errorStream == null) {
+            throw new IOException("body has been read or not body!");
+        }
+        String ret = StreamUtil.readString(errorStream, charset, true);
+        close();
+        return ret;
     }
 }

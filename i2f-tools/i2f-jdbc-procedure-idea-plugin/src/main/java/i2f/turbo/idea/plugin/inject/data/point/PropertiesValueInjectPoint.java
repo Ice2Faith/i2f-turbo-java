@@ -1,7 +1,5 @@
 package i2f.turbo.idea.plugin.inject.data.point;
 
-import java.util.List;
-
 /**
  * @author Ice2Faith
  * @date 2026/4/16 11:06

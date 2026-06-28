@@ -1,11 +1,11 @@
 package i2f.net.http.data;
 
-import i2f.net.http.impl.HttpFormUrlEncodedRequestBodyHandler;
-import i2f.net.http.impl.HttpJsonRequestBodyHandler;
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
-import i2f.net.http.interfaces.IHttpRequestBodyHandler;
-import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,9 +13,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * @author Ice2Faith
@@ -25,47 +26,36 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class HttpRequest {
-    public static final String GET = "GET";
-    public static final String POST = "POST";
-    public static final String PUT = "PUT";
-    public static final String DELETE = "DELETE";
 
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String CONTENT_FORM_URLENCODE = "application/x-www-form-urlencoded";
-    public static final String CONTENT_JSON = "application/json";
+    protected String url;
+    protected String method = HttpMethodConstants.GET;
+    protected Object params;
+    protected Object data;
+    protected HttpHeaders header = new HttpHeaders();
+    protected List<MultipartFile> files;
 
-
-    private String url;
-    private String method;
-    private Map<String, Object> params;
-    private Map<String, Object> data;
-    private Map<String, Object> header;
-    private List<MultipartFile> files;
-
-    private int connectTimeout = 30 * 1000;
-    private int readTimeout = 30 * 1000;
-    private String charset = "UTF-8";
-    private boolean allowRedirect = true;
-    private boolean cloudAcceptByteArray = false;
-
-    private IHttpRequestBodyHandler requestBodyHandler;
+    protected int connectTimeout = (int) TimeUnit.SECONDS.toMillis(30);
+    protected int readTimeout = (int) TimeUnit.MINUTES.toMillis(5);
+    protected String charset = "UTF-8";
+    protected boolean allowRedirect = true;
+    protected boolean cloudAcceptByteArray = false;
 
     public static HttpRequest doGet() {
         return new HttpRequest()
-                .setMethod(GET);
+                .setMethod(HttpMethodConstants.GET);
     }
 
     public static HttpRequest doGet(String url) {
         return doGet().setUrl(url);
     }
 
-    public static HttpRequest doGet(String url, Map<String, Object> params) {
+    public static HttpRequest doGet(String url, Object params) {
         return doGet(url).setParams(params);
     }
 
     public static HttpRequest doPost() {
         return new HttpRequest()
-                .setMethod(POST);
+                .setMethod(HttpMethodConstants.POST);
     }
 
     public static HttpRequest doPost(String url) {
@@ -74,7 +64,7 @@ public class HttpRequest {
 
     public static HttpRequest doPut() {
         return new HttpRequest()
-                .setMethod(PUT);
+                .setMethod(HttpMethodConstants.PUT);
     }
 
     public static HttpRequest doPut(String url) {
@@ -83,7 +73,7 @@ public class HttpRequest {
 
     public static HttpRequest doDelete() {
         return new HttpRequest()
-                .setMethod(DELETE);
+                .setMethod(HttpMethodConstants.DELETE);
     }
 
     public static HttpRequest doDelete(String url) {
@@ -91,20 +81,22 @@ public class HttpRequest {
     }
 
     public HttpRequest form() {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE);
-        this.setRequestBodyHandler(new HttpFormUrlEncodedRequestBodyHandler());
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form);
         return this;
     }
 
     public HttpRequest json() {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON);
-        this.setRequestBodyHandler(new HttpJsonRequestBodyHandler());
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json);
         return this;
     }
 
-    public HttpRequest json(IJsonSerializer processor) {
-        this.addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON);
-        this.setRequestBodyHandler(new HttpJsonRequestBodyHandler(processor));
+    public HttpRequest multipart() {
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Multipart);
+        return this;
+    }
+
+    public HttpRequest xml() {
+        this.addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Xml);
         return this;
     }
 
@@ -112,8 +104,16 @@ public class HttpRequest {
         return send(new HttpUrlConnectProcessor());
     }
 
+    public <T> T send(IHttpResponseExtractor<T> extractor) throws IOException {
+        return send(new HttpUrlConnectProcessor(), extractor);
+    }
+
     public HttpResponse send(IHttpProcessor processor) throws IOException {
-        return processor.doHttp(this);
+        return processor.http(this);
+    }
+
+    public <T> T send(IHttpProcessor processor, IHttpResponseExtractor<T> extractor) throws IOException {
+        return processor.http(this, extractor);
     }
 
     public HttpRequest addFile(File file) throws FileNotFoundException {
@@ -142,27 +142,27 @@ public class HttpRequest {
         return this;
     }
 
-    public HttpRequest addParam(String key, Object value) {
-        if (params == null) {
-            params = new HashMap<>();
-        }
-        params.put(key, value);
-        return this;
-    }
-
-    public HttpRequest addData(String key, Object value) {
-        if (data == null) {
-            data = new HashMap<>();
-        }
-        data.put(key, value);
-        return this;
-    }
-
     public HttpRequest addHeader(String key, Object value) {
         if (header == null) {
-            header = new HashMap<>();
+            header = new HttpHeaders();
         }
-        header.put(key, value);
+        header.add(key, value);
+        return this;
+    }
+
+    public HttpRequest addAllHeader(Map<String, ?> map) {
+        if (header == null) {
+            header = new HttpHeaders();
+        }
+        header.addAll(map);
+        return this;
+    }
+
+    public HttpRequest applyHeader(Consumer<HttpHeaders> consumer) {
+        if (header == null) {
+            header = new HttpHeaders();
+        }
+        header.apply(consumer);
         return this;
     }
 
@@ -184,30 +184,36 @@ public class HttpRequest {
         return this;
     }
 
-    public Map<String, Object> getParams() {
+    public Object getParams() {
         return params;
     }
 
-    public HttpRequest setParams(Map<String, Object> params) {
+    public HttpRequest setParams(Object params) {
         this.params = params;
         return this;
     }
 
-    public Map<String, Object> getData() {
+    public Object getData() {
         return data;
     }
 
-    public HttpRequest setData(Map<String, Object> data) {
+    public HttpRequest setData(Object data) {
         this.data = data;
         return this;
     }
 
-    public Map<String, Object> getHeader() {
+    public HttpHeaders getHeader() {
         return header;
     }
 
-    public HttpRequest setHeader(Map<String, Object> header) {
+    public HttpRequest setHeader(HttpHeaders header) {
         this.header = header;
+        return this;
+    }
+
+    public HttpRequest setHeader(Map<String, ?> header) {
+        this.header = new HttpHeaders();
+        this.header.addAll(header);
         return this;
     }
 
@@ -265,12 +271,4 @@ public class HttpRequest {
         return this;
     }
 
-    public IHttpRequestBodyHandler getRequestBodyHandler() {
-        return requestBodyHandler;
-    }
-
-    public HttpRequest setRequestBodyHandler(IHttpRequestBodyHandler requestBodyHandler) {
-        this.requestBodyHandler = requestBodyHandler;
-        return this;
-    }
 }

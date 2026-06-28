@@ -60,7 +60,7 @@ public class PageWrappers {
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DIALECT_MAPPING.dialectOf(conn);
+        DatabaseType type = DatabaseType.dialectOfConnection(conn);
         return wrapper(type);
     }
 
@@ -69,7 +69,7 @@ public class PageWrappers {
         if (ret != null) {
             return ret;
         }
-        DatabaseType type = DIALECT_MAPPING.dialectOf(jdbcUrl);
+        DatabaseType type = DatabaseType.dialectOfJdbcUrl(jdbcUrl);
         return wrapper(type);
     }
 

@@ -10,7 +10,6 @@ import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.util.PsiTreeUtil;
 
 import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
-
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptPsiElement;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.*;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.impl.TinyScriptPsiImplUtil;
@@ -29,6 +28,12 @@ public class TinyScriptScriptImpl extends TinyScriptPsiElement implements TinySc
     public void accept(@NotNull PsiElementVisitor visitor) {
         if (visitor instanceof TinyScriptVisitor) accept((TinyScriptVisitor) visitor);
         else super.accept(visitor);
+    }
+
+    @Override
+    @Nullable
+    public TinyScriptCommentSegment getCommentSegment() {
+        return findChildByClass(TinyScriptCommentSegment.class);
     }
 
     @Override

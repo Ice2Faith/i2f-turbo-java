@@ -12,11 +12,10 @@
     <artifactId>i2f-jdk-ext-all</artifactId>
 
     <dependencies>
-        <!-- <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jdk-ext-swl</artifactId>
-        </dependency> -->
-
+            <artifactId>i2f-jdk-ext-all</artifactId>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdk-ext-swl</artifactId>
@@ -25,6 +24,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-jdk-ext-web</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>

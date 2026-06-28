@@ -6,6 +6,7 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 
 import java.util.Map;
 import java.util.function.Consumer;
@@ -24,7 +25,7 @@ public class ContextInvokeMethodClassNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String clazz = node.getTagAttrMap().get(AttrConsts.CLASS);
         if (clazz == null || clazz.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.CLASS);

@@ -52,8 +52,10 @@ public class InMemoryRagEmbeddingStore implements RagEmbeddingStore {
         }
 
         candidate.sort(RagEmbedding::compareByScoreDesc);
+
         List<RagEmbedding> ret = new ArrayList<>();
-        for (int i = 0; i < topN; i++) {
+        int size = candidate.size();
+        for (int i = 0; i < topN && i < size; i++) {
             ret.add(candidate.get(i));
         }
         return ret;

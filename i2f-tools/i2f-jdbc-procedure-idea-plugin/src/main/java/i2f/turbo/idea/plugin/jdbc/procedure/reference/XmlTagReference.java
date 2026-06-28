@@ -11,6 +11,7 @@ import com.intellij.psi.search.PsiShortNamesCache;
 import com.intellij.psi.tree.TokenSet;
 import com.intellij.psi.xml.XmlElementType;
 import com.intellij.psi.xml.XmlTag;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.lru.LruMap;
 import org.jetbrains.annotations.NotNull;
 
@@ -176,20 +177,20 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
 
     public static final Map<String, String> TAG_ALIAS_MAP = new HashMap<>() {
         {
-            put("lang-eval-ts", "lang-eval-tinyScript");
-            put("lang-eval-tinyscript", "lang-eval-tinyScript");
-            put("lang-eval-js", "lang-eval-javascript");
-            put("lang-catch", "lang-try");
-            put("lang-finally", "lang-try");
-            put("lang-otherwise", "lang-choose");
-            put("lang-java-import", "lang-eval-java");
-            put("lang-java-member", "lang-eval-java");
-            put("lang-java-body", "lang-eval-java");
-            put("etl-extra", "sql-etl");
-            put("etl-load", "sql-etl");
-            put("etl-transform", "sql-etl");
-            put("etl-before", "sql-etl");
-            put("etl-after", "sql-etl");
+            put(TagConsts.LANG_EVAL_TS, "lang-eval-tinyScript");
+            put(TagConsts.LANG_EVAL_TINYSCRIPT, "lang-eval-tinyScript");
+            put(TagConsts.LANG_EVAL_JS, TagConsts.LANG_EVAL_JAVASCRIPT);
+            put(TagConsts.LANG_CATCH, TagConsts.LANG_TRY);
+            put(TagConsts.LANG_FINALLY, TagConsts.LANG_TRY);
+            put(TagConsts.LANG_OTHERWISE, TagConsts.LANG_CHOOSE);
+            put(TagConsts.LANG_JAVA_IMPORT, TagConsts.LANG_EVAL_JAVA);
+            put(TagConsts.LANG_JAVA_MEMBE, TagConsts.LANG_EVAL_JAVA);
+            put(TagConsts.LANG_JAVA_BODY, TagConsts.LANG_EVAL_JAVA);
+            put(TagConsts.ETL_EXTRA, TagConsts.SQL_ETL);
+            put(TagConsts.ETL_LOAD, TagConsts.SQL_ETL);
+            put(TagConsts.ETL_TRANSFORM, TagConsts.SQL_ETL);
+            put(TagConsts.ETL_BEFORE, TagConsts.SQL_ETL);
+            put(TagConsts.ETL_AFTER, TagConsts.SQL_ETL);
         }
     };
 

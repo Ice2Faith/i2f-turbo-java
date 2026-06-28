@@ -5,9 +5,9 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.PsiShortNamesCache;
 import i2f.lru.LruMap;
+import i2f.text.StringUtils;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectJavaMetadata;
-import i2f.turbo.idea.plugin.inject.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

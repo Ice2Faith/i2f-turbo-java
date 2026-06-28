@@ -43,6 +43,10 @@ public interface RagEmbeddingModel {
         return UUID.randomUUID().toString().replace("-", "");
     }
 
+    default List<RagEmbedding> embedAll(Collection<String> content) {
+        return embedAll(null, content);
+    }
+
     default List<RagEmbedding> embedAll(Supplier<String> idGenerator, Collection<String> content) {
         List<RagEmbedding> ret = new ArrayList<>();
         if (idGenerator == null) {

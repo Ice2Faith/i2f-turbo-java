@@ -7,13 +7,16 @@ import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
 import i2f.invokable.method.IMethod;
 import i2f.invokable.method.impl.jdk.JdkInstanceStaticMethod;
 import i2f.invokable.method.impl.jdk.JdkMethod;
+import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 
+import java.io.File;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -86,21 +89,51 @@ public class TinyScript {
         ERROR_LISTENER.add(DefaultAntlrErrorListener.INSTANCE);
     }
 
+    public static Object script(File scriptFile, Object context) throws Exception {
+        String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
+        return script(formula, context, scriptFile.getName(), 0, null);
+    }
+
+    public static Object script(File scriptFile, Object context, TinyScriptResolver resolver) throws Exception {
+        String formula = StreamUtil.readString(scriptFile, StandardCharsets.UTF_8.name());
+        return script(formula, context, scriptFile.getName(), 0, resolver);
+    }
+
     public static Object script(String formula, Object context) {
-        return script(formula, context, null);
+        return script(formula, context, null, 0, null);
+    }
+
+    public static Object script(String formula, Object context, String scriptFileName) {
+        return script(formula, context, scriptFileName, 0, null);
     }
 
     public static Object script(String formula, Object context, TinyScriptResolver resolver) {
+        return script(formula, context, null, 0, resolver);
+    }
+
+    public static Object script(String formula, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                TinyScriptResolver resolver) {
         TinyScriptParser.ScriptContext tree = parse(formula);
-        return script(tree, context, resolver);
+        return script(tree, context, scriptFileName, scriptLineOffset, resolver);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context) {
-        return script(tree, context, null);
+        return script(tree, context, null, 0, null);
+    }
+
+    public static Object script(TinyScriptParser.ScriptContext tree, Object context, String scriptFileName) {
+        return script(tree, context, scriptFileName, 0, null);
     }
 
     public static Object script(TinyScriptParser.ScriptContext tree, Object context, TinyScriptResolver resolver) {
-        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context, resolver);
+        return script(tree, context, null, 0, resolver);
+    }
+
+    public static Object script(TinyScriptParser.ScriptContext tree, Object context,
+                                String scriptFileName, int scriptLineOffset,
+                                TinyScriptResolver resolver) {
+        TinyScriptVisitor<Object> visitor = new TinyScriptVisitorImpl(context, scriptFileName, scriptLineOffset, resolver);
         Object ret = visitor.visit(tree);
         return ret;
     }

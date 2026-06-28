@@ -12,11 +12,10 @@
     <artifactId>i2f-spring-all</artifactId>
 
     <dependencies>
-       <!-- <dependency>
+        <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-all</artifactId>
-        </dependency> -->
-
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-authentication</artifactId>
@@ -45,6 +44,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-web</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>

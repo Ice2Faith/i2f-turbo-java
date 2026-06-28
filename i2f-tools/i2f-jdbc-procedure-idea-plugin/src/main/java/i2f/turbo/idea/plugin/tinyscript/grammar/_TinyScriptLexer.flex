@@ -25,7 +25,7 @@ import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-TERM_COMMENT_SINGLE_LINE="//"[^\n]*\n
+TERM_COMMENT_SINGLE_LINE="//"[^\n]*(\n|\$)
 TERM_COMMENT_MULTI_LINE="/"\*([^*]|(\*+([^*/])))*\*+"/"
 TERM_CONST_STRING_MULTILINE=```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)```
 TERM_CONST_STRING_MULTILINE_QUOTE=\"\"\"(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)\"\"\"
@@ -73,41 +73,43 @@ WS=[ \t\r\n]+
   "*"                                       { return OP_MUL; }
   "/"                                       { return OP_DIV; }
   "%"                                       { return OP_MOD; }
-  "in"                                      { return OP_IN; }
-  "notin"                                   { return OP_NOT_IN; }
-  "as"                                      { return OP_AS; }
-  "cast"                                    { return OP_CAST; }
-  "is"                                      { return OP_IS; }
-  "instanceof"                              { return OP_INSTANCE_OF; }
-  "typeof"                                  { return OP_TYPE_OF; }
+  "in"                                      { return KEY_IN; }
+  "notin"                                   { return KEY_NOT_IN; }
+  "as"                                      { return KEY_AS; }
+  "cast"                                    { return KEY_CAST; }
+  "is"                                      { return KEY_IS; }
+  "instanceof"                              { return KEY_INSTANCE_OF; }
+  "typeof"                                  { return KEY_TYPE_OF; }
   "+"                                       { return OP_ADD; }
   "-"                                       { return OP_SUB; }
   ">="                                      { return OP_GTE; }
-  "gte"                                     { return OP_GTE_STR; }
+  "gte"                                     { return KEY_GTE; }
   "<="                                      { return OP_LTE; }
-  "lte"                                     { return OP_LTE_STR; }
+  "lte"                                     { return KEY_LTE; }
   "!="                                      { return OP_NE; }
-  "ne"                                      { return OP_NE_STR; }
+  "ne"                                      { return KEY_NE; }
   "<>"                                      { return OP_NEQ; }
-  "neq"                                     { return OP_NEQ_STR; }
+  "neq"                                     { return KEY_NEQ; }
   "=="                                      { return OP_EQ; }
-  "eq"                                      { return OP_EQ_STR; }
+  "eq"                                      { return KEY_EQ; }
   ">"                                       { return OP_GT; }
-  "gt"                                      { return OP_GT_STR; }
+  "gt"                                      { return KEY_GT; }
   "<"                                       { return OP_LT; }
-  "lt"                                      { return OP_LT_STR; }
+  "lt"                                      { return KEY_LT; }
   "&&"                                      { return OP_AND; }
-  "and"                                     { return OP_AND_STR; }
+  "and"                                     { return KEY_AND; }
   "||"                                      { return OP_OR; }
-  "or"                                      { return OP_OR_STR; }
+  "or"                                      { return KEY_OR; }
   "!"                                       { return OP_EXCLAM; }
-  "not"                                     { return OP_NOT; }
+  "not"                                     { return KEY_NOT; }
   "="                                       { return OP_ASSIGN; }
   "+="                                      { return OP_ASSIGN_ADD; }
   "-="                                      { return OP_ASSIGN_SUB; }
   "*="                                      { return OP_ASSIGN_MUL; }
   "/="                                      { return OP_ASSIGN_DIV; }
   "%="                                      { return OP_ASSIGN_MOD; }
+  "?="                                      { return OP_ASSIGN_IFNULL; }
+  ".="                                      { return OP_ASSIGN_NOTNULL; }
   "|"                                       { return OP_VERTICAL_BAR; }
   "|>"                                      { return OP_PIPELINE; }
   "::"                                      { return OP_SELF_PIPE; }
@@ -126,9 +128,9 @@ WS=[ \t\r\n]+
   "foreach"                                 { return KEY_FOREACH; }
   "if"                                      { return KEY_IF; }
   "else"                                    { return KEY_ELSE; }
+  "elif"                                    { return KEY_ELIF; }
   "new"                                     { return KEY_NEW; }
   "func"                                    { return KEY_FUNC; }
-  "KEY_ELIF"                                { return KEY_ELIF; }
 
   {TERM_COMMENT_SINGLE_LINE}                { return TERM_COMMENT_SINGLE_LINE; }
   {TERM_COMMENT_MULTI_LINE}                 { return TERM_COMMENT_MULTI_LINE; }

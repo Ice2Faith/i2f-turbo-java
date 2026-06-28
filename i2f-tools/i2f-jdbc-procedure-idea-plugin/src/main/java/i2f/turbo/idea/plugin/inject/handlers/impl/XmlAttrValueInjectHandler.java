@@ -11,7 +11,9 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
+import i2f.extension.velocity.VelocityGenerator;
 import i2f.match.impl.SimpleMatcher;
+import i2f.text.StringUtils;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
@@ -21,8 +23,6 @@ import i2f.turbo.idea.plugin.inject.data.point.XmlRelationContextJavaXmlAttr;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
 import i2f.turbo.idea.plugin.inject.metadata.XmlMetadataResolver;
-import i2f.turbo.idea.plugin.inject.utils.StringUtils;
-import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
 
 import java.util.HashMap;
 import java.util.List;

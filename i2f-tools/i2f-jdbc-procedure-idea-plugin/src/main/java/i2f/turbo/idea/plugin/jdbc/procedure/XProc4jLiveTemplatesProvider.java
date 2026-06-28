@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 public class XProc4jLiveTemplatesProvider implements DefaultLiveTemplatesProvider {
     @Override
     public String[] getDefaultLiveTemplateFiles() {
-        return new String[]{"assets/liveTemplates/XProc4j.xml"};
+        return new String[]{"assets/xproc4j/liveTemplates/XProc4j.xml"};
     }
 
     @Nullable

@@ -5,7 +5,6 @@ import i2f.jdbc.meta.JdbcMeta;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.executor.impl.BasicJdbcProcedureExecutor;
-import i2f.jdbc.procedure.executor.impl.DefaultJdbcProcedureExecutor;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 
@@ -30,7 +29,7 @@ public class TestProcedureExecutor {
         File file = new File("./i2f-jdk/i2f-jdbc-procedure/src/test/java/i2f/jdbc/procedure/test/test-basic.xml");
         XmlNode node = JdbcProcedureParser.parse(file);
 
-        BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
+        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
         Map<String, Object> params = executor.createParams();
@@ -79,7 +78,7 @@ public class TestProcedureExecutor {
 
 //        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
 
-        BasicJdbcProcedureExecutor executor = new DefaultJdbcProcedureExecutor();
+        BasicJdbcProcedureExecutor executor = new BasicJdbcProcedureExecutor();
         executor.getDebug().set(true);
 
         Map<String, Object> params = executor.createParams();

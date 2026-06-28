@@ -5,15 +5,15 @@ import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
+import i2f.extension.velocity.VelocityGenerator;
 import i2f.match.impl.AntMatcher;
+import i2f.text.StringUtils;
 import i2f.turbo.idea.plugin.inject.config.ProjectInjectConfig;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectPlace;
 import i2f.turbo.idea.plugin.inject.data.point.AnnotationInjectPoint;
 import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
-import i2f.turbo.idea.plugin.inject.utils.StringUtils;
-import i2f.turbo.idea.plugin.inject.velocity.VelocityGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;

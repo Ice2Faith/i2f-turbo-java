@@ -30,6 +30,14 @@ public class JsonUtils {
         return ret;
     }
 
+    public static String toPrettyJson(Object obj) {
+        try {
+            return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
     public static String toJson(Object obj) {
         try {
             return objectMapper.writeValueAsString(obj);

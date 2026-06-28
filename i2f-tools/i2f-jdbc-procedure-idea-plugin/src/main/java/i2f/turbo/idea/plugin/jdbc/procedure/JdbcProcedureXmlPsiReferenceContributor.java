@@ -9,6 +9,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.util.ProcessingContext;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,8 +42,8 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
 //            log.warn("xml-psi-reference attribute :"+xmlAttribute);
             String name = xmlAttribute.getName();
 //            log.warn("xml-psi-reference attr-name :"+name);
-            if ("refid".equals(name)
-                    || "id".equals(name)) {
+            if (AttrConsts.REFID.equals(name)
+                    || AttrConsts.ID.equals(name)) {
                 return createReference(xmlAttributeValue);
             }
 
@@ -55,7 +56,7 @@ public class JdbcProcedureXmlPsiReferenceContributor extends PsiReferenceContrib
             if (value == null || value.isEmpty()) {
                 return PsiReference.EMPTY_ARRAY;
             }
-            ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
+            ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(xmlAttributeValue.getProject(), value);
 //            log.warn("xml-psi-reference attr-value-meta :"+meta);
             if (meta == null) {
                 return PsiReference.EMPTY_ARRAY;

@@ -14,14 +14,17 @@ import java.util.concurrent.TimeUnit;
  * @desc
  */
 @Data
-@ConfigurationProperties(prefix = "xproc4j")
+@ConfigurationProperties(prefix = SpringJdbcProcedureProperties.CONFIG_PREFIX)
 public class SpringJdbcProcedureProperties {
+    public static final String CONFIG_PREFIX = "xproc4j";
     public static final String DEFAULT_XML_LOCATIONS = "classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml";
     public static final String DEFAULT_WATCHING_DIRECTORIES = "classpath*:procedure/;classpath*:com/";
 
     protected boolean enable = true;
 
     protected boolean debug = false;
+
+    protected boolean enableFunic = false;
 
     protected boolean reportOnBoot = true;
 
@@ -40,6 +43,8 @@ public class SpringJdbcProcedureProperties {
     protected long slowProcedureMillsSeconds = TimeUnit.SECONDS.toMillis(30);
 
     protected long slowNodeMillsSeconds = TimeUnit.SECONDS.toMillis(15);
+
+    protected List<String> primaryDatasourceNames = new ArrayList<>();
 
     protected List<String> invokeLogPredicateRegexes = new ArrayList<>();
 

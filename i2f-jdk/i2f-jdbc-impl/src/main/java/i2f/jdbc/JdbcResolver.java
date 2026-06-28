@@ -758,7 +758,7 @@ public class JdbcResolver {
      */
     public static <T> void batch(Connection conn, String sql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
         List<String> expression = new ArrayList<>();
-        RegexUtil.regexFindAndReplace(sql, "('[^']*')" + // 字符串，保持不变
+        sql=RegexUtil.regexFindAndReplace(sql, "('[^']*')" + // 字符串，保持不变
                 "|(--[^\\n]*($|\\n))" + // 单行注释，不变
                 "|(/\\*[^*]*\\*/)" + // 多行注释，不变
                 "|(\\$\\{[^}]+\\})", (result) -> {
@@ -767,7 +767,7 @@ public class JdbcResolver {
                     || result.startsWith("/*")) {
                 return result;
             }
-            expression.add(result);
+            expression.add(result.substring(2,result.length()-1).trim());
             return "?";
         });
         batch(conn, sql, expression, iterator, filter, batchSize);

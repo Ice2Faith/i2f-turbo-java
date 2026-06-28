@@ -13,14 +13,26 @@ repositories {
     maven{
         url = uri("https://maven.aliyun.com/repository/public")
     }
+
+    // 新增 flatDir，指定本地 JAR 包所在的目录
+    flatDir {
+        dirs("lib")
+    }
 }
 
 dependencies {
     implementation("org.antlr:antlr4-runtime:4.13.2")
-    implementation("org.apache.velocity:velocity:1.7")
+    implementation("org.apache.velocity:velocity-engine-core:2.3")
     // 核心依赖
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.5")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5")
+    // 本地依赖
+//    implementation(fileTree(mapOf("dir" to "lib", "include" to listOf("*.jar"))))
+    implementation(":i2f-extension-xproc4j:1.0-jdk8")
+    // xproc4j 语法验证依赖
+    implementation("ognl:ognl:3.4.11")
+    implementation("org.apache.groovy:groovy:4.0.18")
+    implementation("org.openjdk.nashorn:nashorn-core:15.4")
 }
 
 tasks.withType<JavaCompile> {

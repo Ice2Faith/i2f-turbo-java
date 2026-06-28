@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class MybatisMapperInflater {
     public static final String DATABASE_TYPE = "databaseType";
+    public static final String DIALECT_TYPE = "dialectType";
 
     public static final MybatisMapperInflater INSTANCE = new MybatisMapperInflater();
 
@@ -87,6 +88,8 @@ public class MybatisMapperInflater {
     public BindSql inflateSql(Connection conn, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         params.put(DATABASE_TYPE, databaseType);
+        DatabaseType dialectType = DatabaseType.dialectOfConnection(conn);
+        params.put(DIALECT_TYPE, dialectType);
         return inflateSql(unqId, params, nodeMap);
     }
 
@@ -106,6 +109,8 @@ public class MybatisMapperInflater {
     public BindSql inflateSqlNode(Connection conn, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         params.put(DATABASE_TYPE, databaseType);
+        DatabaseType dialectType = DatabaseType.dialectOfConnection(conn);
+        params.put(DIALECT_TYPE, dialectType);
         return inflateSqlNode(node, params, nodeMap);
     }
 
@@ -131,6 +136,12 @@ public class MybatisMapperInflater {
         if (type == null) {
             if (databaseType != null) {
                 params.put(DATABASE_TYPE, databaseType);
+            }
+        }
+        Object dialect = params.get(DIALECT_TYPE);
+        if (type == null) {
+            if (databaseType != null) {
+                params.put(DIALECT_TYPE, databaseType);
             }
         }
         Map<String, Object> workParam = new LinkedHashMap<>(params);

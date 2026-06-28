@@ -10,5 +10,6 @@ public enum CompletionScope {
     SQL_IDENTIFIER,
     FUNCTIONS,
     TINY_SCRIPT,
+    FUNIC,
     SQL
 }

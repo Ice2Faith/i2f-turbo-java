@@ -8,7 +8,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.impl.BreakSignalException;
 import i2f.jdbc.procedure.signal.impl.ContinueSignalException;
 
@@ -32,14 +32,14 @@ public class LangWhileNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         String test = node.getTagAttrMap().get(AttrConsts.TEST);
         if (test == null || test.isEmpty()) {
             warnPoster.accept(TAG_NAME + " missing attribute " + AttrConsts.TEST);
         }
         if (test != null && !test.isEmpty()) {
             try {
-                GrammarReporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
+                reporter.reportAttributeFeatureGrammar(AttrConsts.TEST, node, FeatureConsts.EVAL, warnPoster);
             } catch (Exception e) {
                 warnPoster.accept(TAG_NAME + " attribute " + AttrConsts.TEST + "[" + test + "]" + " expression maybe wrong!");
             }

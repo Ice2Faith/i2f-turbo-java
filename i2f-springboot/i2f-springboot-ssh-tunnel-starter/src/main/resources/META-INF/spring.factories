@@ -1,2 +1,5 @@
+org.springframework.context.ApplicationListener=\
+  i2f.springboot.ssh.tunnel.TunnelSetupConfiguration
+
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
   i2f.springboot.ssh.tunnel.TunnelAutoConfiguration

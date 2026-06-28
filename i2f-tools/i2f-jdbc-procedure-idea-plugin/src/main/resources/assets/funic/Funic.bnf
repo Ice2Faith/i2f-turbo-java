@@ -1,0 +1,631 @@
+// 第七步:定义bnf语法
+// 第八步:右键生成parse code
+// 第九步:右键生成flex文件
+{
+  // 语言解析器,由Grammar-Kit插件根据bnf语法文件自动生成
+  parserClass="i2f.turbo.idea.plugin.funic.grammar.parser.FunicParser"
+  // 定义辅助类,供 FunicParser 类使用
+  parserUtilClass="i2f.turbo.idea.plugin.funic.lang.parser.FunicParserUtil"
+
+  // 指定生成的PsiElement子类需要继承的父类
+  extends="i2f.turbo.idea.plugin.funic.lang.psi.FunicPsiElement"
+
+  // 指定所有生成的PsiElement类的类名前缀
+  psiClassPrefix="Funic"
+  // 指定所有生成的PsiElement实现类的类名后缀
+  psiImplClassSuffix="Impl"
+  // 指定所有生成的PsiElement类的包位置
+  psiPackage="i2f.turbo.idea.plugin.funic.grammar.psi.elements"
+  // 指定所有生成的PsiElement实现类的包位置
+  psiImplPackage="i2f.turbo.idea.plugin.funic.grammar.psi.elements.impl"
+
+  // 指定ElementType所在的类,由Grammar-Kit自动生成
+  elementTypeHolderClass="i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes"
+  // 定义elementType类型,供 FunicTypes 类使用
+  elementTypeClass="i2f.turbo.idea.plugin.funic.lang.psi.FunicElementType"
+  // 定义tokenType类型,供 FunicTypes 类使用
+  tokenTypeClass="i2f.turbo.idea.plugin.funic.lang.psi.FunicTokenType"
+  // 定义工具类,供所有PsiElement实现类使用
+  psiImplUtilClass="i2f.turbo.idea.plugin.funic.lang.psi.impl.FunicPsiImplUtil"
+
+    extends(".*script")=script
+  // 定义终结符，这里目前只会使用regexp来进行正则表达式匹配得到终结符
+  // 研究不深，还不知道怎么对终结符进行重用，也就是一个终极符分解为多个终结符的语法
+  tokens=[
+    TERM_COMMENT_SINGLE_LINE= "regexp://[^\n]*(\n|$)"
+
+    TERM_COMMENT_MULTI_LINE= "regexp:/\*([^*]|(\*+([^*/])))*\*+/";
+
+    TERM_CONST_STRING_MULTILINE= "regexp:```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)```"
+    TERM_CONST_STRING_MULTILINE_QUOTE= 'regexp:"""(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)"""'
+
+    TERM_CONST_STRING_RENDER= "regexp:[rR]\"((\\\")+|[^\"])*\""
+    TERM_CONST_STRING_RENDER_SINGLE= "regexp:[rR]'((\\')+|[^'])*'"
+
+    TERM_CONST_STRING= "regexp:\"((\\\")+|[^\"])*\""
+    TERM_CONST_STRING_SINGLE= "regexp:'((\\\\')+|[^'])*'"
+
+    TERM_CONST_VISITOR= "regexp:\$(\!)?\{[^}]*}"
+
+    TERM_CONST_NUMBER_HEX="regexp:0[xX][0-9a-fA-F_]+[lL]?"
+
+    TERM_CONST_NUMBER_OTC="regexp:0[oOtT][0-7_]+[lL]?"
+
+    TERM_CONST_NUMBER_BIN="regexp:0[bB][0-7_]+[lL]?"
+
+    TERM_CONST_NUMBER_SCIEN_2="regexp:[0-9]+[0-9_]*\.[0-9]+[0-9_]*[eE][-]?[0-9]+[0-9_]*[fF]?"
+
+    TERM_CONST_NUMBER_SCIEN_1="regexp:[0-9]+[0-9_]*[eE][-]?[0-9]+[0-9_]*[lL]?"
+
+    TERM_CONST_NUMBER_FLOAT="regexp:[0-9]+[0-9_]*\.[0-9]+[0-9_]*[fF]?"
+
+    TERM_CONST_NUMBER="regexp:[0-9]+[0-9_]*[lL]?"
+
+    KW_CONST_BOOLEAN="regexp:true|false"
+
+    KW_CONST_NULL="null"
+
+    KW_CONST_CLASS= "class"
+
+    TERM_CONST_CLASS="regexp:([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*.class"
+
+    KW_FUNC= "func"
+    KW_DEF= "def"
+
+    KW_TRY= "try"
+    KW_CATCH= "catch"
+    KW_FINALLY= "finally"
+
+    KW_THROW= "throw"
+
+    KW_RETURN= "return"
+
+    KW_CONTINUE= "continue"
+    KW_BREAK= "break"
+
+    KW_FOR= "for"
+    KW_DO= "do"
+    KW_WHILE= "while"
+
+    KW_IF= "if"
+    KW_ELIF= "elif"
+    KW_ELSE= "else"
+
+    KW_AS= "as"
+
+    KW_NEW= "new"
+
+    KW_NOT= "not"
+
+    KW_TEQ= "teq"
+    KW_TNEQ= "tneq"
+    KW_GTE= "gte"
+    KW_LTE= "lte"
+    KW_GT= "gt"
+    KW_LT= "lt"
+    KW_NEQ= "neq"
+    KW_NE= "ne"
+    KW_EQ= "eq"
+    KW_IN= "in"
+    KW_INSTANCEOF= "instanceof"
+    KW_IS= "is"
+
+    KW_AND= "and"
+    KW_OR= "or"
+
+    KW_GO= "go"
+    KW_SYNCHRONIZED= "synchronized"
+
+    KW_IMPORT= "import"
+
+    KW_DEBUGGER= "debugger"
+
+    IDENTIFIER="regexp:[a-zA-Z_][a-zA-Z0-9_]*"
+
+    TERM_PAREN_L   = '('
+    TERM_PAREN_R   = ')'
+    TERM_COMMA    = ','
+    TERM_OPTION_DOT      = '?.'
+    TERM_DOT      = '.'
+    TERM_CURLY_L   = '{'
+    TERM_CURLY_R   = '}'
+
+    TERM_SEMICOLON=';';
+    TERM_COLON=':';
+
+    TERM_BRACKET_SQUARE_L='[';
+    TERM_BRACKET_SQUARE_R=']';
+
+    TERM_QUESTION='?';
+    TERM_SHARP='#';
+    TERM_AT='@';
+
+    OP_EXTRA='...';
+    OP_EXTEND_TO='->';
+    OP_RECV_FROM='<-';
+    OP_DOT_STAR='.*';
+
+    OP_DIAMOND_NAME_L='<?';
+    OP_DIAMOND_NAME_R='?>';
+
+    OP_MUL='*';
+    OP_INT_DIV='//';
+    OP_DIV='/';
+    OP_MOD='%';
+    OP_INCR='++';
+    OP_DECR='--';
+    OP_ADD='+';
+    OP_SUB='-';
+    OP_GTE='>=';
+    OP_LTE='<=';
+    OP_TNEQ='!==';
+    OP_NE='!=';
+    OP_NEQ='<>';
+    OP_TEQ='===';
+    OP_EQ='==';
+    OP_GT='>';
+    OP_LT='<';
+    OP_AND='&&';
+    OP_OR='||';
+    OP_EXCLAM='!';
+    OP_BIT_LMOV='<<';
+    OP_BIT_RSMOV='>>>';
+    OP_BIT_RMOV='>>';
+    OP_BIT_XOR='^';
+    OP_BIT_AND='&';
+    OP_BIT_OR='|';
+    OP_BIT_REVERSE='~';
+
+    OP_ASSIGN='=';
+    OP_ASSIGN_ADD='+=';
+    OP_ASSIGN_SUB='-=';
+    OP_ASSIGN_MUL='*=';
+    OP_ASSIGN_DIV='/=';
+    OP_ASSIGN_MOD='%=';
+    OP_ASSIGN_IFNULL='?=';
+    OP_ASSIGN_NOTNULL='.=';
+
+    OP_PIPELINE='|>';
+    OP_SELF_PIPE='::';
+
+    WORD="regexp:\w+"
+
+    // 定义空白符
+    WS="regexp:[ \t\r\n]+"
+  ]
+}
+
+root::=
+    script
+    ;
+
+// 语法正文
+script::=
+    segment+
+    | express (TERM_SEMICOLON)? <<eof>>
+    | commentSegment <<eof>>
+    ;
+
+segment::=
+    express TERM_SEMICOLON
+    | commentSegment
+    ;
+
+express::=
+    expressSegment (operatorSegment)*
+
+//    {extends=express}
+//    {
+//       recoverWhile="content_recover"
+//    }
+    ;
+    // 因为定义上每条语句独立，因此配置recoverWhile
+    // 这样就算某一条语句报错，也不影响IDEA与其他语句的分析操作
+
+    // 对于不满足语法的，都用当WORD字符处理
+//    private content_recover ::= !(WORD)
+
+commentSegment::=
+    TERM_COMMENT_SINGLE_LINE | TERM_COMMENT_MULTI_LINE
+    ;
+
+operatorSegment::=
+    instanceFunctionCallRightPart // 实例函数调用
+    | instanceFieldValueRightPart // 实例值获取
+    | squareQuoteRightPart // 中括号取值表达式
+    | factorRightPart // 阶乘/百分号后置表达式
+    | incrDecrAfterRightPart // 后置自增表达式
+    | mathMulDivOperatorPart express // 数学乘除运算；数学运算，需要从左到右，因此不能提取为子规则
+    | percentRightPart
+    | mathAddSubOperatorPart express // 数学加减运算；数学运算，需要从左到右，因此不能提取为子规则
+    | castAsRightPart // 类型转换
+    | compareOperatorPart express // 比较运算符
+    | logicalLinkOperatorPart express // 逻辑连接符
+    | bitOperatorPart  express // 位运算符号；数学运算，需要从左到右，因此不能提取为子规则
+    | thirdOperateRightPart // 三目运算符
+    | pipelineFunctionExpress+ // 管道函数
+    | assignRightPart // 等号赋值表达式
+    ;
+
+expressSegment::=
+    circleExpress // 括号表达式
+    | newInstanceExpress // 新建实例对象
+    | newArrayExpress // 新建数组
+    | ifElseExpress // if-else 语句
+    | whileExpress // while 语句
+    | doWhileExpress // do-while 语句
+    | foreachExpress // 集合迭代语句
+    | forLoopExpress // for 循环语句
+    | forRangeExpress // for-range 语句
+    | breakExpress // break 语句
+    | continueExpress // continue 语句
+    | returnExpress // return 语句
+    | throwExpress // throw 语句
+    | importExpress // 导入语句
+    | tryCatchFinallyExpress // try-catch-finally 语句
+    | functionDeclareExpress // 函数声明语句
+    | lambdaExpress // Lambda语句
+    | goRunExpress // 启动线程语句
+    | awaitExpress // 等待异步执行的结果返回
+    | synchronizedExpress // 同步语句
+    | staticFunctionCall // 静态函数调用
+    | globalFunctionCall // 全局函数调用
+    | staticFieldValue // 静态值获取
+    | prefixOperatorPart express // 前置表达式；高优先级，不能提取为子规则
+    | incrDecrPrefixOperatorPart express // 前置自增表达式；高优先级，不能提取为子规则
+    | listValueExpress // 列表表达式
+    | mapValueExpress // 映射表达式
+    | scriptBlock // 语句块
+    | debuggerExpress
+    | KW_DEF extractExpress // 等号赋值表达式，后接 assignRightPart
+    | extractExpress // 等号赋值表达式，后接 assignRightPart
+    | KW_DEF express // 等号赋值表达式，后接 assignRightPart
+    | valueSegment // 字面值常量
+    ;
+
+
+debuggerExpress::=
+    KW_DEBUGGER fullName? (TERM_PAREN_L express TERM_PAREN_R)?;
+
+
+extractExpress::=
+    TERM_SHARP TERM_CURLY_L extractPairs? TERM_CURLY_R
+    ;
+
+extractPairs::=
+    extractPair (TERM_COMMA extractPair)*
+    ;
+
+extractPair::=
+    (express) (TERM_COLON (express))?
+    ;
+
+
+logicalLinkOperatorPart::=
+    (OP_AND | KW_AND | OP_OR | KW_OR )
+;
+
+compareOperatorPart::=
+    (OP_TEQ | KW_TEQ | OP_TNEQ | KW_TNEQ | OP_GT | KW_GT | OP_GTE | KW_GTE | OP_LT | KW_LT | OP_LTE | KW_LTE | OP_EQ | KW_EQ | OP_NE | OP_NEQ | KW_NEQ | KW_NE | KW_IN | (KW_NOT KW_IN) | KW_INSTANCEOF | KW_IS )
+;
+
+bitOperatorPart::=
+    (OP_BIT_LMOV | OP_BIT_RSMOV | OP_BIT_RMOV | OP_BIT_XOR  | OP_BIT_AND  | OP_BIT_OR  )
+;
+
+mathAddSubOperatorPart::=
+(OP_ADD | OP_SUB )
+;
+
+mathMulDivOperatorPart::=
+    (OP_MUL | OP_INT_DIV | OP_DIV | OP_MOD)
+;
+
+incrDecrPrefixOperatorPart::=
+    (OP_INCR | OP_DECR)
+;
+
+prefixOperatorPart::=
+    (OP_EXCLAM | KW_NOT | OP_BIT_REVERSE | OP_SUB)
+;
+
+// :: 用来访问表示上一个管道传递过来的成员函数
+// 参数，支持使用 $_ 作为占位符表示传递过来的参数作为第几个值(暂未实现)，默认第一个值
+pipelineFunctionExpress::=
+   OP_PIPELINE ( staticFunctionCall | staticFieldValue | OP_SELF_PIPE? (globalFunctionCall|functionName)   | functionName) // 函数链
+;
+
+synchronizedExpress::=
+   KW_SYNCHRONIZED  TERM_PAREN_L express TERM_PAREN_R scriptBlock
+;
+
+// 直接捕获声明时的参数列表
+lambdaExpress::=
+    functionArguments OP_EXTEND_TO scriptBlock
+;
+
+importExpress::=
+    KW_IMPORT fullName (OP_DOT_STAR)?
+;
+
+// 主要是用来异步运行lambda或者函数
+goRunExpress::=
+    KW_GO lambdaExpress
+    | KW_GO scriptBlock
+    | KW_GO express
+;
+
+awaitExpress::=
+   (OP_RECV_FROM express)+
+;
+
+
+functionDeclareExpress::=
+    (KW_FUNC|KW_DEF) IDENTIFIER functionDeclareParameters functionDeclareReturn? scriptBlock
+;
+
+functionDeclareReturn::=
+    TERM_COLON fullName
+;
+
+functionDeclareParameters::=
+    TERM_PAREN_L ( functionParameter (TERM_COMMA functionParameter)*)? TERM_PAREN_R
+;
+
+functionParameter::=
+    fullName IDENTIFIER
+    | IDENTIFIER TERM_COLON fullName
+    |IDENTIFIER
+;
+
+tryCatchFinallyExpress::=
+    KW_TRY scriptBlock catchBlock* (KW_FINALLY scriptBlock)?
+;
+
+catchBlock::=
+    KW_CATCH TERM_PAREN_L (fullName (OP_BIT_OR fullName)*) IDENTIFIER TERM_PAREN_R scriptBlock
+    | KW_CATCH TERM_PAREN_L IDENTIFIER TERM_PAREN_R scriptBlock
+    ;
+
+throwExpress::=
+    KW_THROW express
+;
+
+returnExpress::=
+    KW_RETURN express?
+;
+
+
+continueExpress::=
+    KW_CONTINUE
+;
+
+breakExpress::=
+    KW_BREAK
+;
+
+// for(i 0...20) 这种循环
+forRangeExpress::=
+    KW_FOR TERM_PAREN_L IDENTIFIER express OP_EXTRA express TERM_PAREN_R scriptBlock
+;
+
+// for(i=0;i<10;i++) 这种循环
+forLoopExpress::=
+    KW_FOR TERM_PAREN_L express? TERM_SEMICOLON express? TERM_SEMICOLON express? TERM_PAREN_R scriptBlock
+;
+
+// for(i : list) 这种循环
+foreachExpress::=
+    KW_FOR TERM_PAREN_L IDENTIFIER TERM_COLON express TERM_PAREN_R scriptBlock
+;
+
+
+doWhileExpress::=
+    KW_DO scriptBlock KW_WHILE conditionBlock
+;
+
+whileExpress::=
+    KW_WHILE conditionBlock scriptBlock
+    ;
+
+ifElseExpress::=
+    KW_IF conditionBlock scriptBlock ((KW_ELSE KW_IF|KW_ELIF) conditionBlock scriptBlock)* (KW_ELSE scriptBlock)?
+;
+
+conditionBlock::=
+TERM_PAREN_L express TERM_PAREN_R
+;
+
+scriptBlock::=
+    TERM_CURLY_L script? TERM_CURLY_R
+;
+
+
+// a as int.class 进行类型转换
+castAsRightPart::=
+    KW_AS (typeClass| express)
+;
+
+// {a:1,...user,b}
+mapValueExpress::=
+    TERM_CURLY_L (unpackMapExpress (TERM_COMMA unpackMapExpress)* )? TERM_COMMA? TERM_CURLY_R
+;
+
+unpackMapExpress::=
+    OP_EXTRA express
+    | keyValueExpress
+;
+
+keyValueExpress::=
+    (IDENTIFIER | constString | constRenderString) TERM_COLON express
+    | variableValue
+;
+
+
+thirdOperateRightPart::=
+    TERM_QUESTION express TERM_COLON express
+;
+
+instanceFieldValueRightPart::=
+    (TERM_DOT|TERM_OPTION_DOT) IDENTIFIER // 实例属性
+;
+
+circleExpress::=
+    TERM_PAREN_L express TERM_PAREN_R
+;
+
+newArrayExpress::=
+    KW_NEW fullName TERM_BRACKET_SQUARE_L constNumber TERM_BRACKET_SQUARE_R (OP_EXTEND_TO listValueExpress)?
+    | KW_NEW fullName TERM_BRACKET_SQUARE_L  TERM_BRACKET_SQUARE_R (OP_EXTEND_TO listValueExpress)
+;
+
+newInstanceExpress::=
+    KW_NEW fullName functionArguments (OP_EXTEND_TO mapValueExpress)?
+;
+
+
+instanceFunctionCallRightPart::=
+    TERM_DOT  functionName  functionArguments// 实例函数
+    ;
+
+globalFunctionCall::=
+    functionName functionArguments // 全局函数
+    ;
+
+// [0],["name"] 这种下标或者属性名访问
+squareQuoteRightPart::=
+    TERM_BRACKET_SQUARE_L express TERM_BRACKET_SQUARE_R
+;
+
+factorRightPart::=
+    OP_EXCLAM
+;
+
+percentRightPart::=
+    OP_MOD
+;
+
+
+incrDecrAfterRightPart::=
+    (OP_INCR | OP_DECR)
+;
+
+assignRightPart::=
+    (OP_ASSIGN | OP_ASSIGN_ADD | OP_ASSIGN_SUB | OP_ASSIGN_MUL | OP_ASSIGN_DIV | OP_ASSIGN_MOD | OP_ASSIGN_IFNULL | OP_ASSIGN_NOTNULL) express
+;
+
+staticFieldValue::=
+    typeMember IDENTIFIER // 静态属性
+;
+
+staticFunctionCall::=
+    typeMember functionName functionArguments // 静态函数
+;
+
+functionName::=
+    OP_DIAMOND_NAME_L express OP_DIAMOND_NAME_R // 函数名支持从变量获取
+    | IDENTIFIER
+;
+
+
+functionArguments::=
+    TERM_PAREN_L (functionArgument (TERM_COMMA functionArgument)*)? TERM_PAREN_R
+;
+
+functionArgument::=
+    IDENTIFIER TERM_COLON express
+    | express
+;
+
+listValueExpress::=
+    TERM_BRACKET_SQUARE_L (unpackListExpress (TERM_COMMA unpackListExpress)*)? TERM_COMMA? TERM_BRACKET_SQUARE_R
+;
+
+unpackListExpress::=
+    OP_EXTRA? express
+;
+
+fullName::=
+    IDENTIFIER (TERM_DOT IDENTIFIER)*
+    ;
+
+typeClass::=
+    TERM_CONST_CLASS
+    ;
+
+typeMember::=
+    typeClass TERM_DOT
+    | fullName TERM_AT
+    | fullName OP_SELF_PIPE
+;
+
+valueSegment::=
+    constValue
+    | refValue
+    | variableValue
+    | typeClass
+;
+
+refValue::=
+    TERM_CONST_VISITOR
+    ;
+
+variableValue::=
+    IDENTIFIER
+;
+
+constValue::=
+    constMultiString
+    | constCharSequence
+    | constNumeric
+    | constBoolean
+    | constNull
+;
+
+
+constCharSequence::=
+    constRenderString
+    | constString
+;
+
+constString::=
+    TERM_CONST_STRING
+    |TERM_CONST_STRING_SINGLE
+    ;
+
+constRenderString::=
+    TERM_CONST_STRING_RENDER
+    |TERM_CONST_STRING_RENDER_SINGLE
+    ;
+
+constMultiString::=
+TERM_CONST_STRING_MULTILINE
+    |TERM_CONST_STRING_MULTILINE_QUOTE
+    ;
+
+constNumeric::=
+    constFloat
+     | constNumber
+;
+
+constNumber::=
+    TERM_CONST_NUMBER_HEX
+    | TERM_CONST_NUMBER_OTC
+    | TERM_CONST_NUMBER_BIN
+    | TERM_CONST_NUMBER
+;
+
+
+constFloat::=
+    TERM_CONST_NUMBER_SCIEN_2
+    |TERM_CONST_NUMBER_SCIEN_1
+    |TERM_CONST_NUMBER_FLOAT
+;
+
+constBoolean::=
+    KW_CONST_BOOLEAN
+;
+
+constNull::=
+    KW_CONST_NULL
+;

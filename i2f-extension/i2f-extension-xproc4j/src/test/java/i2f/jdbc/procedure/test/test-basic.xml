@@ -1,0 +1,92 @@
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="BASIC">
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 arg3.int="1" arg4.string="man"
+                 arg5.int="2" arg6.string="woman"
+                 result="dec"/>
+    <lang-println tag="dec1" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 arg7.string="undefined"
+                 result="dec"/>
+    <lang-println tag="dec2" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg1.int="0" arg2.string="unknown"
+                 result="dec"/>
+    <lang-println tag="dec3" dec="dec"/>
+
+    <lang-invoke method="decode" arg0.int="1"
+                 arg2.string="unknown"
+                 result="dec"/>
+    <lang-println tag="dec4" dec="dec"/>
+
+    <lang-invoke method="SimpleDateFormat.new" arg0.string="yyyy-MM-dd HH:mm:ss.SSS" result="fmt"/>
+    <lang-invoke method="Date.new" result="now"/>
+    <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
+    <lang-println tag="now" now="str"/>
+    <lang-printf>
+        <lang-eval result="now">
+                new Date()
+        </lang-eval>
+    </lang-printf>
+    <lang-printf>
+        <sql-query-object result="count" result-type="Long">
+            <sql-dialect databases="mysql,gbase,mariadb">
+                select count(1) as cnt
+                from sys_user
+                where del_flag = 1
+            </sql-dialect>
+            <sql-dialect databases="oracle,dm">
+                SELECT COUNT(1) as "cnt"
+                FROM SYS_USER
+                WHERE DEL_FLAG = 1
+            </sql-dialect>
+        </sql-query-object>
+    </lang-printf>
+    <lang-set value.int="1" result="count"/>
+
+    <lang-if test="count gt 0">
+        <lang-printf>
+            <sql-update result="updateCount">
+                delete
+                from sys_user
+                where del_flag = 1
+            </sql-update>
+        </lang-printf>
+    </lang-if>
+    <lang-fori begin.int="0" end.int="10" incr.int="1" item="item">
+        <lang-println tag.string="fori" i="item" is-first="first" index="index"/>
+    </lang-fori>
+    <lang-println tag.string="======================================"/>
+    <lang-foreach collection="list" item="item">
+        <lang-println tag.string="foreach" item="item" is-first="first" index="index"/>
+    </lang-foreach>
+    <lang-println tag.string="======================================"/>
+    <lang-foreach collection="list" item="item">
+        <lang-println tag.string="fori" i="item" is-first="first" index="index"/>
+        <lang-fori begin.int="0" end.int="10" incr.int="1" item="item">
+            <lang-println tag.string="-->fori-foreach" i="item" is-first="first" index="index"/>
+        </lang-fori>
+    </lang-foreach>
+    <lang-eval-java result="date">
+            long ts = System.currentTimeMillis();
+            String str = Long.toString(ts, 16);
+            System.out.println("ts-hex:" + str);
+            return new Date();
+    </lang-eval-java>
+    <lang-println date="date"/>
+    <lang-eval-javascript result="js">
+        function test() {
+            return 'hello' + (1 + 2);
+        }
+
+        test()
+    </lang-eval-javascript>
+    <lang-println js="js"/>
+
+
+</procedure>

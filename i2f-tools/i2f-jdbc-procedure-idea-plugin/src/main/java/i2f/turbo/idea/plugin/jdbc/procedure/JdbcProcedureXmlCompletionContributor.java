@@ -17,13 +17,21 @@ import com.intellij.sql.psi.SqlBinaryExpression;
 import com.intellij.sql.psi.SqlIdentifier;
 import com.intellij.sql.psi.SqlParameter;
 import com.intellij.sql.psi.SqlTokenType;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.ParamsConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
+import i2f.jdbc.procedure.node.base.Propagation;
+import i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes;
+import i2f.turbo.idea.plugin.funic.lang.psi.FunicTokenType;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.JDBCType;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -110,57 +118,38 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
             TinyScriptTokenType tokenType = (TinyScriptTokenType) type;
             String name = tokenType.getDebugName();
 //            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
-            if ("NAMING".equalsIgnoreCase(name)) {
-                // 控制遍历频率，避免CPU过高
-                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
-//                log.warn("xml-ts-completions:" + completions);
-                if (completions != null && !completions.isEmpty()) {
-                    for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
-                    }
+            if (TinyScriptTypes.NAMING.getDebugName().equalsIgnoreCase(name)) {
+                if (completionByIdetifier(result, position)) {
                     return;
                 }
-            } else if ("REF_EXPRESS".equalsIgnoreCase(name)) {
-                // 控制遍历频率，避免CPU过高
-                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
-                String text = position.getText();
-                String[] arr = text.split("[\n;]", 2);
-                text = arr[0].trim();
-//                log.warn("xml-ts-ref:[" + text+"]");
-                String prefix = "";
-                String suffix = "";
-                if (text.startsWith("$!{")) {
-                    prefix = "$!{";
-                    suffix = "}";
-                } else if (text.startsWith("#!{")) {
-                    prefix = "#!{";
-                    suffix = "}";
-                } else if (text.startsWith("${")) {
-                    prefix = "${";
-                    suffix = "}";
-                } else if (text.startsWith("#{")) {
-                    prefix = "#{";
-                    suffix = "}";
-                }
-                if (text.endsWith("}")) {
-                    suffix = "";
-                }
-                if (completions != null && !completions.isEmpty()) {
-                    for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(prefix + attr + suffix).withIcon(XProc4jConsts.ICON));
-                    }
+            } else if (TinyScriptTypes.REF_EXPRESS.getDebugName().equalsIgnoreCase(name)) {
+                if (completionByDollarExpress(result, position)) {
                     return;
                 }
             } else if ("$".equalsIgnoreCase(name)) {
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
+                if (completionByDollarSingle(result, position)) {
+                    return;
+                }
+            }
+        }
 
-                String prefix = "${";
-                String suffix = "}";
-                if (completions != null && !completions.isEmpty()) {
-                    for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(prefix + attr + suffix).withIcon(XProc4jConsts.ICON));
-                    }
+        if (type instanceof FunicTokenType) {
+            FunicTokenType tokenType = (FunicTokenType) type;
+            String name = tokenType.getDebugName();
+//            log.warn("xml-ts:" + tokenType.getDebugName() + "," + type.getClass()+", "+position.getText());
+            if (FunicTypes.IDENTIFIER.getDebugName().equalsIgnoreCase(name)) {
+                // 控制遍历频率，避免CPU过高
+                if (completionByIdetifier(result, position)) {
+                    return;
+                }
+            } else if (FunicTypes.TERM_CONST_VISITOR.getDebugName().equalsIgnoreCase(name)) {
+                // 控制遍历频率，避免CPU过高
+                if (completionByDollarExpress(result, position)) {
+                    return;
+                }
+            } else if ("$".equalsIgnoreCase(name)) {
+                if (completionByDollarSingle(result, position)) {
                     return;
                 }
             }
@@ -194,9 +183,9 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 //                log.warn("xml-attr completion tag-attr:" + name);
                 if (name != null && name.endsWith(".")) {
                     List<String> completions = JdbcProcedureProjectMetaHolder.FEATURES;
-                    if (name.startsWith("type")
-                            || name.startsWith("rollback-for")
-                            || name.startsWith("no-rollback-for")) {
+                    if (name.startsWith(AttrConsts.TYPE)
+                            || name.startsWith(AttrConsts.ROLLBACK_FOR)
+                            || name.startsWith(AttrConsts.NO_ROLLBACK_FOR)) {
                         completions = new ArrayList<>();
                         completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES_CAUSE);
                         completions.addAll(JdbcProcedureProjectMetaHolder.FEATURES);
@@ -213,17 +202,19 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                         String tagName = parentTag.getName();
 //                        log.warn("xml-attr completion tag-name:" + tagName);
                         List<String> completions = new ArrayList<>();
-                        if (Arrays.asList("procedure-call", "function-call", "script-include").contains(tagName)) {
+                        if (Arrays.asList(TagConsts.PROCEDURE_CALL,
+                                TagConsts.FUNCTION_CALL,
+                                TagConsts.SCRIPT_INCLUDE).contains(tagName)) {
                             StringBuilder completionAllArgs = new StringBuilder();
 //                            log.warn("xml-attr completion call-node tag-name:" + tagName);
 
-                            XmlAttribute refidAttr = parentTag.getAttribute("refid");
+                            XmlAttribute refidAttr = parentTag.getAttribute(AttrConsts.REFID);
 //                            log.warn("xml-attr completion call-node refid-attribute:" + refidAttr);
 
                             if (refidAttr != null) {
                                 String refid = refidAttr.getValue();
 //                                log.warn("xml-attr completion call-node refid-attribute-id:" + refid);
-                                ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(refid);
+                                ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(refidAttr.getProject(), refid);
 //                                log.warn("xml-attr completion call-node refid-attribute-meta:" + meta);
                                 if (meta != null) {
                                     List<String> arguments = meta.getArguments();
@@ -245,9 +236,9 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                             }
                         }
 
-                        if (Arrays.asList("procedure", "script-segment").contains(tagName)) {
+                        if (Arrays.asList(TagConsts.PROCEDURE, TagConsts.SCRIPT_SEGMENT).contains(tagName)) {
                             Set<String> list = new TreeSet<>();
-                            for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+                            for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.getProjectMetaMap(attribute.getProject()).entrySet()) {
                                 StringBuilder completionAllArgs = new StringBuilder();
                                 ProcedureMeta meta = entry.getValue();
                                 List<String> arguments = meta.getArguments();
@@ -270,8 +261,8 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
                         if (completions.isEmpty()) {
                             completions.addAll(Arrays.asList(
-                                    "_lang", "id", "refid", "__file", "__line",
-                                    "return", "result", "value"
+                                    "_lang", AttrConsts.ID, AttrConsts.REFID, "__file", "__line",
+                                    ParamsConsts.RETURN, AttrConsts.RESULT, AttrConsts.VALUE
                             ));
                         }
 
@@ -298,14 +289,16 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
             String attributeName = attribute.getName();
 
-            if (Arrays.asList("refid").contains(attributeName)) {
+            if (Arrays.asList(AttrConsts.REFID).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
                 }
                 String tagName = xmlTag.getName();
-                if (Arrays.asList("procedure-call", "function-call", "script-include").contains(tagName)) {
+                if (Arrays.asList(TagConsts.PROCEDURE_CALL,
+                        TagConsts.FUNCTION_CALL,
+                        TagConsts.SCRIPT_INCLUDE).contains(tagName)) {
                     List<String> completions = new ArrayList<>();
-                    for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.entrySet()) {
+                    for (Map.Entry<String, ProcedureMeta> entry : JdbcProcedureProjectMetaHolder.getProjectMetaMap(xmlTag.getProject()).entrySet()) {
                         ProcedureMeta value = entry.getValue();
                         completions.add(value.getName());
                     }
@@ -318,21 +311,17 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
 
-            } else if (Arrays.asList("propagation").contains(attributeName)) {
+            } else if (Arrays.asList(AttrConsts.PROPAGATION).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
                 }
                 String tagName = xmlTag.getName();
                 List<String> completions = new ArrayList<>();
-                completions.addAll(Arrays.asList(
-                        "REQUIRED",
-                        "SUPPORTS",
-                        "MANDATORY",
-                        "REQUIRES_NEW",
-                        "NOT_SUPPORTED",
-                        "NEVER",
-                        "NESTED"
-                ));
+                completions.addAll(Arrays.stream(Propagation.values())
+                        .map(e -> String.valueOf(e))
+                        .collect(Collectors.toList())
+                );
+
                 if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
@@ -340,7 +329,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                     return;
                 }
 
-            } else if (Arrays.asList("isolation").contains(attributeName)) {
+            } else if (Arrays.asList(AttrConsts.ISOLATION).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
                 }
@@ -361,17 +350,17 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "read-only",
-                    "await",
-                    "params_share",
-                    "limited",
-                    "accept-batch",
-                    "before-truncate",
+                    AttrConsts.READ_ONLY,
+                    AttrConsts.AWAIT,
+                    AttrConsts.PARAMS_SHARE,
+                    AttrConsts.LIMITED,
+                    AttrConsts.ACCEPT_BATCH,
+                    AttrConsts.BEFORE_TRUNCATE,
                     "write-only",
                     "enable",
                     "disable",
-                    "jump-error",
-                    "full-send"
+                    AttrConsts.JUMP_ERROR,
+                    AttrConsts.FULL_SEND
             ).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
@@ -390,22 +379,18 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "time-unit"
+                    AttrConsts.TIME_UNIT
             ).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
                 }
                 String tagName = xmlTag.getName();
                 List<String> completions = new ArrayList<>();
-                completions.addAll(Arrays.asList(
-                        "NANOSECONDS",
-                        "MICROSECONDS",
-                        "MILLISECONDS",
-                        "SECONDS",
-                        "MINUTES",
-                        "HOURS",
-                        "DAYS"
-                ));
+                completions.addAll(
+                        Arrays.stream(TimeUnit.values())
+                                .map(e -> String.valueOf(e))
+                                .collect(Collectors.toList())
+                );
                 if (completions != null && !completions.isEmpty()) {
                     for (String attr : completions) {
                         result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
@@ -414,7 +399,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "jdbc-type",
+                    AttrConsts.JDBC_TYPE,
                     "jdbcType"
             ).contains(attributeName)) {
                 if (xmlTag == null) {
@@ -432,7 +417,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "pattern",
+                    AttrConsts.PATTERN,
                     "date-format",
                     "format"
             ).contains(attributeName)) {
@@ -499,7 +484,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "database", "databases"
+                    "database", AttrConsts.DATABASES
             ).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
@@ -522,7 +507,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "datasource", "datasources"
+                    AttrConsts.DATASOURCE, AttrConsts.DATASOURCES
             ).contains(attributeName)) {
                 if (xmlTag == null) {
                     return;
@@ -543,7 +528,7 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
                 }
 
             } else if (Arrays.asList(
-                    "result-type",
+                    AttrConsts.RESULT_TYPE,
                     "resultType",
                     "parameter-type",
                     "parameterType"
@@ -570,17 +555,72 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
             } else {
                 // 控制遍历频率，避免CPU过高
-                Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
-
-                if (completions != null && !completions.isEmpty()) {
-                    for (String attr : completions) {
-                        result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
-                    }
-                    return;
-                }
+                completionByIdetifier(result, position);
 
             }
         }
+    }
+
+    private static boolean completionByDollarSingle(@NotNull CompletionResultSet result, PsiElement position) {
+        // 控制遍历频率，避免CPU过高
+        Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
+
+        String prefix = "${";
+        String suffix = "}";
+        if (completions != null && !completions.isEmpty()) {
+            for (String attr : completions) {
+                result.addElement(LookupElementBuilder.create(prefix + attr + suffix).withIcon(XProc4jConsts.ICON));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean completionByDollarExpress(@NotNull CompletionResultSet result, PsiElement position) {
+        // 控制遍历频率，避免CPU过高
+        Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
+        String text = position.getText();
+        String[] arr = text.split("[\n;]", 2);
+        text = arr[0].trim();
+//                log.warn("xml-ts-ref:[" + text+"]");
+        String prefix = "";
+        String suffix = "";
+        if (text.startsWith("$!{")) {
+            prefix = "$!{";
+            suffix = "}";
+        } else if (text.startsWith("#!{")) {
+            prefix = "#!{";
+            suffix = "}";
+        } else if (text.startsWith("${")) {
+            prefix = "${";
+            suffix = "}";
+        } else if (text.startsWith("#{")) {
+            prefix = "#{";
+            suffix = "}";
+        }
+        if (text.endsWith("}")) {
+            suffix = "";
+        }
+        if (completions != null && !completions.isEmpty()) {
+            for (String attr : completions) {
+                result.addElement(LookupElementBuilder.create(prefix + attr + suffix).withIcon(XProc4jConsts.ICON));
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean completionByIdetifier(@NotNull CompletionResultSet result, PsiElement position) {
+        // 控制遍历频率，避免CPU过高
+        Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
+//                log.warn("xml-ts-completions:" + completions);
+        if (completions != null && !completions.isEmpty()) {
+            for (String attr : completions) {
+                result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
+            }
+            return true;
+        }
+        return false;
     }
 
 

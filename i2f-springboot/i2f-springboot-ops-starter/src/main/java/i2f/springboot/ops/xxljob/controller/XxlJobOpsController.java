@@ -10,6 +10,7 @@ import i2f.jdbc.JdbcResolver;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.provider.DatasourceProvider;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.xxljob.data.XxlJobInfoMeta;
@@ -62,6 +63,9 @@ public class XxlJobOpsController implements IOpsProvider {
 
     @Autowired
     private HostIdHelper hostIdHelper;
+
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
 
     @Autowired(required = false)
     private DatasourceProvider datasourceProvider;
@@ -156,6 +160,7 @@ public class XxlJobOpsController implements IOpsProvider {
                 .subTitle("执行XXL-JOB任务")
                 .icon("el-icon-timer")
                 .href("./xxl-job/index.html")
+                .group(OpsHomeMenuGroup.Schedule)
         );
     }
 
@@ -232,7 +237,7 @@ public class XxlJobOpsController implements IOpsProvider {
             XxlJobOperateDto req = transfer.recv(reqDto, XxlJobOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -272,7 +277,7 @@ public class XxlJobOpsController implements IOpsProvider {
             XxlJobOperateDto req = transfer.recv(reqDto, XxlJobOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

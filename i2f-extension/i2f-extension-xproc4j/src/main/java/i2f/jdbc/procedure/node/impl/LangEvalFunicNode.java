@@ -1,0 +1,112 @@
+package i2f.jdbc.procedure.node.impl;
+
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
+import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
+import i2f.extension.antlr4.script.tiny.impl.context.TinyScriptFunctions;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.LangConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
+import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
+import i2f.jdbc.procedure.node.impl.funic.ProcedureFunicResolver;
+import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
+import i2f.jdbc.procedure.signal.SignalException;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+
+/**
+ * @author Ice2Faith
+ * @date 2025/1/20 14:07
+ */
+public class LangEvalFunicNode extends AbstractExecutorNode implements EvalScriptProvider {
+    public static final String TAG_NAME = TagConsts.LANG_EVAL_FUNIC;
+
+    static {
+        Funic.registryMethods(TinyScriptFunctions.INSTANCE);
+    }
+
+    public static void main(String[] args) {
+        /*language=funic*/
+        String script = "a+b";
+        Map<String, Object> context = new HashMap<>();
+        context.put("a", 1);
+        context.put("b", 2.5);
+        Object obj = evalFunic(script, context, null);
+        System.out.println(obj);
+    }
+
+    public static Object evalFunic(String script, Object context, JdbcProcedureExecutor executor) {
+        return evalFunic(null, script, context, executor);
+    }
+
+    public static Object evalFunic(XmlNode node, String script, Object context, JdbcProcedureExecutor executor) {
+
+        Object obj = null;
+
+        try {
+            FunicParser.RootContext tree = Funic.parse(script);
+            FunicResolver resolver = new ProcedureFunicResolver(executor, node);
+            String scriptFileName = null;
+            int scriptLineOffset = 0;
+            if (node != null) {
+                scriptFileName = node.getLocationFile();
+                scriptLineOffset = node.getLocationLineNumber();
+            }
+            obj = Funic.script(tree, context, scriptFileName, scriptLineOffset, resolver);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new IllegalStateException(e.getMessage(), e);
+            }
+        }
+        return obj;
+    }
+
+
+    @Override
+    public String tag() {
+        return TAG_NAME;
+    }
+
+
+    @Override
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
+        String script = node.getTextBody();
+        if (script != null && !script.isEmpty()) {
+            reporter.reportExprFeatureGrammar(script, FeatureConsts.EVAL_FUNIC, node, "element body ", warnPoster);
+        }
+    }
+
+    @Override
+    public void execInner(XmlNode node, Map<String, Object> context, JdbcProcedureExecutor executor) {
+        String result = node.getTagAttrMap().get(AttrConsts.RESULT);
+        String script = node.getTextBody();
+        Object obj = evalFunic(node, script, context, executor);
+
+        if (result != null) {
+            obj = executor.resultValue(obj, node.getAttrFeatureMap().get(AttrConsts.RESULT), node, context);
+            executor.visitSet(context, result, obj);
+        }
+
+    }
+
+    @Override
+    public boolean support(String lang) {
+        return LangConsts.FUNIC.equalsIgnoreCase(lang);
+    }
+
+    @Override
+    public Object eval(String script, Map<String, Object> params, JdbcProcedureExecutor executor) {
+        Object obj = evalFunic(script, params, executor);
+        return obj;
+    }
+
+
+}

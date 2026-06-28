@@ -2,6 +2,7 @@ package i2f.serialize.str.json.impl;
 
 import i2f.match.regex.RegexPattens;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
@@ -35,6 +36,10 @@ public class JsonParser {
     }
 
     public static Object parse(String json) {
+        return parseNext(json, "");
+    }
+
+    public static Object parseNext(String json, String parentKey) {
         List<String> tokens = splitTokens(json, part -> {
             String trim = part.trim();
             if (trim.isEmpty()) {
@@ -47,7 +52,7 @@ public class JsonParser {
         });
         String bestJson = null;
         for (String token : tokens) {
-            if (token.startsWith("{") || token.startsWith("[")) {
+            if (token != null) {
                 bestJson = token;
                 break;
             }
@@ -57,6 +62,42 @@ public class JsonParser {
             throw new IllegalArgumentException("non-json content found!");
         }
 
+        // 先处理简单类型
+        if (bestJson != null) {
+            String v = bestJson;
+            if (v.startsWith("{") || v.startsWith("[")) {
+                // no nothing, process after
+            } else if (v.startsWith("\"") || v.startsWith("'")) {
+                Object val = unescape(v);
+                return val;
+            } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
+                long val = Long.parseLong(v);
+                return val;
+            } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
+                Object val = Double.parseDouble(v);
+                return val;
+            } else if ("true".equals(v)) {
+                return true;
+            } else if ("false".equals(v)) {
+                return false;
+            } else if ("null".equals(v)) {
+                return null;
+            } else {
+                try {
+                    BigDecimal num = new BigDecimal(v);
+                    double dv = num.doubleValue();
+                    if (Double.isInfinite(dv)) {
+                        return num;
+                    } else {
+                        return dv;
+                    }
+                } catch (Exception e) {
+                    throw new IllegalArgumentException("un-support parse value: " + v + " of path: " + parentKey + " content: " + v);
+                }
+            }
+        }
+
+        // 开始处理复杂类型
         String prefix = bestJson.substring(0, 1);
         String innerText = bestJson.substring(1, bestJson.length() - 1);
 
@@ -118,27 +159,8 @@ public class JsonParser {
             for (Map.Entry<String, String> entry : kvs.entrySet()) {
                 String k = unescape(entry.getKey());
                 String v = entry.getValue();
-                if (v.startsWith("{") || v.startsWith("[")) {
-                    Object val = parse(v);
-                    ret.put(k, val);
-                } else if (v.startsWith("\"") || v.startsWith("'")) {
-                    Object val = unescape(v);
-                    ret.put(k, val);
-                } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
-                    long val = Long.parseLong(v);
-                    ret.put(k, val);
-                } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
-                    Object val = Double.parseDouble(v);
-                    ret.put(k, val);
-                } else if ("true".equals(v)) {
-                    ret.put(k, true);
-                } else if ("false".equals(v)) {
-                    ret.put(k, false);
-                } else if ("null".equals(v)) {
-                    ret.put(k, null);
-                } else {
-                    throw new IllegalArgumentException("un-support parse value: " + v + " of key: " + k);
-                }
+                Object val = parseNext(v, parentKey + "." + k);
+                ret.put(k, val);
             }
 
             return ret;
@@ -193,29 +215,12 @@ public class JsonParser {
                 i++;
             }
 
+            i = 0;
             for (String elem : elems) {
                 String v = elem;
-                if (v.startsWith("{") || v.startsWith("[")) {
-                    Object val = parse(v);
-                    ret.add(val);
-                } else if (v.startsWith("\"") || v.startsWith("'")) {
-                    Object val = unescape(v);
-                    ret.add(val);
-                } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
-                    long val = Long.parseLong(v);
-                    ret.add(val);
-                } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
-                    Object val = Double.parseDouble(v);
-                    ret.add(val);
-                } else if ("true".equals(v)) {
-                    ret.add(true);
-                } else if ("false".equals(v)) {
-                    ret.add(false);
-                } else if ("null".equals(v)) {
-                    ret.add(null);
-                } else {
-                    throw new IllegalArgumentException("un-support parse value: " + v);
-                }
+                Object val = parseNext(v, parentKey + "[" + i + "]");
+                ret.add(val);
+                i++;
             }
 
             return ret;
@@ -247,7 +252,7 @@ public class JsonParser {
         }
         char ch = str.charAt(index.get());
         if (ch == '"') {
-            Pattern pattern = Pattern.compile(RegexPattens.QUOTE_STRING_REGEX);
+            Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
             Matcher matcher = pattern.matcher(str);
             if (matcher.find(index.get())) {
                 MatchResult result = matcher.toMatchResult();
@@ -258,7 +263,7 @@ public class JsonParser {
                 return part;
             }
         } else if (ch == '\'') {
-            Pattern pattern = Pattern.compile(RegexPattens.SINGLE_QUOTE_STRING_REGEX);
+            Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
             Matcher matcher = pattern.matcher(str);
             if (matcher.find(index.get())) {
                 MatchResult result = matcher.toMatchResult();
@@ -281,7 +286,7 @@ public class JsonParser {
             if (index.get() + 1 < str.length()) {
                 char nch = str.charAt(index.get() + 1);
                 if (nch == '/') {
-                    Pattern pattern = Pattern.compile(RegexPattens.SINGLE_LINE_COMMENT_REGEX);
+                    Pattern pattern = RegexPattens.SINGLE_LINE_COMMENT_PATTERN;
                     Matcher matcher = pattern.matcher(str);
                     if (matcher.find(index.get())) {
                         MatchResult result = matcher.toMatchResult();
@@ -295,7 +300,7 @@ public class JsonParser {
                         return ch + "";
                     }
                 } else if (nch == '*') {
-                    Pattern pattern = Pattern.compile(RegexPattens.MULTI_LINE_COMMENT_REGEX);
+                    Pattern pattern = RegexPattens.MULTI_LINE_COMMENT_PATTERN;
                     Matcher matcher = pattern.matcher(str);
                     if (matcher.find(index.get())) {
                         MatchResult result = matcher.toMatchResult();
@@ -369,7 +374,7 @@ public class JsonParser {
                     return ret;
                 }
             } else if (ch == '"') {
-                Pattern pattern = Pattern.compile(RegexPattens.QUOTE_STRING_REGEX);
+                Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
                 Matcher matcher = pattern.matcher(expression);
                 if (matcher.find(index.get())) {
                     MatchResult result = matcher.toMatchResult();
@@ -381,7 +386,7 @@ public class JsonParser {
                     continue;
                 }
             } else if (ch == '\'') {
-                Pattern pattern = Pattern.compile(RegexPattens.SINGLE_QUOTE_STRING_REGEX);
+                Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
                 Matcher matcher = pattern.matcher(expression);
                 if (matcher.find(index.get())) {
                     MatchResult result = matcher.toMatchResult();

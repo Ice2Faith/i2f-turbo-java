@@ -32,6 +32,11 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-annotations-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-environment-std</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

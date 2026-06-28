@@ -3,6 +3,7 @@ package i2f.springboot.ops.xproc4j.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import i2f.springboot.ops.xproc4j.data.XProc4jOperateDto;
@@ -49,6 +50,9 @@ public class XProc4jOpsController implements IOpsProvider {
     private HostIdHelper hostIdHelper;
 
     @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
+    @Autowired
     protected OpsSecureTransfer transfer;
 
     @Autowired
@@ -64,6 +68,7 @@ public class XProc4jOpsController implements IOpsProvider {
                         .subTitle("执行 XProc4J 脚本")
                         .icon("el-icon-table-lamp")
                         .href("./xproc4j/index.html")
+                        .group(OpsHomeMenuGroup.Component)
                 );
             }
         } catch (Exception e) {
@@ -105,7 +110,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -125,7 +130,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -150,7 +155,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -242,7 +247,7 @@ public class XProc4jOpsController implements IOpsProvider {
             XProc4jOperateDto req = transfer.recv(reqDto, XProc4jOperateDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

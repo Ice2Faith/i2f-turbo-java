@@ -38,7 +38,8 @@ import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;
 import i2f.jdbc.procedure.node.impl.*;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
-import i2f.jdbc.procedure.reportor.GrammarReporter;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
+import i2f.jdbc.procedure.reporter.impl.BasicGrammarReporter;
 import i2f.jdbc.procedure.script.EvalScriptProvider;
 import i2f.jdbc.procedure.signal.SignalException;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
@@ -103,6 +104,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final ConcurrentHashMap<String, FeatureFunction> featuresMap = new ConcurrentHashMap<>();
     protected final CopyOnWriteArrayList<EvalScriptProvider> evalScriptProviders = new CopyOnWriteArrayList<>();
     protected final ConcurrentHashMap<String, ILockProvider> lockProviders = new ConcurrentHashMap<>();
+    protected final CopyOnWriteArrayList<String> primaryDatasourceNames = new CopyOnWriteArrayList<>();
     protected final AtomicBoolean debug = new AtomicBoolean(true);
     protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger(debug);
     private final JdbcProcedureLogger threadAppenderLogger = new ThreadAppenderJdbcProcedureLogger();
@@ -122,6 +124,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     protected final AtomicBoolean optimizeConstAttrValue = new AtomicBoolean(true);
     protected final CopyOnWriteArraySet<String> constAttrValueOptimizeFeatures = new CopyOnWriteArraySet<>();
 
+    protected volatile IGrammarReporter grammarReporter = new BasicGrammarReporter();
+
     {
         List<ExecutorNode> list = defaultExecutorNodes();
         for (ExecutorNode node : list) {
@@ -136,6 +140,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryEvalScriptProvider(this);
         initFeatureMap();
         initConstAttrValueOptimizeFeatures();
+
+        afterConstructor();
     }
 
     public BasicJdbcProcedureExecutor() {
@@ -152,9 +158,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         this.namingContext = namingContext;
     }
 
+    public void afterConstructor() {
 
-    public static List<ExecutorNode> defaultExecutorNodes() {
+    }
+
+    public void afterInitExecutorNodes(List<ExecutorNode> nodes) {
+
+    }
+
+    public List<ExecutorNode> defaultExecutorNodes() {
         List<ExecutorNode> ret = new ArrayList<>();
+
         ServiceLoader<ExecutorNode> nodes = ServiceLoader.load(ExecutorNode.class);
         for (ExecutorNode item : nodes) {
             ret.add(item);
@@ -175,11 +189,6 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new LangChooseNode());
         ret.add(new LangContinueNode());
         ret.add(new LangDoWhileNode());
-        ret.add(new LangEvalGroovyNode());
-        ret.add(new LangEvalJavaNode());
-        ret.add(new LangEvalJavascriptNode());
-        ret.add(new LangEvalNode());
-        ret.add(new LangEvalTinyScriptNode());
         ret.add(new LangFileDeleteNode());
         ret.add(new LangFileExistsNode());
         ret.add(new LangFileListNode());
@@ -242,8 +251,14 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new SqlUpdateNode());
         ret.add(new TextNode());
 
+        afterInitExecutorNodes(ret);
 
         return ret;
+    }
+
+    @Override
+    public IGrammarReporter grammarReporter() {
+        return this.grammarReporter;
     }
 
     @Override
@@ -417,22 +432,27 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             throw new IllegalArgumentException(LangConsts.XPROC4J + " lang accept xml format script, script format maybe wrong!", parseEx);
         }
         if (isDebug()) {
-            if (isDebug()) {
-                logger().logDebug("eval script begin report grammar ... ");
-            }
-            Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
-            String validKey = UUID.randomUUID().toString();
-            metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
-            Set<String> validKeySet = new HashSet<>();
-            validKeySet.add(validKey);
-            GrammarReporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+            IGrammarReporter reporter = grammarReporter();
+            if (reporter != null) {
+                if (isDebug()) {
+                    logger().logDebug("eval script begin report grammar ... ");
+                }
 
-            if (isDebug()) {
-                logger().logDebug("eval script begin report grammar finished. ");
+                Map<String, ProcedureMeta> metaMap = new LinkedHashMap<>(getMetaMap());
+                String validKey = UUID.randomUUID().toString();
+                metaMap.put(validKey, ProcedureMeta.ofMeta(validKey, node));
+                Set<String> validKeySet = new HashSet<>();
+                validKeySet.add(validKey);
+                reporter.reportGrammar(this, validKeySet, metaMap, (str) -> logger().logDebug(str));
+
+                if (isDebug()) {
+                    logger().logDebug("eval script begin report grammar finished. ");
+                }
             }
         }
         return executor.exec(node, params);
     }
+
 
     @Override
     public JdbcProcedureContext getContext() {
@@ -779,7 +799,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         }
         DataSource primary = ret.get(ParamsConsts.DEFAULT_DATASOURCE);
         if (primary == null) {
-            List<String> defaultNames = Arrays.asList("primary", "master", "main", "default", "leader");
+            List<String> defaultNames = new ArrayList<>();
+            defaultNames.addAll(primaryDatasourceNames);
+            defaultNames.addAll(Arrays.asList("primary", "master", "main", "default", "leader"));
             for (Map.Entry<String, DataSource> entry : ret.entrySet()) {
                 String name = entry.getKey();
                 if (defaultNames.contains(name)) {
@@ -1301,24 +1323,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryFeatureFunction(FeatureConsts.HASHCODE, (value, node, context) -> {
             return value == null ? 0 : value.hashCode();
         });
-        registryFeatureFunction(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavaNode.evalJava(context, this, "", "", text);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_JS, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalJavascriptNode.evalJavascript(text, context, this);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
-        });
-        registryFeatureFunction(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
 
-        registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
-            String text = value == null ? "" : String.valueOf(value);
-            return LangEvalGroovyNode.evalGroovyScript(text, context, this);
-        });
         registryFeatureFunction(FeatureConsts.CLASS, (value, node, context) -> {
             String text = value == null ? "" : String.valueOf(value);
             return loadClass(text);
@@ -1383,6 +1388,12 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         registryFeatureFunction(FeatureConsts.LOCATION, (value, node, context) -> {
             return XmlNode.getNodeLocation(node);
         });
+
+        afterInitFeatureMap();
+    }
+
+    public void afterInitFeatureMap() {
+
     }
 
     protected void initConstAttrValueOptimizeFeatures() {
@@ -1422,7 +1433,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             return false;
         }
         Connection conn = getConnection(datasource, params);
-        List<String> databaseNames = detectDatabaseType(conn);
+        List<String> databaseNames = detectDatabaseDialectType(conn);
         String[] arr = databases.split(",");
         for (String item : arr) {
             for (String databaseName : databaseNames) {
@@ -1434,9 +1445,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return false;
     }
 
-    public List<String> detectDatabaseType(Connection conn) throws Exception {
+    public List<String> detectDatabaseType(DatabaseType databaseType) throws Exception {
         List<String> ret = new ArrayList<>();
-        DatabaseType databaseType = getDatabaseType(conn);
         if (databaseType == null) {
             return ret;
         }
@@ -1445,6 +1455,16 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(name.toLowerCase());
         ret.add(enumName.toLowerCase());
         return ret;
+    }
+
+    public List<String> detectDatabaseType(Connection conn) throws Exception {
+        DatabaseType databaseType = getDatabaseType(conn);
+        return detectDatabaseType(databaseType);
+    }
+
+    public List<String> detectDatabaseDialectType(Connection conn) throws Exception {
+        DatabaseType databaseType = getDatabaseDialectType(conn);
+        return detectDatabaseType(databaseType);
     }
 
     @Override
@@ -2124,6 +2144,9 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         return DatabaseType.typeOfConnection(conn);
     }
 
+    public DatabaseType getDatabaseDialectType(Connection conn) throws SQLException {
+        return DatabaseType.dialectOfConnection(conn);
+    }
 
     @Override
     public Object sqlQueryObject(String datasource, BindSql bql, Map<String, Object> params, Class<?> resultType) {
@@ -2165,6 +2188,8 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public void fillDatabaseDialectType(Map<String, Object> params, Connection conn) throws SQLException {
         DatabaseType databaseType = getDatabaseType(conn);
         visitSet(params, MybatisMapperInflater.DATABASE_TYPE, databaseType);
+        DatabaseType dialectType = getDatabaseDialectType(conn);
+        visitSet(params, MybatisMapperInflater.DIALECT_TYPE, dialectType);
     }
 
     @Override
@@ -2303,7 +2328,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             Connection conn = connEntry.getKey();
             datasource = connEntry.getValue();
 
-            List<String> databaseNames = detectDatabaseType(conn);
+            List<String> databaseNames = detectDatabaseDialectType(conn);
             String[] arr = key.split(",");
             for (String item : arr) {
                 for (String databaseName : databaseNames) {
@@ -2389,7 +2414,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
                 }
             }
             if (key != null) {
-                List<String> databaseNames = detectDatabaseType(conn);
+                List<String> databaseNames = detectDatabaseDialectType(conn);
                 String[] arr = key.split(",");
                 for (String item : arr) {
                     for (String databaseName : databaseNames) {

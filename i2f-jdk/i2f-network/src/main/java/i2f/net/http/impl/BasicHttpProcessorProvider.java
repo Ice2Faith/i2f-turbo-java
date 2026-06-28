@@ -1,11 +1,14 @@
 package i2f.net.http.impl;
 
 
+import i2f.net.http.consts.ContentTypeConstants;
+import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
 import i2f.net.http.interfaces.HttpProcessorProvider;
 import i2f.net.http.interfaces.IHttpProcessor;
-import i2f.net.http.interfaces.IHttpRequestBodyHandler;
+import i2f.net.http.interfaces.IHttpResponseExtractor;
 import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.io.IOException;
@@ -18,9 +21,6 @@ import java.util.Map;
  */
 public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     protected IHttpProcessor httpProcessor;
-    protected IHttpRequestBodyHandler formRequestBodyHandler = new HttpFormUrlEncodedRequestBodyHandler();
-    protected IHttpRequestBodyHandler jsonRequestBodyHandler = new HttpJsonRequestBodyHandler();
-    protected IHttpRequestBodyHandler multipartFormDataRequestBodyHandler = new HttpMultipartFormDataRequestBodyHandler();
 
     public BasicHttpProcessorProvider(IHttpProcessor httpProcessor) {
         this.httpProcessor = httpProcessor;
@@ -28,262 +28,238 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public <T> T postFormForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public String postFormForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postForm(HttpRequest request) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor);
     }
 
     @Override
     public <T> T postJsonForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer jsonProcessor) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsObject(jsonProcessor, clazz, charset);
     }
 
     @Override
     public String postJsonForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postJson(HttpRequest request) throws IOException {
-        return request.setMethod(HttpRequest.POST)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+        return request.setMethod(HttpMethodConstants.POST)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor);
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data) throws IOException {
+    public HttpResponse postJson(String url, Object data) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor);
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params) throws IOException {
+    public HttpResponse postJson(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor);
     }
 
     @Override
-    public HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse postJson(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor);
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String postJsonForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
-    public <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postJsonForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_JSON)
-                .setRequestBodyHandler(jsonRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data) throws IOException {
+    public HttpResponse postForm(String url, Object data) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor);
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params) throws IOException {
+    public HttpResponse postForm(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor);
     }
 
     @Override
-    public HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse postForm(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor);
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, String charset) throws IOException {
+    public String postFormForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException {
+    public String postFormForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String postFormForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
-    public <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T postFormForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
                 .setUrl(url)
                 .setData(data)
                 .setParams(params)
                 .setHeader(header)
-                .addHeader(HttpRequest.CONTENT_TYPE, HttpRequest.CONTENT_FORM_URLENCODE)
-                .setRequestBodyHandler(formRequestBodyHandler)
+                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
@@ -296,7 +272,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse get(String url, Map<String, Object> params) throws IOException {
+    public HttpResponse get(String url, Object params) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -304,7 +280,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse get(String url, Map<String, Object> params, Map<String, Object> header) throws IOException {
+    public HttpResponse get(String url, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -321,7 +297,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String getForString(String url, Map<String, Object> params, String charset) throws IOException {
+    public String getForString(String url, Object params, String charset) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -330,7 +306,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public String getForString(String url, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException {
+    public String getForString(String url, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -348,7 +324,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T getForObject(String url, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T getForObject(String url, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -357,7 +333,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public <T> T getForObject(String url, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
+    public <T> T getForObject(String url, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
                 .setUrl(url)
                 .setParams(params)
@@ -367,7 +343,12 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     }
 
     @Override
-    public HttpResponse doHttp(HttpRequest request) throws IOException {
-        return httpProcessor.doHttp(request);
+    public HttpResponse http(HttpRequest request) throws IOException {
+        return httpProcessor.http(request);
+    }
+
+    @Override
+    public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
+        return httpProcessor.http(request, extractor);
     }
 }

@@ -3,10 +3,10 @@ package i2f.turbo.idea.plugin.inject.config;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.intellij.lang.Language;
 import com.intellij.openapi.project.Project;
+import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import i2f.turbo.idea.plugin.inject.data.LanguageInjectItem;
 import i2f.turbo.idea.plugin.inject.utils.JsonUtils;
-import i2f.turbo.idea.plugin.inject.utils.StreamUtil;
 
 import java.io.File;
 import java.util.*;
@@ -66,19 +66,26 @@ public class ProjectInjectConfig {
             });
 
             return ret;
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
         }
         return ret;
     }
 
     public static File getConfigFile(File baseDir) {
-        File ret = new File(baseDir, "language-inject-template.jsonc");
-        if (ret.exists() && ret.isFile()) {
-            return ret;
+        String[] searchFiles = {
+                "language-inject-template.jsonc",
+                "language-inject-template.json",
+                ".idea/language-inject-template.jsonc",
+                ".idea/language-inject-template.json"
+        };
+        for (String searchFile : searchFiles) {
+            File ret = new File(baseDir, searchFile);
+            if (ret.exists() && ret.isFile()) {
+                return ret;
+            }
         }
-        ret = new File(baseDir, "language-inject-template.json");
-        return ret;
+        return new File(baseDir, "language-inject-template.json");
     }
 
 

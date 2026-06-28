@@ -5,6 +5,7 @@
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - Ssh</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
     <script src="../lib/vue/vue-2.js"></script>
     <script src="../lib/moment/moment-2.24.0.js"></script>
     <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -23,7 +24,7 @@
     <script src="../common/OpsSecureDto.js"></script>
     <script src="../common/OpsSecureHelper.js"></script>
     <script src="../common/OpsSecureTransfer.js"></script>
-    <script src="../lib/echarts-5/echarts.min.js"></script>
+    <script src="../lib/vue-contextmenujs-1.4.11/contextmenu.umd.js"></script>
     <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
     <script src="../lib/codemirror-6.65.7/codemirror.min.js"></script>
     <link rel="stylesheet" href="../lib/codemirror-6.65.7/codemirror.min.css"/>
@@ -111,7 +112,11 @@
                    @click="doRefreshWorkdir">
     </el-input>
     <el-card shadow="never">
-        <textarea ref="refEditor"></textarea>
+        <div :class="'expand-main-editor'+(expandMainEditor?' expand-main-editor__expand':'')"
+             @contextmenu.prevent="onEditorContextmenu(editor)">
+            <textarea ref="refEditor"></textarea>
+        </div>
+        <span class="el-icon-full-screen expand-main-editor__badge" @click="expandMainEditor=!expandMainEditor"></span>
     </el-card>
 
     <el-row>
@@ -137,7 +142,29 @@
             </el-row>
             <el-row type="flex" justify="center">
                 <el-form-item>
-                    <el-checkbox v-model="form.runAsFile">以文件执行</el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                执行SFTP命令，使用SFTP通道<br/>
+                                因此只允许执行SFTP命令，不允许使用SHELL命令<br/>
+                                用于在限制只允许SFTP登录的场景下使用
+                            </span>
+                        <el-checkbox slot="reference" v-model="form.sftpCmd">SFTP命令</el-checkbox>
+                    </el-popover>
+                    <el-popover
+                            placement="top-start"
+                            width="200"
+                            trigger="hover">
+                            <span>
+                                把脚本生成一个shell脚本文件之后进行执行<br/>
+                                好处是，某些命令，直接执行可能有问题，例如管道重定向等<br/>
+                                生成临时脚本文件之后执行，则不存在这样的问题
+                            </span>
+                        <el-checkbox slot="reference" v-if="!form.sftpCmd" v-model="form.runAsFile">以文件执行
+                        </el-checkbox>
+                    </el-popover>
                     <el-button v-loading="metas.resultLoading" size="medium"
                                type="primary"
                                @click="onExecute">
@@ -162,7 +189,9 @@
                 </el-select>
             </el-form-item>
         </el-form>
-        <textarea ref="refResultEditor"></textarea>
+        <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor)">
+            <textarea ref="refResultEditor"></textarea>
+        </div>
     </el-card>
     <el-drawer
             title="文件列表"
@@ -263,7 +292,9 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <textarea ref="refTextViewerEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor)">
+                <textarea ref="refTextViewerEditor"></textarea>
+            </div>
         </el-card>
     </el-dialog>
 
@@ -293,7 +324,9 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <textarea ref="refFileEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.fileEditor)">
+                <textarea ref="refFileEditor"></textarea>
+            </div>
         </el-card>
     </el-dialog>
 
@@ -345,6 +378,7 @@
         methods: {
             getDefaultData() {
                 return {
+                    expandMainEditor: false,
                     editor: null,
                     opsBroadcastChannel:null,
                     langEditors: {
@@ -417,6 +451,7 @@
                         },
                         workdir: '',
                         cmd: '',
+                        sftpCmd: false,
                         runAsFile: false,
                         waitForSeconds: 120,
                         inline: false,
@@ -562,6 +597,345 @@
                     }
                 }
                 return ret;
+            },
+            onEditorContextmenu(editor, categoryList) {
+                let _this = this
+                let convertText = function (convertor) {
+                    try {
+                        let text = editor.getSelection();
+                        if (!text || text == '') {
+                            text = editor.getValue()
+                            text = convertor(text);
+                            editor.setValue(text)
+                        } else {
+                            text = convertor(text);
+                            editor.replaceSelection(text)
+                        }
+                    } catch (e) {
+                        _this.$message.error('操作失败')
+                    }
+                }
+
+                let presetMenusMap = {
+                    text: [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `upper`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toUpperCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `lower`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toLowerCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的字符串', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(searchText, replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: `regexp_replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的正则', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(new RegExp(searchText, 'g'), replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: 'encode/decode',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `encode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return btoa(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `decode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return atob(s);
+                                        })
+                                    }
+                                },
+
+                            ]
+                        },
+                        {
+                            label: 'SQL escape',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `escape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return "'" + s.replaceAll("'", "''") + "'";
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `unescape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            if (s.startsWith("'")) {
+                                                s = s.substring(1);
+                                            }
+                                            if (s.endsWith("'")) {
+                                                s = s.substring(0, s.length - 1);
+                                            }
+                                            return s.replaceAll("''", "'");
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            label: 'Json Convert',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `to_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return JSON.stringify(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `parse_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            if (typeof obj == 'string') {
+                                                return obj + '';
+                                            }
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `format_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+
+                    ],
+                    sql: [
+                        {
+                            label: 'SQL segments',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `count(1)`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `select`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `update`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'update ' + s + '\n set \n\nwhere  \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `delete`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'delete from ' + s + '\nwhere  \n';
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {label: '', divided: true}, // 分割线
+                        ...((typeof sqlFormatter != 'object') ? [] : [{
+                            label: `format sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return _this.formatSql(s);
+                                })
+                            }
+                        }]),
+                    ],
+                    'json-editor': [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `Json Editor`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let text = editor.getValue();
+                                this.showJsonEditor(text, (res) => {
+                                    editor.setValue(res);
+                                });
+
+                            }
+                        },
+                    ]
+                }
+                let menus = [...presetMenusMap.text]
+                categoryList = categoryList || []
+                if (categoryList && categoryList.length > 0) {
+                    for (let i = 0; i < categoryList.length; i++) {
+                        let category = categoryList[i];
+                        if (category == 'text') {
+                            continue;
+                        }
+                        menus.push(...presetMenusMap[category])
+                    }
+                }
+                this.$contextmenu({
+                    items: menus,
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
+            formatSql(sql) {
+                if (!sql) {
+                    return sql;
+                }
+
+                // 设置选项
+                const options = {
+                    keywordCase: 'lower',
+                    indent: '\t'
+                };
+
+                // 格式化SQL
+                const formatted = sqlFormatter.format(sql, options);
+                return formatted;
             },
             initEditor() {
                 let _this = this;
@@ -734,6 +1108,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -760,15 +1162,14 @@
                 this.metas.workdirLoading = true;
                 try {
                     let req = this.assignSshMeta({})
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/workdir',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {}
+                            let resp = this.transferRecv(res.data.data) || {}
                             //console.log(resp)
                             this.form.workdir = resp.workdir;
                         } else {
@@ -828,18 +1229,18 @@
                     let req = this.assignSshMeta({
                         workdir: this.form.workdir,
                         cmd: cmd,
+                        sftpCmd: this.form.sftpCmd,
                         runAsFile: this.form.runAsFile,
                         waitForSeconds: this.form.waitForSeconds,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/cmd`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.metas.resultText = resp || '';
                             try {
@@ -874,17 +1275,17 @@
                 this.drawer.fileList.filesLoading = true;
                 try {
                     let req = this.assignSshMeta({
-                        workdir: this.form.workdir
+                        workdir: this.form.workdir,
+                        pattern: this.drawer.fileList.filterFile,
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/file-list',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || []
+                            let resp = this.transferRecv(res.data.data) || []
                             // console.log(resp)
                             this.drawer.fileList.files = resp;
                         } else {
@@ -927,12 +1328,11 @@
                 let req = this.assignSshMeta({
                     path: path,
                 });
-                let transfer = this.getTransfer();
                 return this.$axios({
                     url: `/download`,
                     method: 'post',
                     responseType: 'blob',
-                    data: transfer.send(req)
+                    data: this.transferSend(req)
                 }).then(res => {
                     let contentDisposition = ''
                     let contentType = ''
@@ -1090,15 +1490,14 @@
                     let req = this.assignSshMeta({
                         path: path
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/delete`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.$message.success('操作成功')
                             this.onRefreshFiles()
@@ -1170,8 +1569,7 @@
                                 path: this.dialog.fileEditor.path,
                                 md5: md5
                             })
-                            let transfer = this.getTransfer();
-                            let reqData = transfer.send(req);
+                            let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k])
                             })
@@ -1186,7 +1584,7 @@
                             }).then(res => {
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
-                                    let resp = transfer.recv(res.data.data)
+                                    let resp = this.transferRecv(res.data.data)
                                     // console.log(resp)
                                     this.$message.success('操作成功')
                                     this.dialog.fileEditor.show = false;
@@ -1221,15 +1619,14 @@
                     let req = this.assignSshMeta({
                         path: this.dialog.createDirectory.text
                     });
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/mkdirs`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.$message.success('操作成功')
                             this.dialog.createDirectory.show = false;
@@ -1291,8 +1688,7 @@
                                 workdir: this.form.workdir,
                                 md5: md5
                             })
-                            let transfer = this.getTransfer();
-                            let reqData = transfer.send(req);
+                            let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k])
                             })
@@ -1307,7 +1703,7 @@
                             }).then(res => {
                                 if (res.data.code == 200) {
                                     //console.log(res.data)
-                                    let resp = transfer.recv(res.data.data)
+                                    let resp = this.transferRecv(res.data.data)
                                     // console.log(resp)
                                     this.$message.success('操作成功')
                                     this.onRefreshFiles()
@@ -1361,6 +1757,22 @@
 
     .checked-item {
         background: darkorange;
+    }
+
+    .expand-main-editor {
+
+    }
+
+    .expand-main-editor__expand .CodeMirror {
+        height: calc(100vh - 160px);
+    }
+
+    .expand-main-editor__badge {
+        float: right;
+        position: relative;
+        bottom: 0px;
+        right: -15px;
+        z-index: 2000;
     }
 
     .el-table__cell .table-cell-hidden{

@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.script.tiny.impl;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -11,6 +12,8 @@ public interface TinyScriptResolver {
     void debug(boolean enable);
 
     void debugLog(Supplier<Object> supplier);
+
+    void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier);
 
     void openDebugger(Object context, String tag, String conditionExpression);
 
@@ -37,4 +40,5 @@ public interface TinyScriptResolver {
     Class<?> loadClass(Object context, String className);
 
     Object getValueBySquareBracketExpression(Object leftValue, Object rightValue);
+
 }

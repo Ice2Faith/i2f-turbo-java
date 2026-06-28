@@ -8,6 +8,7 @@ import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostFileItemDto;
 import i2f.springboot.ops.ssh.data.SshOperateDto;
@@ -54,6 +55,7 @@ public class SshOpsController implements IOpsProvider {
                 .subTitle("连接/操作SSH主机命令/文件")
                 .icon("el-icon-link")
                 .href("./ssh/index.html")
+                .group(OpsHomeMenuGroup.Host)
         );
     }
 
@@ -86,12 +88,21 @@ public class SshOpsController implements IOpsProvider {
             SshOperateDto req = transfer.recv(reqDto, SshOperateDto.class);
             try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String workdir = req.getWorkdir();
+                String pattern = req.getPattern();
+
                 String dir = util.realpath(workdir);
                 List<HostFileItemDto> resp = new ArrayList<>();
                 List<HostFileItemDto> dirList = new ArrayList<>();
                 List<HostFileItemDto> fileList = new ArrayList<>();
                 if (util.existDir(dir)) {
-                    Vector<ChannelSftp.LsEntry> files = util.listFiles(dir);
+                    String searchPattern = dir;
+                    if (pattern != null && !pattern.isEmpty()) {
+                        if (!pattern.contains("*")) {
+                            pattern = "*" + pattern + "*";
+                        }
+                        searchPattern = searchPattern + "/" + pattern;
+                    }
+                    Vector<ChannelSftp.LsEntry> files = util.listFiles(searchPattern);
                     if (files != null) {
                         for (ChannelSftp.LsEntry file : files) {
                             HostFileItemDto item = new HostFileItemDto();
@@ -382,6 +393,13 @@ public class SshOpsController implements IOpsProvider {
             try (SftpUtil util = new SftpUtil(req.getMeta()).login()) {
                 String workdir = req.getWorkdir();
                 String cmd = req.getCmd();
+
+                if (req.isSftpCmd()) {
+                    ChannelSftp sftp = util.getChannelSftp();
+                    String resp = execSftpCmd(sftp, workdir, cmd);
+                    return transfer.success(resp);
+                }
+
                 boolean runAsFile = req.isRunAsFile();
                 long waitForSeconds = req.getWaitForSeconds();
                 if (waitForSeconds < 0) {
@@ -410,7 +428,7 @@ public class SshOpsController implements IOpsProvider {
                     if (bashFile != null && bashFile.exists()) {
                         bashFile.delete();
                     }
-                    if (runAsFile) {
+                    if (runAsFile && bashFile != null) {
                         try {
                             util.delete(workdir, bashFile.getName());
                         } catch (Exception e) {
@@ -423,6 +441,124 @@ public class SshOpsController implements IOpsProvider {
             log.warn(e.getMessage(), e);
             return transfer.error(e);
         }
+    }
+
+    public static String execSftpCmd(ChannelSftp sftp, String workdir, String cmd) throws Exception {
+        StringBuilder builder = new StringBuilder();
+        if (workdir != null && !workdir.isEmpty()) {
+            builder.append(">/ cd ").append(workdir);
+            sftp.cd(workdir);
+        }
+        String[] lines = cmd.split("\n");
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) {
+                continue;
+            }
+            StringTokenizer st = new StringTokenizer(line);
+            List<String> cmdArr = new ArrayList<>();
+            while (st.hasMoreTokens()) {
+                String token = st.nextToken();
+                cmdArr.add(token);
+            }
+            builder.append(">/ ").append(cmdArr).append("\n");
+            String name = cmdArr.get(0);
+            if ("cd".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                sftp.cd(cmdArr.get(1));
+            } else if ("hardlink".equals(name)) {
+                if (cmdArr.size() != 3) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 2 args (oldpath,newpath)");
+                }
+                sftp.hardlink(cmdArr.get(1), cmdArr.get(2));
+            } else if ("lcd".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                sftp.lcd(cmdArr.get(1));
+            } else if ("lpwd".equals(name)) {
+                if (cmdArr.size() != 1) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 0 args");
+                }
+                String ret = sftp.lpwd();
+                builder.append(ret).append("\n");
+            } else if ("ls".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                Vector<ChannelSftp.LsEntry> files = (Vector<ChannelSftp.LsEntry>) sftp.ls(cmdArr.get(1));
+                if (files != null) {
+                    for (ChannelSftp.LsEntry file : files) {
+                        HostFileItemDto item = new HostFileItemDto();
+                        item.setName(file.getFilename());
+                        if (".".equals(item.getName())) {
+                            continue;
+                        }
+                        if ("..".equals(item.getName())) {
+                            continue;
+                        }
+                        if (file.getAttrs().isDir()) {
+                            builder.append("dir");
+                        } else {
+                            builder.append("file");
+                        }
+                        ;
+                        builder.append(" ").append(HumanUtil.humanFileSize(file.getAttrs().getSize()));
+                        builder.append(" ").append(file.getFilename());
+                        builder.append("\n");
+                    }
+                }
+            } else if ("mkdir".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                sftp.mkdir(cmdArr.get(1));
+            } else if ("pwd".equals(name)) {
+                if (cmdArr.size() != 1) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 0 args");
+                }
+                String pwd = sftp.pwd();
+                builder.append(pwd).append("\n");
+            } else if ("readlink".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                String path = sftp.readlink(cmdArr.get(1));
+                builder.append(path).append("\n");
+            } else if ("realpath".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                String path = sftp.realpath(cmdArr.get(1));
+                builder.append(path).append("\n");
+            } else if ("rename".equals(name)) {
+                if (cmdArr.size() != 3) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 2 args (oldpath,newpath)");
+                }
+                sftp.rename(cmdArr.get(1), cmdArr.get(2));
+            } else if ("rm".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                sftp.rm(cmdArr.get(1));
+            } else if ("rmdir".equals(name)) {
+                if (cmdArr.size() != 2) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
+                }
+                sftp.rmdir(cmdArr.get(1));
+            } else if ("symlink".equals(name)) {
+                if (cmdArr.size() != 3) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need 2 args (oldpath,newpath)");
+                }
+                sftp.symlink(cmdArr.get(1), cmdArr.get(2));
+            } else {
+                throw new IllegalArgumentException("un-resolved sftp command: " + name + ", full args: " + cmdArr);
+            }
+        }
+
+        return builder.toString();
     }
 
 }

@@ -13,6 +13,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class RedisOperateDto {
+    protected RedisMeta meta;
+
     protected String pattern;
     protected Long count;
 

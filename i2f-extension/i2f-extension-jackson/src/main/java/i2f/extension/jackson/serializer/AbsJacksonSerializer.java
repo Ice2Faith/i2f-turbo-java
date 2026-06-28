@@ -47,12 +47,31 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
 
     @Override
     public Object deserialize(String text, Object typeToken) {
-        return deserialize(text, (TypeReference) typeToken);
+        if (typeToken instanceof Type) {
+            return deserialize(text, (Type) typeToken);
+        } else if (typeToken instanceof TypeReference) {
+            return deserialize(text, (TypeReference) typeToken);
+        }
+        throw new UnsupportedOperationException("Jackson un-support parseText.");
     }
 
     public <T> T deserialize(String text, TypeReference<T> typeToken) {
         try {
             Object obj = getMapper().readValue(text, typeToken);
+            return (T) obj;
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
+    }
+
+    public <T> T deserialize(String text, Type typeToken) {
+        try {
+            Object obj = getMapper().readValue(text, new TypeReference<Object>() {
+                @Override
+                public Type getType() {
+                    return (Type) typeToken;
+                }
+            });
             return (T) obj;
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage(), e);

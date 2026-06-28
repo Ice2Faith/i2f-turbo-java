@@ -8,6 +8,7 @@ import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptBreakExcep
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptContinueException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptEvaluateException;
 import i2f.extension.antlr4.script.tiny.impl.exception.impl.TinyScriptReturnException;
+import i2f.jvm.JvmUtil;
 import i2f.reflect.ReflectResolver;
 import i2f.typeof.TypeOf;
 import lombok.Data;
@@ -36,6 +37,8 @@ import java.util.function.Supplier;
 public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     protected Object global = null;
     protected Object context = new HashMap<>();
+    protected String scriptFileName;
+    protected int scriptLineOffset;
     protected ConcurrentHashMap<String, CopyOnWriteArrayList<TinyScriptMethod>> declareFunctionMap = new ConcurrentHashMap<>();
     protected TinyScriptResolver resolver = new DefaultTinyScriptResolver();
 
@@ -51,66 +54,130 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
         }
     }
 
+    public TinyScriptVisitorImpl(Object context, String scriptFileName, TinyScriptResolver resolver) {
+        this.context = context;
+        this.scriptFileName = scriptFileName;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
+    }
+
+    public TinyScriptVisitorImpl(Object context, String scriptFileName, int scriptLineOffset, TinyScriptResolver resolver) {
+        this.context = context;
+        this.scriptFileName = scriptFileName;
+        this.scriptLineOffset = scriptLineOffset;
+        if (resolver != null) {
+            this.resolver = resolver;
+        }
+    }
+
 
     @Override
     public Object visitDeclareFunction(TinyScriptParser.DeclareFunctionContext ctx) {
-        TinyScriptMethod method = new TinyScriptMethod();
-        int count = ctx.getChildCount();
-        for (int i = 0; i < count; i++) {
-            ParseTree item = ctx.getChild(i);
-            if (item instanceof TerminalNode) {
-                TerminalNode terminalNode = (TerminalNode) item;
-                String token = (String) visitTerminal(terminalNode);
-                if (i == 0) {
-                    if (!"func".equals(token)) {
-                        throw new IllegalArgumentException("invalid declare function, expect 'func' but found '" + token + "'!");
+        try {
+            debugNode(ctx);
+            TinyScriptMethod method = new TinyScriptMethod();
+            int count = ctx.getChildCount();
+            for (int i = 0; i < count; i++) {
+                ParseTree item = ctx.getChild(i);
+                if (item instanceof TerminalNode) {
+                    TerminalNode terminalNode = (TerminalNode) item;
+                    String token = (String) visitTerminal(terminalNode);
+                    if (i == 0) {
+                        if (!"func".equals(token)) {
+                            throw new IllegalArgumentException("invalid declare function, expect 'func' but found '" + token + "'!");
+                        }
+                    } else if (i == 1) {
+                        String name = token;
+                        method.setName(name);
+                    } else {
+                        if (!Arrays.asList("(", ")").contains(token)) {
+                            throw new IllegalArgumentException("invalid declare function parameter separator, expect '(/)' but found '" + token + "'!");
+                        }
                     }
-                } else if (i == 1) {
-                    String name = token;
-                    method.setName(name);
-                } else {
-                    if (!Arrays.asList("(", ")").contains(token)) {
-                        throw new IllegalArgumentException("invalid declare function parameter separator, expect '(/)' but found '" + token + "'!");
-                    }
+                } else if (item instanceof TinyScriptParser.ParameterListContext) {
+                    TinyScriptParser.ParameterListContext parameterListCtx = (TinyScriptParser.ParameterListContext) item;
+                    List<String> parameters = (List<String>) visitParameterList(parameterListCtx);
+                    method.setParameters(parameters);
+                } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
+                    TinyScriptParser.ScriptBlockContext scriptBlockCtx = (TinyScriptParser.ScriptBlockContext) item;
+                    method.setScriptBlockContext(scriptBlockCtx);
                 }
-            } else if (item instanceof TinyScriptParser.ParameterListContext) {
-                TinyScriptParser.ParameterListContext parameterListCtx = (TinyScriptParser.ParameterListContext) item;
-                List<String> parameters = (List<String>) visitParameterList(parameterListCtx);
-                method.setParameters(parameters);
-            } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
-                TinyScriptParser.ScriptBlockContext scriptBlockCtx = (TinyScriptParser.ScriptBlockContext) item;
-                method.setScriptBlockContext(scriptBlockCtx);
             }
+            if (method.getName() == null || method.getName().isEmpty()) {
+                throw new IllegalArgumentException("invalid declare function, expect function name but found '" + method.getName() + "'!");
+            }
+            if (method.getScriptBlockContext() == null) {
+                throw new IllegalArgumentException("invalid declare function, expect function body but not found !");
+            }
+            CopyOnWriteArrayList<TinyScriptMethod> list = declareFunctionMap.computeIfAbsent(method.getName(), k -> new CopyOnWriteArrayList<>());
+            list.add(0, method);
+            return method;
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
-        if (method.getName() == null || method.getName().isEmpty()) {
-            throw new IllegalArgumentException("invalid declare function, expect function name but found '" + method.getName() + "'!");
-        }
-        if (method.getScriptBlockContext() == null) {
-            throw new IllegalArgumentException("invalid declare function, expect function body but not found !");
-        }
-        CopyOnWriteArrayList<TinyScriptMethod> list = declareFunctionMap.computeIfAbsent(method.getName(), k -> new CopyOnWriteArrayList<>());
-        list.add(0, method);
-        return method;
     }
 
     @Override
     public Object visitParameterList(TinyScriptParser.ParameterListContext ctx) {
-        List<String> ret = new ArrayList<>();
-        int count = ctx.getChildCount();
-        for (int i = 0; i < count; i++) {
-            ParseTree item = ctx.getChild(i);
-            if (item instanceof TerminalNode) {
-                TerminalNode terminalNode = (TerminalNode) item;
-                String token = (String) visitTerminal(terminalNode);
-                if (!",".equals(token)) {
-                    ret.add(token);
+        try {
+            debugNode(ctx);
+            List<String> ret = new ArrayList<>();
+            int count = ctx.getChildCount();
+            for (int i = 0; i < count; i++) {
+                ParseTree item = ctx.getChild(i);
+                if (item instanceof TerminalNode) {
+                    TerminalNode terminalNode = (TerminalNode) item;
+                    String token = (String) visitTerminal(terminalNode);
+                    if (!",".equals(token)) {
+                        ret.add(token);
+                    }
                 }
             }
+            return ret;
+        } catch (Throwable e) {
+            if (e instanceof TinyScriptException) {
+                throw (TinyScriptException) e;
+            }
+            throw new TinyScriptEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
         }
-        return ret;
     }
 
     public void debugNode(ParseTree context) {
+        if (JvmUtil.isDebug()) {
+            if (context instanceof ParserRuleContext) {
+                ParserRuleContext ruleContext = (ParserRuleContext) context;
+                Token start = ruleContext.getStart();
+                if (start == null) {
+                    int count = 3;
+                    do {
+                        ParserRuleContext parent = ruleContext.getParent();
+                        if (parent != null) {
+                            ruleContext = parent;
+                            start = ruleContext.getStart();
+                        }
+                        if (start == null) {
+                            break;
+                        }
+                        count--;
+                    } while (count >= 0);
+                }
+                if (start != null) {
+                    resolver.debugBridge(scriptFileName == null ? "virtual_script.tis" : scriptFileName,
+                            scriptLineOffset + start.getLine(),
+                            () -> {
+                                Map<String, Object> variableMap = new HashMap<>();
+                                variableMap.put("astNode", context);
+                                variableMap.put("root", this.context);
+                                variableMap.put("visitor", this);
+                                return variableMap;
+                            });
+                }
+            }
+        }
         resolver.debugLog(() -> context.getClass().getSimpleName().replace("$", ".") + ": " + context.getText() + getTreeLocationText(", location ", context, null));
     }
 

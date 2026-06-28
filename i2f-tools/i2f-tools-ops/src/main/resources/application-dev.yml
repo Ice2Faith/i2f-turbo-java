@@ -1,0 +1,103 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: i2f-tools-ops
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 100MB
+  jackson:
+    locale: zh_CN
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss.SSS
+  autoconfigure:
+    exclude:
+      # redis 配置，如果没有redis需要注释开启排除
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.redisson.spring.starter.RedissonAutoConfiguration
+      # datasource 配置，如果没有datasource需要注释开启排除
+      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password: "*********"
+    database: 0
+    connect-timeout: 5s
+    timeout: 15s
+    lettuce:
+      shutdown-timeout: 3s
+      pool:
+        max-active: 64
+        max-idle: 16
+        min-idle: 3
+        time-between-eviction-runs: 10s
+        max-wait: 5s
+    jedis:
+      pool:
+        max-active: 64
+        max-idle: 16
+        min-idle: 3
+        time-between-eviction-runs: 10s
+        max-wait: 5s
+  datasource:
+    dynamic:
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/test_db
+          username: root
+          password: "*********"
+        slave:
+          driver-class-name: oracle.jdbc.OracleDriver
+          url: jdbc:oracle:thin:@192.168.7.140:1521/db_test
+          username: sysdba
+          password: "*********"
+
+xproc4j:
+  debug: false
+  report-on-boot: false
+  procedure-meta:
+    grammar-reporter:
+      enable: false
+  # 慢SQL
+  slow-sql-min-mills-seconds: 60000
+  # 慢节点
+  slow-node-mills-seconds: 180000
+  # 慢过程
+  slow-procedure-mills-seconds: 300000
+
+logging:
+  level:
+    root: info
+
+# ops 操作面板
+i2f:
+  springboot:
+    ops:
+      secure:
+#         cert:
+      datasource:
+#        datasourceMap:
+#          sample:
+#            driver: com.mysql.cj.jdbc.Driver
+#            url: jdbc:mysql://localhost:3306/test_db
+#            username: root
+#            password: xxxxxxx
+    ssh:
+      tunnel:
+        servers:
+#          - name: jump-server
+#            ssh:
+#              host: 10.1.x.101
+#              port: 22
+#              username: app
+#              password: 123xxxx
+#            tunnels:
+#              - name: mysql
+#                localPort: 3306
+#                remoteHost: 10.5.x.102
+#                remotePort: 3306
+#                # jdbc:mysql://localhost:3306/test_db

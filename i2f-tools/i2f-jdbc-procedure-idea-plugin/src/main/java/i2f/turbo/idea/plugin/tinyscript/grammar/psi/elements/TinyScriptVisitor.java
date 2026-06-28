@@ -23,6 +23,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
         visitPsiElement(o);
     }
 
+    public void visitCastInstanceOfRightPart(@NotNull TinyScriptCastInstanceOfRightPart o) {
+        visitPsiElement(o);
+    }
+
     public void visitCatchBodyBlock(@NotNull TinyScriptCatchBodyBlock o) {
         visitPsiElement(o);
     }
@@ -32,6 +36,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     }
 
     public void visitCommentSegment(@NotNull TinyScriptCommentSegment o) {
+        visitPsiElement(o);
+    }
+
+    public void visitCompareOperatorPart(@NotNull TinyScriptCompareOperatorPart o) {
         visitPsiElement(o);
     }
 
@@ -163,6 +171,18 @@ public class TinyScriptVisitor extends PsiElementVisitor {
         visitPsiElement(o);
     }
 
+    public void visitLogicalLinkOperatorPart(@NotNull TinyScriptLogicalLinkOperatorPart o) {
+        visitPsiElement(o);
+    }
+
+    public void visitMathAddSubOperatorPart(@NotNull TinyScriptMathAddSubOperatorPart o) {
+        visitPsiElement(o);
+    }
+
+    public void visitMathMulDivOperatorPart(@NotNull TinyScriptMathMulDivOperatorPart o) {
+        visitPsiElement(o);
+    }
+
     public void visitNamingBlock(@NotNull TinyScriptNamingBlock o) {
         visitPsiElement(o);
     }
@@ -188,6 +208,10 @@ public class TinyScriptVisitor extends PsiElementVisitor {
     }
 
     public void visitParenSegment(@NotNull TinyScriptParenSegment o) {
+        visitPsiElement(o);
+    }
+
+    public void visitPercentRightPart(@NotNull TinyScriptPercentRightPart o) {
         visitPsiElement(o);
     }
 
@@ -219,7 +243,15 @@ public class TinyScriptVisitor extends PsiElementVisitor {
         visitPsiElement(o);
     }
 
+    public void visitSquareQuoteRightPart(@NotNull TinyScriptSquareQuoteRightPart o) {
+        visitPsiElement(o);
+    }
+
     public void visitStaticEnumValue(@NotNull TinyScriptStaticEnumValue o) {
+        visitPsiElement(o);
+    }
+
+    public void visitThirdOperateRightPart(@NotNull TinyScriptThirdOperateRightPart o) {
         visitPsiElement(o);
     }
 

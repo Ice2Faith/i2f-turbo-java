@@ -244,19 +244,29 @@ public class XProc4jHelper {
             return params;
         }
         String[] trimKeys = {
-                "stack_lock",
+                "lock",
+                "executorLock",
+                "jvmLock",
+
                 "context",
                 "env",
                 "beans",
+
                 "datasources",
+
                 "trace",
+
                 "executor",
+
                 "lru",
                 "executorLru",
                 "staticLru",
+
                 "connections",
                 "metas",
+
                 "_vm",
+
                 "listeners"
         };
         for (String key : trimKeys) {
@@ -269,6 +279,13 @@ public class XProc4jHelper {
         if (global != null && global instanceof Map) {
             Map<?, ?> map = (Map<?, ?>) global;
             trimUnSerializeValues(map);
+        }
+        Set keys = params.keySet();
+        for (Object key : keys) {
+            Object val = params.get(key);
+            if (val instanceof Map) {
+                trimContextParams((Map) val);
+            }
         }
         return params;
     }

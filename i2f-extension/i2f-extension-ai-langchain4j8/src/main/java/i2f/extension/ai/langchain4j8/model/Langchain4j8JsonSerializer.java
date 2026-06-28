@@ -1,8 +1,8 @@
 package i2f.extension.ai.langchain4j8.model;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.typeof.token.TypeToken;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Type;
@@ -46,7 +46,12 @@ public class Langchain4j8JsonSerializer implements IJsonSerializer {
 
     @Override
     public Object deserialize(String enc, Object type) {
-        return gson.fromJson(enc, (Type) type);
+        if (type instanceof Type) {
+            return gson.fromJson(enc, (Type) type);
+        } else if (type instanceof TypeToken) {
+            return gson.fromJson(enc, ((TypeToken) type).getType());
+        }
+        throw new UnsupportedOperationException("Langchain4j8 un-support parseText.");
     }
 
 }

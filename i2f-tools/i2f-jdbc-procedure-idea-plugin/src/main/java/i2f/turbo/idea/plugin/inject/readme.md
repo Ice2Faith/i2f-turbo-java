@@ -4,7 +4,6 @@
 - 项目级配置隔离，丰富的语言注入支持。
 - 另外也提供一些其他类型的注入点
 
-
 ## 注入点配置
 
 - 类型配置参考：[language-inject-template.jsonc](./docs/language-inject-template.jsonc)
@@ -33,7 +32,8 @@ XML文件中的标签内部内容
 
 XML文件中的标签内部的SQL语句
 
-- Velocity 可用参数：[xml-text-sql-parameter-template-params.jsonc](./docs/params/xml-text-sql-parameter-template-params.jsonc)
+- Velocity
+  可用参数：[xml-text-sql-parameter-template-params.jsonc](./docs/params/xml-text-sql-parameter-template-params.jsonc)
 
 ### json-prop-value
 
@@ -52,7 +52,6 @@ JSON文件中的属性名
 Properties中的属性值
 
 - Velocity 可用参数：[properties-value-template-params.jsonc](./docs/params/properties-value-template-params.jsonc)
-
 
 ## 使用案例
 
@@ -156,7 +155,6 @@ class Worker {
 - 因此，你自己业务中的切面逻辑，也要考虑这个问题，配合插件使用
 - 具体可参考： [annotation-template-params.jsonc](./docs/params/annotation-template-params.jsonc)
 
-
 ### 怎么编写 `Velocity` 模板？
 
 在 IDEA 中， `Velocity` 文件以 `.vm` 后缀表示，`.vm` 之前可以添加模板生成后内容的实际文件后缀（例如： `.groovy`）。
@@ -165,7 +163,6 @@ class Worker {
 方便编写模板。
 
 - 可以参考: [template.groovy.vm](./docs/template.groovy.vm)
-
 
 ---
 

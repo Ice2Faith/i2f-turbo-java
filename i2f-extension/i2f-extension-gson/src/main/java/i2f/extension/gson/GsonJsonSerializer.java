@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import i2f.serialize.std.str.json.IJsonSerializer;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -56,7 +57,16 @@ public class GsonJsonSerializer implements IJsonSerializer {
 
     @Override
     public Object deserialize(String text, Object typeToken) {
-        return deserialize(text, (TypeToken) typeToken);
+        if (typeToken instanceof Type) {
+            return deserialize(text, (Type) typeToken);
+        } else if (typeToken instanceof TypeToken) {
+            return deserialize(text, (TypeToken) typeToken);
+        }
+        throw new UnsupportedOperationException("Gson un-support parseText.");
+    }
+
+    public <T> T deserialize(String text, Type token) {
+        return getGson().fromJson(text, token);
     }
 
     public <T> T deserialize(String text, TypeToken<T> token) {

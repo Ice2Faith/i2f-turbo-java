@@ -3,21 +3,14 @@ package i2f.extension.velocity;
 import i2f.extension.velocity.stringify.Stringifier;
 import i2f.extension.velocity.stringify.impl.DefaultStringifier;
 import i2f.extension.velocity.stringify.impl.ListableStringifier;
-import i2f.io.stream.StreamUtil;
+import i2f.mixin.all.AllMixins;
 import i2f.os.OsUtil;
 import i2f.serialize.str.json.impl.Json2;
 import i2f.serialize.str.xml.impl.Xml2;
-import i2f.text.StringUtils;
 import i2f.typeof.TypeOf;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
-import java.net.URLEncoder;
-import java.security.SecureRandom;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -25,96 +18,15 @@ import java.util.*;
  * @date 2022/2/12 8:36
  * @desc
  */
-public class GeneratorTool {
-    public static final Stringifier STRINGIFIER = new ListableStringifier();
-    private final String sharp = "#";
-    private final String dolar = "$";
+public class GeneratorTool implements AllMixins {
+    public static final GeneratorTool INSTANCE = new GeneratorTool();
+    public final Stringifier STRINGIFIER = new ListableStringifier();
 
-    public static final SecureRandom random = new SecureRandom();
-
-    public String getSharp() {
-        return sharp;
-    }
-
-    public String getDolar() {
-        return dolar;
-    }
-
-    public String newline() {
-        return "\n";
-    }
-
-    public static boolean isnull(Object obj) {
-        return obj == null;
-    }
-
-    public static boolean notNull(Object obj) {
-        return !isnull(obj);
-    }
-
-    public static boolean isEmpty(String str) {
-        return StringUtils.isEmpty(str);
-    }
-
-    public static boolean notEmpty(String str) {
-        return !isEmpty(str);
-    }
-
-    public static boolean isArray(Object obj) {
-        if (isnull(obj)) {
-            return false;
-        }
-        Class cls = obj.getClass();
-        return cls.isArray();
-    }
-
-    public static boolean match(String str, String regex) {
-        if (isnull(str) || isnull(regex)) {
-            return false;
-        }
-        return str.matches(regex);
-    }
-
-    public static String str(Object obj) {
+    public String str(Object obj) {
         if (STRINGIFIER.support(obj)) {
             return STRINGIFIER.stringify(obj);
         }
         return DefaultStringifier.INSTANCE.stringify(obj);
-    }
-
-    public static Object ifnull(Object obj, Object defVal) {
-        if (isnull(obj)) {
-            return defVal;
-        }
-        return obj;
-    }
-
-    public static String ifEmpty(String obj, String defVal) {
-        if (isEmpty(obj)) {
-            return defVal;
-        }
-        return obj;
-    }
-
-    public static String lower(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return str.toLowerCase();
-    }
-
-    public static String upper(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return str.toUpperCase();
-    }
-
-    public static String[] split(String str, String sep, int limit) {
-        if (isEmpty(str)) {
-            return new String[0];
-        }
-        return str.split(sep, limit);
     }
 
     /**
@@ -127,7 +39,7 @@ public class GeneratorTool {
      * @param close
      * @return
      */
-    public static String join(Object obj, String fmt, String sep, String open, String close) {
+    public String join(Object obj, String fmt, String sep, String open, String close) {
         StringBuilder builder = new StringBuilder();
         if (open != null) {
             builder.append(open);
@@ -151,7 +63,7 @@ public class GeneratorTool {
                 isFirst = false;
             }
 
-        } else if (isArray(obj)) {
+        } else if (is_array(obj)) {
             boolean isFirst = true;
             for (int i = 0; i < Array.getLength(obj); i++) {
                 if (!isFirst) {
@@ -175,21 +87,7 @@ public class GeneratorTool {
         return builder.toString();
     }
 
-    public static String replace(String str, String src, String dst) {
-        if (isnull(str) || isnull(src)) {
-            return str;
-        }
-        return str.replace(src, dst);
-    }
-
-    public static String replaceAll(String str, String src, String dst) {
-        if (isnull(str) || isnull(src)) {
-            return str;
-        }
-        return str.replaceAll(src, dst);
-    }
-
-    public static List<Integer> fori(int begin, int end, int step) {
+    public List<Integer> fori(int begin, int end, int step) {
         List<Integer> ret = new ArrayList<>();
         for (int i = begin; i != end; i += step) {
             ret.add(i);
@@ -197,179 +95,7 @@ public class GeneratorTool {
         return ret;
     }
 
-    public static String firstLower(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return StringUtils.firstLower(str);
-    }
-
-    public static String firstUpper(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return StringUtils.firstUpper(str);
-    }
-
-    public static String format(String fmt, Object... args) {
-        if (isEmpty(fmt)) {
-            return fmt;
-        }
-        return String.format(fmt, args);
-    }
-
-    public static String format(Date date, String fmt) {
-        if (isnull(date) || isEmpty(fmt)) {
-            return str(date);
-        }
-        SimpleDateFormat f = new SimpleDateFormat(fmt);
-        return f.format(date);
-    }
-
-    public static Date now() {
-        return new Date();
-    }
-
-    public static Date date(String dt, String fmt) throws ParseException {
-        if (isEmpty(dt) || isEmpty(fmt)) {
-            return null;
-        }
-        SimpleDateFormat f = new SimpleDateFormat(fmt);
-        return f.parse(dt);
-    }
-
-    public static int randInt(int bound) {
-        return random.nextInt(bound);
-    }
-
-    public static int randInt(int begin, int end) {
-        return random.nextInt(end - begin) + begin;
-    }
-
-    public static double randDouble() {
-        return random.nextDouble();
-    }
-
-    public static double randDouble(double min, double max, int scale) {
-        double pow = Math.pow(10, scale);
-        int bound = (int) ((max - min) * pow);
-        return (random.nextInt() % bound) / pow + min;
-    }
-
-    public static boolean contains(String str, String sub) {
-        if (str == null && sub == null) {
-            return true;
-        }
-        if (sub == null || sub.isEmpty()) {
-            return true;
-        }
-        if (str == null) {
-            return false;
-        }
-        return str.contains(sub);
-    }
-
-    public static int round(double a) {
-        return (int) Math.round(a);
-    }
-
-    public static double add(double a, double b) {
-        return a + b;
-    }
-
-    public static double sub(double a, double b) {
-        return a - b;
-    }
-
-    public static double div(double a, double b) {
-        return a / b;
-    }
-
-    public static double mul(double a, double b) {
-        return a * b;
-    }
-
-    public static double mod(double a, double b) {
-        return ((int) a) % ((int) b);
-    }
-
-    public static double pow(double a, double b) {
-        return Math.pow(a, b);
-    }
-
-    public static double sqrt(double a) {
-        return Math.sqrt(a);
-    }
-
-    public static double log(double a) {
-        return Math.log(a);
-    }
-
-    public static boolean equal(Object obj1, Object obj2) {
-        if (isnull(obj1) && isnull(obj2)) {
-            return true;
-        }
-        if (isnull(obj1)) {
-            return obj2.equals(obj1);
-        }
-        return obj1.equals(obj2);
-    }
-
-    public static String sysProperty(String key) {
-        return System.getProperty(key);
-    }
-
-    public static String sysEnv(String key) {
-        return System.getenv(key);
-    }
-
-    public static String uuid() {
-        return UUID.randomUUID().toString();
-    }
-
-    public static String readFile(String filePath, String charset) throws IOException {
-        return StreamUtil.readString(new File(filePath), charset);
-    }
-
-    public static void writeFile(String filePath, Object content, String charset) throws IOException {
-        String os = str(content);
-        StreamUtil.writeString(os, charset, new File(filePath));
-    }
-
-    public static File[] listFiles(String filePath) {
-        File file = new File(filePath);
-        if (!file.exists()) {
-            return new File[0];
-        }
-        if (file.isFile()) {
-            return new File[0];
-        }
-        return file.listFiles();
-    }
-
-    public static boolean existFile(String filePath) {
-        File file = new File(filePath);
-        return file.exists();
-    }
-
-    public static boolean isFile(String filePath) {
-        File file = new File(filePath);
-        return file.exists() && file.isFile();
-    }
-
-    public static boolean isDir(String filePath) {
-        File file = new File(filePath);
-        return file.exists() && file.isDirectory();
-    }
-
-    public static void mkdirs(String filePath) {
-        File file = new File(filePath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-    }
-
-    public static void cmd(String cmdline, boolean wait) {
+    public void cmd(String cmdline, boolean wait) {
         try {
             Process process = Runtime.getRuntime().exec(cmdline);
             if (wait) {
@@ -380,11 +106,11 @@ public class GeneratorTool {
         }
     }
 
-    public static String cmdResult(String cmdLine, String charset) throws IOException, InterruptedException {
+    public String cmdResult(String cmdLine, String charset) throws IOException, InterruptedException {
         return OsUtil.runCmd(cmdLine, charset);
     }
 
-    public static List<Map<String, Object>> list(Object itr) {
+    public List<Map<String, Object>> list(Object itr) {
         List<Map<String, Object>> ret = new ArrayList<>();
         if (itr instanceof Collection) {
             Collection col = (Collection) itr;
@@ -402,7 +128,7 @@ public class GeneratorTool {
                 ret.add(obj);
                 index++;
             }
-        } else if (isArray(itr)) {
+        } else if (is_array(itr)) {
             int size = Array.getLength(itr);
             for (int i = 0; i < size; i++) {
                 Object val = Array.get(itr, i);
@@ -418,8 +144,8 @@ public class GeneratorTool {
         return ret;
     }
 
-    public static boolean instanceOf(Object obj, String typeName) {
-        if (isnull(obj) || isEmpty(typeName)) {
+    public boolean instanceOf(Object obj, String typeName) {
+        if (isnull(obj) || is_empty(typeName)) {
             return false;
         }
         Class objCls = obj.getClass();
@@ -451,88 +177,15 @@ public class GeneratorTool {
         return false;
     }
 
-    public static String toPascal(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return StringUtils.toPascal(str);
-    }
-
-    public static String toCamel(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        return StringUtils.toCamel(str);
-    }
-
-    public static String toUnderScore(String str) {
-        if (str.contains("_")) {
-            return str.trim();
-        }
-        return StringUtils.toUnderScore(str);
-    }
-
-    public static String toSnake(String str) {
-        if (str.contains("-")) {
-            return str.trim();
-        }
-        return StringUtils.toSnake(str);
-    }
-
-    public static String toPropertyCase(String str) {
-        if (str.contains(".")) {
-            return str.trim();
-        }
-        return StringUtils.toPropertyCase(str);
-    }
-
-    public static String toPathCase(String str) {
-        if (str.contains("/")) {
-            return str.trim();
-        }
-        return StringUtils.toPathCase(str);
-    }
-
-    public static String toColonCase(String str) {
-        if (str.contains(":")) {
-            return str.trim();
-        }
-        return StringUtils.toColonCase(str);
-    }
-
-    public static String toUrlEncoded(String str) {
-        if (isEmpty(str)) {
-            return str;
-        }
-        try {
-            return URLEncoder.encode(str, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-
-        }
-        return str;
-    }
-
-    public static String toBase64(String str) {
-        if (str == null) {
-            return null;
-        }
-        try {
-            return Base64.getEncoder().encodeToString(str.getBytes("UTF-8"));
-        } catch (UnsupportedEncodingException e) {
-
-        }
-        return str;
-    }
-
-    public static String toXmlString(Object obj) {
+    public String toXmlString(Object obj) {
         return Xml2.toXmlString(str(obj));
     }
 
-    public static String toJsonString(Object obj) {
+    public String toJsonString(Object obj) {
         return Json2.toJson(obj);
     }
 
-    public static String[] split(String str, boolean trimBefore, String regex, int limit, boolean removeEmpty) {
+    public String[] split(String str, boolean trimBefore, String regex, int limit, boolean removeEmpty) {
         String[] ret = new String[]{};
         if (str == null) {
             return ret;
@@ -557,7 +210,7 @@ public class GeneratorTool {
         return ret;
     }
 
-    protected static boolean isInTypes(Class target, Class... types) {
+    public boolean isInTypes(Class target, Class... types) {
         if (target == null) {
             return false;
         }

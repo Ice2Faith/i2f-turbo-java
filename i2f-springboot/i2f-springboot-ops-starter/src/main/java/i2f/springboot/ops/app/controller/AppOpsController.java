@@ -9,6 +9,7 @@ import i2f.springboot.ops.app.data.thread.AppThreadInfoDto;
 import i2f.springboot.ops.app.util.AppUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
+import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.host.data.HostOperateDto;
 import jakarta.servlet.http.HttpServletRequest;
@@ -56,6 +57,9 @@ public class AppOpsController implements IOpsProvider {
     @Autowired
     private HostIdHelper hostIdHelper;
 
+    @Autowired
+    private HostIdProxyHelper hostIdProxyHelper;
+
     @Override
     public List<OpsHomeMenuDto> getMenus() {
         return Collections.singletonList(new OpsHomeMenuDto()
@@ -63,6 +67,7 @@ public class AppOpsController implements IOpsProvider {
                 .subTitle("获取应用信息与执行表达式脚本")
                 .icon("el-icon-mobile")
                 .href("./app/index.html")
+                .group(OpsHomeMenuGroup.App)
         );
     }
 
@@ -98,7 +103,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -135,7 +140,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -162,7 +167,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -183,7 +188,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -208,7 +213,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -234,7 +239,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);
@@ -265,7 +270,7 @@ public class AppOpsController implements IOpsProvider {
             AppOperationDto req = transfer.recv(reqDto, AppOperationDto.class);
             if (!hostIdHelper.canAcceptHostId(req.getHostId())) {
                 if (req.isProxyHostId()) {
-                    return hostIdHelper.proxyHostId(req, req.getHostId(), request);
+                    return hostIdProxyHelper.proxyHostId(req, req.getHostId(), request);
                 }
             }
             assertHostId(req);

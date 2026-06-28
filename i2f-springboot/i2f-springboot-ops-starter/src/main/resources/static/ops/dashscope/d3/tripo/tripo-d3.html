@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 1小时缓存过期 -->
+    <meta http-equiv="Cache-Control" content="max-age=3600, public">
+    <title>Ops - Tripo 3D</title>
+    <link rel="icon" type="image/png" href="../../../favicon.png">
+    <script src="../../../lib/vue/vue-2.js"></script>
+    <script src="../../../lib/moment/moment-2.24.0.js"></script>
+    <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../../../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../../../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../../../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../../../lib/element-ui/fonts/element-icons.woff"/>
+    <script src="../../../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../../../lib/axios/qs.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+    <script src="../../../lib/base64/Base64.js"></script>
+    <script src="../../../common/OpsSecureKeyPair.js"></script>
+    <script src="../../../common/OpsSecureCertPair.js"></script>
+    <script src="../../../common/OpsSecureDto.js"></script>
+    <script src="../../../common/OpsSecureHelper.js"></script>
+    <script src="../../../common/OpsSecureTransfer.js"></script>
+    <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
+    <script src="../../../lib/codemirror-6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/codemirror.min.css"/>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
+    <script src="../../../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/theme/idea.min.css"/>
+
+    <script src="../../../lib/codemirror-6.65.7/addon/search/search.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/searchcursor.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/jump-to-line.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/match-highlighter.min.js"></script>
+
+    <script src="../../../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <link rel="stylesheet" href="../../../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
+    <script src="../../../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../../../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
+</head>
+<body>
+<div id="app">
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+    <el-row class="cert-block">
+        <el-divider>DashScope 操作<i class="el-icon-d-caret"></i></el-divider>
+        <el-form inline label-position="left" label-width="120px">
+            <el-form-item>
+                <el-row slot="label">
+                    Api Key
+                    <el-link href="https://bailian.console.aliyun.com/cn-beijing?tab=model#/api-key" target="_blank">
+                        <i class="el-icon-question"></i>
+                    </el-link>
+                </el-row>
+                <el-input clearable v-model="form.meta.apiKey" placeholder="Api Key"></el-input>
+            </el-form-item>
+        </el-form>
+    </el-row>
+
+
+    <el-card shadow="never">
+        <el-row style="width: 100%;">
+            <el-form inline label-position="top" label-width="120px">
+                <el-row type="flex">
+                    <template v-if="form.workMode=='t2m'">
+                        <el-col :span="24">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="form.workMode=='i2m'">
+                        <el-col :span="24">
+                            <el-form-item label="参考图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="form.workMode=='r2m'">
+                        <el-col :span="24">
+                            <el-form-item label="参考图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-remove="onRemoveImageFile"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-row>
+            </el-form>
+
+            <el-divider></el-divider>
+            <el-form inline label-position="top" label-width="80px">
+                <el-row type="flex">
+                    <el-col :span="10">
+                        <el-row type="flex">
+                            <el-form-item label="模型">
+                                <el-select clearable filterable v-model="form.modelName" placeholder="模型">
+                                    <el-option
+                                            v-for="item in metas.modelList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item>
+                                <span slot="label">
+                                    模式
+                                     <el-popover
+                                             placement="top-start"
+                                             title="模型类型"
+                                             width="360"
+                                             trigger="hover">
+                                         切换不同模式之后，需要重新上传图片，因为使用的是临时文件，和模型是绑定的。<br/>
+                                         如果不重新上传，模型将会找不到上传的图片。
+                                        <i slot="reference" class="el-icon-question"></i>
+                                      </el-popover>
+                                </span>
+                                <el-select clearable filterable v-model="form.workMode" placeholder="模式"
+                                           style="width: 180px;">
+                                    <el-option
+                                            v-for="item in metas.workModeList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['t2m','i2m','r2m'].includes(form.workMode)" label="贴图质量">
+                                <el-select clearable filterable v-model="form.textureQuality" placeholder="贴图质量">
+                                    <el-option
+                                            v-for="item in metas.textureQualityList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="supportHigh && ['t2m','r2m'].includes(form.workMode)" label="几何精度">
+                                <el-select clearable filterable v-model="form.geometryQuality" placeholder="几何精度">
+                                    <el-option
+                                            v-for="item in metas.geometryQualityList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item label="选项">
+                                <el-checkbox v-model="form.texture">包含贴图</el-checkbox>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-row type="flex" justify="center">
+                            <el-form-item label="操作">
+                                <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                           type="primary"
+                                           @click="onExecute">
+                                    执行
+                                </el-button>
+                                <el-popover
+                                        placement="top-start"
+                                        title="执行"
+                                        width="360"
+                                        trigger="hover">
+                                    点击执行之后，将会提交异步任务给平台。<br/>
+                                    后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
+                                    只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
+                                    <i slot="reference" class="el-icon-question"></i>
+                                </el-popover>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+
+
+                <el-row v-if="metas.resultTaskId">
+                    <el-divider></el-divider>
+
+                    <el-form-item>
+                        <el-input clearable v-model="metas.resultTaskId" placeholder="Task Id"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button v-loading="metas.resultModelLoading" size="medium"
+                                   type="primary"
+                                   @click="onQueryStatus">
+                            查询
+                        </el-button>
+                        <el-link v-if="metas.resultPreviewModelImageUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultPreviewModelImageUrl"
+                                 type="success">
+                            下载预览图<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultPbrModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultPbrModelUrl"
+                                 type="success">
+                            下载PBR模型<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultBaseModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultBaseModelUrl"
+                                 type="success">
+                            下载无贴图模型<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                        <el-divider direction="vertical"></el-divider>
+                        <el-link v-if="metas.resultPbrModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="getModelPreviewUrl(metas.resultPbrModelUrl)"
+                                 target="_blank"
+                                 type="success">
+                            查看PBR模型<i class="el-icon-view el-icon--right"></i>
+                        </el-link>
+                        <el-link v-if="metas.resultBaseModelUrl"
+                                 style="margin-left: 15px;"
+                                 :href="getModelPreviewUrl(metas.resultBaseModelUrl)"
+                                 target="_blank"
+                                 type="success">
+                            查看无贴图模型<i class="el-icon-view el-icon--right"></i>
+                        </el-link>
+                    </el-form-item>
+                </el-row>
+
+                <img v-if="metas.resultPreviewModelImageUrl"
+                       :src="metas.resultPreviewModelImageUrl"
+                        @click="handlePictureCardPreview(metas.resultPreviewModelImageUrl)"
+                       style="max-width:100%;max-height: 960px;"
+                       title="Output Image"/>
+            </el-form>
+
+
+        </el-row>
+    </el-card>
+
+
+    <el-dialog :visible.sync="dialog.imagePreview.show" style="text-align: center;">
+        <img width="100%" :src="dialog.imagePreview.imageUrl" alt="">
+    </el-dialog>
+
+
+</div>
+</body>
+<script>
+    Vue.use(VueVirtualScroller.default);
+    window.app = new Vue({
+        components: {},
+        data() {
+            return this.getDefaultData()
+        },
+        created() {
+            this.initStoreData();
+            this.initBroadcast();
+        },
+        mounted() {
+
+        },
+        watch: {},
+        computed: {
+            supportHigh(){
+                return this.form.modelName.indexOf('Tripo-H') >=0;
+            }
+        },
+        methods: {
+            handlePictureCardPreview(file) {
+                this.dialog.imagePreview.imageUrl = file.url || file;
+                this.dialog.imagePreview.show = true;
+            },
+            getDefaultData() {
+                return {
+                    dialogImageUrl: '',
+                    dialogVisible: false,
+                    opsBroadcastChannel: null,
+                    langEditors: {},
+                    completions: [],
+                    storage: {},
+                    metas: {
+                        cert: '',
+                        resultTaskLoading: false,
+                        resultTaskId: '',
+                        resultModelLoading: false,
+                        resultPbrModelUrl: '',
+                        resultBaseModelUrl: '',
+                        resultPreviewModelImageUrl: '',
+                        uploadImageLoading: false,
+                        uploadImageList: [],
+                        langList: [
+                            {label: 'Text', value: 'text'},
+                        ],
+                        modelList:[
+                            {label:'高精度3D模型生成，输出产物最高200万面',value:'Tripo/Tripo-H3.1'},
+                            {label:'专业3D模型生成，输出产物最高2万面，速度更快',value:'Tripo/Tripo-P1.0'}
+                        ],
+                        workModeList: [
+                            {label: '文生模型', value: 't2m'},
+                            {label: '图生模型', value: 'i2m'},
+                            {label: '多图参考生模型', value: 'r2m'},
+                        ],
+                        textureQualityList: [
+                            {label: '标清贴图', value: 'standard'},
+                            {label: '高清贴图', value: 'detailed'},
+                        ],
+                        geometryQualityList: [
+                            {label: '标准版。生成的3D模型最高150万面', value: 'standard'},
+                            {label: '超清版。生成的3D模型最高200万面', value: 'ultra'},
+                        ],
+                    },
+                    drawer: {},
+                    dialog: {
+                        imagePreview: {
+                            show: false,
+                            imageUrl: ''
+                        },
+                    },
+                    form: {
+                        meta: {
+                            apiKey: '',
+                        },
+                        workMode: 't2m',
+                        modelName: 'Tripo/Tripo-P1.0',
+                        prompt: '',
+                        imageUrlList: [],
+                        textureQuality: 'standard',
+                        geometryQuality: 'standard',
+                        texture: true,
+                    }
+                }
+            },
+            initBroadcast() {
+                this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
+                setInterval(() => {
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'cert',
+                        data: this.metas.cert
+                    });
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'dashscope',
+                        data: this.form.meta.apiKey
+                    });
+                }, 3000)
+
+
+                this.opsBroadcastChannel.onmessage = (event) => {
+                    let data = event.data;
+                    if (data.type == 'cert') {
+                        if (!this.metas.cert || this.metas.cert == '') {
+                            this.metas.cert = data.data;
+                        }
+                    }
+                    if (data.type == 'dashscope') {
+                        if (!this.form.meta.apiKey || this.form.meta.apiKey == '') {
+                            this.form.meta.apiKey = data.data;
+                        }
+                    }
+                };
+
+            },
+            loadData() {
+                let content = localStorage.getItem('ops:dashscope:d3:tripo-3d:data');
+                if (!content) {
+                    return
+                }
+                content = content.trim();
+                if (content.length == 0) {
+                    return;
+                }
+                try {
+                    let obj = JSON.parse(content);
+                    Object.keys(obj).forEach(k => {
+                        this.$data[k] = obj[k];
+                    });
+                } catch (e) {
+
+                }
+            },
+            storeData() {
+                try {
+                    let data = {...this.$data};
+                    data.opsBroadcastChannel = null;
+                    data.langEditors = {};
+                    Object.keys(this.$data.langEditors).forEach(k => {
+                        data.langEditors[k] = null;
+                    })
+                    let json = JSON.stringify(data);
+                    let obj = JSON.parse(json);
+                    obj.metas.cert = '';
+                    obj.form.meta.apiKey = '';
+                    let content = JSON.stringify(obj);
+                    localStorage.setItem('ops:dashscope:d3:tripo-3d:data', content);
+                } catch (e) {
+                    // console.log(e)
+                }
+            },
+            initStoreData() {
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if (reset != 'true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
+            },
+            getTransfer() {
+                let cert = this.metas.cert;
+                if (!cert || cert.length == 0) {
+                    cert = '';
+                }
+                cert = cert.trim();
+                if (!cert || cert.length == 0) {
+                    throw new Error('请先填写连接证书')
+                }
+                let ex = null;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (!ex) {
+                    ex = new Error('init transfer error')
+                }
+                throw ex;
+            },
+            transferSend(req) {
+                let ex = null;
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (ex != null) {
+                    throw ex;
+                }
+            },
+            transferRecv(req) {
+                let ex = null;
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (ex != null) {
+                    throw ex;
+                }
+            },
+            messageError(msg, limit) {
+                window._lastError = msg;
+                if (limit && limit >= 0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
+            onCertChange() {
+
+            },
+            assignDashScopeMeta(req) {
+                req.meta = this.form.meta;
+                req.modelName = this.form.modelName;
+                if (!req.meta.apiKey) {
+                    throw new Error('请先填写 Api Key')
+                }
+                return req;
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function (e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function (e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            onRemoveImageFile(file, fileList) {
+                this.metas.uploadImageList = fileList || []
+                this.updateUploadImageUrls()
+            },
+            updateUploadImageUrls() {
+                this.form.imageUrlList = this.metas.uploadImageList.map(e => e.saveUrl).filter(e => e && e != '')
+            },
+            onUploadImageFileChange(file) {
+                if (this.form.workMode != 'r2m') {
+                    this.metas.uploadImageList = []
+                }
+                this.metas.uploadImageList.push(file)
+                this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doUploadFile(file)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doUploadFile(file, type) {
+                this.metas.uploadImageLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5 => {
+                            let form = new FormData();
+                            form.append('file', file.raw, file.name);
+
+                            let req = this.assignDashScopeMeta({
+                                md5: md5
+                            })
+                            let reqData = this.transferSend(req);
+                            Object.keys(reqData).forEach(k => {
+                                form.append(k, reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `../../tmp-file/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data)
+                                    file.saveUrl = resp;
+                                    this.updateUploadImageUrls()
+
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                } else {
+                                    this.messageError(res.data.msg, 300)
+                                }
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            }).finally(() => {
+                                this.metas.uploadImageLoading = false;
+                            })
+                        }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.uploadImageLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.uploadImageLoading = false;
+                }
+            },
+            onExecute() {
+                this.$confirm('即将执行转换，是否继续？<br/>', '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute() {
+                this.metas.resultTaskLoading = true;
+                try {
+                    let payload = {}
+                    if (this.form.workMode == 't2m') {
+                        payload = {
+                            input: {
+                                prompt: this.form.prompt
+                            },
+                            parameters: {
+                                texture_quality: this.form.textureQuality,
+                            }
+                        }
+                    } else if (this.form.workMode == 'i2m') {
+                        payload = {
+                            input: {
+                                image: this.form.imageUrlList[0]
+                            },
+                            parameters: {
+                                texture_quality: this.form.textureQuality,
+                            }
+                        }
+                    } else if (this.form.workMode == 'r2m') {
+                        payload = {
+                            input: {
+                                images: this.form.imageUrlList
+                            },
+                            parameters: {
+                                texture_quality: this.form.textureQuality,
+                            }
+                        }
+                    } else {
+                        throw new Error('请选择运行模式！')
+                    }
+                    if(this.supportHigh){
+                        payload.parameters={
+                            ...payload.parameters,
+                            geometry_quality: this.form.geometry_quality,
+                        }
+                    }
+                    if(this.form.texture){
+                        payload.parameters={
+                            ...payload.parameters,
+                            pbr: true,
+                            texture: true
+                        }
+                    }else{
+                        payload.parameters={
+                            ...payload.parameters,
+                            pbr: false,
+                            texture: false
+                        }
+                    }
+                    let req = this.assignDashScopeMeta(payload);
+                    this.$axios({
+                        url: `./generate`,
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            this.metas.resultTaskId = resp;
+                            this.onQueryStatus();
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.resultTaskLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultTaskLoading = false;
+                }
+            },
+            onQueryStatus() {
+                this.metas.resultModelLoading = true;
+                try {
+                    let req = this.assignDashScopeMeta({
+                        taskId: this.metas.resultTaskId
+                    });
+                    this.$axios({
+                        url: `../../task/status`,
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            let taskStatus = resp.output.task_status
+                            if ('PENDING' == taskStatus
+                                || 'RUNNING' == taskStatus) {
+                                setTimeout(() => {
+                                    this.onQueryStatus()
+                                }, 5000)
+                            } else if ('SUCCEEDED' == taskStatus) {
+                                let result=resp.output.results[0] || {}
+                                this.metas.resultPbrModelUrl=result.pbr_model_url;
+                                this.metas.resultBaseModelUrl=result.base_model_url;
+                                this.metas.resultPreviewModelImageUrl =result.rendered_image_url
+                                this.metas.resultModelLoading = false;
+                            } else {
+                                let code = resp.output.code;
+                                let message = resp.output.message;
+                                this.messageError(`${code}: ${message}`, 300)
+                                this.metas.resultModelLoading = false;
+                            }
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                            this.metas.resultModelLoading = false;
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                        this.metas.resultModelLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultModelLoading = false;
+                }
+            },
+            getModelPreviewUrl(modelUrl){
+                return '../../../viewer/d3-viewer.html?modelType=glb&modelUrl='+encodeURIComponent(new URL('./download',window.location.href).href+'?modelUrl='+encodeURIComponent(modelUrl))
+            }
+
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+    .cert-block {
+        max-height: 32px;
+        overflow: hidden;
+    }
+
+    .cert-block:hover {
+        max-height: 280px;
+    }
+
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+
+    .el-table__cell .table-cell-hidden {
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden {
+        display: inline-block;
+    }
+
+    .scroller {
+        height: calc(100vh - 200px);
+    }
+
+    .upload-image .el-upload-list--picture-card .el-upload-list__item {
+        width: 260px;
+        height: 260px;
+    }
+
+    .upload-image .el-upload--picture-card {
+        width: 260px;
+        height: 260px;
+        line-height: 260px;
+    }
+</style>
+</html>

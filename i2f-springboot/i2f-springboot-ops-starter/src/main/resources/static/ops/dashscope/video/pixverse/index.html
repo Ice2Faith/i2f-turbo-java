@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- 1小时缓存过期 -->
+    <meta http-equiv="Cache-Control" content="max-age=3600, public">
+    <title>Ops - PixVerse</title>
+    <link rel="icon" type="image/png" href="../../../favicon.png">
+    <script src="../../../lib/vue/vue-2.js"></script>
+    <script src="../../../lib/moment/moment-2.24.0.js"></script>
+    <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
+    <link rel="stylesheet" href="../../../lib/element-ui/element-ui-2.15.10.css"/>
+    <link rel="stylesheet" href="../../../lib/element-ui/element-ui-2.15.10-icon.css"/>
+    <link href="../../../lib/element-ui/fonts/element-icons.ttf"/>
+    <link href="../../../lib/element-ui/fonts/element-icons.woff"/>
+    <script src="../../../lib/axios/axios-1.1.3.min.js"></script>
+    <script src="../../../lib/axios/qs.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm4.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm3.js"></script>
+    <script src="../../../lib/sm-crypto-0.3.2.1-RELEASE/sm2.js"></script>
+    <script src="../../../lib/base64/Base64.js"></script>
+    <script src="../../../common/OpsSecureKeyPair.js"></script>
+    <script src="../../../common/OpsSecureCertPair.js"></script>
+    <script src="../../../common/OpsSecureDto.js"></script>
+    <script src="../../../common/OpsSecureHelper.js"></script>
+    <script src="../../../common/OpsSecureTransfer.js"></script>
+    <!-- 从这里查找 CDN 资源： https://cdnjs.com/libraries/codemirror -->
+    <script src="../../../lib/codemirror-6.65.7/codemirror.min.js"></script>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/codemirror.min.css"/>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/addon/hint/show-hint.min.css"/>
+    <script src="../../../lib/codemirror-6.65.7/addon/hint/show-hint.min.js"></script>
+    <link rel="stylesheet" href="../../../lib/codemirror-6.65.7/theme/idea.min.css"/>
+
+    <script src="../../../lib/codemirror-6.65.7/addon/search/search.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/searchcursor.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/jump-to-line.min.js"></script>
+    <script src="../../../lib/codemirror-6.65.7/addon/search/match-highlighter.min.js"></script>
+
+    <script src="../../../lib/codemirror-6.65.7/mode/shell/shell.min.js"></script>
+
+    <link rel="stylesheet" href="../../../lib/vue-virtual-scroller/vue-virtual-scroller.css"/>
+    <script src="../../../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../../../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
+
+</head>
+<body>
+<div id="app">
+    <el-row class="cert-block">
+        <el-divider>连接证书<i class="el-icon-d-caret"></i></el-divider>
+        <el-input
+                type="textarea"
+                :rows="3"
+                placeholder="请输入连接证书"
+                v-model="metas.cert"
+                @change="onCertChange">
+        </el-input>
+    </el-row>
+    <el-row class="cert-block">
+        <el-divider>DashScope 操作<i class="el-icon-d-caret"></i></el-divider>
+        <el-form inline label-position="left" label-width="120px">
+            <el-form-item>
+                <el-row slot="label">
+                    Api Key
+                    <el-link href="https://bailian.console.aliyun.com/cn-beijing?tab=model#/api-key" target="_blank">
+                        <i class="el-icon-question"></i>
+                    </el-link>
+                </el-row>
+                <el-input clearable v-model="form.meta.apiKey" placeholder="Api Key"></el-input>
+            </el-form-item>
+        </el-form>
+    </el-row>
+
+
+    <el-card shadow="never">
+        <el-row style="width: 100%;">
+            <el-form inline label-position="top" label-width="120px">
+                <el-row type="flex">
+                    <template v-if="pixVerseWorkMode=='t2v'">
+                        <el-col :span="24">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="pixVerseWorkMode=='i2v'">
+                        <el-col :span="12">
+                            <el-form-item label="首帧图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                    <template v-if="pixVerseWorkMode=='r2v'">
+                        <el-col :span="12">
+                            <el-form-item label="参考图片">
+                                <el-upload
+                                        class="upload-image"
+                                        ref="uploadImage"
+                                        style="display: inline-block;"
+                                        action="#"
+                                        list-type="picture-card"
+                                        :file-list="metas.uploadImageList"
+                                        accept=".png,.jpeg,.jpg"
+                                        :auto-upload="false"
+                                        :on-remove="onRemoveImageFile"
+                                        :on-preview="handlePictureCardPreview"
+                                        :on-change="onUploadImageFileChange">
+                                    <i class="el-icon-plus"></i>
+                                </el-upload>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="12">
+                            <el-form-item label="提示词" style="width: 100%;">
+                                <el-input type="textarea" :rows="12" v-model="form.prompt"/>
+                            </el-form-item>
+                        </el-col>
+                    </template>
+                </el-row>
+            </el-form>
+
+            <el-divider></el-divider>
+            <el-form inline label-position="top" label-width="80px">
+                <el-row type="flex">
+                    <el-col :span="10">
+                        <el-row type="flex">
+                            <el-form-item>
+                                <span slot="label">
+                                    模式
+                                     <el-popover
+                                             placement="top-start"
+                                             title="模型类型"
+                                             width="360"
+                                             trigger="hover">
+                                         切换不同模式之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
+                                         如果不重新上传，模型将会找不到上传的图片和视频。
+                                        <i slot="reference" class="el-icon-question"></i>
+                                      </el-popover>
+                                </span>
+                                <el-select clearable filterable v-model="form.workMode" placeholder="模式"
+                                           style="width: 180px;">
+                                    <el-option
+                                            v-for="item in metas.workModeList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="分辨率">
+                                <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
+                                    <el-option
+                                            v-for="item in metas.resolutionList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['t2v','r2v'].includes(pixVerseWorkMode)" label="宽高比">
+                                <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
+                                    <el-option
+                                            v-for="item in metas.ratioList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="pixVerseSupportAudio && ['t2v','i2v','r2v'].includes(pixVerseWorkMode)"
+                                          label="声音控制">
+                                <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
+                                    <el-option
+                                            v-for="item in metas.audioSettingList"
+                                            :key="item.value"
+                                            :label="item.label"
+                                            :value="item.value">
+                                    </el-option>
+                                </el-select>
+                            </el-form-item>
+                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="时长(s)">
+                                <el-input-number v-model="form.duration" :min="1" :max="pixVerseMaxDuration"
+                                                 size="small"/>
+                            </el-form-item>
+                            <el-form-item label="选项">
+                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="4">
+                        <el-row type="flex" justify="center">
+                            <el-form-item label="操作">
+                                <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                           type="primary"
+                                           @click="onExecute">
+                                    执行
+                                </el-button>
+                                <el-popover
+                                        placement="top-start"
+                                        title="执行"
+                                        width="360"
+                                        trigger="hover">
+                                    点击执行之后，将会提交异步任务给平台。<br/>
+                                    后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
+                                    只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
+                                    <i slot="reference" class="el-icon-question"></i>
+                                </el-popover>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                    <el-col :span="10">
+                        <el-row type="flex" justify="end">
+
+                        </el-row>
+                    </el-col>
+                </el-row>
+
+
+                <el-row v-if="metas.resultTaskId">
+                    <el-divider></el-divider>
+
+                    <el-form-item>
+                        <el-input clearable v-model="metas.resultTaskId" placeholder="Task Id"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button v-loading="metas.resultVideoLoading" size="medium"
+                                   type="primary"
+                                   @click="onQueryStatus">
+                            查询
+                        </el-button>
+                        <el-link v-if="metas.resultVideoUrl"
+                                 style="margin-left: 15px;"
+                                 :href="metas.resultVideoUrl"
+                                 type="success">
+                            下载<i class="el-icon-download el-icon--right"></i>
+                        </el-link>
+                    </el-form-item>
+                </el-row>
+
+                <video v-if="metas.resultVideoUrl"
+                       :src="metas.resultVideoUrl"
+                       controls
+                       style="max-width:100%;max-height: 960px;"
+                       title="Output Video">
+                    Output Video
+                </video>
+            </el-form>
+
+
+        </el-row>
+    </el-card>
+
+
+    <el-dialog :visible.sync="dialog.imagePreview.show" style="text-align: center;">
+        <img width="100%" :src="dialog.imagePreview.imageUrl" alt="">
+    </el-dialog>
+
+    <el-dialog :visible.sync="dialog.videoPreview.show" style="text-align: center;">
+        <video v-if="dialog.videoPreview.videoUrl"
+               :src="dialog.videoPreview.videoUrl"
+               controls
+               style="max-width:100%;max-height: 960px;"
+               title="Video">
+            Video
+        </video>
+    </el-dialog>
+
+</div>
+</body>
+<script>
+    Vue.use(VueVirtualScroller.default);
+    window.app = new Vue({
+        components: {},
+        data() {
+            return this.getDefaultData()
+        },
+        created() {
+            this.initStoreData();
+            this.initBroadcast();
+        },
+        mounted() {
+
+        },
+        watch: {},
+        computed: {
+            pixVerseWorkMode() {
+                let mode = this.form.workMode
+                return mode.split('_', 2)[0]
+            },
+            pixVerseModelName() {
+                return this.metas.workModeModelNameMap[this.form.workMode].name;
+            },
+            pixVerseMaxDuration() {
+                return this.metas.workModeModelNameMap[this.form.workMode].duration;
+            },
+            pixVerseSupportAudio() {
+                return this.metas.workModeModelNameMap[this.form.workMode].audio;
+            },
+            pixVerseSize() {
+                const dictMap = this.metas.workModeModelNameMap[this.form.workMode].size;
+                return dictMap[this.form.resolution][this.form.ratio]
+
+            },
+        },
+        methods: {
+            handlePictureCardPreview(file) {
+                this.dialog.imagePreview.imageUrl = file.url;
+                this.dialog.imagePreview.show = true;
+            },
+            handleVideoCardPreview(file) {
+                this.dialog.videoPreview.videoUrl = file.url;
+                this.dialog.videoPreview.show = true;
+            },
+            getDefaultData() {
+                return {
+                    dialogImageUrl: '',
+                    dialogVisible: false,
+                    opsBroadcastChannel: null,
+                    langEditors: {},
+                    completions: [],
+                    storage: {},
+                    metas: {
+                        cert: '',
+                        resultTaskLoading: false,
+                        resultTaskId: '',
+                        resultVideoLoading: false,
+                        resultVideoUrl: '',
+                        uploadImageLoading: false,
+                        uploadImageList: [],
+                        uploadVideoLoading: false,
+                        uploadVideoList: [],
+                        langList: [
+                            {label: 'Text', value: 'text'},
+                        ],
+                        workModeList: [
+                            {label: '文生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 't2v_c1'},
+                            {label: '文生视频 6.0(通用)', value: 't2v_v6'},
+                            {label: '文生视频 5.6(通用)', value: 't2v_v5'},
+                            {label: '首帧生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 'i2v_c1'},
+                            {label: '首帧生视频 6.0(通用)', value: 'i2v_v6'},
+                            {label: '首帧生视频 5.6(通用)', value: 'i2v_v5'},
+
+                            {label: '多图参考生视频 C1(打斗、法术特效、高速运动等动态场景)', value: 'r2v_c1'},
+                            {label: '多图参考生视频 5.6(通用)', value: 'r2v_v5'},
+                        ],
+                        resolutionList: [
+                            {label: '360P', value: '360P'},
+                            {label: '540P', value: '540P'},
+                            {label: '720P', value: '720P'},
+                            {label: '1080P', value: '1080P'},
+                        ],
+                        ratioList: [
+                            {label: '16:9', value: '16:9'},
+                            {label: '9:16', value: '9:16'},
+                            {label: '1:1', value: '1:1'},
+                            {label: '4:3', value: '4:3'},
+                            {label: '3:4', value: '3:4'},
+                        ],
+                        audioSettingList: [
+                            {label: '有声', value: true},
+                            {label: '无声', value: false},
+                        ],
+                        workModeModelNameMap: {
+                            't2v_c1': {
+                                name: 'pixverse/pixverse-c1-t2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            't2v_v6': {
+                                name: 'pixverse/pixverse-v6-t2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            't2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-t2v',
+                                duration: 10,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1280*960',
+                                        '1:1': '1280*1280',
+                                        '3:4': '960*1280',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1920*1440',
+                                        '1:1': '1808*1808',
+                                        '3:4': '1440*1920',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            'i2v_c1': {
+                                name: 'pixverse/pixverse-c1-it2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'i2v_v6': {
+                                name: 'pixverse/pixverse-v6-it2v',
+                                duration: 15,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'i2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-it2v',
+                                duration: 10,
+                                audio: true,
+                                size: {
+                                    '360P': {},
+                                    '540P': {},
+                                    '720P': {},
+                                    '1080P': {}
+                                }
+                            },
+                            'r2v_c1': {
+                                name: 'pixverse/pixverse-c1-r2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*832',
+                                        '1:1': '960*960',
+                                        '3:4': '832*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1664*1248',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1248*1664',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                            'r2v_v5': {
+                                name: 'pixverse/pixverse-v5.6-r2v',
+                                duration: 16,
+                                audio: true,
+                                size: {
+                                    '360P': {
+                                        '16:9': '640*360',
+                                        '4:3': '640*480',
+                                        '1:1': '640*640',
+                                        '3:4': '480*640',
+                                        '9:16': '360*640',
+                                    },
+                                    '540P': {
+                                        '16:9': '1024*576',
+                                        '4:3': '1024*768',
+                                        '1:1': '1024*1024',
+                                        '3:4': '768*1024',
+                                        '9:16': '576*1024',
+                                    },
+                                    '720P': {
+                                        '16:9': '1280*720',
+                                        '4:3': '1108*830',
+                                        '1:1': '960*960',
+                                        '3:4': '830*1108',
+                                        '9:16': '720*1280',
+                                    },
+                                    '1080P': {
+                                        '16:9': '1920*1080',
+                                        '4:3': '1662*1246',
+                                        '1:1': '1440*1440',
+                                        '3:4': '1246*1662',
+                                        '9:16': '1080*1920',
+                                    }
+                                }
+                            },
+                        },
+                        parameterModeList: [
+                            {label: '标准模式，生成速度较快，性价比高，适用于快速预览和基础动画场景', value: 'wan-std'},
+                            {
+                                label: '专业模式，动画流畅度更高，效果更佳，但处理时间和费用也相应增加(+0.2元/s)',
+                                value: 'wan-pro'
+                            },
+                        ]
+                    },
+                    drawer: {},
+                    dialog: {
+                        imagePreview: {
+                            show: false,
+                            imageUrl: ''
+                        },
+                        videoPreview: {
+                            show: false,
+                            videoUrl: ''
+                        }
+                    },
+                    form: {
+                        meta: {
+                            apiKey: '',
+                        },
+                        workMode: 'i2v_c1',
+                        prompt: '',
+                        imageUrlList: [],
+                        videoUrl: '',
+                        resolution: '720P',
+                        ratio: '16:9',
+                        duration: 10,
+                        watermark: false,
+                        audioSetting: true
+                    }
+                }
+            },
+            initBroadcast() {
+                this.opsBroadcastChannel = new BroadcastChannel('ops_station_broadcast');
+
+                setInterval(() => {
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'cert',
+                        data: this.metas.cert
+                    });
+                    this.opsBroadcastChannel.postMessage({
+                        type: 'dashscope',
+                        data: this.form.meta.apiKey
+                    });
+                }, 3000)
+
+
+                this.opsBroadcastChannel.onmessage = (event) => {
+                    let data = event.data;
+                    if (data.type == 'cert') {
+                        if (!this.metas.cert || this.metas.cert == '') {
+                            this.metas.cert = data.data;
+                        }
+                    }
+                    if (data.type == 'dashscope') {
+                        if (!this.form.meta.apiKey || this.form.meta.apiKey == '') {
+                            this.form.meta.apiKey = data.data;
+                        }
+                    }
+                };
+
+            },
+            loadData() {
+                let content = localStorage.getItem('ops:dashscope:video:pix-verse:data');
+                if (!content) {
+                    return
+                }
+                content = content.trim();
+                if (content.length == 0) {
+                    return;
+                }
+                try {
+                    let obj = JSON.parse(content);
+                    Object.keys(obj).forEach(k => {
+                        this.$data[k] = obj[k];
+                    });
+                } catch (e) {
+
+                }
+            },
+            storeData() {
+                try {
+                    let data = {...this.$data};
+                    data.opsBroadcastChannel = null;
+                    data.langEditors = {};
+                    Object.keys(this.$data.langEditors).forEach(k => {
+                        data.langEditors[k] = null;
+                    })
+                    let json = JSON.stringify(data);
+                    let obj = JSON.parse(json);
+                    obj.metas.cert = '';
+                    obj.form.meta.apiKey = '';
+                    let content = JSON.stringify(obj);
+                    localStorage.setItem('ops:dashscope:video:pix-verse:data', content);
+                } catch (e) {
+                    // console.log(e)
+                }
+            },
+            initStoreData() {
+                let reset = new URL(window.location.href).searchParams.get('reset');
+                if (reset != 'true') {
+                    this.loadData();
+                }
+                setInterval(() => {
+                    this.storeData();
+                }, 1000);
+            },
+            doResetData() {
+                let newData = this.getDefaultData();
+                Object.keys(newData).forEach(k => {
+                    this.$data[k] = newData[k];
+                })
+            },
+            getTransfer() {
+                let cert = this.metas.cert;
+                if (!cert || cert.length == 0) {
+                    cert = '';
+                }
+                cert = cert.trim();
+                if (!cert || cert.length == 0) {
+                    throw new Error('请先填写连接证书')
+                }
+                let ex = null;
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        let keyPair = OpsSecureHelper.deserializeKeyPair(cert)
+                        return new OpsSecureTransfer(keyPair)
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (!ex) {
+                    ex = new Error('init transfer error')
+                }
+                throw ex;
+            },
+            transferSend(req) {
+                let ex = null;
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (ex != null) {
+                    throw ex;
+                }
+            },
+            transferRecv(req) {
+                let ex = null;
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    } catch (e) {
+                        ex = e;
+                    }
+                }
+                if (ex != null) {
+                    throw ex;
+                }
+            },
+            messageError(msg, limit) {
+                window._lastError = msg;
+                if (limit && limit >= 0) {
+                    if (msg && msg.length > limit) {
+                        msg = msg.substring(0, limit) + '...'
+                    }
+                }
+                this.$message.error(msg)
+            },
+            onCertChange() {
+
+            },
+            assignDashScopeMeta(req) {
+                req.meta = this.form.meta;
+                req.modelName = this.pixVerseModelName;
+                if (!req.meta.apiKey) {
+                    throw new Error('请先填写 Api Key')
+                }
+                return req;
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function (e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function (e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            onRemoveImageFile(file, fileList) {
+                this.metas.uploadImageList = fileList || []
+                this.updateUploadImageUrls()
+            },
+            updateUploadImageUrls() {
+                this.form.imageUrlList = this.metas.uploadImageList.map(e => e.saveUrl).filter(e => e && e != '')
+            },
+            onUploadImageFileChange(file) {
+                if (this.pixVerseWorkMode != 'r2v') {
+                    this.metas.uploadImageList = []
+                }
+                this.metas.uploadImageList.push(file)
+                this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doUploadFile(file, 'image')
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            onUploadVideoFileChange(file) {
+                this.metas.uploadVideoList = []
+                this.metas.uploadVideoList.push(file)
+                this.$confirm('即将上传文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doUploadFile(file, 'video')
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doUploadFile(file, type) {
+                if (type == 'image') {
+                    this.metas.uploadImageLoading = true;
+                } else if (type == 'video') {
+                    this.metas.uploadVideoLoading = true;
+                }
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5 => {
+                            let form = new FormData();
+                            form.append('file', file.raw, file.name);
+
+                            let req = this.assignDashScopeMeta({
+                                md5: md5
+                            })
+                            let reqData = this.transferSend(req);
+                            Object.keys(reqData).forEach(k => {
+                                form.append(k, reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `../../tmp-file/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data)
+                                    file.saveUrl = resp;
+                                    if (type == 'image') {
+                                        this.updateUploadImageUrls()
+                                    } else if (type == 'video') {
+                                        this.form.videoUrl = resp;
+                                    }
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                } else {
+                                    this.messageError(res.data.msg, 300)
+                                }
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            }).finally(() => {
+                                if (type == 'image') {
+                                    this.metas.uploadImageLoading = false;
+                                } else if (type == 'video') {
+                                    this.metas.uploadVideoLoading = false;
+                                }
+                            })
+                        }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        if (type == 'image') {
+                            this.metas.uploadImageLoading = false;
+                        } else if (type == 'video') {
+                            this.metas.uploadVideoLoading = false;
+                        }
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    if (type == 'image') {
+                        this.metas.uploadImageLoading = false;
+                    } else if (type == 'video') {
+                        this.metas.uploadVideoLoading = false;
+                    }
+                }
+            },
+            onExecute() {
+                this.$confirm('即将执行转换，是否继续？<br/>', '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doExecute();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doExecute() {
+                this.metas.resultTaskLoading = true;
+                try {
+                    let payload = {}
+                    if (this.pixVerseWorkMode == 't2v') {
+                        payload = {
+                            input: {
+                                prompt: this.form.prompt
+                            },
+                            parameters: {
+                                size: this.pixVerseSize,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark,
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
+                            }
+                        }
+                    } else if (this.pixVerseWorkMode == 'i2v') {
+                        payload = {
+                            input: {
+                                prompt: this.form.prompt,
+                                media: [
+                                    {
+                                        type: "image_url",
+                                        url: this.form.imageUrlList[0]
+                                    }
+                                ]
+                            },
+                            parameters: {
+                                resolution: this.form.resolution,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark,
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
+                            }
+                        }
+                    } else if (this.pixVerseWorkMode == 'r2v') {
+                        let mediaList = this.form.imageUrlList.map(e => {
+                            return {
+                                type: "image_url",
+                                url: e
+                            }
+                        })
+                        payload = {
+                            input: {
+                                prompt: this.form.prompt,
+                                media: [
+                                    ...mediaList
+                                ]
+                            },
+                            parameters: {
+                                size: this.pixVerseSize,
+                                duration: this.form.duration,
+                                watermark: this.form.watermark,
+                                ...(this.pixVerseSupportAudio ? {
+                                    audio: this.form.audioSetting,
+                                } : {})
+                            }
+                        }
+                    } else {
+                        throw new Error('请选择运行模式！')
+                    }
+                    let req = this.assignDashScopeMeta(payload);
+                    this.$axios({
+                        url: `./generate`,
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            this.metas.resultTaskId = resp;
+                            this.onQueryStatus();
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.resultTaskLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultTaskLoading = false;
+                }
+            },
+            onQueryStatus() {
+                this.metas.resultVideoLoading = true;
+                try {
+                    let req = this.assignDashScopeMeta({
+                        taskId: this.metas.resultTaskId
+                    });
+                    this.$axios({
+                        url: `../../task/status`,
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            let taskStatus = resp.output.task_status
+                            if ('PENDING' == taskStatus
+                                || 'RUNNING' == taskStatus) {
+                                setTimeout(() => {
+                                    this.onQueryStatus()
+                                }, 5000)
+                            } else if ('SUCCEEDED' == taskStatus) {
+                                this.metas.resultVideoUrl = resp.output.video_url
+                                this.metas.resultVideoLoading = false;
+                            } else {
+                                let code = resp.output.code;
+                                let message = resp.output.message;
+                                this.messageError(`${code}: ${message}`, 300)
+                                this.metas.resultVideoLoading = false;
+                            }
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                            this.metas.resultVideoLoading = false;
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                        this.metas.resultVideoLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultVideoLoading = false;
+                }
+            }
+
+        }
+    })
+    let defaultConfig = {
+        baseURL: './',
+        timeout: 10 * 60 * 1000,
+        responseType: 'json'
+    }
+    let request = axios.create(defaultConfig)
+    window.app.$axios = request
+    window.app.$mount('#app')
+</script>
+<style>
+    .cert-block {
+        max-height: 32px;
+        overflow: hidden;
+    }
+
+    .cert-block:hover {
+        max-height: 280px;
+    }
+
+    .list-item {
+        margin-top: 3px;
+        border-bottom: solid 1px #777;
+    }
+
+    .list-item:hover {
+        background: lightskyblue;
+    }
+
+    .checked-item {
+        background: darkorange;
+    }
+
+    .el-table__cell .table-cell-hidden {
+        display: none;
+    }
+
+    .el-table__cell:hover .table-cell-hidden {
+        display: inline-block;
+    }
+
+    .scroller {
+        height: calc(100vh - 200px);
+    }
+
+    .upload-image .el-upload-list--picture-card .el-upload-list__item {
+        width: 260px;
+        height: 260px;
+    }
+
+    .upload-image .el-upload--picture-card {
+        width: 260px;
+        height: 260px;
+        line-height: 260px;
+    }
+</style>
+</html>

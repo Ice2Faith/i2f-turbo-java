@@ -14,6 +14,7 @@ public class OpsHomeMenuDto {
     protected String subTitle;
     protected String icon;
     protected String href;
+    protected String group;
     protected boolean disabled;
 
     public OpsHomeMenuDto title(String title) {
@@ -33,6 +34,16 @@ public class OpsHomeMenuDto {
 
     public OpsHomeMenuDto href(String href) {
         this.href = href;
+        return this;
+    }
+
+    public OpsHomeMenuDto group(String group) {
+        this.group = group;
+        return this;
+    }
+
+    public OpsHomeMenuDto group(OpsMenuGroup group) {
+        this.group = group.order()+"/"+group.text();
         return this;
     }
 

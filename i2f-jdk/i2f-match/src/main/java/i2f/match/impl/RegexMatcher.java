@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
  * @date 2025/9/20 16:25
  */
 public class RegexMatcher implements IPriorMatcher {
+    public static final RegexMatcher INSTANCE=new RegexMatcher();
     protected LruMap<String, Pattern> cache = new LruMap<>(1024);
 
     public Pattern patternOf(String pattern) {

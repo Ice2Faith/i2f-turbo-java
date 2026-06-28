@@ -26,57 +26,57 @@ public interface HttpProcessorProvider extends IHttpProcessor {
 
     HttpResponse postJson(HttpRequest request) throws IOException;
 
-    HttpResponse postJson(String url, Map<String, Object> data) throws IOException;
+    HttpResponse postJson(String url, Object data) throws IOException;
 
-    HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params) throws IOException;
+    HttpResponse postJson(String url, Object data, Object params) throws IOException;
 
-    HttpResponse postJson(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException;
+    HttpResponse postJson(String url, Object data, Object params, Map<String, Object> header) throws IOException;
 
-    String postJsonForString(String url, Map<String, Object> data, String charset) throws IOException;
+    String postJsonForString(String url, Object data, String charset) throws IOException;
 
-    String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException;
+    String postJsonForString(String url, Object data, Object params, String charset) throws IOException;
 
-    String postJsonForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException;
+    String postJsonForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException;
 
-    <T> T postJsonForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postJsonForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postJsonForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T postJsonForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postJsonForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    HttpResponse postForm(String url, Map<String, Object> data) throws IOException;
+    HttpResponse postForm(String url, Object data) throws IOException;
 
-    HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params) throws IOException;
+    HttpResponse postForm(String url, Object data, Object params) throws IOException;
 
-    HttpResponse postForm(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header) throws IOException;
+    HttpResponse postForm(String url, Object data, Object params, Map<String, Object> header) throws IOException;
 
-    String postFormForString(String url, Map<String, Object> data, String charset) throws IOException;
+    String postFormForString(String url, Object data, String charset) throws IOException;
 
-    String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, String charset) throws IOException;
+    String postFormForString(String url, Object data, Object params, String charset) throws IOException;
 
-    String postFormForString(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException;
+    String postFormForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException;
 
-    <T> T postFormForObject(String url, Map<String, Object> data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postFormForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postFormForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T postFormForObject(String url, Map<String, Object> data, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T postFormForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
     HttpResponse get(String url) throws IOException;
 
-    HttpResponse get(String url, Map<String, Object> params) throws IOException;
+    HttpResponse get(String url, Object params) throws IOException;
 
-    HttpResponse get(String url, Map<String, Object> params, Map<String, Object> header) throws IOException;
+    HttpResponse get(String url, Object params, Map<String, Object> header) throws IOException;
 
     String getForString(String url, String charset) throws IOException;
 
-    String getForString(String url, Map<String, Object> params, String charset) throws IOException;
+    String getForString(String url, Object params, String charset) throws IOException;
 
-    String getForString(String url, Map<String, Object> params, Map<String, Object> header, String charset) throws IOException;
+    String getForString(String url, Object params, Map<String, Object> header, String charset) throws IOException;
 
     <T> T getForObject(String url, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T getForObject(String url, Map<String, Object> params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T getForObject(String url, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 
-    <T> T getForObject(String url, Map<String, Object> params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
+    <T> T getForObject(String url, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException;
 }

@@ -8,11 +8,11 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlFile;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlProcedureJumpSourceFileAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.print.attribute.standard.PageRanges;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -36,7 +36,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
             return ResolveResult.EMPTY_ARRAY;
         }
         XmlAttribute xmlAttribute = (XmlAttribute) parent;
-        if (!"refid".equals(xmlAttribute.getName())) {
+        if (!AttrConsts.REFID.equals(xmlAttribute.getName())) {
             return new ResolveResult[0];
         }
 
@@ -44,7 +44,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
 
 //        log.warn("xml-id-ref:"+value);
 
-        Map.Entry<VirtualFile, Integer> entry = JdbcProcedureXmlProcedureJumpSourceFileAction.getProcedureFileByProcedureId(value);
+        Map.Entry<VirtualFile, Integer> entry = JdbcProcedureXmlProcedureJumpSourceFileAction.getProcedureFileByProcedureId(xmlAttribute.getProject(), value);
         if (entry == null) {
             return new ResolveResult[0];
         }
@@ -80,7 +80,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
             if (element instanceof XmlAttribute) {
                 XmlAttribute attribute = (XmlAttribute) element;
                 String name = attribute.getName();
-                if ("id".equals(name)) {
+                if (AttrConsts.ID.equals(name)) {
                     if (Objects.equals(idValue, attribute.getValue())) {
                         ref.set(attribute);
                         return false;
@@ -120,7 +120,7 @@ public class XmlIdRefReference extends PsiReferenceBase<XmlAttributeValue> imple
             return false;
         }
         XmlAttribute attr = (XmlAttribute) parent;
-        if (!"id".equals(attr.getName())) {
+        if (!AttrConsts.ID.equals(attr.getName())) {
             return false;
         }
         String targetId = attr.getValue();

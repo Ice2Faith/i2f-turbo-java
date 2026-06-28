@@ -23,7 +23,6 @@ import java.util.List;
  * @author Ice2Faith
  * @date 2025/11/28 14:30
  */
-@ConditionalOnClass(ChannelSftp.class)
 @Slf4j
 @Data
 @NoArgsConstructor

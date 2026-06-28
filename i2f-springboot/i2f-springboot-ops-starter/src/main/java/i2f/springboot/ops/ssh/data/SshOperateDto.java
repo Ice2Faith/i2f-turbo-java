@@ -17,6 +17,8 @@ public class SshOperateDto {
     protected String workdir;
     protected String path;
 
+    protected String pattern;
+
     protected boolean inline;
 
     protected String md5;
@@ -24,6 +26,7 @@ public class SshOperateDto {
     protected String cmd;
     protected boolean runAsFile;
     protected long waitForSeconds;
+    protected boolean sftpCmd;
 
     protected int lineCount;
 }

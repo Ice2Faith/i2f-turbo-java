@@ -1,0 +1,254 @@
+package i2f.jdbc.procedure.executor.impl;
+
+import i2f.context.std.INamingContext;
+import i2f.environment.std.IEnvironment;
+import i2f.extension.ognl.OgnlUtil;
+import i2f.extension.velocity.VelocityGenerator;
+import i2f.extension.velocity.directives.common.ScriptDirective;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.context.JdbcProcedureContext;
+import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.ExecutorNode;
+import i2f.jdbc.procedure.node.impl.*;
+import i2f.jdbc.procedure.reportor.impl.DefaultGrammarReporter;
+import i2f.jdbc.procedure.script.EvalScriptProvider;
+import i2f.jdbc.procedure.signal.SignalException;
+import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
+import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
+import i2f.jdbc.proxy.xml.mybatis.inflater.impl.OgnlMybatisMapperInflater;
+import i2f.reflect.ReflectResolver;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
+/**
+ * @author Ice2Faith
+ * @date 2025/1/22 10:06
+ */
+public class DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor {
+    protected volatile MybatisMapperInflater mybatisMapperInflater;
+
+    public DefaultJdbcProcedureExecutor() {
+    }
+
+    public DefaultJdbcProcedureExecutor(JdbcProcedureContext context) {
+        super(context);
+    }
+
+    public DefaultJdbcProcedureExecutor(JdbcProcedureContext context, IEnvironment environment, INamingContext namingContext) {
+        super(context, environment, namingContext);
+    }
+
+    @Override
+    public void afterConstructor() {
+        this.grammarReporter = new DefaultGrammarReporter();
+    }
+
+    @Override
+    public void afterInitExecutorNodes(List<ExecutorNode> ret) {
+        ret.add(new LangEvalFunicNode());
+        ret.add(new LangEvalGroovyNode());
+        ret.add(new LangEvalJavaNode());
+        ret.add(new LangEvalJavascriptNode());
+        ret.add(new LangEvalNode());
+        ret.add(new LangEvalTinyScriptNode());
+    }
+
+    @Override
+    public void afterInitFeatureMap() {
+        registryFeatureFunction(FeatureConsts.EVAL_JAVA, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavaNode.evalJava(context, this, "", "", text);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_JS, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalJavascriptNode.evalJavascript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_TINYSCRIPT, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalTinyScriptNode.evalTinyScript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_TS, featuresMap.get(FeatureConsts.EVAL_TINYSCRIPT));
+
+        registryFeatureFunction(FeatureConsts.EVAL_GROOVY, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalGroovyNode.evalGroovyScript(text, context, this);
+        });
+        registryFeatureFunction(FeatureConsts.EVAL_FUNIC, (value, node, context) -> {
+            String text = value == null ? "" : String.valueOf(value);
+            return LangEvalFunicNode.evalFunic(text, context, this);
+        });
+    }
+
+
+    @Override
+    public boolean innerTest(String test, Object params) {
+        try {
+            Object obj = OgnlUtil.evaluateExpression(test, params);
+            return toBoolean(obj);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public Object innerEval(String script, Object params) {
+        try {
+            return OgnlUtil.evaluateExpression(script, params);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public Object innerVisit(String script, Object params) {
+        try {
+            return OgnlUtil.evaluateExpression(script, params);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public String innerRender(String script, Object params) {
+        try {
+            Map<String, Object> renderMap = null;
+            if (params instanceof Map) {
+                renderMap = (Map<String, Object>) params;
+            } else {
+                renderMap = ReflectResolver.beanVirtual2map(params, new HashMap<>());
+            }
+
+            JdbcProcedureExecutor executor = this;
+            CopyOnWriteArrayList<ScriptDirective.VelocityScriptProvider> adapters = new CopyOnWriteArrayList<>();
+            for (EvalScriptProvider item : getEvalScriptProviders()) {
+                adapters.add(new ScriptDirective.VelocityScriptProvider() {
+                    @Override
+                    public boolean support(String lang) {
+                        return item.support(lang);
+                    }
+
+                    @Override
+                    public Object eval(String script, Object params) {
+                        Map<String, Object> ctx = new HashMap<>();
+                        if (params instanceof Map) {
+                            ctx = (Map<String, Object>) params;
+                        } else {
+                            ctx.put("root", params);
+                        }
+                        return item.eval(script, ctx, executor);
+                    }
+                });
+            }
+
+            ScriptDirective.THREAD_PROVIDERS.set(adapters);
+            return VelocityGenerator.render(script, renderMap);
+        } catch (Exception e) {
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(e.getMessage(), e);
+            }
+        }
+    }
+
+    @Override
+    public MybatisMapperInflater getMybatisMapperInflater() {
+        if (mybatisMapperInflater != null) {
+            return mybatisMapperInflater;
+        }
+        synchronized (this) {
+            mybatisMapperInflater = createNewMybatisMapperInflater();
+        }
+        return mybatisMapperInflater;
+    }
+
+    public MybatisMapperInflater createNewMybatisMapperInflater() {
+        JdbcProcedureExecutor executor = this;
+        return new OgnlMybatisMapperInflater() {
+            @Override
+            public boolean testExpression(String expression, Object params) {
+                return executor.test(expression, params);
+            }
+
+            @Override
+            public Object evalExpression(String expression, Object params) {
+                return executor.eval(expression, params);
+            }
+
+            @Override
+            public Object runScript(String script, String lang, Map<String, Object> params, MybatisMapperNode node) {
+                if ("eval".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.eval(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("ognl".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = OgnlUtil.evaluateExpression(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("visit".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.visit(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("test".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.test(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                if ("render".equalsIgnoreCase(lang)) {
+                    try {
+                        Object obj = executor.render(script, params);
+                        return obj;
+                    } catch (Exception e) {
+
+                    }
+                }
+                EvalScriptProvider provider = null;
+                CopyOnWriteArrayList<EvalScriptProvider> list = executor.getEvalScriptProviders();
+                for (EvalScriptProvider item : list) {
+                    if (item.support(lang)) {
+                        provider = item;
+                        break;
+                    }
+                }
+                if (provider == null) {
+                    throw new ThrowSignalException("eval script provider not found for lang=" + lang);
+                }
+                executor.prepareParams(params);
+                Object ret = provider.eval(script, params, executor);
+                return ret;
+            }
+        };
+    }
+
+}

@@ -5,6 +5,7 @@
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - Datasource</title>
+    <link rel="icon" type="image/png" href="../favicon.png">
     <script src="../lib/vue/vue-2.js"></script>
     <script src="../lib/moment/moment-2.24.0.js"></script>
     <script src="../lib/element-ui/element-ui-2.15.10.js"></script>
@@ -42,6 +43,7 @@
 
     <link rel="stylesheet" href="../lib/vue-virtual-scroller/vue-virtual-scroller.css" />
     <script src="../lib/vue-virtual-scroller/vue-virtual-scroller.min.js"></script>
+    <script src="../lib/crypto-js-4.2.0/crypto-js.min.js"></script>
 
 
     <script src="../lib/codemirror-6.65.7/mode/yaml/yaml.min.js" ></script>
@@ -97,7 +99,11 @@
               @change="onSqlChange">
     </el-input>-->
     <el-card shadow="never">
-        <textarea ref="refEditor" ></textarea>
+    <div :class="'expand-main-editor'+(expandMainEditor?' expand-main-editor__expand':'')"
+         @contextmenu.prevent="onEditorContextmenu(editor,['sql'])">
+        <textarea ref="refEditor"></textarea>
+    </div>
+    <span class="el-icon-full-screen expand-main-editor__badge" @click="expandMainEditor=!expandMainEditor"></span>
     </el-card>
 
     <el-row>
@@ -132,6 +138,7 @@
                     </el-form-item>
                 </template>
                 <template v-else>
+                    <el-divider direction="vertical"></el-divider>
                     <el-form-item label="数据源">
                         <el-select clearable filterable v-model="form.datasource" placeholder="数据源">
                             <el-option
@@ -210,6 +217,11 @@
                                type="success"
                                @click="onExport">
                         导出
+                    </el-button>
+                    <el-button v-loading="metas.importLoading" size="medium"
+                               type="danger"
+                               @click="onImport(null)">
+                        导入
                     </el-button>
                 </el-form-item>
             </el-row>
@@ -315,7 +327,10 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <textarea ref="refResultEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor)">
+                <textarea ref="refResultEditor"></textarea>
+            </div>
+
         </el-card>
     </el-row>
     <el-drawer
@@ -352,10 +367,16 @@
 
                     </el-row>
                     <el-row>
-                        <el-input clearable v-model="drawer.metadata.checkDatabase" placeholder="选中数据库"></el-input>
+                        <el-input clearable v-model="drawer.metadata.checkDatabase" placeholder="选中数据库">
+                            <i slot="prefix" class="el-input__icon el-icon-magic-stick"
+                               @click="drawer.metadata.checkDatabase=convertTextFormal(drawer.metadata.checkDatabase)"></i>
+                        </el-input>
                     </el-row>
                     <el-row>
-                        <el-input clearable v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库"></el-input>
+                        <el-input clearable v-model="drawer.metadata.filterDatabase" placeholder="过滤数据库">
+                            <i slot="prefix" class="el-input__icon el-icon-magic-stick"
+                               @click="drawer.metadata.filterDatabase=convertTextFormal(drawer.metadata.filterDatabase)"></i>
+                        </el-input>
                     </el-row>
                     <recycle-scroller :items="computeFilterDatabases"
                                       class="scroller"
@@ -398,11 +419,16 @@
                     </el-row>
                     <el-row>
                         <el-input clearable v-model="drawer.metadata.checkTable" placeholder="选中表">
+                            <i slot="prefix" class="el-input__icon el-icon-magic-stick"
+                               @click="drawer.metadata.checkTable=convertTextFormal(drawer.metadata.checkTable)"></i>
                             <el-button slot="append" icon="el-icon-search" @click="onViewTableInfo(null)"></el-button>
                         </el-input>
                     </el-row>
                     <el-row>
-                        <el-input clearable v-model="drawer.metadata.filterTable" placeholder="过滤表"></el-input>
+                        <el-input clearable v-model="drawer.metadata.filterTable" placeholder="过滤表">
+                            <i slot="prefix" class="el-input__icon el-icon-magic-stick"
+                               @click="drawer.metadata.filterTable=convertTextFormal(drawer.metadata.filterTable)"></i>
+                        </el-input>
                     </el-row>
                     <recycle-scroller :items="computeFilterTables"
                                       class="scroller"
@@ -575,7 +601,9 @@
                         :value="item.value">
                 </el-option>
             </el-select>
-            <textarea ref="refTableInfoTableDdlEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.tableInfoTableDdlEditor)">
+                <textarea ref="refTableInfoTableDdlEditor"></textarea>
+            </div>
         </el-row>
 
     </el-dialog>
@@ -601,7 +629,9 @@
                     美化SQL
                 </el-button>
             </el-form>
-            <textarea ref="refTextViewerEditor"></textarea>
+            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor)">
+                <textarea ref="refTextViewerEditor"></textarea>
+            </div>
     </el-dialog>
 
     <el-dialog
@@ -788,6 +818,54 @@
 
         <div ref="refEchartDom" style="height: 480px;width:100%;"></div>
     </el-dialog>
+
+
+    <el-dialog
+            :title="dialog.importData.title"
+            :visible.sync="dialog.importData.show"
+            width="60%">
+        <el-row>
+            <el-form label-width="80px">
+                <el-form-item label="目标表名">
+                    <el-input clearable
+                              placeholder="目标表名"
+                              v-model="dialog.importData.table">
+                    </el-input>
+                </el-form-item>
+                <el-form-item label="导入文件">
+                    <el-upload
+                            ref="upload"
+                            style="display: inline-block;"
+                            action="#"
+                            accept=".csv"
+                            :file-list="dialog.importData.uploadList"
+                            :auto-upload="false"
+                            :on-change="onImportFileChange"
+                    >
+                        <el-button slot="trigger" type="success" size="medium" :loading="metas.uploadLoading" type="primary">导入文件</el-button>
+                    </el-upload>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="360"
+                            trigger="hover">
+                        点击[导入文件]之后，确认导入文件就开始导入文件。<br/>
+                        目前仅支持 .csv 文件类型进行导入，请体检在 Excel 中转换文件类型。<br/>
+                        导入规则为，CSV 文件第一行，也就是表头行，含义为对应的列名。<br/>
+                        因此，表头行需要和导入表的列名能够对应上，允许大小写不一致，没匹配上的列不会被导入。<br/>
+                        导入程序将会尝试匹配数据库的列类型，如果匹配错误，将会按照字符串进行插入。<br/>
+                        因此，如果有特殊的情况，可以创建一个全为 varchar 类型的临时导入表进行导入。<br/>
+                        后续在数据库中进行类型转换。
+                        <i slot="reference" class="el-icon-question"></i>
+                    </el-popover>
+                </el-form-item>
+            </el-form>
+        </el-row>
+        <el-row type="flex" justify="end">
+            <el-button @click="dialog.importData.show=false">取消</el-button>
+        </el-row>
+
+    </el-dialog>
 </div>
 </body>
 <script>
@@ -844,8 +922,19 @@
             }
         },
         methods: {
+            convertTextFormal(text) {
+                if (!text) {
+                    return text;
+                }
+                let ret = text.toLowerCase();
+                if (ret == text) {
+                    return ret.toUpperCase();
+                }
+                return ret;
+            },
             getDefaultData() {
                 return {
+                    expandMainEditor: false,
                     opsBroadcastChannel: null,
                     chart: null,
                     editor: null,
@@ -1035,6 +1124,12 @@
                                 startProp: null,
                                 endProp: null,
                             }
+                        },
+                        importData:{
+                            show: false,
+                            title: '数据导入',
+                            table: '',
+                            uploadList: []
                         }
                     },
                     form: {
@@ -1221,6 +1316,345 @@
                 }
                 return ret;
             },
+            onEditorContextmenu(editor, categoryList) {
+                let _this = this
+                let convertText = function (convertor) {
+                    try {
+                        let text = editor.getSelection();
+                        if (!text || text == '') {
+                            text = editor.getValue()
+                            text = convertor(text);
+                            editor.setValue(text)
+                        } else {
+                            text = convertor(text);
+                            editor.replaceSelection(text)
+                        }
+                    } catch (e) {
+                        _this.$message.error('操作失败')
+                    }
+                }
+
+                let presetMenusMap = {
+                    text: [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `upper`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toUpperCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `lower`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return s.toLowerCase();
+                                })
+                            }
+                        },
+                        {
+                            label: `replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的字符串', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(searchText, replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: `regexp_replace`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let searchText = '';
+                                let replaceText = '';
+                                this.$prompt('请输入要查找的正则', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    searchText = value;
+                                    this.$prompt('请输入要替换为的字符串', '输入框', {
+                                        confirmButtonText: '确定',
+                                        cancelButtonText: '取消',
+                                    }).then(({value}) => {
+                                        replaceText = value;
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return s.replaceAll(new RegExp(searchText, 'g'), replaceText);
+                                        })
+                                    })
+                                })
+
+
+                            }
+                        },
+                        {
+                            label: 'encode/decode',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `encode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return btoa(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `decode_base64`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return atob(s);
+                                        })
+                                    }
+                                },
+
+                            ]
+                        },
+                        {
+                            label: 'SQL escape',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `escape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return "'" + s.replaceAll("'", "''") + "'";
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `unescape_sql`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            if (s.startsWith("'")) {
+                                                s = s.substring(1);
+                                            }
+                                            if (s.endsWith("'")) {
+                                                s = s.substring(0, s.length - 1);
+                                            }
+                                            return s.replaceAll("''", "'");
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            label: 'Json Convert',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `to_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return JSON.stringify(s);
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `parse_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            if (typeof obj == 'string') {
+                                                return obj + '';
+                                            }
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `format_json`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            let obj = JSON.parse(s);
+                                            return JSON.stringify(obj, null, '    ')
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+
+                    ],
+                    sql: [
+                        {
+                            label: 'SQL segments',
+                            icon: 'el-icon-magic-stick',
+                            children: [
+                                {label: '', divided: true}, // 分割线
+                                {
+                                    label: `count(1)`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select count(1) \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `select`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'select * \nfrom ' + s + '\nwhere 1=1 \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `update`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'update ' + s + '\n set \n\nwhere  \n';
+                                        })
+                                    }
+                                },
+                                {
+                                    label: `delete`,
+                                    icon: 'el-icon-magic-stick',
+                                    onClick: () => {
+                                        convertText(function (s) {
+                                            if (!s) {
+                                                return s;
+                                            }
+                                            return 'delete from ' + s + '\nwhere  \n';
+                                        })
+                                    }
+                                },
+                            ]
+                        },
+                        {label: '', divided: true}, // 分割线
+                        ...((typeof sqlFormatter != 'object') ? [] : [{
+                            label: `format sql`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let _this = this;
+                                convertText(function (s) {
+                                    if (!s) {
+                                        return s;
+                                    }
+                                    return _this.formatSql(s);
+                                })
+                            }
+                        }]),
+                    ],
+                    'json-editor': [
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `Json Editor`,
+                            icon: 'el-icon-magic-stick',
+                            onClick: () => {
+                                let text = editor.getValue();
+                                this.showJsonEditor(text, (res) => {
+                                    editor.setValue(res);
+                                });
+
+                            }
+                        },
+                    ]
+                }
+                let menus = [...presetMenusMap.text]
+                categoryList = categoryList || []
+                if (categoryList && categoryList.length > 0) {
+                    for (let i = 0; i < categoryList.length; i++) {
+                        let category = categoryList[i];
+                        if (category == 'text') {
+                            continue;
+                        }
+                        menus.push(...presetMenusMap[category])
+                    }
+                }
+                this.$contextmenu({
+                    items: menus,
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
+            formatSql(sql) {
+                if (!sql) {
+                    return sql;
+                }
+
+                // 设置选项
+                const options = {
+                    keywordCase: 'lower',
+                    indent: '\t'
+                };
+
+                // 格式化SQL
+                const formatted = sqlFormatter.format(sql, options);
+                return formatted;
+            },
             initEditor(){
                 let _this=this;
                 function asyncHint(editor, callback, options) {
@@ -1382,6 +1816,34 @@
                 }
                 throw ex;
             },
+            transferSend(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.send(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
+            transferRecv(req){
+                let ex=null;
+                for (let i = 0; i < 5; i++) {
+                    try{
+                        let transfer = this.getTransfer();
+                        return transfer.recv(req);
+                    }catch (e){
+                        ex=e;
+                    }
+                }
+                if(ex!=null){
+                    throw ex;
+                }
+            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1399,15 +1861,14 @@
                 this.metas.datasourceListLoading = true;
                 try {
                     let timestamp = new Date().getTime();
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/datasources',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: this.transferSend(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.datasourceList = resp.list;
                             this.form.datasource = resp.defaultName;
@@ -1430,15 +1891,14 @@
                 this.metas.driverListLoading = true;
                 try {
                     let timestamp = new Date().getTime();
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/drivers',
                         method: 'post',
-                        data: transfer.send(timestamp)
+                        data: this.transferSend(timestamp)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.driverList = resp;
                             if (resp.length > 0 && this.form.driver == '') {
@@ -1552,15 +2012,14 @@
                         maxCount: this.form.maxCount,
                     },true);
                     let operate = this.metas.operate;
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/${operate}`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             this.metas.resultSql=sql;
                             // console.log(resp)
                             if (operate == 'update' && !resp.columns) {
@@ -1623,11 +2082,10 @@
                         maxCount: this.form.maxCount,
                     },true);
                     let operate = this.metas.operate;
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/export`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         let contentDisposition = ''
                         let contentType = ''
@@ -1719,15 +2177,14 @@
                         sendFullScript: this.dialog.scriptRunner.sendFullScript,
                         stopOnError: this.dialog.scriptRunner.stopOnError,
                     },true);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: `/runner`,
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             //console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             //console.log(resp)
                             this.metas.resultText = resp + '';
                             this.metas.resultType = 'text';
@@ -1761,15 +2218,14 @@
                 this.drawer.metadata.databasesLoading = true;
                 try {
                     let req = this.fillDatasourceForm({});
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/databases',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data)
+                            let resp = this.transferRecv(res.data.data)
                             // console.log(resp)
                             this.drawer.metadata.databases = resp.list;
                             this.drawer.metadata.checkDatabase = resp.defaultName;
@@ -1812,15 +2268,14 @@
                         table: tablePattern,
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/tables',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || []
+                            let resp = this.transferRecv(res.data.data) || []
                             // console.log(resp)
                             this.drawer.metadata.tables = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database;
@@ -1911,15 +2366,14 @@
                         table: this.drawer.metadata.checkTable
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/table/info',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data) || {};
+                            let resp = this.transferRecv(res.data.data) || {};
                             // console.log(resp)
                             this.dialog.tableInfo.meta = resp;
                             this.dialog.tableInfo.title = resp.name;
@@ -1948,15 +2402,14 @@
                         ddlType: this.dialog.tableInfo.ddlType
                     });
                     req=this.cleanReqForm(req);
-                    let transfer = this.getTransfer();
                     this.$axios({
                         url: '/metadata/table/ddl',
                         method: 'post',
-                        data: transfer.send(req)
+                        data: this.transferSend(req)
                     }).then(res => {
                         if (res.data.code == 200) {
                             // console.log(res.data)
-                            let resp = transfer.recv(res.data.data);
+                            let resp = this.transferRecv(res.data.data);
                             // console.log(resp)
                             this.dialog.tableInfo.tableDdl = resp;
                             let storageKey = this.getDatasourceStorageKey(req) + '#' + req.database + '#' + req.table + '#' + req.ddlType;
@@ -2490,21 +2943,6 @@
                     this.editor.setValue(this.formatSql(text))
                 }
             },
-            formatSql(sql){
-                if(!sql){
-                    return sql;
-                }
-
-                // 设置选项
-                const options = {
-                    keywordCase: 'lower',
-                    indent: '\t'
-                };
-
-                // 格式化SQL
-                const formatted = sqlFormatter.format(sql, options);
-                return formatted;
-            },
             onTextViewerSqlFormat(){
                 let editor=this.langEditors['textViewerEditor']
                 if(!editor){
@@ -2529,7 +2967,7 @@
                     "CLOB","NCLOB","BLOB",
                     "ROWID","SQLXML",
                 ].includes(jdbcType)){
-                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                    itemValue = "'" + (itemValue + '').replaceAll("'", "''") + "'";
                 }else if([
                     "INT","TINYINT","SMALLINT","BIGINT","INTEGER",
                     "NUMERIC",
@@ -2541,7 +2979,7 @@
                     "DATE","TIME","TIMESTAMP",
                     "TIME_WITH_TIMEZONE","TIMESTAMP_WITH_TIMEZONE"
                 ].includes(jdbcType)){
-                    itemValue="'"+(itemValue+'').replace("'","''")+"'";
+                    itemValue = "'" + (itemValue + '').replaceAll("'", "''") + "'";
                 }
                 return itemValue
             },
@@ -2584,30 +3022,131 @@
                             label: `建表 DDL`,
                             icon: 'el-icon-view',
                             onClick: () => {
-                                let columnSql=''
-                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
-                                    let meta=this.metas.resultColumns[i];
-                                    if(i>0){
-                                        columnSql+=',\n'
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let columnSql = ''
+                                    for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                                        let meta = this.metas.resultColumns[i];
+                                        if (i > 0) {
+                                            columnSql += ',\n'
+                                        }
+                                        let columnType = meta.typeName || 'varchar';
+                                        if (meta.precision > 0 && meta.scale > 0) {
+                                            columnType += '(' + meta.precision + ',' + meta.scale + ')';
+                                        } else if (meta.precision > 0) {
+                                            columnType += '(' + meta.precision + ',' + meta.scale + ')';
+                                        }
+                                        columnSql += '\t' + meta.label + ' ' + columnType;
+                                        if (meta.autoIncrement === true) {
+                                            columnSql += ' auto_increment';
+                                        }
+                                        if (meta.nullable === false) {
+                                            columnSql += ' not null';
+                                        }
                                     }
-                                    let columnType=meta.typeName || 'varchar';
-                                    if(meta.precision>0 && meta.scale>0){
-                                        columnType+='('+meta.precision+','+meta.scale+')';
-                                    }else if(meta.precision>0){
-                                        columnType+='('+meta.precision+','+meta.scale+')';
+                                    let sql = 'create table ' + value + ' (\n' + columnSql + '\n);';
+                                    this.onViewText(sql, 'DDL语句', 'sql')
+                                })
+
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: 'Insert SQL',
+                            icon: 'el-icon-edit',
+                            onClick: () => {
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsInsertSql(row, value);
+                                        sql += '\n';
                                     }
-                                    columnSql+='\t'+meta.label+' '+columnType;
-                                    if(meta.autoIncrement===true){
-                                        columnSql+=' auto_increment';
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
+                            }
+                        },
+                        {
+                            label: 'Update SQL',
+                            icon: 'el-icon-edit',
+                            onClick: () => {
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsUpdateSql(row, value);
+                                        sql += '\n';
                                     }
-                                    if(meta.nullable===false){
-                                        columnSql+=' not null';
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
+                            }
+                        },
+                        {
+                            label: 'Delete SQL',
+                            icon: 'el-icon-delete',
+                            onClick: () => {
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = '';
+                                    for (let i = 0; i < this.metas.resultList.length; i++) {
+                                        let row = this.metas.resultList[i]
+                                        sql += this.convertRowAsDeleteSql(row, value);
+                                        sql += '\n';
+                                    }
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
+                            }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: '求值',
+                            icon: 'el-icon-view',
+                            onClick: () => {
+                                let list = this.metas.resultColumns.filter(e => e.label == column.property)
+                                let metaColumn = list[0] || {};
+
+                                let sum = 0;
+                                let count = 0;
+                                let min = null;
+                                let max = null;
+
+                                for (let i = 0; i < this.metas.resultList.length; i++) {
+                                    let row = this.metas.resultList[i];
+                                    let value = row[metaColumn.label];
+                                    try {
+                                        sum += 0 + value;
+                                    } catch (e) {
+
+                                    }
+                                    count++;
+                                    if (min == null) {
+                                        min = value;
+                                    } else if (value < min) {
+                                        min = value;
+                                    }
+                                    if (max == null) {
+                                        max = value;
+                                    } else if (value > max) {
+                                        max = value;
                                     }
                                 }
-                                let sql='create table t_xxx (\n'+columnSql+'\n);';
-                                this.onViewText(sql,'DDL语句','sql')
+                                let text = '计数：' + count + '\n'
+                                    + '平均值：' + (count == 0 ? sum : (sum / count)) + '\n'
+                                    + '最大值：' + max + '\n'
+                                    + '最小值：' + min + '\n'
+                                this.onViewText(text, '值预览', 'text')
                             }
-                        }
+                        },
                     ],
                     event, // 必须传入 event 以确定位置
                     zIndex: 3000,
@@ -2616,6 +3155,62 @@
 
                 event.returnValue=false;
                 return false
+            },
+            defaultTableName() {
+                return 't_xxx';
+            },
+            convertRowAsInsertSql(row, tableName) {
+                tableName = tableName || this.defaultTableName();
+                let nameSql = '';
+                let valueSql = '';
+                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                    let columnMeta = this.metas.resultColumns[i];
+                    if (i > 0) {
+                        nameSql += ',';
+                        valueSql += ',';
+                    }
+                    nameSql += columnMeta.label;
+                    valueSql += this.castValueAsSqlValue(row[columnMeta.label], columnMeta)
+                }
+                let sql = 'insert into ' + tableName + ' (' + nameSql + ') \nvalues (' + valueSql + ');';
+                return sql;
+            },
+            convertRowAsUpdateSql(row, tableName) {
+                tableName = tableName || this.defaultTableName();
+                let nameSql = '';
+                let valueSql = '';
+                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                    let columnMeta = this.metas.resultColumns[i];
+                    if (i > 0) {
+                        nameSql += ',\n';
+                        valueSql += '\n\tand ';
+                    } else {
+                        valueSql += '\t';
+                    }
+                    let pairSql = columnMeta.label + ' = ' + this.castValueAsSqlValue(row[columnMeta.label], columnMeta);
+
+                    nameSql += '\t' + pairSql;
+                    valueSql += pairSql;
+                }
+                let sql = 'update ' + tableName + '\nset\n' + nameSql + '\nwhere \n' + valueSql + '\n;';
+                return sql;
+            },
+            convertRowAsDeleteSql(row, tableName) {
+                tableName = tableName || this.defaultTableName();
+                let valueSql = '';
+                for (let i = 0; i < this.metas.resultColumns.length; i++) {
+                    let columnMeta = this.metas.resultColumns[i];
+                    if (i > 0) {
+                        valueSql += '\n\tand ';
+                    } else {
+                        valueSql += '\t';
+                    }
+                    let pairSql = columnMeta.label + ' = ' + this.castValueAsSqlValue(row[columnMeta.label], columnMeta);
+
+                    valueSql += pairSql;
+                }
+                let sql = 'delete from ' + tableName + '\n where \n' + valueSql + '\n;';
+                return sql;
             },
             handleResultTableContextMenu(row, column, event){
                 if(column.type=='index'){
@@ -2646,64 +3241,39 @@
                             label: 'Insert SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let nameSql='';
-                                let valueSql='';
-                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
-                                    let columnMeta=this.metas.resultColumns[i];
-                                    if(i>0){
-                                        nameSql+=',';
-                                        valueSql+=',';
-                                    }
-                                    nameSql+=columnMeta.label;
-                                    valueSql+=this.castValueAsSqlValue(row[columnMeta.label],columnMeta)
-                                }
-                                let sql='insert into t_xxx ('+nameSql+') \nvalues ('+valueSql+');';
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsInsertSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Update SQL',
                             icon: 'el-icon-edit',
                             onClick: () => {
-                                let nameSql='';
-                                let valueSql='';
-                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
-                                    let columnMeta=this.metas.resultColumns[i];
-                                    if(i>0){
-                                        nameSql+=',\n';
-                                        valueSql+='\n\tand ';
-                                    }else{
-                                        valueSql+='\t';
-                                    }
-                                    let pairSql=columnMeta.label+' = '+this.castValueAsSqlValue(row[columnMeta.label],columnMeta);
-
-                                    nameSql+='\t'+ pairSql;
-                                    valueSql+=pairSql;
-                                }
-                                let sql='update t_xxx\nset\n'+nameSql+'\nwhere \n'+valueSql+'\n;';
-
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsUpdateSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         },
                         {
                             label: 'Delete SQL',
                             icon: 'el-icon-delete',
                             onClick: () => {
-                                let valueSql='';
-                                for (let i = 0; i < this.metas.resultColumns.length; i++) {
-                                    let columnMeta=this.metas.resultColumns[i];
-                                    if(i>0){
-                                        valueSql+='\n\tand ';
-                                    }else{
-                                        valueSql+='\t';
-                                    }
-                                    let pairSql=columnMeta.label+' = '+this.castValueAsSqlValue(row[columnMeta.label],columnMeta);
-
-                                    valueSql+=pairSql;
-                                }
-                                let sql='delete from t_xxx\n where \n'+valueSql+'\n;';
-
-                                this.onViewText(sql,'SQL语句','sql')
+                                this.$prompt('请输入表名', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    let sql = this.convertRowAsDeleteSql(row, value)
+                                    this.onViewText(sql, 'SQL语句', 'sql')
+                                })
                             }
                         }
                     ],
@@ -2714,6 +3284,110 @@
 
                 event.returnValue=false;
                 return false
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function(e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function(e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            onImport(table){
+                if(table){
+                    this.dialog.importData.table=table;
+                }
+                this.dialog.importData.show=true;
+            },
+            onImportFileChange(file){
+                this.dialog.importData.uploadList = []
+                this.dialog.importData.uploadList.push(file)
+                this.$confirm('即将导入文件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.dialog.importData.show=false;
+                    this.doImportFile(file)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            doImportFile(file){
+                this.metas.resultLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5=>{
+                            let form=new FormData();
+                            form.append('file',file.raw,file.name);
+
+                            let req=this.fillDatasourceForm({
+                                table: this.dialog.importData.table,
+                                md5: md5
+                            },true)
+
+                            if(!req.table){
+                                throw new Error('请先填写目标表')
+                            }
+
+                            let reqData=this.transferSend(req);
+                            Object.keys(reqData).forEach(k=>{
+                                form.append(k,reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `/import`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data)
+                                    //console.log(resp)
+                                    this.metas.resultText = resp + '';
+                                    this.metas.resultType = 'text';
+                                    this.metas.resultLang='text';
+                                    this.form.useMultiDatasource=false;
+                                } else {
+                                    this.metas.resultText = res.data.msg;
+                                    this.metas.resultType = 'text';
+                                    this.metas.resultLang='text';
+                                    this.messageError(res.data.msg,300)
+                                }
+                                setTimeout(()=>{
+                                    this.initResultEditor();
+                                },200)
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            }).finally(() => {
+                                this.metas.resultLoading = false;
+                            })
+                        }).catch(err => {
+                            this.messageError(err.errorMessage || err.message || '操作失败',300)
+                            this.metas.resultLoading = false;
+                        })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败',300)
+                    this.metas.resultLoading = false;
+                }
             }
         }
     })
@@ -2746,6 +3420,23 @@
     .checked-item {
         background: darkorange;
     }
+
+    .expand-main-editor {
+
+    }
+
+    .expand-main-editor__expand .CodeMirror {
+        height: calc(100vh - 130px);
+    }
+
+    .expand-main-editor__badge {
+        float: right;
+        position: relative;
+        bottom: 0px;
+        right: -15px;
+        z-index: 2000;
+    }
+
     .el-table__cell .table-cell-hidden{
         display: none;
     }

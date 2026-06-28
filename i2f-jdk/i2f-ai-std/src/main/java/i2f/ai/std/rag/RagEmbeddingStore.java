@@ -1,5 +1,7 @@
 package i2f.ai.std.rag;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -10,7 +12,23 @@ import java.util.List;
 public interface RagEmbeddingStore {
     String store(RagEmbedding embedding);
 
+    default List<RagEmbedding> storeAll(Collection<RagEmbedding> list) {
+        List<RagEmbedding> ret = new ArrayList<>();
+        for (RagEmbedding item : list) {
+            String id = store(item);
+            item.setId(id);
+            ret.add(item);
+        }
+        return ret;
+    }
+
     void remove(String id);
+
+    default void removeAll(Collection<String> ids) {
+        for (String id : ids) {
+            remove(id);
+        }
+    }
 
     List<RagEmbedding> similar(RagVector vector, int topN);
 

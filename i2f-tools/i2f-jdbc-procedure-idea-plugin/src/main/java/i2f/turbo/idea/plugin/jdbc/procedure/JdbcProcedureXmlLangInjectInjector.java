@@ -5,6 +5,7 @@ import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
@@ -12,6 +13,13 @@ import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlText;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.FeatureConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
+import i2f.match.regex.RegexUtil;
+import i2f.turbo.idea.plugin.funic.FunicConsts;
+import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
@@ -20,6 +28,7 @@ import java.net.URL;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author Ice2Faith
@@ -46,15 +55,15 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         URL url = null;
         if (url == null) {
             try {
-                url = JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/JsInject.js");
-            } catch (Exception e) {
+                url = JdbcProcedureXmlLangInjectInjector.class.getResource("/assets/xproc4j/JsInject.js");
+            } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }
         }
         if (url == null) {
             try {
-                url = Thread.currentThread().getContextClassLoader().getResource("/assets/JsInject.js");
-            } catch (Exception e) {
+                url = Thread.currentThread().getContextClassLoader().getResource("/assets/xproc4j/JsInject.js");
+            } catch (Throwable e) {
                 log.warn(e.getMessage(), e);
             }
         }
@@ -65,7 +74,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 builder.append(line).append("\n");
             }
             JS_INJECT_PREFIX = builder.toString();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.warn(e.getMessage(), e);
         }
 
@@ -119,96 +128,121 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public static final String[] JAVA_LANG_TAGS = {
-            "lang-eval",
-            "lang-eval-java",
-            "lang-java-import",
-            "lang-java-member",
-            "lang-java-body"
+            TagConsts.LANG_EVAL_JAVA,
+            TagConsts.LANG_JAVA_IMPORT,
+            TagConsts.LANG_JAVA_MEMBE,
+            TagConsts.LANG_JAVA_BODY
     };
 
     public static final String[] SQL_LANG_TAGS = {
-            "sql-query-row",
-            "sql-query-list",
-            "sql-query-object",
-            "sql-update",
-            "sql-dialect",
-            "sql-cursor",
-            "sql-etl"
+            TagConsts.SQL_QUERY_ROW,
+            TagConsts.SQL_QUERY_LIST,
+            TagConsts.SQL_QUERY_OBJECT,
+            TagConsts.SQL_UPDATE,
+            TagConsts.SQL_DIALECT,
+            TagConsts.SQL_CURSOR,
+            TagConsts.SQL_ETL
     };
 
-    public static final String EVAL_JAVA_IMPORTS = "\n" +
+    public static final String EVAL_JAVA_IMPORTS_TEMPLATE = "\n" +
 
-            "import i2f.jdbc.procedure.annotations.*;\n" +
+            "\n" +
+            "import i2f.bindsql.BindSql;\n" +
+            "import i2f.bindsql.count.CountWrappers;\n" +
+            "import i2f.bindsql.count.ICountWrapper;\n" +
+            "import i2f.bindsql.page.IPageWrapper;\n" +
+            "import i2f.bindsql.page.PageWrappers;\n" +
+            "import i2f.clock.SystemClock;\n" +
+            "import i2f.context.impl.ListableNamingContext;\n" +
+            "import i2f.context.std.INamingContext;\n" +
+            "import i2f.convert.obj.ObjectConvertor;\n" +
+            "import i2f.database.type.DatabaseType;\n" +
+            "import i2f.environment.impl.ListableDelegateEnvironment;\n" +
+            "import i2f.environment.std.IEnvironment;\n" +
+            "import i2f.invokable.method.IMethod;\n" +
+            "import i2f.jdbc.JdbcResolver;\n" +
+            "import i2f.jdbc.data.QueryColumn;\n" +
+            "import i2f.jdbc.data.QueryResult;\n" +
+            "import i2f.jdbc.procedure.annotations.JdbcProcedureComponent;\n" +
+            "import i2f.jdbc.procedure.annotations.JdbcProcedureFunction;\n" +
             "import i2f.jdbc.procedure.consts.*;\n" +
-            "import i2f.jdbc.procedure.context.impl.*;\n" +
-            "import i2f.jdbc.procedure.context.*;\n" +
-            "import i2f.jdbc.procedure.executor.impl.*;\n" +
+            "import i2f.jdbc.procedure.context.ContextHolder;\n" +
+            "import i2f.jdbc.procedure.context.JdbcProcedureContext;\n" +
+            "import i2f.jdbc.procedure.context.ProcedureMeta;\n" +
+            "import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;\n" +
+            "import i2f.jdbc.procedure.datasource.DataSourceProvider;\n" +
+            "import i2f.jdbc.procedure.datasource.impl.NamingContextDataSourceProvider;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEvent;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEventHandler;\n" +
+            "import i2f.jdbc.procedure.event.XProc4jEventListener;\n" +
+            "import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;\n" +
             "import i2f.jdbc.procedure.executor.*;\n" +
-            "import i2f.jdbc.procedure.node.base.*;\n" +
-            "import i2f.jdbc.procedure.node.basic.*;\n" +
+            "import i2f.jdbc.procedure.executor.event.*;\n" +
+            "import i2f.jdbc.procedure.log.JdbcProcedureLogger;\n" +
+            "import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;\n" +
+            "import i2f.jdbc.procedure.node.ExecutorNode;\n" +
+            "import i2f.jdbc.procedure.node.event.XmlExecUseTimeEvent;\n" +
             "import i2f.jdbc.procedure.node.impl.*;\n" +
-            "import i2f.jdbc.procedure.node.*;\n" +
-            "import i2f.jdbc.procedure.parser.data.*;\n" +
-            "import i2f.jdbc.procedure.parser.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.class4j.impl.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.class4j.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.xml.impl.*;\n" +
-            "import i2f.jdbc.procedure.provider.types.xml.*;\n" +
-            "import i2f.jdbc.procedure.provider.*;\n" +
-            "import i2f.jdbc.procedure.registry.impl.*;\n" +
-            "import i2f.jdbc.procedure.registry.*;\n" +
-            "import i2f.jdbc.procedure.reportor.*;\n" +
-            "import i2f.jdbc.procedure.signal.impl.*;\n" +
-            "import i2f.jdbc.procedure.signal.*;\n" +
-            "import i2f.jdbc.*;\n" +
-            "import i2f.jdbc.data.*;\n" +
-            "import i2f.database.type.*;\n" +
-            "import i2f.bindsql.*;\n" +
-            "import i2f.bindsql.page.*;\n" +
-            "import i2f.bindsql.data.*;\n" +
-            "import i2f.bindsql.count.*;\n" +
-            "import i2f.compiler.*;\n" +
-            "import i2f.script.*;\n" +
-            "import i2f.reflect.*;\n" +
-            "import i2f.reflect.vistor.*;\n" +
-            "import i2f.convert.obj.*;\n" +
-            "import i2f.container.builder.map.*;\n" +
-            "import i2f.check.*;\n" +
-            "import i2f.match.regex.*;\n" +
-            "import i2f.match.regex.data.*;\n" +
-            "import i2f.page.*;\n" +
-            "import i2f.reference.*;\n" +
-            "import i2f.text.*;\n" +
-            "import i2f.typeof.*;\n" +
-            "import i2f.typeof.token.*;\n" +
-            "import i2f.typeof.token.data.*;\n" +
-            "import i2f.uid.*;\n" +
-            "import i2f.clock.std.*;\n" +
-            "import i2f.clock.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.exception.*;\n" +
-            "import i2f.extension.antlr4.script.tiny.impl.exception.impl.*;\n" +
-            "import i2f.extension.groovy.*;\n" +
-            "import i2f.extension.ognl.*;\n" +
-            "import i2f.extension.velocity.*;\n" +
-
+            "import i2f.jdbc.procedure.parser.JdbcProcedureParser;\n" +
+            "import i2f.jdbc.procedure.parser.data.XmlNode;\n" +
+            "import i2f.jdbc.procedure.reportor.GrammarReporter;\n" +
+            "import i2f.jdbc.procedure.script.EvalScriptProvider;\n" +
+            "import i2f.jdbc.procedure.signal.SignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.ControlSignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.NotFoundSignalException;\n" +
+            "import i2f.jdbc.procedure.signal.impl.ThrowSignalException;\n" +
+            "import i2f.jdbc.procedure.util.JdbcProcedureUtil;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;\n" +
+            "import i2f.jdbc.proxy.xml.mybatis.parser.MybatisMapperParser;\n" +
+            "import i2f.lock.ILockProvider;\n" +
+            "import i2f.lru.CachedSupplier;\n" +
+            "import i2f.lru.LruMap;\n" +
+            "import i2f.lru.WeakStackRetrieveCacheProvider;\n" +
+            "import i2f.page.ApiOffsetSize;\n" +
+            "import i2f.reference.Reference;\n" +
+            "import i2f.reflect.ReflectResolver;\n" +
+            "import i2f.reflect.vistor.Visitor;\n" +
+            "import i2f.text.StringUtils;\n" +
+            "import i2f.typeof.TypeOf;\n" +
+            "import i2f.uid.SnowflakeLongUid;\n" +
+            "\n" +
+            "import javax.sql.DataSource;\n" +
+            "import java.io.ByteArrayOutputStream;\n" +
+            "import java.io.PrintStream;\n" +
+            "import java.sql.Connection;\n" +
+            "import java.sql.SQLException;\n" +
+            "import java.text.SimpleDateFormat;\n" +
+            "import java.time.Duration;\n" +
+            "import java.time.LocalDate;\n" +
+            "import java.time.LocalDateTime;\n" +
+            "import java.time.LocalTime;\n" +
+            "import java.time.format.DateTimeFormatter;\n" +
             "import java.util.*;\n" +
-            "import java.math.*;\n" +
-            "import java.time.*;\n" +
-            "import java.text.*;\n" +
-            "import java.util.regex.*;\n" +
-            "import java.io.*;\n" +
-            "import java.lang.reflect.*;\n" +
-            "import javax.sql.*;\n" +
-            "import java.util.concurrent.*;\n" +
-            "import java.nio.*;\n" +
-            "import java.nio.charset.*;\n" +
-            "import java.util.concurrent.atomic.*;\n" +
-            "import java.util.concurrent.locks.*;\n" +
-            "import java.time.chrono.*;\n" +
-            "import java.time.format.*;\n" +
-            "import java.time.temporal.*;\n" +
-            "import java.time.zone.*;\n";
+            "import java.util.concurrent.ConcurrentHashMap;\n" +
+            "import java.util.concurrent.CopyOnWriteArrayList;\n" +
+            "import java.util.concurrent.CopyOnWriteArraySet;\n" +
+            "import java.util.concurrent.TimeUnit;\n" +
+            "import java.util.concurrent.atomic.AtomicBoolean;\n" +
+            "import java.util.concurrent.atomic.AtomicInteger;\n" +
+            "import java.util.concurrent.atomic.AtomicLong;\n" +
+            "import java.util.concurrent.atomic.AtomicReference;\n" +
+            "import java.util.concurrent.locks.ReentrantLock;\n" +
+            "import java.util.function.Consumer;\n" +
+            "import java.util.function.Function;\n" +
+            "import java.util.function.Supplier;\n";
+
+
+    public static String getEvalJavaImports(Project project) {
+        String pkg = CompletionHelper.getBasePackage(project);
+        if (pkg == null || pkg.isEmpty()) {
+            return EVAL_JAVA_IMPORTS_TEMPLATE;
+        }
+        if (!pkg.endsWith(".")) {
+            pkg = pkg + ".";
+        }
+        return EVAL_JAVA_IMPORTS_TEMPLATE.replace("i2f.", pkg);
+    }
 
 
     @Override
@@ -594,10 +628,23 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public Language getPossibleTinyScriptLanguage() {
-        Language lang = Language.findLanguageByID("TinyScript");
+        Language lang = Language.findLanguageByID(TinyScriptConsts.LANGUAGE_ID);
         if (lang != null) {
             return lang;
         }
+        return getPossibleFallbackScriptLanguage();
+    }
+
+    public Language getPossibleFunicLanguage() {
+        Language lang = Language.findLanguageByID(FunicConsts.LANGUAGE_ID);
+        if (lang != null) {
+            return lang;
+        }
+        return getPossibleFallbackScriptLanguage();
+    }
+
+    private static Language getPossibleFallbackScriptLanguage() {
+        Language lang;
         lang = Language.findLanguageByID("Scala");
         if (lang != null) {
             return lang;
@@ -635,13 +682,13 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         String name = tag.getName();
         if (Arrays.asList(
-                "lang-body",
-                "lang-catch",
-                "lang-finally",
-                "script-segment",
-                "lang-synchronized",
-                "lang-async",
-                "sql-scope"
+                TagConsts.LANG_BODY,
+                TagConsts.LANG_CATCH,
+                TagConsts.LANG_FINALLY,
+                TagConsts.SCRIPT_SEGMENT,
+                TagConsts.LANG_SYNCHRONIZED,
+                TagConsts.LANG_ASYNC,
+                TagConsts.SQL_SCOPE
         ).contains(name)) {
             return null;
         }
@@ -683,15 +730,21 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if (Arrays.asList(SQL_LANG_TAGS).contains(name)) {
             return Language.findLanguageByID("SQL");
         }
-        if (Arrays.asList("lang-eval-ts",
-                "lang-eval-tinyscript").contains(name)) {
+        if (Arrays.asList(TagConsts.LANG_EVAL_TS,
+                TagConsts.LANG_EVAL_TINYSCRIPT).contains(name)) {
             Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 return lang;
             }
         }
+        if (Arrays.asList(TagConsts.LANG_EVAL_FUNIC).contains(name)) {
+            Language lang = getPossibleFunicLanguage();
+            if (lang != null) {
+                return lang;
+            }
+        }
 
-        if (Arrays.asList("lang-eval").contains(name)) {
+        if (Arrays.asList(TagConsts.LANG_EVAL).contains(name)) {
             Language lang = getPossibleEvalLanguage();
             if (lang != null) {
                 return lang;
@@ -714,26 +767,31 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
                 String[] arr = attrName.split("[\\.;:]");
                 Set<String> set = new LinkedHashSet<>(Arrays.asList(arr));
-                if (set.contains("body-xml")
-                        || set.contains("body-text")) {
-                    if (set.contains("eval-java")) {
+                if (set.contains(FeatureConsts.BODY_XML)
+                        || set.contains(FeatureConsts.BODY_TEXT)) {
+                    if (set.contains(FeatureConsts.EVAL_JAVA)) {
                         return Language.findLanguageByID("JAVA");
-                    } else if (set.contains("eval-js")) {
+                    } else if (set.contains(FeatureConsts.EVAL_JS)) {
                         return Language.findLanguageByID("JavaScript");
-                    } else if (set.contains("eval-js")) {
+                    } else if (set.contains(FeatureConsts.EVAL_GROOVY)) {
                         return Language.findLanguageByID("Groovy");
-                    } else if (set.contains("eval-ts")
-                            || set.contains("eval-tinyscript")) {
+                    } else if (set.contains(FeatureConsts.EVAL_TS)
+                            || set.contains(FeatureConsts.EVAL_TINYSCRIPT)) {
                         Language lang = getPossibleTinyScriptLanguage();
                         if (lang != null) {
                             return lang;
                         }
-                    } else if (set.contains("render")) {
+                    } else if (set.contains(FeatureConsts.EVAL_FUNIC)) {
+                        Language lang = getPossibleFunicLanguage();
+                        if (lang != null) {
+                            return lang;
+                        }
+                    } else if (set.contains(FeatureConsts.RENDER)) {
                         Language ret = getPossibleRenderLanguage();
                         if (ret != null) {
                             return ret;
                         }
-                    } else if (set.contains("eval")) {
+                    } else if (set.contains(FeatureConsts.EVAL)) {
                         Language lang = getPossibleEvalLanguage();
                         if (lang != null) {
                             return lang;
@@ -743,6 +801,74 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
         return detectLanguage(tag.getParentTag());
+    }
+
+    public void searchEvalJavaParts(PsiElement element,
+                                    AtomicReference<String> importsRef,
+                                    AtomicReference<String> membersRef,
+                                    AtomicReference<String> bodyRef) {
+        if (element == null) {
+            return;
+        }
+        if (element instanceof XmlTag) {
+            XmlTag xmlTag = (XmlTag) element;
+            String name = xmlTag.getName();
+            if (!Arrays.asList(
+                    TagConsts.LANG_EVAL_JAVA,
+                    TagConsts.LANG_JAVA_IMPORT,
+                    TagConsts.LANG_JAVA_MEMBE,
+                    TagConsts.LANG_JAVA_BODY,
+                    TagConsts.LANG_EVAL_GROOVY
+            ).contains(name)) {
+                if (bodyRef != null) {
+                    String text = xmlTag.getValue().getText();
+                    if (text != null && !text.isEmpty()) {
+                        bodyRef.set(text);
+                    }
+                }
+                return;
+            }
+            if (TagConsts.LANG_EVAL_JAVA.equals(name)
+                    || TagConsts.LANG_EVAL_GROOVY.equals(name)) {
+                XmlTag[] subTags = xmlTag.getSubTags();
+                if (subTags != null && subTags.length > 0) {
+                    for (XmlTag subTag : subTags) {
+                        String subName = subTag.getName();
+                        if (TagConsts.LANG_JAVA_IMPORT.equals(subName)) {
+                            if (importsRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    importsRef.set(text);
+                                }
+                            }
+                        } else if (TagConsts.LANG_JAVA_MEMBE.equals(subName)) {
+                            if (membersRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    membersRef.set(text);
+                                }
+                            }
+                        } else if (TagConsts.LANG_JAVA_BODY.equals(subName)) {
+                            if (bodyRef != null) {
+                                String text = subTag.getValue().getText();
+                                if (text != null && !text.isEmpty()) {
+                                    bodyRef.set(text);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    if (bodyRef != null) {
+                        String text = xmlTag.getValue().getText();
+                        if (text != null && !text.isEmpty()) {
+                            bodyRef.set(text);
+                        }
+                    }
+                }
+                return;
+            }
+        }
+        searchEvalJavaParts(element.getParent(), importsRef, membersRef, bodyRef);
     }
 
     public void injectXmlText(MultiHostRegistrar registrar, XmlText xmlText) {
@@ -762,26 +888,51 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
 //        log.info("xml tag :" + tagName + ", with lang:" + targetLang.getDisplayName());
 
         if (targetLang instanceof JavaLanguage) {
-            if ("lang-java-import".equals(tagName)) {
+            AtomicReference<String> importsRef = new AtomicReference<>();
+            AtomicReference<String> memberRef = new AtomicReference<>();
+            AtomicReference<String> bodyRef = new AtomicReference<>();
+            searchEvalJavaParts(xmlText, importsRef, memberRef, bodyRef);
+
+            String importSegment = getEvalJavaImports(xmlText.getProject()) + "\n"
+                    + Optional.ofNullable(importsRef.get()).orElse("");
+            String memberSegment = Optional.ofNullable(memberRef.get()).orElse("");
+            String bodySegment = Optional.ofNullable(bodyRef.get()).orElse("");
+
+            Set<String> additionalImports = new LinkedHashSet<>();
+            memberSegment = RegexUtil.regexFindAndReplace(memberSegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            if (!additionalImports.isEmpty()) {
+                importSegment += "\n" + String.join("\n", additionalImports);
+            }
+
+            if (TagConsts.LANG_JAVA_IMPORT.equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace("",
+                        .addPlace(importSegment + "\n",
                                 "class MyDsl {}",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            } else if ("lang-java-member".equals(tagName)) {
+            } else if (TagConsts.LANG_JAVA_MEMBE.equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "public class MyJavaProcedure { ",
                                 " }",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
                         .doneInjecting();
-            } else if ("lang-java-body".equals(tagName)
-                    || "lang-eval-java".equals(tagName)) {
+            } else if (TagConsts.LANG_JAVA_BODY.equals(tagName)
+                    || TagConsts.LANG_EVAL_JAVA.equals(tagName)) {
+
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "public class MyJavaProcedure { \n"
+                                        + Optional.ofNullable(memberRef.get()).orElse("") + "\n"
                                         + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
                                 (PsiLanguageInjectionHost) xmlText,
@@ -790,7 +941,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             } else {
 
                 registrar.startInjecting(targetLang)
-                        .addPlace("public class MyJavaEval { public Object eval() throws Throwable{ ",
+                        .addPlace(importSegment + "\n" +
+                                        "public class MyJavaEval { public Object eval() throws Throwable{ ",
                                 "} }",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
@@ -805,10 +957,32 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             new TextRange(0, xmlText.getTextRange().getLength()))
                     .doneInjecting();
         } else if (Arrays.asList("groovy").contains(targetLang.getID().toLowerCase())) {
+            AtomicReference<String> importsRef = new AtomicReference<>();
+            AtomicReference<String> memberRef = new AtomicReference<>();
+            AtomicReference<String> bodyRef = new AtomicReference<>();
+            searchEvalJavaParts(xmlText, importsRef, memberRef, bodyRef);
 
-            if ("lang-eval-groovy".equals(tagName)) {
+            String importSegment = getEvalJavaImports(xmlText.getProject()) + "\n"
+                    + Optional.ofNullable(importsRef.get()).orElse("");
+            String memberSegment = Optional.ofNullable(memberRef.get()).orElse("");
+            String bodySegment = Optional.ofNullable(bodyRef.get()).orElse("");
+
+            Set<String> additionalImports = new LinkedHashSet<>();
+            memberSegment = RegexUtil.regexFindAndReplace(memberSegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
+                additionalImports.add(s);
+                return "/*" + s + "*/";
+            });
+            if (!additionalImports.isEmpty()) {
+                importSegment += "\n" + String.join("\n", additionalImports);
+            }
+
+            if (TagConsts.LANG_EVAL_GROOVY.equals(tagName)) {
                 registrar.startInjecting(targetLang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(importSegment + "\n"
                                         + "class MyGroovyProcedure { \n"
                                         + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
@@ -817,7 +991,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
             } else {
                 registrar.startInjecting(targetLang)
-                        .addPlace("",
+                        .addPlace(importSegment + "\n",
                                 "",
                                 (PsiLanguageInjectionHost) xmlText,
                                 new TextRange(0, xmlText.getTextRange().getLength()))
@@ -846,8 +1020,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if (attrName == null) {
             attrName = "";
         }
-        if ("lang-set".equals(tagName)) {
-            if ("radix".equals(attrName)) {
+        if (TagConsts.LANG_SET.equals(tagName)) {
+            if (AttrConsts.RADIX.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -859,7 +1033,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-            if ("value".equals(attrName) || attrName.startsWith("value.")) {
+            if (AttrConsts.VALUE.equals(attrName) || attrName.startsWith(AttrConsts.VALUE + ".")) {
                 Language lang = detectXmlTagLangAttribute(tag);
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -871,10 +1045,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-fori".equals(tagName)) {
-            if ("begin".equals(attrName)
-                    || "end".equals(attrName)
-                    || "incr".equals(attrName)) {
+        } else if (TagConsts.LANG_FORI.equals(tagName)) {
+            if (AttrConsts.BEGIN.equals(attrName)
+                    || AttrConsts.END.equals(attrName)
+                    || AttrConsts.INCR.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -886,12 +1060,12 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-invoke".equals(tagName)) {
-            if ("method".equals(attrName)) {
+        } else if (TagConsts.LANG_INVOKE.equals(tagName)) {
+            if (AttrConsts.METHOD.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
-                            .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                            .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                             + "public class MyJavaProcedure { \n"
                                             + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                     "\n} \n}",
@@ -901,9 +1075,9 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-catch".equals(tagName)
-                || "lang-throw".equals(tagName)) {
-            if ("type".equals(attrName)) {
+        } else if (TagConsts.LANG_CATCH.equals(tagName)
+                || TagConsts.LANG_THROW.equals(tagName)) {
+            if (AttrConsts.TYPE.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -916,7 +1090,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 }
             }
         } else if (tagName.startsWith("sql-")) {
-            if ("result-type".equals(attrName)) {
+            if (AttrConsts.RESULT_TYPE.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -928,10 +1102,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("lang-async".equals(tagName)
-                || "lang-latch-await".equals(tagName)
-                || "lang-sleep".equalsIgnoreCase(tagName)) {
-            if ("time-unit".equals(attrName)) {
+        } else if (TagConsts.LANG_ASYNC.equals(tagName)
+                || TagConsts.LANG_LATCH_AWAIT.equals(tagName)
+                || TagConsts.LANG_SLEEP.equals(tagName)) {
+            if (AttrConsts.TIME_UNIT.equals(attrName)) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
                     registrar.startInjecting(lang)
@@ -942,14 +1116,14 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                             .doneInjecting();
                     return;
                 }
-            } else if ("delay".equalsIgnoreCase(attrName)
-                    || "timeout".equalsIgnoreCase(attrName)
-                    || "await".equalsIgnoreCase(attrName)
-                    || "read-only".equalsIgnoreCase(attrName)
-                    || "params_share".equalsIgnoreCase(attrName)
-                    || "limited".equalsIgnoreCase(attrName)
-                    || "accept-batch".equalsIgnoreCase(attrName)
-                    || "before-truncate".equalsIgnoreCase(attrName)
+            } else if (AttrConsts.DELAY.equalsIgnoreCase(attrName)
+                    || AttrConsts.TIMEOUT.equalsIgnoreCase(attrName)
+                    || AttrConsts.AWAIT.equalsIgnoreCase(attrName)
+                    || AttrConsts.READ_ONLY.equalsIgnoreCase(attrName)
+                    || AttrConsts.PARAMS_SHARE.equalsIgnoreCase(attrName)
+                    || AttrConsts.LIMITED.equalsIgnoreCase(attrName)
+                    || AttrConsts.ACCEPT_BATCH.equalsIgnoreCase(attrName)
+                    || AttrConsts.BEFORE_TRUNCATE.equalsIgnoreCase(attrName)
             ) {
                 Language lang = findPossibleLanguage("java");
                 if (lang != null) {
@@ -962,7 +1136,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                     return;
                 }
             }
-        } else if ("propagation".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.PROPAGATION.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -974,7 +1148,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        } else if ("isolation".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.ISOLATION.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -987,11 +1161,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                 return;
             }
         } else if (
-                "class".equalsIgnoreCase(attrName)
-                        || "type".equalsIgnoreCase(attrName)
-                        || "result-type".equalsIgnoreCase(attrName)
-                        || "rollback-for".equalsIgnoreCase(attrName)
-                        || "no-rollback-for".equalsIgnoreCase(attrName)
+                AttrConsts.CLASS.equalsIgnoreCase(attrName)
+                        || AttrConsts.TYPE.equalsIgnoreCase(attrName)
+                        || AttrConsts.RESULT_TYPE.equalsIgnoreCase(attrName)
+                        || AttrConsts.ROLLBACK_FOR.equalsIgnoreCase(attrName)
+                        || AttrConsts.NO_ROLLBACK_FOR.equalsIgnoreCase(attrName)
                         || "resultType".equalsIgnoreCase(attrName)
                         || "parameterType".equalsIgnoreCase(attrName)
                         || "className".equalsIgnoreCase(attrName)
@@ -1011,7 +1185,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
                         .doneInjecting();
                 return;
             }
-        } else if ("package".equalsIgnoreCase(attrName)) {
+        } else if (AttrConsts.PACKAGE.equalsIgnoreCase(attrName)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1066,10 +1240,10 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.equals("test")
-                || attrName.equals("collection")
-                || attrName.contains(".eval.")
-                || attrName.endsWith(".eval")) {
+        if (attrName.equals(AttrConsts.TEST)
+                || attrName.equals(AttrConsts.COLLECTION)
+                || attrName.contains("." + FeatureConsts.EVAL + ".")
+                || attrName.endsWith("." + FeatureConsts.EVAL)) {
             Language lang = getPossibleEvalLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1082,11 +1256,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-java")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_JAVA)) {
             Language lang = findPossibleLanguage("java");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                         + "public class MyJavaProcedure { \n"
                                         + "public Object exec(JdbcProcedureExecutor executor,Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",
@@ -1097,7 +1271,7 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-js")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_JS)) {
             Language lang = findPossibleLanguage("javascript");
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1111,8 +1285,8 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-ts")
-                || attrName.contains(".eval-tinyscript")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_TS)
+                || attrName.contains("." + FeatureConsts.EVAL_TINYSCRIPT)) {
             Language lang = getPossibleTinyScriptLanguage();
             if (lang != null) {
                 registrar.startInjecting(lang)
@@ -1125,11 +1299,24 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
             }
         }
 
-        if (attrName.contains(".eval-groovy")) {
+        if (attrName.contains("." + FeatureConsts.EVAL_FUNIC)) {
+            Language lang = getPossibleFunicLanguage();
+            if (lang != null) {
+                registrar.startInjecting(lang)
+                        .addPlace("",
+                                "",
+                                (PsiLanguageInjectionHost) attrValueElement,
+                                new TextRange(0, attrValueElement.getTextRange().getLength()))
+                        .doneInjecting();
+                return;
+            }
+        }
+
+        if (attrName.contains("." + FeatureConsts.EVAL_GROOVY)) {
             Language lang = findPossibleLanguage("groovy");
             if (lang != null) {
                 registrar.startInjecting(lang)
-                        .addPlace(EVAL_JAVA_IMPORTS + "\n"
+                        .addPlace(getEvalJavaImports(attrValueElement.getProject()) + "\n"
                                         + "class MyGroovyProcedure { \n"
                                         + "def exec(JdbcProcedureExecutor executor, Map<String,Object> params) throws Throwable { \n",
                                 "\n} \n}",

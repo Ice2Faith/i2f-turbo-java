@@ -109,22 +109,31 @@ public class SkillsHelper {
         StringBuilder builder = new StringBuilder();
 
         builder.append(
-                "## 技能(skill)设定\n" +
-                        "- 你拥有以下技能(skill)；\n" +
-                        "- 如果有需要使用这些技能的时候，使用下述的技能名称获取技能的详细教程(使用工具[getSkillDocument])；\n" +
-                        "- 每一个技能都没有其他资源文件和脚本文件可供使用，也就是这两个工具（[getSkillAsset]和[runSkillCommand]）不可使用；\n" +
-                        "- 除非这一个技能的详细教程中明确提及了，才会有相应的资源文件和脚本文件，才能够使用这两个工具；\n" +
-                        "- 如果这个技能的教程中有明确提及到了其他资源文件，才能获取提及到的资源文件阅读(使用工具[getSkillAsset])，***没有明确提及的资源不能使用工具获取***；\n" +
-                        "- 如果这个技能的教程中有明确提及需要运行的命令行脚本，才能在命令行运行提及到的脚本（使用工具[runSkillCommand]），***没有明确提及的脚本不能使用工具运行***；\n" +
-                        "- ***特别注意***，技能(skill)和工具(tool)不一样；\n" +
-                        "-***技能只能使用上面的三个工具进行调用***，***不允许获取教程中未明确提及的资源***，***不允许执行教程中未明确提及的脚本***；\n" +
+                "# 技能系统\n" +
+                        "\n" +
+                        "- 技能系统，你具有一系列的技能，根据需要使用合适的技能帮助完成目标\n" +
+                        "- 技能包含基础的技能文档，以及可能包含的技能资源、技能脚本\n" +
+                        "- 当你需要使用某个技能时，需要使用 `get_skill_document` 工具先获取技能的文档\n" +
+                        "- 技能文档会指导你如何使用这个技能完成目标\n" +
+                        "- 技能文档中，可能还会提及到技能附加的资源或者脚本\n" +
+                        "- 如果需要阅读这些附加的资源或者脚本，需要使用 `get_skill_resource` 工具获取内容进行阅读\n" +
+                        "- 如果技能中需要执行技能中的脚本，需要使用 `run_skill_script` 工具进行运行脚本\n" +
+                        "\n" +
+                        "## 使用规范\n" +
+                        "\n" +
+                        "- 技能(skill)是一个独立的体系，只能使用 `get_skill_document`/ `get_skill_resource`/  `run_skill_script` 三个工具进行交互\n" +
+                        "- 技能是基于工具(tool)实现的，不要把技能与工具进行混淆\n" +
+                        "- 其他工具不能够与技能进行交互，因为设计上不支持\n" +
+                        "- 每个技能是互相隔离的，因此三个工具调用时，都需要带上技能名称\n" +
+                        "- 每个技能都是特殊设计的，因此是严谨的，只有技能文档中提及的资源或者脚本才是真实存在的，没有提及是不存在的\n" +
+                        "- 因此，不要猜测、假设任何技能中存在某些资源或者脚本，应该严格遵守文档内容" +
                         ""
         ).append("\n");
 
-        builder.append("### 技能(skill)列表").append("\n");
+        builder.append("## 技能(skill)定义列表").append("\n");
         for (Map.Entry<String, SkillDefinition> entry : skillMap.entrySet()) {
             SkillDefinition definition = entry.getValue();
-            builder.append("#### ").append("技能名称：").append(definition.getName()).append("\n")
+            builder.append("### ").append("技能名称：").append(definition.getName()).append("\n")
                     .append("- ").append("技能描述：").append(definition.getDescription()).append("\n")
                     .append("\n");
         }

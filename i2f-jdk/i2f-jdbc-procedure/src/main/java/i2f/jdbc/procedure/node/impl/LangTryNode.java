@@ -9,6 +9,7 @@ import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.procedure.node.base.MatchException;
 import i2f.jdbc.procedure.node.basic.AbstractExecutorNode;
 import i2f.jdbc.procedure.parser.data.XmlNode;
+import i2f.jdbc.procedure.reporter.IGrammarReporter;
 import i2f.jdbc.procedure.signal.impl.ControlSignalException;
 import i2f.jdbc.procedure.signal.impl.ThrowSignalException;
 
@@ -32,7 +33,7 @@ public class LangTryNode extends AbstractExecutorNode {
 
 
     @Override
-    public void reportGrammar(XmlNode node, Consumer<String> warnPoster) {
+    public void reportGrammar(IGrammarReporter reporter, XmlNode node, Consumer<String> warnPoster) {
         List<XmlNode> nodes = node.getChildren();
         if (nodes == null) {
             warnPoster.accept(TAG_NAME + " missing child element");

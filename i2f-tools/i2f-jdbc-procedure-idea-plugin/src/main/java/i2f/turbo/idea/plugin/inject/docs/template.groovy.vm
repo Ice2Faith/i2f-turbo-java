@@ -8,7 +8,7 @@ class Worker {
         ${item.fullType} p${item.index};
     #end
 
-    def run(){
+    def run() {
         // 这里往上的部分作为 prefixTemplate
         // ----------------------------------------------------
 

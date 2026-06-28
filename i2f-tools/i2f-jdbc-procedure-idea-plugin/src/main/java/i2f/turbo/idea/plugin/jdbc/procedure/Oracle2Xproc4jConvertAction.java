@@ -1,15 +1,30 @@
 package i2f.turbo.idea.plugin.jdbc.procedure;
 
+import com.intellij.lang.Language;
 import com.intellij.openapi.actionSystem.ActionUpdateThread;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.EditorFactory;
+import com.intellij.openapi.editor.EditorSettings;
+import com.intellij.openapi.editor.ex.EditorEx;
+import com.intellij.openapi.editor.highlighter.EditorHighlighterFactory;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
+import com.intellij.openapi.fileEditor.ex.FileEditorProviderManager;
+import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.PlainTextFileType;
+import com.intellij.openapi.fileTypes.PlainTextLanguage;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.DialogWrapper;
+import com.intellij.testFramework.LightVirtualFile;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.ConvertType;
 import i2f.extension.antlr4.xproc4j.oracle.grammar.impl.Oracle2Xproc4j;
+import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,9 +33,12 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Collection;
+import java.util.List;
 
 public class Oracle2Xproc4jConvertAction extends AnAction {
     public static final Logger log = Logger.getInstance(Oracle2Xproc4jConvertAction.class);
+
 
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
@@ -48,7 +66,11 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
     }
 
     public static class ConvertDialog extends DialogWrapper {
-        private JTextArea inputArea;
+        private Project project;
+        private String initialText;
+        private LightVirtualFile virtualFile;
+        private FileEditor fileEditor;
+        private Editor inputArea;
         private JRadioButton radioOptionXproc4j;
         private JRadioButton radioOptionTinyScript;
         private JRadioButton radioOptionOgnl;
@@ -59,13 +81,28 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
 
         public ConvertDialog(Project project, String initialText) {
             super(project);
+            this.project = project;
+            this.initialText = initialText;
             init(); // 初始化对话框
             setTitle("Oracle to XProc4J convertor");
 
-            // 设置初始输入文本
-            if (inputArea != null && initialText != null) {
-                inputArea.setText(initialText);
+        }
+
+        public Language getSqlLanguage() {
+            Language language = null;
+            Collection<Language> list = Language.getRegisteredLanguages();
+            for (Language item : list) {
+                if (item.getID().equalsIgnoreCase("oracle")) {
+                    return item;
+                }
+                if (item.getID().equalsIgnoreCase("sql")) {
+                    language = item;
+                }
             }
+            if (language == null) {
+                language = PlainTextLanguage.INSTANCE;
+            }
+            return language;
         }
 
         @Override
@@ -84,15 +121,56 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             gbc.fill = GridBagConstraints.BOTH;
             gbc.weighty = 5.0; // 让输出框占据剩余垂直空间
             JLabel inputLabel = new JLabel("Input:");
-            inputArea = new JTextArea(5, 20);
-            inputArea.setLineWrap(true);
-            inputArea.setWrapStyleWord(true);
-            inputArea.setEditable(true);
-            inputArea.setBackground(UIManager.getColor("TextField.background")); // 保持背景色一致
 
-            JScrollPane inputScrollPane = new JScrollPane(inputArea);
+            Language language = getSqlLanguage();
+            FileType fileType = language.getAssociatedFileType();
+            if (fileType == null) {
+                fileType = PlainTextFileType.INSTANCE;
+            }
+
+            JComponent editorComponent = null;
+
+            virtualFile = new LightVirtualFile("Virtual.sql", fileType, initialText == null ? "" : initialText);
+            virtualFile.setWritable(true);
+
+            // 2. 找到该文件类型对应的默认 FileEditorProvider (通常是 TextEditorProvider)
+            List<FileEditorProvider> providers = FileEditorProviderManager.getInstance().getProviderList(project, virtualFile);
+
+            if (providers != null && !providers.isEmpty()) {
+                fileEditor = providers.get(0).createEditor(project, virtualFile);
+                editorComponent = fileEditor.getComponent();
+            } else {
+                // 2. 创建可编辑的 Document 和 Editor
+                // 初始内容设为空字符串，createEditor 的最后一个参数 false 表示【可编辑】
+                Document document = EditorFactory.getInstance().createDocument(initialText == null ? "" : initialText);
+                inputArea = EditorFactory.getInstance().createEditor(document, project, fileType, false);
+
+                // 3. 配置编辑器设置（开启行号、折叠、软换行等）
+                EditorSettings settings = inputArea.getSettings();
+                settings.setLineNumbersShown(true);
+                settings.setFoldingOutlineShown(true);
+                settings.setAdditionalColumnsCount(3);
+                settings.setAdditionalLinesCount(3);
+                settings.setUseSoftWraps(true); // 开启软换行，提升编辑体验
+                settings.setLanguageSupplier(() -> language);
+                settings.setWheelFontChangeEnabled(true);
+
+                // 4. 显式设置语法高亮（确保高亮与 Language 完美匹配）
+                if (inputArea instanceof EditorEx) {
+                    EditorEx editorEx = (EditorEx) inputArea;
+                    editorEx.setHighlighter(
+                            EditorHighlighterFactory.getInstance().createEditorHighlighter(project, fileType)
+                    );
+                }
+
+                editorComponent = inputArea.getComponent();
+            }
+
+
+            JScrollPane inputScrollPane = new JScrollPane(editorComponent);
 
             JPanel inputRow = new JPanel(new BorderLayout(5, 0));
+            inputRow.setPreferredSize(new Dimension(720, 480));
             inputRow.add(inputLabel, BorderLayout.NORTH);
             inputRow.add(inputScrollPane, BorderLayout.CENTER);
             mainPanel.add(inputRow, gbc);
@@ -102,8 +180,8 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             gbc.gridy = 1;
             gbc.fill = GridBagConstraints.BOTH;
             gbc.weighty = 1.0; // 让输出框占据剩余垂直空间
-            radioOptionXproc4j = new JRadioButton("XProc4J");
-            radioOptionTinyScript = new JRadioButton("TinyScript");
+            radioOptionXproc4j = new JRadioButton(XProc4jConsts.NAME);
+            radioOptionTinyScript = new JRadioButton(TinyScriptConsts.LANGUAGE_ID);
             radioOptionOgnl = new JRadioButton("Ognl");
 
             // 默认选中第一个
@@ -152,11 +230,40 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
             return mainPanel;
         }
 
+        @Override
+        protected @NotNull Action[] createActions() {
+            return new Action[]{this.getOKAction()};
+        }
+
+        @Override
+        protected void dispose() {
+            if (fileEditor != null) {
+                fileEditor.dispose();
+                fileEditor = null;
+            }
+            if (virtualFile != null) {
+                virtualFile = null;
+            }
+            if (inputArea != null) {
+                EditorFactory.getInstance().releaseEditor(inputArea);
+                inputArea = null;
+            }
+            super.dispose();
+        }
+
+        public String getEditorText() {
+            if (fileEditor != null) {
+                Document document = FileDocumentManager.getInstance().getDocument(virtualFile);
+                return document.getText();
+            }
+            return inputArea.getDocument().getText();
+        }
+
         /**
          * 处理转换按钮点击事件
          */
         private void onConvertClicked(ActionEvent e) {
-            String sourceText = inputArea.getText();
+            String sourceText = getEditorText();
             if (sourceText == null || sourceText.trim().isEmpty()) {
                 outputArea.setText("Please input text!");
                 return;
@@ -169,7 +276,7 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
                 // 注意：如果 convert 方法是静态的，直接调用；如果是实例方法，需要实例化
                 String result = Oracle2Xproc4j.convert(sourceText, type);
                 outputArea.setText(result);
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 StringWriter writer = new StringWriter();
                 PrintWriter pw = new PrintWriter(writer);
                 pw.println("convert error " + ex.getClass() + " : " + ex.getMessage());
@@ -183,9 +290,15 @@ public class Oracle2Xproc4jConvertAction extends AnAction {
          * 根据单选框状态返回 type 值
          */
         private ConvertType getSelectedType() {
-            if (radioOptionXproc4j.isSelected()) return ConvertType.XPROC4J;
-            if (radioOptionTinyScript.isSelected()) return ConvertType.TINY_SCRIPT;
-            if (radioOptionOgnl.isSelected()) return ConvertType.OGNL;
+            if (radioOptionXproc4j.isSelected()) {
+                return ConvertType.XPROC4J;
+            }
+            if (radioOptionTinyScript.isSelected()) {
+                return ConvertType.TINY_SCRIPT;
+            }
+            if (radioOptionOgnl.isSelected()) {
+                return ConvertType.OGNL;
+            }
             return ConvertType.XPROC4J; // 默认
         }
 

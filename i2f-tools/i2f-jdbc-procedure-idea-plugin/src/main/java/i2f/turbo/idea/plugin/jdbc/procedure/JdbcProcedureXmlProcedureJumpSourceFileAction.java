@@ -18,6 +18,7 @@ import com.intellij.psi.PsiManager;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
+import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,7 +68,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         SelectionModel selectionModel = editor.getSelectionModel();
         if (selectionModel != null) {
             String selectedText = selectionModel.getSelectedText();
-            Map.Entry<VirtualFile, Integer> file = getProcedureFileByProcedureId(selectedText);
+            Map.Entry<VirtualFile, Integer> file = getProcedureFileByProcedureId(project, selectedText);
             if (file != null) {
                 return file;
             }
@@ -103,16 +104,16 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
         }
         String name = xmlAttribute.getName();
 //        log.warn("xml-jump-source attr-name: " + name);
-        if (!"refid".equals(name)
-                && !"id".equals(name)) {
+        if (!AttrConsts.REFID.equals(name)
+                && !AttrConsts.ID.equals(name)) {
             return null;
         }
         XmlAttributeValue xmlAttributeValue = (XmlAttributeValue) element;
         String value = xmlAttributeValue.getValue();
-        return getProcedureFileByProcedureId(value);
+        return getProcedureFileByProcedureId(xmlAttributeValue.getProject(), value);
     }
 
-    public static Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(String value) {
+    public static Map.Entry<VirtualFile, Integer> getProcedureFileByProcedureId(Project project, String value) {
         if (value == null) {
             return null;
         }
@@ -129,7 +130,7 @@ public class JdbcProcedureXmlProcedureJumpSourceFileAction extends AnAction {
             value = value.substring(0, value.length() - ".xml".length());
         }
         //        log.warn("xml-jump-source attr-value: " + value);
-        ProcedureMeta meta = JdbcProcedureProjectMetaHolder.PROCEDURE_META_MAP.get(value);
+        ProcedureMeta meta = JdbcProcedureProjectMetaHolder.getProjectMeta(project, value);
 //        log.warn("xml-jump-source attr-meta: " + meta);
         if (meta == null) {
             return null;

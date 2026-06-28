@@ -271,8 +271,8 @@ public class ExtApplicationLauncher {
         return null;
     }
 
-    public String getManifestProperty(String key) throws Exception {
-        ProtectionDomain protectionDomain = this.getClass().getProtectionDomain();
+    public Manifest getManifestByClass(Class<?> clazz) throws Exception {
+        ProtectionDomain protectionDomain = clazz.getProtectionDomain();
         CodeSource codeSource = protectionDomain.getCodeSource();
         if (codeSource == null) {
             return null;
@@ -287,6 +287,26 @@ public class ExtApplicationLauncher {
         }
         File file = new File(path);
         Manifest manifest = getManifest(file);
+        return manifest;
+    }
+
+    public Manifest getManifestByResource(ClassLoader loader) throws Exception {
+        URL url = Thread.currentThread().getContextClassLoader().getResource("META-INF/MANIFEST.MF");
+        if (url == null) {
+            return null;
+        }
+        Manifest ret = new Manifest(url.openStream());
+        return ret;
+    }
+
+    public String getManifestProperty(String key) throws Exception {
+        Manifest manifest = getManifestByResource(Thread.currentThread().getContextClassLoader());
+        if (manifest == null) {
+            manifest = getManifestByResource(this.getClass().getClassLoader());
+        }
+        if (manifest == null) {
+            manifest = getManifestByClass(this.getClass());
+        }
         if (manifest == null) {
             return null;
         }

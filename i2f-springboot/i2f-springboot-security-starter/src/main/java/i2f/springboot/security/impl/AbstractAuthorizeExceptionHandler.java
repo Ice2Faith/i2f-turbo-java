@@ -1,6 +1,6 @@
 package i2f.springboot.security.impl;
 
-import i2f.net.http.HttpStatus;
+import i2f.net.http.consts.HttpStatusConstants;
 import i2f.resp.ApiResp;
 import i2f.springboot.security.exception.BoostAuthenticationException;
 import i2f.web.servlet.ServletContextUtil;
@@ -27,15 +27,15 @@ public class AbstractAuthorizeExceptionHandler implements AuthorizeExceptionHand
         log.info("--------------authorize exception-----------");
         String requestUri = request.getRequestURI();
         if ("/error".equals(requestUri)) {
-            onAuthoriedError(HttpStatus.ERROR, requestUri, request, response, ex);
+            onAuthoriedError(HttpStatusConstants.ERROR, requestUri, request, response, ex);
         } else {
-            int statusCode = HttpStatus.FORBIDDEN;
+            int statusCode = HttpStatusConstants.FORBIDDEN;
             if (ex instanceof InsufficientAuthenticationException) {
-                statusCode = HttpStatus.UNAUTHORIZED;
+                statusCode = HttpStatusConstants.UNAUTHORIZED;
             }
             if (ex instanceof UsernameNotFoundException
                     || ex instanceof BadCredentialsException) {
-                statusCode = HttpStatus.UNAUTHORIZED;
+                statusCode = HttpStatusConstants.UNAUTHORIZED;
             }
             onAuthoriedFailure(statusCode, requestUri, request, response, ex);
         }

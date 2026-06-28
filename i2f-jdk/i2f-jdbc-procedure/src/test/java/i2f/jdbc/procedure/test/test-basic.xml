@@ -29,9 +29,9 @@
     <lang-invoke method="format" target="fmt" arg0="now" result="str"/>
     <lang-println tag="now" now="str"/>
     <lang-printf>
-        <lang-eval result="now">
+        <lang-string result="now">
                 new Date()
-        </lang-eval>
+        </lang-string>
     </lang-printf>
     <lang-printf>
         <sql-query-object result="count" result-type="Long">
@@ -72,21 +72,7 @@
             <lang-println tag.string="-->fori-foreach" i="item" is-first="first" index="index"/>
         </lang-fori>
     </lang-foreach>
-    <lang-eval-java result="date">
-            long ts = System.currentTimeMillis();
-            String str = Long.toString(ts, 16);
-            System.out.println("ts-hex:" + str);
-            return new Date();
-    </lang-eval-java>
-    <lang-println date="date"/>
-    <lang-eval-javascript result="js">
-        function test() {
-            return 'hello' + (1 + 2);
-        }
 
-        test()
-    </lang-eval-javascript>
-    <lang-println js="js"/>
 
 
 </procedure>

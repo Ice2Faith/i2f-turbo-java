@@ -12,11 +12,6 @@
     <artifactId>i2f-extension-all</artifactId>
 
     <dependencies>
-        <!--  <dependency>
-          <groupId>i2f.turbo</groupId>
-          <artifactId>i2f-extension-all</artifactId>
-      </dependency> -->
-
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-7zip</artifactId>
@@ -27,8 +22,24 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-dashscope</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ai-langchain4j</artifactId>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-langchain4j8</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-openai</artifactId>
+        </dependency>
+        <!--<dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-all</artifactId>
+        </dependency>-->
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-antlr4</artifactId>
@@ -112,6 +123,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-filesystem-sftp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-freemarker</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -200,6 +215,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ognl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-okhttp</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -299,12 +318,17 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-xproc4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-zip4j</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-zookeeper</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>

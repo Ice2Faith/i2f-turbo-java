@@ -88,20 +88,19 @@
 - i2f-jdk-all
     - 是一个聚合包
     - 包含了i2f-jdk下的所有模块的整合包
-- i2f-javax
+- i2f-jdk-ext
     - 主要用于处理不再默认的jre中的java拓展包
     - 例如javax对于j2ee的部分
-- i2f-jakarta
-    - 由于javax部分已经想jakarta迁移
-    - 所以原来对javax的支持部分，也需要迁移到jakarta中来
-    - 遵循的原则是，原来javax中的部分，包、类、方法都会保持一致
-    - javax中没有的部分则额外添加
+  - 在jdk17分支中，这部分对应jakarta内容
 - i2f-extension
     - 用于对于第三方jar包的功能进行二次封装
     - 因此，这部分依赖第三方功能
     - 打包时，仅打包本包内容
     - 同时，依赖i2f-jdk模块的内容
     - 因此，使用时，需要本包引入，第三方包引入，以及jdk的依赖引入
+- i2f-extension-all
+  - 是一个聚合包
+  - 包含了i2f-extension下的所有模块的整合包
 - i2f-spring
     - 用于针对spring的部分进行封装
     - 这部分，仅针对spring的基础部分，也就是springframework部分
@@ -110,6 +109,9 @@
     - 这部分，仅依赖spring以及jdk依赖
     - 某种意义上来说，也算是extension的一部分
     - 只不过单独拧出来
+- i2f-spring-all
+  - 是一个聚合包
+  - 包含了i2f-spring下的所有模块的整合包
 - i2f-springboot
     - 用于针对springboot的自动装配
     - 实现一些自动装配的功能，也就是starter功能
@@ -130,20 +132,19 @@
 - i2f-jdk-all
     - it an merge package
     - included all module of in i2f-jdk
-- i2f-javax
+- i2f-jdk-ext
     - mainly to process java extension package which not include in default jre
     - such as, javax for j2ee partial
-- i2f-jakarta
-    - because of javax move to jakarta
-    - so that, old javax also need adapt jakarta, it is this module do
-    - the rule is that keep same as package, class, method
-    - it will be append to while javax not exists some features
+  - jakarta also in it which on jdk17 branch
 - i2f-extension
     - the features base on the thrid java package
     - so, it rely on the thrid package
     - only include itself code when package module
     - and, maybe rely some module from i2f-jdk
     - so that, add itself, thrid package and jdk module package when you use it
+- i2f-extension-all
+  - it an merge package
+  - included all module of in i2f-extension
 - i2f-spring
     - make features for spring package only
     - it only for spring basic features, also is springframework
@@ -152,12 +153,15 @@
     - and, only rely on jdk modules
     - in some means, it is a patrial of extension
     - but, use single module built.
+- i2f-spring-all
+  - it an merge package
+  - included all module of in i2f-spring
 - i2f-springboot
-    - make features fir springboot to auto-confuguration
+  - make features fir springboot to auto-configuration
     - implements some features to auto-configuration, also is some springboot starter
     - base on jdk, spring, extension
 - the others
     - maybe provide some module of the name end with all
-    - those module only merge some has similiar feature modules to package
+  - those module only merge some has similar feature modules to package
     - it only package other modules
     - itself not implements any features.

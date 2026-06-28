@@ -17,6 +17,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.extension.ai.openai.impl.OpenAiAi;
 import i2f.extension.ai.openai.tool.OpenAiToolDefinition;
 import i2f.extension.ai.openai.tool.OpenAiToolHelper;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -43,7 +44,7 @@ public class OpenAiModel implements AiModel {
     public static AiAgent agent(OpenAiModel model) {
         return new AiAgent()
                 .model(model)
-                .jsonSerializer(OpenAiJsonSerializer.INSTANCE);
+                .jsonSerializer(JacksonJsonSerializer.INSTANCE);
     }
 
     public static Builder builder() {

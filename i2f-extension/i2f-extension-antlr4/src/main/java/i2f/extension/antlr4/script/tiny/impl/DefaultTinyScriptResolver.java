@@ -2,6 +2,7 @@ package i2f.extension.antlr4.script.tiny.impl;
 
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.tiny.impl.context.DefaultFunctionCallContext;
+import i2f.extension.antlr4.script.tiny.impl.debugger.TinyScriptDebugBridgeReporter;
 import i2f.invokable.method.IMethod;
 import i2f.match.regex.RegexUtil;
 import i2f.reference.Reference;
@@ -299,6 +300,11 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     String.valueOf(supplier.get())
             ));
         }
+    }
+
+    @Override
+    public void debugBridge(String fileName, int lineNumber, Supplier<Map<String, Object>> variableMapSupplier) {
+        TinyScriptDebugBridgeReporter.proxy(fileName, lineNumber, variableMapSupplier);
     }
 
     @Override
@@ -644,10 +650,22 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
 
     @Override
     public String renderString(Object context, String text) {
-        return RegexUtil.regexFindAndReplace(text, "[\\\\]*\\$\\{[^}]+\\}", (str) -> {
-            str = str.substring("${".length(), str.length() - "}".length());
+        return RegexUtil.regexFindAndReplace(text, "[\\\\]*\\$(\\!)?\\{[^}]+\\}", (str) -> {
+            boolean null2empty=false;
+            if(str.startsWith("$!{")){
+                null2empty=true;
+                str = str.substring("$!{".length(), str.length() - "}".length());
+            }else{
+                null2empty=false;
+                str = str.substring("${".length(), str.length() - "}".length());
+            }
             str = str.trim();
             Object value = getValue(context, str);
+            if(value==null){
+                if(null2empty){
+                    value="";
+                }
+            }
             return String.valueOf(value);
         });
     }

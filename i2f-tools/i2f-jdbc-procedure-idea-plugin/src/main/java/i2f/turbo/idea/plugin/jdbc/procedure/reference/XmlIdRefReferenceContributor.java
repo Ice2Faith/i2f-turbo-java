@@ -7,6 +7,8 @@ import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
+import i2f.jdbc.procedure.consts.AttrConsts;
+import i2f.jdbc.procedure.consts.TagConsts;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -22,7 +24,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
         // 处理 refid -> id 的跳转
         registrar.registerReferenceProvider(
                 XmlPatterns.xmlAttributeValue()
-                        .withParent(XmlPatterns.xmlAttribute("refid")),
+                        .withParent(XmlPatterns.xmlAttribute(AttrConsts.REFID)),
                 new PsiReferenceProvider() {
                     @Override
                     public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
@@ -40,7 +42,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                             XmlTag rootTag = xmlFile.getRootTag();
                             if (rootTag != null) {
                                 String name = rootTag.getName();
-                                if (!"procedure".equals(name)) {
+                                if (!TagConsts.PROCEDURE.equals(name)) {
                                     isSupport = false;
                                 }
                             }
@@ -56,7 +58,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
         // 处理 id -> 所有 refid 的反向引用（用于 Find Usages）
         registrar.registerReferenceProvider(
                 XmlPatterns.xmlAttributeValue()
-                        .withParent(XmlPatterns.xmlAttribute("id")),
+                        .withParent(XmlPatterns.xmlAttribute(AttrConsts.ID)),
                 new PsiReferenceProvider() {
                     @Override
                     public @NotNull PsiReference[] getReferencesByElement(@NotNull PsiElement element,
@@ -73,7 +75,7 @@ public class XmlIdRefReferenceContributor extends PsiReferenceContributor {
                             XmlTag rootTag = xmlFile.getRootTag();
                             if (rootTag != null) {
                                 String name = rootTag.getName();
-                                if (!"procedure".equals(name)) {
+                                if (!TagConsts.PROCEDURE.equals(name)) {
                                     isSupport = false;
                                 }
                             }
