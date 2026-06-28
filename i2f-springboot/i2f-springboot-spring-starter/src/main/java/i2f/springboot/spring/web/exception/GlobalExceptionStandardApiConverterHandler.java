@@ -1,6 +1,5 @@
 package i2f.springboot.spring.web.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.spring.web.api.StandardApiExceptionConverter;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import org.springframework.web.servlet.ModelAndView;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;

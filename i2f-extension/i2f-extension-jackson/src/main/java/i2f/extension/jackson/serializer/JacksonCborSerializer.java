@@ -1,7 +1,7 @@
 package i2f.extension.jackson.serializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.cbor.databind.CBORMapper;
 
 public class JacksonCborSerializer extends AbsJacksonSerializer {
     private ObjectMapper mapper = new CBORMapper();

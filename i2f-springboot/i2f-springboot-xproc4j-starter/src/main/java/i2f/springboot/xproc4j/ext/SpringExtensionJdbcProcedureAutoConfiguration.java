@@ -1,6 +1,5 @@
 package i2f.springboot.xproc4j.ext;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.jdbc.procedure.context.ContextHolder;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
@@ -10,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author Ice2Faith

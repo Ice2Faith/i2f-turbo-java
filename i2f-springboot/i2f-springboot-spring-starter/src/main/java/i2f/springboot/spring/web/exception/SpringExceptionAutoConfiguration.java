@@ -1,6 +1,5 @@
 package i2f.springboot.spring.web.exception;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.spring.web.api.StandardApiExceptionConverter;
 import i2f.springboot.spring.web.api.impl.ApiRespExceptionConverter;
 import lombok.Data;
@@ -12,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.HandlerExceptionResolver;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author Ice2Faith

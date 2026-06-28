@@ -1,7 +1,5 @@
 package i2f.springcloud.discovery.remote;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springcloud.discovery.provider.DiscoveryServiceInstance;
 import jakarta.annotation.PostConstruct;
 import lombok.Data;
@@ -16,6 +14,8 @@ import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;

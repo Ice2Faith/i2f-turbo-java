@@ -39,7 +39,7 @@
 ```java
 package i2f.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import i2f.database.metadata.DatabaseMetadataProvider;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
 import i2f.database.metadata.data.ColumnMeta;

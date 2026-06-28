@@ -1,7 +1,7 @@
 package i2f.extension.jackson.serializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.protobuf.ProtobufMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.protobuf.ProtobufMapper;
 
 public class JacksonProtobufSerializer extends AbsJacksonSerializer {
     private ObjectMapper mapper = new ProtobufMapper();

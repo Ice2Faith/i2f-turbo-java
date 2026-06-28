@@ -1,7 +1,5 @@
 package i2f.extension.ai.openai.impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.openai.client.OpenAIClient;
 import com.openai.client.okhttp.OpenAIOkHttpClient;
 import com.openai.models.chat.completions.*;
@@ -11,6 +9,8 @@ import i2f.extension.ai.openai.tool.OpenAiToolDefinition;
 import i2f.extension.ai.openai.tool.OpenAiToolHelper;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;

@@ -1,6 +1,5 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
 import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
@@ -19,6 +18,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.util.ArrayList;

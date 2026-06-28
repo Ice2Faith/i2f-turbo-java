@@ -1,6 +1,5 @@
 package i2f.springboot.ops.app.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.app.data.service.AppServiceInstanceDto;
 import i2f.springboot.ops.common.*;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.ArrayList;
 import java.util.List;

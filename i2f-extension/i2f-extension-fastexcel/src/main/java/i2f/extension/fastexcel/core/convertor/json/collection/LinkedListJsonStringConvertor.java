@@ -3,9 +3,9 @@ package i2f.extension.fastexcel.core.convertor.json.collection;
 import cn.idev.excel.metadata.GlobalConfiguration;
 import cn.idev.excel.metadata.data.ReadCellData;
 import cn.idev.excel.metadata.property.ExcelContentProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.fastexcel.core.convertor.json.AbsObjectJsonStringConvertor;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.LinkedList;
 

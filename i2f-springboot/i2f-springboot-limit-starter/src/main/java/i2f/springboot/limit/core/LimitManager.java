@@ -1,7 +1,5 @@
 package i2f.springboot.limit.core;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.limit.data.LimitRule;
 import i2f.springboot.limit.data.LimitRuleItem;
 import i2f.springboot.limit.properties.LimitRuleProperties;
@@ -15,6 +13,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

@@ -17,6 +17,7 @@
                 <exclude>org.springframework*:*</exclude>
                 <exclude>org.apache*:*</exclude>
                 <exclude>com.fasterxml.jackson*:*</exclude>
+                <exclude>tools.jackson*:*</exclude>
                 <exclude>com.alibaba*:*</exclude>
                 <exclude>com.google*:*</exclude>
                 <exclude>org.slf4j*:*</exclude>

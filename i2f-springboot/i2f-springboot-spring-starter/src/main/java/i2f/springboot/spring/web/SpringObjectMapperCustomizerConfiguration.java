@@ -1,6 +1,5 @@
 package i2f.springboot.spring.web;
 
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import i2f.extension.jackson.datetime.deserializer.JacksonDateDeserializer;
 import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateDeserializer;
 import i2f.extension.jackson.datetime.deserializer.JacksonLocalDateTimeDeserializer;
@@ -15,6 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.util.StringUtils;
+import tools.jackson.databind.ser.std.ToStringSerializer;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;

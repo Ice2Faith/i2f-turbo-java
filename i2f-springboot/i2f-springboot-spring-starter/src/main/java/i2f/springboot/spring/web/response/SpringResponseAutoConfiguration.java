@@ -1,6 +1,5 @@
 package i2f.springboot.spring.web.response;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.spring.web.api.StandardApiResponseConverter;
 import i2f.springboot.spring.web.api.impl.ApiRespResponseConverter;
 import i2f.springboot.spring.web.response.impl.ApiRespNotFoundResponseConverter;
@@ -11,6 +10,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author Ice2Faith

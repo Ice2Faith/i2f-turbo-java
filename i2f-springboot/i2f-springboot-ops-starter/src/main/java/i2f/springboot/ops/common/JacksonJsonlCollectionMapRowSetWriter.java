@@ -1,10 +1,10 @@
 package i2f.springboot.ops.common;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.rowset.impl.json.AbsJsonlMapRowSetWriter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.JsonProcessingException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 

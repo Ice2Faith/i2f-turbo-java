@@ -3,9 +3,9 @@ package i2f.extension.easyexcel.core.convertor.json.collection;
 import com.alibaba.excel.metadata.GlobalConfiguration;
 import com.alibaba.excel.metadata.data.ReadCellData;
 import com.alibaba.excel.metadata.property.ExcelContentProperty;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.easyexcel.core.convertor.json.AbsObjectJsonStringConvertor;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.concurrent.CopyOnWriteArraySet;
 

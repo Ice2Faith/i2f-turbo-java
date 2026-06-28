@@ -1,6 +1,5 @@
 package i2f.springboot.ops.awss3.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.filesystem.oss.aws.s3.AwsS3OssFileSystem;
 import i2f.io.filesystem.IFile;
 import i2f.io.stream.StreamUtil;
@@ -32,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.services.s3.S3Client;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.*;
 import java.security.MessageDigest;

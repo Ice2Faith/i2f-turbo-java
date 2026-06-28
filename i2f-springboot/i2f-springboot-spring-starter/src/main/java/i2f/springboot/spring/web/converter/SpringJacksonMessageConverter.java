@@ -1,12 +1,12 @@
 package i2f.springboot.spring.web.converter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import lombok.Data;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author Ice2Faith

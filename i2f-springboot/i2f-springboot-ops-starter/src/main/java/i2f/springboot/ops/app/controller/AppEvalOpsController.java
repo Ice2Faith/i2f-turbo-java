@@ -1,6 +1,5 @@
 package i2f.springboot.ops.app.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.lang.GroovyShell;
 import i2f.extension.groovy.GroovyScript;
 import i2f.springboot.ops.app.data.AppOperationDto;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -1,9 +1,9 @@
 package i2f.extension.jackson.sensible.annotations;
 
 import com.fasterxml.jackson.annotation.JacksonAnnotationsInside;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import i2f.extension.jackson.sensible.JacksonSensibleSerializer;
 import i2f.extension.jackson.sensible.handler.impl.SensibleType;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

@@ -14,7 +14,7 @@
         <parent>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-parent</artifactId>
-            <version>2.3.7.RELEASE</version>
+            <version>4.0.6</version>
         </parent>
     -->
 
@@ -27,12 +27,12 @@
     <description>maven project</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 
-        <lombok.version>1.18.16</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
 
         <!-- 指定主类，也就是启动类 -->
         <main.class>com.springboot.maven.SpringBootMavenApplication</main.class>
@@ -52,10 +52,6 @@
          -->
         <additional.classpath>lib/res-lib-1.0.jar pom/res-lib-1.0.jar</additional.classpath>
 
-        <spring.version>5.2.12.RELEASE</spring.version>
-        <spring-boot.version>2.3.7.RELEASE</spring-boot.version>
-        <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
-        <alibaba-cloud.version>0.2.2.RELEASE</alibaba-cloud.version>
     </properties>
 
     <dependencyManagement>
@@ -79,12 +75,13 @@
 
 
             <dependency>
-                <groupId>org.springframework.cloud</groupId>
+                <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
-                <version>${alibaba-cloud.version}</version>
+                <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
 
             <dependency>
                 <groupId>org.projectlombok</groupId>

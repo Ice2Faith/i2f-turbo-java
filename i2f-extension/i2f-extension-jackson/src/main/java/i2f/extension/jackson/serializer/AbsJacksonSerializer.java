@@ -1,10 +1,10 @@
 package i2f.extension.jackson.serializer;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import i2f.serialize.std.exception.SerializeException;
 import i2f.serialize.std.str.IStringObjectSerializer;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectWriter;
 
 import java.lang.reflect.Type;
 import java.util.Map;

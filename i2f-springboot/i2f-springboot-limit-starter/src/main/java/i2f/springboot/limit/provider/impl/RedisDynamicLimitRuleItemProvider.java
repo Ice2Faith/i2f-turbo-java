@@ -1,6 +1,5 @@
 package i2f.springboot.limit.provider.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.limit.core.LimitConsts;
 import i2f.springboot.limit.core.LimitRedisHolder;
 import i2f.springboot.limit.data.LimitRule;
@@ -14,6 +13,7 @@ import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.ObjectMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

@@ -1,7 +1,5 @@
 package i2f.springboot.shiro.filter;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.authentication.password.LoginPasswordDecoder;
 import i2f.springboot.shiro.handler.ILoginFailureHandler;
 import i2f.springboot.shiro.handler.ILoginSuccessHandler;
@@ -21,6 +19,8 @@ import org.apache.shiro.authc.UsernamePasswordToken;
 import org.apache.shiro.subject.Subject;
 import org.springframework.http.MediaType;
 import org.springframework.web.filter.OncePerRequestFilter;
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.InputStream;

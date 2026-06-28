@@ -1,9 +1,9 @@
 package i2f.extension.jackson.sensible.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.extension.jackson.sensible.handler.AbsDictSensibleHandler;
 import i2f.extension.jackson.sensible.handler.ISensibleHandler;
 import i2f.extension.jackson.sensible.holder.SensibleHandlersHolder;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 import java.util.List;

@@ -1,7 +1,7 @@
 package i2f.extension.jackson.serializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
 
 public class JacksonYamlSerializer extends AbsJacksonSerializer {
     private ObjectMapper mapper = new YAMLMapper();

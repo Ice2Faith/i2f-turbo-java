@@ -15,27 +15,27 @@
 
 ```xml
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-xml</artifactId>
 </dependency>
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-yaml</artifactId>
 </dependency>
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-protobuf</artifactId>
 </dependency>
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-cbor</artifactId>
 </dependency>
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-csv</artifactId>
 </dependency>
 <dependency>
-    <groupId>com.fasterxml.jackson.dataformat</groupId>
+    <groupId>tools.jackson.dataformat</groupId>
     <artifactId>jackson-dataformat-smile</artifactId>
 </dependency>
 ```
@@ -46,17 +46,17 @@
 
 ```xml
 <dependency>
-  <groupId>com.fasterxml.jackson.core</groupId>
+  <groupId>tools.jackson.core</groupId>
   <artifactId>jackson-databind</artifactId>
   <version>2.10.3</version>
 </dependency>
 <dependency>
-  <groupId>com.fasterxml.jackson.datatype</groupId>
+  <groupId>tools.jackson.datatype</groupId>
   <artifactId>jackson-datatype-jdk8</artifactId>
   <version>2.10.3</version>
 </dependency>
 <dependency>
-  <groupId>com.fasterxml.jackson.module</groupId>
+  <groupId>tools.jackson.module</groupId>
   <artifactId>jackson-module-parameter-names</artifactId>
   <version>2.10.3</version>
 </dependency>
@@ -70,7 +70,7 @@
 ### 用法总览
 
 ```java
-import com.fasterxml.jackson.core.type.TypeReference;
+import tools.jackson.core.type.TypeReference;
 import i2f.spring.serialize.jackson.JacksonJsonSerializer;
 import i2f.spring.serialize.jackson.JacksonXmlSerializer;
 import i2f.spring.serialize.jackson.JacksonYamlSerializer;
@@ -143,9 +143,9 @@ new TypeReference<T>(){}
 - 示例如下
 
 ```java
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
-import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import tools.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import lombok.Data;
 
 import java.math.BigDecimal;

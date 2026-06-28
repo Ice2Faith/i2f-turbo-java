@@ -1,7 +1,7 @@
 package i2f.extension.jackson.serializer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.csv.CsvMapper;
 
 public class JacksonCsvSerializer extends AbsJacksonSerializer {
     private ObjectMapper mapper = new CsvMapper();

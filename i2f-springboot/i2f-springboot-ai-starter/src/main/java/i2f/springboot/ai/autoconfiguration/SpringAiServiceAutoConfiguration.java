@@ -1,6 +1,5 @@
 package i2f.springboot.ai.autoconfiguration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.std.agent.AiAgent;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.rag.RagWorker;
@@ -20,6 +19,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tools.jackson.databind.ObjectMapper;
 
 /**
  * @author Ice2Faith
