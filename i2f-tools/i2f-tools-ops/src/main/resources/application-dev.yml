@@ -18,7 +18,7 @@ spring:
       - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
       - org.redisson.spring.starter.RedissonAutoConfiguration
       # datasource 配置，如果没有datasource需要注释开启排除
-      - org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration
+      - org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration
       - com.baomidou.dynamic.datasource.spring.boot.autoconfigure.DynamicDataSourceAutoConfiguration
   redis:
     host: 127.0.0.1
