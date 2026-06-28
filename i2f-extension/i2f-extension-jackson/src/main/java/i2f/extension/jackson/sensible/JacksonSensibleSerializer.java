@@ -4,31 +4,28 @@ import i2f.extension.jackson.sensible.annotations.Sensible;
 import i2f.extension.jackson.sensible.handler.ISensibleHandler;
 import i2f.extension.jackson.sensible.handler.impl.TruncateSensibleHandler;
 import i2f.extension.jackson.sensible.holder.SensibleHandlersHolder;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.JsonSerializer;
-import tools.jackson.databind.SerializerProvider;
-import tools.jackson.databind.ser.ContextualSerializer;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-public class JacksonSensibleSerializer extends JsonSerializer<Object>
-        implements ContextualSerializer {
+public class JacksonSensibleSerializer extends ValueSerializer<Object> {
 
     private ISensibleHandler handler;
     private Sensible ann;
 
     @Override
-    public void serialize(Object obj, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(Object obj, JsonGenerator jsonGenerator, SerializationContext serializerProvider) throws JacksonException {
         obj = handler.handle(obj, ann);
-        jsonGenerator.writeObject(obj);
+        serializerProvider.writeValue(jsonGenerator, obj);
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider serializerProvider, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext serializerProvider, BeanProperty beanProperty) {
         if (beanProperty == null) {
             return serializerProvider.findNullValueSerializer(null);
         }
@@ -37,7 +34,7 @@ public class JacksonSensibleSerializer extends JsonSerializer<Object>
             ann = beanProperty.getContextAnnotation(Sensible.class);
         }
         if (ann == null) {
-            return serializerProvider.findValueSerializer(beanProperty.getType(), beanProperty);
+            return serializerProvider.findValueSerializer(beanProperty.getType());
         }
         Class<?> rawClass = beanProperty.getType().getRawClass();
         Collection<ISensibleHandler> handlers = SensibleHandlersHolder.getContextHandlers();

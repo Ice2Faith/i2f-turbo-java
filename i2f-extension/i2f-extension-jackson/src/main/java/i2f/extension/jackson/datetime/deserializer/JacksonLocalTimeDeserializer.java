@@ -2,15 +2,12 @@ package i2f.extension.jackson.datetime.deserializer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import i2f.convert.obj.ObjectConvertor;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonProcessingException;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JsonDeserializer;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.deser.ContextualDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
@@ -19,7 +16,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2023/6/16 23:18
  * @desc
  */
-public class JacksonLocalTimeDeserializer extends JsonDeserializer<LocalTime> implements ContextualDeserializer {
+public class JacksonLocalTimeDeserializer extends ValueDeserializer<LocalTime> {
     private DateTimeFormatter formatter;
 
 
@@ -28,7 +25,7 @@ public class JacksonLocalTimeDeserializer extends JsonDeserializer<LocalTime> im
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) {
         if (beanProperty == null) {
             return this;
         }
@@ -46,7 +43,7 @@ public class JacksonLocalTimeDeserializer extends JsonDeserializer<LocalTime> im
     }
 
     @Override
-    public LocalTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public LocalTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws JacksonException {
         String str = jsonParser.getText();
         if (str == null) {
             return null;
@@ -55,10 +52,10 @@ public class JacksonLocalTimeDeserializer extends JsonDeserializer<LocalTime> im
         try {
             return parse(str, formatter);
         } catch (Exception e) {
-            if (e instanceof JsonProcessingException) {
-                throw (JsonProcessingException) e;
+            if (e instanceof JacksonException) {
+                throw (JacksonException) e;
             } else {
-                throw new IOException(e.getMessage(), e);
+                throw new IllegalArgumentException(e.getMessage(), e);
             }
         }
 

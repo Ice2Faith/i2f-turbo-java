@@ -16,10 +16,13 @@ public class JacksonJsonSerializer extends AbsJacksonSerializer implements IJson
     public static JacksonJsonSerializer INSTANCE = new Supplier<JacksonJsonSerializer>() {
         @Override
         public JacksonJsonSerializer get() {
-            JsonMapper mapper = new JsonMapper();
-            mapper.setLocale(Locale.getDefault());
-            mapper.setDateFormat(new SimpleDateFormat(DEFAULT_DATE_FMT));
-            mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
+            JsonMapper mapper = JsonMapper.builder()
+                    .defaultLocale(Locale.getDefault())
+                    .defaultDateFormat(new SimpleDateFormat(DEFAULT_DATE_FMT))
+                    .withAllConfigOverrides(config -> {
+                        config.setDefaultInclusion(JsonInclude.Value.ALL_ALWAYS);
+                    })
+                    .build();
             return new JacksonJsonSerializer(mapper);
         }
     }.get();

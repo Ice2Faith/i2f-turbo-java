@@ -4,15 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import i2f.convert.obj.ObjectConvertor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonParser;
-import tools.jackson.core.JsonProcessingException;
 import tools.jackson.databind.BeanProperty;
 import tools.jackson.databind.DeserializationContext;
-import tools.jackson.databind.JsonDeserializer;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.deser.ContextualDeserializer;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,7 +21,7 @@ import java.util.Date;
  */
 @Data
 @NoArgsConstructor
-public class JacksonDateDeserializer extends JsonDeserializer<Date> implements ContextualDeserializer {
+public class JacksonDateDeserializer extends ValueDeserializer<Date> {
     private DateFormat formatter;
 
     public JacksonDateDeserializer(DateFormat formatter) {
@@ -32,7 +29,7 @@ public class JacksonDateDeserializer extends JsonDeserializer<Date> implements C
     }
 
     @Override
-    public JsonDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueDeserializer<?> createContextual(DeserializationContext deserializationContext, BeanProperty beanProperty) {
         if (beanProperty == null) {
             return this;
         }
@@ -50,7 +47,7 @@ public class JacksonDateDeserializer extends JsonDeserializer<Date> implements C
     }
 
     @Override
-    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JsonProcessingException {
+    public Date deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws JacksonException {
         String str = jsonParser.getText();
         if (str == null) {
             return null;
@@ -59,10 +56,10 @@ public class JacksonDateDeserializer extends JsonDeserializer<Date> implements C
         try {
             return parse(str, formatter);
         } catch (Exception e) {
-            if (e instanceof JsonProcessingException) {
-                throw (JsonProcessingException) e;
+            if (e instanceof JacksonException) {
+                throw (JacksonException) e;
             } else {
-                throw new IOException(e.getMessage(), e);
+                throw new IllegalArgumentException(e.getMessage(), e);
             }
         }
 

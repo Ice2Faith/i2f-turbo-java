@@ -1,7 +1,7 @@
 package i2f.extension.jackson.serializer;
 
 import tools.jackson.databind.ObjectMapper;
-import tools.jackson.dataformat.smile.databind.SmileMapper;
+import tools.jackson.dataformat.smile.SmileMapper;
 
 public class JacksonSmileSerializer extends AbsJacksonSerializer {
     private ObjectMapper mapper = new SmileMapper();

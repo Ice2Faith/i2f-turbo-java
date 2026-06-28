@@ -14,10 +14,13 @@ public class JacksonXmlSerializer extends AbsJacksonSerializer implements IXmlSe
     public static JacksonXmlSerializer INSTANCE = new Supplier<JacksonXmlSerializer>() {
         @Override
         public JacksonXmlSerializer get() {
-            XmlMapper mapper = new XmlMapper();
-            mapper.setLocale(Locale.getDefault());
-            mapper.setDateFormat(new SimpleDateFormat(DEFAULT_DATE_FMT));
-            mapper.setSerializationInclusion(JsonInclude.Include.ALWAYS);
+            XmlMapper mapper = XmlMapper.builder()
+                    .defaultLocale(Locale.getDefault())
+                    .defaultDateFormat(new SimpleDateFormat(DEFAULT_DATE_FMT))
+                    .withAllConfigOverrides(config -> {
+                        config.setDefaultInclusion(JsonInclude.Value.ALL_ALWAYS);
+                    })
+                    .build();
             return new JacksonXmlSerializer(mapper);
         }
     }.get();

@@ -1,14 +1,12 @@
 package i2f.extension.jackson.datetime.serializer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import tools.jackson.core.JacksonException;
 import tools.jackson.core.JsonGenerator;
 import tools.jackson.databind.BeanProperty;
-import tools.jackson.databind.JsonMappingException;
-import tools.jackson.databind.JsonSerializer;
-import tools.jackson.databind.SerializerProvider;
-import tools.jackson.databind.ser.ContextualSerializer;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueSerializer;
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,7 +16,7 @@ import java.util.Date;
  * @date 2023/6/16 23:18
  * @desc
  */
-public class JacksonDateSerializer<T extends Date> extends JsonSerializer<T> implements ContextualSerializer {
+public class JacksonDateSerializer<T extends Date> extends ValueSerializer<T> {
     private DateFormat formatter;
 
     public JacksonDateSerializer(DateFormat formatter) {
@@ -26,7 +24,7 @@ public class JacksonDateSerializer<T extends Date> extends JsonSerializer<T> imp
     }
 
     @Override
-    public JsonSerializer<?> createContextual(SerializerProvider serializerProvider, BeanProperty beanProperty) throws JsonMappingException {
+    public ValueSerializer<?> createContextual(SerializationContext serializerProvider, BeanProperty beanProperty) {
         if (beanProperty == null) {
             return this;
         }
@@ -44,24 +42,24 @@ public class JacksonDateSerializer<T extends Date> extends JsonSerializer<T> imp
     }
 
     @Override
-    public void serialize(T date, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
+    public void serialize(T date, JsonGenerator jsonGenerator, SerializationContext serializerProvider) throws JacksonException {
         if (date != null) {
             try {
                 String str = format(date, formatter);
                 if (str != null) {
                     jsonGenerator.writeString(str);
                 } else {
-                    serializerProvider.defaultSerializeValue(date, jsonGenerator);
+                    serializerProvider.writeValue(jsonGenerator, date);
                 }
             } catch (Exception e) {
-                if (e instanceof IOException) {
-                    throw (IOException) e;
+                if (e instanceof JacksonException) {
+                    throw (JacksonException) e;
                 } else {
-                    throw new IOException(e.getMessage(), e);
+                    throw new IllegalArgumentException(e.getMessage(), e);
                 }
             }
         } else {
-            serializerProvider.defaultSerializeNull(jsonGenerator);
+            serializerProvider.defaultSerializeNullValue(jsonGenerator);
         }
     }
 
