@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.web.reactive.function.client.WebClientCustomizer;
+import org.springframework.boot.webclient.WebClientCustomizer;
 import org.springframework.context.annotation.Bean;
 
 /**
