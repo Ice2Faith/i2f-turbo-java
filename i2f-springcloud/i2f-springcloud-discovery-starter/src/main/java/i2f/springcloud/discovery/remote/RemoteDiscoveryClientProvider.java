@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.server.autoconfigure.ServerProperties;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.core.env.Environment;
@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
@@ -54,12 +55,10 @@ public class RemoteDiscoveryClientProvider implements DiscoveryClient {
     private RestTemplate restTemplate = new RestTemplate();
 
     @Autowired(required = false)
-    private ObjectMapper objectMapper = new ObjectMapper() {
-        {
-            setTimeZone(TimeZone.getTimeZone(ZoneId.of("GMT+8")));
-            setLocale(Locale.CHINA);
-        }
-    };
+    private ObjectMapper objectMapper = JsonMapper.builder()
+            .defaultTimeZone(TimeZone.getTimeZone(ZoneId.of("GMT+8")))
+            .defaultLocale(Locale.CHINA)
+            .build();
 
     @Override
     public String description() {

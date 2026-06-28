@@ -1,7 +1,6 @@
 package i2f.springboot.xproc4j.ext;
 
 import org.springframework.web.client.RestTemplate;
-import tools.jackson.core.JsonProcessingException;
 import tools.jackson.databind.ObjectMapper;
 
 /**
@@ -13,12 +12,12 @@ public class SpringWebFunctions {
 
     public static volatile RestTemplate restTemplate = new RestTemplate();
 
-    public static String to_json(Object obj) throws JsonProcessingException {
+    public static String to_json(Object obj) {
         return objectMapper.writeValueAsString(obj);
     }
 
 
-    public static Object parse_json(Object json, Object type) throws JsonProcessingException {
+    public static Object parse_json(Object json, Object type) {
         if (json == null) {
             return null;
         }

@@ -65,7 +65,7 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
         if (showHeaders) {
             builder.append("request header:").append("\n");
             HttpHeaders headers = request.getHeaders();
-            for (String item : headers.keySet()) {
+            for (String item : headers.headerNames()) {
                 List<String> vals = headers.get(item);
                 for (String val : vals) {
                     builder.append("\t" + item + ":" + val).append("\n");
@@ -86,13 +86,13 @@ public class RequestLogGlobalFilter implements GlobalFilter, Ordered {
 
         log.info(builder.toString() + "-----------global filter pending ------------\n");
         return chain.filter(exchange.mutate().request(request).build()).then(Mono.fromRunnable(() -> {
-            Integer rawStatusCode = response.getRawStatusCode();
+            Integer rawStatusCode = response.getStatusCode().value();
             builder.append("response code:\t" + rawStatusCode).append("\n");
 
             if (showHeaders) {
                 builder.append("response header:").append("\n");
                 HttpHeaders headers = response.getHeaders();
-                for (String item : headers.keySet()) {
+                for (String item : headers.headerNames()) {
                     List<String> vals = headers.get(item);
                     for (String val : vals) {
                         builder.append("\t" + item + ":" + val).append("\n");

@@ -207,7 +207,13 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                         dataBuffer.read(dataBytes);
                         DataBufferUtils.release(dataBuffer);
 
-                        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>(request.getHeaders());
+                        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+
+                        HttpHeaders reqHeaders = request.getHeaders();
+                        for (String name : reqHeaders.headerNames()) {
+                            List<String> list = reqHeaders.get(name);
+                            headers.addAll(name, list);
+                        }
 
 
                         // 请求参数
@@ -402,7 +408,7 @@ public class SwlGatewayFilter implements GlobalFilter, Ordered {
                 // 如果是大文件下载，这里可是内存包装
                 // 使用白名单，避免OOM
                 boolean specificResponseBody = false;
-                Collection<String> headerNames = delegateResponse.getHeaders().keySet();
+                Collection<String> headerNames = delegateResponse.getHeaders().headerNames();
                 for (String item : headerNames) {
                     if (item == null || item.isEmpty()) {
                         continue;
