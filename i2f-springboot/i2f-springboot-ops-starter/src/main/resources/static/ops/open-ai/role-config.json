@@ -34,6 +34,11 @@
     "url": "./role-poetry.md"
   },
   {
+    "label": "爱莉希雅",
+    "icon": "el-icon-chat-line-round",
+    "url": "./role-elysia.md"
+  },
+  {
     "label": "Api聊天女友",
     "icon": "el-icon-chat-line-round",
     "url": "./role-api-girlfirend.md"
