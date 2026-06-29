@@ -63,12 +63,13 @@ public class CommandTools {
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
         File dir = null;
-        if (workdir != null && !workdir.isEmpty()) {
-            if (localFileTools == null) {
-                throw new IllegalStateException("missing local-file secure control.");
-            }
-            dir = localFileTools.getFile(workdir);
+        if (workdir == null || workdir.isEmpty()) {
+            workdir = ".";
         }
+        if (localFileTools == null) {
+            throw new IllegalStateException("missing local-file secure control.");
+        }
+        dir = localFileTools.getFile(workdir);
         String ret = OsUtil.runCmd(commandArray.toArray(new String[0]), null, dir, null);
         return ret;
     }
