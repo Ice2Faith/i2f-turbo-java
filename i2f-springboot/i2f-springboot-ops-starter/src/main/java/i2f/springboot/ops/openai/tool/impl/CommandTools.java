@@ -56,7 +56,7 @@ public class CommandTools {
             tags = {
                     AiTags.EXECUTABLE_VALUE,
                     AiTags.HUMAN_VALUE
-            }, description = "run an command line"
+            }, description = "run an command line, implements by java process."
     )
     public String run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/k\",\"start\",\"calc\"]")
                                    List<String> commandArray,
