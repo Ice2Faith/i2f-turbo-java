@@ -42,5 +42,15 @@
     "label": "Api聊天女友",
     "icon": "el-icon-chat-line-round",
     "url": "./role-api-girlfirend.md"
+  },
+  {
+    "label": "实施规划师",
+    "icon": "el-icon-chat-line-round",
+    "url": "./role-guideline.md"
+  },
+  {
+    "label": "智能开发工程师",
+    "icon": "el-icon-chat-line-round",
+    "url": "./role-ai-programmer.md"
   }
 ]
