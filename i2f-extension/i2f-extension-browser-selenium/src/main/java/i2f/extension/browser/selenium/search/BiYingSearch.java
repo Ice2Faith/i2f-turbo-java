@@ -114,6 +114,14 @@ public class BiYingSearch {
                 }
 
                 driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
+                if (true) {
+                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                    try {
+                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 1));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
 
                 if (SearchType.SEARCH_FIRST == entry.getValue()) {
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
