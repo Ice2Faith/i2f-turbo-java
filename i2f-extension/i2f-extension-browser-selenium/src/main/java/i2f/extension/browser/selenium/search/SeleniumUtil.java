@@ -13,7 +13,7 @@ public class SeleniumUtil {
         if (driver instanceof JavascriptExecutor) {
             try {
                 JavascriptExecutor executor = (JavascriptExecutor) driver;
-                executor.executeScript("document.querySelectorAll('style, script','link','svg','canvas').forEach(function(el) { el.remove(); });");
+                executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function(el) { el.remove(); });");
             } catch (Throwable e) {
 
             }
