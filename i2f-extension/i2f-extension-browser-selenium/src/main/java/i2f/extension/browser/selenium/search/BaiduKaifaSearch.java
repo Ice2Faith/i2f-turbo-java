@@ -118,7 +118,7 @@ public class BaiduKaifaSearch {
                 if (true) {
                     WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                     try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 1));
+                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
