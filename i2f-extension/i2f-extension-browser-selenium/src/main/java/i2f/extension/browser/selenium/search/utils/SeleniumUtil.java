@@ -13,17 +13,25 @@ public class SeleniumUtil {
         if (driver instanceof JavascriptExecutor) {
             JavascriptExecutor executor = (JavascriptExecutor) driver;
             try {
-                executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function(el) { el.remove(); });");
+                executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function (el) {\n" +
+                        "    try {\n" +
+                        "        el.remove();\n" +
+                        "    } catch (e) {\n" +
+                        "    }\n" +
+                        "});");
             } catch (Throwable e) {
 
             }
 
             try {
-                String cleanAttributesScript = "document.querySelectorAll('*').forEach(function(el) { " +
-                        "    el.removeAttribute('class'); " +
-                        "    el.removeAttribute('style'); " +
-                        "    el.removeAttribute('id'); " +
-                        "    el.removeAttribute('onclick'); " +
+                String cleanAttributesScript = "document.querySelectorAll('*').forEach(function (el) {\n" +
+                        "    try {\n" +
+                        "        el.removeAttribute('class');\n" +
+                        "        el.removeAttribute('style');\n" +
+                        "        el.removeAttribute('id');\n" +
+                        "        el.removeAttribute('onclick');\n" +
+                        "    } catch (e) {\n" +
+                        "    }\n" +
                         "});";
 
                 executor.executeScript(cleanAttributesScript);
