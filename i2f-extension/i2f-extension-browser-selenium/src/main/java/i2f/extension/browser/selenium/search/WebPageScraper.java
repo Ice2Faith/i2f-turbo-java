@@ -3,7 +3,6 @@ package i2f.extension.browser.selenium.search;
 import i2f.extension.browser.selenium.BrowserSelenium;
 import i2f.extension.browser.selenium.search.data.SearchResult;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -42,12 +41,7 @@ public class WebPageScraper {
             body = driver.findElement(By.tagName("body"));
             text = body.getText();
 
-            try {
-                JavascriptExecutor executor = (JavascriptExecutor) driver;
-                executor.executeScript("document.querySelectorAll('style, script','link').forEach(function(el) { el.remove(); });");
-            } catch (Throwable e) {
-
-            }
+            SeleniumUtil.removeNoContentElements(driver);
             SearchResult result = new SearchResult();
             result.setUrl(url);
             result.setDescription(null);

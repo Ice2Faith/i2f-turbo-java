@@ -5,7 +5,6 @@ import i2f.extension.browser.selenium.search.data.SearchContext;
 import i2f.extension.browser.selenium.search.data.SearchResult;
 import i2f.extension.browser.selenium.search.enums.SearchType;
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -191,12 +190,7 @@ public class SouGouSearch {
 
 
                     if (context != null) {
-                        try {
-                            JavascriptExecutor executor = (JavascriptExecutor) driver;
-                            executor.executeScript("document.querySelectorAll('style, script','link').forEach(function(el) { el.remove(); });");
-                        } catch (Throwable e) {
-
-                        }
+                        SeleniumUtil.removeNoContentElements(driver);
                         SearchResult result = entry.getKey();
                         result.setTitle(driver.getTitle());
                         result.setHtml(driver.getPageSource());
@@ -220,12 +214,7 @@ public class SouGouSearch {
                     System.out.println("www-article:\n" + text);
 
                     if (context != null) {
-                        try {
-                            JavascriptExecutor executor = (JavascriptExecutor) driver;
-                            executor.executeScript("document.querySelectorAll('style, script','link').forEach(function(el) { el.remove(); });");
-                        } catch (Throwable e) {
-
-                        }
+                        SeleniumUtil.removeNoContentElements(driver);
                         SearchResult result = entry.getKey();
                         result.setTitle(driver.getTitle());
                         result.setHtml(driver.getPageSource());
