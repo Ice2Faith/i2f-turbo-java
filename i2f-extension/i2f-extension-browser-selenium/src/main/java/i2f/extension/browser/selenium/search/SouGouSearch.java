@@ -205,6 +205,11 @@ public class SouGouSearch {
                 if (SearchType.ARTICLE == entry.getValue()) {
                     WebElement body = driver.findElement(By.tagName("body"));
                     String text = body.getText();
+                    if (text == null || text.trim().isEmpty()) {
+                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+                    }
+                    body = driver.findElement(By.tagName("body"));
+                    text = body.getText();
                     System.out.println("www-article:\n" + text);
 
                     if (context != null) {
