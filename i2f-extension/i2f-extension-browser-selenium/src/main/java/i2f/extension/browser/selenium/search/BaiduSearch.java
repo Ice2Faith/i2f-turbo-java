@@ -63,17 +63,17 @@ public class BaiduSearch {
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
             try {
-                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#form[action=\"/s\"]"), 0));
+                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s_form .chat-input-textarea"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            WebElement inputElem = driver.findElement(By.cssSelector("#form[action=\"/s\"] input[name=\"wd\"]"));
+            WebElement inputElem = driver.findElement(By.cssSelector(".s_form .chat-input-textarea"));
             inputElem.click();
             inputElem.sendKeys(question);
 
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(3) + 1));
-            WebElement enterElem = driver.findElement(By.cssSelector("#form[action=\"/s\"] input[type=\"submit\"]"));
+            WebElement enterElem = driver.findElement(By.cssSelector(".s_form #chat-submit-button"));
             enterElem.click();
         }
         try {
@@ -194,7 +194,7 @@ public class BaiduSearch {
                     }
 
                     // 第一页有可能有AI回答
-                    List<WebElement> aiElems = driver.findElements(By.cssSelector("div[tpl=\"ai_index\"] .dqa-markdown_5emil"));
+                    List<WebElement> aiElems = driver.findElements(By.cssSelector(".ai-entry .cosd-markdown .cosd-markdown-content"));
                     List<WebElement> ai2Elems = driver.findElements(By.cssSelector("div[tpl=\"new_baikan_index\"]"));
                     aiElems.addAll(ai2Elems);
                     for (WebElement item : aiElems) {
@@ -226,6 +226,12 @@ public class BaiduSearch {
                 if (SearchType.ARTICLE == entry.getValue()) {
                     WebElement body = driver.findElement(By.tagName("body"));
                     String text = body.getText();
+                    if (text == null || text.trim().isEmpty()) {
+                        // 无文本，在等几秒
+                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+                    }
+                    body = driver.findElement(By.tagName("body"));
+                    text = body.getText();
                     System.out.println("www-article:\n" + text);
 
                     if (context != null) {
