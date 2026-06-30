@@ -10,3 +10,7 @@ ai:
   tools:
     file:
       root-path: ./ai-root
+    selenium-web-search:
+      enable: false
+    command:
+      enable: false
