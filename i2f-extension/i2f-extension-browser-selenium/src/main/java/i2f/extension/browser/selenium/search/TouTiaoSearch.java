@@ -99,141 +99,146 @@ public class TouTiaoSearch {
                     continue;
                 }
 
-
-                if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-                } else {
-                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
-                }
                 try {
-                    if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
-                        driver.navigate().to(entry.getKey().getUrl());
-                    }
-                } catch (Exception e) {
-                    continue;
-                }
 
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
-                if (true) {
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+
+                    if (SearchType.SEARCH_FIRST != entry.getValue()) {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                    } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+                    }
                     try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                    try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-                // 百度搜索页面
-                if (Arrays.asList(SearchType.SEARCH_FIRST,
-                        SearchType.SEARCH_PAGE).contains(entry.getValue())) {
-
-
-                    // 普通条目聚合
-                    List<WebElement> wwwElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-card-content"));
-                    for (WebElement item : wwwElems) {
-                        String text = item.getText();
-                        System.out.println("www-response:\n" + text);
-                        WebElement headerElem = item.findElement(By.cssSelector(".cs-header"));
-                        if (headerElem == null) {
-                            continue;
+                        if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
+                            driver.navigate().to(entry.getKey().getUrl());
                         }
-                        String title = headerElem.getText();
+                    } catch (Exception e) {
+                        continue;
+                    }
+
+                    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
+                    if (true) {
+                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                        try {
+                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                        try {
+                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            break;
+                        }
+                    }
+                    // 百度搜索页面
+                    if (Arrays.asList(SearchType.SEARCH_FIRST,
+                            SearchType.SEARCH_PAGE).contains(entry.getValue())) {
+
+
+                        // 普通条目聚合
+                        List<WebElement> wwwElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-card-content"));
+                        for (WebElement item : wwwElems) {
+                            String text = item.getText();
+                            System.out.println("www-response:\n" + text);
+                            WebElement headerElem = item.findElement(By.cssSelector(".cs-header"));
+                            if (headerElem == null) {
+                                continue;
+                            }
+                            String title = headerElem.getText();
 //                        System.out.println("www-href:\n" + href);
-                        List<WebElement> aElems = item.findElements(By.cssSelector(".cs-header a"));
-                        if (aElems == null || aElems.isEmpty()) {
-                            continue;
+                            List<WebElement> aElems = item.findElements(By.cssSelector(".cs-header a"));
+                            if (aElems == null || aElems.isEmpty()) {
+                                continue;
+                            }
+                            WebElement aElem = aElems.get(0);
+                            if (aElem != null) {
+                                String href = aElem.getAttribute("href");
+                                System.out.println("www-href:\n" + href);
+                                if (context != null) {
+                                    SearchResult result = new SearchResult();
+                                    result.setUrl(href);
+                                    result.setTitle(title);
+                                    result.setDescription(item.getText());
+                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                }
+                            }
+
                         }
-                        WebElement aElem = aElems.get(0);
-                        if (aElem != null) {
-                            String href = aElem.getAttribute("href");
-                            System.out.println("www-href:\n" + href);
+
+
+                    }
+
+                    // 百度搜索首页
+                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                        // 最大翻页
+                        int maxPage = 5;
+                        List<WebElement> pageElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-pagination a"));
+                        for (int i = 0; i < pageElems.size(); i++) {
+                            if (i == 0 || i == pageElems.size() - 1) {
+                                continue;
+                            }
+                            WebElement page = pageElems.get(i);
+                            String href = page.getAttribute("href");
+
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(href);
-                                result.setTitle(title);
-                                result.setDescription(item.getText());
-                                urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));
+                            }
+
+                            maxPage--;
+                            if (maxPage <= 0) {
+                                break;
+                            }
+                        }
+
+
+                        if (context != null) {
+                            SeleniumUtil.removeNoContentElements(driver);
+                            SearchResult result = entry.getKey();
+                            result.setTitle(driver.getTitle());
+                            result.setHtml(driver.getPageSource());
+                            WebElement body = driver.findElement(By.tagName("body"));
+                            if (body != null) {
+                                result.setText(body.getText());
                             }
                         }
 
                     }
 
-
-                }
-
-                // 百度搜索首页
-                if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                    // 最大翻页
-                    int maxPage = 5;
-                    List<WebElement> pageElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-pagination a"));
-                    for (int i = 0; i < pageElems.size(); i++) {
-                        if (i == 0 || i == pageElems.size() - 1) {
-                            continue;
+                    // 跳转的具体条目
+                    if (SearchType.ARTICLE == entry.getValue()) {
+                        WebElement body = driver.findElement(By.tagName("body"));
+                        String text = body.getText();
+                        if (text == null || text.trim().isEmpty()) {
+                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
                         }
-                        WebElement page = pageElems.get(i);
-                        String href = page.getAttribute("href");
+                        body = driver.findElement(By.tagName("body"));
+                        text = body.getText();
+                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
-                            SearchResult result = new SearchResult();
-                            result.setUrl(href);
-                            urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));
+                            SeleniumUtil.removeNoContentElements(driver);
+                            SearchResult result = entry.getKey();
+                            result.setTitle(driver.getTitle());
+                            result.setHtml(driver.getPageSource());
+                            if (body != null) {
+                                result.setText(body.getText());
+                            }
+                            context.getResults().add(result);
                         }
-
-                        maxPage--;
-                        if (maxPage <= 0) {
-                            break;
-                        }
+                        maxFetchCount.decrementAndGet();
                     }
 
 
-                    if (context != null) {
-                        SeleniumUtil.removeNoContentElements(driver);
-                        SearchResult result = entry.getKey();
-                        result.setTitle(driver.getTitle());
-                        result.setHtml(driver.getPageSource());
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        if (body != null) {
-                            result.setText(body.getText());
-                        }
+                    if (maxFetchCount.get() <= 0) {
+                        break;
                     }
-
-                }
-
-                // 跳转的具体条目
-                if (SearchType.ARTICLE == entry.getValue()) {
-                    WebElement body = driver.findElement(By.tagName("body"));
-                    String text = body.getText();
-                    if (text == null || text.trim().isEmpty()) {
-                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                    }
-                    body = driver.findElement(By.tagName("body"));
-                    text = body.getText();
-                    System.out.println("www-article:\n" + text);
-
-                    if (context != null) {
-                        SeleniumUtil.removeNoContentElements(driver);
-                        SearchResult result = entry.getKey();
-                        result.setTitle(driver.getTitle());
-                        result.setHtml(driver.getPageSource());
-                        if (body != null) {
-                            result.setText(body.getText());
-                        }
-                        context.getResults().add(result);
-                    }
-                    maxFetchCount.decrementAndGet();
-                }
-
-
-                if (maxFetchCount.get() <= 0) {
-                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

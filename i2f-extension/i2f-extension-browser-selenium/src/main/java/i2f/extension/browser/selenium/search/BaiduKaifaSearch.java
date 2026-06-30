@@ -100,102 +100,50 @@ public class BaiduKaifaSearch {
                     continue;
                 }
 
-
-                if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-                } else {
-                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-                }
                 try {
-                    if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
-                        driver.navigate().to(entry.getKey().getUrl());
+                    if (SearchType.SEARCH_FIRST != entry.getValue()) {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                    } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                     }
-                } catch (Exception e) {
-                    continue;
-                }
-
-                driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
-                if (true) {
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                     try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
+                        if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
+                            driver.navigate().to(entry.getKey().getUrl());
+                        }
                     } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                    WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                    try {
-                        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
-                // 百度搜索页面
-                if (Arrays.asList(SearchType.SEARCH_FIRST,
-                        SearchType.SEARCH_PAGE).contains(entry.getValue())) {
-
-
-                    // 普通条目聚合
-                    List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
-                    for (WebElement item : wwwElems) {
-                        String text = item.getText();
-                        System.out.println("www-response:\n" + text);
-                        String href = item.getAttribute("mu");
-//                        System.out.println("www-href:\n" + href);
-                        List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
-                        if (aElems == null || aElems.isEmpty()) {
-                            continue;
-                        }
-                        WebElement aElem = aElems.get(0);
-                        if (aElem != null) {
-                            href = aElem.getAttribute("href");
-                            System.out.println("www-href:\n" + href);
-                            if (context != null) {
-                                SearchResult result = new SearchResult();
-                                result.setUrl(href);
-                                result.setDescription(item.getText());
-                                urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
-                            }
-                        }
-
+                        continue;
                     }
 
-
-                }
-
-                // 百度搜索首页
-                if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                    // 最大翻页
-                    int maxPage = 3;
-                    List<WebElement> pageElems = driver.findElements(By.cssSelector("#kf-search-page-footer #pagination-pc .pagination .pagination-item"));
-                    for (int i = 0; i < pageElems.size(); i++) {
-                        if (i == 0) {
-                            continue;
+                    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
+                    if (true) {
+                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                        try {
+                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        WebElement page = pageElems.get(i);
-                        page.click();
+                    }
 
-//                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 8));
-                        TimeUnit.SECONDS.sleep(RANDOM.nextInt(3) + 2);
-
-                        if (true) {
-                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                            try {
-                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                break;
-                            }
+                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                        try {
+                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            break;
                         }
+                    }
+                    // 百度搜索页面
+                    if (Arrays.asList(SearchType.SEARCH_FIRST,
+                            SearchType.SEARCH_PAGE).contains(entry.getValue())) {
+
 
                         // 普通条目聚合
                         List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
                         for (WebElement item : wwwElems) {
                             String text = item.getText();
                             System.out.println("www-response:\n" + text);
+                            String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
                             List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
                             if (aElems == null || aElems.isEmpty()) {
@@ -203,7 +151,7 @@ public class BaiduKaifaSearch {
                             }
                             WebElement aElem = aElems.get(0);
                             if (aElem != null) {
-                                String href = aElem.getAttribute("href");
+                                href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
                                     SearchResult result = new SearchResult();
@@ -215,75 +163,130 @@ public class BaiduKaifaSearch {
 
                         }
 
-                        maxPage--;
-                        if (maxPage <= 0) {
-                            break;
-                        }
+
                     }
 
-                    // 等待AI回答响应完毕
+                    // 百度搜索首页
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                        // 最大翻页
+                        int maxPage = 3;
+                        List<WebElement> pageElems = driver.findElements(By.cssSelector("#kf-search-page-footer #pagination-pc .pagination .pagination-item"));
+                        for (int i = 0; i < pageElems.size(); i++) {
+                            if (i == 0) {
+                                continue;
+                            }
+                            WebElement page = pageElems.get(i);
+                            page.click();
+
+//                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 8));
+                            TimeUnit.SECONDS.sleep(RANDOM.nextInt(3) + 2);
+
+                            if (true) {
+                                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                                try {
+                                    wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    break;
+                                }
+                            }
+
+                            // 普通条目聚合
+                            List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
+                            for (WebElement item : wwwElems) {
+                                String text = item.getText();
+                                System.out.println("www-response:\n" + text);
+//                        System.out.println("www-href:\n" + href);
+                                List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
+                                if (aElems == null || aElems.isEmpty()) {
+                                    continue;
+                                }
+                                WebElement aElem = aElems.get(0);
+                                if (aElem != null) {
+                                    String href = aElem.getAttribute("href");
+                                    System.out.println("www-href:\n" + href);
+                                    if (context != null) {
+                                        SearchResult result = new SearchResult();
+                                        result.setUrl(href);
+                                        result.setDescription(item.getText());
+                                        urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    }
+                                }
+
+                            }
+
+                            maxPage--;
+                            if (maxPage <= 0) {
+                                break;
+                            }
+                        }
+
+                        // 等待AI回答响应完毕
+                        if (SearchType.SEARCH_FIRST == entry.getValue()) {
 //                            driver.manage().timeouts().implicitlyWait(Duration.ofMillis(20000));
 //                    TimeUnit.SECONDS.sleep(20);
+                        }
+
+                        // 第一页有可能有AI回答
+                        List<WebElement> aiElems = driver.findElements(By.cssSelector("div[tpl=\"ai_index\"] .dqa-markdown_5emil"));
+                        List<WebElement> ai2Elems = driver.findElements(By.cssSelector("div[tpl=\"new_baikan_index\"]"));
+                        aiElems.addAll(ai2Elems);
+                        for (WebElement item : aiElems) {
+                            String text = item.getText();
+                            System.out.println("ai-response:\n" + text);
+                            if (context != null) {
+                                SearchResult result = new SearchResult();
+                                result.setUrl(entry.getKey().getUrl());
+                                result.setTitle(context.getQuestion());
+                                result.setDescription("AI answer");
+                                result.setText(text);
+                                context.getResults().add(result);
+                            }
+                        }
+
+                        if (context != null) {
+                            SeleniumUtil.removeNoContentElements(driver);
+                            SearchResult result = entry.getKey();
+                            result.setTitle(driver.getTitle());
+                            result.setHtml(driver.getPageSource());
+                            WebElement body = driver.findElement(By.tagName("body"));
+                            if (body != null) {
+                                result.setText(body.getText());
+                            }
+                        }
+
                     }
 
-                    // 第一页有可能有AI回答
-                    List<WebElement> aiElems = driver.findElements(By.cssSelector("div[tpl=\"ai_index\"] .dqa-markdown_5emil"));
-                    List<WebElement> ai2Elems = driver.findElements(By.cssSelector("div[tpl=\"new_baikan_index\"]"));
-                    aiElems.addAll(ai2Elems);
-                    for (WebElement item : aiElems) {
-                        String text = item.getText();
-                        System.out.println("ai-response:\n" + text);
+                    // 跳转的具体条目
+                    if (SearchType.ARTICLE == entry.getValue()) {
+                        WebElement body = driver.findElement(By.tagName("body"));
+                        String text = body.getText();
+                        if (text == null || text.trim().isEmpty()) {
+                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+                        }
+                        body = driver.findElement(By.tagName("body"));
+                        text = body.getText();
+                        System.out.println("www-article:\n" + text);
+
                         if (context != null) {
-                            SearchResult result = new SearchResult();
-                            result.setUrl(entry.getKey().getUrl());
-                            result.setTitle(context.getQuestion());
-                            result.setDescription("AI answer");
-                            result.setText(text);
+                            SeleniumUtil.removeNoContentElements(driver);
+                            SearchResult result = entry.getKey();
+                            result.setTitle(driver.getTitle());
+                            result.setHtml(driver.getPageSource());
+                            if (body != null) {
+                                result.setText(body.getText());
+                            }
                             context.getResults().add(result);
                         }
+                        maxFetchCount.decrementAndGet();
                     }
 
-                    if (context != null) {
-                        SeleniumUtil.removeNoContentElements(driver);
-                        SearchResult result = entry.getKey();
-                        result.setTitle(driver.getTitle());
-                        result.setHtml(driver.getPageSource());
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        if (body != null) {
-                            result.setText(body.getText());
-                        }
+
+                    if (maxFetchCount.get() <= 0) {
+                        break;
                     }
-
-                }
-
-                // 跳转的具体条目
-                if (SearchType.ARTICLE == entry.getValue()) {
-                    WebElement body = driver.findElement(By.tagName("body"));
-                    String text = body.getText();
-                    if (text == null || text.trim().isEmpty()) {
-                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                    }
-                    body = driver.findElement(By.tagName("body"));
-                    text = body.getText();
-                    System.out.println("www-article:\n" + text);
-
-                    if (context != null) {
-                        SeleniumUtil.removeNoContentElements(driver);
-                        SearchResult result = entry.getKey();
-                        result.setTitle(driver.getTitle());
-                        result.setHtml(driver.getPageSource());
-                        if (body != null) {
-                            result.setText(body.getText());
-                        }
-                        context.getResults().add(result);
-                    }
-                    maxFetchCount.decrementAndGet();
-                }
-
-
-                if (maxFetchCount.get() <= 0) {
-                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {
