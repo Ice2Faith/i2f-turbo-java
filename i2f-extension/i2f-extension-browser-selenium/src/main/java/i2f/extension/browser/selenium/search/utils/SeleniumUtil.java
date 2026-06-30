@@ -1,4 +1,4 @@
-package i2f.extension.browser.selenium.search;
+package i2f.extension.browser.selenium.search.utils;
 
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;

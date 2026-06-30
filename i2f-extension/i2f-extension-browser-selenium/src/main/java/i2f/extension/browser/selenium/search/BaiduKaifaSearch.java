@@ -4,6 +4,7 @@ import i2f.extension.browser.selenium.BrowserSelenium;
 import i2f.extension.browser.selenium.search.data.SearchContext;
 import i2f.extension.browser.selenium.search.data.SearchResult;
 import i2f.extension.browser.selenium.search.enums.SearchType;
+import i2f.extension.browser.selenium.search.utils.SeleniumUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -28,14 +29,18 @@ public class BaiduKaifaSearch {
     public static final SecureRandom RANDOM = new SecureRandom();
 
     public static SearchContext search(String question) {
-        return search(question, 5, null);
+        return search(question, 5, false, null);
     }
 
     public static SearchContext search(String question, String driverPath) {
-        return search(question, 5, driverPath);
+        return search(question, 5, false, driverPath);
     }
 
     public static SearchContext search(String question, int maxArticleCount, String driverPath) {
+        return search(question, 5, false, driverPath);
+    }
+
+    public static SearchContext search(String question, int maxArticleCount, boolean webUi, String driverPath) {
         if (maxArticleCount <= 0) {
             maxArticleCount = 5;
         }
@@ -58,7 +63,7 @@ public class BaiduKaifaSearch {
 
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
-        WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
+        WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
         if (true) {
             driver.get("https://kaifa.baidu.com/");
 
