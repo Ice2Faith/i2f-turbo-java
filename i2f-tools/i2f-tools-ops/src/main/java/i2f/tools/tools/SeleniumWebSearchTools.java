@@ -10,8 +10,17 @@ import i2f.extension.browser.selenium.search.BiYingSearch;
 import i2f.extension.browser.selenium.search.WebPageScraper;
 import i2f.extension.browser.selenium.search.data.SearchContext;
 import i2f.extension.browser.selenium.search.data.SearchResult;
+import i2f.os.OsUtil;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 /**
  * @author Ice2Faith
@@ -19,9 +28,32 @@ import org.springframework.stereotype.Component;
  * @desc
  */
 @ConditionalOnExpression("${ai.tools.selenium-web-search.enable:false}")
+@Conditional(SeleniumWebSearchTools.WindowsSeleniumCondition.class)
+@Data
+@NoArgsConstructor
 @Component
 @Tools
 public class SeleniumWebSearchTools {
+
+    public static class WindowsSeleniumCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            if (!OsUtil.isWindows()) {
+                return false;
+            }
+            try {
+                return ClassUtils.isPresent("org.openqa.selenium.WebDriver", context.getClassLoader());
+            } catch (Throwable e) {
+
+            }
+            return false;
+        }
+    }
+
+    @Value("${ai.tools.selenium-web-search.web-ui:true}")
+    protected boolean webUi=true;
+
     @Tool(
             tags = {
                     AiTags.READONLY_VALUE,
@@ -34,7 +66,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_kaifa_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduKaifaSearch.search(content, 5, null);
+        SearchContext ret = BaiduKaifaSearch.search(content, 5,webUi, null);
         return ret;
     }
 
@@ -50,7 +82,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduSearch.search(content, 5, null);
+        SearchContext ret = BaiduSearch.search(content, 5,webUi, null);
         return ret;
     }
 
@@ -66,7 +98,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_biying(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BiYingSearch.search(content, 5, null);
+        SearchContext ret = BiYingSearch.search(content, 5,webUi, null);
         return ret;
     }
 
@@ -82,7 +114,7 @@ public class SeleniumWebSearchTools {
     public SearchResult selenium_scrape_web_page(
             @ToolParam(value = "url", description = "the url of scrape, for example \"https://spring.io/projects/spring-boot\"")
             String url) {
-        SearchResult ret = WebPageScraper.scraper(url, null);
+        SearchResult ret = WebPageScraper.scraper(url,webUi, null);
         return ret;
     }
 }
