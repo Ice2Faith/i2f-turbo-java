@@ -11,11 +11,23 @@ import org.openqa.selenium.WebDriver;
 public class SeleniumUtil {
     public static void removeNoContentElements(WebDriver driver) {
         if (driver instanceof JavascriptExecutor) {
+            JavascriptExecutor executor = (JavascriptExecutor) driver;
             try {
-                JavascriptExecutor executor = (JavascriptExecutor) driver;
                 executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function(el) { el.remove(); });");
             } catch (Throwable e) {
 
+            }
+
+            try {
+                String cleanAttributesScript = "document.querySelectorAll('*').forEach(function(el) { " +
+                        "    el.removeAttribute('class'); " +
+                        "    el.removeAttribute('style'); " +
+                        "});";
+
+                executor.executeScript(cleanAttributesScript);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.out.println(e.getMessage());
             }
         }
     }
