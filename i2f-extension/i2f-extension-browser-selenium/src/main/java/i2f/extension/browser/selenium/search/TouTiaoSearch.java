@@ -63,6 +63,7 @@ public class TouTiaoSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
+        SeleniumUtil.blockNetworkResources(driver);
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         if (true) {
             driver.get("https://www.toutiao.com/");

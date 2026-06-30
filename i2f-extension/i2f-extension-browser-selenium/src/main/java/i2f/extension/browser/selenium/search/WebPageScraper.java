@@ -20,6 +20,7 @@ public class WebPageScraper {
     public static SearchResult scraper(String url, boolean webUi, String driverPath) {
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
+        SeleniumUtil.blockNetworkResources(driver);
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         try {
             driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
