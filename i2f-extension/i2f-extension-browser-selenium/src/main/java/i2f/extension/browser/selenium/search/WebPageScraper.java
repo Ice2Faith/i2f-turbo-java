@@ -20,7 +20,10 @@ public class WebPageScraper {
     public static SearchResult scraper(String url, String driverPath) {
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, true, driverPath);
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         try {
+            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+
             driver.get(url);
 
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
@@ -30,7 +33,6 @@ public class WebPageScraper {
                 e.printStackTrace();
             }
 
-            driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
 
             WebElement body = driver.findElement(By.tagName("body"));
             String text = body.getText();

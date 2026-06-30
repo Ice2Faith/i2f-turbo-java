@@ -62,7 +62,7 @@ public class SouGouSearch {
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
-
+        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
         if (true) {
             driver.get("https://www.sogou.com/");
 
@@ -100,7 +100,7 @@ public class SouGouSearch {
 
 
                 if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(10));
+                    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
                 } else {
                     driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
                 }

@@ -22,6 +22,8 @@ public class SeleniumUtil {
                 String cleanAttributesScript = "document.querySelectorAll('*').forEach(function(el) { " +
                         "    el.removeAttribute('class'); " +
                         "    el.removeAttribute('style'); " +
+                        "    el.removeAttribute('id'); " +
+                        "    el.removeAttribute('onclick'); " +
                         "});";
 
                 executor.executeScript(cleanAttributesScript);
