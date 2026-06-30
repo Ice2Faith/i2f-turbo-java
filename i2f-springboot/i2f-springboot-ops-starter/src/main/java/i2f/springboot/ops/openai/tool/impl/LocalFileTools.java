@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -60,6 +61,77 @@ public class LocalFileTools {
         File startFile = getFile(startPath);
 
         search_files_next(ret, startFile, pattern, maxDeep, rootFile);
+        return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "make directory"
+    )
+    public boolean mkdirs(@ToolParam(value = "path", description = "create path, support multiply path(s), for example /user or /user/a/b ")
+                          String path) {
+        File file = getFile(path);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return true;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "get file statistics, include exists,length,type(dir/file)"
+    )
+    public Map<String, Object> get_file_stat(@ToolParam(value = "path", description = "the path, for example /user or /user/a.txt ")
+                                             String path) {
+        File file = getFile(path);
+        Map<String, Object> ret = new HashMap<>();
+        boolean exists = file.exists();
+        ret.put("path", getSubPath(file));
+        ret.put("exists", exists);
+        if (exists) {
+            ret.put("lengthInBytes", file.length());
+            ret.put("lengthInHuman", HumanUtil.humanFileSize(file.length()));
+            if (file.isFile()) {
+                ret.put("type", "file");
+            }
+            if (file.isDirectory()) {
+                ret.put("type", "dir");
+            }
+            ret.put("canExecute", file.canExecute());
+            ret.put("canRead", file.canRead());
+            ret.put("canWrite", file.canWrite());
+        }
+        return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "get text file total lines"
+    )
+    public Map<String, Object> get_file_total_lines(@ToolParam(value = "path", description = "the path, for example /user or /user/a.txt ")
+                                                    String path) throws Exception {
+        File file = getFile(path);
+        Map<String, Object> ret = new HashMap<>();
+        boolean exists = file.exists();
+        ret.put("path", getSubPath(file));
+        ret.put("exists", exists);
+        ret.put("totalLines", -1);
+        if (exists) {
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+                int count = 0;
+                String line = null;
+                while ((line = reader.readLine()) != null) {
+                    count++;
+                }
+                ret.put("totalLines", count);
+            }
+        }
         return ret;
     }
 
