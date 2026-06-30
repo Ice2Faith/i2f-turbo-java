@@ -22,7 +22,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class BrowserSelenium {
 
-
     // https://www.runoob.com/selenium/selenium-install.html
     // https://www.selenium.dev/documentation/webdriver/getting_started/install_library/
     // chromedriver 下载地址，其中 145.0.7632.117 替换为自己的chrome的版本即可下载
