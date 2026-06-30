@@ -46,16 +46,20 @@ public class BrowserSelenium {
         String[] driverSuffixes = {"", ".exe"};
         byte[] buff = new byte[4096];
         int len = 0;
+        File driverDir = new File(DEFAULT_DRIVERS_PATH);
+        if (!driverDir.exists()) {
+            driverDir.mkdirs();
+        }
         for (String driverName : driverNames) {
             for (String driverSuffix : driverSuffixes) {
                 String resourcePath = "assets/webdriver/" + driverName + driverSuffix;
-                File driverDir = new File(DEFAULT_DRIVERS_PATH);
-                if (!driverDir.exists()) {
-                    driverDir.mkdirs();
+                File saveFile = new File(driverDir, driverName + driverSuffix);
+                if (saveFile.exists()) {
+                    continue;
                 }
                 try (InputStream is = loader.getResourceAsStream(resourcePath)) {
                     if (is != null) {
-                        try (FileOutputStream fos = new FileOutputStream(DEFAULT_DRIVERS_PATH + "/" + driverName + driverSuffix)) {
+                        try (FileOutputStream fos = new FileOutputStream(saveFile)) {
                             while ((len = is.read(buff)) > 0) {
                                 fos.write(buff, 0, len);
                             }
