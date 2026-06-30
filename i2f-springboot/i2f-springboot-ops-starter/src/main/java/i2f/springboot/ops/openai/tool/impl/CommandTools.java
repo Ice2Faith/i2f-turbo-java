@@ -20,7 +20,7 @@ import java.util.List;
  * @date 2026/6/22 16:38
  * @desc
  */
-@ConditionalOnExpression("${ai.tools.command.enable:true}")
+@ConditionalOnExpression("${ai.tools.command.enable:false}")
 @Component
 @Data
 @NoArgsConstructor
