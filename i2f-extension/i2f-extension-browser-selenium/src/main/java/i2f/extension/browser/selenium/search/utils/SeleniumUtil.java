@@ -47,6 +47,10 @@ public class SeleniumUtil {
     }
 
     public static void blockNetworkResources(WebDriver driver) {
+        if (true) {
+            return;
+        }
+        // TODO 改善实现，目前的实现，使用 setBlockedURLs 会导致浏览器卡住死锁等待，不会往下继续执行
         if (driver instanceof HasCdp) {
             HasCdp hasCdp = (HasCdp) driver;
             try {
