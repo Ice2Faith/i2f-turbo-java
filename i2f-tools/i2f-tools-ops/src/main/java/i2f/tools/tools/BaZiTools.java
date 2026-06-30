@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * @date 2026/6/10 15:18
  * @desc
  */
-@ConditionalOnExpression("${i2f.tools.ba-zi.enable:true}")
+@ConditionalOnExpression("${ai.tools.ba-zi.enable:true}")
 @Component
 @Tools
 public class BaZiTools {

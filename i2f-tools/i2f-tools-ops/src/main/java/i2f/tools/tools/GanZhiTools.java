@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/10 15:42
  * @desc
  */
-@ConditionalOnExpression("${i2f.tools.gan-zhi.enable:true}")
+@ConditionalOnExpression("${ai.tools.gan-zhi.enable:true}")
 @Component
 @Tools
 public class GanZhiTools {
