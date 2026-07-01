@@ -22,7 +22,7 @@ public class BrowserPlaywright {
         }
 
         Browser browser = playwright.chromium().launch(
-                launchOptions.setHeadless(withUi)
+                launchOptions.setHeadless(!withUi)
         );
         ret.setBrowser(browser);
 
