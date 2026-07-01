@@ -2,6 +2,7 @@ package i2f.extension.browser.playwright.search;
 
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.impl.TargetClosedError;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.browser.std.search.enums.SearchType;
@@ -68,6 +69,9 @@ public class BaiduSearch {
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (e instanceof TargetClosedError) {
+                        throw e;
+                    }
                 }
 
                 ElementHandle inputElem = driver.getPage().querySelector(".s_form .chat-input-textarea");
@@ -106,6 +110,10 @@ public class BaiduSearch {
                             driver.getPage().navigate(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        if (e instanceof TargetClosedError) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -117,8 +125,12 @@ public class BaiduSearch {
                             );
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (e instanceof TargetClosedError) {
+                                break;
+                            }
                         }
                     }
+
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         try {
                             driver.getPage().waitForSelector("div[tpl=\"www_index\"]", new Page.WaitForSelectorOptions()
@@ -264,6 +276,9 @@ public class BaiduSearch {
                         break;
                     }
                 } catch (Exception e) {
+                    if (e instanceof TargetClosedError) {
+                        break;
+                    }
                     e.printStackTrace();
                 }
             }

@@ -18,7 +18,7 @@ public class SeleniumUtil {
         if (driver instanceof JavascriptExecutor) {
             JavascriptExecutor executor = (JavascriptExecutor) driver;
             try {
-                executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function (el) {\n" +
+                executor.executeScript("document.querySelectorAll('style, script, link , svg ,canvas, noscript, input[type=\"hidden\"]').forEach(function (el) {\n" +
                         "    try {\n" +
                         "        el.remove();\n" +
                         "    } catch (e) {\n" +

@@ -2,6 +2,7 @@ package i2f.extension.browser.playwright.search;
 
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.impl.TargetClosedError;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.browser.std.search.enums.SearchType;
@@ -25,7 +26,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class BaiduKaifaSearch {
     public static final SecureRandom RANDOM = new SecureRandom();
-
 
     public static SearchContext search(String question) {
         return search(question, 5, false);
@@ -70,6 +70,9 @@ public class BaiduKaifaSearch {
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (e instanceof TargetClosedError) {
+                        throw e;
+                    }
                 }
 
                 ElementHandle inputElem = driver.getPage().querySelector("#home-search-container .ant-input-search input");
@@ -108,6 +111,10 @@ public class BaiduKaifaSearch {
                             driver.getPage().navigate(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        if (e instanceof TargetClosedError) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -119,6 +126,9 @@ public class BaiduKaifaSearch {
                             );
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (e instanceof TargetClosedError) {
+                                break;
+                            }
                         }
                     }
 
@@ -262,6 +272,7 @@ public class BaiduKaifaSearch {
                         ElementHandle body = driver.getPage().querySelector("body");
                         String text = body.innerText();
                         if (text == null || text.trim().isEmpty()) {
+                            // 无文本，在等几秒
                             driver.getPage().waitForTimeout(Duration.ofSeconds(5).toMillis());
                         }
                         body = driver.getPage().querySelector("body");
@@ -286,6 +297,9 @@ public class BaiduKaifaSearch {
                         break;
                     }
                 } catch (Exception e) {
+                    if (e instanceof TargetClosedError) {
+                        break;
+                    }
                     e.printStackTrace();
                 }
             }

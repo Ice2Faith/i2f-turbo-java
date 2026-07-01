@@ -14,7 +14,7 @@ public class PlaywrightUtil {
     public static void removeNoContentElements(Page page) {
 
         try {
-            page.evaluate("document.querySelectorAll('style, script, link , svg ,canvas, noscript').forEach(function (el) {\n" +
+            page.evaluate("document.querySelectorAll('style, script, link , svg ,canvas, noscript, input[type=\"hidden\"]').forEach(function (el) {\n" +
                     "    try {\n" +
                     "        el.remove();\n" +
                     "    } catch (e) {\n" +

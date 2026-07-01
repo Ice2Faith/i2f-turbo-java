@@ -3,6 +3,7 @@ package i2f.extension.browser.playwright;
 import com.microsoft.playwright.*;
 import i2f.extension.browser.playwright.context.PlaywrightDriver;
 
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -19,6 +20,12 @@ public class BrowserPlaywright {
 
         if (launchOptions == null) {
             launchOptions = new BrowserType.LaunchOptions();
+            launchOptions.setArgs(Arrays.asList(
+                            "--no-sandbox",
+                            "--disable-gpu",
+                            "--remote-allow-origins=*",
+                            "--disable-blink-features=AutomationControlled"))
+                    .setChromiumSandbox(false);
         }
 
         Browser browser = playwright.chromium().launch(
