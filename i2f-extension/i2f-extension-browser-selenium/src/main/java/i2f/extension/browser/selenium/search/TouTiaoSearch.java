@@ -73,6 +73,9 @@ public class TouTiaoSearch {
                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".search-container .search"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
+                if (SeleniumUtil.isCannotRecoveryException(e)) {
+                    throw e;
+                }
             }
 
             WebElement inputElem = driver.findElement(By.cssSelector(".search-container .search input"));
@@ -113,6 +116,9 @@ public class TouTiaoSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        if (SeleniumUtil.isCannotRecoveryException(e)) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -123,6 +129,9 @@ public class TouTiaoSearch {
                             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (SeleniumUtil.isCannotRecoveryException(e)) {
+                                break;
+                            }
                         }
                     }
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
@@ -240,6 +249,9 @@ public class TouTiaoSearch {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (SeleniumUtil.isCannotRecoveryException(e)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

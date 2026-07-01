@@ -74,6 +74,9 @@ public class BaiduKaifaSearch {
                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#home-search-container .ant-input-search"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
+                if (SeleniumUtil.isCannotRecoveryException(e)) {
+                    throw e;
+                }
             }
 
             WebElement inputElem = driver.findElement(By.cssSelector("#home-search-container .ant-input-search input"));
@@ -112,6 +115,10 @@ public class BaiduKaifaSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        if (SeleniumUtil.isCannotRecoveryException(e)) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -122,6 +129,9 @@ public class BaiduKaifaSearch {
                             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (SeleniumUtil.isCannotRecoveryException(e)) {
+                                break;
+                            }
                         }
                     }
 
@@ -288,6 +298,9 @@ public class BaiduKaifaSearch {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (SeleniumUtil.isCannotRecoveryException(e)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

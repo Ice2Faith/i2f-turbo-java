@@ -1,8 +1,12 @@
 package i2f.extension.browser.selenium.search.utils;
 
 import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.NoSuchSessionException;
+import org.openqa.selenium.NoSuchWindowException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chromium.HasCdp;
+import org.openqa.selenium.remote.UnreachableBrowserException;
+import org.openqa.selenium.remote.http.ConnectionFailedException;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -93,5 +97,15 @@ public class SeleniumUtil {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean isCannotRecoveryException(Throwable e) {
+        if (e instanceof NoSuchSessionException
+                || e instanceof NoSuchWindowException
+                || e instanceof ConnectionFailedException
+                || e instanceof UnreachableBrowserException) {
+            return true;
+        }
+        return false;
     }
 }

@@ -72,6 +72,9 @@ public class SouGouSearch {
                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".search-box form"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
+                if (SeleniumUtil.isCannotRecoveryException(e)) {
+                    throw e;
+                }
             }
 
             WebElement inputElem = driver.findElement(By.cssSelector(".search-box form .sec-input"));
@@ -113,6 +116,9 @@ public class SouGouSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        if (SeleniumUtil.isCannotRecoveryException(e)) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -124,6 +130,9 @@ public class SouGouSearch {
                             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (SeleniumUtil.isCannotRecoveryException(e)) {
+                                break;
+                            }
                         }
                     }
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
@@ -246,6 +255,9 @@ public class SouGouSearch {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (SeleniumUtil.isCannotRecoveryException(e)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

@@ -73,6 +73,9 @@ public class BiYingSearch {
                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".sbox_cn form"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
+                if (SeleniumUtil.isCannotRecoveryException(e)) {
+                    throw e;
+                }
             }
 
             WebElement inputElem = driver.findElement(By.cssSelector(".sbox_cn form #sb_form_q"));
@@ -111,6 +114,9 @@ public class BiYingSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        if (SeleniumUtil.isCannotRecoveryException(e)) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -121,6 +127,9 @@ public class BiYingSearch {
                             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (SeleniumUtil.isCannotRecoveryException(e)) {
+                                break;
+                            }
                         }
                     }
 
@@ -239,6 +248,9 @@ public class BiYingSearch {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (SeleniumUtil.isCannotRecoveryException(e)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

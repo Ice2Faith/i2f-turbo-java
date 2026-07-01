@@ -73,6 +73,9 @@ public class BaiduSearch {
                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s_form .chat-input-textarea"), 0));
             } catch (Exception e) {
                 e.printStackTrace();
+                if (SeleniumUtil.isCannotRecoveryException(e)) {
+                    throw e;
+                }
             }
 
             WebElement inputElem = driver.findElement(By.cssSelector(".s_form .chat-input-textarea"));
@@ -113,6 +116,10 @@ public class BaiduSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
+                        if (SeleniumUtil.isCannotRecoveryException(e)) {
+                            break;
+                        }
                         continue;
                     }
 
@@ -123,6 +130,9 @@ public class BaiduSearch {
                             wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
                         } catch (Exception e) {
                             e.printStackTrace();
+                            if (SeleniumUtil.isCannotRecoveryException(e)) {
+                                break;
+                            }
                         }
                     }
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
@@ -270,6 +280,9 @@ public class BaiduSearch {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
+                    if (SeleniumUtil.isCannotRecoveryException(e)) {
+                        break;
+                    }
                 }
             }
         } catch (Exception e) {

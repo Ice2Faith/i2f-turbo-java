@@ -1,6 +1,7 @@
 package i2f.extension.browser.playwright.search.utils;
 
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.impl.TargetClosedError;
 import i2f.browser.std.search.consts.SearchBlockConsts;
 import i2f.browser.std.search.utils.SearchUtil;
 
@@ -95,5 +96,12 @@ public class PlaywrightUtil {
                 route.resume(); // 放行其他请求（如 HTML, JS, CSS, XHR 等）
             }
         });
+    }
+
+    public static boolean isCannotRecoveryException(Throwable e) {
+        if (e instanceof TargetClosedError) {
+            return true;
+        }
+        return false;
     }
 }

@@ -2,7 +2,6 @@ package i2f.extension.browser.playwright.search;
 
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.impl.TargetClosedError;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.browser.std.search.enums.SearchType;
@@ -69,7 +68,7 @@ public class TouTiaoSearch {
                     );
                 } catch (Exception e) {
                     e.printStackTrace();
-                    if (e instanceof TargetClosedError) {
+                    if (PlaywrightUtil.isCannotRecoveryException(e)) {
                         throw e;
                     }
                 }
@@ -111,7 +110,7 @@ public class TouTiaoSearch {
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
-                        if (e instanceof TargetClosedError) {
+                        if (PlaywrightUtil.isCannotRecoveryException(e)) {
                             break;
                         }
                         continue;
@@ -125,7 +124,7 @@ public class TouTiaoSearch {
                             );
                         } catch (Exception e) {
                             e.printStackTrace();
-                            if (e instanceof TargetClosedError) {
+                            if (PlaywrightUtil.isCannotRecoveryException(e)) {
                                 break;
                             }
                         }
@@ -247,7 +246,7 @@ public class TouTiaoSearch {
                         break;
                     }
                 } catch (Exception e) {
-                    if (e instanceof TargetClosedError) {
+                    if (PlaywrightUtil.isCannotRecoveryException(e)) {
                         break;
                     }
                     e.printStackTrace();

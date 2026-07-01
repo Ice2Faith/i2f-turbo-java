@@ -2,7 +2,6 @@ package i2f.extension.browser.playwright.search;
 
 import com.microsoft.playwright.ElementHandle;
 import com.microsoft.playwright.Page;
-import com.microsoft.playwright.impl.TargetClosedError;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.extension.browser.playwright.BrowserPlaywright;
 import i2f.extension.browser.playwright.context.PlaywrightDriver;
@@ -33,7 +32,7 @@ public class WebPageScraper {
                 );
             } catch (Exception e) {
                 e.printStackTrace();
-                if (e instanceof TargetClosedError) {
+                if (PlaywrightUtil.isCannotRecoveryException(e)) {
                     throw e;
                 }
             }
