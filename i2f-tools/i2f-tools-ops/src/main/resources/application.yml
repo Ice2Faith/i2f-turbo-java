@@ -13,6 +13,6 @@ ai:
     selenium-web-search:
       enable: false
     playwright-web-search:
-      enable: true
+      enable: false
     command:
       enable: true

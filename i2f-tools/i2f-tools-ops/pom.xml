@@ -64,6 +64,8 @@
 
         <jackson.version>2.13.5</jackson.version>
         <slf4j.version>1.7.36</slf4j.version>
+
+        <selenium.version>4.45.0</selenium.version>
     </properties>
 
     <dependencies>
@@ -289,7 +291,6 @@
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
-            <version>4.32.0</version>
         </dependency>
 
         <dependency>
@@ -313,6 +314,15 @@
                 <version>${lombok.version}</version>
                 <optional>true</optional>
                 <scope>provided</scope>
+            </dependency>
+
+            <!-- 强制覆盖 Spring Boot 默认的 Selenium 4.1.4 版本 -->
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-bom</artifactId>
+                <version>${selenium.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
             <dependency>
