@@ -17,7 +17,7 @@ import java.time.Duration;
  * @desc
  */
 public class WebPageScraper {
-    public static SearchResult scraper(String url, boolean webUi, String driverPath) {
+    public static SearchResult scraper(String url, boolean webUi, String driverPath) throws Exception {
         // 打开目标网页
         WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
         SeleniumUtil.blockNetworkResources(driver);
