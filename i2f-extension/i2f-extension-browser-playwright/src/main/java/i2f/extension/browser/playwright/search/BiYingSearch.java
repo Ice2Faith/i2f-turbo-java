@@ -100,7 +100,7 @@ public class BiYingSearch {
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                        driver.getPage().setDefaultNavigationTimeout(Duration.ofSeconds(15).toMillis());
+                        driver.getPage().setDefaultNavigationTimeout(Duration.ofSeconds(30).toMillis());
                     } else {
                         driver.getPage().setDefaultNavigationTimeout(Duration.ofSeconds(60).toMillis());
                     }

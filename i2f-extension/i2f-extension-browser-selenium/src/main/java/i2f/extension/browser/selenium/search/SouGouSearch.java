@@ -106,9 +106,9 @@ public class SouGouSearch {
 
 
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-                    } else {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+                    } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                     }
 
                     try {

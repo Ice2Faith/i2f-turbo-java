@@ -107,9 +107,9 @@ public class TouTiaoSearch {
 
 
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
-                    } else {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
+                    } else {
+                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                     }
                     try {
                         if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
