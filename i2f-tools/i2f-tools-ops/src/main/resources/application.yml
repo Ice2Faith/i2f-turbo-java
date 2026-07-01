@@ -15,4 +15,4 @@ ai:
     playwright-web-search:
       enable: false
     command:
-      enable: true
+      enable: false
