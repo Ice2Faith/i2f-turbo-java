@@ -12,5 +12,7 @@ ai:
       root-path: ./ai-root
     selenium-web-search:
       enable: false
+    playwright-web-search:
+      enable: true
     command:
-      enable: false
+      enable: true

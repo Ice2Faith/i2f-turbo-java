@@ -6,10 +6,10 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
-import i2f.extension.browser.selenium.search.BaiduKaifaSearch;
-import i2f.extension.browser.selenium.search.BaiduSearch;
-import i2f.extension.browser.selenium.search.BiYingSearch;
-import i2f.extension.browser.selenium.search.WebPageScraper;
+import i2f.extension.browser.playwright.search.BaiduKaifaSearch;
+import i2f.extension.browser.playwright.search.BaiduSearch;
+import i2f.extension.browser.playwright.search.BiYingSearch;
+import i2f.extension.browser.playwright.search.WebPageScraper;
 import i2f.os.OsUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,15 +27,15 @@ import org.springframework.util.ClassUtils;
  * @date 2026/6/30 10:37
  * @desc
  */
-@ConditionalOnExpression("${ai.tools.selenium-web-search.enable:false}")
-@Conditional(SeleniumWebSearchTools.WindowsSeleniumCondition.class)
+@ConditionalOnExpression("${ai.tools.playwright-web-search.enable:false}")
+@Conditional(PlaywrightWebSearchTools.WindowsPlaywrightCondition.class)
 @Data
 @NoArgsConstructor
 @Component
 @Tools
-public class SeleniumWebSearchTools {
+public class PlaywrightWebSearchTools {
 
-    public static class WindowsSeleniumCondition implements Condition {
+    public static class WindowsPlaywrightCondition implements Condition {
 
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
@@ -43,7 +43,7 @@ public class SeleniumWebSearchTools {
                 return false;
             }
             try {
-                return ClassUtils.isPresent("org.openqa.selenium.WebDriver", context.getClassLoader());
+                return ClassUtils.isPresent("com.microsoft.playwright.Playwright", context.getClassLoader());
             } catch (Throwable e) {
 
             }
@@ -51,8 +51,8 @@ public class SeleniumWebSearchTools {
         }
     }
 
-    @Value("${ai.tools.selenium-web-search.web-ui:true}")
-    protected boolean webUi=true;
+    @Value("${ai.tools.playwright-web-search.web-ui:true}")
+    protected boolean webUi = true;
 
     @Tool(
             tags = {
@@ -63,10 +63,10 @@ public class SeleniumWebSearchTools {
             },
             description = "search content by web, suitable for retrieving technical development materials, implement by https://kaifa.baidu.com"
     )
-    public SearchContext selenium_web_search_by_kaifa_baidu(
+    public SearchContext playwright_web_search_by_kaifa_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduKaifaSearch.search(content, 5,webUi, null);
+        SearchContext ret = BaiduKaifaSearch.search(content, 5, webUi);
         return ret;
     }
 
@@ -79,10 +79,10 @@ public class SeleniumWebSearchTools {
             },
             description = "search content by web, suitable for retrieving public web materials, implement by https://www.baidu.com"
     )
-    public SearchContext selenium_web_search_by_baidu(
+    public SearchContext playwright_web_search_by_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduSearch.search(content, 5,webUi, null);
+        SearchContext ret = BaiduSearch.search(content, 5, webUi);
         return ret;
     }
 
@@ -95,10 +95,10 @@ public class SeleniumWebSearchTools {
             },
             description = "search content by web, suitable for retrieving public web materials, especially English or international content, implement by https://www.biying.com"
     )
-    public SearchContext selenium_web_search_by_biying(
+    public SearchContext playwright_web_search_by_biying(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BiYingSearch.search(content, 5,webUi, null);
+        SearchContext ret = BiYingSearch.search(content, 5, webUi);
         return ret;
     }
 
@@ -111,10 +111,10 @@ public class SeleniumWebSearchTools {
             },
             description = "scrape the web page content from a specific URL"
     )
-    public SearchResult selenium_scrape_web_page(
+    public SearchResult playwright_scrape_web_page(
             @ToolParam(value = "url", description = "the url of scrape, for example \"https://spring.io/projects/spring-boot\"")
             String url) throws Exception {
-        SearchResult ret = WebPageScraper.scraper(url,webUi, null);
+        SearchResult ret = WebPageScraper.scraper(url, webUi);
         return ret;
     }
 }
