@@ -9,7 +9,7 @@
         <version>1.0-jdk8</version>
     </parent>
 
-    <artifactId>i2f-extension-browser-selenium</artifactId>
+    <artifactId>i2f-extension-browser-playwright</artifactId>
 
 
     <dependencies>
@@ -29,9 +29,9 @@
         </dependency>
 
         <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>4.32.0</version>
+            <groupId>com.microsoft.playwright</groupId>
+            <artifactId>playwright</artifactId>
+            <version>1.58.0</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>
@@ -47,6 +47,5 @@
             </plugin>
         </plugins>
     </build>
-
 
 </project>

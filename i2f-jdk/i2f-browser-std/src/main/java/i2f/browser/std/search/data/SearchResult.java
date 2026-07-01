@@ -1,4 +1,4 @@
-package i2f.extension.browser.selenium.search.data;
+package i2f.browser.std.search.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,7 +1,7 @@
 package i2f.extension.browser.selenium.search;
 
+import i2f.browser.std.search.data.SearchResult;
 import i2f.extension.browser.selenium.BrowserSelenium;
-import i2f.extension.browser.selenium.search.data.SearchResult;
 import i2f.extension.browser.selenium.search.utils.SeleniumUtil;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;

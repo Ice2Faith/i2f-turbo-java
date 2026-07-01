@@ -1,4 +1,4 @@
-package i2f.extension.browser.selenium.search.enums;
+package i2f.browser.std.search.enums;
 
 /**
  * @author Ice2Faith

@@ -1,15 +1,13 @@
-package i2f.extension.browser.selenium.search;
+package i2f.extension.browser.playwright.search;
 
+import com.microsoft.playwright.ElementHandle;
+import com.microsoft.playwright.Page;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.browser.std.search.enums.SearchType;
-import i2f.extension.browser.selenium.BrowserSelenium;
-import i2f.extension.browser.selenium.search.utils.SeleniumUtil;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+import i2f.extension.browser.playwright.BrowserPlaywright;
+import i2f.extension.browser.playwright.context.PlaywrightDriver;
+import i2f.extension.browser.playwright.search.utils.PlaywrightUtil;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -28,19 +26,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BaiduKaifaSearch {
     public static final SecureRandom RANDOM = new SecureRandom();
 
+
     public static SearchContext search(String question) {
-        return search(question, 5, false, null);
+        return search(question, 5, false);
     }
 
-    public static SearchContext search(String question, String driverPath) {
-        return search(question, 5, false, driverPath);
+    public static SearchContext search(String question, int maxArticleCount) {
+        return search(question, maxArticleCount, false);
     }
 
-    public static SearchContext search(String question, int maxArticleCount, String driverPath) {
-        return search(question, maxArticleCount, false, driverPath);
-    }
-
-    public static SearchContext search(String question, int maxArticleCount, boolean webUi, String driverPath) {
+    public static SearchContext search(String question, int maxArticleCount, boolean webUi) {
         if (maxArticleCount <= 0) {
             maxArticleCount = 5;
         }
@@ -63,28 +58,29 @@ public class BaiduKaifaSearch {
 
         AtomicInteger maxFetchCount = new AtomicInteger(maxArticleCount);
         // 打开目标网页
-        WebDriver driver = BrowserSelenium.getWebDriver(null, webUi, driverPath);
-        SeleniumUtil.blockNetworkResources(driver);
-        driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
-        if (true) {
-            driver.get("https://kaifa.baidu.com/");
+        try (PlaywrightDriver driver = BrowserPlaywright.getWebDriver(webUi, null)) {
+            PlaywrightUtil.blockNetworkResources(driver.getPage());
+            driver.getPage().setDefaultTimeout(Duration.ofSeconds(30).toMillis());
+            if (true) {
+                driver.getPage().navigate("https://kaifa.baidu.com/");
 
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-            try {
-                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#home-search-container .ant-input-search"), 0));
-            } catch (Exception e) {
-                e.printStackTrace();
+                try {
+                    driver.getPage().waitForSelector("#home-search-container .ant-input-search", new Page.WaitForSelectorOptions()
+                            .setTimeout(Duration.ofSeconds(60).toMillis())
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                ElementHandle inputElem = driver.getPage().querySelector("#home-search-container .ant-input-search input");
+                inputElem.click();
+                inputElem.press(question);
+
+                driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(3) + 1).toMillis());
+                ElementHandle enterElem = driver.getPage().querySelector("#home-search-container .ant-input-search button");
+                enterElem.click();
             }
 
-            WebElement inputElem = driver.findElement(By.cssSelector("#home-search-container .ant-input-search input"));
-            inputElem.click();
-            inputElem.sendKeys(question);
-
-            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(3) + 1));
-            WebElement enterElem = driver.findElement(By.cssSelector("#home-search-container .ant-input-search button"));
-            enterElem.click();
-        }
-        try {
 
             while (true) {
 
@@ -103,32 +99,34 @@ public class BaiduKaifaSearch {
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
-                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(15));
+                        driver.getPage().setDefaultNavigationTimeout(Duration.ofSeconds(15).toMillis());
                     } else {
-                        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+                        driver.getPage().setDefaultNavigationTimeout(Duration.ofSeconds(60).toMillis());
                     }
                     try {
-                        if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
-                            driver.navigate().to(entry.getKey().getUrl());
+                        if (!Objects.equals(driver.getPage().url(), entry.getKey().getUrl())) {
+                            driver.getPage().navigate(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
                         continue;
                     }
 
-                    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
+                    driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(5) + 1).toMillis());
                     if (true) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                         try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("body"), 0));
+                            driver.getPage().waitForSelector("body", new Page.WaitForSelectorOptions()
+                                    .setTimeout(Duration.ofSeconds(60).toMillis())
+                            );
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                         try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
+                            driver.getPage().waitForSelector("#content-left .ant-list-items .ant-list-item", new Page.WaitForSelectorOptions()
+                                    .setTimeout(Duration.ofSeconds(60).toMillis())
+                            );
                         } catch (Exception e) {
                             e.printStackTrace();
                             break;
@@ -140,24 +138,24 @@ public class BaiduKaifaSearch {
 
 
                         // 普通条目聚合
-                        List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
-                        for (WebElement item : wwwElems) {
-                            String text = item.getText();
+                        List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("#content-left .ant-list-items .ant-list-item ");
+                        for (ElementHandle item : wwwElems) {
+                            String text = item.innerText();
                             System.out.println("www-response:\n" + text);
                             String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
-                            List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
+                            List<ElementHandle> aElems = item.querySelectorAll("span:first-child > a");
                             if (aElems == null || aElems.isEmpty()) {
                                 continue;
                             }
-                            WebElement aElem = aElems.get(0);
+                            ElementHandle aElem = aElems.get(0);
                             if (aElem != null) {
                                 href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
-                                    result.setDescription(item.getText());
+                                    result.setDescription(item.innerText());
                                     urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
                                 }
                             }
@@ -171,21 +169,22 @@ public class BaiduKaifaSearch {
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         // 最大翻页
                         int maxPage = 3;
-                        List<WebElement> pageElems = driver.findElements(By.cssSelector("#kf-search-page-footer #pagination-pc .pagination .pagination-item"));
+                        List<ElementHandle> pageElems = driver.getPage().querySelectorAll("#kf-search-page-footer #pagination-pc .pagination .pagination-item");
                         for (int i = 0; i < pageElems.size(); i++) {
                             if (i == 0) {
                                 continue;
                             }
-                            WebElement page = pageElems.get(i);
+                            ElementHandle page = pageElems.get(i);
                             page.click();
 
 //                        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 8));
                             TimeUnit.SECONDS.sleep(RANDOM.nextInt(3) + 2);
 
                             if (true) {
-                                WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                                 try {
-                                    wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
+                                    driver.getPage().waitForSelector("#content-left .ant-list-items .ant-list-item", new Page.WaitForSelectorOptions()
+                                            .setTimeout(Duration.ofSeconds(60).toMillis())
+                                    );
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                     break;
@@ -193,23 +192,23 @@ public class BaiduKaifaSearch {
                             }
 
                             // 普通条目聚合
-                            List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
-                            for (WebElement item : wwwElems) {
-                                String text = item.getText();
+                            List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("#content-left .ant-list-items .ant-list-item ");
+                            for (ElementHandle item : wwwElems) {
+                                String text = item.innerText();
                                 System.out.println("www-response:\n" + text);
 //                        System.out.println("www-href:\n" + href);
-                                List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
+                                List<ElementHandle> aElems = item.querySelectorAll("span:first-child > a");
                                 if (aElems == null || aElems.isEmpty()) {
                                     continue;
                                 }
-                                WebElement aElem = aElems.get(0);
+                                ElementHandle aElem = aElems.get(0);
                                 if (aElem != null) {
                                     String href = aElem.getAttribute("href");
                                     System.out.println("www-href:\n" + href);
                                     if (context != null) {
                                         SearchResult result = new SearchResult();
                                         result.setUrl(href);
-                                        result.setDescription(item.getText());
+                                        result.setDescription(item.innerText());
                                         urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
                                     }
                                 }
@@ -229,11 +228,11 @@ public class BaiduKaifaSearch {
                         }
 
                         // 第一页有可能有AI回答
-                        List<WebElement> aiElems = driver.findElements(By.cssSelector("div[tpl=\"ai_index\"] .dqa-markdown_5emil"));
-                        List<WebElement> ai2Elems = driver.findElements(By.cssSelector("div[tpl=\"new_baikan_index\"]"));
+                        List<ElementHandle> aiElems = driver.getPage().querySelectorAll("div[tpl=\"ai_index\"] .dqa-markdown_5emil");
+                        List<ElementHandle> ai2Elems = driver.getPage().querySelectorAll("div[tpl=\"new_baikan_index\"]");
                         aiElems.addAll(ai2Elems);
-                        for (WebElement item : aiElems) {
-                            String text = item.getText();
+                        for (ElementHandle item : aiElems) {
+                            String text = item.innerText();
                             System.out.println("ai-response:\n" + text);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
@@ -246,13 +245,13 @@ public class BaiduKaifaSearch {
                         }
 
                         if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
+                            PlaywrightUtil.removeNoContentElements(driver.getPage());
                             SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
-                            WebElement body = driver.findElement(By.tagName("body"));
+                            result.setTitle(driver.getPage().title());
+                            result.setHtml(driver.getPage().content());
+                            ElementHandle body = driver.getPage().waitForSelector("body");
                             if (body != null) {
-                                result.setText(body.getText());
+                                result.setText(body.innerText());
                             }
                         }
 
@@ -260,22 +259,22 @@ public class BaiduKaifaSearch {
 
                     // 跳转的具体条目
                     if (SearchType.ARTICLE == entry.getValue()) {
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        String text = body.getText();
+                        ElementHandle body = driver.getPage().querySelector("body");
+                        String text = body.innerText();
                         if (text == null || text.trim().isEmpty()) {
-                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
+                            driver.getPage().waitForTimeout(Duration.ofSeconds(5).toMillis());
                         }
-                        body = driver.findElement(By.tagName("body"));
-                        text = body.getText();
+                        body = driver.getPage().querySelector("body");
+                        text = body.innerText();
                         System.out.println("www-article:\n" + text);
 
                         if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
+                            PlaywrightUtil.removeNoContentElements(driver.getPage());
                             SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
+                            result.setTitle(driver.getPage().title());
+                            result.setHtml(driver.getPage().content());
                             if (body != null) {
-                                result.setText(body.getText());
+                                result.setText(body.innerText());
                             }
                             context.getResults().add(result);
                         }
@@ -292,9 +291,6 @@ public class BaiduKaifaSearch {
             }
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            // 关闭浏览器
-            driver.quit();
         }
 
         return context;

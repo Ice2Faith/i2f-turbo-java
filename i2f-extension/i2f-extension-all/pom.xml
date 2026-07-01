@@ -50,6 +50,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-browser-playwright</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-browser-selenium</artifactId>
         </dependency>
         <dependency>

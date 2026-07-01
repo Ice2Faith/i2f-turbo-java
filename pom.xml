@@ -214,6 +214,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-browser-std</artifactId>
+                <version>${i2f.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bytes</artifactId>
                 <version>${i2f.version}</version>
                 <optional>true</optional>
@@ -1071,6 +1077,12 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-asr-vosk</artifactId>
+                <version>${i2f.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-browser-playwright</artifactId>
                 <version>${i2f.version}</version>
                 <optional>true</optional>
             </dependency>

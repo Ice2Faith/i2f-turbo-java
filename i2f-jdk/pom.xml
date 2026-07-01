@@ -164,6 +164,7 @@
         <module>i2f-design-pattern</module>
 
         <module>test-features</module>
+        <module>i2f-browser-std</module>
     </modules>
 
 
