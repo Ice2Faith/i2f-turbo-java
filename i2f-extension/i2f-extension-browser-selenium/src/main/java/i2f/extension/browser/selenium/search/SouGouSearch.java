@@ -145,7 +145,7 @@ public class SouGouSearch {
                         List<WebElement> wwwElems = driver.findElements(By.cssSelector(".results .vrwrap[exposed=\"1\"]"));
                         for (WebElement item : wwwElems) {
                             String text = item.getText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             List<WebElement> titleElems = item.findElements(By.cssSelector(".vr-title"));
                             if (titleElems == null || titleElems.isEmpty()) {
                                 continue;
@@ -225,7 +225,7 @@ public class SouGouSearch {
                         }
                         body = driver.findElement(By.tagName("body"));
                         text = body.getText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             SeleniumUtil.removeNoContentElements(driver);

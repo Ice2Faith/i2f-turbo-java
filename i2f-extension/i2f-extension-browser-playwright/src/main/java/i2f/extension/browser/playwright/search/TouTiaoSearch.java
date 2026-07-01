@@ -138,7 +138,7 @@ public class TouTiaoSearch {
                         List<ElementHandle> wwwElems = driver.getPage().querySelectorAll(".s-result-list .result-content .cs-card-content");
                         for (ElementHandle item : wwwElems) {
                             String text = item.innerText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             ElementHandle headerElem = item.querySelector(".cs-header");
                             if (headerElem == null) {
                                 continue;
@@ -214,7 +214,7 @@ public class TouTiaoSearch {
                         }
                         body = driver.getPage().querySelector("body");
                         text = body.innerText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             PlaywrightUtil.removeNoContentElements(driver.getPage());

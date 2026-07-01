@@ -141,7 +141,7 @@ public class BaiduKaifaSearch {
                         List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("#content-left .ant-list-items .ant-list-item ");
                         for (ElementHandle item : wwwElems) {
                             String text = item.innerText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
                             List<ElementHandle> aElems = item.querySelectorAll("span:first-child > a");
@@ -195,7 +195,7 @@ public class BaiduKaifaSearch {
                             List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("#content-left .ant-list-items .ant-list-item ");
                             for (ElementHandle item : wwwElems) {
                                 String text = item.innerText();
-                                System.out.println("www-response:\n" + text);
+//                                System.out.println("www-response:\n" + text);
 //                        System.out.println("www-href:\n" + href);
                                 List<ElementHandle> aElems = item.querySelectorAll("span:first-child > a");
                                 if (aElems == null || aElems.isEmpty()) {
@@ -233,7 +233,7 @@ public class BaiduKaifaSearch {
                         aiElems.addAll(ai2Elems);
                         for (ElementHandle item : aiElems) {
                             String text = item.innerText();
-                            System.out.println("ai-response:\n" + text);
+//                            System.out.println("ai-response:\n" + text);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(entry.getKey().getUrl());
@@ -266,7 +266,7 @@ public class BaiduKaifaSearch {
                         }
                         body = driver.getPage().querySelector("body");
                         text = body.innerText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             PlaywrightUtil.removeNoContentElements(driver.getPage());

@@ -143,7 +143,7 @@ public class BaiduKaifaSearch {
                         List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
                         for (WebElement item : wwwElems) {
                             String text = item.getText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
                             List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
@@ -196,7 +196,7 @@ public class BaiduKaifaSearch {
                             List<WebElement> wwwElems = driver.findElements(By.cssSelector("#content-left .ant-list-items .ant-list-item "));
                             for (WebElement item : wwwElems) {
                                 String text = item.getText();
-                                System.out.println("www-response:\n" + text);
+//                                System.out.println("www-response:\n" + text);
 //                        System.out.println("www-href:\n" + href);
                                 List<WebElement> aElems = item.findElements(By.cssSelector("span:first-child > a"));
                                 if (aElems == null || aElems.isEmpty()) {
@@ -234,7 +234,7 @@ public class BaiduKaifaSearch {
                         aiElems.addAll(ai2Elems);
                         for (WebElement item : aiElems) {
                             String text = item.getText();
-                            System.out.println("ai-response:\n" + text);
+//                            System.out.println("ai-response:\n" + text);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(entry.getKey().getUrl());
@@ -267,7 +267,7 @@ public class BaiduKaifaSearch {
                         }
                         body = driver.findElement(By.tagName("body"));
                         text = body.getText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             SeleniumUtil.removeNoContentElements(driver);

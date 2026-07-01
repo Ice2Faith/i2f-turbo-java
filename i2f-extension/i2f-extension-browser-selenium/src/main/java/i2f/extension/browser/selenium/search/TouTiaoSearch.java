@@ -143,7 +143,7 @@ public class TouTiaoSearch {
                         List<WebElement> wwwElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-card-content"));
                         for (WebElement item : wwwElems) {
                             String text = item.getText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             WebElement headerElem = item.findElement(By.cssSelector(".cs-header"));
                             if (headerElem == null) {
                                 continue;
@@ -219,7 +219,7 @@ public class TouTiaoSearch {
                         }
                         body = driver.findElement(By.tagName("body"));
                         text = body.getText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             SeleniumUtil.removeNoContentElements(driver);

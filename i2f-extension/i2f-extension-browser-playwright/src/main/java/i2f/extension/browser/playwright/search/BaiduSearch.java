@@ -150,7 +150,7 @@ public class BaiduSearch {
                         List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("div[tpl=\"www_index\"]");
                         for (ElementHandle item : wwwElems) {
                             String text = item.innerText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
                             List<ElementHandle> aElems = item.querySelectorAll("a.sc-link");
@@ -210,7 +210,7 @@ public class BaiduSearch {
                         aiElems.addAll(ai2Elems);
                         for (ElementHandle item : aiElems) {
                             String text = item.innerText();
-                            System.out.println("ai-response:\n" + text);
+//                            System.out.println("ai-response:\n" + text);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(entry.getKey().getUrl());

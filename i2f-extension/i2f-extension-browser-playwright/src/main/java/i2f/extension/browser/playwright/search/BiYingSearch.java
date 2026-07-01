@@ -139,7 +139,7 @@ public class BiYingSearch {
                         List<ElementHandle> wwwElems = driver.getPage().querySelectorAll("#b_results .b_algo");
                         for (ElementHandle item : wwwElems) {
                             String text = item.innerText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             ElementHandle h2Elem = item.querySelector("h2");
                             if (h2Elem == null) {
                                 continue;
@@ -215,7 +215,7 @@ public class BiYingSearch {
                         }
                         body = driver.getPage().querySelector("body");
                         text = body.innerText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             PlaywrightUtil.removeNoContentElements(driver.getPage());

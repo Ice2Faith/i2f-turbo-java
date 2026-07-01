@@ -139,7 +139,7 @@ public class SouGouSearch {
                         List<ElementHandle> wwwElems = driver.getPage().querySelectorAll(".results .vrwrap[exposed=\"1\"]");
                         for (ElementHandle item : wwwElems) {
                             String text = item.innerText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             List<ElementHandle> titleElems = item.querySelectorAll(".vr-title");
                             if (titleElems == null || titleElems.isEmpty()) {
                                 continue;
@@ -219,7 +219,7 @@ public class SouGouSearch {
                         }
                         body = driver.getPage().querySelector("body");
                         text = body.innerText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             PlaywrightUtil.removeNoContentElements(driver.getPage());

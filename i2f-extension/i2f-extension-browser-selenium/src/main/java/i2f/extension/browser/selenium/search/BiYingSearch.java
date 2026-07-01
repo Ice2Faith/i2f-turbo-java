@@ -142,7 +142,7 @@ public class BiYingSearch {
                         List<WebElement> wwwElems = driver.findElements(By.cssSelector("#b_results .b_algo"));
                         for (WebElement item : wwwElems) {
                             String text = item.getText();
-                            System.out.println("www-response:\n" + text);
+//                            System.out.println("www-response:\n" + text);
                             WebElement h2Elem = item.findElement(By.cssSelector("h2"));
                             if (h2Elem == null) {
                                 continue;
@@ -218,7 +218,7 @@ public class BiYingSearch {
                         }
                         body = driver.findElement(By.tagName("body"));
                         text = body.getText();
-                        System.out.println("www-article:\n" + text);
+//                        System.out.println("www-article:\n" + text);
 
                         if (context != null) {
                             SeleniumUtil.removeNoContentElements(driver);
