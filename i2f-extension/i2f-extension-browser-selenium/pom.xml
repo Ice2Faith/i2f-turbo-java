@@ -38,6 +38,21 @@
 
     </dependencies>
 
+    <dependencyManagement>
+        <dependencies>
+            <!-- 强制覆盖 Spring Boot 会管理 selenium 版本，所以需要强制覆盖，不然就会被替换为 springboot版本，导致各种不兼容问题 -->
+            <!--
+            <dependency>
+                <groupId>org.seleniumhq.selenium</groupId>
+                <artifactId>selenium-bom</artifactId>
+                <version>4.45.0</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            -->
+        </dependencies>
+    </dependencyManagement>
+
     <build>
         <plugins>
             <!-- 打包插件 -->
