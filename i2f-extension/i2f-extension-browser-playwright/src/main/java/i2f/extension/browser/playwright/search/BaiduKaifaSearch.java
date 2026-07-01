@@ -74,7 +74,7 @@ public class BaiduKaifaSearch {
 
                 ElementHandle inputElem = driver.getPage().querySelector("#home-search-container .ant-input-search input");
                 inputElem.click();
-                inputElem.press(question);
+                inputElem.fill(question);
 
                 driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(3) + 1).toMillis());
                 ElementHandle enterElem = driver.getPage().querySelector("#home-search-container .ant-input-search button");

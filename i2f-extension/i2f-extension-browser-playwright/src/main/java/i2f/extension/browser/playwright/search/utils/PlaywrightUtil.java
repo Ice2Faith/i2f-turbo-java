@@ -40,6 +40,27 @@ public class PlaywrightUtil {
             e.printStackTrace();
         }
 
+        try {
+            String cleanCommentScript = "(function() {\n" +
+                    "    const walker = document.createTreeWalker(\n" +
+                    "        document.documentElement,\n" +
+                    "        NodeFilter.SHOW_COMMENT,\n" +
+                    "        null,\n" +
+                    "        false\n" +
+                    "    );\n" +
+                    "\n" +
+                    "    const nodesToRemove = [];\n" +
+                    "    while (walker.nextNode()) {\n" +
+                    "        nodesToRemove.push(walker.currentNode);\n" +
+                    "    }\n" +
+                    "    \n" +
+                    "    nodesToRemove.forEach(node => node.parentNode.removeChild(node));\n" +
+                    "})();";
+
+            page.evaluate(cleanCommentScript);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void blockNetworkResources(Page page) {

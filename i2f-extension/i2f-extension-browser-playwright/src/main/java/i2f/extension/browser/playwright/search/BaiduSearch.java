@@ -72,7 +72,7 @@ public class BaiduSearch {
 
                 ElementHandle inputElem = driver.getPage().querySelector(".s_form .chat-input-textarea");
                 inputElem.click();
-                inputElem.press(question);
+                inputElem.fill(question);
 
                 driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(3) + 1).toMillis());
                 ElementHandle enterElem = driver.getPage().querySelector(".s_form #chat-submit-button");

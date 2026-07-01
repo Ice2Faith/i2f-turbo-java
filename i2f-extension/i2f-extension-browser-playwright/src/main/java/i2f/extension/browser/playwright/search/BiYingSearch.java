@@ -73,7 +73,7 @@ public class BiYingSearch {
 
                 ElementHandle inputElem = driver.getPage().querySelector(".sbox_cn form #sb_form_q");
                 inputElem.click();
-                inputElem.press(question);
+                inputElem.fill(question);
 
                 driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(3) + 1).toMillis());
                 ElementHandle enterElem = driver.getPage().querySelector(".sbox_cn form #search_icon");

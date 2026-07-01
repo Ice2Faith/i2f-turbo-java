@@ -72,7 +72,7 @@ public class SouGouSearch {
 
                 ElementHandle inputElem = driver.getPage().querySelector(".search-box form .sec-input");
                 inputElem.click();
-                inputElem.press(question);
+                inputElem.fill(question);
 
                 driver.getPage().waitForTimeout(Duration.ofSeconds(RANDOM.nextInt(3) + 1).toMillis());
                 ElementHandle enterElem = driver.getPage().querySelector(".search-box form .enter-input");
