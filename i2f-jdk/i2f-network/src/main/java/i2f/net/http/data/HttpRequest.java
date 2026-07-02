@@ -1,6 +1,7 @@
 package i2f.net.http.data;
 
 import i2f.builder.BaseBuilder;
+import i2f.builder.Builder;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
@@ -41,44 +42,49 @@ public class HttpRequest implements BaseBuilder<HttpRequest> {
     protected boolean allowRedirect = true;
     protected boolean cloudAcceptByteArray = false;
 
-    public static HttpRequest doGet() {
-        return new HttpRequest()
-                .setMethod(HttpMethodConstants.GET);
+    public static Builder<HttpRequest> doGet() {
+        return new HttpRequest().toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.GET);
     }
 
-    public static HttpRequest doGet(String url) {
-        return doGet().setUrl(url);
+    public static Builder<HttpRequest> doGet(String url) {
+        return doGet()
+                .set(u -> u::setUrl, url);
     }
 
-    public static HttpRequest doGet(String url, Object params) {
-        return doGet(url).setParams(params);
+    public static Builder<HttpRequest> doGet(String url, Object params) {
+        return doGet(url)
+                .set(u -> u::setParams, params);
     }
 
-    public static HttpRequest doPost() {
-        return new HttpRequest()
-                .setMethod(HttpMethodConstants.POST);
+    public static Builder<HttpRequest> doPost() {
+        return new HttpRequest().toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.POST);
     }
 
-    public static HttpRequest doPost(String url) {
-        return doPost().setUrl(url);
+    public static Builder<HttpRequest> doPost(String url) {
+        return doPost()
+                .set(u -> u::setUrl, url);
     }
 
-    public static HttpRequest doPut() {
-        return new HttpRequest()
-                .setMethod(HttpMethodConstants.PUT);
+    public static Builder<HttpRequest> doPut() {
+        return new HttpRequest().toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.PUT);
     }
 
-    public static HttpRequest doPut(String url) {
-        return doPut().setUrl(url);
+    public static Builder<HttpRequest> doPut(String url) {
+        return doPut()
+                .set(u -> u::setUrl, url);
     }
 
-    public static HttpRequest doDelete() {
-        return new HttpRequest()
-                .setMethod(HttpMethodConstants.DELETE);
+    public static Builder<HttpRequest> doDelete() {
+        return new HttpRequest().toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.DELETE);
     }
 
-    public static HttpRequest doDelete(String url) {
-        return doDelete().setUrl(url);
+    public static Builder<HttpRequest> doDelete(String url) {
+        return doDelete()
+                .set(u -> u::setUrl, url);
     }
 
     public HttpRequest form() {
@@ -167,109 +173,11 @@ public class HttpRequest implements BaseBuilder<HttpRequest> {
         return this;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public HttpRequest setUrl(String url) {
-        this.url = url;
-        return this;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public HttpRequest setMethod(String method) {
-        this.method = method;
-        return this;
-    }
-
-    public Object getParams() {
-        return params;
-    }
-
-    public HttpRequest setParams(Object params) {
-        this.params = params;
-        return this;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public HttpRequest setData(Object data) {
-        this.data = data;
-        return this;
-    }
-
-    public HttpHeaders getHeader() {
-        return header;
-    }
-
-    public HttpRequest setHeader(HttpHeaders header) {
-        this.header = header;
-        return this;
-    }
-
     public HttpRequest setHeader(Map<String, ?> header) {
         this.header = new HttpHeaders();
         this.header.addAll(header);
         return this;
     }
 
-    public List<MultipartFile> getFiles() {
-        return files;
-    }
-
-    public HttpRequest setFiles(List<MultipartFile> files) {
-        this.files = files;
-        return this;
-    }
-
-    public int getConnectTimeout() {
-        return connectTimeout;
-    }
-
-    public HttpRequest setConnectTimeout(int connectTimeout) {
-        this.connectTimeout = connectTimeout;
-        return this;
-    }
-
-    public int getReadTimeout() {
-        return readTimeout;
-    }
-
-    public HttpRequest setReadTimeout(int readTimeout) {
-        this.readTimeout = readTimeout;
-        return this;
-    }
-
-    public String getCharset() {
-        return charset;
-    }
-
-    public HttpRequest setCharset(String charset) {
-        this.charset = charset;
-        return this;
-    }
-
-    public boolean isAllowRedirect() {
-        return allowRedirect;
-    }
-
-    public HttpRequest setAllowRedirect(boolean allowRedirect) {
-        this.allowRedirect = allowRedirect;
-        return this;
-    }
-
-    public boolean isCloudAcceptByteArray() {
-        return cloudAcceptByteArray;
-    }
-
-    public HttpRequest setCloudAcceptByteArray(boolean cloudAcceptByteArray) {
-        this.cloudAcceptByteArray = cloudAcceptByteArray;
-        return this;
-    }
 
 }

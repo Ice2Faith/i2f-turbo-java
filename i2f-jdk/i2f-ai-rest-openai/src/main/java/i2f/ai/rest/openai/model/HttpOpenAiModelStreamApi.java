@@ -184,14 +184,15 @@ public class HttpOpenAiModelStreamApi {
             }
 
             httpProcessor.http(HttpRequest.doPost(getChatCompletionsUrl())
-                            .json()
-                            .addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
-                            .applyHeader(headers -> {
+                            .set(u -> u::json)
+                            .set2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
+                            .set(u -> u::applyHeader, headers -> {
                                 if (apiKey != null && !apiKey.isEmpty()) {
                                     headers.add("Authorization", "Bearer " + apiKey);
                                 }
                             })
-                            .setData(reqMap)
+                            .set(u -> u::setData, reqMap)
+                            .build()
                     , response -> {
                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
                             String line = null;

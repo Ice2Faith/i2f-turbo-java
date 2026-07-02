@@ -28,317 +28,322 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public <T> T postFormForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+        return request.toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build()
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public String postFormForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+        return request.toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build()
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postForm(HttpRequest request) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor);
+        return request.toBuilder()
+                .set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor);
     }
 
     @Override
     public <T> T postJsonForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer jsonProcessor) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsObject(jsonProcessor, clazz, charset);
     }
 
     @Override
     public String postJsonForString(HttpRequest request, String charset) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postJson(HttpRequest request) throws IOException {
-        return request.setMethod(HttpMethodConstants.POST)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor);
+        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse postJson(String url, Object data) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse postJson(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse postJson(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor);
     }
 
     @Override
     public String postJsonForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String postJsonForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String postJsonForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public <T> T postJsonForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T postJsonForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T postJsonForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public HttpResponse postForm(String url, Object data) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse postForm(String url, Object data, Object params) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse postForm(String url, Object data, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor);
     }
 
     @Override
     public String postFormForString(String url, Object data, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String postFormForString(String url, Object data, Object params, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String postFormForString(String url, Object data, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public <T> T postFormForObject(String url, Object data, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T postFormForObject(String url, Object data, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T postFormForObject(String url, Object data, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doPost()
-                .setUrl(url)
-                .setData(data)
-                .setParams(params)
-                .setHeader(header)
-                .addHeader(HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setData, data)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public HttpResponse get(String url) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse get(String url, Object params) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .build().send(httpProcessor);
     }
 
     @Override
     public HttpResponse get(String url, Object params, Map<String, Object> header) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .setHeader(header)
-                .send(httpProcessor);
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .build().send(httpProcessor);
     }
 
     @Override
     public String getForString(String url, String charset) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String getForString(String url, Object params, String charset) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public String getForString(String url, Object params, Map<String, Object> header, String charset) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .setHeader(header)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .build().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public <T> T getForObject(String url, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T getForObject(String url, Object params, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public <T> T getForObject(String url, Object params, Map<String, Object> header, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
-                .setUrl(url)
-                .setParams(params)
-                .setHeader(header)
-                .send(httpProcessor)
+                .set(u -> u::setUrl, url)
+                .set(u -> u::setParams, params)
+                .set(u -> u::setHeader, header)
+                .build().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 

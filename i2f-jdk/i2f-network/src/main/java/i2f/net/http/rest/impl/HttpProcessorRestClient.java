@@ -29,14 +29,17 @@ public class HttpProcessorRestClient implements IRestClient {
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
-        HttpRequest req = new HttpRequest();
-        req.setUrl(request.getUrl());
-        req.setMethod(request.getMethod());
-        req.setParams(request.getParams());
-        req.setHeader(request.getHeaders());
-        req.setData(request.getBody());
-        req.json();
-        req.addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8);
+        HttpRequest req = new HttpRequest().toBuilder()
+                .set(u -> u::setUrl, request.getUrl())
+                .set(u -> u::setMethod, request.getMethod())
+                .set(u -> u::setParams, request.getParams())
+                .set(u -> u::setHeader, request.getHeaders())
+                .set(u -> u::setData, request.getBody())
+                .set(u -> u::json)
+                .with(u -> u::json)
+                .apply(HttpRequest::json)
+                .with2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
+                .build();
 
         RestHttpResponse<T> ret = httpProcessor.http(req, response -> {
             try (HttpResponse resp = response) {

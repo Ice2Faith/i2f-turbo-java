@@ -22,6 +22,9 @@ import java.util.function.Supplier;
  * .set(RestHttpResponse::setBody,obj) // 通过类引用进行设置值
  * .with(u->u::statusMessage,resp.getStatusMessage()) // with 适用于链式调用，返回源对象的情况
  * .with(RestHttpResponse::headers,resp.getHeader()) // with 适用于链式调用，返回源对象的情况
+ * .set(u -> u::json) // 调用实体类的无参方法
+ * .with(u->u::json) // 调用实体类的无参有返回值方法
+ * .apply(HttpRequest::json) // 也可以通过类名方式调用无参方法
  * .build();
  */
 public class Builder<T> {
@@ -39,16 +42,59 @@ public class Builder<T> {
         return new Builder<>(supplier.get());
     }
 
+    /**
+     * type 只是用来辅助IDE进行类型提示的，所以直接new一个匿名内部类即可
+     * 例如：
+     * <code>
+     * of(ArrayList::new,String.class)
+     * </code>
+     * 这样得到的builder类型就是以 String 进行补全提示的
+     *
+     * @param supplier
+     * @param clazz
+     * @param <T>
+     * @return
+     */
     public static <T> Builder<T> of(Supplier<T> supplier, Class<T> clazz) {
         return new Builder<>(supplier.get());
     }
 
+    /**
+     * type 只是用来辅助IDE进行类型提示的，所以直接new一个匿名内部类即可
+     * 例如：
+     * <code>
+     * of(HashMap::new,new BuilderType<Map<String,Object>>(){})
+     * </code>
+     * 这样得到的builder类型就是以 Map<String,Object> 进行补全提示的
+     *
+     * @param supplier
+     * @param type
+     * @param <T>
+     * @return
+     */
     public static <T> Builder<T> of(Supplier<T> supplier, BuilderType<T> type) {
         return new Builder<>(supplier.get());
     }
 
     public Builder<T> apply(Consumer<T> consumer) {
         consumer.accept(target);
+        return this;
+    }
+
+    public <R> Builder<T> apply(Function<T, R> consumer) {
+        consumer.apply(target);
+        return this;
+    }
+
+    public Builder<T> set(Function<T, Runnable> setter) {
+        Runnable consumer = setter.apply(target);
+        consumer.run();
+        return this;
+    }
+
+    public <R> Builder<T> with(Function<T, Supplier<R>> setter) {
+        Supplier<R> consumer = setter.apply(target);
+        consumer.get();
         return this;
     }
 
