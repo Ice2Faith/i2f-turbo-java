@@ -1,5 +1,6 @@
 package i2f.spring.web.rest;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
@@ -25,7 +26,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class SpringWebRestClient implements IRestClient {
+public class SpringWebRestClient implements IRestClient, BaseBuilder<SpringWebRestClient> {
     protected RestTemplate restTemplate;
 
     @Override

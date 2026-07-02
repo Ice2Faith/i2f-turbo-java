@@ -5,6 +5,7 @@ import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
 import i2f.ai.std.model.message.impl.AssistantMessage;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -25,7 +26,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiAiModel implements AiModel {
+public class HttpOpenAiAiModel implements AiModel, BaseBuilder<HttpOpenAiAiModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;

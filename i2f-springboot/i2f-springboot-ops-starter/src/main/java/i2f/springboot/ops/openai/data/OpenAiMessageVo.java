@@ -4,6 +4,7 @@ import i2f.ai.rest.openai.model.data.OpenAiAssistantMessage;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
+import i2f.builder.BaseBuilder;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
 import lombok.Data;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiMessageVo {
+public class OpenAiMessageVo implements BaseBuilder<OpenAiMessageVo> {
     protected String type;
     protected OpenAiSystemMessage system;
     protected OpenAiUserMessage user;

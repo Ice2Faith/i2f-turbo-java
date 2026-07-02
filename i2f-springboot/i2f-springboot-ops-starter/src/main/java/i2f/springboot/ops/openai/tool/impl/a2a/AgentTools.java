@@ -51,13 +51,13 @@ public class AgentTools {
         completion.setStream(null);
         completion.setStream_options(null);
 
-        HttpOpenAiAiModel aiModel = HttpOpenAiAiModel.builder()
-                .restClient(SpringWebRestClient.builder()
-                        .restTemplate(restTemplate)
+        HttpOpenAiAiModel aiModel = new HttpOpenAiAiModel().toBuilder()
+                .set(u -> u::setRestClient, new SpringWebRestClient().toBuilder()
+                        .set(u -> u::setRestTemplate, restTemplate)
                         .build())
-                .baseUrl(meta.getBaseUrl())
-                .apiKey(meta.getApiKey())
-                .model(completion.getModel())
+                .set(u -> u::setBaseUrl, meta.getBaseUrl())
+                .set(u -> u::setApiKey, meta.getApiKey())
+                .set(u -> u::setModel, completion.getModel())
                 .build();
 
         OpenAiCompletionRespDto resp = aiModel.completion(completion);

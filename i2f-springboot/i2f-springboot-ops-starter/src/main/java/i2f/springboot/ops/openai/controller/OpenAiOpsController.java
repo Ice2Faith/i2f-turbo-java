@@ -327,20 +327,20 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 } else {
                                                     callRet = objectMapper.writeValueAsString(callRet);
                                                 }
-                                                OpenAiToolMessage toolMsg = OpenAiToolMessage.builder()
-                                                        .tool_call_id(id)
-                                                        .content(String.valueOf(callRet))
+                                                OpenAiToolMessage toolMsg = new OpenAiToolMessage().toBuilder()
+                                                        .set(u -> u::setTool_call_id, id)
+                                                        .set(u -> u::setContent, String.valueOf(callRet))
                                                         .build();
 
                                                 if (toolMsg != null) {
-                                                    EchoOpenAiToolMessage toolEchoMsg = EchoOpenAiToolMessage.builder()
-                                                            .message(toolMsg)
-                                                            .function(function)
+                                                    EchoOpenAiToolMessage toolEchoMsg = new EchoOpenAiToolMessage().toBuilder()
+                                                            .set(u -> u::setMessage, toolMsg)
+                                                            .set(u -> u::setFunction, function)
                                                             .build();
                                                     toolEchoMsg.createContent();
-                                                    OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                            .type(OpsOpenAiConsts.ECHO_TOOL)
-                                                            .echo_tool(toolEchoMsg)
+                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toBuilder()
+                                                            .set(u -> u::setType, OpsOpenAiConsts.ECHO_TOOL)
+                                                            .set(u -> u::setEcho_tool, toolEchoMsg)
                                                             .build();
                                                     String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                                     OpsSecureReturn<?> resp = null;
@@ -354,9 +354,9 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     emitter.send(respJson);
                                                 }
                                                 if (toolMsg != null) {
-                                                    OpenAiMessageVo toolEchoVo = OpenAiMessageVo.builder()
-                                                            .type(OpenAiConsts.TOOL)
-                                                            .tool(toolMsg)
+                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toBuilder()
+                                                            .set(u -> u::setType, OpenAiConsts.TOOL)
+                                                            .set(u -> u::setTool, toolMsg)
                                                             .build();
                                                     String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                                     OpsSecureReturn<?> resp = null;
@@ -394,9 +394,10 @@ public class OpenAiOpsController implements IOpsProvider {
                     url = url + "/chat/completions";
 
                     HttpRequest.doPost(url)
-                            .json()
-                            .addHeader(HttpHeaderConstants.Authorization, HttpHeaderConstants.Bearer + " " + req.getMeta().getApiKey())
-                            .setData(completion)
+                            .set(u -> u::json)
+                            .set2(u -> u::addHeader, HttpHeaderConstants.Authorization, HttpHeaderConstants.Bearer + " " + req.getMeta().getApiKey())
+                            .set(u -> u::setData, completion)
+                            .build()
                             .send(new SpringWebHttpProcessor(restTemplate),
                                     response -> {
                                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {

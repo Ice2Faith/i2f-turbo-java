@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiToolMessage implements OpenAiMessage {
+public class OpenAiToolMessage implements OpenAiMessage, BaseBuilder<OpenAiToolMessage> {
     protected final String role = OpenAiConsts.TOOL;
     protected String tool_call_id;
     protected String content;
