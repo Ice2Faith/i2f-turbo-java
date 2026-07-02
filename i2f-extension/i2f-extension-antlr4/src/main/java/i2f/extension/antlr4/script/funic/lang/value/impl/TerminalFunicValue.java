@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,7 +14,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
  */
 @Data
 @NoArgsConstructor
-public class TerminalFunicValue implements FunicValue {
+public class TerminalFunicValue implements FunicValue, BaseBuilder<TerminalFunicValue> {
     protected TerminalNode node;
     protected Token symbol;
     protected String text;

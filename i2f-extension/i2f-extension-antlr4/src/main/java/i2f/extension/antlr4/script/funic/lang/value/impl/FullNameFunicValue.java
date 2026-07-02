@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
@@ -12,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class FullNameFunicValue implements FunicValue {
+public class FullNameFunicValue implements FunicValue, BaseBuilder<FullNameFunicValue> {
     protected FunicParser.FullNameContext node;
     protected String value;
 

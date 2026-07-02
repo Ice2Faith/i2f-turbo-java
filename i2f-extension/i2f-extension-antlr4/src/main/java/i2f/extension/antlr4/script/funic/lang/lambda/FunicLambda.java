@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.lambda;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
@@ -20,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Data
 @NoArgsConstructor
-public class FunicLambda {
+public class FunicLambda implements BaseBuilder<FunicLambda> {
     protected List<Map.Entry<String, Object>> arguments;
     protected FunicParser.ScriptBlockContext body;
 

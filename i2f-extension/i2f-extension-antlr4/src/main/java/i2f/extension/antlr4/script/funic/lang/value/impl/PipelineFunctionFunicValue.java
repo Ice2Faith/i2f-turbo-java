@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class PipelineFunctionFunicValue implements FunicValue {
+public class PipelineFunctionFunicValue implements FunicValue, BaseBuilder<PipelineFunctionFunicValue> {
     public static enum Type {
         INSTANCE, GLOBAL, STATIC
     }

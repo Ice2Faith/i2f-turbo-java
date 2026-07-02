@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.context;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class FunicFunctionCallContext {
+public class FunicFunctionCallContext implements BaseBuilder<FunicFunctionCallContext> {
     protected DefaultFunicVisitor visitor;
     protected Type type;
     protected Class<?> callClass;

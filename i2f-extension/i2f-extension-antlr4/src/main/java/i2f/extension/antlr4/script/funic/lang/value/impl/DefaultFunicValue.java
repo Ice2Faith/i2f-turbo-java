@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
  */
 @Data
 @NoArgsConstructor
-public class DefaultFunicValue implements FunicValue {
+public class DefaultFunicValue implements FunicValue, BaseBuilder<DefaultFunicValue> {
     protected RuleNode node;
     protected Object value;
 

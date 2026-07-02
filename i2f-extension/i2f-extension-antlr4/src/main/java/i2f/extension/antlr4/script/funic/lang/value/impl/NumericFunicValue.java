@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,7 @@ import java.math.BigInteger;
  */
 @Data
 @NoArgsConstructor
-public class NumericFunicValue implements FunicValue {
+public class NumericFunicValue implements FunicValue, BaseBuilder<NumericFunicValue> {
     protected RuleNode node;
     protected Object value;
 

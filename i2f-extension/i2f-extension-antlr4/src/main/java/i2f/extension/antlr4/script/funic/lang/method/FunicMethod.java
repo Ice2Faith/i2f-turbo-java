@@ -1,5 +1,6 @@
 package i2f.extension.antlr4.script.funic.lang.method;
 
+import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Data
 @NoArgsConstructor
-public class FunicMethod implements IMethod {
+public class FunicMethod implements IMethod, BaseBuilder<FunicMethod> {
     protected String name;
     protected Class<?> returnType;
     protected List<Map.Entry<Class, String>> parameters;
