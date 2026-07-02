@@ -36,8 +36,6 @@ public class HttpProcessorRestClient implements IRestClient {
                 .set(u -> u::setHeader, request.getHeaders())
                 .set(u -> u::setData, request.getBody())
                 .set(u -> u::json)
-                .with(u -> u::json)
-                .apply(HttpRequest::json)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
                 .build();
 
