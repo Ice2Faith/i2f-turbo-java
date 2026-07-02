@@ -56,13 +56,13 @@ public class SpringWebRestClient implements IRestClient {
                 reqEntity,
                 responseType);
 
-        return (RestHttpResponse<T>) RestHttpResponse.builder()
-                .statusCode(respEntity.getStatusCodeValue())
-                .statusMessage(respEntity.getStatusCode().getReasonPhrase())
-                .headers(HttpHeaders.create()
+        return new RestHttpResponse<T>().toBuilder()
+                .set(u -> u::setStatusCode, respEntity.getStatusCodeValue())
+                .set(u -> u::setStatusMessage, respEntity.getStatusCode().getReasonPhrase())
+                .set(u -> u::setHeaders, HttpHeaders.create()
                         .addAll(respEntity.getHeaders())
                 )
-                .body(respEntity.getBody())
+                .set(u -> u::setBody, respEntity.getBody())
                 .build();
     }
 }

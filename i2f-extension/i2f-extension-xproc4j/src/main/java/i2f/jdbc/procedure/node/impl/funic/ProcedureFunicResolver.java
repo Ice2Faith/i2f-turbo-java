@@ -167,51 +167,55 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
 
     @Override
     public Object getCallContextOfInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return ProcedureFunicFunctionCallContext.builder()
-                .visitor(visitor)
-                .type(FunicFunctionCallContext.Type.INSTANCE_METHOD)
-                .invokeTarget(target)
-                .methodName(methodName)
-                .argsList(args)
-                .executor(executor)
-                .node(node)
+        return new ProcedureFunicFunctionCallContext().toBuilder()
+                .cast(ProcedureFunicFunctionCallContext.class)
+                .set(u -> u::setVisitor, visitor)
+                .set(u -> u::setType, FunicFunctionCallContext.Type.INSTANCE_METHOD)
+                .set(u -> u::setInvokeTarget, target)
+                .set(u -> u::setMethodName, methodName)
+                .set(u -> u::setArgsList, args)
+                .set(u -> u::setExecutor, executor)
+                .set(u -> u::setNode, node)
                 .build();
     }
 
     @Override
     public Object getCallContextOfInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return ProcedureFunicFunctionCallContext.builder()
-                .visitor(visitor)
-                .type(FunicFunctionCallContext.Type.GLOBAL_METHOD)
-                .methodName(methodName)
-                .argsList(args)
-                .executor(executor)
-                .node(node)
+        return new ProcedureFunicFunctionCallContext().toBuilder()
+                .cast(ProcedureFunicFunctionCallContext.class)
+                .set(u -> u::setVisitor, visitor)
+                .set(u -> u::setType, FunicFunctionCallContext.Type.GLOBAL_METHOD)
+                .set(u -> u::setMethodName, methodName)
+                .set(u -> u::setArgsList, args)
+                .set(u -> u::setExecutor, executor)
+                .set(u -> u::setNode, node)
                 .build();
     }
 
     @Override
     public Object getCallContextOfNewInstance(Class<?> clazz, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return ProcedureFunicFunctionCallContext.builder()
-                .visitor(visitor)
-                .type(FunicFunctionCallContext.Type.NEW_INSTANCE)
-                .callClass(clazz)
-                .argsList(args)
-                .executor(executor)
-                .node(node)
+        return new ProcedureFunicFunctionCallContext().toBuilder()
+                .cast(ProcedureFunicFunctionCallContext.class)
+                .set(u -> u::setVisitor, visitor)
+                .set(u -> u::setType, FunicFunctionCallContext.Type.NEW_INSTANCE)
+                .set(u -> u::setCallClass, clazz)
+                .set(u -> u::setArgsList, args)
+                .set(u -> u::setExecutor, executor)
+                .set(u -> u::setNode, node)
                 .build();
     }
 
     @Override
     public Object getCallContextOfInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return ProcedureFunicFunctionCallContext.builder()
-                .visitor(visitor)
-                .type(FunicFunctionCallContext.Type.STATIC_METHOD)
-                .callClass(type)
-                .methodName(methodName)
-                .argsList(args)
-                .executor(executor)
-                .node(node)
+        return new ProcedureFunicFunctionCallContext().toBuilder()
+                .cast(ProcedureFunicFunctionCallContext.class)
+                .set(u -> u::setVisitor, visitor)
+                .set(u -> u::setType, FunicFunctionCallContext.Type.STATIC_METHOD)
+                .set(u -> u::setCallClass, type)
+                .set(u -> u::setMethodName, methodName)
+                .set(u -> u::setArgsList, args)
+                .set(u -> u::setExecutor, executor)
+                .set(u -> u::setNode, node)
                 .build();
     }
 

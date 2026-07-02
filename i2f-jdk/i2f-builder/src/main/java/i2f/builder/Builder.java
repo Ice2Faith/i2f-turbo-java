@@ -153,6 +153,11 @@ public class Builder<T> {
         return of(mapper.apply(target));
     }
 
+    @SuppressWarnings("unchecked")
+    public <R extends T> Builder<R> cast(Class<R> clazz) {
+        return map(e -> (R) e);
+    }
+
     public Builder<T> orElse(T instead) {
         return orElse(Objects::isNull, instead);
     }
