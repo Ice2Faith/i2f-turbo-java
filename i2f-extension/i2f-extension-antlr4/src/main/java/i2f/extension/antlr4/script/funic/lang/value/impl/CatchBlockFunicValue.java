@@ -4,7 +4,6 @@ import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -15,7 +14,6 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class CatchBlockFunicValue implements FunicValue {
     protected String name;
     protected List<Class<?>> types;

@@ -23,7 +23,6 @@ import i2f.jvm.JvmUtil;
 import i2f.match.regex.RegexUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -49,7 +48,6 @@ import java.util.stream.Collectors;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     public static final ExecutorService DEFAULT_GO_POOL = Executors.newWorkStealingPool(Runtime.getRuntime().availableProcessors() * 2);
     protected Object context = new HashMap<>();

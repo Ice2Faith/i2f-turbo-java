@@ -31,6 +31,8 @@
         <module>i2f-bindsql-page</module>
         <module>i2f-bindsql-stringify</module>
         <module>i2f-bql</module>
+        <module>i2f-browser-std</module>
+        <module>i2f-builder</module>
         <module>i2f-bytes</module>
         <module>i2f-cache</module>
         <module>i2f-cache-std</module>
@@ -164,7 +166,6 @@
         <module>i2f-design-pattern</module>
 
         <module>test-features</module>
-        <module>i2f-browser-std</module>
     </modules>
 
 

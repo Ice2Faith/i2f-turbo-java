@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionReqDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -14,7 +13,6 @@ import lombok.experimental.SuperBuilder;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiCompletionDto extends OpenAiCompletionReqDto {
 
 }

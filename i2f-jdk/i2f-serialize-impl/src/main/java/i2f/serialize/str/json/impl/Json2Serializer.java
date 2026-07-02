@@ -5,7 +5,6 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.typeof.token.TypeToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.lang.reflect.Type;
 
@@ -16,9 +15,8 @@ import java.lang.reflect.Type;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class Json2Serializer implements IJsonSerializer {
-    private JsonGenerator generator = new JsonGenerator();
+    private JsonGenerator generator = JsonGenerator.INSTANCE;
     private boolean weakMatchField = true;
 
     @Override

@@ -4,6 +4,7 @@ import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.data.HttpResponse;
+import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
@@ -12,7 +13,6 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.IOException;
 
@@ -23,9 +23,8 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class HttpProcessorRestClient implements IRestClient {
-    protected IHttpProcessor httpProcessor;
+    protected IHttpProcessor httpProcessor = new HttpUrlConnectProcessor();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     @Override
@@ -42,14 +41,16 @@ public class HttpProcessorRestClient implements IRestClient {
         RestHttpResponse<T> ret = httpProcessor.http(req, response -> {
             try (HttpResponse resp = response) {
                 T obj = resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
-                return (RestHttpResponse<T>) RestHttpResponse.builder()
-                        .statusCode(resp.getStatusCode())
-                        .statusMessage(resp.getStatusMessage())
-                        .headers(resp.getHeader())
-                        .body(obj)
+                return new RestHttpResponse<T>().toBuilder()
+                        .set(u -> u::setStatusCode, resp.getStatusCode())
+                        .set(RestHttpResponse::setBody, obj)
+                        .set(u -> u::setStatusMessage, resp.getStatusMessage())
+                        .set(u -> u::setHeaders, resp.getHeader())
+                        .set(u -> u::setBody, obj)
                         .build();
             }
         });
+
 
         return ret;
     }

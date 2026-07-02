@@ -17,7 +17,6 @@ import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -35,7 +34,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class HttpUrlConnectProcessor implements IHttpProcessor {
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IXmlSerializer xmlSerializer = new Xml2Serializer();

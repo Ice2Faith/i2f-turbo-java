@@ -8,7 +8,6 @@ import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -17,7 +16,6 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiMessageVo {
     protected String type;
     protected OpenAiSystemMessage system;

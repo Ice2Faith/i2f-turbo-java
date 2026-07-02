@@ -1,5 +1,6 @@
 package i2f.net.http.data;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpHeaderConstants;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
  * @date 2026/6/24 19:53
  * @desc
  */
-public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
+public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> implements BaseBuilder<HttpHeaders> {
     public HttpHeaders(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }

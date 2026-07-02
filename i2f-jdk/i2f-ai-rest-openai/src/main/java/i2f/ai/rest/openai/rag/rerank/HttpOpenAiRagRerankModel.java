@@ -11,9 +11,9 @@ import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
+import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -26,9 +26,8 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class HttpOpenAiRagRerankModel implements RagRerankModel {
-    protected IRestClient restClient;
+    protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
     protected String model;
@@ -82,17 +81,17 @@ public class HttpOpenAiRagRerankModel implements RagRerankModel {
 
     public HttpOpenAiRerankRespDto rerank(HttpOpenAiRerankReqDto req) {
         try {
-            RestHttpResponse<HttpOpenAiRerankRespDto> resp = restClient.rest(RestHttpRequest.builder()
-                            .url(getRerankUrl())
-                            .method(HttpMethodConstants.POST)
-                            .headers(HttpHeaders.create()
+            RestHttpResponse<HttpOpenAiRerankRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+                            .set(u -> u::setUrl, getRerankUrl())
+                            .set(u -> u::setMethod, HttpMethodConstants.POST)
+                            .set(u -> u::setHeaders, HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {
                                             headers.add("Authorization", "Bearer " + apiKey);
                                         }
                                     })
                             )
-                            .body(req)
+                            .set(u -> u::setBody, req)
                             .build(),
                     HttpOpenAiRerankRespDto.class);
             HttpOpenAiRerankRespDto ret = resp.getBody();

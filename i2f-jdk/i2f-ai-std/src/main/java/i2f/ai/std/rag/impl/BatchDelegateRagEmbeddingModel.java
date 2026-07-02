@@ -5,7 +5,6 @@ import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -19,7 +18,6 @@ import java.util.function.Supplier;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class BatchDelegateRagEmbeddingModel implements RagEmbeddingModel {
     protected RagEmbeddingModel target;
     protected int batchSize = 10;

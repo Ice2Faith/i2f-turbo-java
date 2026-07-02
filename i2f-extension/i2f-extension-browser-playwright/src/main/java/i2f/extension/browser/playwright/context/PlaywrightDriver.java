@@ -6,7 +6,6 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -18,7 +17,6 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class PlaywrightDriver implements Closeable {
     protected Playwright playwright;
     protected Browser browser;

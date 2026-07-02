@@ -2,7 +2,6 @@ package i2f.ai.rest.openai.model.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -11,7 +10,6 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiUserMessage implements OpenAiMessage {
     protected final String role = OpenAiConsts.USER;
     protected String content;

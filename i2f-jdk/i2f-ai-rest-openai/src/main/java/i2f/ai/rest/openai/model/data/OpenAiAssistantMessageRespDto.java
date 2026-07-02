@@ -2,7 +2,6 @@ package i2f.ai.rest.openai.model.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiAssistantMessageRespDto implements OpenAiMessage {
     protected final String role = OpenAiConsts.ASSISTANT;
     protected String content;
@@ -40,9 +38,9 @@ public class OpenAiAssistantMessageRespDto implements OpenAiMessage {
         if (tool_calls != null) {
             list = new ArrayList<>(tool_calls);
         }
-        return OpenAiAssistantMessage.builder()
-                .content(content)
-                .tool_calls(list)
+        return new OpenAiAssistantMessage().toBuilder()
+                .set(u -> u::setContent, content)
+                .set(u -> u::setTool_calls, list)
                 .build();
     }
 }

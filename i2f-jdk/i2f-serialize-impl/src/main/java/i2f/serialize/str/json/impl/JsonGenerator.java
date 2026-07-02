@@ -4,7 +4,6 @@ import i2f.check.Predicates;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -20,8 +19,10 @@ import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class JsonGenerator {
+    public static final JsonGenerator INSTANCE = new JsonGenerator();
+    public static final JsonGenerator INSTANCE_WITHOUT_NULL = createWithoutNull();
+
     public boolean nullExclude = false;
     public String sep = ",";
     public String quote = "\"";
@@ -29,6 +30,12 @@ public class JsonGenerator {
     public String datePattern = "yyyy-MM-dd HH:mm:ss.SSS";
     public ThreadLocal<SimpleDateFormat> fmt = ThreadLocal.withInitial(() -> new SimpleDateFormat(datePattern));
     public ThreadLocal<DateTimeFormatter> formatter = ThreadLocal.withInitial(() -> DateTimeFormatter.ofPattern(datePattern));
+
+    public static JsonGenerator createWithoutNull() {
+        JsonGenerator ret = new JsonGenerator();
+        ret.setNullExclude(true);
+        return ret;
+    }
 
     public String toJson(Object obj) {
         if (Predicates.isNull(obj)) {

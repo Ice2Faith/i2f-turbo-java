@@ -1,10 +1,10 @@
 package i2f.net.http.rest.data;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -13,8 +13,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class RestHttpRequest {
+public class RestHttpRequest implements BaseBuilder<RestHttpRequest> {
     /**
      * 请求URL
      */

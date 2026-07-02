@@ -1,5 +1,6 @@
 package i2f.net.http.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ import java.io.InputStream;
  */
 @Data
 @NoArgsConstructor
-public class MultipartFile {
+public class MultipartFile implements BaseBuilder<MultipartFile> {
     private String name;
     private String fileName;
     private Long length;

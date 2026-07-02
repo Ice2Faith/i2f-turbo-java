@@ -6,7 +6,6 @@ import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class FunicLambda {
     protected List<Map.Entry<String, Object>> arguments;
     protected FunicParser.ScriptBlockContext body;

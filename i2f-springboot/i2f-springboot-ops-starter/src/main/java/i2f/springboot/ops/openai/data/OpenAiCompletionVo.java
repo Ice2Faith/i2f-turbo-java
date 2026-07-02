@@ -3,7 +3,6 @@ package i2f.springboot.ops.openai.data;
 import i2f.ai.rest.openai.model.data.OpenAiToolsDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiCompletionVo {
     protected String model;
     protected boolean stream;

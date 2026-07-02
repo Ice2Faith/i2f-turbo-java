@@ -1,5 +1,6 @@
 package i2f.net.http.data;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
@@ -25,7 +26,7 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-public class HttpRequest {
+public class HttpRequest implements BaseBuilder<HttpRequest> {
 
     protected String url;
     protected String method = HttpMethodConstants.GET;

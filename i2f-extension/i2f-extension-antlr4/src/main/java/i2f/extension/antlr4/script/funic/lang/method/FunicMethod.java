@@ -11,7 +11,6 @@ import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import java.util.stream.Collectors;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class FunicMethod implements IMethod {
     protected String name;
     protected Class<?> returnType;
@@ -107,13 +105,12 @@ public class FunicMethod implements IMethod {
     }
 
     public FunicMethod copy() {
-        FunicMethod ret = FunicMethod.builder()
-                .name(name)
-                .parameters(new ArrayList<>(parameters))
-                .returnType(returnType)
-                .body(body)
-                .visitor(visitor)
-                .build();
+        FunicMethod ret = new FunicMethod();
+        ret.setName(name);
+        ret.setParameters(new ArrayList<>(parameters));
+        ret.setReturnType(returnType);
+        ret.setBody(body);
+        ret.setVisitor(visitor);
         return ret;
     }
 }

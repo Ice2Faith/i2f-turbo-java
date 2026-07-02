@@ -5,7 +5,6 @@ import i2f.ai.rest.openai.model.data.OpenAiToolCallFunction;
 import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -14,7 +13,6 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class EchoOpenAiToolMessage implements OpenAiMessage {
     protected final String role = OpsOpenAiConsts.ECHO_TOOL;
     protected OpenAiToolMessage message;

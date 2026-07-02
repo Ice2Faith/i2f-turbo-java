@@ -2,7 +2,6 @@ package i2f.ai.rest.openai.model.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.Map;
 
@@ -13,7 +12,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OpenAiToolsDefinition {
     protected String type = OpenAiConsts.FUNCTION;
     protected Map<String, Object> function;

@@ -2,7 +2,6 @@ package i2f.workflow.rag;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -14,7 +13,6 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class DagNode {
     protected String id;
     protected DagTask<?> task;

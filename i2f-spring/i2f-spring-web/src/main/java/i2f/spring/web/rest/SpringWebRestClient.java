@@ -7,7 +7,6 @@ import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.url.FormUrlEncodedEncoder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +25,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class SpringWebRestClient implements IRestClient {
     protected RestTemplate restTemplate;
 

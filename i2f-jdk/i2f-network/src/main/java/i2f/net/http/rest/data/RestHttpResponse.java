@@ -1,9 +1,9 @@
 package i2f.net.http.rest.data;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -12,8 +12,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class RestHttpResponse<T> {
+public class RestHttpResponse<T> implements BaseBuilder<RestHttpResponse<T>> {
     /**
      * HTTP响应码
      */
@@ -34,4 +33,5 @@ public class RestHttpResponse<T> {
     public boolean isSuccess() {
         return statusCode >= 200 && statusCode < 300;
     }
+
 }

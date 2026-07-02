@@ -10,10 +10,10 @@ import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
+import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import i2f.reflect.ReflectResolver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -25,9 +25,8 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class HttpOpenAiAiModel implements AiModel {
-    protected IRestClient restClient;
+    protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
     protected String model;
@@ -101,17 +100,17 @@ public class HttpOpenAiAiModel implements AiModel {
             for (String key : removeKeys) {
                 reqMap.remove(key);
             }
-            RestHttpResponse<OpenAiCompletionRespDto> resp = restClient.rest(RestHttpRequest.builder()
-                            .url(getChatCompletionsUrl())
-                            .method(HttpMethodConstants.POST)
-                            .headers(HttpHeaders.create()
+            RestHttpResponse<OpenAiCompletionRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+                            .set(u -> u::setUrl, getChatCompletionsUrl())
+                            .set(u -> u::setMethod, HttpMethodConstants.POST)
+                            .set(u -> u::setHeaders, HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {
                                             headers.add("Authorization", "Bearer " + apiKey);
                                         }
                                     })
                             )
-                            .body(reqMap)
+                            .set(u -> u::setBody, reqMap)
                             .build(),
                     OpenAiCompletionRespDto.class);
             OpenAiCompletionRespDto ret = resp.getBody();
