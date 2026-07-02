@@ -27,9 +27,32 @@ public class QueryResult {
         return columns.size();
     }
 
+    public String getColumnName(int colIndex) {
+        return columns.get(colIndex).getName();
+    }
+
     public Object get(int rowIndex, int colIndex) {
         return rows.get(rowIndex).get(columns.get(colIndex).getName());
     }
 
+    public Object get(int rowIndex, String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            QueryColumn col = columns.get(i);
+            if (col.getName().equals(columnName)) {
+                return rows.get(rowIndex).get(columns.get(i).getName());
+            }
+        }
+        return null;
+    }
+
+    public Object getIgnoreCase(int rowIndex, String columnName) {
+        for (int i = 0; i < columns.size(); i++) {
+            QueryColumn col = columns.get(i);
+            if (col.getName().equalsIgnoreCase(columnName)) {
+                return rows.get(rowIndex).get(columns.get(i).getName());
+            }
+        }
+        return null;
+    }
 
 }
