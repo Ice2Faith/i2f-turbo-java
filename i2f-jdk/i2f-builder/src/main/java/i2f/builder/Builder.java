@@ -2,6 +2,8 @@ package i2f.builder;
 
 import i2f.builder.lambda.*;
 import i2f.lambda.core.Lambda;
+import i2f.lambda.core.func.IBuilder;
+import i2f.lambda.core.func.ISetter;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
@@ -103,13 +105,13 @@ public class Builder<T> {
         return this;
     }
 
-    public <E> Builder<T> set(ClassLambdaSetter<T, E> setter, E val) {
-        setter.set(target, val);
+    public <E> Builder<T> set(ISetter<T, E> setter, E val) {
+        setter.accept(target, val);
         return this;
     }
 
-    public <R, E> Builder<T> with(ClassLambdaBuilder<T, R, E> setter, E val) {
-        setter.set(target, val);
+    public <R, E> Builder<T> with(IBuilder<R, T, E> setter, E val) {
+        setter.apply(target, val);
         return this;
     }
 
@@ -125,12 +127,12 @@ public class Builder<T> {
         return this;
     }
 
-    public <V1, V2> Builder<T> set2(ClassLambdaBiSetter<T, V1, V2> setter, V1 v1, V2 v2) {
+    public <V1, V2> Builder<T> set2(LambdaBiSetter<T, V1, V2> setter, V1 v1, V2 v2) {
         setter.set(target, v1, v2);
         return this;
     }
 
-    public <R, V1, V2> Builder<T> with2(ClassLambdaBiBuilder<T, R, V1, V2> setter, V1 v1, V2 v2) {
+    public <R, V1, V2> Builder<T> with2(LambdaBiBuilder<T, R, V1, V2> setter, V1 v1, V2 v2) {
         setter.set(target, v1, v2);
         return this;
     }

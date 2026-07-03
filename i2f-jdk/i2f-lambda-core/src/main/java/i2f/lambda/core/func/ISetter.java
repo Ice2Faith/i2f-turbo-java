@@ -9,5 +9,5 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface ISetter<T, V> extends Serializable {
-    void accept(T obj, V val) throws Throwable;
+    void accept(T obj, V val);
 }

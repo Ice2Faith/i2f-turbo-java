@@ -9,5 +9,5 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface IBuilder<R, T, V> extends Serializable {
-    R apply(T obj, V val) throws Throwable;
+    R apply(T obj, V val);
 }

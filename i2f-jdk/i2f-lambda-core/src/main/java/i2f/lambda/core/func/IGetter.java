@@ -9,5 +9,5 @@ import java.io.Serializable;
  */
 @FunctionalInterface
 public interface IGetter<R, V> extends Serializable {
-    R apply(V v) throws Throwable;
+    R apply(V v);
 }
