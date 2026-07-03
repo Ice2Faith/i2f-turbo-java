@@ -20,4 +20,7 @@ public class RagEmbeddingModelProperties {
     protected int dimension;
     protected boolean enableLoadDocs = false;
     protected String docsPath = RagHelper.DEFAULT_RAG_DIR;
+    protected int maxSegmentSizeInChars = 512;
+    protected int docsEmbedBatchSize = -1;
+    protected double maxOverlapRate = 0.15;
 }

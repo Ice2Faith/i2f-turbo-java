@@ -3,6 +3,7 @@ package i2f.springboot.ops.openai.rag;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.rag.HttpOpenAiRagEmbeddingModel;
 import i2f.ai.std.rag.*;
+import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
@@ -90,7 +91,14 @@ public class RagAutoConfiguration {
         }
         RagHelper.loadDocuments(dir,
                 worker,
-                new SimpleRecursiveRagTextSplitter());
+                new RagLoadDocumentsOptions().toBuilder()
+                        .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toBuilder()
+                                .set(u -> u::setMaxSegmentSizeInChars, properties.getMaxSegmentSizeInChars())
+                                .set(u -> u::setMaxOverlapRate, properties.getMaxOverlapRate())
+                                .build())
+                        .set(u -> u::setStoreBatchSize, properties.getDocsEmbedBatchSize())
+                        .build()
+        );
 
         File historyDir = new File(dir.getParentFile(), "rags_history");
         if (!historyDir.exists()) {
