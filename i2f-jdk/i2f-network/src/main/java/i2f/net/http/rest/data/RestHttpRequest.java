@@ -1,6 +1,6 @@
 package i2f.net.http.rest.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RestHttpRequest implements BaseBuilder<RestHttpRequest> {
+public class RestHttpRequest implements BaseMutator<RestHttpRequest> {
     /**
      * 请求URL
      */

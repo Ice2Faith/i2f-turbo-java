@@ -4,10 +4,10 @@ import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingStore;
 import i2f.ai.std.rag.RagVector;
 import i2f.bindsql.BindSql;
-import i2f.builder.BaseBuilder;
 import i2f.io.stream.StreamUtil;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.mutator.BaseMutator;
 import i2f.resources.ResourceUtil;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Data
 @NoArgsConstructor
-public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseBuilder<SqliteRagEmbeddingStore> {
+public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<SqliteRagEmbeddingStore> {
     public static final String DIR_NAME = "sqlite-vec";
     public static final String DEFAULT_DB_FILE_PATH = StdConst.RUNTIME_PERSIST_DIR + "/" + DIR_NAME + "/sqlite-vec.db";
     public static final String DEFAULT_TABLE_NAME = "tb_vec";

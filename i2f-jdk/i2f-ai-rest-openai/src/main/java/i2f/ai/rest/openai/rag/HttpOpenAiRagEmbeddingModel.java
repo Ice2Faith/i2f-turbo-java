@@ -4,7 +4,7 @@ import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -24,7 +24,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseBuilder<HttpOpenAiRagEmbeddingModel> {
+public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseMutator<HttpOpenAiRagEmbeddingModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
@@ -77,7 +77,7 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseBuild
 
     public HttpOpenAiEmbeddingRespDto embedding(HttpOpenAiEmbeddingReqDto req) {
         try {
-            RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+            RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
                             .set(u -> u::setUrl, getEmbeddingUrl())
                             .set(u -> u::setMethod, HttpMethodConstants.POST)
                             .set(u -> u::setHeaders, HttpHeaders.create()
@@ -88,7 +88,7 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseBuild
                                     })
                             )
                             .set(u -> u::setBody, req)
-                            .build(),
+                            .done(),
                     HttpOpenAiEmbeddingRespDto.class);
             HttpOpenAiEmbeddingRespDto ret = resp.getBody();
             return ret;

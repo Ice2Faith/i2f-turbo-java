@@ -1,6 +1,6 @@
 package i2f.spring.web.rest;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
@@ -26,7 +26,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class SpringWebRestClient implements IRestClient, BaseBuilder<SpringWebRestClient> {
+public class SpringWebRestClient implements IRestClient, BaseMutator<SpringWebRestClient> {
     protected RestTemplate restTemplate;
 
     public SpringWebRestClient(RestTemplate restTemplate) {
@@ -61,13 +61,13 @@ public class SpringWebRestClient implements IRestClient, BaseBuilder<SpringWebRe
                 reqEntity,
                 responseType);
 
-        return new RestHttpResponse<T>().toBuilder()
+        return new RestHttpResponse<T>().toMutator()
                 .set(u -> u::setStatusCode, respEntity.getStatusCodeValue())
                 .set(u -> u::setStatusMessage, respEntity.getStatusCode().getReasonPhrase())
                 .set(u -> u::setHeaders, HttpHeaders.create()
                         .addAll(respEntity.getHeaders())
                 )
                 .set(u -> u::setBody, respEntity.getBody())
-                .build();
+                .done();
     }
 }

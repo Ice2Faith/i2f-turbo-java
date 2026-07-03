@@ -1,6 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiSystemMessage implements OpenAiMessage, BaseBuilder<OpenAiSystemMessage> {
+public class OpenAiSystemMessage implements OpenAiMessage, BaseMutator<OpenAiSystemMessage> {
     protected final String role = OpenAiConsts.SYSTEM;
     protected String content;
 

@@ -1,6 +1,5 @@
 package i2f.extension.antlr4.script.funic.lang.method;
 
-import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.exception.FunicControlException;
@@ -10,6 +9,7 @@ import i2f.extension.antlr4.script.funic.lang.exception.control.FunicReturnExcep
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
  */
 @Data
 @NoArgsConstructor
-public class FunicMethod implements IMethod, BaseBuilder<FunicMethod> {
+public class FunicMethod implements IMethod, BaseMutator<FunicMethod> {
     protected String name;
     protected Class<?> returnType;
     protected List<Map.Entry<Class, String>> parameters;

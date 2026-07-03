@@ -1,6 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiAssistantMessageRespDto implements OpenAiMessage, BaseBuilder<OpenAiAssistantMessageRespDto> {
+public class OpenAiAssistantMessageRespDto implements OpenAiMessage, BaseMutator<OpenAiAssistantMessageRespDto> {
     protected final String role = OpenAiConsts.ASSISTANT;
     protected String content;
     protected String reasoning_content;
@@ -39,9 +39,9 @@ public class OpenAiAssistantMessageRespDto implements OpenAiMessage, BaseBuilder
         if (tool_calls != null) {
             list = new ArrayList<>(tool_calls);
         }
-        return new OpenAiAssistantMessage().toBuilder()
+        return new OpenAiAssistantMessage().toMutator()
                 .set(u -> u::setContent, content)
                 .set(u -> u::setTool_calls, list)
-                .build();
+                .done();
     }
 }

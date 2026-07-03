@@ -348,21 +348,21 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 } else {
                                                     callRet = objectMapper.writeValueAsString(callRet);
                                                 }
-                                                OpenAiToolMessage toolMsg = new OpenAiToolMessage().toBuilder()
+                                                OpenAiToolMessage toolMsg = new OpenAiToolMessage().toMutator()
                                                         .set(u -> u::setTool_call_id, id)
                                                         .set(u -> u::setContent, String.valueOf(callRet))
-                                                        .build();
+                                                        .done();
 
                                                 if (toolMsg != null) {
-                                                    EchoOpenAiToolMessage toolEchoMsg = new EchoOpenAiToolMessage().toBuilder()
+                                                    EchoOpenAiToolMessage toolEchoMsg = new EchoOpenAiToolMessage().toMutator()
                                                             .set(u -> u::setMessage, toolMsg)
                                                             .set(u -> u::setFunction, function)
-                                                            .build();
+                                                            .done();
                                                     toolEchoMsg.createContent();
-                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toBuilder()
+                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toMutator()
                                                             .set(u -> u::setType, OpsOpenAiConsts.ECHO_TOOL)
                                                             .set(u -> u::setEcho_tool, toolEchoMsg)
-                                                            .build();
+                                                            .done();
                                                     String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                                     OpsSecureReturn<?> resp = null;
                                                     if (req.isEncryptOutput()) {
@@ -375,10 +375,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     emitter.send(respJson);
                                                 }
                                                 if (toolMsg != null) {
-                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toBuilder()
+                                                    OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toMutator()
                                                             .set(u -> u::setType, OpenAiConsts.TOOL)
                                                             .set(u -> u::setTool, toolMsg)
-                                                            .build();
+                                                            .done();
                                                     String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
                                                     OpsSecureReturn<?> resp = null;
                                                     if (req.isEncryptOutput()) {
@@ -418,7 +418,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             .set(u -> u::json)
                             .set2(u -> u::addHeader, HttpHeaderConstants.Authorization, HttpHeaderConstants.Bearer + " " + req.getMeta().getApiKey())
                             .set(u -> u::setData, completion)
-                            .build()
+                            .done()
                             .send(new SpringWebHttpProcessor(restTemplate),
                                     response -> {
                                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {

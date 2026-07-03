@@ -1,6 +1,6 @@
 package i2f.ai.std.rag.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RagSearchResultItem implements BaseBuilder<RagSearchResultItem> {
+public class RagSearchResultItem implements BaseMutator<RagSearchResultItem> {
     protected int rank;
     protected String content;
 }

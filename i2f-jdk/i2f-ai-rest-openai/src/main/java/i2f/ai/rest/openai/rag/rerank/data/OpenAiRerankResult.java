@@ -1,6 +1,6 @@
 package i2f.ai.rest.openai.rag.rerank.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiRerankResult implements BaseBuilder<OpenAiRerankResult> {
+public class OpenAiRerankResult implements BaseMutator<OpenAiRerankResult> {
     protected Integer index;
     protected Double relevance_score;
     protected OpenAiRerankResultDocument document;

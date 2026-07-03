@@ -40,9 +40,9 @@ public class RagHelper {
 
     public static void loadDocuments(RagWorker worker,
                                      RagTextSplitter splitter) throws IOException {
-        loadDocuments(new File(DEFAULT_RAG_DIR), worker, new RagLoadDocumentsOptions().toBuilder()
+        loadDocuments(new File(DEFAULT_RAG_DIR), worker, new RagLoadDocumentsOptions().toMutator()
                 .set(p -> p::setSplitter, splitter)
-                .build());
+                .done());
     }
 
 
@@ -56,14 +56,14 @@ public class RagHelper {
             return;
         }
         if (options == null) {
-            options = new RagLoadDocumentsOptions().toBuilder()
+            options = new RagLoadDocumentsOptions().toMutator()
                     .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
                     .set(u -> u::setStoreBatchSize, -1)
-                    .build();
+                    .done();
         }
-        options.toBuilder()
+        options.toMutator()
                 .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
-                .build();
+                .done();
         if (path.isFile()) {
             if (options.getTextFileFilter().test(path)) {
                 String text = StreamUtil.readString(path);

@@ -1,6 +1,6 @@
 package i2f.ai.std.rag.rerank.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RagRerankDocument implements BaseBuilder<RagRerankDocument> {
+public class RagRerankDocument implements BaseMutator<RagRerankDocument> {
     protected String text;
     protected double score;
     protected int index;

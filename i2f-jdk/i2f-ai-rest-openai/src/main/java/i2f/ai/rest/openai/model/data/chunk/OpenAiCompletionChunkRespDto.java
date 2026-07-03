@@ -1,7 +1,7 @@
 package i2f.ai.rest.openai.model.data.chunk;
 
 import i2f.ai.rest.openai.model.data.OpenAiCompletionUsage;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiCompletionChunkRespDto implements BaseBuilder<OpenAiCompletionChunkRespDto> {
+public class OpenAiCompletionChunkRespDto implements BaseMutator<OpenAiCompletionChunkRespDto> {
     protected String id;
     protected String object;
     protected Long created;

@@ -9,11 +9,11 @@ import i2f.ai.std.service.annotations.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
-import i2f.builder.BaseBuilder;
 import i2f.context.std.INamingContext;
 import i2f.invokable.IInvokable;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.match.regex.RegexUtil;
+import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.proxy.std.impl.MethodHandlesUtil;
 import i2f.reflect.vistor.Visitor;
@@ -34,7 +34,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler, BaseBuilder<AiServiceDynamicProxyHandler> {
+public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler, BaseMutator<AiServiceDynamicProxyHandler> {
     protected INamingContext context;
     protected JsonSchemaAnnotationResolver resolver = JsonSchemaAnnotationResolver.INSTANCE;
 

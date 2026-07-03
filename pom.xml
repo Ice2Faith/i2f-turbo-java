@@ -203,11 +203,6 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
-                <artifactId>i2f-builder</artifactId>
-                <version>${i2f.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-bytes</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
@@ -624,6 +619,11 @@
             <dependency>
                 <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-mixins</artifactId>
+                <version>${i2f.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-mutator</artifactId>
                 <version>${i2f.version}</version>
             </dependency>
             <dependency>

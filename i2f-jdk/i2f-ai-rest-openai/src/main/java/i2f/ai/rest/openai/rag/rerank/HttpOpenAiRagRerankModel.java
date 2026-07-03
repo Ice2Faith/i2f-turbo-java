@@ -6,7 +6,7 @@ import i2f.ai.rest.openai.rag.rerank.data.OpenAiRerankResult;
 import i2f.ai.rest.openai.rag.rerank.data.OpenAiRerankResultDocument;
 import i2f.ai.std.rag.rerank.RagRerankModel;
 import i2f.ai.std.rag.rerank.data.RagRerankDocument;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiRagRerankModel implements RagRerankModel, BaseBuilder<HttpOpenAiRagRerankModel> {
+public class HttpOpenAiRagRerankModel implements RagRerankModel, BaseMutator<HttpOpenAiRagRerankModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
@@ -82,7 +82,7 @@ public class HttpOpenAiRagRerankModel implements RagRerankModel, BaseBuilder<Htt
 
     public HttpOpenAiRerankRespDto rerank(HttpOpenAiRerankReqDto req) {
         try {
-            RestHttpResponse<HttpOpenAiRerankRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+            RestHttpResponse<HttpOpenAiRerankRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
                             .set(u -> u::setUrl, getRerankUrl())
                             .set(u -> u::setMethod, HttpMethodConstants.POST)
                             .set(u -> u::setHeaders, HttpHeaders.create()
@@ -93,7 +93,7 @@ public class HttpOpenAiRagRerankModel implements RagRerankModel, BaseBuilder<Htt
                                     })
                             )
                             .set(u -> u::setBody, req)
-                            .build(),
+                            .done(),
                     HttpOpenAiRerankRespDto.class);
             HttpOpenAiRerankRespDto ret = resp.getBody();
             return ret;

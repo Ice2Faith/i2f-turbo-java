@@ -1,7 +1,7 @@
 package i2f.ai.rest.openai.metadata.model;
 
 import i2f.ai.rest.openai.metadata.model.data.OpenAiModelsRespDto;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -20,7 +20,7 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiModelsApi implements BaseBuilder<HttpOpenAiModelsApi> {
+public class HttpOpenAiModelsApi implements BaseMutator<HttpOpenAiModelsApi> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
@@ -36,7 +36,7 @@ public class HttpOpenAiModelsApi implements BaseBuilder<HttpOpenAiModelsApi> {
 
     public OpenAiModelsRespDto models() {
         try {
-            RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+            RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
                             .set(u -> u::setUrl, getModelsUrl())
                             .set(u -> u::setMethod, HttpMethodConstants.GET)
                             .set(u -> u::setHeaders, HttpHeaders.create()
@@ -46,7 +46,7 @@ public class HttpOpenAiModelsApi implements BaseBuilder<HttpOpenAiModelsApi> {
                                         }
                                     })
                             )
-                            .build(),
+                            .done(),
                     OpenAiModelsRespDto.class);
             OpenAiModelsRespDto ret = resp.getBody();
             return ret;

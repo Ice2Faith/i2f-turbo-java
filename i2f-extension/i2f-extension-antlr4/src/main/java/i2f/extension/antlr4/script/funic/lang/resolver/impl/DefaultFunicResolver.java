@@ -952,13 +952,13 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     public Object getCallContextOfInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new FunicFunctionCallContext().toBuilder()
+        return new FunicFunctionCallContext().toMutator()
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.INSTANCE_METHOD)
                 .set(u -> u::setInvokeTarget, target)
                 .set(u -> u::setMethodName, methodName)
                 .set(u -> u::setArgsList, args)
-                .build();
+                .done();
     }
 
     public Reference<?> beforeInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -1040,12 +1040,12 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     public Object getCallContextOfInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new FunicFunctionCallContext().toBuilder()
+        return new FunicFunctionCallContext().toMutator()
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.GLOBAL_METHOD)
                 .set(u -> u::setMethodName, methodName)
                 .set(u -> u::setArgsList, args)
-                .build();
+                .done();
     }
 
     public Reference<?> beforeInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -1098,13 +1098,13 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     public Object getCallContextOfInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new FunicFunctionCallContext().toBuilder()
+        return new FunicFunctionCallContext().toMutator()
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.STATIC_METHOD)
                 .set(u -> u::setCallClass, type)
                 .set(u -> u::setMethodName, methodName)
                 .set(u -> u::setArgsList, args)
-                .build();
+                .done();
     }
 
     public Reference<?> beforeInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
@@ -1130,12 +1130,12 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     public Object getCallContextOfNewInstance(Class<?> clazz, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new FunicFunctionCallContext().toBuilder()
+        return new FunicFunctionCallContext().toMutator()
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.NEW_INSTANCE)
                 .set(u -> u::setCallClass, clazz)
                 .set(u -> u::setArgsList, args)
-                .build();
+                .done();
     }
 
     public Object doNewInstance(Class<?> clazz, List<Object> args, DefaultFunicVisitor visitor) throws Exception {

@@ -1,6 +1,6 @@
 package i2f.ai.rest.openai.metadata.model.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiModelsRespDto implements BaseBuilder<OpenAiModelsRespDto> {
+public class OpenAiModelsRespDto implements BaseMutator<OpenAiModelsRespDto> {
     protected String object;
     protected List<OpenAiModelsItem> data;
 }

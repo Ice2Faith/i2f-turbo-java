@@ -1,8 +1,8 @@
 package i2f.net.http.data;
 
 
-import i2f.builder.BaseBuilder;
 import i2f.io.stream.StreamUtil;
+import i2f.mutator.BaseMutator;
 import i2f.serialize.std.str.IStringObjectSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.nio.charset.StandardCharsets;
  */
 @Data
 @NoArgsConstructor
-public class HttpResponse implements Closeable, BaseBuilder<HttpResponse> {
+public class HttpResponse implements Closeable, BaseMutator<HttpResponse> {
     private int statusCode;
     private String statusMessage;
     private long contentLength;

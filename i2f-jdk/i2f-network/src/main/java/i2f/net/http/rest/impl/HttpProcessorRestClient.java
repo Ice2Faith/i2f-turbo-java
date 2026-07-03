@@ -1,6 +1,6 @@
 package i2f.net.http.rest.impl;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
@@ -24,13 +24,13 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-public class HttpProcessorRestClient implements IRestClient, BaseBuilder<HttpProcessorRestClient> {
+public class HttpProcessorRestClient implements IRestClient, BaseMutator<HttpProcessorRestClient> {
     protected IHttpProcessor httpProcessor = new HttpUrlConnectProcessor();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
-        HttpRequest req = new HttpRequest().toBuilder()
+        HttpRequest req = new HttpRequest().toMutator()
                 .set(u -> u::setUrl, request.getUrl())
                 .set(u -> u::setMethod, request.getMethod())
                 .set(u -> u::setParams, request.getParams())
@@ -38,18 +38,18 @@ public class HttpProcessorRestClient implements IRestClient, BaseBuilder<HttpPro
                 .set(u -> u::setData, request.getBody())
                 .set(u -> u::json)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
-                .build();
+                .done();
 
         RestHttpResponse<T> ret = httpProcessor.http(req, response -> {
             try (HttpResponse resp = response) {
                 T obj = resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
-                return new RestHttpResponse<T>().toBuilder()
+                return new RestHttpResponse<T>().toMutator()
                         .set(u -> u::setStatusCode, resp.getStatusCode())
                         .set(RestHttpResponse::setBody, obj)
                         .set(u -> u::setStatusMessage, resp.getStatusMessage())
                         .set(u -> u::setHeaders, resp.getHeader())
                         .set(u -> u::setBody, obj)
-                        .build();
+                        .done();
             }
         });
 

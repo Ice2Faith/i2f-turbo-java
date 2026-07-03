@@ -167,7 +167,7 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
 
     @Override
     public Object getCallContextOfInvokeInstanceMethod(Object target, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new ProcedureFunicFunctionCallContext().toBuilder()
+        return new ProcedureFunicFunctionCallContext().toMutator()
                 .cast(ProcedureFunicFunctionCallContext.class)
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.INSTANCE_METHOD)
@@ -176,12 +176,12 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
                 .set(u -> u::setArgsList, args)
                 .set(u -> u::setExecutor, executor)
                 .set(u -> u::setNode, node)
-                .build();
+                .done();
     }
 
     @Override
     public Object getCallContextOfInvokeGlobalMethod(String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new ProcedureFunicFunctionCallContext().toBuilder()
+        return new ProcedureFunicFunctionCallContext().toMutator()
                 .cast(ProcedureFunicFunctionCallContext.class)
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.GLOBAL_METHOD)
@@ -189,12 +189,12 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
                 .set(u -> u::setArgsList, args)
                 .set(u -> u::setExecutor, executor)
                 .set(u -> u::setNode, node)
-                .build();
+                .done();
     }
 
     @Override
     public Object getCallContextOfNewInstance(Class<?> clazz, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new ProcedureFunicFunctionCallContext().toBuilder()
+        return new ProcedureFunicFunctionCallContext().toMutator()
                 .cast(ProcedureFunicFunctionCallContext.class)
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.NEW_INSTANCE)
@@ -202,12 +202,12 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
                 .set(u -> u::setArgsList, args)
                 .set(u -> u::setExecutor, executor)
                 .set(u -> u::setNode, node)
-                .build();
+                .done();
     }
 
     @Override
     public Object getCallContextOfInvokeStaticMethod(Class<?> type, String methodName, List<Map.Entry<String, Object>> args, DefaultFunicVisitor visitor) {
-        return new ProcedureFunicFunctionCallContext().toBuilder()
+        return new ProcedureFunicFunctionCallContext().toMutator()
                 .cast(ProcedureFunicFunctionCallContext.class)
                 .set(u -> u::setVisitor, visitor)
                 .set(u -> u::setType, FunicFunctionCallContext.Type.STATIC_METHOD)
@@ -216,7 +216,7 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
                 .set(u -> u::setArgsList, args)
                 .set(u -> u::setExecutor, executor)
                 .set(u -> u::setNode, node)
-                .build();
+                .done();
     }
 
 }

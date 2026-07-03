@@ -3,7 +3,7 @@ package i2f.springboot.ops.openai.data.message;
 import i2f.ai.rest.openai.model.data.OpenAiMessage;
 import i2f.ai.rest.openai.model.data.OpenAiToolCallFunction;
 import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class EchoOpenAiToolMessage implements OpenAiMessage, BaseBuilder<EchoOpenAiToolMessage> {
+public class EchoOpenAiToolMessage implements OpenAiMessage, BaseMutator<EchoOpenAiToolMessage> {
     protected final String role = OpsOpenAiConsts.ECHO_TOOL;
     protected OpenAiToolMessage message;
     protected OpenAiToolCallFunction function;

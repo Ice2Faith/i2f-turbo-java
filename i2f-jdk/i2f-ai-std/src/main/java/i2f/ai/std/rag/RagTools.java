@@ -4,7 +4,7 @@ import i2f.ai.std.rag.data.RagSearchResultItem;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,7 +19,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Tools
-public class RagTools implements BaseBuilder<RagTools> {
+public class RagTools implements BaseMutator<RagTools> {
     protected RagWorker worker;
 
     public RagTools(RagWorker worker) {

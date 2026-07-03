@@ -42,31 +42,31 @@ public class RagAutoConfiguration {
     @ConditionalOnMissingBean(RagEmbeddingModel.class)
     @Bean
     public RagEmbeddingModel ragEmbeddingModel() {
-        return new HttpOpenAiRagEmbeddingModel().toBuilder()
+        return new HttpOpenAiRagEmbeddingModel().toMutator()
                 .set(u -> u::setRestClient, new SpringWebRestClient(new RestTemplate()))
                 .set(u -> u::setBaseUrl, properties.getBaseUrl())
                 .set(u -> u::setApiKey, properties.getApiKey())
                 .set(u -> u::setModel, properties.getModel())
-                .build();
+                .done();
     }
 
     @ConditionalOnMissingBean(RagEmbeddingStore.class)
     @Bean
     public RagEmbeddingStore ragEmbeddingStore() {
-        return new SqliteRagEmbeddingStore().toBuilder()
+        return new SqliteRagEmbeddingStore().toMutator()
                 .set(u -> u::setDimension, properties.getDimension())
                 .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(new ObjectMapper()))
-                .build();
+                .done();
     }
 
     @ConditionalOnMissingBean(RagWorker.class)
     @Bean
     public RagWorker ragWorker(@Autowired RagEmbeddingModel ragEmbeddingModel,
                                @Autowired RagEmbeddingStore ragEmbeddingStore) {
-        RagWorker ret = new RagWorker().toBuilder()
+        RagWorker ret = new RagWorker().toMutator()
                 .set(u -> u::setModel, ragEmbeddingModel)
                 .set(u -> u::setStore, ragEmbeddingStore)
-                .build();
+                .done();
         new Thread(() -> {
             try {
                 loadDocs(ret);
@@ -91,13 +91,13 @@ public class RagAutoConfiguration {
         }
         RagHelper.loadDocuments(dir,
                 worker,
-                new RagLoadDocumentsOptions().toBuilder()
-                        .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toBuilder()
+                new RagLoadDocumentsOptions().toMutator()
+                        .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toMutator()
                                 .set(u -> u::setMaxSegmentSizeInChars, properties.getMaxSegmentSizeInChars())
                                 .set(u -> u::setMaxOverlapRate, properties.getMaxOverlapRate())
-                                .build())
+                                .done())
                         .set(u -> u::setStoreBatchSize, properties.getDocsEmbedBatchSize())
-                        .build()
+                        .done()
         );
 
         File historyDir = new File(dir.getParentFile(), "rags_history");

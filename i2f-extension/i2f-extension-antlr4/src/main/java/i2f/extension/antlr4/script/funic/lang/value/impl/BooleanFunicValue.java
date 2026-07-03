@@ -1,7 +1,7 @@
 package i2f.extension.antlr4.script.funic.lang.value.impl;
 
-import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.tree.RuleNode;
@@ -13,7 +13,7 @@ import org.antlr.v4.runtime.tree.RuleNode;
  */
 @Data
 @NoArgsConstructor
-public class BooleanFunicValue implements FunicValue, BaseBuilder<BooleanFunicValue> {
+public class BooleanFunicValue implements FunicValue, BaseMutator<BooleanFunicValue> {
     protected RuleNode node;
     protected boolean value;
 

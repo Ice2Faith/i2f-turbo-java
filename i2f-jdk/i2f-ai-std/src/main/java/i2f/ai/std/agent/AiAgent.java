@@ -18,7 +18,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.typeof.TypeOf;
@@ -39,7 +39,7 @@ import java.util.function.Predicate;
  */
 @Data
 @NoArgsConstructor
-public class AiAgent implements BaseBuilder<AiAgent> {
+public class AiAgent implements BaseMutator<AiAgent> {
     public static final ExecutorService DEFAULT_TOOL_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 2);
     protected volatile AiModel model;
     protected volatile RagWorker ragWorker;

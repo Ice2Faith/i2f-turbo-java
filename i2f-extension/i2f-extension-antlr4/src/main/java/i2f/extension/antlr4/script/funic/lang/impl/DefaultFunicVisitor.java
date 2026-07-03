@@ -106,10 +106,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                         } else if (e instanceof FunicReturnException) {
                             FunicReturnException returnEx = (FunicReturnException) e;
                             if (returnEx.isHasRetValue()) {
-                                return new DefaultFunicValue().toBuilder()
+                                return new DefaultFunicValue().toMutator()
                                         .set(u -> u::setNode, ctx)
                                         .set(u -> u::setValue, returnEx.getRetValue())
-                                        .build();
+                                        .done();
                             }
                             break;
                         }
@@ -117,9 +117,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -195,10 +195,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                             }
                         }
 
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                 }
                 if (count == 2) {
@@ -209,10 +209,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                         String methodName = secondValue.getKey();
                         List<Map.Entry<String, Object>> args = (List<Map.Entry<String, Object>>) secondValue.getValue();
                         Object ret = resolver.invokeInstanceMethod(firstValue.get(), methodName, args, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.InstanceFieldValueRightPartContext) {
                         FunicParser.InstanceFieldValueRightPartContext secondCtx = (FunicParser.InstanceFieldValueRightPartContext) second;
@@ -220,41 +220,41 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                         String operator = secondValue.getKey();
                         if (firstValue.get() == null) {
                             if ("?.".equals(operator)) {
-                                return new NullFunicValue().toBuilder()
+                                return new NullFunicValue().toMutator()
                                         .set(u -> u::setNode, ctx)
-                                        .build();
+                                        .done();
                             }
                         }
                         String name = (String) secondValue.getValue();
                         Object value = resolver.getFieldValue(firstValue.get(), name, this);
-                        return new ParentFunicValue().toBuilder()
+                        return new ParentFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setParent, firstValue.get())
                                 .set(u -> u::setKey, name)
                                 .set(u -> u::setValue, value)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.SquareQuoteRightPartContext) {
                         FunicParser.SquareQuoteRightPartContext secondCtx = (FunicParser.SquareQuoteRightPartContext) second;
                         FunicValue secondValue = visitSquareQuoteRightPart(secondCtx);
                         Object secondObj = secondValue.get();
                         Object value = resolver.getSquareFieldValue(firstValue.get(), secondObj, this);
-                        return new ParentFunicValue().toBuilder()
+                        return new ParentFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setParent, firstValue.get())
                                 .set(u -> u::setKey, secondObj)
                                 .set(u -> u::setValue, value)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.FactorPercentRightPartContext) {
                         FunicParser.FactorPercentRightPartContext secondCtx = (FunicParser.FactorPercentRightPartContext) second;
                         TerminalFunicValue secondValue = (TerminalFunicValue) visitFactorPercentRightPart(secondCtx);
                         String operator = secondValue.getText();
                         Object value = resolver.suffixOperator(firstValue.get(), operator, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, value)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.IncrDecrAfterRightPartContext) {
                         FunicParser.IncrDecrAfterRightPartContext secondCtx = (FunicParser.IncrDecrAfterRightPartContext) second;
@@ -263,32 +263,32 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                         Object value = resolver.suffixOperator(firstValue.get(), operator, this);
                         ParentFunicValue parentValue = (ParentFunicValue) firstValue;
                         resolver.setSquareFieldValue(parentValue.getParent(), parentValue.getKey(), value, this);
-                        return new ParentFunicValue().toBuilder()
+                        return new ParentFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setParent, parentValue.getParent())
                                 .set(u -> u::setKey, parentValue.getKey())
                                 .set(u -> u::setValue, firstValue.get())
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.CastAsRightPartContext) {
                         FunicParser.CastAsRightPartContext secondCtx = (FunicParser.CastAsRightPartContext) second;
                         TypeFunicValue secondValue = (TypeFunicValue) visitCastAsRightPart(secondCtx);
                         Class<?> type = secondValue.getType();
                         Object ret = resolver.convertType(firstValue.get(), type, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.ThirdOperateRightPartContext) {
                         FunicParser.ThirdOperateRightPartContext secondCtx = (FunicParser.ThirdOperateRightPartContext) second;
                         ListFunicValue secondValue = (ListFunicValue) visitThirdOperateRightPart(secondCtx);
                         List<Object> list = secondValue.getList();
                         boolean ok = resolver.toBoolean(firstValue.get(), this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ok ? list.get(0) : list.get(1))
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.AssignRightPartContext) {
                         FunicParser.AssignRightPartContext secondCtx = (FunicParser.AssignRightPartContext) second;
@@ -306,10 +306,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
                         Object value = rightValue.get();
                         Object ret = resolver.doubleOperator(firstValue.get(), operator, value, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.MathAddSubOperatorPartContext) {
                         FunicParser.MathAddSubOperatorPartContext secondCtx = (FunicParser.MathAddSubOperatorPartContext) second;
@@ -321,10 +321,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
                         Object value = rightValue.get();
                         Object ret = resolver.doubleOperator(firstValue.get(), operator, value, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.CompareOperatorPartContext) {
                         FunicParser.CompareOperatorPartContext secondCtx = (FunicParser.CompareOperatorPartContext) second;
@@ -336,10 +336,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
                         Object value = rightValue.get();
                         Object ret = resolver.doubleOperator(firstValue.get(), operator, value, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.LogicalLinkOperatorPartContext) {
                         FunicParser.LogicalLinkOperatorPartContext secondCtx = (FunicParser.LogicalLinkOperatorPartContext) second;
@@ -354,10 +354,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                             return value;
                         };
                         Object ret = resolver.doubleOperator(firstValue.get(), operator, rightSupplier, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                     if (second instanceof FunicParser.BitOperatorPartContext) {
                         FunicParser.BitOperatorPartContext secondCtx = (FunicParser.BitOperatorPartContext) second;
@@ -369,10 +369,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
                         Object value = rightValue.get();
                         Object ret = resolver.doubleOperator(firstValue.get(), operator, value, this);
-                        return new DefaultFunicValue().toBuilder()
+                        return new DefaultFunicValue().toMutator()
                                 .set(u -> u::setNode, ctx)
                                 .set(u -> u::setValue, ret)
-                                .build();
+                                .done();
                     }
                 }
             }
@@ -473,10 +473,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(1);
                 FunicValue nextValue = visitExpress(nextCtx);
                 Object value = resolver.prefixOperator(nextValue.get(), (String) operators.get(0), this);
-                return new DefaultFunicValue().toBuilder()
+                return new DefaultFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, value)
-                        .build();
+                        .done();
             }
             if (child instanceof FunicParser.IncrDecrPrefixOperatorPartContext) {
                 FunicParser.IncrDecrPrefixOperatorPartContext operatorsCtx = (FunicParser.IncrDecrPrefixOperatorPartContext) child;
@@ -489,12 +489,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 Object ret = resolver.prefixOperator(nextValue.get(), (String) operators.get(0), this);
                 ParentFunicValue parentValue = (ParentFunicValue) nextValue;
                 resolver.setSquareFieldValue(parentValue.getParent(), parentValue.getKey(), ret, this);
-                return new ParentFunicValue().toBuilder()
+                return new ParentFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setParent, parentValue.getParent())
                         .set(u -> u::setKey, parentValue.getKey())
                         .set(u -> u::setValue, ret)
-                        .build();
+                        .done();
             }
             if (child instanceof FunicParser.ListValueExpressContext) {
                 FunicParser.ListValueExpressContext nextCtx = (FunicParser.ListValueExpressContext) child;
@@ -568,9 +568,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             resolver.onDebugger(label, value, ctx, this);
 
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -621,9 +621,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     this);
         }
         if (ret == null) {
-            return new NullFunicValue().toBuilder()
+            return new NullFunicValue().toMutator()
                     .set(u -> u::setNode, extraCtx)
-                    .build();
+                    .done();
         }
         return ret;
     }
@@ -656,10 +656,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     list.add(nextValue.getList());
                 }
             }
-            return new ListFunicValue().toBuilder()
+            return new ListFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -681,10 +681,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     list.add(nextCtx);
                 }
             }
-            return new ListFunicValue().toBuilder()
+            return new ListFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -732,12 +732,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             resolver.setSquareFieldValue(parentValue.getParent(), parentValue.getKey(), value, this);
         }
 
-        return new ParentFunicValue().toBuilder()
+        return new ParentFunicValue().toMutator()
                 .set(u -> u::setNode, triggerNode)
                 .set(u -> u::setParent, parentValue.getParent())
                 .set(u -> u::setKey, parentValue.getKey())
                 .set(u -> u::setValue, value)
-                .build();
+                .done();
     }
 
     @Override
@@ -930,15 +930,15 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
             FunicParser.ScriptBlockContext bodyCtx = (FunicParser.ScriptBlockContext) ctx.getChild(2);
 
-            FunicLambda lambda = new FunicLambda().toBuilder()
+            FunicLambda lambda = new FunicLambda().toMutator()
                     .set(u -> u::setArguments, argumentsList)
                     .set(u -> u::setBody, bodyCtx)
-                    .build();
+                    .done();
 
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, lambda)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -958,10 +958,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (ok) {
                 importPackages.add(0, packageName);
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, packageName)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1019,10 +1019,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             }
 
 
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, future)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1101,15 +1101,15 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (list.size() == 1) {
-                return new DefaultFunicValue().toBuilder()
+                return new DefaultFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, list.get(0))
-                        .build();
+                        .done();
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1151,22 +1151,22 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 returnType = returnValue.getType();
             }
 
-            IMethod method = new FunicMethod().toBuilder()
+            IMethod method = new FunicMethod().toMutator()
                     .set(u -> u::setName, name)
                     .set(u -> u::setParameters, parameters)
                     .set(u -> u::setReturnType, returnType)
                     .set(u -> u::setBody, bodyCtx)
                     .set(u -> u::setVisitor, this)
-                    .build();
+                    .done();
             boolean ok = resolver.onPreRegisterContextGlobalMethod(method, this);
             if (ok) {
                 CopyOnWriteArrayList<IMethod> list = registryMethods.computeIfAbsent(name, e -> new CopyOnWriteArrayList<>());
                 list.add(0, method);
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, method)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1182,10 +1182,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.FullNameContext nextCtx = (FunicParser.FullNameContext) ctx.getChild(1);
             FullNameFunicValue nextValue = (FullNameFunicValue) visitFullName(nextCtx);
             Class<?> clazz = resolver.findClass(nextValue.getName(), this);
-            return new TypeFunicValue().toBuilder()
+            return new TypeFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, clazz)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1208,10 +1208,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     list.add(new AbstractMap.SimpleEntry<>(nextValue.getKey(), nextValue.getValue()));
                 }
             }
-            return new ListKeyPairFunicValue().toBuilder()
+            return new ListKeyPairFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1228,11 +1228,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (count == 1) {
                 TerminalNode terminalCtx = (TerminalNode) ctx.getChild(0);
                 TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(terminalCtx);
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, terminalValue.getText())
                         .set(u -> u::setValue, null)
-                        .build();
+                        .done();
             } else if (count == 2) {
                 FunicParser.FullNameContext typeCtx = (FunicParser.FullNameContext) ctx.getChild(0);
                 FullNameFunicValue typeValue = (FullNameFunicValue) visitFullName(typeCtx);
@@ -1241,11 +1241,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
                 TerminalNode terminalCtx = (TerminalNode) ctx.getChild(1);
                 TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(terminalCtx);
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, terminalValue.getText())
                         .set(u -> u::setValue, clazz)
-                        .build();
+                        .done();
             } else if (count == 3) {
                 TerminalNode terminalCtx = (TerminalNode) ctx.getChild(0);
                 TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal(terminalCtx);
@@ -1255,11 +1255,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 String className = typeValue.getName();
                 Class<?> clazz = resolver.findClass(className, this);
 
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, terminalValue.getText())
                         .set(u -> u::setValue, clazz)
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " function parameter not support this formal!");
         } catch (Throwable e) {
@@ -1350,9 +1350,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     visitScriptBlock(finallyCtx);
                 }
             }
-            return new NullFunicValue().toBuilder()
+            return new NullFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1502,9 +1502,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -1577,9 +1577,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -1628,9 +1628,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -1665,9 +1665,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -1702,9 +1702,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 }
             }
             if (ret == null) {
-                return new NullFunicValue().toBuilder()
+                return new NullFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .build();
+                        .done();
             }
             return ret;
         } catch (Throwable e) {
@@ -1742,9 +1742,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ScriptBlockContext scriptCtx = (FunicParser.ScriptBlockContext) list.get(size - 1);
                 return visitScriptBlock(scriptCtx);
             }
-            return new NullFunicValue().toBuilder()
+            return new NullFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1760,10 +1760,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(1);
             FunicValue value = visitExpress(nextCtx);
             boolean ok = resolver.toBoolean(value.get(), this);
-            return new BooleanFunicValue().toBuilder()
+            return new BooleanFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, ok)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1781,9 +1781,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ScriptContext nextCtx = (FunicParser.ScriptContext) ctx.getChild(1);
                 return visitScript(nextCtx);
             }
-            return new NullFunicValue().toBuilder()
+            return new NullFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1808,10 +1808,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     return nextValue;
                 }
                 Object typeObj = nextValue.get();
-                return new TypeFunicValue().toBuilder()
+                return new TypeFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, typeObj == null ? Object.class : typeObj.getClass())
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + "cast express un-support child type:" + child.getClass());
         } catch (Throwable e) {
@@ -1836,10 +1836,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     map.putAll(nextValue.getMap());
                 }
             }
-            return new MapFunicValue().toBuilder()
+            return new MapFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, map)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1864,10 +1864,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 Map<String, Object> next = resolver.unpackMap(nextValue.get(), this);
                 map.putAll(next);
             }
-            return new MapFunicValue().toBuilder()
+            return new MapFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, map)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1884,11 +1884,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (count == 1) {
                 FunicParser.VariableValueContext nextCtx = (FunicParser.VariableValueContext) ctx.getChild(0);
                 ParentFunicValue value = (ParentFunicValue) visitVariableValue(nextCtx);
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, (String) value.getKey())
                         .set(u -> u::setValue, value.get())
-                        .build();
+                        .done();
             } else if (count == 3) {
                 ParseTree first = ctx.getChild(0);
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(2);
@@ -1904,11 +1904,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     ConstStringFunicValue stringValue = (ConstStringFunicValue) visitConstRenderString((FunicParser.ConstRenderStringContext) first);
                     name = stringValue.getText();
                 }
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, name)
                         .set(u -> u::setValue, nextValue.get())
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support key-value node!");
         } catch (Throwable e) {
@@ -1929,13 +1929,13 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.ExpressContext nameCtx = (FunicParser.ExpressContext) ctx.getChild(3);
             FunicValue elseValue = visitExpress(nameCtx);
 
-            return new ListFunicValue().toBuilder()
+            return new ListFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, new ArrayList<>(Arrays.asList(
                             trueValue.get(),
                             elseValue.get()
                     )))
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -1956,11 +1956,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
             String name = nameValue.getText();
 
-            return new KeyPairFunicValue().toBuilder()
+            return new KeyPairFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setKey, operator)
                     .set(u -> u::setValue, name)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2023,10 +2023,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     Array.set(obj, i, item);
                 }
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, obj)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2060,10 +2060,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (initMap != null) {
                 resolver.assign(obj, Collections.singletonList(initMap), this);
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, obj)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2084,11 +2084,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             ListKeyPairFunicValue argsValue = (ListKeyPairFunicValue) visitFunctionArguments(argsCtx);
             List<Map.Entry<String, Object>> args = argsValue.getList();
 
-            return new KeyPairFunicValue().toBuilder()
+            return new KeyPairFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setKey, name)
                     .set(u -> u::setValue, args)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2106,12 +2106,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         ListKeyPairFunicValue argsValue = (ListKeyPairFunicValue) visitFunctionArguments(argsCtx);
         List<Map.Entry<String, Object>> args = argsValue.getList();
 
-        return new PipelineFunctionFunicValue().toBuilder()
+        return new PipelineFunctionFunicValue().toMutator()
                 .set(u -> u::setType, PipelineFunctionFunicValue.Type.GLOBAL)
                 .set(u -> u::setClazz, null)
                 .set(u -> u::setName, name)
                 .set(u -> u::setArgs, args)
-                .build();
+                .done();
     }
 
     @Override
@@ -2123,10 +2123,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             Object value = resolver.invokeGlobalMethod(nextValue.getName(),
                     nextValue.getArgs(),
                     this);
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2202,11 +2202,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     value = nextValue.get();
                 }
             }
-            return new KeyPairFunicValue().toBuilder()
+            return new KeyPairFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setKey, operator.toString())
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2223,10 +2223,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             TerminalFunicValue operatorValue = (TerminalFunicValue) visitTerminal(operatorCtx);
             ret.add(operatorValue.getText());
         }
-        return new ListFunicValue().toBuilder()
+        return new ListFunicValue().toMutator()
                 .set(u -> u::setNode, ctx)
                 .set(u -> u::setValue, ret)
-                .build();
+                .done();
     }
 
     public KeyPairFunicValue getStaticFieldMetaValue(FunicParser.StaticFieldValueContext ctx) {
@@ -2237,11 +2237,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         TerminalNode nameCtx = (TerminalNode) ctx.getChild(1);
         TerminalFunicValue nameValue = (TerminalFunicValue) visitTerminal(nameCtx);
         String name = nameValue.getText();
-        return new KeyPairFunicValue().toBuilder()
+        return new KeyPairFunicValue().toMutator()
                 .set(u -> u::setNode, ctx)
                 .set(u -> u::setKey, name)
                 .set(u -> u::setValue, type)
-                .build();
+                .done();
     }
 
     @Override
@@ -2253,12 +2253,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             Class<?> type = (Class<?>) metaValue.getValue();
 
             Object value = resolver.getStaticFieldOrEnum(type, name, this);
-            return new ParentFunicValue().toBuilder()
+            return new ParentFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setParent, type)
                     .set(u -> u::setKey, name)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2280,12 +2280,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
         ListKeyPairFunicValue argsValue = (ListKeyPairFunicValue) visitFunctionArguments(argsCtx);
         List<Map.Entry<String, Object>> args = argsValue.getList();
 
-        return new PipelineFunctionFunicValue().toBuilder()
+        return new PipelineFunctionFunicValue().toMutator()
                 .set(u -> u::setType, PipelineFunctionFunicValue.Type.STATIC)
                 .set(u -> u::setClazz, type)
                 .set(u -> u::setName, name)
                 .set(u -> u::setArgs, args)
-                .build();
+                .done();
     }
 
     @Override
@@ -2298,10 +2298,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     nextValue.getClazz(),
                     nextValue.getName(), nextValue.getArgs(),
                     this);
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2318,17 +2318,17 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (count == 3) {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(1);
                 FunicValue nextValue = visitExpress(nextCtx);
-                return new ConstStringFunicValue().toBuilder()
+                return new ConstStringFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, String.valueOf(nextValue.get()))
-                        .build();
+                        .done();
             }
             TerminalNode nextCtx = (TerminalNode) ctx.getChild(0);
             TerminalFunicValue nextValue = (TerminalFunicValue) visitTerminal(nextCtx);
-            return new ConstStringFunicValue().toBuilder()
+            return new ConstStringFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, nextValue.getText())
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2351,10 +2351,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     list.add(new AbstractMap.SimpleEntry<>(nextValue.getKey(), nextValue.getValue()));
                 }
             }
-            return new ListKeyPairFunicValue().toBuilder()
+            return new ListKeyPairFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2372,11 +2372,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(0);
                 FunicValue value = visitExpress(nextCtx);
                 Object obj = value.get();
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, null)
                         .set(u -> u::setValue, obj)
-                        .build();
+                        .done();
             } else if (count == 3) {
                 TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal((TerminalNode) ctx.getChild(0));
                 String text = terminalValue.getText();
@@ -2384,11 +2384,11 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(2);
                 FunicValue value = visitExpress(nextCtx);
                 Object obj = value.get();
-                return new KeyPairFunicValue().toBuilder()
+                return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setKey, text)
                         .set(u -> u::setValue, obj)
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support function argument node!");
         } catch (Throwable e) {
@@ -2413,10 +2413,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                     list.addAll(nextValue.getList());
                 }
             }
-            return new ListFunicValue().toBuilder()
+            return new ListFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, list)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2434,19 +2434,19 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(0);
                 FunicValue value = visitExpress(nextCtx);
                 Object obj = value.get();
-                return new ListFunicValue().toBuilder()
+                return new ListFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, new ArrayList<>(Collections.singletonList(obj)))
-                        .build();
+                        .done();
             } else if (count == 2) {
                 FunicParser.ExpressContext nextCtx = (FunicParser.ExpressContext) ctx.getChild(1);
                 FunicValue value = visitExpress(nextCtx);
                 Object obj = value.get();
                 List<Object> list = resolver.unpackList(obj, this);
-                return new ListFunicValue().toBuilder()
+                return new ListFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, list)
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support value segment node!");
         } catch (Throwable e) {
@@ -2467,10 +2467,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal((TerminalNode) ctx.getChild(i));
                 builder.append(terminalValue.getText());
             }
-            return new FullNameFunicValue().toBuilder()
+            return new FullNameFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, builder.toString())
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2486,10 +2486,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.FullNameContext nextCtx = (FunicParser.FullNameContext) ctx.getChild(0);
             FullNameFunicValue value = (FullNameFunicValue) visitFullName(nextCtx);
             Class<?> clazz = resolver.findClass(value.getName(), this);
-            return new TypeFunicValue().toBuilder()
+            return new TypeFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, clazz)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2505,10 +2505,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicParser.FullNameContext nextCtx = (FunicParser.FullNameContext) ctx.getChild(1);
             FullNameFunicValue value = (FullNameFunicValue) visitFullName(nextCtx);
             Class<?> clazz = resolver.findClass(value.getName(), this);
-            return new TypeFunicValue().toBuilder()
+            return new TypeFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, clazz)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2534,10 +2534,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 FunicParser.FullNameContext nextCtx = (FunicParser.FullNameContext) child;
                 FullNameFunicValue value = (FullNameFunicValue) visitFullName(nextCtx);
                 Class<?> clazz = resolver.findClass(value.getName(), this);
-                return new TypeFunicValue().toBuilder()
+                return new TypeFunicValue().toMutator()
                         .set(u -> u::setNode, nextCtx)
                         .set(u -> u::setValue, clazz)
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support value segment node!");
         } catch (Throwable e) {
@@ -2601,17 +2601,17 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             }
             if (contextValue instanceof ParentFunicValue) {
                 ParentFunicValue parentValue = (ParentFunicValue) contextValue;
-                return new ParentFunicValue().toBuilder()
+                return new ParentFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setParent, parentValue.getParent())
                         .set(u -> u::setKey, parentValue.getKey())
                         .set(u -> u::setValue, value)
-                        .build();
+                        .done();
             }
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2628,12 +2628,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             TerminalFunicValue terminalValue = (TerminalFunicValue) visitTerminal((TerminalNode) child);
             String text = terminalValue.getText();
             Object value = resolver.getFieldValue(context, text, this);
-            return new ParentFunicValue().toBuilder()
+            return new ParentFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setParent, context)
                     .set(u -> u::setKey, text)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2701,10 +2701,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             FunicValue nextValue = visitTerminal((TerminalNode) child);
             TerminalFunicValue terminalValue = (TerminalFunicValue) nextValue;
             String text = (String) terminalValue.get();
-            return new ConstStringFunicValue().toBuilder()
+            return new ConstStringFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, text)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2722,10 +2722,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             TerminalFunicValue terminalValue = (TerminalFunicValue) nextValue;
             String text = (String) terminalValue.get();
             String value = resolver.renderString(text, this);
-            return new ConstStringFunicValue().toBuilder()
+            return new ConstStringFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2767,10 +2767,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             }
 
             Object value = resolver.multilineString(builder.toString(), features, this);
-            return new DefaultFunicValue().toBuilder()
+            return new DefaultFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2787,17 +2787,17 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             if (child instanceof FunicParser.ConstFloatContext) {
                 FunicParser.ConstFloatContext nextCtx = (FunicParser.ConstFloatContext) child;
                 FunicValue value = visitConstFloat(nextCtx);
-                return new NumericFunicValue().toBuilder()
+                return new NumericFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, value.get())
-                        .build();
+                        .done();
             } else if (child instanceof FunicParser.ConstNumberContext) {
                 FunicParser.ConstNumberContext nextCtx = (FunicParser.ConstNumberContext) child;
                 FunicValue value = visitConstNumber(nextCtx);
-                return new NumericFunicValue().toBuilder()
+                return new NumericFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
                         .set(u -> u::setValue, value.get())
-                        .build();
+                        .done();
             }
             throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + " un-support numeric node!");
         } catch (Throwable e) {
@@ -2814,10 +2814,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             debugNode(ctx);
             ParseTree child = ctx.getChild(0);
             FunicValue value = visitTerminal((TerminalNode) child);
-            return new NumberFunicValue().toBuilder()
+            return new NumberFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value.get())
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2832,10 +2832,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             debugNode(ctx);
             ParseTree child = ctx.getChild(0);
             FunicValue value = visitTerminal((TerminalNode) child);
-            return new FloatFunicValue().toBuilder()
+            return new FloatFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, value.get())
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2850,10 +2850,10 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             debugNode(ctx);
             ParseTree child = ctx.getChild(0);
             FunicValue value = visitTerminal((TerminalNode) child);
-            return new BooleanFunicValue().toBuilder()
+            return new BooleanFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setValue, (boolean) value.get())
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -2868,9 +2868,9 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
             debugNode(ctx);
             // ParseTree child = ctx.getChild(0);
             // VisitorValue value = visitTerminal((TerminalNode) child);
-            return new NullFunicValue().toBuilder()
+            return new NullFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;
@@ -3033,12 +3033,12 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 value = terminalText;
             }
 
-            return new TerminalFunicValue().toBuilder()
+            return new TerminalFunicValue().toMutator()
                     .set(u -> u::setNode, ctx)
                     .set(u -> u::setSymbol, symbol)
                     .set(u -> u::setText, terminalText)
                     .set(u -> u::setValue, value)
-                    .build();
+                    .done();
         } catch (Throwable e) {
             if (e instanceof FunicException) {
                 throw (FunicException) e;

@@ -2,7 +2,7 @@ package i2f.ai.std.rag.data;
 
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagTextSplitter;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +17,7 @@ import java.util.function.Predicate;
  */
 @Data
 @NoArgsConstructor
-public class RagLoadDocumentsOptions implements BaseBuilder<RagLoadDocumentsOptions> {
+public class RagLoadDocumentsOptions implements BaseMutator<RagLoadDocumentsOptions> {
     protected RagTextSplitter splitter;
     protected int storeBatchSize;
     protected Predicate<File> textFileFilter;

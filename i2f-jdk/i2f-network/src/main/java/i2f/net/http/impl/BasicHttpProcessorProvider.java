@@ -28,53 +28,53 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
 
     @Override
     public <T> T postFormForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
-        return request.toBuilder()
+        return request.toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build()
+                .done()
                 .send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
     @Override
     public String postFormForString(HttpRequest request, String charset) throws IOException {
-        return request.toBuilder()
+        return request.toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build()
+                .done()
                 .send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postForm(HttpRequest request) throws IOException {
-        return request.toBuilder()
+        return request.toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
     public <T> T postJsonForObject(HttpRequest request, String charset, Class<T> clazz, IJsonSerializer jsonProcessor) throws IOException {
-        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+        return request.toMutator().set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(jsonProcessor, clazz, charset);
     }
 
     @Override
     public String postJsonForString(HttpRequest request, String charset) throws IOException {
-        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+        return request.toMutator().set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
     @Override
     public HttpResponse postJson(HttpRequest request) throws IOException {
-        return request.toBuilder().set(u -> u::setMethod, HttpMethodConstants.POST)
+        return request.toMutator().set(u -> u::setMethod, HttpMethodConstants.POST)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -93,7 +93,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -113,7 +113,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -124,7 +124,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -136,7 +136,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -146,7 +146,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -157,7 +157,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -169,7 +169,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Json)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -179,7 +179,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -189,7 +189,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -209,7 +209,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -220,7 +220,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -232,7 +232,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -242,7 +242,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setData, data)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -253,7 +253,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setData, data)
                 .set(u -> u::setParams, params)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -265,7 +265,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
                 .with2(u -> u::addHeader, HttpHeaderConstants.ContentType, ContentTypeConstants.Form)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -273,7 +273,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     public HttpResponse get(String url) throws IOException {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -281,7 +281,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
@@ -290,14 +290,14 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
-                .build().send(httpProcessor);
+                .done().send(httpProcessor);
     }
 
     @Override
     public String getForString(String url, String charset) throws IOException {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -306,7 +306,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -316,7 +316,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsString(charset);
     }
 
@@ -324,7 +324,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
     public <T> T getForObject(String url, String charset, Class<T> clazz, IJsonSerializer processor) throws IOException {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -333,7 +333,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
         return HttpRequest.doGet()
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 
@@ -343,7 +343,7 @@ public class BasicHttpProcessorProvider implements HttpProcessorProvider {
                 .set(u -> u::setUrl, url)
                 .set(u -> u::setParams, params)
                 .set(u -> u::setHeader, header)
-                .build().send(httpProcessor)
+                .done().send(httpProcessor)
                 .getContentAsObject(processor, clazz, charset);
     }
 

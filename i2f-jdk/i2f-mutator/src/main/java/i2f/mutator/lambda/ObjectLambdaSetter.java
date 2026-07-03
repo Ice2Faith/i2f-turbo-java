@@ -1,4 +1,4 @@
-package i2f.builder.lambda;
+package i2f.mutator.lambda;
 
 import java.io.Serializable;
 

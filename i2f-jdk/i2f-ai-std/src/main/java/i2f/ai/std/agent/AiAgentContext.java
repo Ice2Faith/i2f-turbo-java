@@ -2,7 +2,7 @@ package i2f.ai.std.agent;
 
 import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.function.Predicate;
  */
 @Data
 @NoArgsConstructor
-public class AiAgentContext implements BaseBuilder<AiAgentContext> {
+public class AiAgentContext implements BaseMutator<AiAgentContext> {
     public static final Map<String, SkillDefinition> DEFAULT_SKILLS_MAP = SkillsHelper.scanFileSystemSkills();
     public static final InheritableThreadLocal<AiAgentContext> CONTEXT = new InheritableThreadLocal<>();
 

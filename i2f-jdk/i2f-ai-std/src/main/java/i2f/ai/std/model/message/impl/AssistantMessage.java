@@ -2,7 +2,7 @@ package i2f.ai.std.model.message.impl;
 
 import i2f.ai.std.model.message.AiMessage;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class AssistantMessage implements AiMessage, BaseBuilder<AssistantMessage> {
+public class AssistantMessage implements AiMessage, BaseMutator<AssistantMessage> {
     protected String text;
     protected String thinking;
     protected FinishReason finishReason;

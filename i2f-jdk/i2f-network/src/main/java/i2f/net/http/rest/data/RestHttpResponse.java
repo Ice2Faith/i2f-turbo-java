@@ -1,6 +1,6 @@
 package i2f.net.http.rest.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class RestHttpResponse<T> implements BaseBuilder<RestHttpResponse<T>> {
+public class RestHttpResponse<T> implements BaseMutator<RestHttpResponse<T>> {
     /**
      * HTTP响应码
      */

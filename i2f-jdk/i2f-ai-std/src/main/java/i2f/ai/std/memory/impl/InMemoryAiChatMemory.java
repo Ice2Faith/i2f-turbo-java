@@ -2,7 +2,7 @@ package i2f.ai.std.memory.impl;
 
 import i2f.ai.std.memory.AiChatMemory;
 import i2f.ai.std.model.message.AiMessage;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  */
 @Data
 @NoArgsConstructor
-public class InMemoryAiChatMemory implements AiChatMemory, BaseBuilder<InMemoryAiChatMemory> {
+public class InMemoryAiChatMemory implements AiChatMemory, BaseMutator<InMemoryAiChatMemory> {
     protected final ConcurrentHashMap<String, ConcurrentLinkedDeque<AiMessage>> store = new ConcurrentHashMap<>();
     protected int maxConversationMessageCount = 20;
 

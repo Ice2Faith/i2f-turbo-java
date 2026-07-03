@@ -9,7 +9,7 @@
         <version>1.0-jdk8</version>
     </parent>
 
-    <artifactId>i2f-builder</artifactId>
+    <artifactId>i2f-mutator</artifactId>
 
     <dependencies>
         <dependency>

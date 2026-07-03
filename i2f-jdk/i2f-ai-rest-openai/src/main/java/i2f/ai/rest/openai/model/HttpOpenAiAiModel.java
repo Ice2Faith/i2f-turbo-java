@@ -5,7 +5,7 @@ import i2f.ai.std.model.AiModel;
 import i2f.ai.std.model.AiRequest;
 import i2f.ai.std.model.message.impl.AssistantMessage;
 import i2f.ai.std.tool.ToolRawDefinition;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -26,7 +26,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiAiModel implements AiModel, BaseBuilder<HttpOpenAiAiModel> {
+public class HttpOpenAiAiModel implements AiModel, BaseMutator<HttpOpenAiAiModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
@@ -101,7 +101,7 @@ public class HttpOpenAiAiModel implements AiModel, BaseBuilder<HttpOpenAiAiModel
             for (String key : removeKeys) {
                 reqMap.remove(key);
             }
-            RestHttpResponse<OpenAiCompletionRespDto> resp = restClient.rest(new RestHttpRequest().toBuilder()
+            RestHttpResponse<OpenAiCompletionRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
                             .set(u -> u::setUrl, getChatCompletionsUrl())
                             .set(u -> u::setMethod, HttpMethodConstants.POST)
                             .set(u -> u::setHeaders, HttpHeaders.create()
@@ -112,7 +112,7 @@ public class HttpOpenAiAiModel implements AiModel, BaseBuilder<HttpOpenAiAiModel
                                     })
                             )
                             .set(u -> u::setBody, reqMap)
-                            .build(),
+                            .done(),
                     OpenAiCompletionRespDto.class);
             OpenAiCompletionRespDto ret = resp.getBody();
             return ret;

@@ -1,7 +1,7 @@
 package i2f.net.http.data;
 
-import i2f.builder.BaseBuilder;
-import i2f.builder.Builder;
+import i2f.mutator.BaseMutator;
+import i2f.mutator.Mutator;
 import i2f.net.http.consts.ContentTypeConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.consts.HttpMethodConstants;
@@ -27,7 +27,7 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-public class HttpRequest implements BaseBuilder<HttpRequest> {
+public class HttpRequest implements BaseMutator<HttpRequest> {
 
     protected String url;
     protected String method = HttpMethodConstants.GET;
@@ -42,47 +42,47 @@ public class HttpRequest implements BaseBuilder<HttpRequest> {
     protected boolean allowRedirect = true;
     protected boolean cloudAcceptByteArray = false;
 
-    public static Builder<HttpRequest> doGet() {
-        return new HttpRequest().toBuilder()
+    public static Mutator<HttpRequest> doGet() {
+        return new HttpRequest().toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.GET);
     }
 
-    public static Builder<HttpRequest> doGet(String url) {
+    public static Mutator<HttpRequest> doGet(String url) {
         return doGet()
                 .set(u -> u::setUrl, url);
     }
 
-    public static Builder<HttpRequest> doGet(String url, Object params) {
+    public static Mutator<HttpRequest> doGet(String url, Object params) {
         return doGet(url)
                 .set(u -> u::setParams, params);
     }
 
-    public static Builder<HttpRequest> doPost() {
-        return new HttpRequest().toBuilder()
+    public static Mutator<HttpRequest> doPost() {
+        return new HttpRequest().toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.POST);
     }
 
-    public static Builder<HttpRequest> doPost(String url) {
+    public static Mutator<HttpRequest> doPost(String url) {
         return doPost()
                 .set(u -> u::setUrl, url);
     }
 
-    public static Builder<HttpRequest> doPut() {
-        return new HttpRequest().toBuilder()
+    public static Mutator<HttpRequest> doPut() {
+        return new HttpRequest().toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.PUT);
     }
 
-    public static Builder<HttpRequest> doPut(String url) {
+    public static Mutator<HttpRequest> doPut(String url) {
         return doPut()
                 .set(u -> u::setUrl, url);
     }
 
-    public static Builder<HttpRequest> doDelete() {
-        return new HttpRequest().toBuilder()
+    public static Mutator<HttpRequest> doDelete() {
+        return new HttpRequest().toMutator()
                 .set(u -> u::setMethod, HttpMethodConstants.DELETE);
     }
 
-    public static Builder<HttpRequest> doDelete(String url) {
+    public static Mutator<HttpRequest> doDelete(String url) {
         return doDelete()
                 .set(u -> u::setUrl, url);
     }

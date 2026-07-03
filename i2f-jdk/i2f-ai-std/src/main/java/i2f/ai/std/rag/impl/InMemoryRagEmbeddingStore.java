@@ -3,7 +3,7 @@ package i2f.ai.std.rag.impl;
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingStore;
 import i2f.ai.std.rag.RagVector;
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Data
 @NoArgsConstructor
-public class InMemoryRagEmbeddingStore implements RagEmbeddingStore, BaseBuilder<InMemoryRagEmbeddingStore> {
+public class InMemoryRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<InMemoryRagEmbeddingStore> {
     protected final Map<String, RagEmbedding> map = new ConcurrentHashMap<>();
 
     @Override

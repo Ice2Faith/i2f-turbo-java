@@ -1,10 +1,10 @@
 package i2f.extension.antlr4.script.funic.lang.lambda;
 
-import i2f.builder.BaseBuilder;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
 import i2f.invokable.method.IMethod;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Data
 @NoArgsConstructor
-public class FunicLambda implements BaseBuilder<FunicLambda> {
+public class FunicLambda implements BaseMutator<FunicLambda> {
     protected List<Map.Entry<String, Object>> arguments;
     protected FunicParser.ScriptBlockContext body;
 

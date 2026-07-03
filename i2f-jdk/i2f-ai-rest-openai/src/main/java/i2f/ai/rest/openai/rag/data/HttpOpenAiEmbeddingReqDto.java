@@ -1,6 +1,6 @@
 package i2f.ai.rest.openai.rag.data;
 
-import i2f.builder.BaseBuilder;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiEmbeddingReqDto implements BaseBuilder<HttpOpenAiEmbeddingReqDto> {
+public class HttpOpenAiEmbeddingReqDto implements BaseMutator<HttpOpenAiEmbeddingReqDto> {
     protected String model;
     protected List<String> input;
 }

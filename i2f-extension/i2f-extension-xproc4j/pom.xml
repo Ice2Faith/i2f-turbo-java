@@ -24,7 +24,7 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-builder</artifactId>
+            <artifactId>i2f-mutator</artifactId>
         </dependency>
 
 
