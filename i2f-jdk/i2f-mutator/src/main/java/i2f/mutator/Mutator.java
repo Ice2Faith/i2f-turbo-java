@@ -6,14 +6,10 @@ import i2f.lambda.core.func.ISetter;
 import i2f.mutator.lambda.*;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * @author Ice2Faith
@@ -267,6 +263,10 @@ public class Mutator<T> {
         return fieldCompute(getter, v -> v == null ? val : v);
     }
 
+    public <R> Mutator<T> fieldIfPresent(Function<T, ObjectLambdaGetter<R>> getter, Function<R, R> convertor) {
+        return fieldCompute(getter, v -> v != null ? convertor.apply(v) : v);
+    }
+
     public <R> Mutator<T> fieldCompute(Function<T, ObjectLambdaGetter<R>> getter, Function<R, R> computer) {
         try {
             ObjectLambdaGetter<R> lambdaGetter = getter.apply(target);
@@ -288,6 +288,48 @@ public class Mutator<T> {
             }
             throw new IllegalStateException(e.getMessage(), e);
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E> Mutator<T> fieldEachCompute(Class<E> fieldType, BiFunction<E, Field, E> computer) {
+        return fieldEachCompute(field -> field.getType().isAssignableFrom(fieldType),
+                (v, f) -> (E) computer.apply((E) v, f));
+    }
+
+    public Mutator<T> fieldEachCompute(Predicate<Field> fieldFilter, BiFunction<Object, Field, Object> computer) {
+        Set<Field> fieldsSet = new LinkedHashSet<>();
+        Lambda.walkField(target.getClass(), field -> {
+            if (fieldFilter == null || fieldFilter.test(field)) {
+                fieldsSet.add(field);
+            }
+            return true;
+        });
+        for (Field field : fieldsSet) {
+            try {
+                Method getterMethod = Lambda.getGetter(target.getClass(), field.getName());
+                Object val = null;
+                if (getterMethod != null) {
+                    val = getterMethod.invoke(target);
+                } else {
+                    field.setAccessible(true);
+                    val = field.get(target);
+                }
+                Object ret = computer.apply(val, field);
+                // 这里直接比较引用，引用一致，则对象未发生变化，不进行赋值，因此不能使用 equals 比较
+                if (ret != val) {
+                    Method setterMethod = Lambda.getSetter(target.getClass(), field.getName());
+                    if (setterMethod != null) {
+                        setterMethod.invoke(target, ret);
+                    } else {
+                        field.setAccessible(true);
+                        field.set(target, ret);
+                    }
+                }
+            } catch (Exception e) {
+                // ignore error
+            }
+        }
+        return this;
     }
 
 }
