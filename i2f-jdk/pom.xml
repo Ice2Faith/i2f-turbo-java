@@ -103,6 +103,7 @@
         <module>i2f-jdk-all</module>
         <module>i2f-jvm</module>
         <module>i2f-lambda</module>
+        <module>i2f-lambda-core</module>
         <module>i2f-launcher</module>
         <module>i2f-lifecycle</module>
         <module>i2f-limit</module>

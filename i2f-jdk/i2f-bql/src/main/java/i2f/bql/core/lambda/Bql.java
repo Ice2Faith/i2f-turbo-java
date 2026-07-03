@@ -17,7 +17,7 @@ import i2f.functional.adapt.IBuilder;
 import i2f.functional.adapt.IExecute;
 import i2f.functional.adapt.IGetter;
 import i2f.functional.adapt.ISetter;
-import i2f.lambda.inflater.LambdaInflater;
+import i2f.lambda.core.Lambda;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -1100,7 +1100,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.map.Bql<H> {
 
 
     public String lambdaFieldName(IFunctional lambda) {
-        Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
+        Field field = Lambda.ofField(lambda);
         return fieldNameResolver.getName(field);
     }
 

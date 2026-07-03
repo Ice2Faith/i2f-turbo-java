@@ -19,4 +19,5 @@ public class OpenAiOperateDto {
     protected boolean encryptOutput = false;
     protected boolean enableTools = false;
     protected boolean enableSkills = false;
+    protected boolean enableRags = false;
 }

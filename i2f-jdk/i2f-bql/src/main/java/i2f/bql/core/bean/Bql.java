@@ -3,7 +3,7 @@ package i2f.bql.core.bean;
 import i2f.bindsql.BindSql;
 import i2f.database.metadata.bean.BeanDatabaseMetadataResolver;
 import i2f.functional.IFunctional;
-import i2f.lambda.inflater.LambdaInflater;
+import i2f.lambda.core.Lambda;
 import i2f.reflect.ReflectResolver;
 
 import java.io.Serializable;
@@ -329,7 +329,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         if (selectCols != null && !selectCols.isEmpty()) {
             for (Serializable lambda : selectCols) {
                 if (lambda instanceof IFunctional) {
-                    Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
+                    Field field = Lambda.ofField(lambda);
                     String colName = fieldNameResolver.getName(field);
                     if (field.getName().equals(colName)) {
                         colMap.put(colName, null);
@@ -416,7 +416,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         if (selectCols != null && !selectCols.isEmpty()) {
             for (Serializable lambda : selectCols) {
                 if (lambda instanceof IFunctional) {
-                    Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
+                    Field field = Lambda.ofField(lambda);
                     String colName = fieldNameResolver.getName(field);
                     if (field.getName().equals(colName)) {
                         colMap.put(colName, null);
@@ -492,7 +492,7 @@ public class Bql<H extends Bql<H>> extends i2f.bql.core.lambda.Bql<H> {
         if (selectCols != null && !selectCols.isEmpty()) {
             for (Serializable lambda : selectCols) {
                 if (lambda instanceof IFunctional) {
-                    Field field = LambdaInflater.fastSerializedLambdaFieldNullable(lambda);
+                    Field field = Lambda.ofField(lambda);
                     String colName = fieldNameResolver.getName(field);
                     if (field.getName().equals(colName)) {
                         colMap.put(colName, null);

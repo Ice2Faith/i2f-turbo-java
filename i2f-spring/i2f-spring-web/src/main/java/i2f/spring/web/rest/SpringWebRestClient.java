@@ -29,6 +29,10 @@ import java.util.Map;
 public class SpringWebRestClient implements IRestClient, BaseBuilder<SpringWebRestClient> {
     protected RestTemplate restTemplate;
 
+    public SpringWebRestClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
         String rawMethod = request.getMethod();

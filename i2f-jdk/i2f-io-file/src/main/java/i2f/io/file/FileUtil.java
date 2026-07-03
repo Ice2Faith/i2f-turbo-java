@@ -339,9 +339,11 @@ public class FileUtil {
         if (srcFile.isFile()) {
             if (checkWhenFilter(srcFile, filter)) {
                 useParentDir(dstFile);
-                InputStream is = new FileInputStream(srcFile);
-                OutputStream os = new FileOutputStream(dstFile);
-                StreamUtil.streamCopy(is, os, true);
+                if (!srcFile.renameTo(dstFile) || !dstFile.exists()) {
+                    InputStream is = new FileInputStream(srcFile);
+                    OutputStream os = new FileOutputStream(dstFile);
+                    StreamUtil.streamCopy(is, os, true);
+                }
             }
         } else if (srcFile.isDirectory()) {
             File[] files = srcFile.listFiles();

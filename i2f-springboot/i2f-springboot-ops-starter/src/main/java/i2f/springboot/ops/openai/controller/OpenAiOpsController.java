@@ -3,6 +3,8 @@ package i2f.springboot.ops.openai.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.data.*;
+import i2f.ai.std.rag.RagTools;
+import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolRawDefinition;
@@ -79,6 +81,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired
     private HostIdProxyHelper hostIdProxyHelper;
+
+    @Autowired(required = false)
+    private RagWorker worker;
 
     private RestTemplate restTemplate = createRestTemplate();
 
@@ -222,6 +227,12 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
+                    if (req.isEnableRags()) {
+                        if (worker != null) {
+
+                        }
+                    }
+
                     if (req.isEnableTools()) {
                         if (toolDefinitionProvider != null) {
                             List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
@@ -229,6 +240,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                 if (!req.isEnableSkills()) {
                                     tools = tools.stream()
                                             .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                            .collect(Collectors.toList());
+                                }
+                                if (!req.isEnableRags()) {
+                                    tools = tools.stream()
+                                            .filter(e -> !RagTools.class.isAssignableFrom(e.getBindClass()))
                                             .collect(Collectors.toList());
                                 }
                                 if (completion.getTools() == null) {
@@ -277,6 +293,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                         if (!req.isEnableSkills()) {
                                             tools = tools.stream()
                                                     .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                                    .collect(Collectors.toList());
+                                        }
+                                        if (!req.isEnableRags()) {
+                                            tools = tools.stream()
+                                                    .filter(e -> !RagTools.class.isAssignableFrom(e.getBindClass()))
                                                     .collect(Collectors.toList());
                                         }
                                         for (ToolRawDefinition tool : tools) {

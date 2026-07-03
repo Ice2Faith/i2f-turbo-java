@@ -1,7 +1,12 @@
 package i2f.builder;
 
 import i2f.builder.lambda.*;
+import i2f.lambda.core.Lambda;
 
+import java.lang.reflect.Array;
+import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -149,6 +154,68 @@ public class Builder<T> {
         return this;
     }
 
+
+    public <R> Builder<T> fieldNull(Function<T, Supplier<R>> filter, Consumer<T> consumer) {
+        if (filter == null || filter.apply(target).get() == null) {
+            consumer.accept(target);
+        }
+        return this;
+    }
+
+    public Builder<T> fieldEmpty(Function<T, Supplier<?>> filter, Consumer<T> consumer) {
+        if (filter == null || isEmpty(filter.apply(target).get())) {
+            consumer.accept(target);
+        }
+        return this;
+    }
+
+    public Builder<T> fieldBlank(Function<T, Supplier<String>> filter, Consumer<T> consumer) {
+        if (filter == null || isBlank(filter.apply(target).get())) {
+            consumer.accept(target);
+        }
+        return this;
+    }
+
+    protected static boolean isEmpty(String str) {
+        return str == null || str.isEmpty();
+    }
+
+
+    protected boolean isBlank(String str) {
+        if (isEmpty(str)) {
+            return true;
+        }
+        for (int i = 0; i < str.length(); i++) {
+            char ch = str.charAt(i);
+            if (!Character.isWhitespace(ch)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean isEmpty(Object obj) {
+        if (obj == null) {
+            return true;
+        }
+        if (obj instanceof String) {
+            return isEmpty((String) obj);
+        } else if (obj instanceof Collection) {
+            Collection<?> col = (Collection<?>) obj;
+            return col.isEmpty();
+        } else if (obj instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) obj;
+            return map.isEmpty();
+        } else if (obj.getClass().isArray()) {
+            return Array.getLength(obj) == 0;
+        } else if (obj instanceof CharSequence) {
+            CharSequence sequence = (CharSequence) obj;
+            return sequence.length() == 0;
+        }
+        return false;
+    }
+
+
     public <R> Builder<R> map(Function<T, R> mapper) {
         return of(mapper.apply(target));
     }
@@ -189,4 +256,36 @@ public class Builder<T> {
     public T build() {
         return target;
     }
+
+    public <R> Builder<T> fieldIfAbsent(Function<T, ObjectLambdaGetter<R>> getter, Supplier<R> supplier) {
+        return fieldCompute(getter, v -> v == null ? supplier.get() : v);
+    }
+
+    public <R> Builder<T> fieldIfAbsentV(Function<T, ObjectLambdaGetter<R>> getter, R val) {
+        return fieldCompute(getter, v -> v == null ? val : v);
+    }
+
+    public <R> Builder<T> fieldCompute(Function<T, ObjectLambdaGetter<R>> getter, Function<R, R> computer) {
+        try {
+            ObjectLambdaGetter<R> lambdaGetter = getter.apply(target);
+            R val = lambdaGetter.get();
+            R ret = computer.apply(val);
+            // 这里直接比较引用，引用一致，则对象未发生变化，不进行赋值，因此不能使用 equals 比较
+            if (ret != val) {
+                Method setter = Lambda.ofSetter(target.getClass(), lambdaGetter);
+                if (setter == null) {
+                    String fieldName = Lambda.ofFieldName(lambdaGetter);
+                    throw new IllegalStateException("cannot find setter for field : " + fieldName);
+                }
+                setter.invoke(target, ret);
+            }
+            return this;
+        } catch (Exception e) {
+            if (e instanceof RuntimeException) {
+                throw (RuntimeException) e;
+            }
+            throw new IllegalStateException(e.getMessage(), e);
+        }
+    }
+
 }
