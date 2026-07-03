@@ -1064,6 +1064,12 @@
             </dependency>
             <dependency>
                 <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-extension-ai-rag-sqlite</artifactId>
+                <version>${i2f.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>i2f.turbo</groupId>
                 <artifactId>i2f-extension-all</artifactId>
                 <version>${i2f.version}</version>
                 <optional>true</optional>

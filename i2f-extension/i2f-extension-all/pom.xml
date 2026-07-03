@@ -32,6 +32,10 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ai-openai</artifactId>
         </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-rag-sqlite</artifactId>
+        </dependency>
         <!--<dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-all</artifactId>
