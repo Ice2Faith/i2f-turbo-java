@@ -410,59 +410,84 @@
                                    @click="summarySessionHistory">会话总结
                         </el-button>
                     </el-popover>
-                    <el-popover
-                            placement="top-start"
-                            title="说明"
-                            width="320"
-                            trigger="hover">
-                        <p>
-                            技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
-                            如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
-                            如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
-                            注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
-                            注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
-                            技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
-                            文件的内容格式要求如下，案例为：<br/>
-                            <br/>
-                            --- <br/>
-                            name: weather_analysis_skill <br/>
-                            description: 获取指定城市天气并分析是否适合户外运动 <br/>
-                            tags: [ weather, sports, analysis ] <br/>
-                            version: 1.0.0 <br/>
-                            author: your_name <br/>
-                            --- <br/>
-                            <br/>
-                            # 第一步：... <br/>
-                            <br/>
-                        </p>
-                        <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
-                            技能调用
-                        </el-checkbox>
+                    <el-popover placement="top-start"
+                                title="更多选项"
+                                width="480"
+                                trigger="hover">
+                        <div>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
+                                    附加时间，自动为用户消息添加发送时间。<br/>
+                                    如果开启，模型将会得到每次发送的时间，对于聊天助手类的应用，可以让模型感知到时间的变化。<br/>
+                                    因此，模型的回答将会变得有时间概念，比如会主动答复用户为什么这么久没理人之类的。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableUserSendTime">
+                                    附加时间
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
+                                    技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
+                                    如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
+                                    如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
+                                    注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
+                                    注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
+                                    技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
+                                    文件的内容格式要求如下，案例为：<br/>
+                                    <br/>
+                                    --- <br/>
+                                    name: weather_analysis_skill <br/>
+                                    description: 获取指定城市天气并分析是否适合户外运动 <br/>
+                                    tags: [ weather, sports, analysis ] <br/>
+                                    version: 1.0.0 <br/>
+                                    author: your_name <br/>
+                                    --- <br/>
+                                    <br/>
+                                    # 第一步：... <br/>
+                                    <br/>
+                                </p>
+                                <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
+                                    技能调用
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
+                                    工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
+                                    如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
+                                    如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
+                                    输出加密，是否将模型的输出结果进行加密传输。<br/>
+                                    如果启用，那将会对模型的响应结果进行加密后返回，但是因为模型输出内容较多较频繁，也会拖慢模型输出速度。<br/>
+                                    如果不器用，则不会进行加密，不会拖慢模型输出速度，大多数情况下，不启用即可。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.encryptOutput">输出加密</el-checkbox>
+                            </el-popover>
+                        </div>
+                        <el-tag slot="reference" size="small">
+                            更多选项
+                        </el-tag>
                     </el-popover>
-                    <el-popover
-                            placement="top-start"
-                            title="说明"
-                            width="320"
-                            trigger="hover">
-                        <p>
-                            工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
-                            如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
-                            如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
-                        </p>
-                        <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
-                    </el-popover>
-                    <el-popover
-                            placement="top-start"
-                            title="说明"
-                            width="320"
-                            trigger="hover">
-                        <p>
-                            输出加密，是否将模型的输出结果进行加密传输。<br/>
-                            如果启用，那将会对模型的响应结果进行加密后返回，但是因为模型输出内容较多较频繁，也会拖慢模型输出速度。<br/>
-                            如果不器用，则不会进行加密，不会拖慢模型输出速度，大多数情况下，不启用即可。<br/>
-                        </p>
-                        <el-checkbox slot="reference" v-model="form.encryptOutput">输出加密</el-checkbox>
-                    </el-popover>
+
                     <el-popover
                             placement="top-start"
                             title="说明"
@@ -1217,6 +1242,7 @@
                         encryptOutput: false,
                         enableTools: false,
                         enableSkills: false,
+                        enableUserSendTime: false,
                         toolApprovalList: []
                     }
                 }
@@ -2221,6 +2247,12 @@
                     type: this.form.messageType,
                     hidden: false,
                 }
+                if (item.type == 'user') {
+                    // 如果开启了附加时间，则将当前时间附加到用户消息中
+                    if (this.form.enableUserSendTime) {
+                        text = '- [send time] ' + (moment(new Date()).format('YYYY-MM-DD HH:mm:ss')) + '\n\n---\n\n' + text;
+                    }
+                }
                 item[this.form.messageType] = {
                     role: this.form.messageType,
                     content: text,
@@ -2228,6 +2260,7 @@
                 if (this.form.messageType == 'assistant') {
                     item[this.form.messageType].reasoning_content = '';
                 }
+
                 messages.push(item);
                 this.form.inputText = '';
 
