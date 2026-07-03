@@ -3,6 +3,7 @@ package i2f.ai.std.rag.impl;
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +19,7 @@ import java.util.function.Supplier;
  */
 @Data
 @NoArgsConstructor
-public class BatchDelegateRagEmbeddingModel implements RagEmbeddingModel {
+public class BatchDelegateRagEmbeddingModel implements RagEmbeddingModel, BaseBuilder<BatchDelegateRagEmbeddingModel> {
     protected RagEmbeddingModel target;
     protected int batchSize = 10;
 

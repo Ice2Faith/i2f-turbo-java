@@ -3,6 +3,7 @@ package i2f.ai.rest.openai.model;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.rest.openai.model.data.chunk.OpenAiCompletionChoiceChunk;
 import i2f.ai.rest.openai.model.data.chunk.OpenAiCompletionChunkRespDto;
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
@@ -29,7 +30,7 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiModelStreamApi {
+public class HttpOpenAiModelStreamApi implements BaseBuilder<HttpOpenAiModelStreamApi> {
     protected IHttpProcessor httpProcessor = new HttpUrlConnectProcessor();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected String baseUrl;

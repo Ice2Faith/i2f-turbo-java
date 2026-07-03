@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiToolCall {
+public class OpenAiToolCall implements BaseBuilder<OpenAiToolCall> {
     protected Integer index;
     protected String id;
     protected String type = OpenAiConsts.FUNCTION;

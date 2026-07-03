@@ -1,5 +1,6 @@
 package i2f.net.http.rest.impl;
 
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
@@ -23,7 +24,7 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-public class HttpProcessorRestClient implements IRestClient {
+public class HttpProcessorRestClient implements IRestClient, BaseBuilder<HttpProcessorRestClient> {
     protected IHttpProcessor httpProcessor = new HttpUrlConnectProcessor();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
 

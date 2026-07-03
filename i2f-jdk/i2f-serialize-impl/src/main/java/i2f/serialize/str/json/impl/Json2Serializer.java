@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -47,4 +48,8 @@ public class Json2Serializer implements IJsonSerializer {
         throw new UnsupportedOperationException("Json2 un-support parseText.");
     }
 
+    @Override
+    public Map<String, Object> deserializeAsMap(String enc) {
+        return (Map<String, Object>) deserialize(enc);
+    }
 }

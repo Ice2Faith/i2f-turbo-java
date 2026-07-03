@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiAssistantMessageRespDto implements OpenAiMessage {
+public class OpenAiAssistantMessageRespDto implements OpenAiMessage, BaseBuilder<OpenAiAssistantMessageRespDto> {
     protected final String role = OpenAiConsts.ASSISTANT;
     protected String content;
     protected String reasoning_content;

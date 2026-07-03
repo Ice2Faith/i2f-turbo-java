@@ -1,6 +1,7 @@
 package i2f.ai.std.model.message.impl;
 
 import i2f.ai.std.model.message.AiMessage;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +12,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class SystemMessage implements AiMessage {
+public class SystemMessage implements AiMessage, BaseBuilder<SystemMessage> {
     protected String text;
     protected transient Object rawMessage;
 

@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiCompletionUsage {
+public class OpenAiCompletionUsage implements BaseBuilder<OpenAiCompletionUsage> {
     protected Long prompt_tokens;
     protected Long completion_tokens;
     protected Long total_tokens;

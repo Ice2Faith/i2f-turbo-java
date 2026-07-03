@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiCompletionReqDto {
+public class OpenAiCompletionReqDto implements BaseBuilder<OpenAiCompletionReqDto> {
     protected String model;
     protected Boolean stream;
     protected List<OpenAiMessage> messages;

@@ -6,6 +6,7 @@ import i2f.ai.rest.openai.rag.rerank.data.OpenAiRerankResult;
 import i2f.ai.rest.openai.rag.rerank.data.OpenAiRerankResultDocument;
 import i2f.ai.std.rag.rerank.RagRerankModel;
 import i2f.ai.std.rag.rerank.data.RagRerankDocument;
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -26,7 +27,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiRagRerankModel implements RagRerankModel {
+public class HttpOpenAiRagRerankModel implements RagRerankModel, BaseBuilder<HttpOpenAiRagRerankModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;

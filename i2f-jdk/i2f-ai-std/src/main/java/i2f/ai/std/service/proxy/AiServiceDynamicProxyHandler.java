@@ -9,6 +9,7 @@ import i2f.ai.std.service.annotations.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.builder.BaseBuilder;
 import i2f.context.std.INamingContext;
 import i2f.invokable.IInvokable;
 import i2f.invokable.method.impl.jdk.JdkMethod;
@@ -21,8 +22,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -35,7 +34,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler {
+public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler, BaseBuilder<AiServiceDynamicProxyHandler> {
     protected INamingContext context;
     protected JsonSchemaAnnotationResolver resolver = JsonSchemaAnnotationResolver.INSTANCE;
 

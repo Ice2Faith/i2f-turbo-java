@@ -4,6 +4,7 @@ import i2f.ai.std.model.message.AiMessage;
 import i2f.ai.std.model.message.impl.SystemMessage;
 import i2f.ai.std.model.message.impl.UserMessage;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +17,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class AiRequest {
+public class AiRequest implements BaseBuilder<AiRequest> {
     protected List<AiMessage> messageList;
     protected Map<String, ToolRawDefinition> toolMap;
 

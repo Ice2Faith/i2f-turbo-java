@@ -3,6 +3,7 @@ package i2f.ai.std.model.message.impl;
 import i2f.ai.std.model.message.AiMessage;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ToolMessage implements AiMessage {
+public class ToolMessage implements AiMessage, BaseBuilder<ToolMessage> {
     protected String id;
     protected String text;
     protected ToolCallRequest request;

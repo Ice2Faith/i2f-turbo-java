@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -31,27 +30,30 @@ public class DelegateToolsMcpToolProvider implements McpToolProvider {
     }
 
     @Override
-    public Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request) {
-        for (McpToolProvider provider : providers) {
-            Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = provider.matchDefinition(request);
-            if (entry != null && entry.getKey() != null) {
-                return entry;
-            }
-        }
-        return null;
+    public String getName() {
+        return "";
     }
 
     @Override
-    public Object callTool(ToolBaseDefinition definition, Map<String, Object> parameterMap, ToolBaseCallRequest request) throws Throwable {
-        return callTool(request);
+    public String getDescription() {
+        return "";
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        for (McpToolProvider provider : providers) {
+            if (provider.support(request)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
         for (McpToolProvider provider : providers) {
-            Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = provider.matchDefinition(request);
-            if (entry != null && entry.getKey() != null) {
-                return provider.callTool(entry.getKey(), entry.getValue(), request);
+            if (provider.support(request)) {
+                return provider.callTool(request);
             }
         }
         throw new IllegalStateException("call tool [" + request.getName() + "] is not support!");

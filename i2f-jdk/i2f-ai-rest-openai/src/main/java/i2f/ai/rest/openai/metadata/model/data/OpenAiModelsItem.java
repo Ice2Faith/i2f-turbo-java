@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.metadata.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiModelsItem {
+public class OpenAiModelsItem implements BaseBuilder<OpenAiModelsItem> {
     protected String id;
     protected String object;
     protected String created;

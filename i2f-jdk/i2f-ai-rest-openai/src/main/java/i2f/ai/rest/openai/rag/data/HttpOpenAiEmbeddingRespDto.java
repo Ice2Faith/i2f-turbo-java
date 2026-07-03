@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.rag.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiEmbeddingRespDto {
+public class HttpOpenAiEmbeddingRespDto implements BaseBuilder<HttpOpenAiEmbeddingRespDto> {
     protected String model;
     protected String object;
     protected List<EmbeddingResult> data;
@@ -20,7 +21,7 @@ public class HttpOpenAiEmbeddingRespDto {
 
     @Data
     @NoArgsConstructor
-    public static class EmbeddingResult {
+    public static class EmbeddingResult implements BaseBuilder<EmbeddingResult> {
         protected List<Double> embedding;
         protected Integer index;
         protected String object;
@@ -28,7 +29,7 @@ public class HttpOpenAiEmbeddingRespDto {
 
     @Data
     @NoArgsConstructor
-    public static class Usage {
+    public static class Usage implements BaseBuilder<Usage> {
         protected Long prompt_tokens;
         protected Long total_tokens;
     }

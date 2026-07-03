@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.rag.rerank.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiRerankRespDto {
+public class HttpOpenAiRerankRespDto implements BaseBuilder<HttpOpenAiRerankRespDto> {
     protected String id;
     protected String object;
     protected String created;

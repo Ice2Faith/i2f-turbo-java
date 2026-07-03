@@ -1,6 +1,7 @@
 package i2f.ai.rest.openai.metadata.model;
 
 import i2f.ai.rest.openai.metadata.model.data.OpenAiModelsRespDto;
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -19,7 +20,7 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiModelsApi {
+public class HttpOpenAiModelsApi implements BaseBuilder<HttpOpenAiModelsApi> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;

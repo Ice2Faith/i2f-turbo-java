@@ -4,6 +4,7 @@ import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
+import i2f.builder.BaseBuilder;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
@@ -23,7 +24,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
+public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseBuilder<HttpOpenAiRagEmbeddingModel> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;

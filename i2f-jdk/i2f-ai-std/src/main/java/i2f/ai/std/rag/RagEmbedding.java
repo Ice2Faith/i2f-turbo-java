@@ -1,5 +1,6 @@
 package i2f.ai.std.rag;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class RagEmbedding {
+public class RagEmbedding implements BaseBuilder<RagEmbedding> {
     protected String id;
     protected RagVector vector;
     protected String content;

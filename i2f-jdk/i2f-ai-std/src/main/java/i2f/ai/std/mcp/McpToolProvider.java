@@ -4,7 +4,6 @@ import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolBaseDefinition;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -12,17 +11,13 @@ import java.util.Map;
  * @desc
  */
 public interface McpToolProvider {
+    String getName();
+
+    String getDescription();
+
     List<ToolBaseDefinition> getTools();
 
-    Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request);
+    boolean support(ToolBaseCallRequest request);
 
-    Object callTool(ToolBaseDefinition definition, Map<String, Object> parameterMap, ToolBaseCallRequest request) throws Throwable;
-
-    default Object callTool(ToolBaseCallRequest request) throws Throwable {
-        Map.Entry<ToolBaseDefinition, Map<String, Object>> entry = matchDefinition(request);
-        if (entry == null || entry.getKey() == null) {
-            throw new IllegalArgumentException("provider not found tool [" + request.getName() + "]");
-        }
-        return callTool(entry.getKey(), entry.getValue(), request);
-    }
+    Object callTool(ToolBaseCallRequest request) throws Throwable;
 }

@@ -3,6 +3,7 @@ package i2f.ai.std.rag;
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
 import i2f.ai.std.rag.rerank.RagRerankModel;
 import i2f.ai.std.rag.rerank.data.RagRerankDocument;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
  */
 @Data
 @NoArgsConstructor
-public class RagWorker {
+public class RagWorker implements BaseBuilder<RagWorker> {
     protected RagEmbeddingModel model;
     protected RagEmbeddingStore store;
     protected RagRerankModel rerankModel;

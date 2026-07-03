@@ -1,5 +1,6 @@
 package i2f.ai.std.tool;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class ToolBaseDefinition {
+public class ToolBaseDefinition implements BaseBuilder<ToolBaseDefinition> {
     protected Map<String, Object> jsonSchema;
     protected String name;
     protected String description;

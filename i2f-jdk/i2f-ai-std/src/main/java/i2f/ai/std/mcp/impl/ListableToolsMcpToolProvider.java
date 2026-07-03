@@ -10,7 +10,9 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -21,9 +23,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 @NoArgsConstructor
 public class ListableToolsMcpToolProvider implements McpToolProvider {
+    public static final String DEFAULT_NAME = "list";
+    public static final String DEFAULT_DESCRIPTION = "default tools set";
+
     protected final CopyOnWriteArrayList<ToolRawDefinition> tools = new CopyOnWriteArrayList<>();
     protected IProxyInvocationHandler invocationHandler;
     protected volatile IJsonSerializer jsonSerializer;
+    protected String name = DEFAULT_NAME;
+    protected String description = DEFAULT_DESCRIPTION;
 
     @Override
     public List<ToolBaseDefinition> getTools() {
@@ -31,44 +38,43 @@ public class ListableToolsMcpToolProvider implements McpToolProvider {
     }
 
     @Override
-    public Map.Entry<ToolBaseDefinition, Map<String, Object>> matchDefinition(ToolBaseCallRequest request) {
-        Map<String, Object> map = jsonSerializer.deserializeAsMap(request.getArguments());
-        String name = request.getName();
-        ToolBaseDefinition firstDefinition = null;
-        ToolBaseDefinition definition = null;
-        for (ToolBaseDefinition tool : tools) {
-            String toolName = tool.getName();
-            if (Objects.equals(toolName, name)) {
-                if (firstDefinition == null) {
-                    firstDefinition = definition;
-                }
-                List<String> parameterNames = tool.getParameterNames();
-                boolean isMatch = true;
-                for (String parameterName : parameterNames) {
-                    boolean ok = map.containsKey(parameterName);
-                    if (!ok) {
-                        isMatch = false;
-                        break;
-                    }
-                }
-                if (isMatch) {
-                    definition = tool;
-                    break;
-                }
-            }
-        }
-        if (definition == null) {
-            definition = firstDefinition;
-        }
-        return new AbstractMap.SimpleEntry<>(definition, map);
+    public String getName() {
+        return name;
     }
 
     @Override
-    public Object callTool(ToolBaseDefinition definition, Map<String, Object> parameterMap, ToolBaseCallRequest request) throws Throwable {
-        if (!(definition instanceof ToolRawDefinition)) {
-            throw new IllegalStateException("un-support tool definition type: " + definition.getClass());
+    public String getDescription() {
+        return description;
+    }
+
+    public ToolRawDefinition getTool(ToolBaseCallRequest request) {
+        String requestName = request.getName();
+        String prefix = getName();
+        if (prefix == null) {
+            prefix = "";
         }
-        ToolRawDefinition rawDefinition = (ToolRawDefinition) definition;
+        prefix = prefix + ".";
+        if (requestName.startsWith(prefix)) {
+            requestName = requestName.substring(prefix.length());
+        }
+        for (ToolRawDefinition tool : tools) {
+            String name = tool.getName();
+            if (name.equals(requestName)) {
+                return tool;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return getTool(request) != null;
+    }
+
+    @Override
+    public Object callTool(ToolBaseCallRequest request) throws Throwable {
+        ToolRawDefinition rawDefinition = getTool(request);
+        Map<String, Object> parameterMap = jsonSerializer.deserializeAsMap(request.getArguments());
         return ToolRawHelper.invokeTool(rawDefinition, parameterMap, invocationHandler);
     }
 }

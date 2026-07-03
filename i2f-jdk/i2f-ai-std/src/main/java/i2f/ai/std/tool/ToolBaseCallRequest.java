@@ -1,5 +1,6 @@
 package i2f.ai.std.tool;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class ToolBaseCallRequest {
+public class ToolBaseCallRequest implements BaseBuilder<ToolBaseCallRequest> {
     protected String id;
     protected String name;
     protected String arguments;

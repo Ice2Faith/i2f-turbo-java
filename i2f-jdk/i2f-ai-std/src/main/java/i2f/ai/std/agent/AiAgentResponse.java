@@ -2,6 +2,7 @@ package i2f.ai.std.agent;
 
 import i2f.ai.std.model.message.AiMessage;
 import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class AiAgentResponse {
+public class AiAgentResponse implements BaseBuilder<AiAgentResponse> {
     protected List<AiMessage> messageList;
     protected Map<String, ToolRawDefinition> toolMap;
     protected AiAgentContext context;

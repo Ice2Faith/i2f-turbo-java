@@ -1,5 +1,6 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class OpenAiCompletionRespDto {
+public class OpenAiCompletionRespDto implements BaseBuilder<OpenAiCompletionRespDto> {
     protected String id;
     protected String object;
     protected Long created;

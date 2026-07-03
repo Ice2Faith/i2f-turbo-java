@@ -1,5 +1,6 @@
 package i2f.ai.std.skill;
 
+import i2f.builder.BaseBuilder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +13,7 @@ import java.util.Set;
  */
 @Data
 @NoArgsConstructor
-public class SkillDefinition {
+public class SkillDefinition implements BaseBuilder<SkillDefinition> {
     protected String name;
     protected String description;
     protected Set<String> tags;
