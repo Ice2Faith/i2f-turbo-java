@@ -249,6 +249,7 @@
             <div
                     class="message-row"
                     :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
+                    :style="msg.hidden? 'filter: grayscale(1);': ''"
             >
                 <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
                     <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
