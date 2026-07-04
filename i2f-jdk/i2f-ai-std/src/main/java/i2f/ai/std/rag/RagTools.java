@@ -42,6 +42,7 @@ public class RagTools implements BaseMutator<RagTools> {
             RagSearchResultItem item = new RagSearchResultItem();
             item.setRank(i + 1);
             item.setContent(rag.getContent());
+            ret.add(item);
         }
 
         return ret;

@@ -105,8 +105,7 @@ public class RagAutoConfiguration {
             historyDir.mkdirs();
         }
         File moveDir = new File(historyDir, "history-" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()));
-        dir.renameTo(moveDir);
-        FileUtil.move(dir, moveDir);
+        FileUtil.move(moveDir, dir);
         dir.mkdirs();
     }
 

@@ -346,7 +346,7 @@
                 ></el-input>
                 <div class="input-actions">
                     <span v-if="metas.ttsPlaying">
-                        <i class="el-icon-turn-off-microphone"
+                        <i class="el-icon-turn-off-microphone microphone-spark"
                            style="font-size: 18px; color: dodgerblue;"
                            @click="stopTts"></i>
                     </span>
@@ -421,12 +421,42 @@
                                     width="320"
                                     trigger="hover">
                                 <p>
+                                    语音播报，自动播报助手消息。<br/>
+                                    如果开启，将会自动播报助手的答复消息。<br/>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             v-if="metas.supportTts"
+                                             v-model="form.enableAutoTts">
+                                    语音播报
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
                                     附加时间，自动为用户消息添加发送时间。<br/>
                                     如果开启，模型将会得到每次发送的时间，对于聊天助手类的应用，可以让模型感知到时间的变化。<br/>
                                     因此，模型的回答将会变得有时间概念，比如会主动答复用户为什么这么久没理人之类的。<br/>
                                 </p>
                                 <el-checkbox slot="reference" v-model="form.enableUserSendTime">
                                     附加时间
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
+                                    知识库，是否允许连接使用知识库。<br/>
+                                    如果开启，模型将根据需要连接使用知识库工具，检索知识库内容。<br/>
+                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             v-model="form.enableRags">
+                                    知识库
                                 </el-checkbox>
                             </el-popover>
                             <el-popover
@@ -1242,7 +1272,9 @@
                         encryptOutput: false,
                         enableTools: false,
                         enableSkills: false,
+                        enableRags: false,
                         enableUserSendTime: false,
+                        enableAutoTts: false,
                         toolApprovalList: []
                     }
                 }
@@ -2250,7 +2282,7 @@
                 if (item.type == 'user') {
                     // 如果开启了附加时间，则将当前时间附加到用户消息中
                     if (this.form.enableUserSendTime) {
-                        text = '- [send time] ' + (moment(new Date()).format('YYYY-MM-DD HH:mm:ss')) + '\n\n---\n\n' + text;
+                        text = '- [send time] ' + (moment(new Date()).format('YYYY-MM-DD HH:mm:ss dddd')) + '\n\n---\n\n' + text;
                     }
                 }
                 item[this.form.messageType] = {
@@ -2561,6 +2593,7 @@
                     req.encryptOutput = encryptOutput;
                     req.enableTools = this.form.enableTools;
                     req.enableSkills = this.form.enableSkills;
+                    req.enableRags = this.form.enableRags;
                     req.toolApprovalList = this.form.toolApprovalList;
                     req = this.transferSend(req);
 
@@ -2606,6 +2639,10 @@
 
                     if (!assistantMsg.assistant.content) {
                         assistantMsg.assistant.content = '[未收到任何内容]';
+                    }
+
+                    if (this.form.enableAutoTts) {
+                        this.onTts(assistantMsg.assistant.content)
                     }
 
                     if (Object.keys(toolCallsMap).length > 0) {

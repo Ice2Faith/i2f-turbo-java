@@ -58,14 +58,16 @@ public class RagHelper {
         if (options == null) {
             options = new RagLoadDocumentsOptions().toMutator()
                     .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
+                    .set(u -> u::setTextFileFilter, RagHelper::isTextFile)
                     .set(u -> u::setStoreBatchSize, -1)
                     .done();
         }
         options.toMutator()
                 .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
+                .fieldIfAbsentV(u -> u::getTextFileFilter, RagHelper::isTextFile)
                 .done();
         if (path.isFile()) {
-            if (options.getTextFileFilter().test(path)) {
+            if (options.getTextFileFilter() == null || options.getTextFileFilter().test(path)) {
                 String text = StreamUtil.readString(path);
                 List<String> list = options.getSplitter().split(text);
                 if (options.getStoreBatchSize() > 0) {

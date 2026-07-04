@@ -16,3 +16,15 @@ ai:
       enable: false
     command:
       enable: false
+  rags:
+    enable: false
+    embedding:
+      baseUrl: http://localhost:11434/v1
+      apiKey: xxx
+      model: qwen3-embedding:0.6b
+      dimension: 1024
+      enableLoadDocs: false
+      docsPath: ./rags
+      maxSegmentSizeInChars: 512
+      docsEmbedBatchSize: 10
+      maxOverlapRate: 0.15

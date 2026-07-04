@@ -393,6 +393,20 @@ html, body {
     color: #e8f4ff;
 }
 
+.microphone-spark {
+    animation: ani-spark 1.5s infinite ease-in-out;
+}
+
+@keyframes ani-spark {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+
 /* 打字机光标：流式输出时在消息末尾闪烁 */
 .streaming-cursor::after {
     content: '|';

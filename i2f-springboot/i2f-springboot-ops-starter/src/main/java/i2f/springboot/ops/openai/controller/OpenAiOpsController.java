@@ -227,12 +227,6 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
-                    if (req.isEnableRags()) {
-                        if (worker != null) {
-
-                        }
-                    }
-
                     if (req.isEnableTools()) {
                         if (toolDefinitionProvider != null) {
                             List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
