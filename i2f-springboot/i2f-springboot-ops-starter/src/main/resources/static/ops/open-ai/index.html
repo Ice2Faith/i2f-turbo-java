@@ -2654,7 +2654,7 @@
                     }
 
                     if (this.form.enableAutoTts) {
-                        this.onTts(assistantMsg.assistant.content)
+                        this.speakTts(assistantMsg.assistant.content)
                     }
 
                     if (Object.keys(toolCallsMap).length > 0) {
@@ -2842,6 +2842,9 @@
             },
             onTts(msg) {
                 let content = msg[msg.type].content;
+                this.speakTts(content)
+            },
+            speakTts(content) {
                 if (content && content != '') {
                     this.$tts.speak(content, {
                         voiceName: 'Yaoyao'
