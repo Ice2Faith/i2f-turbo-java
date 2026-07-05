@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.data;
 
+import i2f.ai.std.tool.definition.ToolDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -20,4 +21,6 @@ public class OpenAiOperateDto {
     protected boolean enableTools = false;
     protected boolean enableSkills = false;
     protected boolean enableRags = false;
+    protected List<String> lruToolNames;
+    protected List<ToolDefinition> loadedTools;
 }

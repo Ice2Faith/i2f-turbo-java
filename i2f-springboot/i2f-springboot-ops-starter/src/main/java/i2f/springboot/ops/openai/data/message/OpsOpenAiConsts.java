@@ -16,4 +16,6 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
     String DEFINITION_TOOL = "definition_tool";
 
     String ECHO_SKILL = "echo_skill";
+
+    String ECHO_LRU_TOOLS = "echo_lru_tools";
 }

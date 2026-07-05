@@ -7,6 +7,8 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,8 +27,6 @@ public class McpProviderTools {
     public McpProviderTools(AbstractMcpToolGatewayManager gatewayManager) {
         this.gatewayManager = gatewayManager;
     }
-
-    public static ThreadLocal<List<ToolDefinition>> TOOLS_HOLDER = new InheritableThreadLocal<>();
 
     @Data
     @NoArgsConstructor
@@ -65,7 +65,6 @@ public class McpProviderTools {
     public String load_tools_from_providers(
             @ToolParam(value = "providerNames", description = "provider name(s), cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
-        TOOLS_HOLDER.remove();
 
         if (providerNames == null) {
             providerNames = new ArrayList<>();
@@ -79,7 +78,14 @@ public class McpProviderTools {
                 tools.addAll(mcpProvider.getTools());
             }
         }
-        TOOLS_HOLDER.set(tools);
+
+        synchronized (this) {
+            OpenAiOperateDto req = AgentTools.REQUEST_HOLDER.get();
+            if (req.getLoadedTools() == null) {
+                req.setLoadedTools(new ArrayList<>());
+            }
+            req.getLoadedTools().addAll(tools);
+        }
 
         return (providerNames.isEmpty() ? "all" : String.valueOf(providerNames)) + " providers loaded " + tools.size() + " tools.";
     }

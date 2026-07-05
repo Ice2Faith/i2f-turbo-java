@@ -13,7 +13,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -69,7 +68,6 @@ public class SpringContextToolAutoConfiguration implements ApplicationContextAwa
     }
 
     @ConditionalOnExpression("${ai.tools.mcp-gateway.enable:true}")
-    @ConditionalOnBean(AbstractMcpToolGatewayManager.class)
     @Bean
     public McpProviderTools mcpProviderTools(@Autowired AbstractMcpToolGatewayManager manager) {
         return new McpProviderTools(manager);
