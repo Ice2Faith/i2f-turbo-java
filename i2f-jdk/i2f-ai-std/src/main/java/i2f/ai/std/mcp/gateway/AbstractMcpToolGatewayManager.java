@@ -39,16 +39,22 @@ public abstract class AbstractMcpToolGatewayManager implements ToolManager {
         return new AbstractMap.SimpleEntry<>(prefix, realName);
     }
 
+    public List<ToolDefinition> getProviderTools(McpToolProvider mcpProvider) {
+        List<ToolDefinition> ret = new ArrayList<>();
+        String prefix = mcpProvider.getName();
+        List<ToolDefinition> tools = mcpProvider.getTools();
+        for (ToolDefinition tool : tools) {
+            ret.add(new McpNameDelegateToolDefinition(wrapPrefixName(prefix, tool.getName()), tool));
+        }
+        return ret;
+    }
+
     @Override
     public List<ToolDefinition> getTools() {
         List<ToolDefinition> ret = new ArrayList<>();
         List<McpToolProvider> mcpProviders = getMcpProviders();
         for (McpToolProvider mcpProvider : mcpProviders) {
-            String prefix = mcpProvider.getName();
-            List<ToolDefinition> tools = mcpProvider.getTools();
-            for (ToolDefinition tool : tools) {
-                ret.add(new McpNameDelegateToolDefinition(wrapPrefixName(prefix, tool.getName()), tool));
-            }
+            ret.addAll(getProviderTools(mcpProvider));
         }
         return ret;
     }

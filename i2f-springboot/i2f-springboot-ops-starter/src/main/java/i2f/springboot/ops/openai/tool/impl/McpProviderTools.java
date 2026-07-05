@@ -13,7 +13,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -62,7 +64,7 @@ public class McpProviderTools {
             },
             description = "load all tools in tool provider(s)"
     )
-    public String load_tools_from_providers(
+    public Map<String, Object> load_tools_from_providers(
             @ToolParam(value = "providerNames", description = "provider name(s), cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
 
@@ -75,7 +77,7 @@ public class McpProviderTools {
         for (McpToolProvider mcpProvider : mcpProviders) {
             String name = mcpProvider.getName();
             if (providerNames.isEmpty() || providerNames.contains(name)) {
-                tools.addAll(mcpProvider.getTools());
+                tools.addAll(gatewayManager.getProviderTools(mcpProvider));
             }
         }
 
@@ -87,7 +89,66 @@ public class McpProviderTools {
             req.getLoadedTools().addAll(tools);
         }
 
-        return (providerNames.isEmpty() ? "all" : String.valueOf(providerNames)) + " providers loaded " + tools.size() + " tools.";
+        List<McpCategoryItem> items = new ArrayList<>();
+        for (ToolDefinition tool : tools) {
+            McpCategoryItem item = new McpCategoryItem();
+            item.setName(tool.getName());
+            item.setDescription(item.getDescription());
+            items.add(item);
+        }
+
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("summary", (providerNames.isEmpty() ? "all" : String.valueOf(providerNames)) + " providers loaded " + tools.size() + " tools.");
+        ret.put("tools", items);
+
+        return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.AUTO_VALUE,
+                    AiTags.READONLY_VALUE
+            },
+            description = "load tools by tool name(s)"
+    )
+    public Map<String, Object> load_tools_by_names(
+            @ToolParam(value = "toolNames", description = "tool name(s)for example [\"app_context.current_time\"] or [\"file.read_text\", \"command\"]")
+            List<String> toolNames) {
+
+        if (toolNames == null) {
+            toolNames = new ArrayList<>();
+        }
+        List<ToolDefinition> managerTools = gatewayManager.getTools();
+
+        List<ToolDefinition> tools = new ArrayList<>();
+        for (ToolDefinition managerTool : managerTools) {
+            String name = managerTool.getName();
+            if (toolNames.contains(name)) {
+                tools.add(managerTool);
+            }
+        }
+
+        synchronized (this) {
+            OpenAiOperateDto req = AgentTools.REQUEST_HOLDER.get();
+            if (req.getLoadedTools() == null) {
+                req.setLoadedTools(new ArrayList<>());
+            }
+            req.getLoadedTools().addAll(tools);
+        }
+
+        List<McpCategoryItem> items = new ArrayList<>();
+        for (ToolDefinition tool : tools) {
+            McpCategoryItem item = new McpCategoryItem();
+            item.setName(tool.getName());
+            item.setDescription(item.getDescription());
+            items.add(item);
+        }
+
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("summary", String.valueOf(toolNames) + " tools loaded " + tools.size() + " tools.");
+        ret.put("tools", items);
+
+        return ret;
     }
 
 
