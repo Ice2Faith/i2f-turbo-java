@@ -52,6 +52,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
@@ -99,6 +100,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private McpProviderTools mcpProviderTools;
+
+    protected SecureRandom random = new SecureRandom();
 
     private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()
@@ -218,6 +221,12 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     // 最后一条是 user/system 消息的时候，允许注入提示词，否则就是 assistant/tool 的时候往往是中间过程，不用注入提示词
                     boolean needInjectSystemPrompt = (injectMsg == null || Arrays.asList(OpenAiConsts.USER, OpenAiConsts.SYSTEM).contains(injectMsg.getType()));
+                    if (!needInjectSystemPrompt) {
+                        // 保留低概率注入提示词，保证长周期时，也能有提示词引导
+                        if (random.nextDouble() < 0.3) {
+                            needInjectSystemPrompt = true;
+                        }
+                    }
 
                     if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
                         String content = McpProviderTools.SYSTEM_PROMPT;
