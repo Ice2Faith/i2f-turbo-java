@@ -12,10 +12,7 @@ import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -125,16 +122,27 @@ public class McpProviderTools {
         }
 
         List<McpCategoryItem> items = new ArrayList<>();
+        Set<String> loaded = new HashSet<>();
         for (ToolDefinition tool : tools) {
+            loaded.add(tool.getName());
+
             McpCategoryItem item = new McpCategoryItem();
             item.setName(tool.getName());
             item.setDescription(tool.getDescription());
             items.add(item);
         }
 
+        Set<String> notLoad = new HashSet<>();
+        for (String toolName : toolNames) {
+            if (!loaded.contains(toolName)) {
+                notLoad.add(toolName);
+            }
+        }
+
         Map<String, Object> ret = new HashMap<>();
-        ret.put("summary", String.valueOf(toolNames) + " tools loaded " + tools.size() + " tools.");
-        ret.put("tools", items);
+        ret.put("summary", "loaded " + items.size() + " tools, not found " + notLoad.size() + " tools.");
+        ret.put("loadedTools", items);
+        ret.put("notFoundTools", notLoad);
 
         return ret;
     }
