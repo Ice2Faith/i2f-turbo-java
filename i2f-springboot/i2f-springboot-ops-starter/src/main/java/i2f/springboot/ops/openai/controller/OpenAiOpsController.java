@@ -194,23 +194,32 @@ public class OpenAiOpsController implements IOpsProvider {
                     completion.setStream_options(vo.getStream_options());
                     completion.setMessages(new ArrayList<>());
 
+                    OpenAiMessageVo injectMsg = null;
                     List<OpenAiMessageVo> voMsgList = vo.getMessages();
                     if (voMsgList != null) {
                         for (OpenAiMessageVo item : voMsgList) {
                             if (OpenAiConsts.USER.equals(item.getType())) {
+                                injectMsg = item;
                                 completion.getMessages().add(item.getUser());
                             } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
+                                injectMsg = item;
                                 completion.getMessages().add(item.getSystem());
                             } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
+                                injectMsg = item;
                                 completion.getMessages().add(item.getAssistant());
                             } else if (OpenAiConsts.TOOL.equals(item.getType())) {
+                                injectMsg = item;
                                 completion.getMessages().add(item.getTool());
                             }
+
                         }
                     }
                     completion.setTools(vo.getTools());
 
-                    if (req.isEnableLruTools() && mcpProviderTools != null) {
+                    // 最后一条是 user/system 消息的时候，允许注入提示词，否则就是 assistant/tool 的时候往往是中间过程，不用注入提示词
+                    boolean needInjectSystemPrompt = (injectMsg == null || Arrays.asList(OpenAiConsts.USER, OpenAiConsts.SYSTEM).contains(injectMsg.getType()));
+
+                    if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
                         String content = McpProviderTools.SYSTEM_PROMPT;
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                         completion.getMessages().add(0, system);
@@ -231,7 +240,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
-                    if (req.isEnableSkills()) {
+                    if (req.isEnableSkills() && needInjectSystemPrompt) {
                         String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap);
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                         completion.getMessages().add(0, system);
