@@ -20,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @Data
 @NoArgsConstructor
 public class ListableAppMcpToolProvider extends AbstractAppMcpToolProvider implements BaseMutator<ListableAppMcpToolProvider> {
-    public static final String DEFAULT_NAME = "app-list";
+    public static final String DEFAULT_NAME = "app_list";
     public static final String DEFAULT_DESCRIPTION = "application embed tools";
     protected String name = DEFAULT_NAME;
     protected String description = DEFAULT_DESCRIPTION;

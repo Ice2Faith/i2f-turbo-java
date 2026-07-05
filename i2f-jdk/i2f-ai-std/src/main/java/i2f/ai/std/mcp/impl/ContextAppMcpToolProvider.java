@@ -24,7 +24,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class ContextAppMcpToolProvider extends AbstractAppMcpToolProvider implements BaseMutator<ContextAppMcpToolProvider> {
-    public static final String DEFAULT_NAME = "app-context";
+    public static final String DEFAULT_NAME = "app_context";
     public static final String DEFAULT_DESCRIPTION = "application context embed tools";
     protected String name = DEFAULT_NAME;
     protected String description = DEFAULT_DESCRIPTION;

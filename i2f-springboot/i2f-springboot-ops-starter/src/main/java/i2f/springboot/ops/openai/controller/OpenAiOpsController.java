@@ -3,13 +3,15 @@ package i2f.springboot.ops.openai.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.data.*;
+import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.rag.RagTools;
 import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
+import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.ToolRawDefinition;
-import i2f.ai.std.tool.ToolRawDefinitionsProvider;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
@@ -92,9 +94,7 @@ public class OpenAiOpsController implements IOpsProvider {
     private ExecutorService toolPool = Executors.newWorkStealingPool(Math.min(Math.max(Runtime.getRuntime().availableProcessors() * 4 + 2, 16), 512));
 
     @Autowired(required = false)
-    private ToolRawDefinitionsProvider toolDefinitionProvider;
-    @Autowired
-    private SkillsTools skillsTools;
+    private ToolManager toolManager;
 
     private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()
@@ -228,33 +228,53 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (req.isEnableTools()) {
-                        if (toolDefinitionProvider != null) {
-                            List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                        if (toolManager != null) {
+                            List<ToolDefinition> tools = toolManager.getTools();
                             if (tools != null) {
                                 if (!req.isEnableSkills()) {
                                     tools = tools.stream()
-                                            .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                            .filter(e -> {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                if (rawTool != null) {
+                                                    if (SkillsTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                        return false;
+                                                    }
+                                                }
+                                                return true;
+                                            })
                                             .collect(Collectors.toList());
                                 }
                                 if (!req.isEnableRags()) {
                                     tools = tools.stream()
-                                            .filter(e -> !RagTools.class.isAssignableFrom(e.getBindClass()))
+                                            .filter(e -> {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                if (rawTool != null) {
+                                                    if (RagTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                        return false;
+                                                    }
+                                                }
+                                                return true;
+                                            })
                                             .collect(Collectors.toList());
                                 }
                                 if (completion.getTools() == null) {
                                     completion.setTools(new ArrayList<>());
                                 }
-                                for (ToolRawDefinition tool : tools) {
+                                for (ToolDefinition tool : tools) {
                                     OpenAiToolDefinitionDto dto = new OpenAiToolDefinitionDto();
                                     dto.setName(tool.getName());
                                     dto.setDescription(tool.getDescription());
-                                    dto.setParameterNames(tool.getParameterNames());
-                                    dto.setTags(tool.getTags());
-                                    if (tool.getBindClass() != null) {
-                                        dto.setBindClass(tool.getBindClass().getSimpleName());
-                                    }
-                                    if (tool.getBindMethod() != null) {
-                                        dto.setBindMethod(tool.getBindMethod().getName());
+                                    ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
+                                    if (rawTool != null) {
+
+                                        dto.setParameterNames(rawTool.getParameterNames());
+                                        dto.setTags(rawTool.getTags());
+                                        if (rawTool.getBindClass() != null) {
+                                            dto.setBindClass(rawTool.getBindClass().getSimpleName());
+                                        }
+                                        if (rawTool.getBindMethod() != null) {
+                                            dto.setBindMethod(rawTool.getBindMethod().getName());
+                                        }
                                     }
                                     String defToolMsg = objectMapper.writeValueAsString(dto);
                                     OpsSecureReturn<?> resp = null;
@@ -281,20 +301,36 @@ public class OpenAiOpsController implements IOpsProvider {
                                 List<OpenAiToolCall> calls = assistantMessage.getTool_calls();
 
                                 if (calls != null && !calls.isEmpty()) {
-                                    Map<String, ToolRawDefinition> definitionMap = new HashMap<>();
-                                    if (toolDefinitionProvider != null) {
-                                        List<ToolRawDefinition> tools = toolDefinitionProvider.getTools();
+                                    Map<String, ToolDefinition> definitionMap = new HashMap<>();
+                                    if (toolManager != null) {
+                                        List<ToolDefinition> tools = toolManager.getTools();
                                         if (!req.isEnableSkills()) {
                                             tools = tools.stream()
-                                                    .filter(e -> !SkillsTools.class.isAssignableFrom(e.getBindClass()))
+                                                    .filter(e -> {
+                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                        if (rawTool != null) {
+                                                            if (SkillsTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                                return false;
+                                                            }
+                                                        }
+                                                        return true;
+                                                    })
                                                     .collect(Collectors.toList());
                                         }
                                         if (!req.isEnableRags()) {
                                             tools = tools.stream()
-                                                    .filter(e -> !RagTools.class.isAssignableFrom(e.getBindClass()))
+                                                    .filter(e -> {
+                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                        if (rawTool != null) {
+                                                            if (RagTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                                return false;
+                                                            }
+                                                        }
+                                                        return true;
+                                                    })
                                                     .collect(Collectors.toList());
                                         }
-                                        for (ToolRawDefinition tool : tools) {
+                                        for (ToolDefinition tool : tools) {
                                             definitionMap.put(tool.getName(), tool);
                                         }
                                     }
@@ -311,18 +347,22 @@ public class OpenAiOpsController implements IOpsProvider {
                                             try {
                                                 String id = call.getId();
                                                 OpenAiToolCallFunction function = call.getFunction();
-                                                String name = function.getName();
-                                                String arguments = function.getArguments();
-                                                ToolRawDefinition definition = definitionMap.get(name);
-                                                Map<String, Object> argumentsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
-                                                });
+
+                                                ToolCallRequest toolCallRequest = new ToolCallRequest().toMutator()
+                                                        .cast(ToolCallRequest.class)
+                                                        .set(u -> u::setId, id)
+                                                        .set(u -> u::setName, function.getName())
+                                                        .set(u -> u::setArguments, function.getArguments())
+                                                        .set(u -> u::setRawRequest, call)
+                                                        .done();
+
                                                 Object callRet = null;
                                                 try {
                                                     OpenAiToolApprovalDto approvalDto = approvalMap.get(id);
                                                     if (approvalDto != null) {
                                                         if (approvalDto.isReject()) {
                                                             String rejectReason = approvalDto.getRejectReason();
-                                                            if (rejectReason == null) {
+                                                            if (rejectReason == null || rejectReason.isEmpty()) {
                                                                 rejectReason = "";
                                                             } else {
                                                                 rejectReason = ", reason is : " + rejectReason;
@@ -330,10 +370,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                                             throw new IllegalStateException("user reject tool execute" + rejectReason);
                                                         }
                                                     }
-                                                    if (definition == null) {
-                                                        throw new IllegalArgumentException("cannot found tool definition: " + name);
+                                                    if (!toolManager.support(toolCallRequest)) {
+                                                        throw new IllegalArgumentException("cannot found tool definition: " + toolCallRequest.getName());
                                                     }
-                                                    callRet = ToolRawHelper.invokeTool(definition, argumentsMap);
+                                                    callRet = toolManager.callTool(toolCallRequest);
                                                 } catch (Throwable e) {
                                                     callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                                 }
