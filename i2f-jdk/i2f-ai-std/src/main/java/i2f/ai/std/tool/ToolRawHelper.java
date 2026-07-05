@@ -1,5 +1,7 @@
 package i2f.ai.std.tool;
 
+import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.definition.impl.DelegateToolDefinition;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
@@ -23,6 +25,16 @@ import java.util.function.Function;
  * @desc
  */
 public class ToolRawHelper {
+    public static ToolRawDefinition extractRawDefinition(ToolDefinition tool) {
+        if (tool instanceof DelegateToolDefinition) {
+            DelegateToolDefinition delegate = (DelegateToolDefinition) tool;
+            tool = delegate.getDelegate();
+        }
+        if (tool instanceof ToolRawDefinition) {
+            return (ToolRawDefinition) tool;
+        }
+        return null;
+    }
 
     public static <R> List<R> convertTools(Map<String, ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
         List<R> ret = new ArrayList<>();

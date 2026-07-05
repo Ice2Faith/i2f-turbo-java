@@ -5,7 +5,6 @@ import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
-import i2f.ai.std.tool.definition.impl.DelegateToolDefinition;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
 
@@ -23,22 +22,13 @@ public abstract class AbstractAppMcpToolProvider implements McpToolProvider {
 
     public abstract IProxyInvocationHandler getInvocationHandler();
 
-    public ToolRawDefinition extractRawDefinition(ToolDefinition tool) {
-        if (tool instanceof DelegateToolDefinition) {
-            DelegateToolDefinition delegate = (DelegateToolDefinition) tool;
-            tool = delegate.getDelegate();
-        }
-        if (tool instanceof ToolRawDefinition) {
-            return (ToolRawDefinition) tool;
-        }
-        return null;
-    }
+
 
     @Override
     public boolean support(ToolBaseCallRequest request) {
         List<ToolDefinition> tools = getTools();
         for (ToolDefinition tool : tools) {
-            ToolRawDefinition rawTool = extractRawDefinition(tool);
+            ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
             if (rawTool == null) {
                 continue;
             }
@@ -53,7 +43,7 @@ public abstract class AbstractAppMcpToolProvider implements McpToolProvider {
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
         List<ToolDefinition> tools = getTools();
         for (ToolDefinition tool : tools) {
-            ToolRawDefinition rawTool = extractRawDefinition(tool);
+            ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
             if (rawTool == null) {
                 continue;
             }
