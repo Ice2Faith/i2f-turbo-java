@@ -16,6 +16,8 @@ ai:
       enable: false
     command:
       enable: false
+    mcp-gateway:
+      enable: true
   rags:
     enable: false
     embedding:
