@@ -12,6 +12,7 @@ import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.lang.reflect.Method;
 import java.util.*;
 
 /**
@@ -21,6 +22,30 @@ import java.util.*;
  */
 @Tools
 public class McpProviderTools {
+    private static final Set<String> exposeTools;
+
+    static {
+        Set<String> names = new HashSet<>();
+        Method[] methods = McpProviderTools.class.getDeclaredMethods();
+        for (Method method : methods) {
+            Tool ann = method.getAnnotation(Tool.class);
+            if (ann == null) {
+                continue;
+            }
+            String name = method.getName();
+            String value = ann.value();
+            if (value != null && !value.isEmpty()) {
+                name = value;
+            }
+            names.add(name);
+        }
+        exposeTools = Collections.unmodifiableSet(names);
+    }
+
+    public static Set<String> toolNames() {
+        return new HashSet<>(exposeTools);
+    }
+
     private AbstractMcpToolGatewayManager gatewayManager;
 
     public McpProviderTools(AbstractMcpToolGatewayManager gatewayManager) {
@@ -62,7 +87,7 @@ public class McpProviderTools {
             description = "list all tools in tool provider(s)"
     )
     public List<McpCategoryItem> list_tools_from_providers(
-            @ToolParam(value = "providerNames", description = "provider name(s), cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
+            @ToolParam(value = "providerNames", description = "provider name(s), provider name must from `tools_provider_list` returns, cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
 
         if (providerNames == null) {
@@ -97,7 +122,7 @@ public class McpProviderTools {
             description = "load tools by tool name(s)"
     )
     public Map<String, Object> load_tools_by_names(
-            @ToolParam(value = "toolNames", description = "tool name(s)for example [\"app_context.current_time\"] or [\"file.read_text\", \"command\"]")
+            @ToolParam(value = "toolNames", description = "tool name(s), tool name must from `list_tools_from_providers` returns, for example [\"app_context.current_time\"] or [\"file.read_text\", \"command\"]")
             List<String> toolNames) {
 
         if (toolNames == null) {
@@ -139,13 +164,16 @@ public class McpProviderTools {
             }
         }
 
+        if (!notLoad.isEmpty()) {
+            throw new IllegalArgumentException("you should use `list_tools_from_providers` returns tool names, those tool not found: " + notLoad);
+        }
+
         Map<String, Object> ret = new HashMap<>();
-        ret.put("summary", "loaded " + items.size() + " tools, not found " + notLoad.size() + " tools.");
+        ret.put("summary", "loaded " + items.size() + " tools.");
         ret.put("loadedTools", items);
-        ret.put("notFoundTools", notLoad);
+
 
         return ret;
     }
-
 
 }

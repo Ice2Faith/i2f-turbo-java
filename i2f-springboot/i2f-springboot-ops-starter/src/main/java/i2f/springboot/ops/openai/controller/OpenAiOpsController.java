@@ -522,10 +522,11 @@ public class OpenAiOpsController implements IOpsProvider {
                         tools = tools.stream().filter(e -> {
                             Map<String, Object> function = e.getFunction();
                             String name = (String) function.get("name");
-                            if (name.contains("tools_provider_list")
-                                    || name.contains("load_tools_from_providers")
-                                    || name.contains("load_tools_by_names")) {
-                                return true;
+                            Set<String> checkNames = McpProviderTools.toolNames();
+                            for (String checkName : checkNames) {
+                                if (name.contains(checkName)) {
+                                    return true;
+                                }
                             }
                             if (unqToolNames.contains(name)) {
                                 return true;
