@@ -1,20 +1,15 @@
-package i2f.ai.std.mcp;
+package i2f.ai.std.tool;
 
-import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
 
 import java.util.List;
 
 /**
  * @author Ice2Faith
- * @date 2026/4/10 10:22
+ * @date 2026/7/5 14:40
  * @desc
  */
-public interface McpToolProvider {
-    String getName();
-
-    String getDescription();
-
+public interface ToolManager {
     List<ToolDefinition> getTools();
 
     boolean support(ToolBaseCallRequest request);
