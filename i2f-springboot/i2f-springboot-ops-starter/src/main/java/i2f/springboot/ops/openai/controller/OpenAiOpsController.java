@@ -210,6 +210,27 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
                     completion.setTools(vo.getTools());
 
+                    if (req.isEnableLruTools() && mcpProviderTools != null) {
+                        String content = McpProviderTools.SYSTEM_PROMPT;
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                        completion.getMessages().add(0, system);
+
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
+                        dto.setEcho_skill(system);
+
+                        String defSkillMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+                    }
+
                     if (req.isEnableSkills()) {
                         String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap);
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);

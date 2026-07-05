@@ -2,6 +2,7 @@ package i2f.springboot.ops.openai.tool.impl;
 
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
+import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -46,6 +47,26 @@ public class McpProviderTools {
         return new HashSet<>(exposeTools);
     }
 
+    public static final String NAME_LIST_PROVIDER = "tools_provider_list";
+    public static final String NAME_LIST_TOOLS = "list_tools_from_providers";
+    public static final String NAME_LOAD_TOOLS = "load_tools_by_names";
+
+    public static final String SYSTEM_PROMPT = "# 动态工具查找与加载\n" +
+            "\n" +
+            "- 系统集成多个工具供应商\n" +
+            "- 使用 `" + NAME_LIST_PROVIDER + "` 获取所有供应商列表\n" +
+            "- 每个供应商提供一组工具\n" +
+            "- 使用 `" + NAME_LIST_TOOLS + "` 获取某些供应商都提供了哪些工具\n" +
+            "\t- 【重要】只能获取 `" + NAME_LIST_PROVIDER + "` 中支持的供应商\n" +
+            "    - 其中 `" + ContextAppMcpToolProvider.DEFAULT_NAME + "` 供应商是特殊的，可能包含系统开发者单独提供的各个领域的工具\n" +
+            "    - 当其他供应商没有相关工具时，`" + ContextAppMcpToolProvider.DEFAULT_NAME + "` 可能包含这些工具\n" +
+            "- 工具需要被加载才能使用\n" +
+            "- 使用 `" + NAME_LOAD_TOOLS + "` 来加载工具\n" +
+            "\t- 【重要】只能加载来自 `" + NAME_LIST_TOOLS + "` 中能够提供的工具\n" +
+            "- 工具数量有限制，使用LRU策略自动卸载最久未使用的工具\n" +
+            "- 因此，需要动态加载工具";
+    ;
+
     private AbstractMcpToolGatewayManager gatewayManager;
 
     public McpProviderTools(AbstractMcpToolGatewayManager gatewayManager) {
@@ -59,7 +80,7 @@ public class McpProviderTools {
         protected String description;
     }
 
-    @Tool(
+    @Tool(value = NAME_LIST_PROVIDER,
             tags = {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE
@@ -79,7 +100,7 @@ public class McpProviderTools {
         return ret;
     }
 
-    @Tool(
+    @Tool(value = NAME_LIST_TOOLS,
             tags = {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE
@@ -87,7 +108,7 @@ public class McpProviderTools {
             description = "list all tools in tool provider(s)"
     )
     public List<McpCategoryItem> list_tools_from_providers(
-            @ToolParam(value = "providerNames", description = "provider name(s), provider name must from `tools_provider_list` returns, cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
+            @ToolParam(value = "providerNames", description = "provider name(s), provider name must from `" + NAME_LIST_PROVIDER + "` returns, cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
 
         if (providerNames == null) {
@@ -114,7 +135,7 @@ public class McpProviderTools {
         return items;
     }
 
-    @Tool(
+    @Tool(value = NAME_LOAD_TOOLS,
             tags = {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE
@@ -122,7 +143,7 @@ public class McpProviderTools {
             description = "load tools by tool name(s)"
     )
     public Map<String, Object> load_tools_by_names(
-            @ToolParam(value = "toolNames", description = "tool name(s), tool name must from `list_tools_from_providers` returns, for example [\"app_context.current_time\"] or [\"file.read_text\", \"command\"]")
+            @ToolParam(value = "toolNames", description = "tool name(s), tool name must from `" + NAME_LIST_TOOLS + "` returns, for example [\"app_context.current_time\"] or [\"file.read_text\", \"command\"]")
             List<String> toolNames) {
 
         if (toolNames == null) {
@@ -165,7 +186,7 @@ public class McpProviderTools {
         }
 
         if (!notLoad.isEmpty()) {
-            throw new IllegalArgumentException("you should use `list_tools_from_providers` returns tool names, those tool not found: " + notLoad);
+            throw new IllegalArgumentException("you should use `" + NAME_LIST_TOOLS + "` returns tool names, those tool not found: " + notLoad);
         }
 
         Map<String, Object> ret = new HashMap<>();
