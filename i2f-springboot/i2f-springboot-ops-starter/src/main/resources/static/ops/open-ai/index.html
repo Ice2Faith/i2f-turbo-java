@@ -422,6 +422,21 @@
                                     width="320"
                                     trigger="hover">
                                 <p>
+                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
+                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具。<br/>
+                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             v-model="form.enableLruTools">
+                                    动态工具
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                                <p>
                                     语音播报，自动播报助手消息。<br/>
                                     如果开启，将会自动播报助手的答复消息。<br/>
                                 </p>
@@ -1276,7 +1291,9 @@
                         enableRags: false,
                         enableUserSendTime: false,
                         enableAutoTts: false,
-                        toolApprovalList: []
+                        toolApprovalList: [],
+                        enableLruTools: false,
+                        lruToolNames: []
                     }
                 }
             },
@@ -2519,6 +2536,10 @@
                             // messages.push(json);
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'echo_lru_tools') {
+                            _this.form.lruToolNames = json || [];
+                            return;
+                        }
 
                         if (json.usage) {
                             // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
@@ -2608,6 +2629,8 @@
                     req.enableSkills = this.form.enableSkills;
                     req.enableRags = this.form.enableRags;
                     req.toolApprovalList = this.form.toolApprovalList;
+                    req.enableLruTools = this.form.enableLruTools;
+                    req.lruToolNames = this.form.lruToolNames;
                     req = this.transferSend(req);
 
                     // 原生 fetch + ReadableStream 解析 SSE

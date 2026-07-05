@@ -42,7 +42,7 @@ public class McpProviderTools {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE
             },
-            description = "list all tools provider names"
+            description = "list all tool provider names"
     )
     public List<McpCategoryItem> tools_provider_list() {
         List<McpToolProvider> mcpProviders = gatewayManager.getMcpProviders();
@@ -93,7 +93,7 @@ public class McpProviderTools {
         for (ToolDefinition tool : tools) {
             McpCategoryItem item = new McpCategoryItem();
             item.setName(tool.getName());
-            item.setDescription(item.getDescription());
+            item.setDescription(tool.getDescription());
             items.add(item);
         }
 
@@ -140,7 +140,7 @@ public class McpProviderTools {
         for (ToolDefinition tool : tools) {
             McpCategoryItem item = new McpCategoryItem();
             item.setName(tool.getName());
-            item.setDescription(item.getDescription());
+            item.setDescription(tool.getDescription());
             items.add(item);
         }
 

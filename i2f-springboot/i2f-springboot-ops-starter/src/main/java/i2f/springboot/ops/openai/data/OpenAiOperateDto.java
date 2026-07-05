@@ -21,6 +21,7 @@ public class OpenAiOperateDto {
     protected boolean enableTools = false;
     protected boolean enableSkills = false;
     protected boolean enableRags = false;
+    protected boolean enableLruTools = false;
     protected List<String> lruToolNames;
     protected List<ToolDefinition> loadedTools;
 }

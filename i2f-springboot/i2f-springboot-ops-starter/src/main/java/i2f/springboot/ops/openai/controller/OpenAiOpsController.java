@@ -24,6 +24,7 @@ import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
+import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -95,6 +96,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private ToolManager toolManager;
+
+    @Autowired(required = false)
+    private McpProviderTools mcpProviderTools;
 
     private RestTemplate createRestTemplate() {
         return new RestTemplateBuilder()
@@ -257,6 +261,19 @@ public class OpenAiOpsController implements IOpsProvider {
                                             })
                                             .collect(Collectors.toList());
                                 }
+                                if (!req.isEnableLruTools()) {
+                                    tools = tools.stream()
+                                            .filter(e -> {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                if (rawTool != null) {
+                                                    if (McpProviderTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                        return false;
+                                                    }
+                                                }
+                                                return true;
+                                            })
+                                            .collect(Collectors.toList());
+                                }
                                 if (completion.getTools() == null) {
                                     completion.setTools(new ArrayList<>());
                                 }
@@ -330,6 +347,19 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     })
                                                     .collect(Collectors.toList());
                                         }
+                                        if (!req.isEnableLruTools()) {
+                                            tools = tools.stream()
+                                                    .filter(e -> {
+                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                        if (rawTool != null) {
+                                                            if (McpProviderTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                                return false;
+                                                            }
+                                                        }
+                                                        return true;
+                                                    })
+                                                    .collect(Collectors.toList());
+                                        }
                                         for (ToolDefinition tool : tools) {
                                             definitionMap.put(tool.getName(), tool);
                                         }
@@ -342,6 +372,16 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                     CountDownLatch latch = new CountDownLatch(calls.size());
                                     for (OpenAiToolCall call : calls) {
+                                        if (req.isEnableLruTools() && mcpProviderTools != null) {
+                                            if (req.getLruToolNames() == null) {
+                                                req.setLruToolNames(new ArrayList<>());
+                                            }
+                                            List<String> lruToolNames = req.getLruToolNames();
+
+                                            OpenAiToolCallFunction f = call.getFunction();
+                                            String name = f.getName();
+                                            lruToolNames.add(0, name);
+                                        }
                                         Runnable toolTask = () -> {
                                             AgentTools.REQUEST_HOLDER.set(req);
                                             try {
@@ -441,6 +481,58 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                         }
+                    }
+
+                    if (req.isEnableLruTools() && mcpProviderTools != null) {
+                        LinkedList<String> unqToolNames = new LinkedList<>();
+
+                        List<String> lruToolNames = req.getLruToolNames();
+                        if (lruToolNames != null) {
+                            for (String name : lruToolNames) {
+                                if (!unqToolNames.contains(name)) {
+                                    unqToolNames.add(name);
+                                }
+                            }
+                        }
+                        List<ToolDefinition> loadedTools = req.getLoadedTools();
+                        if (loadedTools != null) {
+                            for (ToolDefinition item : loadedTools) {
+                                if (unqToolNames.contains(item.getName())) {
+                                    unqToolNames.remove(item.getName());
+                                }
+                                unqToolNames.add(0, item.getName());
+                            }
+                        }
+                        while (unqToolNames.size() > 20) {
+                            unqToolNames.removeLast();
+                        }
+
+                        String emitToolMsg = objectMapper.writeValueAsString(unqToolNames);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(emitToolMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(emitToolMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LRU_TOOLS);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+
+                        List<OpenAiToolsDefinition> tools = completion.getTools();
+                        tools = tools.stream().filter(e -> {
+                            Map<String, Object> function = e.getFunction();
+                            String name = (String) function.get("name");
+                            if (name.contains("tools_provider_list")
+                                    || name.contains("load_tools_from_providers")
+                                    || name.contains("load_tools_by_names")) {
+                                return true;
+                            }
+                            if (unqToolNames.contains(name)) {
+                                return true;
+                            }
+                            return false;
+                        }).collect(Collectors.toList());
+                        completion.setTools(tools);
                     }
 
 
