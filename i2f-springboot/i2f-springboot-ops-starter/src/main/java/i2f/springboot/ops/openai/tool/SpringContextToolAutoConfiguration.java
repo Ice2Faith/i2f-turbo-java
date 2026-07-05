@@ -1,16 +1,19 @@
 package i2f.springboot.ops.openai.tool;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
 import i2f.ai.std.mcp.gateway.impl.ContextMcpToolGatewayManager;
 import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
 import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.impl.ContextAppToolManager;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.spring.core.SpringContext;
+import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -63,5 +66,12 @@ public class SpringContextToolAutoConfiguration implements ApplicationContextAwa
                 .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(objectMapper))
                 .done();
         return ret;
+    }
+
+    @ConditionalOnExpression("${ai.tools.mcp-gateway.enable:true}")
+    @ConditionalOnBean(AbstractMcpToolGatewayManager.class)
+    @Bean
+    public McpProviderTools mcpProviderTools(@Autowired AbstractMcpToolGatewayManager manager) {
+        return new McpProviderTools(manager);
     }
 }
