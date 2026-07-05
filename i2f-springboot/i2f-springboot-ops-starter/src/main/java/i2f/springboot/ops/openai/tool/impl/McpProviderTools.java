@@ -62,9 +62,9 @@ public class McpProviderTools {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE
             },
-            description = "load all tools in tool provider(s)"
+            description = "list all tools in tool provider(s)"
     )
-    public Map<String, Object> load_tools_from_providers(
+    public List<McpCategoryItem> list_tools_from_providers(
             @ToolParam(value = "providerNames", description = "provider name(s), cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
 
@@ -81,14 +81,6 @@ public class McpProviderTools {
             }
         }
 
-        synchronized (this) {
-            OpenAiOperateDto req = AgentTools.REQUEST_HOLDER.get();
-            if (req.getLoadedTools() == null) {
-                req.setLoadedTools(new ArrayList<>());
-            }
-            req.getLoadedTools().addAll(tools);
-        }
-
         List<McpCategoryItem> items = new ArrayList<>();
         for (ToolDefinition tool : tools) {
             McpCategoryItem item = new McpCategoryItem();
@@ -97,11 +89,7 @@ public class McpProviderTools {
             items.add(item);
         }
 
-        Map<String, Object> ret = new HashMap<>();
-        ret.put("summary", (providerNames.isEmpty() ? "all" : String.valueOf(providerNames)) + " providers loaded " + tools.size() + " tools.");
-        ret.put("tools", items);
-
-        return ret;
+        return items;
     }
 
     @Tool(

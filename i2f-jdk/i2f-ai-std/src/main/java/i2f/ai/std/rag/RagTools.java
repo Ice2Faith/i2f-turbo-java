@@ -26,11 +26,13 @@ public class RagTools implements BaseMutator<RagTools> {
         this.worker = worker;
     }
 
-    @Tool(description = "获取与文本内容具有相关性的文档资料")
-    public List<RagSearchResultItem> rag_search(@ToolParam(description = "文本内容") String text,
-                                                @ToolParam(description = "最多返回的条数，一般建议小于10，常用 3 或者 5") int topN) {
+    @Tool(description = "获取与文本内容具有相关性的知识库文档资料")
+    public List<RagSearchResultItem> rag_search(@ToolParam(description = "检索文本内容") String text,
+                                                @ToolParam(description = "最多返回的条数，允许为 null 默认为 3，一般建议小于10，例如 3 或者 5") Integer topN) {
         List<RagSearchResultItem> ret = new ArrayList<>();
-
+        if (topN == null) {
+            topN = 3;
+        }
         List<RagEmbedding> list = worker.similar(text, topN);
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
