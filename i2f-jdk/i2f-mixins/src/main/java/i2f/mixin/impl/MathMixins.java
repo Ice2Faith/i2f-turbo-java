@@ -414,4 +414,117 @@ public interface MathMixins {
 
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
+
+    default Object max_of(Object... numbers) {
+        BigDecimal ret = null;
+        Object firstNumber = null;
+        for (Object number : numbers) {
+            if (number == null) {
+                continue;
+            }
+            Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+            if (!(num instanceof BigDecimal)) {
+                throw new IllegalArgumentException("number cannot cast as number type, of type :" + num.getClass());
+            }
+            if (firstNumber == null) {
+                firstNumber = number;
+            }
+            BigDecimal item = (BigDecimal) num;
+            if (ret == null) {
+                ret = item;
+            } else {
+                if (ret.compareTo(item) < 0) {
+                    ret = item;
+                }
+            }
+        }
+        if (ret == null) {
+            return null;
+        }
+        if (firstNumber == null) {
+            return ret;
+        }
+        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+    }
+
+    default Object min_of(Object... numbers) {
+        BigDecimal ret = null;
+        Object firstNumber = null;
+        for (Object number : numbers) {
+            if (number == null) {
+                continue;
+            }
+            Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+            if (!(num instanceof BigDecimal)) {
+                throw new IllegalArgumentException("number cannot cast as number type, of type :" + num.getClass());
+            }
+            if (firstNumber == null) {
+                firstNumber = number;
+            }
+            BigDecimal item = (BigDecimal) num;
+            if (ret == null) {
+                ret = item;
+            } else {
+                if (ret.compareTo(item) > 0) {
+                    ret = item;
+                }
+            }
+        }
+        if (ret == null) {
+            return null;
+        }
+        if (firstNumber == null) {
+            return ret;
+        }
+        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+    }
+
+    default Object avg_of(Object... numbers) {
+        BigDecimal sum = BigDecimal.ZERO;
+        Object firstNumber = null;
+        for (Object number : numbers) {
+            if (number == null) {
+                continue;
+            }
+            Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+            if (!(num instanceof BigDecimal)) {
+                throw new IllegalArgumentException("number cannot cast as number type, of type :" + num.getClass());
+            }
+            if (firstNumber == null) {
+                firstNumber = number;
+            }
+            BigDecimal item = (BigDecimal) num;
+            sum = sum.add(item);
+        }
+
+        BigDecimal ret = sum.divide(BigDecimal.valueOf(numbers.length), MixinConsts.MATH_CONTEXT);
+        if (firstNumber == null) {
+            return ret;
+        }
+        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+    }
+
+    default Object sum_of(Object... numbers) {
+        BigDecimal sum = BigDecimal.ZERO;
+        Object firstNumber = null;
+        for (Object number : numbers) {
+            if (number == null) {
+                continue;
+            }
+            Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+            if (!(num instanceof BigDecimal)) {
+                throw new IllegalArgumentException("number cannot cast as number type, of type :" + num.getClass());
+            }
+            if (firstNumber == null) {
+                firstNumber = number;
+            }
+            BigDecimal item = (BigDecimal) num;
+            sum = sum.add(item);
+        }
+
+        if (firstNumber == null) {
+            return sum;
+        }
+        return ObjectConvertor.tryConvertAsType(sum, firstNumber.getClass());
+    }
 }
