@@ -1143,12 +1143,15 @@ public class ReflectResolver {
         if (realType.equals(requireType)) {
             return dis;
         }
+        if (TypeOf.isSameBasicType(realType, requireType)) {
+            return dis + 1;
+        }
         if (realType.equals(Object.class)) {
             return Integer.MAX_VALUE;
         }
         Class<?> superclass = realType.getSuperclass();
         if (superclass != null) {
-            int next = getTypeDistance(superclass, requireType, dis + 1);
+            int next = getTypeDistance(superclass, requireType, dis + 2);
             if (next != Integer.MAX_VALUE) {
                 return next;
             }
@@ -1156,7 +1159,7 @@ public class ReflectResolver {
         Class<?>[] interfaces = realType.getInterfaces();
         if (interfaces != null) {
             for (Class<?> nextClass : interfaces) {
-                int next = getTypeDistance(nextClass, requireType, dis + 1);
+                int next = getTypeDistance(nextClass, requireType, dis + 2);
                 if (next != -1) {
                     return next;
                 }
