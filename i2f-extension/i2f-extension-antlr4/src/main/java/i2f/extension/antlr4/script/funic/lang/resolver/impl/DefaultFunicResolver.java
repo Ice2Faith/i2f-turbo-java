@@ -36,7 +36,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -1054,11 +1053,11 @@ public class DefaultFunicResolver implements FunicResolver {
 
     public List<IMethod> searchGlobalMethod(String methodName, DefaultFunicVisitor visitor) {
         List<IMethod> ret = new ArrayList<>();
-        List<IMethod> registerList = visitor.getRegistryMethods().get(methodName);
+        List<IMethod> registerList = getVisitorRegistryMethods(methodName, visitor);
         if (registerList != null) {
             ret.addAll(registerList);
         }
-        CopyOnWriteArrayList<IMethod> list = Funic.GLOBAL_METHODS.get(methodName);
+        List<IMethod> list = getStaticGlobalRegistryMethods(methodName, visitor);
         if (list != null) {
             ret.addAll(list);
         }
@@ -1067,6 +1066,14 @@ public class DefaultFunicResolver implements FunicResolver {
             ret.addAll(builtin);
         }
         return ret;
+    }
+
+    public List<IMethod> getStaticGlobalRegistryMethods(String methodName, DefaultFunicVisitor visitor) {
+        return Funic.GLOBAL_METHODS.get(methodName);
+    }
+
+    public List<IMethod> getVisitorRegistryMethods(String methodName, DefaultFunicVisitor visitor) {
+        return visitor.getRegistryMethods().get(methodName);
     }
 
     public List<IMethod> getBuiltinGlobalMethods(String methodName, DefaultFunicVisitor visitor) {

@@ -1,10 +1,23 @@
 package i2f.extension.antlr4.script.funic.lang.resolver.impl;
 
 import i2f.extension.antlr4.script.funic.lang.exception.throwable.FunicRejectException;
+import i2f.extension.antlr4.script.funic.lang.functions.FunicFunctionHelper;
 import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
 import i2f.invokable.method.IMethod;
+import i2f.mixin.MixinProxyFactory;
+import i2f.mixin.impl.*;
+import i2f.mutator.BaseMutator;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -12,13 +25,110 @@ import java.util.function.Predicate;
  * @date 2026/4/23 20:00
  * @desc
  */
-public class SandboxFunicResolver extends DefaultFunicResolver {
+@Data
+@NoArgsConstructor
+public class SandboxFunicResolver extends DefaultFunicResolver implements BaseMutator<SandboxFunicResolver> {
 
-    protected Predicate<String> multilineFeatureFilter;
-    protected Predicate<String> renderPlaceholderExpressFilter;
-    protected Predicate<IMethod> execMethodFilter;
-    protected Predicate<Class<?>> newInstanceFilter;
-    protected Predicate<String> findClassFilter;
+    protected volatile Predicate<String> multilineFeatureFilter = SandboxFunicResolver::isSafeMultilineFeature;
+    protected volatile Predicate<String> renderPlaceholderExpressFilter;
+    protected volatile Predicate<IMethod> execMethodFilter = SandboxFunicResolver::isSafeExecMethod;
+    protected volatile Predicate<Class<?>> newInstanceFilter = SandboxFunicResolver::isSafeClass;
+    protected volatile Predicate<Class<?>> newArrayFilter = SandboxFunicResolver::isSafeClass;
+    protected volatile Predicate<String> findClassFilter = SandboxFunicResolver::isSafeClassName;
+    protected final AtomicBoolean useStaticGlobalMethods = new AtomicBoolean(false);
+    protected final AtomicBoolean useBuiltInGlobalMethods = new AtomicBoolean(false);
+    protected final AtomicBoolean useVisitorRegistryGlobalMethods = new AtomicBoolean(false);
+    protected final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> globalMethods = new ConcurrentHashMap<>();
+
+    public static SandboxFunicResolver createDefault() {
+        SandboxFunicResolver resolver = new SandboxFunicResolver();
+        resolver.resetGlobalMethods();
+        return resolver;
+    }
+
+    public static <T> boolean rejectAll(T obj) {
+        return false;
+    }
+
+    public static boolean isSafeMultilineFeature(String feature) {
+        return Arrays.asList("render", "align", "trim").contains(feature);
+    }
+
+    public static boolean isSafeClassName(String className) {
+        if (DangerousConsts.DEFAULT_DANGEROUS_CLASS_NAMES.contains(className)) {
+            return false;
+        }
+        for (String pkg : DangerousConsts.DEFAULT_DANGEROUS_PACKAGES) {
+            if (className.startsWith(pkg)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static boolean isSafeClass(Class<?> clazz) {
+        String className = clazz.getName();
+        return isSafeClassName(className);
+    }
+
+    public static boolean isSafeExecMethod(IMethod method) {
+        if (DangerousConsts.DEFAULT_GLOBAL_DANGEROUS_METHODS.contains(method.getName())) {
+            return false;
+        }
+        Class<?> clazz = method.getDeclaringClass();
+        if (!isSafeClass(clazz)) {
+            return false;
+        }
+        String name = clazz.getName();
+        Set<String> names = DangerousConsts.DEFAULT_CLASS_DANGEROUS_METHODS.get(name);
+        if (names != null) {
+            if (names.contains(method.getName())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public void resetGlobalMethods() {
+        globalMethods.clear();
+        registryDefaultMethods();
+    }
+
+    public void registryDefaultMethods() {
+        registryMethods(System.out, e -> e.getName().toLowerCase().contains("print"));
+        registryMethods(Math.class, e -> !e.getName().toLowerCase().contains("extra"));
+
+        registryMethods(MixinProxyFactory.getMixinInstance(ArrayMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(CollectionMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(DateMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(MapMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(MatchMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(MathMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(RandomMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(RegexMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(StringMixins.class));
+        registryMethods(MixinProxyFactory.getMixinInstance(UuidMixins.class));
+    }
+
+    public void registryMethods(Object target) {
+        registryMethods(target, null);
+    }
+
+    public void registryMethods(Object target, Predicate<Method> filter) {
+        List<IMethod> methods = FunicFunctionHelper.ofInstanceMethods(target, filter);
+        registryMethods(methods);
+    }
+
+    public void registryMethods(Iterable<? extends IMethod> iterable) {
+        if (iterable == null) {
+            return;
+        }
+        for (IMethod item : iterable) {
+            String name = item.getName();
+            CopyOnWriteArrayList<IMethod> list = globalMethods.computeIfAbsent(name, key -> new CopyOnWriteArrayList<>());
+            list.add(0, item);
+        }
+    }
 
     @Override
     public Object applyMultilineFeature(Object ret, String feature, DefaultFunicVisitor visitor) {
@@ -69,7 +179,10 @@ public class SandboxFunicResolver extends DefaultFunicResolver {
 
     @Override
     public Object newArray(Class<?> elementType, int count, DefaultFunicVisitor visitor) {
-        return super.newArray(elementType, count, visitor);
+        if (newArrayFilter == null || newArrayFilter.test(elementType)) {
+            return super.newArray(elementType, count, visitor);
+        }
+        throw new FunicRejectException("New Array of element type [" + elementType + "] has been reject!");
     }
 
     @Override
@@ -78,6 +191,40 @@ public class SandboxFunicResolver extends DefaultFunicResolver {
             return super.findClass(className, visitor);
         }
         throw new FunicRejectException("Find class [" + className + "] has been reject!");
+    }
+
+    @Override
+    public List<IMethod> getStaticGlobalRegistryMethods(String methodName, DefaultFunicVisitor visitor) {
+        List<IMethod> ret = new ArrayList<>();
+        if (globalMethods != null && !globalMethods.isEmpty()) {
+            List<IMethod> next = globalMethods.get(methodName);
+            if (next != null) {
+                ret.addAll(next);
+            }
+        }
+        if (useStaticGlobalMethods.get()) {
+            List<IMethod> next = super.getStaticGlobalRegistryMethods(methodName, visitor);
+            if (next != null) {
+                ret.addAll(next);
+            }
+        }
+        return ret;
+    }
+
+    @Override
+    public List<IMethod> getVisitorRegistryMethods(String methodName, DefaultFunicVisitor visitor) {
+        if (useVisitorRegistryGlobalMethods.get()) {
+            return super.getVisitorRegistryMethods(methodName, visitor);
+        }
+        return null;
+    }
+
+    @Override
+    public List<IMethod> getBuiltinGlobalMethods(String methodName, DefaultFunicVisitor visitor) {
+        if (useBuiltInGlobalMethods.get()) {
+            return super.getBuiltinGlobalMethods(methodName, visitor);
+        }
+        return null;
     }
 
 }
