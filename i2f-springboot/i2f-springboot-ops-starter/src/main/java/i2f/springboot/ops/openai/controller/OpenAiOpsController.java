@@ -455,6 +455,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     callRet = toolManager.callTool(toolCallRequest);
                                                 } catch (Throwable e) {
                                                     callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
+                                                    log.warn(e.getMessage(), e);
                                                 }
                                                 if (callRet instanceof CharSequence) {
                                                     callRet = String.valueOf(callRet);

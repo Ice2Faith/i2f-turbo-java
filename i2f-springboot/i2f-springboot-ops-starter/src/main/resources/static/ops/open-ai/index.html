@@ -81,10 +81,18 @@
 
     <script src="../lib/common/TextToSpeech.js"></script>
 
+    <link rel="stylesheet" href="../lib/common/back-top-bottom/i2f-back-top-bottom.css"/>
+    <script src="../lib/common/back-top-bottom/i2f-back-top-bottom.js"></script>
+
     <link rel="stylesheet" href="../lib/print-js/1.6.0/print.min.css"/>
     <script src="../lib/print-js/1.6.0/print.min.js"></script>
 <body>
 <div id="app">
+    <span class="i2f-back-top-bottom"
+          style="box-shadow: 2px 2px 5px #444;"
+          top-selector=".scroll-top-mark"
+          bottom-selector=".scroll-bottom-mark"></span>
+
     <!-- 顶部配置栏：鼠标悬浮展开，离开折叠 -->
     <div class="top-config-bar" @mouseenter="metas.showConfig=true" @mouseleave="metas.showConfig=false">
         <div class="top-config-title">
@@ -234,7 +242,8 @@
             <!-- 消息列表 -->
     <div class="message-list center-message-list" id="mainMessageList" ref="messageList"
          @contextmenu.prevent="onContextMenuMessageListPanel">
-        <el-backtop target=".center-message-list" :bottom="180"></el-backtop>
+        <span class="scroll-top-mark" style="width:0;height:0;opacity: 0;"></span>
+
         <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
                     <i class="el-icon-chat-dot-round"></i>
                     <p>发送消息，开始对话</p>
@@ -267,17 +276,17 @@
                     <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
                          class="thinking-content"
                          :class="{
-                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
-                            }"
+                                    'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
+                                    }"
                          :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
                          v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
 
                     </div>
                     <div class="message-content"
                          :class="{
-                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
-                            'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
-                            }"
+                                    'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
+                                    'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
+                                    }"
                          v-html="renderMarkdown(msg[msg.type].content)"></div>
                     <div class="bubble-actions">
                         <el-popover
@@ -293,26 +302,26 @@
                                 total: {{msg.usage.total_tokens}}<br/>
                             </p>
                             <span slot="reference" v-if="msg.usage && msg.usage.total_tokens>=0">
-                                    tokens:
-                                    {{msg.usage.prompt_tokens}} /
-                                    {{msg.usage.completion_tokens}} /
-                                    {{msg.usage.total_tokens}}
-                                </span>
+                                            tokens:
+                                            {{msg.usage.prompt_tokens}} /
+                                            {{msg.usage.completion_tokens}} /
+                                            {{msg.usage.total_tokens}}
+                                        </span>
                         </el-popover>
                         <span class="hover-show-child">
-                                <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
-                                   class="el-icon-circle-close "></i>
-                                <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
-                                   class="el-icon-edit"></i>
-                                <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
-                                   class="el-icon-refresh"></i>
-                                <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
-                                   class="el-icon-copy-document"></i>
-                                <i class="el-icon-microphone"
-                                   v-if="metas.supportTts"
-                                   style="color: orangered;font-size: 14px;"
-                                   @click="onTts(msg)"></i>
-                            </span>
+                                        <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                                           class="el-icon-circle-close "></i>
+                                        <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
+                                           class="el-icon-edit"></i>
+                                        <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                                           class="el-icon-refresh"></i>
+                                        <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                                           class="el-icon-copy-document"></i>
+                                        <i class="el-icon-microphone"
+                                           v-if="metas.supportTts"
+                                           style="color: orangered;font-size: 14px;"
+                                           @click="onTts(msg)"></i>
+                                    </span>
 
                     </div>
                 </div>
@@ -322,16 +331,17 @@
         <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
         <div v-if="currentSession?.sending && !currentSession?.streamingStarted"
              class="message-row message-row-left">
-                    <div class="message-avatar avatar-ai">
-                        <i class="el-icon-cpu"></i>
-                    </div>
-                    <div class="message-bubble bubble-ai">
-                        <div class="message-role-label">助手</div>
-                        <div class="message-content typing">
-                            <span></span><span></span><span></span>
-                        </div>
-                    </div>
+            <div class="message-avatar avatar-ai">
+                <i class="el-icon-cpu"></i>
+            </div>
+            <div class="message-bubble bubble-ai">
+                <div class="message-role-label">助手</div>
+                <div class="message-content typing">
+                    <span></span><span></span><span></span>
                 </div>
+            </div>
+                </div>
+        <span class="scroll-bottom-mark" style="width:0;height:0;opacity: 0;"></span>
             </div>
 
             <!-- 底部输入区 -->
@@ -413,20 +423,31 @@
                     </el-popover>
                     <el-popover placement="top-start"
                                 title="更多选项"
-                                width="480"
+                                width="720"
                                 trigger="hover">
                         <div>
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
                                     如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具。<br/>
                                     此功能需要后端开启 mcp 桥接网关支持。<br/>
+                                <hr/>
+                                <el-tag v-for="(tn,ti) in form.lruToolNames"
+                                        size="mini"
+                                        style="margin-left: 3px;"
+                                        closable
+                                        @close="form.lruToolNames.splice(ti,1)">
+                                    {{tn}}
+                                </el-tag>
+                                <hr/>
+                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
                                 </p>
                                 <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools"
                                              v-model="form.enableLruTools">
                                     动态工具
                                 </el-checkbox>
@@ -434,7 +455,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     语音播报，自动播报助手消息。<br/>
@@ -449,7 +470,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     附加时间，自动为用户消息添加发送时间。<br/>
@@ -463,7 +484,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     知识库，是否允许连接使用知识库。<br/>
@@ -471,6 +492,7 @@
                                     此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
                                 </p>
                                 <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools"
                                              v-model="form.enableRags">
                                     知识库
                                 </el-checkbox>
@@ -478,7 +500,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
@@ -507,7 +529,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
@@ -519,7 +541,7 @@
                             <el-popover
                                     placement="top-start"
                                     title="说明"
-                                    width="320"
+                                    width="480"
                                     trigger="hover">
                                 <p>
                                     输出加密，是否将模型的输出结果进行加密传输。<br/>
@@ -621,12 +643,12 @@
                 total: {{currentSessionTotalUsages.total_tokens}}<br/>
             </p>
             <span slot="reference" v-if="currentSessionTotalUsages">
-                            total: [
-                                    {{currentSessionTotalUsages.prompt_tokens}} /
-                                    {{currentSessionTotalUsages.completion_tokens}} /
-                                    {{currentSessionTotalUsages.total_tokens}}
-                            ]
-                        </span>
+                                        total: [
+                                                {{currentSessionTotalUsages.prompt_tokens}} /
+                                                {{currentSessionTotalUsages.completion_tokens}} /
+                                                {{currentSessionTotalUsages.total_tokens}}
+                                        ]
+                                    </span>
         </el-popover>
         <el-popover
                 v-if="currentSessionVisibleUsages"
@@ -641,16 +663,16 @@
                 total: {{currentSessionVisibleUsages.total_tokens}}<br/>
             </p>
             <span slot="reference" v-if="currentSessionVisibleUsages">
-                            visible: [
-                                {{currentSessionVisibleUsages.prompt_tokens}} /
-                                {{currentSessionVisibleUsages.completion_tokens}} /
-                                {{currentSessionVisibleUsages.total_tokens}}
-                            ]
-                        </span>
+                                        visible: [
+                                            {{currentSessionVisibleUsages.prompt_tokens}} /
+                                            {{currentSessionVisibleUsages.completion_tokens}} /
+                                            {{currentSessionVisibleUsages.total_tokens}}
+                                        ]
+                                    </span>
         </el-popover>
         <span>
-                        会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
-                    </span>
+                                    会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
+                                </span>
     </div>
             </div>
         </div>
