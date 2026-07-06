@@ -543,6 +543,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                 unqToolNames.add(0, item.getName());
                             }
                         }
+
+                        Integer keepSize = req.getLruToolMaxSize();
+                        if (keepSize == null || keepSize < 1) {
+                            keepSize = 20;
+                        }
                         while (unqToolNames.size() > 20) {
                             unqToolNames.removeLast();
                         }
@@ -580,6 +585,19 @@ public class OpenAiOpsController implements IOpsProvider {
                     String url = req.getMeta().getBaseUrl();
                     url = extraStandardBaseUrl(url);
                     url = url + "/chat/completions";
+
+                    if (req.isEnableEchoRequestPayload()) {
+                        String emitPayloadMsg = objectMapper.writeValueAsString(completion);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(emitPayloadMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(emitPayloadMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_REQUEST_PAYLOAD);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+                    }
 
                     HttpRequest.doPost(url)
                             .set(u -> u::json)

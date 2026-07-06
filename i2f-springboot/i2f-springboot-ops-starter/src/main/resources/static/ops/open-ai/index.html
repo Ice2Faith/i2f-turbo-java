@@ -225,7 +225,10 @@
                         @click="selectSession(session.sessionId)"
                 >
                     <el-checkbox v-model="session.checked" style="margin-right: 5px;"></el-checkbox>
-                    <div class="session-title">{{ session.title || '新对话' }}</div>
+                    <div class="session-title"
+                         @contextmenu.prevent="onContextMenuSessionListItem(session)">
+                        {{ session.title || '新对话' }}
+                    </div>
                     <el-button
                             class="session-delete-btn"
                             type="text"
@@ -432,32 +435,6 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
-                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
-                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具。<br/>
-                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
-                                <hr/>
-                                <el-tag v-for="(tn,ti) in form.lruToolNames"
-                                        size="mini"
-                                        style="margin-left: 3px;"
-                                        closable
-                                        @close="form.lruToolNames.splice(ti,1)">
-                                    {{tn}}
-                                </el-tag>
-                                <hr/>
-                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools"
-                                             v-model="form.enableLruTools">
-                                    动态工具
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
                                     语音播报，自动播报助手消息。<br/>
                                     如果开启，将会自动播报助手的答复消息。<br/>
                                 </p>
@@ -479,6 +456,52 @@
                                 </p>
                                 <el-checkbox slot="reference" v-model="form.enableUserSendTime">
                                     附加时间
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    回显请求，将实际发送给LLM大模型的请求报文回显回来。<br/>
+                                    如果开启，后端将会将请求报文回显给前端，前端在[消息列表]页面右键菜单，可以查看请求报文。<br/>
+                                    可以用于学习报文、或者观察实际发送报文是否符合预期。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableEchoRequestPayload">
+                                    回显请求
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
+                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具，并使用LRU策略淘汰最久未使用的工具。<br/>
+                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
+                                <hr/>
+                                <el-tag v-for="(tn,ti) in form.lruToolNames"
+                                        size="mini"
+                                        style="margin-left: 3px;"
+                                        closable
+                                        @close="form.lruToolNames.splice(ti,1)">
+                                    {{tn}}
+                                </el-tag>
+                                <hr/>
+                                最大工具个数：
+                                <el-input-number v-model="form.lruToolMaxSize"
+                                                 size="mini"
+                                                 :min="1"
+                                                 :max="99999"></el-input-number>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools"
+                                             v-model="form.enableLruTools">
+                                    动态工具
                                 </el-checkbox>
                             </el-popover>
                             <el-popover
@@ -966,6 +989,7 @@
                         showConfig: false,
                         supportTts: false,
                         ttsPlaying: false,
+                        echoRequestPayload: {},
                         moreSendMenus: [],
                         loadModelsLoading: false,
                         loadModels: {
@@ -1315,7 +1339,9 @@
                         enableAutoTts: false,
                         toolApprovalList: [],
                         enableLruTools: false,
-                        lruToolNames: []
+                        lruToolMaxSize: 20,
+                        lruToolNames: [],
+                        enableEchoRequestPayload: false,
                     }
                 }
             },
@@ -2236,6 +2262,27 @@
                     minWidth: 180
                 });
             },
+            onContextMenuSessionListItem(session) {
+                this.$contextmenu({
+                    items: [
+                        {
+                            label: `更改标题`,
+                            icon: 'el-icon-edit',
+                            onClick: () => {
+                                this.$prompt('请输入标题', '输入框', {
+                                    confirmButtonText: '确定',
+                                    cancelButtonText: '取消',
+                                }).then(({value}) => {
+                                    session.title = value;
+                                })
+                            }
+                        }
+                    ],
+                    event, // 必须传入 event 以确定位置
+                    zIndex: 3000,
+                    minWidth: 180
+                });
+            },
             onContextMenuMessageListPanel() {
                 let _this = this;
                 this.$contextmenu({
@@ -2304,6 +2351,25 @@
                                 window.print()
 
                             }
+                        },
+                        {label: '', divided: true}, // 分割线
+                        {
+                            label: `请求报文`,
+                            icon: 'el-icon-discover',
+                            onClick: () => {
+
+                                let obj = this.metas.echoRequestPayload;
+                                let text = JSON.stringify(obj, null, '    ');
+
+                                this.dialog.messageEditor.type = 'view';
+                                this.dialog.messageEditor.text = text;
+                                this.dialog.messageEditor.lang = 'javascript';
+                                this.dialog.messageEditor.show = true;
+                                setTimeout(() => {
+                                    this.initMessageEditor();
+                                }, 200)
+                            }
+
                         }
                     ],
                     event, // 必须传入 event 以确定位置
@@ -2562,6 +2628,10 @@
                             _this.form.lruToolNames = json || [];
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'echo_request_payload') {
+                            _this.metas.echoRequestPayload = json || {};
+                            return;
+                        }
 
                         if (json.usage) {
                             // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
@@ -2653,6 +2723,8 @@
                     req.toolApprovalList = this.form.toolApprovalList;
                     req.enableLruTools = this.form.enableLruTools;
                     req.lruToolNames = this.form.lruToolNames;
+                    req.lruToolMaxSize = this.form.lruToolMaxSize;
+                    req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
                     req = this.transferSend(req);
 
                     // 原生 fetch + ReadableStream 解析 SSE
