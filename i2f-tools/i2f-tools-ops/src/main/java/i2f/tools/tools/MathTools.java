@@ -43,15 +43,31 @@ public class MathTools {
             tags = {
                     AiTags.AUTO_VALUE
             },
-            description = "evaluate math expressions; " +
-                    " support `+`,`-`,`*`,`/`,`(`,`)`,`%`(mod double operator, or percent suffix operator) math operators; " +
-                    " support sin(a),cos(a),tan(a),asin(a),acos(a),atan(a),atan2(y,x),sinh(x),cosh(x),tanh(x) trigonometric functions, with arguments in radians; " +
-                    " support the toRadians(a) function to convert angles to radians, and the toDegrees(a) function to convert radians to angles; " +
-                    " support exp(a),log(a),log10(a),sqrt(a),ceil(a),floor(a),round(a),pow(a,b),abs(a),max(a,b),min(a,b) math functions;" +
-                    " support max_of(...numbers),min_of(...numbers),avg_of(...numbers),sum_of(...numbers) multiply arguments math functions"
+            description = "evaluate math expressions; \n" +
+                    " support `+`,`-`,`*`,`/`,`(`,`)`,`%`(mod double operator, or percent suffix operator) math operators; \n" +
+                    " support sin(a),cos(a),tan(a),asin(a),acos(a),atan(a),atan2(y,x),sinh(x),cosh(x),tanh(x) trigonometric functions, with arguments in radians; \n" +
+                    " support the toRadians(a) function to convert angles to radians, and the toDegrees(a) function to convert radians to angles; \n" +
+                    " support exp(a),log(a),log10(a),sqrt(a),ceil(a),floor(a),round(a),pow(a,b),abs(a),max(a,b),min(a,b) math functions;\n" +
+                    " support max_of(...numbers),min_of(...numbers),avg_of(...numbers),sum_of(...numbers) multiply arguments math functions; \n" +
+                    " Note: The ^ operator performs a bitwise XOR, not exponentiation; use the pow function for powers;\n "+
+                    " The expression supports multi-statement composition, \n" +
+                    " with each statement separated by a semicolon. \n" +
+                    " Variables can be used and assigned to directly without prior declaration;\n" +
+                    " undeclared variables will default to null ;\n" +
+                    " Returns the result of the final statement,  \n" +
+                    " for example `a=0;b=1;c=a+b; c/2`.\n" +
+                    " It returns the result of the final statement `c/2`, which evaluates to `(0 + 1)/2` here. \n" +
+                    " To return multiple values, format the expression as a JSON array. For example, `a=1;b=2;[a,b,3]` evaluates to `[1,2,3]`, \n" +
+                    " or use JSON Object likely format. For example `a=1;b=2;{a: a,b: b}` evaluates to `{a: 1,b: 2}`. \n" +
+                    " Supports `for(i=0;i<10;i++){};` and `for(i in [1,2,3]){};` loop statements. \n" +
+                    " Note that the loop body must be wrapped in {}, and the statement must end with a semicolon (i.e., };). \n"+
+                    " for example `arr=[1,2,3];sum=0;for(i=0;i<arr.size();i++){sum+=arr[i];};sum` or `arr=[1,2,3];sum=0;for(i=0;i<arr.size();i++){sum+=arr.get(i);};sum` or `arr=[1,2,3];sum=0;for(i in arr){sum+=i;};sum`\n" +
+                    " support `if(i>0){}else if(i<5){} else {};` condition statements.\n" +
+                    " Note that the condition body must be wrapped in {}, and the statement must end with a semicolon (i.e., };). \n" +
+                    " for example `a=1;if(a>0){a--};a` or `a=1;b=0;if(a>5){b=1;}else{b=0};[a,b]`"
     )
     public List<MathEvalResultItem> eval_math_expression(
-            @ToolParam(value = "expressions", description = "the math expression list, for example [\"1+(2-5)*3/4%6*3.14\"] or [\"sin(toRadians(63))+12.125\",\"sum_of(1,2,3,4,5)\"]")
+            @ToolParam(value = "expressions", description = "the math expression list, for example [\"1+(2-5)*3/4%6*3.14\"] or [\"sin(toRadians(63))+12.125\",\"sum_of(1,2,3,4,5)\"] or [\"a=0;b=1;\nc=2;(a+b)/c\",\"a=1;b=2;\nc=a/b;\nc\"]")
             List<String> expressions) {
         List<MathEvalResultItem> ret = new ArrayList<>();
         for (int i = 0; i < expressions.size(); i++) {
