@@ -177,7 +177,7 @@ public class DefaultFunicResolver implements FunicResolver {
             BigDecimal ret = decimal.divide(new BigDecimal("100"), MATH_CONTEXT);
             return castAsNumberType(ret, value);
         });
-        prefixOperatorFunctionMap.put("++", (value, visitor) -> {
+        suffixOperatorFunctionMap.put("++", (value, visitor) -> {
             value = unwrapSupplierValue(value);
             if (value == null) {
                 throw new FunicThrowException("math incr cannot be null");
@@ -196,7 +196,7 @@ public class DefaultFunicResolver implements FunicResolver {
             BigDecimal ret = num.add(BigDecimal.ONE, MATH_CONTEXT);
             return castAsNumberType(ret, value);
         });
-        prefixOperatorFunctionMap.put("--", (value, visitor) -> {
+        suffixOperatorFunctionMap.put("--", (value, visitor) -> {
             value = unwrapSupplierValue(value);
             if (value == null) {
                 throw new FunicThrowException("math decr cannot be null");
