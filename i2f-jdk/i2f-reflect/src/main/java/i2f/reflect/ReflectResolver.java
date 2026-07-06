@@ -727,10 +727,10 @@ public class ReflectResolver {
             }
             return true;
         });
-        if(constructors==null || constructors.isEmpty()){
+        if (constructors == null || constructors.isEmpty()) {
             try {
-                T ret=getDefaultInstanceForJuc(clazz,args);
-                if(ret!=null){
+                T ret = getDefaultInstanceForJuc(clazz, args);
+                if (ret != null) {
                     return ret;
                 }
             } catch (Exception e) {
@@ -750,10 +750,10 @@ public class ReflectResolver {
         } catch (Throwable e) {
             ex = e;
         }
-        if(!success){
+        if (!success) {
             try {
-                ret=getDefaultInstanceForJuc(clazz,args);
-                if(ret!=null){
+                ret = getDefaultInstanceForJuc(clazz, args);
+                if (ret != null) {
                     return ret;
                 }
             } catch (Exception e) {
@@ -772,48 +772,48 @@ public class ReflectResolver {
         return ret;
     }
 
-    protected static <T> T getDefaultInstanceForJuc(Class<T> clazz,Object ... args){
-        if(Map.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new LinkedHashMap<>();
+    protected static <T> T getDefaultInstanceForJuc(Class<T> clazz, Object... args) {
+        if (Map.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new LinkedHashMap<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Map){
-                    return (T)new LinkedHashMap<>((Map)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Map) {
+                    return (T) new LinkedHashMap<>((Map) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new HashMap<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new HashMap<>((int) args[0]);
                 }
             }
         }
-        if(Set.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new LinkedHashSet<>();
+        if (Set.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new LinkedHashSet<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Collection){
-                    return (T)new LinkedHashSet<>((Collection)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Collection) {
+                    return (T) new LinkedHashSet<>((Collection) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new HashSet<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new HashSet<>((int) args[0]);
                 }
             }
-            return (T)new HashSet<>(Arrays.asList(args));
+            return (T) new HashSet<>(Arrays.asList(args));
         }
-        if(Collection.class.equals(clazz)
-        ||List.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new ArrayList<>();
+        if (Collection.class.equals(clazz)
+                || List.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new ArrayList<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Collection){
-                    return (T)new ArrayList<>((Collection)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Collection) {
+                    return (T) new ArrayList<>((Collection) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new ArrayList<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new ArrayList<>((int) args[0]);
                 }
             }
-            return (T)new ArrayList<>(Arrays.asList(args));
+            return (T) new ArrayList<>(Arrays.asList(args));
         }
         return null;
     }
@@ -1309,35 +1309,29 @@ public class ReflectResolver {
         return valueGet(ivkObj, ivkObj.getClass(), fieldName);
     }
 
-    public static Object valueGet(Object ivkObj, Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
-        Field field = getField(clazz, fieldName);
-        if (field == null) {
-            throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
-        }
-        return valueGet(ivkObj, field);
-    }
-
     public static Object valueGetStatic(Field field) throws IllegalArgumentException, IllegalAccessException {
         return valueGet(null, field);
     }
 
     public static Object valueGet(Object ivkObj, Field field) throws IllegalArgumentException, IllegalAccessException {
-        Method getter = getGetter(field);
+        return valueGet(ivkObj, field.getDeclaringClass(), field.getName());
+    }
+
+    public static Object valueGet(Object ivkObj, Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
+        Method getter = getGetter(clazz, fieldName);
         boolean success = false;
         Object ret = null;
         Throwable ex = null;
         if (!success) {
             try {
                 if (getter != null) {
-                    boolean ok = true;
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        if (ivkObj == null) {
-                            if (!Modifier.isStatic(getter.getModifiers())) {
-                                ok = false;
-                            }
-                        }
+                    if (!Modifier.isPublic(getter.getModifiers())) {
+                        getter.setAccessible(true);
                     }
-                    if (ok) {
+                    if (Modifier.isStatic(getter.getModifiers())) {
+                        ret = getter.invoke(null);
+                        success = true;
+                    } else {
                         ret = getter.invoke(ivkObj);
                         success = true;
                     }
@@ -1348,9 +1342,20 @@ public class ReflectResolver {
         }
         if (!success) {
             try {
-                field.setAccessible(true);
-                ret = field.get(ivkObj);
-                success = true;
+                Field field = getField(clazz, fieldName);
+                if (field == null) {
+                    throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
+                }
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    field.setAccessible(true);
+                }
+                if (Modifier.isStatic(field.getModifiers())) {
+                    ret = field.get(null);
+                    success = true;
+                } else {
+                    ret = field.get(ivkObj);
+                    success = true;
+                }
             } catch (Throwable e) {
                 ex = e;
             }
@@ -1375,36 +1380,31 @@ public class ReflectResolver {
         return valueSet(ivkObj, ivkObj.getClass(), fieldName, value);
     }
 
-    public static Object valueSet(Object ivkObj, Class<?> clazz, String fieldName, Object value) throws IllegalArgumentException, IllegalAccessException {
-        Field field = getField(clazz, fieldName);
-        if (field == null) {
-            throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
-        }
-        return valueSet(ivkObj, field, value);
-    }
 
     public static Object valueSetStatic(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
         return valueSet(null, field, value);
     }
 
     public static Object valueSet(Object ivkObj, Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-        Method setter = getSetter(field);
+        return valueSet(ivkObj, field.getDeclaringClass(), field.getName(), value);
+    }
+
+    public static Object valueSet(Object ivkObj, Class<?> clazz, String fieldName, Object value) throws IllegalArgumentException, IllegalAccessException {
+        Method setter = getSetter(clazz, fieldName);
         boolean success = false;
         Object ret = null;
         Throwable ex = null;
         if (!success) {
             try {
                 if (setter != null) {
-                    boolean ok = true;
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        if (ivkObj == null) {
-                            if (!Modifier.isStatic(setter.getModifiers())) {
-                                ok = false;
-                            }
-                        }
+                    if (!Modifier.isPublic(setter.getModifiers())) {
+                        setter.setAccessible(true);
                     }
-                    if (ok) {
-                        value = ObjectConvertor.tryConvertAsType(value, setter.getParameterTypes()[0]);
+                    value = ObjectConvertor.tryConvertAsType(value, setter.getParameterTypes()[0]);
+                    if (Modifier.isStatic(setter.getModifiers())) {
+                        ret = setter.invoke(null, value);
+                        success = true;
+                    } else {
                         ret = setter.invoke(ivkObj, value);
                         success = true;
                     }
@@ -1415,11 +1415,21 @@ public class ReflectResolver {
         }
         if (!success) {
             try {
-                field.setAccessible(true);
-                ret = field.get(ivkObj);
+                Field field = getField(clazz, fieldName);
+                if (field == null) {
+                    throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
+                }
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    field.setAccessible(true);
+                }
                 value = ObjectConvertor.tryConvertAsType(value, field.getType());
-                field.set(ivkObj, value);
-                success = true;
+                if (Modifier.isStatic(field.getModifiers())) {
+                    field.set(null, value);
+                    success = true;
+                } else {
+                    field.set(ivkObj, value);
+                    success = true;
+                }
             } catch (Throwable e) {
                 ex = e;
             }
@@ -2151,9 +2161,6 @@ public class ReflectResolver {
         if (!Modifier.isPublic(modifiers)) {
             return false;
         }
-        if (Modifier.isStatic(modifiers)) {
-            return false;
-        }
         if (method.getParameterCount() != 0) {
             return false;
         }
@@ -2223,9 +2230,6 @@ public class ReflectResolver {
     public static boolean isSetter(Method method) {
         int modifiers = method.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            return false;
-        }
-        if (Modifier.isStatic(modifiers)) {
             return false;
         }
         if (method.getParameterCount() != 1) {

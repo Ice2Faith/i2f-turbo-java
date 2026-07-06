@@ -5,6 +5,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -44,10 +45,17 @@ public final class MethodHandlesUtil {
                 privateLookupInMethod = MethodHandles.class.getMethod("privateLookupIn", Class.class, MethodHandles.Lookup.class);
 
                 implLookupField = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-                implLookupField.setAccessible(true);
+                try {
+                    // jdk 9+ 之后，这个方法需要添加 JVM 参数： --add-opens java.base/java.lang.invoke=ALL-UNNAMED
+                    // 否则是绝对不会正常的，这里依旧尝试设置，一般不会使用此方式
+                    implLookupField.setAccessible(true);
+                } catch (Exception ex) {
+
+                }
             } catch (ReflectiveOperationException ex) {
                 throw new IllegalStateException("Cannot find Lookup constructor or IMPL_LOOKUP field in current JDK version", ex);
             }
+
             if (implLookupField == null) {
                 throw new IllegalStateException("current JDK version un-support got MethodHandles.Lookup private constructor", e);
             }
@@ -67,12 +75,33 @@ public final class MethodHandlesUtil {
                 // 通过反射创建 Lookup 实例，传入声明该方法的接口类和允许的模式
                 return LOOKUP_CONSTRUCTOR.newInstance(declaringClass, ALLOWED_MODES);
             }
-
             // jdk9+ 使用 privateLookupIn
-            if (PRIVATE_LOOKUP_IN_METHOD != null && IMPL_LOOKUP_FIELD != null) {
-                MethodHandles.Lookup baseLookup = (MethodHandles.Lookup) IMPL_LOOKUP_FIELD.get(null);
-                // 将 IMPL_LOOKUP 的权限降级到目标类，并赋予全部模式
-                return (MethodHandles.Lookup) PRIVATE_LOOKUP_IN_METHOD.invoke(null, declaringClass, baseLookup);
+            if (PRIVATE_LOOKUP_IN_METHOD != null) {
+                try {
+                    // 先进行 jdk9+ 的正常访问
+                    MethodHandles.Lookup baseLookup = MethodHandles.lookup();
+                    // 将 IMPL_LOOKUP 的权限降级到目标类，并赋予全部模式
+                    return (MethodHandles.Lookup) PRIVATE_LOOKUP_IN_METHOD.invoke(null, declaringClass, baseLookup);
+                } catch (InvocationTargetException e) {
+                    Throwable te = e.getTargetException();
+                    // 这里在jdk8中，应该是 ReflectiveOperationException
+                    // 但是jdk17中实际测试，是 java.lang.reflect.InaccessibleObjectException extends RuntimeException
+                    // 因此这里直接判断是否是反射包的报错
+                    if (te.getClass().getName().startsWith("java.lang.reflect.")) {
+                        // 正常访问不行，降级进行暴力反射，这时候就必须要添加 JVM 参数： --add-opens java.base/java.lang.invoke=ALL-UNNAMED
+                        // 一般情况下，不应该走到此分支中
+                        try {
+                            MethodHandles.Lookup baseLookup = (MethodHandles.Lookup) IMPL_LOOKUP_FIELD.get(null);
+                            // 将 IMPL_LOOKUP 的权限降级到目标类，并赋予全部模式
+                            return (MethodHandles.Lookup) PRIVATE_LOOKUP_IN_METHOD.invoke(null, declaringClass, baseLookup);
+                        } catch (Exception ex) {
+                            ex.addSuppressed(te);
+                            throw ex;
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
             }
 
             throw new IllegalStateException("No available method to create Lookup instance");
