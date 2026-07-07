@@ -2734,6 +2734,7 @@
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
                     req = this.transferSend(req);
 
+                    this.$responsing = true;
                     // 原生 fetch + ReadableStream 解析 SSE
                     session.abortController = new AbortController();
                     const response = await fetch('./stream',
@@ -2773,6 +2774,8 @@
                             handleChunk(line.slice(5).trim());
                         }
                     }
+
+                    this.$responsing = false;
 
                     if (!assistantMsg.assistant.content) {
                         assistantMsg.assistant.content = '[未收到任何内容]';
@@ -2861,6 +2864,7 @@
                         assistantMsg.assistant.content = assistantMsg.assistant.content || ('[\u8bf7\u6c42\u9519\u8bef] ' + errMsg);
                     }
                 } finally {
+                    this.$responsing = false;
                     session.sending = false;
                     session.streamingStarted = false;
                     session.abortController = null;
@@ -2989,6 +2993,7 @@
     let request = axios.create(defaultConfig);
     window.app.$axios = request;
     window.app.$tts = new TextToSpeech();
+    window.app.$responsing = false;
     // 初始化 markdown-it
     let md = (typeof markdownit === 'function') ? markdownit({
         html: false,        // 禁止原始 HTML 防止 XSS
@@ -2997,7 +3002,7 @@
         breaks: true,       // \n 转为 <br>
         highlight: function (str, lang) {
 
-            if (lang == 'echarts') {
+            if (lang == 'echarts' && !window.app.$responsing) {
                 let chartId = 'chart_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
                 let text = `<div id="${chartId}" class="echart-code-block"></div>`;
                 let count = 10;
@@ -3009,6 +3014,9 @@
                         return;
                     }
 
+                    if (!dom) {
+                        return;
+                    }
                     dom.chartCode = str;
 
                     let json = str.trim();
