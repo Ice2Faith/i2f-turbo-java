@@ -72,6 +72,9 @@
 
     <link rel="stylesheet" href="../lib/jsoneditor/10.4.1/jsoneditor.min.css"/>
     <script src="../lib/jsoneditor/10.4.1/jsoneditor.min.js"></script>
+
+    <script src="../lib/ses@1.11.0/dist/ses.umd.js"></script>
+    <script src="../lib/common/SesSetup.js"></script>
 </head>
 <body>
 <div id="app">
@@ -1458,39 +1461,6 @@
                     throw ex;
                 }
             },
-            evalWorker(){
-                if (!window.worker) {
-                    window.worker = new Worker(URL.createObjectURL(new Blob([`
-                        self.onmessage = function(e) {
-                            try {
-                                // 使用 Function 构造函数替代 eval，避免闭包污染
-                                const func = new Function(e.data);
-                                const result = func();
-                                postMessage({ success: true, data: result });
-                            } catch (err) {
-                                postMessage({ success: false, error: err.toString() });
-                            }
-                        };
-                    `], {type: 'text/javascript'})));
-                }
-                return window.worker;
-            },
-            eval(code){
-                return new Promise((resolve, reject)=>{
-                    const worker = this.evalWorker();
-
-                    worker.postMessage(code); // 发送代码到 Worker
-
-                    worker.onmessage = function(e) {
-                        const { success, data, error } = e.data;
-                        if (success) {
-                            resolve(data)
-                        } else {
-                            reject(error);
-                        }
-                    };
-                })
-            },
             messageError(msg,limit){
                 window._lastError=msg;
                 if(limit && limit>=0) {
@@ -1636,7 +1606,7 @@
             doExecute() {
                 this.metas.resultLoading = true;
                 try {
-                    this.eval('return '+this.form.params)
+                    ses_eval('return ' + this.form.params)
                         .then(params=>{
                             let req = this.assignHostId({
                                 procedureId: this.form.procedureId,
