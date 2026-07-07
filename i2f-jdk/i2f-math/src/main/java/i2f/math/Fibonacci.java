@@ -21,12 +21,15 @@ public class Fibonacci {
         if (i < 0) {
             return NEG_ONE;
         }
+        if (i == 0) {
+            return BigInteger.ZERO;
+        }
         if (i >= 0 && i < nums.length) {
             if (nums[i].compareTo(BigInteger.ZERO) > 0) {
                 return nums[i];
             }
         }
-        if (i == 0 || i == 1) {
+        if (i == 1 || i == 2) {
             nums[i] = BigInteger.ONE;
             return nums[i];
         }
