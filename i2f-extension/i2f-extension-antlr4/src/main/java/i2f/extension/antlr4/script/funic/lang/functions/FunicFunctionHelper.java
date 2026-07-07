@@ -95,6 +95,9 @@ public class FunicFunctionHelper {
     }
 
     public static List<IMethod> ofInstanceMethods(Object target, Predicate<Method> filter) {
+        if (target instanceof Class) {
+            return ofMethods((Class<?>) target, filter);
+        }
         List<IMethod> ret = new ArrayList<>();
         if (target == null) {
             return ret;

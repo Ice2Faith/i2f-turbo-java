@@ -246,7 +246,7 @@ public class DefaultFunicResolver implements FunicResolver {
             BigDecimal ret = lv.divide(rv, MATH_CONTEXT);
             return castAsNumberType(ret, leftValue, rightValue);
         });
-        doubleOperatorFunctionMap.put("//", (leftValue, rightValue, visitor) -> {
+        doubleOperatorFunctionMap.put("\\", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
             rightValue = unwrapSupplierValue(rightValue);
             if (leftValue == null) {

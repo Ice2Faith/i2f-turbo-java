@@ -656,7 +656,7 @@ public class MathUtil {
      * @return
      */
     public static long fibonacci(int i) {
-        return Fibonacci.get(i);
+        return Fibonacci.get(i).longValue();
     }
 
     /**

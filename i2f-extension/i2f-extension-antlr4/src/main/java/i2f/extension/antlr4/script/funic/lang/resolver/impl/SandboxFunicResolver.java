@@ -119,6 +119,15 @@ public class SandboxFunicResolver extends DefaultFunicResolver implements BaseMu
         registryMethods(methods);
     }
 
+    public void registryMethods(Class<?> clazz) {
+        registryMethods(clazz, null);
+    }
+
+    public void registryMethods(Class<?> clazz, Predicate<Method> filter) {
+        List<IMethod> methods = FunicFunctionHelper.ofMethods(clazz, filter);
+        registryMethods(methods);
+    }
+
     public void registryMethods(Iterable<? extends IMethod> iterable) {
         if (iterable == null) {
             return;

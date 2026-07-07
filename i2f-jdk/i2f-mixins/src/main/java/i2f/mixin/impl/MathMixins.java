@@ -2,10 +2,14 @@ package i2f.mixin.impl;
 
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.math.Factorial;
+import i2f.math.Fibonacci;
+import i2f.math.HexNumberConverter;
 import i2f.mixin.consts.MixinConsts;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.Arrays;
 
 /**
  * @author Ice2Faith
@@ -415,7 +419,78 @@ public interface MathMixins {
         return ObjectConvertor.tryConvertAsType(obj, number.getClass());
     }
 
+    default double from_radix(Object hex, Integer radix) {
+        if (hex == null) {
+            throw new IllegalArgumentException("hex to number require text.");
+        }
+        if (radix == null) {
+            throw new IllegalArgumentException("hex to number require radix.");
+        }
+        double ret = HexNumberConverter.hex2number(String.valueOf(hex), radix);
+        return ret;
+    }
+
+    default String to_radix(Object number, Integer radix) {
+        if (number == null) {
+            throw new IllegalArgumentException("hex to number require text.");
+        }
+        if (radix == null) {
+            throw new IllegalArgumentException("hex to number require radix.");
+        }
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+        BigDecimal obj = (BigDecimal) num;
+        double val = obj.doubleValue();
+        return HexNumberConverter.number2hex(val, radix, 20);
+    }
+
+    default Object to_radians(Object number) {
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+        BigDecimal obj = (BigDecimal) num;
+        double ret = Math.toRadians(obj.doubleValue());
+        return ObjectConvertor.tryConvertAsType(ret, number.getClass());
+    }
+
+    default Object to_degrees(Object number) {
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+        BigDecimal obj = (BigDecimal) num;
+        double ret = Math.toDegrees(obj.doubleValue());
+        return ObjectConvertor.tryConvertAsType(ret, number.getClass());
+    }
+
+    default BigInteger fibonacci(Object number) {
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+        BigDecimal obj = (BigDecimal) num;
+        BigInteger ret = Fibonacci.get(obj.intValue());
+        return ret;
+    }
+
+    default BigInteger factorial(Object number) {
+        Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
+        if (!(num instanceof BigDecimal)) {
+            throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
+        }
+        BigDecimal obj = (BigDecimal) num;
+        BigInteger ret = Factorial.get(obj.intValue());
+        return ret;
+    }
+
     default Object max_of(Object... numbers) {
+        return max_of(Arrays.asList(numbers));
+    }
+
+    default Object max_of(Iterable<?> numbers) {
         BigDecimal ret = null;
         Object firstNumber = null;
         for (Object number : numbers) {
@@ -448,6 +523,10 @@ public interface MathMixins {
     }
 
     default Object min_of(Object... numbers) {
+        return min_of(Arrays.asList(numbers));
+    }
+
+    default Object min_of(Iterable<?> numbers) {
         BigDecimal ret = null;
         Object firstNumber = null;
         for (Object number : numbers) {
@@ -480,9 +559,15 @@ public interface MathMixins {
     }
 
     default Object avg_of(Object... numbers) {
+        return avg_of(Arrays.asList(numbers));
+    }
+
+    default Object avg_of(Iterable<?> numbers) {
         BigDecimal sum = BigDecimal.ZERO;
         Object firstNumber = null;
+        int length = 0;
         for (Object number : numbers) {
+            length++;
             if (number == null) {
                 continue;
             }
@@ -497,7 +582,7 @@ public interface MathMixins {
             sum = sum.add(item);
         }
 
-        BigDecimal ret = sum.divide(BigDecimal.valueOf(numbers.length), MixinConsts.MATH_CONTEXT);
+        BigDecimal ret = sum.divide(BigDecimal.valueOf(length), MixinConsts.MATH_CONTEXT);
         if (firstNumber == null) {
             return ret;
         }
@@ -505,6 +590,10 @@ public interface MathMixins {
     }
 
     default Object sum_of(Object... numbers) {
+        return sum_of(Arrays.asList(numbers));
+    }
+
+    default Object sum_of(Iterable<?> numbers) {
         BigDecimal sum = BigDecimal.ZERO;
         Object firstNumber = null;
         for (Object number : numbers) {

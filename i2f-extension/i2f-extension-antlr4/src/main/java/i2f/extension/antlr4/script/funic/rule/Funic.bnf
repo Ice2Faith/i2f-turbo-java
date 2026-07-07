@@ -149,7 +149,7 @@
     OP_DIAMOND_NAME_R='?>';
 
     OP_MUL='*';
-    OP_INT_DIV='//';
+    OP_INT_DIV='\\';
     OP_DIV='/';
     OP_MOD='%';
     OP_INCR='++';

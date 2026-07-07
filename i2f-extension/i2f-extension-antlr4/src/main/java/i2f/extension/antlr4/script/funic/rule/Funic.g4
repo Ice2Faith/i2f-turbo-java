@@ -266,7 +266,7 @@ mathAddSubOperatorPart:
 ;
 
 mathMulDivOperatorPart:
-    ('*' | '//' | '/' | '%')
+    ('*' | '\\' | '/' | '%')
 ;
 
 incrDecrPrefixOperatorPart:
