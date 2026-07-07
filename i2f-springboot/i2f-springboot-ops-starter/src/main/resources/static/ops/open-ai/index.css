@@ -657,6 +657,12 @@ html, body {
 
 }
 
+.echart-code-block {
+    width: 100%;
+    height: 320px;
+    background: white;
+}
+
 /**
  * style for print action
  */
@@ -712,5 +718,9 @@ html, body {
     .tool-message-content {
         height: unset;
         overflow: unset;
+    }
+
+    .echart-code-block {
+        width: 480px;
     }
 }

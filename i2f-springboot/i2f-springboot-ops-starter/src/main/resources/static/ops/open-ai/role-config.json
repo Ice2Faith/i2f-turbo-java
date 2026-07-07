@@ -24,6 +24,11 @@
     "url": "./role-unicode-emoji.md"
   },
   {
+    "label": "Echarts图表绘制",
+    "icon": "el-icon-pie-chart",
+    "url": "./role-echarts-painter.md"
+  },
+  {
     "label": "易学命理大师",
     "icon": "el-icon-discover",
     "url": "./role-sizubazi.md"
