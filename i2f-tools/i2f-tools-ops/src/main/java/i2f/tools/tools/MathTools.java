@@ -93,7 +93,7 @@ public class MathTools {
                 item.setResult(val);
             } catch (Exception e) {
                 item.setSuccess(false);
-                item.setErrorMessage("evaluate expression error, " + e.getClass() + " : " + e.getMessage());
+                item.setErrorMessage("evaluate expression error, maybe your variable/function name is internal reserved keywords or block not end with '};', " + e.getClass() + " : " + e.getMessage());
             }
         }
 
