@@ -55,7 +55,7 @@ public class MathTools {
                     "- Return JSON `[a,b]` or `{a:1}` for multiples.\n" +
                     "- allow `//`,`/**/` comment, allow line sep.\n" +
                     "Ops: \n" +
-                    "- `+,-,*,/,%,()` for normal, `~,&,|,^,>>,<<,>>>` for bitwise,`==,!=,>,<,>=,<=,et,ne,gt,lt,gte,lte,in,not in` for compare, `||,&&,!,and,or,not` for logic. \n" +
+                    "- `+,-,*,/,%,()` for normal, `~,&,|,^,>>,<<,>>>` for bitwise,`==,!=,>,<,>=,<=,eq,ne,gt,lt,gte,lte,in,not in` for compare, `||,&&,!,and,or,not` for logic. \n" +
                     "- Note: `^`=XOR, use `pow(a,b)` for powers.\n" +
                     "Strings: `\"` or `'`. Escape same-type quotes only. `+` concatenates (coerces to string), support Java String methods (e.g., `indexOf()`). \n" +
                     "Funcs:\n" +
