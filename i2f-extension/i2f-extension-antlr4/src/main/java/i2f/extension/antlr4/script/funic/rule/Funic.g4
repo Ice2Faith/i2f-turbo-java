@@ -218,7 +218,8 @@ express:
     | express mathAddSubOperatorPart express // 数学加减运算；数学运算，需要从左到右，因此不能提取为子规则
     | express castAsRightPart // 类型转换
     | express compareOperatorPart express // 比较运算符
-    | express logicalLinkOperatorPart express // 逻辑连接符
+    | express logicalLinkHighOperatorPart express // 逻辑连接符
+    | express logicalLinkLowOperatorPart express // 逻辑连接符
     | express bitOperatorPart  express // 位运算符号；数学运算，需要从左到右，因此不能提取为子规则
     | listValueExpress // 列表表达式
     | mapValueExpress // 映射表达式
@@ -248,10 +249,13 @@ extractPair:
     (express) (':' (express))?
     ;
 
-logicalLinkOperatorPart:
-    ('&&' | KW_AND | '||' | KW_OR )
+logicalLinkHighOperatorPart:
+    ('&&' | KW_AND)
 ;
 
+logicalLinkLowOperatorPart:
+    ('||' | KW_OR )
+;
 
 compareOperatorPart:
     ('===' | KW_TEQ | '!==' | KW_TNEQ | '>' | KW_GT | '>=' | KW_GTE | '<' | KW_LT | '<=' | KW_LTE | '==' | KW_EQ | '!=' | '<>' | KW_NEQ | KW_NE | KW_IN | (KW_NOT KW_IN) | KW_INSTANCEOF | KW_IS )

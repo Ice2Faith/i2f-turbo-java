@@ -341,9 +341,27 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                                 .set(u -> u::setValue, ret)
                                 .done();
                     }
-                    if (second instanceof FunicParser.LogicalLinkOperatorPartContext) {
-                        FunicParser.LogicalLinkOperatorPartContext secondCtx = (FunicParser.LogicalLinkOperatorPartContext) second;
-                        ListFunicValue secondValue = (ListFunicValue) visitLogicalLinkOperatorPart(secondCtx);
+                    if (second instanceof FunicParser.LogicalLinkHighOperatorPartContext) {
+                        FunicParser.LogicalLinkHighOperatorPartContext secondCtx = (FunicParser.LogicalLinkHighOperatorPartContext) second;
+                        ListFunicValue secondValue = (ListFunicValue) visitLogicalLinkHighOperatorPart(secondCtx);
+                        String operator = (String) secondValue.getList().get(0);
+
+                        FunicSupplier<Object> rightSupplier = () -> {
+                            FunicParser.ExpressContext rightCtx = (FunicParser.ExpressContext) ctx.getChild(2);
+                            FunicValue rightValue = visitExpress(rightCtx);
+
+                            Object value = rightValue.get();
+                            return value;
+                        };
+                        Object ret = resolver.doubleOperator(firstValue.get(), operator, rightSupplier, this);
+                        return new DefaultFunicValue().toMutator()
+                                .set(u -> u::setNode, ctx)
+                                .set(u -> u::setValue, ret)
+                                .done();
+                    }
+                    if (second instanceof FunicParser.LogicalLinkLowOperatorPartContext) {
+                        FunicParser.LogicalLinkLowOperatorPartContext secondCtx = (FunicParser.LogicalLinkLowOperatorPartContext) second;
+                        ListFunicValue secondValue = (ListFunicValue) visitLogicalLinkLowOperatorPart(secondCtx);
                         String operator = (String) secondValue.getList().get(0);
 
                         FunicSupplier<Object> rightSupplier = () -> {
@@ -741,7 +759,21 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
     }
 
     @Override
-    public FunicValue visitLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
+    public FunicValue visitLogicalLinkHighOperatorPart(FunicParser.LogicalLinkHighOperatorPartContext ctx) {
+        try {
+            debugNode(ctx);
+            ListFunicValue listValue = (ListFunicValue) getOperatorsNode(ctx);
+            return listValue;
+        } catch (Throwable e) {
+            if (e instanceof FunicException) {
+                throw (FunicException) e;
+            }
+            throw new FunicEvaluateException(getTreeLocationText("location ", ctx, " ") + "cause by: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public FunicValue visitLogicalLinkLowOperatorPart(FunicParser.LogicalLinkLowOperatorPartContext ctx) {
         try {
             debugNode(ctx);
             ListFunicValue listValue = (ListFunicValue) getOperatorsNode(ctx);

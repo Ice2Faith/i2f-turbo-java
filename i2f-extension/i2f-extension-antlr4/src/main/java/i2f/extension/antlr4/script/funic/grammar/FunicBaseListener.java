@@ -146,7 +146,7 @@ public class FunicBaseListener implements FunicListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void enterLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
+    public void enterLogicalLinkHighOperatorPart(FunicParser.LogicalLinkHighOperatorPartContext ctx) {
     }
 
     /**
@@ -155,7 +155,25 @@ public class FunicBaseListener implements FunicListener {
      * <p>The default implementation does nothing.</p>
      */
     @Override
-    public void exitLogicalLinkOperatorPart(FunicParser.LogicalLinkOperatorPartContext ctx) {
+    public void exitLogicalLinkHighOperatorPart(FunicParser.LogicalLinkHighOperatorPartContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void enterLogicalLinkLowOperatorPart(FunicParser.LogicalLinkLowOperatorPartContext ctx) {
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The default implementation does nothing.</p>
+     */
+    @Override
+    public void exitLogicalLinkLowOperatorPart(FunicParser.LogicalLinkLowOperatorPartContext ctx) {
     }
 
     /**
