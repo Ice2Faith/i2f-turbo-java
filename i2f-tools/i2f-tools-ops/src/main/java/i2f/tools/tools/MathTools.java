@@ -4,6 +4,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
@@ -14,7 +15,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -27,7 +30,9 @@ import java.util.List;
 @Component
 @Tools
 public class MathTools {
-    private static final FunicResolver resolver = SandboxFunicResolver.createDefault();
+    private static final FunicResolver resolver = SandboxFunicResolver.createDefault().toMutator()
+            .apply(u->{u.getUseVisitorRegistryGlobalMethods().set(true);})
+            .done();
 
     @Data
     @NoArgsConstructor
@@ -43,31 +48,33 @@ public class MathTools {
             tags = {
                     AiTags.AUTO_VALUE
             },
-            description = "evaluate math expressions; \n" +
-                    " support `+`,`-`,`*`,`/`,`(`,`)`,`%`(mod double operator, or percent suffix operator) math operators; \n" +
-                    " support sin(a),cos(a),tan(a),asin(a),acos(a),atan(a),atan2(y,x),sinh(x),cosh(x),tanh(x) trigonometric functions, with arguments in radians; \n" +
-                    " support the toRadians(a) function to convert angles to radians, and the toDegrees(a) function to convert radians to angles; \n" +
-                    " support exp(a),log(a),log10(a),sqrt(a),ceil(a),floor(a),round(a),pow(a,b),abs(a),max(a,b),min(a,b) math functions;\n" +
-                    " support max_of(...numbers),min_of(...numbers),avg_of(...numbers),sum_of(...numbers) multiply arguments math functions; \n" +
-                    " Note: The ^ operator performs a bitwise XOR, not exponentiation; use the pow function for powers;\n "+
-                    " The expression supports multi-statement composition, \n" +
-                    " with each statement separated by a semicolon. \n" +
-                    " Variables can be used and assigned to directly without prior declaration;\n" +
-                    " undeclared variables will default to null ;\n" +
-                    " Returns the result of the final statement,  \n" +
-                    " for example `a=0;b=1;c=a+b; c/2`.\n" +
-                    " It returns the result of the final statement `c/2`, which evaluates to `(0 + 1)/2` here. \n" +
-                    " To return multiple values, format the expression as a JSON array. For example, `a=1;b=2;[a,b,3]` evaluates to `[1,2,3]`, \n" +
-                    " or use JSON Object likely format. For example `a=1;b=2;{a: a,b: b}` evaluates to `{a: 1,b: 2}`. \n" +
-                    " Supports `for(i=0;i<10;i++){};` and `for(i in [1,2,3]){};` loop statements. \n" +
-                    " Note that the loop body must be wrapped in {}, and the statement must end with a semicolon (i.e., };). \n"+
-                    " for example `arr=[1,2,3];sum=0;for(i=0;i<arr.size();i++){sum+=arr[i];};sum` or `arr=[1,2,3];sum=0;for(i=0;i<arr.size();i++){sum+=arr.get(i);};sum` or `arr=[1,2,3];sum=0;for(i in arr){sum+=i;};sum`\n" +
-                    " support `if(i>0){}else if(i<5){} else {};` condition statements.\n" +
-                    " Note that the condition body must be wrapped in {}, and the statement must end with a semicolon (i.e., };). \n" +
-                    " for example `a=1;if(a>0){a--};a` or `a=1;b=0;if(a>5){b=1;}else{b=0};[a,b]`"
+            /*language=markdown*/
+            description = "Math/logic evaluator (BigDecimal/BigInteger).\n" +
+                    "- Multi-statements via `;` (returns final).\n" +
+                    "- Vars auto-declare (null).\n" +
+                    "- Return JSON `[a,b]` or `{a:1}` for multiples.\n" +
+                    "- allow `//`,`/**/` comment, allow line sep.\n" +
+                    "Ops: `+,-,*,/,%,()` for normal, `~,&,|,^,>>,<<,>>>` for bitwise. Note: `^`=XOR, use `pow(a,b)` for powers.\n" +
+                    "Strings: `\"` or `'`. Escape same-type quotes only. `+` concatenates (coerces to string), support Java String methods (e.g., `substring()`,`indexOf()`). \n" +
+                    "Funcs:\n" +
+                    "- Trig(rad): sin,cos,tan,asin,acos,atan,atan2,sinh,cosh,tanh,to_radians,to_degrees.\n" +
+                    "- Math: exp,log,log10,sqrt,ceil,floor,round,pow,abs,max,min.\n" +
+                    "- Aggregates(arr/args): max_of,min_of,avg_of,sum_of.\n" +
+                    "- Radix(2-36): from_radix(text,radix),to_radix(num,radix).\n" +
+                    "- Misc: fibonacci(n),factorial(n).\n" +
+                    "- Oracle-compat(lowercase): numbers,strings,regex category functions(e.g., `trunc()`,`ltrim()`,`regexp_like()`). `substr` is 0-based.\n" +
+                    "Control: \n" +
+                    "- `for(i=0;i<n;i++){...};` or `for(i in arr){...};` (continue/break, no labels).\n" +
+                    "- `if(cond){...}else if{...}else{...};`. \n" +
+                    "- `def add(a,b){...};` (udf, declare before use, no embed, overload by args cnt, return one). \n" +
+                    "    - Strict isolation: outer var `a` to function inside `global.a`, outer not has `global`.\n" +
+                    "- Blocks need `{}`, stmts must end with `;`.\n" +
+                    "Collections:\n" +
+                    "- JSON arrays/objects support Java ArrayList/HashMap methods (e.g., `add()`,`put()`,`get()`). \n" +
+                    "- Direct access: `arr[index]` (get/set), `map.name` (get/put)."
     )
     public List<MathEvalResultItem> eval_math_expression(
-            @ToolParam(value = "expressions", description = "the math expression list, for example [\"1+(2-5)*3/4%6*3.14\"] or [\"sin(toRadians(63))+12.125\",\"sum_of(1,2,3,4,5)\"] or [\"a=0;b=1;\nc=2;(a+b)/c\",\"a=1;b=2;\nc=a/b;\nc\"]")
+            @ToolParam(value = "expressions", description = "the math expression list, for example [\"1+(2-5)*3/4%6*3.14\"] or [\"sin(to_radians(63))+12.125\",\"sum_of(1,2,3,4,5)\"] or [\"a=0;b=1;\nc=2;(a+b)/c\",\"a=1;b=2;\nc=a/b;\nc\"]")
             List<String> expressions) {
         List<MathEvalResultItem> ret = new ArrayList<>();
         for (int i = 0; i < expressions.size(); i++) {
@@ -91,5 +98,6 @@ public class MathTools {
         return ret;
 
     }
+
 
 }
