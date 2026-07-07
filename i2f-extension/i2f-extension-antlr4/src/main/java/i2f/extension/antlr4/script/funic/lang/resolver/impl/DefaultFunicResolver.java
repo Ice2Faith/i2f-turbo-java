@@ -1160,67 +1160,11 @@ public class DefaultFunicResolver implements FunicResolver {
     }
 
     public Object castAsNumberType(Object value, Object sourceType) {
-        if (value == null) {
-            return null;
-        }
-        if (sourceType == null) {
-            return value;
-        }
-        Class<?> valueClass = value.getClass();
-        Class<?> sourceClass = sourceType.getClass();
-        Object ret = ObjectConvertor.tryConvertAsType(value, sourceClass);
-        if (TypeOf.instanceOf(ret, sourceClass)) {
-            if (new BigDecimal(String.valueOf(value)).compareTo(new BigDecimal(String.valueOf(ret))) == 0) {
-                return ret;
-            }
-        }
-        return value;
+        return ObjectConvertor.safeConvertAsNumberType(value, sourceType);
     }
 
     public Object castAsNumberType(Object value, Object leftSourceType, Object rightSourceType) {
-        if (value == null) {
-            return null;
-        }
-        if (leftSourceType == null && rightSourceType == null) {
-            return value;
-        }
-        if (leftSourceType != null && rightSourceType != null) {
-            if (TypeOf.instanceOf(leftSourceType, BigDecimal.class)) {
-                return castAsNumberType(value, leftSourceType);
-            }
-            if (TypeOf.instanceOf(rightSourceType, BigDecimal.class)) {
-                return castAsNumberType(value, rightSourceType);
-            }
-            if (TypeOf.instanceOf(leftSourceType, BigInteger.class)) {
-                if (TypeOf.typeOfAny(rightSourceType.getClass(), float.class, Float.class, double.class, Double.class)) {
-                    return castAsNumberType(value, BigDecimal.ONE);
-                }
-                return castAsNumberType(value, BigInteger.ONE);
-            }
-            if (TypeOf.instanceOf(rightSourceType, BigInteger.class)) {
-                if (TypeOf.typeOfAny(leftSourceType.getClass(), float.class, Float.class, double.class, Double.class)) {
-                    return castAsNumberType(value, BigDecimal.ONE);
-                }
-                return castAsNumberType(value, BigInteger.ONE);
-            }
-            if (TypeOf.typeOfAny(leftSourceType.getClass(), float.class, Float.class, double.class, Double.class) || TypeOf.typeOfAny(rightSourceType.getClass(), float.class, Float.class, double.class, Double.class)) {
-                double ref = 1.0;
-                return castAsNumberType(value, ref);
-            }
-            if (TypeOf.typeOfAny(leftSourceType.getClass(), long.class, Long.class) || TypeOf.typeOfAny(rightSourceType.getClass(), long.class, Long.class)) {
-                long ref = 1L;
-                return castAsNumberType(value, ref);
-            }
-            if (TypeOf.typeOfAny(leftSourceType.getClass(), int.class, Integer.class) || TypeOf.typeOfAny(rightSourceType.getClass(), int.class, Integer.class)) {
-                int ref = 1;
-                return castAsNumberType(value, ref);
-            }
-            return castAsNumberType(value, BigDecimal.ONE);
-        } else if (leftSourceType != null) {
-            return castAsNumberType(value, leftSourceType);
-        } else {
-            return castAsNumberType(value, rightSourceType);
-        }
+        return ObjectConvertor.safeConvertAsNumberType(value, leftSourceType, rightSourceType);
     }
 
     @Override

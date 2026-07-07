@@ -66,7 +66,7 @@ public interface MathMixins {
         BigDecimal obj = (BigDecimal) num;
         obj = obj.negate(MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(obj, number);
     }
 
     default Object abs(Object number) {
@@ -81,7 +81,7 @@ public interface MathMixins {
         BigDecimal obj = (BigDecimal) num;
         obj = obj.abs(MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(obj, number);
     }
 
     default Object ln(Object number) {
@@ -96,7 +96,7 @@ public interface MathMixins {
         BigDecimal obj = (BigDecimal) num;
         obj = BigDecimal.valueOf(Math.log(obj.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(obj, number);
     }
 
     default Object add(Object number1, Object number2) {
@@ -119,7 +119,7 @@ public interface MathMixins {
         BigDecimal b2 = (BigDecimal) num2;
         b1 = b1.add(b2, MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object sub(Object number1, Object number2) {
@@ -142,7 +142,7 @@ public interface MathMixins {
         BigDecimal b2 = (BigDecimal) num2;
         b1 = b1.subtract(b2, MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object mul(Object number1, Object number2) {
@@ -165,7 +165,7 @@ public interface MathMixins {
         BigDecimal b2 = (BigDecimal) num2;
         b1 = b1.multiply(b2, MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object div(Object number1, Object number2) {
@@ -188,7 +188,7 @@ public interface MathMixins {
         BigDecimal b2 = (BigDecimal) num2;
         b1 = b1.divide(b2, MixinConsts.MATH_CONTEXT);
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object mod(Object number1, Object number2) {
@@ -211,7 +211,7 @@ public interface MathMixins {
         BigInteger b2 = (BigInteger) num2;
         b1 = b1.mod(b2);
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object pow(Object number1, Object number2) {
@@ -234,7 +234,7 @@ public interface MathMixins {
         BigDecimal b2 = (BigDecimal) num2;
         b1 = BigDecimal.valueOf(Math.pow(b1.doubleValue(), b2.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1, number2);
     }
 
     default Object sin(Object number1) {
@@ -250,7 +250,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.sin(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object cos(Object number1) {
@@ -266,7 +266,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.cos(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object tan(Object number1) {
@@ -282,7 +282,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.tan(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object asin(Object number1) {
@@ -298,7 +298,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.asin(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object acos(Object number1) {
@@ -314,7 +314,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.acos(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object atan(Object number1) {
@@ -330,7 +330,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.atan(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object sqrt(Object number1) {
@@ -346,7 +346,7 @@ public interface MathMixins {
         BigDecimal b1 = (BigDecimal) num1;
         b1 = BigDecimal.valueOf(Math.sqrt(b1.doubleValue()));
 
-        return ObjectConvertor.tryConvertAsType(b1, number1.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(b1, number1);
     }
 
     default Object round(Object number) {
@@ -383,7 +383,7 @@ public interface MathMixins {
             obj = obj.multiply(scale, MixinConsts.MATH_CONTEXT);
         }
 
-        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(obj, number);
     }
 
     default Object trunc(Object number, Integer precision) {
@@ -416,7 +416,7 @@ public interface MathMixins {
             obj = obj.multiply(scale, MixinConsts.MATH_CONTEXT);
         }
 
-        return ObjectConvertor.tryConvertAsType(obj, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(obj, number);
     }
 
     default double from_radix(Object hex, Integer radix) {
@@ -453,7 +453,7 @@ public interface MathMixins {
         }
         BigDecimal obj = (BigDecimal) num;
         double ret = Math.toRadians(obj.doubleValue());
-        return ObjectConvertor.tryConvertAsType(ret, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(BigDecimal.valueOf(ret), number);
     }
 
     default Object to_degrees(Object number) {
@@ -463,27 +463,27 @@ public interface MathMixins {
         }
         BigDecimal obj = (BigDecimal) num;
         double ret = Math.toDegrees(obj.doubleValue());
-        return ObjectConvertor.tryConvertAsType(ret, number.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(BigDecimal.valueOf(ret), number);
     }
 
-    default BigInteger fibonacci(Object number) {
+    default Object fibonacci(Object number) {
         Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
         if (!(num instanceof BigDecimal)) {
             throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
         }
         BigDecimal obj = (BigDecimal) num;
         BigInteger ret = Fibonacci.get(obj.intValue());
-        return ret;
+        return ObjectConvertor.safeConvertAsNumberType(ret, number);
     }
 
-    default BigInteger factorial(Object number) {
+    default Object factorial(Object number) {
         Object num = ObjectConvertor.tryConvertAsType(number, BigDecimal.class);
         if (!(num instanceof BigDecimal)) {
             throw new IllegalArgumentException("number cannot cast as number type, of type :" + number.getClass());
         }
         BigDecimal obj = (BigDecimal) num;
         BigInteger ret = Factorial.get(obj.intValue());
-        return ret;
+        return ObjectConvertor.safeConvertAsNumberType(ret, number);
     }
 
     default Object max_of(Object... numbers) {
@@ -492,6 +492,7 @@ public interface MathMixins {
 
     default Object max_of(Iterable<?> numbers) {
         BigDecimal ret = null;
+        Object originRet = null;
         Object firstNumber = null;
         for (Object number : numbers) {
             if (number == null) {
@@ -507,19 +508,21 @@ public interface MathMixins {
             BigDecimal item = (BigDecimal) num;
             if (ret == null) {
                 ret = item;
+                originRet = number;
             } else {
                 if (ret.compareTo(item) < 0) {
                     ret = item;
+                    originRet = number;
                 }
             }
         }
-        if (ret == null) {
+        if (originRet == null) {
             return null;
         }
         if (firstNumber == null) {
             return ret;
         }
-        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+        return originRet;
     }
 
     default Object min_of(Object... numbers) {
@@ -528,6 +531,7 @@ public interface MathMixins {
 
     default Object min_of(Iterable<?> numbers) {
         BigDecimal ret = null;
+        Object originRet = null;
         Object firstNumber = null;
         for (Object number : numbers) {
             if (number == null) {
@@ -543,19 +547,21 @@ public interface MathMixins {
             BigDecimal item = (BigDecimal) num;
             if (ret == null) {
                 ret = item;
+                originRet = number;
             } else {
                 if (ret.compareTo(item) > 0) {
                     ret = item;
+                    originRet = item;
                 }
             }
         }
-        if (ret == null) {
+        if (originRet == null) {
             return null;
         }
         if (firstNumber == null) {
             return ret;
         }
-        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+        return originRet;
     }
 
     default Object avg_of(Object... numbers) {
@@ -586,7 +592,7 @@ public interface MathMixins {
         if (firstNumber == null) {
             return ret;
         }
-        return ObjectConvertor.tryConvertAsType(ret, firstNumber.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(ret, firstNumber);
     }
 
     default Object sum_of(Object... numbers) {
@@ -614,6 +620,6 @@ public interface MathMixins {
         if (firstNumber == null) {
             return sum;
         }
-        return ObjectConvertor.tryConvertAsType(sum, firstNumber.getClass());
+        return ObjectConvertor.safeConvertAsNumberType(sum, firstNumber);
     }
 }

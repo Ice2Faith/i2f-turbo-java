@@ -13,7 +13,6 @@ import i2f.typeof.TypeOf;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -395,27 +394,7 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     }
 
     public static Object convertNumberType(BigDecimal num, Number left, Number right) {
-        if (TypeOf.instanceOf(left, BigDecimal.class)
-                || TypeOf.instanceOf(right, BigDecimal.class)) {
-            return num;
-        }
-        if (TypeOf.instanceOf(left, BigInteger.class)
-                || TypeOf.instanceOf(right, BigDecimal.class)) {
-            return num.toBigInteger();
-        }
-        if (TypeOf.instanceOf(left, Double.class)
-                || TypeOf.instanceOf(right, Double.class)) {
-            return num.doubleValue();
-        }
-        if (TypeOf.instanceOf(left, Float.class)
-                || TypeOf.instanceOf(right, Float.class)) {
-            return num.floatValue();
-        }
-        if (TypeOf.instanceOf(left, Long.class)
-                || TypeOf.instanceOf(right, Long.class)) {
-            return num.longValue();
-        }
-        return num.intValue();
+        return ObjectConvertor.safeConvertAsNumberType(num, left, right);
     }
 
     public static int compare(Object left, Object right) {

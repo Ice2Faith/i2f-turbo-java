@@ -334,6 +334,127 @@ public class ObjectConvertor {
         }
     }
 
+    /**
+     * 保证将 value 转换为 targetNumberType 时，精度不会丢失
+     * 如果出现抓换后精度丢失，这原样返回 value，不进行转换
+     *
+     * @param value
+     * @param targetNumberType 可以是实际目标对象，也可以是 class 类型
+     * @return
+     */
+    public static Object safeConvertAsNumberType(Object value, Object targetNumberType) {
+        if (value == null) {
+            return null;
+        }
+        if (targetNumberType == null) {
+            return value;
+        }
+        Class<?> sourceClass = targetNumberType.getClass();
+        if (targetNumberType instanceof Class) {
+            sourceClass = (Class<?>) targetNumberType;
+        }
+        if (TypeOf.instanceOf(value, sourceClass)) {
+            return value;
+        }
+        try {
+            // 直接强制转换，这里可能导致精度丢失
+            Object ret = ObjectConvertor.tryConvertAsType(value, sourceClass);
+            if (TypeOf.instanceOf(ret, sourceClass)) {
+                // 强制转换之后，直接查看精度是否丢失，未丢失精度则成功转换
+                BigDecimal valueDecimal = null;
+                if (value instanceof BigDecimal) {
+                    valueDecimal = (BigDecimal) value;
+                } else {
+                    valueDecimal = new BigDecimal(String.valueOf(value));
+                }
+                BigDecimal candidateDecimal = null;
+                if (ret instanceof BigDecimal) {
+                    candidateDecimal = (BigDecimal) ret;
+                } else {
+                    candidateDecimal = new BigDecimal(String.valueOf(ret));
+                }
+                if (valueDecimal.compareTo(candidateDecimal) == 0) {
+                    return ret;
+                }
+            }
+        } catch (Exception e) {
+            // ignore exception
+        }
+        // 否则未成功保留精度转换，返回源值
+        return value;
+    }
+
+    /**
+     * 保证将 value 转换为 leftSourceType 与 rightSourceType 发生运算时，精度不会丢失
+     * 如果出现抓换后精度丢失，这原样返回 value，不进行转换
+     *
+     * @param value
+     * @param leftSourceType  可以是实际目标对象，也可以是 class 类型
+     * @param rightSourceType 可以是实际目标对象，也可以是 class 类型
+     * @return
+     */
+    public static Object safeConvertAsNumberType(Object value, Object leftSourceType, Object rightSourceType) {
+        if (value == null) {
+            return null;
+        }
+        if (leftSourceType == null && rightSourceType == null) {
+            return value;
+        }
+        Class<?> leftClass = null;
+        Class<?> rightClass = null;
+        if (leftSourceType != null) {
+            if (leftSourceType instanceof Class) {
+                leftClass = (Class<?>) leftSourceType;
+            } else {
+                leftClass = leftSourceType.getClass();
+            }
+        }
+        if (rightSourceType != null) {
+            if (rightSourceType instanceof Class) {
+                rightClass = (Class<?>) rightSourceType;
+            } else {
+                rightClass = rightSourceType.getClass();
+            }
+        }
+        if (leftClass != null && rightClass != null) {
+            if (TypeOf.typeOf(leftClass, BigDecimal.class)) {
+                return safeConvertAsNumberType(value, leftClass);
+            }
+            if (TypeOf.typeOf(rightClass, BigDecimal.class)) {
+                return safeConvertAsNumberType(value, rightClass);
+            }
+            if (TypeOf.typeOf(leftClass, BigInteger.class)) {
+                if (TypeOf.typeOfAny(rightClass, float.class, Float.class, double.class, Double.class)) {
+                    return safeConvertAsNumberType(value, BigDecimal.ONE);
+                }
+                return safeConvertAsNumberType(value, BigInteger.ONE);
+            }
+            if (TypeOf.typeOf(rightClass, BigInteger.class)) {
+                if (TypeOf.typeOfAny(leftClass, float.class, Float.class, double.class, Double.class)) {
+                    return safeConvertAsNumberType(value, BigDecimal.ONE);
+                }
+                return safeConvertAsNumberType(value, BigInteger.ONE);
+            }
+            if (TypeOf.typeOfAny(leftClass, float.class, Float.class, double.class, Double.class) || TypeOf.typeOfAny(rightClass, float.class, Float.class, double.class, Double.class)) {
+                double ref = 1.0;
+                return safeConvertAsNumberType(value, ref);
+            }
+            if (TypeOf.typeOfAny(leftClass, long.class, Long.class) || TypeOf.typeOfAny(rightClass, long.class, Long.class)) {
+                long ref = 1L;
+                return safeConvertAsNumberType(value, ref);
+            }
+            if (TypeOf.typeOfAny(leftClass, int.class, Integer.class) || TypeOf.typeOfAny(rightClass, int.class, Integer.class)) {
+                int ref = 1;
+                return safeConvertAsNumberType(value, ref);
+            }
+            return safeConvertAsNumberType(value, BigDecimal.ONE);
+        } else if (leftClass != null) {
+            return safeConvertAsNumberType(value, leftClass);
+        } else {
+            return safeConvertAsNumberType(value, rightClass);
+        }
+    }
+
     public static Object tryConvertAsType(Object val, Class<?> targetType) {
         if (val == null) {
             if (TypeOf.typeOfAny(targetType, Boolean.class, boolean.class)) {
