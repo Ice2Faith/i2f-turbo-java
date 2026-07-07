@@ -54,8 +54,10 @@ public class MathTools {
                     "- Vars auto-declare (null).\n" +
                     "- Return JSON `[a,b]` or `{a:1}` for multiples.\n" +
                     "- allow `//`,`/**/` comment, allow line sep.\n" +
-                    "Ops: `+,-,*,/,%,()` for normal, `~,&,|,^,>>,<<,>>>` for bitwise. Note: `^`=XOR, use `pow(a,b)` for powers.\n" +
-                    "Strings: `\"` or `'`. Escape same-type quotes only. `+` concatenates (coerces to string), support Java String methods (e.g., `substring()`,`indexOf()`). \n" +
+                    "Ops: \n" +
+                    "- `+,-,*,/,%,()` for normal, `~,&,|,^,>>,<<,>>>` for bitwise,`==,!=,>,<,>=,<=,in,not in` for compare, `||,&&,!,and,or,not` for logic. \n" +
+                    "- Note: `^`=XOR, use `pow(a,b)` for powers.\n" +
+                    "Strings: `\"` or `'`. Escape same-type quotes only. `+` concatenates (coerces to string), support Java String methods (e.g., `indexOf()`). \n" +
                     "Funcs:\n" +
                     "- Trig(rad): sin,cos,tan,asin,acos,atan,atan2,sinh,cosh,tanh,to_radians,to_degrees.\n" +
                     "- Math: exp,log,log10,sqrt,ceil,floor,round,pow,abs,max,min.\n" +
@@ -64,13 +66,13 @@ public class MathTools {
                     "- Misc: fibonacci(n),factorial(n).\n" +
                     "- Oracle-compat(lowercase): numbers,strings,regex category functions(e.g., `trunc()`,`ltrim()`,`regexp_like()`). `substr` is 0-based.\n" +
                     "Control: \n" +
-                    "- `for(i=0;i<n;i++){...};` or `for(i in arr){...};` (continue/break, no labels).\n" +
+                    "- `for(i=0;i<n;i++){...};` or `for(i : arr){...};` or `while(cond){};` (continue/break, no labels).\n" +
                     "- `if(cond){...}else if{...}else{...};`. \n" +
                     "- `def add(a,b){...};` (udf, declare before use, no embed, overload by args cnt, return one). \n" +
                     "    - Strict isolation: outer var `a` to function inside `global.a`, outer not has `global`.\n" +
                     "- Blocks need `{}`, stmts must end with `;`.\n" +
                     "Collections:\n" +
-                    "- JSON arrays/objects support Java ArrayList/HashMap methods (e.g., `add()`,`put()`,`get()`). \n" +
+                    "- JSON arrays/objects support Java List/Map methods (e.g., `add()`,`put()`,`get()`). \n" +
                     "- Direct access: `arr[index]` (get/set), `map.name` (get/put)."
     )
     public List<MathEvalResultItem> eval_math_expression(
