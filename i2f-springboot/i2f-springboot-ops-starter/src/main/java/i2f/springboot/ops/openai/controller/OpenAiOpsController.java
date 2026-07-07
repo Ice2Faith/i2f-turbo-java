@@ -251,23 +251,25 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     if (req.isEnableSkills() && needInjectSystemPrompt) {
                         String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap);
-                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
-                        completion.getMessages().add(0, system);
+                        if (content != null && !content.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
 
-                        OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
-                        dto.setEcho_skill(system);
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_SKILL);
+                            dto.setEcho_skill(system);
 
-                        String defSkillMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
+                            String defSkillMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
                     }
 
                     if (req.isEnableTools()) {
