@@ -91,6 +91,10 @@
 
     <script src="../lib/ses@1.11.0/dist/ses.umd.js"></script>
     <script src="../lib/common/SesSetup.js"></script>
+
+    <link rel="stylesheet" href="../lib/katex@0.16.9/dist/katex.min.css">
+    <script src="../lib/katex@0.16.9/dist/katex.min.js"></script>
+    <script src="../lib/markdown-it-texmath@1.0.0/texmath.min.js"></script>
 <body>
 <div id="app">
     <span class="i2f-back-top-bottom"
@@ -3001,10 +3005,11 @@
         typographer: true,  // 智能标点替换
         breaks: true,       // \n 转为 <br>
         highlight: function (str, lang) {
-
+            let innerHtml = null
             if (lang == 'echarts' && !window.app.$responsing) {
+
                 let chartId = 'chart_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
-                let text = `<div id="${chartId}" class="echart-code-block"></div>`;
+                innerHtml = `<div id="${chartId}" class="echart-code-block"></div>`;
                 let count = 10;
                 let applyFunc = () => {
                     let dom = document.querySelector('#' + chartId);
@@ -3028,12 +3033,8 @@
 
                 };
                 setTimeout(applyFunc, 300);
-                return text;
-            }
-
-            let innerHtml = null
-            // 检查语言是否受支持
-            if (lang && hljs.getLanguage(lang)) {
+            } else if (lang && hljs.getLanguage(lang)) {
+                // 检查语言是否受支持
                 try {
                     innerHtml = hljs.highlight(str, {language: lang}).value;
                 } catch (__) {
@@ -3055,7 +3056,7 @@
                             <code>
                                 {{innerHtml}}
                             </code>
-                        </pre>
+                    </pre>
                 </div>`;
             text = text.replaceAll(/\s*\n\s*/g, '');
             text = text.replaceAll('{{lang}}', lang);
@@ -3063,6 +3064,17 @@
             return text;
         }
     }) : null;
+    if (window.texmath && window.katex) {
+        // 集成 katex 显示公式
+        md.use(window.texmath, {
+            engine: window.katex,     // 明确指定使用 KaTeX 作为渲染引擎
+            delimiters: 'dollars',     // 使用 $...$ 和 $$...$$ 语法
+            katexOptions: {
+                strict: false,       // 关闭严格模式，不再抛出 LaTeX 兼容性警告
+                throwOnError: false  // 遇到真正的语法错误时不抛出异常，防止页面崩溃
+            }
+        });
+    }
     window.app.$md = md;
     window.app.$mount('#app');
 
@@ -3086,6 +3098,10 @@
             return
         }
         let text = findDom.innerText;
+        let echartDom = findDom.querySelector('.echart-code-block');
+        if (echartDom) {
+            text = echartDom.chartCode;
+        }
         copy2clipboard(text);
     }
 
@@ -3108,7 +3124,47 @@
         }
     }
 
+    function getParentMessageBubbleDom(dom) {
+        let searchDom = dom;
+        let findDom = null;
+        let level = 10;
+        while (searchDom) {
+            if (level <= 0) {
+                break;
+            }
+            findDom = searchDom.querySelector('.message-bubble');
+            if (findDom) {
+                break;
+            }
+            searchDom = searchDom.parentElement;
+            level--;
+        }
+        return findDom;
+    }
+
     function renderEcharts(dom, options) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderEcharts(dom, options);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            doRenderEcharts(dom, options)
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
+
+    }
+
+    function doRenderEcharts(dom, options) {
         if (dom.chart) {
             dom.chart.dispose();
         }

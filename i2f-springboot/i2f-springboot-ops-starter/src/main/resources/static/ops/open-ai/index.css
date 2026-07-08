@@ -659,6 +659,7 @@ html, body {
 
 .echart-code-block {
     width: 100%;
+    min-width: 360px;
     height: 320px;
     background: white;
 }
