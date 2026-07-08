@@ -1,20 +1,42 @@
-// ses@1.11.0
-'use strict';
-(functors => {
+// ses@2.2.0
+(functors => options => {
+    'use strict';
+
+    const {
+        Map,
+        Object,
+        ReferenceError,
+        Reflect,
+        TypeError,
+    } = globalThis;
+    const {
+        create,
+        defineProperties,
+        defineProperty,
+        freeze,
+        fromEntries,
+        getOwnPropertyDescriptors,
+        getOwnPropertyNames,
+        keys,
+    } = Object;
+    const {get, set} = Reflect;
+
+    const {} = options || {};
+
 
     const cell = (name, value = undefined) => {
         const observers = [];
-        return Object.freeze({
-            get: Object.freeze(() => {
+        return freeze({
+            get: freeze(() => {
                 return value;
             }),
-            set: Object.freeze((newValue) => {
+            set: freeze((newValue) => {
                 value = newValue;
                 for (const observe of observers) {
                     observe(value);
                 }
             }),
-            observe: Object.freeze((observe) => {
+            observe: freeze((observe) => {
                 observers.push(observe);
                 observe(value);
             }),
@@ -29,11 +51,13 @@
             ArrayBuffer: cell("ArrayBuffer"),
             Date: cell("Date"),
             FinalizationRegistry: cell("FinalizationRegistry"),
-            Float32Array: cell("Float32Array"),
+            FERAL_FLOAT64_ARRAY: cell("FERAL_FLOAT64_ARRAY"),
+            DataView: cell("DataView"),
             JSON: cell("JSON"),
             Map: cell("Map"),
             Math: cell("Math"),
             Number: cell("Number"),
+            BigInt: cell("BigInt"),
             Object: cell("Object"),
             Promise: cell("Promise"),
             Proxy: cell("Proxy"),
@@ -45,6 +69,7 @@
             Uint8Array: cell("Uint8Array"),
             WeakMap: cell("WeakMap"),
             WeakSet: cell("WeakSet"),
+            Temporal: cell("Temporal"),
             FERAL_ERROR: cell("FERAL_ERROR"),
             RangeError: cell("RangeError"),
             ReferenceError: cell("ReferenceError"),
@@ -55,7 +80,6 @@
             create: cell("create"),
             defineProperties: cell("defineProperties"),
             entries: cell("entries"),
-            freeze: cell("freeze"),
             getOwnPropertyDescriptor: cell("getOwnPropertyDescriptor"),
             getOwnPropertyDescriptors: cell("getOwnPropertyDescriptors"),
             getOwnPropertyNames: cell("getOwnPropertyNames"),
@@ -71,13 +95,20 @@
             setPrototypeOf: cell("setPrototypeOf"),
             values: cell("values"),
             fromEntries: cell("fromEntries"),
+            freeze: cell("freeze"),
             speciesSymbol: cell("speciesSymbol"),
             toStringTagSymbol: cell("toStringTagSymbol"),
             iteratorSymbol: cell("iteratorSymbol"),
             matchAllSymbol: cell("matchAllSymbol"),
+            replaceSymbol: cell("replaceSymbol"),
+            searchSymbol: cell("searchSymbol"),
             unscopablesSymbol: cell("unscopablesSymbol"),
             symbolKeyFor: cell("symbolKeyFor"),
             symbolFor: cell("symbolFor"),
+            max: cell("max"),
+            min: cell("min"),
+            trunc: cell("trunc"),
+            MAX_SAFE_INTEGER: cell("MAX_SAFE_INTEGER"),
             isInteger: cell("isInteger"),
             stringifyJson: cell("stringifyJson"),
             defineProperty: cell("defineProperty"),
@@ -93,6 +124,7 @@
             isArray: cell("isArray"),
             arrayPrototype: cell("arrayPrototype"),
             arrayBufferPrototype: cell("arrayBufferPrototype"),
+            dataViewPrototype: cell("dataViewPrototype"),
             mapPrototype: cell("mapPrototype"),
             proxyRevocable: cell("proxyRevocable"),
             regexpPrototype: cell("regexpPrototype"),
@@ -106,7 +138,7 @@
             iteratorPrototype: cell("iteratorPrototype"),
             typedArrayPrototype: cell("typedArrayPrototype"),
             uncurryThis: cell("uncurryThis"),
-            objectHasOwnProperty: cell("objectHasOwnProperty"),
+            hasOwn: cell("hasOwn"),
             arrayFilter: cell("arrayFilter"),
             arrayForEach: cell("arrayForEach"),
             arrayIncludes: cell("arrayIncludes"),
@@ -133,16 +165,16 @@
             setForEach: cell("setForEach"),
             setHas: cell("setHas"),
             iterateSet: cell("iterateSet"),
-            regexpTest: cell("regexpTest"),
             regexpExec: cell("regexpExec"),
+            regexpReplace: cell("regexpReplace"),
+            regexpSearch: cell("regexpSearch"),
             matchAllRegExp: cell("matchAllRegExp"),
+            sealRegexp: cell("sealRegexp"),
+            freezeRegexp: cell("freezeRegexp"),
             stringEndsWith: cell("stringEndsWith"),
             stringIncludes: cell("stringIncludes"),
             stringIndexOf: cell("stringIndexOf"),
             stringMatch: cell("stringMatch"),
-            generatorNext: cell("generatorNext"),
-            generatorThrow: cell("generatorThrow"),
-            stringReplace: cell("stringReplace"),
             stringSearch: cell("stringSearch"),
             stringSlice: cell("stringSlice"),
             stringSplit: cell("stringSplit"),
@@ -156,13 +188,14 @@
             weaksetHas: cell("weaksetHas"),
             functionToString: cell("functionToString"),
             functionBind: cell("functionBind"),
+            generatorNext: cell("generatorNext"),
+            generatorThrow: cell("generatorThrow"),
             promiseAll: cell("promiseAll"),
             promiseCatch: cell("promiseCatch"),
             promiseThen: cell("promiseThen"),
             finalizationRegistryRegister: cell("finalizationRegistryRegister"),
             finalizationRegistryUnregister: cell("finalizationRegistryUnregister"),
-            getConstructorOf: cell("getConstructorOf"),
-            isObject: cell("isObject"),
+            isPrimitive: cell("isPrimitive"),
             isError: cell("isError"),
             identity: cell("identity"),
             FERAL_EVAL: cell("FERAL_EVAL"),
@@ -170,6 +203,7 @@
             noEvalEvaluate: cell("noEvalEvaluate"),
             FERAL_STACK_GETTER: cell("FERAL_STACK_GETTER"),
             FERAL_STACK_SETTER: cell("FERAL_STACK_SETTER"),
+            AsyncGeneratorFunctionInstance: cell("AsyncGeneratorFunctionInstance"),
         },
         {},
         {
@@ -180,6 +214,13 @@
         },
         {},
         {
+            isBufferImmutable: cell("isBufferImmutable"),
+            sliceBufferToImmutable: cell("sliceBufferToImmutable"),
+            optTransferBufferToImmutable: cell("optTransferBufferToImmutable"),
+        },
+        {},
+        {},
+        {
             an: cell("an"),
             bestEffortStringify: cell("bestEffortStringify"),
             enJoin: cell("enJoin"),
@@ -187,7 +228,10 @@
         {},
         {},
         {
-            makeLRUCacheMap: cell("makeLRUCacheMap"),
+            makeCacheMapKit: cell("makeCacheMapKit"),
+        },
+        {
+            makeCacheMapKit: cell("makeCacheMapKit"),
         },
         {
             makeNoteLogArgsArrayKit: cell("makeNoteLogArgsArrayKit"),
@@ -200,10 +244,10 @@
             makeError: cell("makeError"),
             annotateError: cell("annotateError"),
             loggedErrorHandler: cell("loggedErrorHandler"),
-            makeAssert: cell("makeAssert"),
             assert: cell("assert"),
             assertEqual: cell("assertEqual"),
             sanitizeError: cell("sanitizeError"),
+            makeAssert: cell("makeAssert"),
         },
         {
             isTypedArray: cell("isTypedArray"),
@@ -239,6 +283,12 @@
         },
         {
             default: cell("default"),
+        },
+        {
+            default: cell("default"),
+        },
+        {
+            tameNaNSideChannel: cell("tameNaNSideChannel"),
         },
         {
             default: cell("default"),
@@ -392,9 +442,11 @@
         {},
     ];
 
-    Object.defineProperties(cells[3], Object.getOwnPropertyDescriptors(cells[2]));
+    defineProperties(cells[3], getOwnPropertyDescriptors(cells[2]));
 
-    const namespaces = cells.map(cells => Object.freeze(Object.create(null, {
+    defineProperties(cells[11], {"makeCacheMapKit": {value: cells[10]["makeCacheMapKit"]}});
+
+    const namespaces = cells.map(cells => freeze(create(null, {
         ...cells,
         // Make this appear like an ESM module namespace object.
         [Symbol.toStringTag]: {
@@ -413,14 +465,13 @@
         for (const [name, observers] of map.get(importName)) {
             const cell = cells[importIndex][name];
             if (cell === undefined) {
-                throw new ReferenceError(`Cannot import name ${name}`);
+                throw new ReferenceError(`Cannot import name ${name} (has ${Object.getOwnPropertyNames(cells[importIndex]).join(', ')})`);
             }
             for (const observer of observers) {
                 cell.observe(observer);
             }
         }
     }
-
 
     functors[0]({
         imports(entries) {
@@ -433,11 +484,13 @@
             ArrayBuffer: cells[0].ArrayBuffer.set,
             Date: cells[0].Date.set,
             FinalizationRegistry: cells[0].FinalizationRegistry.set,
-            Float32Array: cells[0].Float32Array.set,
+            FERAL_FLOAT64_ARRAY: cells[0].FERAL_FLOAT64_ARRAY.set,
+            DataView: cells[0].DataView.set,
             JSON: cells[0].JSON.set,
             Map: cells[0].Map.set,
             Math: cells[0].Math.set,
             Number: cells[0].Number.set,
+            BigInt: cells[0].BigInt.set,
             Object: cells[0].Object.set,
             Promise: cells[0].Promise.set,
             Proxy: cells[0].Proxy.set,
@@ -449,6 +502,7 @@
             Uint8Array: cells[0].Uint8Array.set,
             WeakMap: cells[0].WeakMap.set,
             WeakSet: cells[0].WeakSet.set,
+            Temporal: cells[0].Temporal.set,
             FERAL_ERROR: cells[0].FERAL_ERROR.set,
             RangeError: cells[0].RangeError.set,
             ReferenceError: cells[0].ReferenceError.set,
@@ -459,7 +513,6 @@
             create: cells[0].create.set,
             defineProperties: cells[0].defineProperties.set,
             entries: cells[0].entries.set,
-            freeze: cells[0].freeze.set,
             getOwnPropertyDescriptor: cells[0].getOwnPropertyDescriptor.set,
             getOwnPropertyDescriptors: cells[0].getOwnPropertyDescriptors.set,
             getOwnPropertyNames: cells[0].getOwnPropertyNames.set,
@@ -475,13 +528,20 @@
             setPrototypeOf: cells[0].setPrototypeOf.set,
             values: cells[0].values.set,
             fromEntries: cells[0].fromEntries.set,
+            freeze: cells[0].freeze.set,
             speciesSymbol: cells[0].speciesSymbol.set,
             toStringTagSymbol: cells[0].toStringTagSymbol.set,
             iteratorSymbol: cells[0].iteratorSymbol.set,
             matchAllSymbol: cells[0].matchAllSymbol.set,
+            replaceSymbol: cells[0].replaceSymbol.set,
+            searchSymbol: cells[0].searchSymbol.set,
             unscopablesSymbol: cells[0].unscopablesSymbol.set,
             symbolKeyFor: cells[0].symbolKeyFor.set,
             symbolFor: cells[0].symbolFor.set,
+            max: cells[0].max.set,
+            min: cells[0].min.set,
+            trunc: cells[0].trunc.set,
+            MAX_SAFE_INTEGER: cells[0].MAX_SAFE_INTEGER.set,
             isInteger: cells[0].isInteger.set,
             stringifyJson: cells[0].stringifyJson.set,
             defineProperty: cells[0].defineProperty.set,
@@ -497,6 +557,7 @@
             isArray: cells[0].isArray.set,
             arrayPrototype: cells[0].arrayPrototype.set,
             arrayBufferPrototype: cells[0].arrayBufferPrototype.set,
+            dataViewPrototype: cells[0].dataViewPrototype.set,
             mapPrototype: cells[0].mapPrototype.set,
             proxyRevocable: cells[0].proxyRevocable.set,
             regexpPrototype: cells[0].regexpPrototype.set,
@@ -510,7 +571,7 @@
             iteratorPrototype: cells[0].iteratorPrototype.set,
             typedArrayPrototype: cells[0].typedArrayPrototype.set,
             uncurryThis: cells[0].uncurryThis.set,
-            objectHasOwnProperty: cells[0].objectHasOwnProperty.set,
+            hasOwn: cells[0].hasOwn.set,
             arrayFilter: cells[0].arrayFilter.set,
             arrayForEach: cells[0].arrayForEach.set,
             arrayIncludes: cells[0].arrayIncludes.set,
@@ -537,16 +598,16 @@
             setForEach: cells[0].setForEach.set,
             setHas: cells[0].setHas.set,
             iterateSet: cells[0].iterateSet.set,
-            regexpTest: cells[0].regexpTest.set,
             regexpExec: cells[0].regexpExec.set,
+            regexpReplace: cells[0].regexpReplace.set,
+            regexpSearch: cells[0].regexpSearch.set,
             matchAllRegExp: cells[0].matchAllRegExp.set,
+            sealRegexp: cells[0].sealRegexp.set,
+            freezeRegexp: cells[0].freezeRegexp.set,
             stringEndsWith: cells[0].stringEndsWith.set,
             stringIncludes: cells[0].stringIncludes.set,
             stringIndexOf: cells[0].stringIndexOf.set,
             stringMatch: cells[0].stringMatch.set,
-            generatorNext: cells[0].generatorNext.set,
-            generatorThrow: cells[0].generatorThrow.set,
-            stringReplace: cells[0].stringReplace.set,
             stringSearch: cells[0].stringSearch.set,
             stringSlice: cells[0].stringSlice.set,
             stringSplit: cells[0].stringSplit.set,
@@ -560,13 +621,14 @@
             weaksetHas: cells[0].weaksetHas.set,
             functionToString: cells[0].functionToString.set,
             functionBind: cells[0].functionBind.set,
+            generatorNext: cells[0].generatorNext.set,
+            generatorThrow: cells[0].generatorThrow.set,
             promiseAll: cells[0].promiseAll.set,
             promiseCatch: cells[0].promiseCatch.set,
             promiseThen: cells[0].promiseThen.set,
             finalizationRegistryRegister: cells[0].finalizationRegistryRegister.set,
             finalizationRegistryUnregister: cells[0].finalizationRegistryUnregister.set,
-            getConstructorOf: cells[0].getConstructorOf.set,
-            isObject: cells[0].isObject.set,
+            isPrimitive: cells[0].isPrimitive.set,
             isError: cells[0].isError.set,
             identity: cells[0].identity.set,
             FERAL_EVAL: cells[0].FERAL_EVAL.set,
@@ -574,6 +636,7 @@
             noEvalEvaluate: cells[0].noEvalEvaluate.set,
             FERAL_STACK_GETTER: cells[0].FERAL_STACK_GETTER.set,
             FERAL_STACK_SETTER: cells[0].FERAL_STACK_SETTER.set,
+            AsyncGeneratorFunctionInstance: cells[0].AsyncGeneratorFunctionInstance.set,
         },
         importMeta: {},
     });
@@ -611,19 +674,19 @@
     functors[4]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            an: cells[4].an.set,
-            bestEffortStringify: cells[4].bestEffortStringify.set,
-            enJoin: cells[4].enJoin.set,
+            isBufferImmutable: cells[4].isBufferImmutable.set,
+            sliceBufferToImmutable: cells[4].sliceBufferToImmutable.set,
+            optTransferBufferToImmutable: cells[4].optTransferBufferToImmutable.set,
         },
         importMeta: {},
     });
     functors[5]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./immutable-arraybuffer-pony.js", 4);
         },
         liveVar: {},
         onceVar: {},
@@ -632,6 +695,7 @@
     functors[6]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./src/immutable-arraybuffer-shim.js", 5);
         },
         liveVar: {},
         onceVar: {},
@@ -640,117 +704,97 @@
     functors[7]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "../commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            makeLRUCacheMap: cells[7].makeLRUCacheMap.set,
+            an: cells[7].an.set,
+            bestEffortStringify: cells[7].bestEffortStringify.set,
+            enJoin: cells[7].enJoin.set,
         },
         importMeta: {},
     });
     functors[8]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../make-lru-cachemap.js", 7);
         },
         liveVar: {},
-        onceVar: {
-            makeNoteLogArgsArrayKit: cells[8].makeNoteLogArgsArrayKit.set,
-        },
+        onceVar: {},
         importMeta: {},
     });
     functors[9]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
-            observeImports(map, "./stringify-utils.js", 4);
-            observeImports(map, "./types.js", 5);
-            observeImports(map, "./internal-types.js", 6);
-            observeImports(map, "./note-log-args.js", 8);
         },
         liveVar: {},
-        onceVar: {
-            quote: cells[9].q.set,
-            bare: cells[9].b.set,
-            redactedDetails: cells[9].X.set,
-            unredactedDetails: cells[9].unredactedDetails.set,
-            makeError: cells[9].makeError.set,
-            note: cells[9].annotateError.set,
-            loggedErrorHandler: cells[9].loggedErrorHandler.set,
-            makeAssert: cells[9].makeAssert.set,
-            assert: cells[9].assert.set,
-            assertEqual: cells[9].assertEqual.set,
-            sanitizeError: cells[9].sanitizeError.set,
-        },
+        onceVar: {},
         importMeta: {},
     });
     functors[10]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
         onceVar: {
-            isTypedArray: cells[10].isTypedArray.set,
-            makeHardener: cells[10].makeHardener.set,
+            makeCacheMapKit: cells[10].makeCacheMapKit.set,
         },
         importMeta: {},
     });
     functors[11]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./src/cachemap.js", 10);
         },
         liveVar: {},
-        onceVar: {
-            cauterizeProperty: cells[11].cauterizeProperty.set,
-        },
+        onceVar: {},
         importMeta: {},
     });
     functors[12]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
+            observeImports(map, "@endo/cache-map", 11);
         },
         liveVar: {},
         onceVar: {
-            NativeErrors: cells[12].NativeErrors.set,
-            constantProperties: cells[12].constantProperties.set,
-            universalPropertyNames: cells[12].universalPropertyNames.set,
-            initialGlobalPropertyNames: cells[12].initialGlobalPropertyNames.set,
-            sharedGlobalPropertyNames: cells[12].sharedGlobalPropertyNames.set,
-            uniqueGlobalPropertyNames: cells[12].uniqueGlobalPropertyNames.set,
-            FunctionInstance: cells[12].FunctionInstance.set,
-            AsyncFunctionInstance: cells[12].AsyncFunctionInstance.set,
-            isAccessorPermit: cells[12].isAccessorPermit.set,
-            permitted: cells[12].permitted.set,
+            makeNoteLogArgsArrayKit: cells[12].makeNoteLogArgsArrayKit.set,
         },
         importMeta: {},
     });
     functors[13]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./cauterize-property.js", 11);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./permits.js", 12);
+            observeImports(map, "../commons.js", 0);
+            observeImports(map, "./stringify-utils.js", 7);
+            observeImports(map, "./types.js", 8);
+            observeImports(map, "./internal-types.js", 9);
+            observeImports(map, "./note-log-args.js", 12);
         },
         liveVar: {},
         onceVar: {
-            makeIntrinsicsCollector: cells[13].makeIntrinsicsCollector.set,
-            getGlobalIntrinsics: cells[13].getGlobalIntrinsics.set,
+            quote: cells[13].q.set,
+            bare: cells[13].b.set,
+            redactedDetails: cells[13].X.set,
+            unredactedDetails: cells[13].unredactedDetails.set,
+            makeError: cells[13].makeError.set,
+            note: cells[13].annotateError.set,
+            loggedErrorHandler: cells[13].loggedErrorHandler.set,
+            assert: cells[13].assert.set,
+            assertEqual: cells[13].assertEqual.set,
+            sanitizeError: cells[13].sanitizeError.set,
+            makeAssert: cells[13].makeAssert.set,
         },
         importMeta: {},
     });
     functors[14]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./permits.js", 12);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./cauterize-property.js", 11);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            default: cells[14].default.set,
+            isTypedArray: cells[14].isTypedArray.set,
+            makeHardener: cells[14].makeHardener.set,
         },
         importMeta: {},
     });
@@ -761,7 +805,7 @@
         },
         liveVar: {},
         onceVar: {
-            default: cells[15].default.set,
+            cauterizeProperty: cells[15].cauterizeProperty.set,
         },
         importMeta: {},
     });
@@ -772,25 +816,39 @@
         },
         liveVar: {},
         onceVar: {
-            default: cells[16].default.set,
+            NativeErrors: cells[16].NativeErrors.set,
+            constantProperties: cells[16].constantProperties.set,
+            universalPropertyNames: cells[16].universalPropertyNames.set,
+            initialGlobalPropertyNames: cells[16].initialGlobalPropertyNames.set,
+            sharedGlobalPropertyNames: cells[16].sharedGlobalPropertyNames.set,
+            uniqueGlobalPropertyNames: cells[16].uniqueGlobalPropertyNames.set,
+            FunctionInstance: cells[16].FunctionInstance.set,
+            AsyncFunctionInstance: cells[16].AsyncFunctionInstance.set,
+            isAccessorPermit: cells[16].isAccessorPermit.set,
+            permitted: cells[16].permitted.set,
         },
         importMeta: {},
     });
     functors[17]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./cauterize-property.js", 15);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./permits.js", 16);
         },
         liveVar: {},
         onceVar: {
-            default: cells[17].default.set,
+            makeIntrinsicsCollector: cells[17].makeIntrinsicsCollector.set,
+            getGlobalIntrinsics: cells[17].getGlobalIntrinsics.set,
         },
         importMeta: {},
     });
     functors[18]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./permits.js", 16);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./cauterize-property.js", 15);
         },
         liveVar: {},
         onceVar: {
@@ -805,9 +863,7 @@
         },
         liveVar: {},
         onceVar: {
-            minEnablements: cells[19].minEnablements.set,
-            moderateEnablements: cells[19].moderateEnablements.set,
-            severeEnablements: cells[19].severeEnablements.set,
+            default: cells[19].default.set,
         },
         importMeta: {},
     });
@@ -815,7 +871,6 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./enablements.js", 19);
         },
         liveVar: {},
         onceVar: {
@@ -827,7 +882,6 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
         onceVar: {
@@ -838,10 +892,12 @@
     functors[22]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./permits.js", 16);
         },
         liveVar: {},
         onceVar: {
-            makeEvalFunction: cells[22].makeEvalFunction.set,
+            default: cells[22].default.set,
         },
         importMeta: {},
     });
@@ -849,11 +905,10 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
         onceVar: {
-            makeFunctionConstructor: cells[23].makeFunctionConstructor.set,
+            tameNaNSideChannel: cells[23].tameNaNSideChannel.set,
         },
         importMeta: {},
     });
@@ -861,16 +916,10 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./make-eval-function.js", 22);
-            observeImports(map, "./make-function-constructor.js", 23);
-            observeImports(map, "./permits.js", 12);
         },
         liveVar: {},
         onceVar: {
-            setGlobalObjectSymbolUnscopables: cells[24].setGlobalObjectSymbolUnscopables.set,
-            setGlobalObjectConstantProperties: cells[24].setGlobalObjectConstantProperties.set,
-            setGlobalObjectMutableProperties: cells[24].setGlobalObjectMutableProperties.set,
-            setGlobalObjectEvaluators: cells[24].setGlobalObjectEvaluators.set,
+            default: cells[24].default.set,
         },
         importMeta: {},
     });
@@ -878,13 +927,12 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
         onceVar: {
-            alwaysThrowHandler: cells[25].alwaysThrowHandler.set,
-            strictScopeTerminatorHandler: cells[25].strictScopeTerminatorHandler.set,
-            strictScopeTerminator: cells[25].strictScopeTerminator.set,
+            minEnablements: cells[25].minEnablements.set,
+            moderateEnablements: cells[25].moderateEnablements.set,
+            severeEnablements: cells[25].severeEnablements.set,
         },
         importMeta: {},
     });
@@ -892,11 +940,11 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./strict-scope-terminator.js", 25);
+            observeImports(map, "./enablements.js", 25);
         },
         liveVar: {},
         onceVar: {
-            createSloppyGlobalsScopeTerminator: cells[26].createSloppyGlobalsScopeTerminator.set,
+            default: cells[26].default.set,
         },
         importMeta: {},
     });
@@ -904,22 +952,21 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            makeEvalScopeKit: cells[27].makeEvalScopeKit.set,
+            default: cells[27].default.set,
         },
         importMeta: {},
     });
     functors[28]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            getSourceURL: cells[28].getSourceURL.set,
+            makeEvalFunction: cells[28].makeEvalFunction.set,
         },
         importMeta: {},
     });
@@ -927,18 +974,11 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./get-source-url.js", 28);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            rejectHtmlComments: cells[29].rejectHtmlComments.set,
-            evadeHtmlCommentTest: cells[29].evadeHtmlCommentTest.set,
-            rejectImportExpressions: cells[29].rejectImportExpressions.set,
-            evadeImportExpressionTest: cells[29].evadeImportExpressionTest.set,
-            rejectSomeDirectEvalExpressions: cells[29].rejectSomeDirectEvalExpressions.set,
-            mandatoryTransforms: cells[29].mandatoryTransforms.set,
-            applyTransforms: cells[29].applyTransforms.set,
-            transforms: cells[29].transforms.set,
+            makeFunctionConstructor: cells[29].makeFunctionConstructor.set,
         },
         importMeta: {},
     });
@@ -946,11 +986,16 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./make-eval-function.js", 28);
+            observeImports(map, "./make-function-constructor.js", 29);
+            observeImports(map, "./permits.js", 16);
         },
         liveVar: {},
         onceVar: {
-            isValidIdentifierName: cells[30].isValidIdentifierName.set,
-            getScopeConstants: cells[30].getScopeConstants.set,
+            setGlobalObjectSymbolUnscopables: cells[30].setGlobalObjectSymbolUnscopables.set,
+            setGlobalObjectConstantProperties: cells[30].setGlobalObjectConstantProperties.set,
+            setGlobalObjectMutableProperties: cells[30].setGlobalObjectMutableProperties.set,
+            setGlobalObjectEvaluators: cells[30].setGlobalObjectEvaluators.set,
         },
         importMeta: {},
     });
@@ -958,11 +1003,13 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./scope-constants.js", 30);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            makeEvaluate: cells[31].makeEvaluate.set,
+            alwaysThrowHandler: cells[31].alwaysThrowHandler.set,
+            strictScopeTerminatorHandler: cells[31].strictScopeTerminatorHandler.set,
+            strictScopeTerminator: cells[31].strictScopeTerminator.set,
         },
         importMeta: {},
     });
@@ -970,16 +1017,11 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./strict-scope-terminator.js", 25);
-            observeImports(map, "./sloppy-globals-scope-terminator.js", 26);
-            observeImports(map, "./eval-scope.js", 27);
-            observeImports(map, "./transforms.js", 29);
-            observeImports(map, "./make-evaluate.js", 31);
-            observeImports(map, "./error/assert.js", 9);
+            observeImports(map, "./strict-scope-terminator.js", 31);
         },
         liveVar: {},
         onceVar: {
-            makeSafeEvaluator: cells[32].makeSafeEvaluator.set,
+            createSloppyGlobalsScopeTerminator: cells[32].createSloppyGlobalsScopeTerminator.set,
         },
         importMeta: {},
     });
@@ -987,10 +1029,11 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            tameFunctionToString: cells[33].tameFunctionToString.set,
+            makeEvalScopeKit: cells[33].makeEvalScopeKit.set,
         },
         importMeta: {},
     });
@@ -1001,7 +1044,7 @@
         },
         liveVar: {},
         onceVar: {
-            tameDomains: cells[34].tameDomains.set,
+            getSourceURL: cells[34].getSourceURL.set,
         },
         importMeta: {},
     });
@@ -1009,195 +1052,189 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./get-source-url.js", 34);
         },
         liveVar: {},
         onceVar: {
-            tameModuleSource: cells[35].tameModuleSource.set,
+            rejectHtmlComments: cells[35].rejectHtmlComments.set,
+            evadeHtmlCommentTest: cells[35].evadeHtmlCommentTest.set,
+            rejectImportExpressions: cells[35].rejectImportExpressions.set,
+            evadeImportExpressionTest: cells[35].evadeImportExpressionTest.set,
+            rejectSomeDirectEvalExpressions: cells[35].rejectSomeDirectEvalExpressions.set,
+            mandatoryTransforms: cells[35].mandatoryTransforms.set,
+            applyTransforms: cells[35].applyTransforms.set,
+            transforms: cells[35].transforms.set,
         },
         importMeta: {},
     });
     functors[36]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
+            observeImports(map, "./commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            consoleLevelMethods: cells[36].consoleLevelMethods.set,
-            consoleOtherMethods: cells[36].consoleOtherMethods.set,
-            makeLoggingConsoleKit: cells[36].makeLoggingConsoleKit.set,
-            pumpLogToConsole: cells[36].pumpLogToConsole.set,
-            makeCausalConsole: cells[36].makeCausalConsole.set,
-            defineCausalConsoleFromLogger: cells[36].defineCausalConsoleFromLogger.set,
-            filterConsole: cells[36].filterConsole.set,
+            isValidIdentifierName: cells[36].isValidIdentifierName.set,
+            getScopeConstants: cells[36].getScopeConstants.set,
         },
         importMeta: {},
     });
     functors[37]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./scope-constants.js", 36);
         },
         liveVar: {},
         onceVar: {
-            makeRejectionHandlers: cells[37].makeRejectionHandlers.set,
+            makeEvaluate: cells[37].makeEvaluate.set,
         },
         importMeta: {},
     });
     functors[38]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
-            observeImports(map, "./assert.js", 9);
-            observeImports(map, "./console.js", 36);
-            observeImports(map, "./unhandled-rejection.js", 37);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./strict-scope-terminator.js", 31);
+            observeImports(map, "./sloppy-globals-scope-terminator.js", 32);
+            observeImports(map, "./eval-scope.js", 33);
+            observeImports(map, "./transforms.js", 35);
+            observeImports(map, "./make-evaluate.js", 37);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            tameConsole: cells[38].tameConsole.set,
+            makeSafeEvaluator: cells[38].makeSafeEvaluator.set,
         },
         importMeta: {},
     });
     functors[39]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
+            observeImports(map, "./commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            filterFileName: cells[39].filterFileName.set,
-            shortenCallSiteString: cells[39].shortenCallSiteString.set,
-            tameV8ErrorConstructor: cells[39].tameV8ErrorConstructor.set,
+            tameFunctionToString: cells[39].tameFunctionToString.set,
         },
         importMeta: {},
     });
     functors[40]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "../commons.js", 0);
-            observeImports(map, "../permits.js", 12);
-            observeImports(map, "./tame-v8-error-constructor.js", 39);
+            observeImports(map, "./commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            default: cells[40].default.set,
+            tameDomains: cells[40].tameDomains.set,
         },
         importMeta: {},
     });
     functors[41]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "@endo/env-options", 3);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
         onceVar: {
-            makeAlias: cells[41].makeAlias.set,
-            load: cells[41].load.set,
-            loadNow: cells[41].loadNow.set,
+            tameModuleSource: cells[41].tameModuleSource.set,
         },
         importMeta: {},
     });
     functors[42]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./module-load.js", 41);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
+            observeImports(map, "../commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            deferExports: cells[42].deferExports.set,
-            getDeferredExports: cells[42].getDeferredExports.set,
+            consoleLevelMethods: cells[42].consoleLevelMethods.set,
+            consoleOtherMethods: cells[42].consoleOtherMethods.set,
+            makeLoggingConsoleKit: cells[42].makeLoggingConsoleKit.set,
+            pumpLogToConsole: cells[42].pumpLogToConsole.set,
+            makeCausalConsole: cells[42].makeCausalConsole.set,
+            defineCausalConsoleFromLogger: cells[42].defineCausalConsoleFromLogger.set,
+            filterConsole: cells[42].filterConsole.set,
         },
         importMeta: {},
     });
     functors[43]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./transforms.js", 29);
-            observeImports(map, "./make-safe-evaluator.js", 32);
+            observeImports(map, "../commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            provideCompartmentEvaluator: cells[43].provideCompartmentEvaluator.set,
-            compartmentEvaluate: cells[43].compartmentEvaluate.set,
+            makeRejectionHandlers: cells[43].makeRejectionHandlers.set,
         },
         importMeta: {},
     });
     functors[44]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./error/assert.js", 9);
-            observeImports(map, "./module-proxy.js", 42);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./compartment-evaluate.js", 43);
+            observeImports(map, "../commons.js", 0);
+            observeImports(map, "./assert.js", 13);
+            observeImports(map, "./console.js", 42);
+            observeImports(map, "./unhandled-rejection.js", 43);
         },
         liveVar: {},
         onceVar: {
-            makeVirtualModuleInstance: cells[44].makeVirtualModuleInstance.set,
-            makeModuleInstance: cells[44].makeModuleInstance.set,
+            tameConsole: cells[44].tameConsole.set,
         },
         importMeta: {},
     });
     functors[45]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./error/assert.js", 9);
-            observeImports(map, "./module-instance.js", 44);
-            observeImports(map, "./commons.js", 0);
+            observeImports(map, "../commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            link: cells[45].link.set,
-            instantiate: cells[45].instantiate.set,
+            filterFileName: cells[45].filterFileName.set,
+            shortenCallSiteString: cells[45].shortenCallSiteString.set,
+            tameV8ErrorConstructor: cells[45].tameV8ErrorConstructor.set,
         },
         importMeta: {},
     });
     functors[46]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./commons.js", 0);
-            observeImports(map, "./global-object.js", 24);
-            observeImports(map, "./error/assert.js", 9);
-            observeImports(map, "./permits.js", 12);
-            observeImports(map, "./module-load.js", 41);
-            observeImports(map, "./module-link.js", 45);
-            observeImports(map, "./module-proxy.js", 42);
-            observeImports(map, "./compartment-evaluate.js", 43);
-            observeImports(map, "./make-safe-evaluator.js", 32);
+            observeImports(map, "../commons.js", 0);
+            observeImports(map, "../permits.js", 16);
+            observeImports(map, "./tame-v8-error-constructor.js", 45);
         },
         liveVar: {},
         onceVar: {
-            InertCompartment: cells[46].InertCompartment.set,
-            CompartmentPrototype: cells[46].CompartmentPrototype.set,
-            compartmentOptions: cells[46].compartmentOptions.set,
-            makeCompartmentConstructor: cells[46].makeCompartmentConstructor.set,
+            default: cells[46].default.set,
         },
         importMeta: {},
     });
     functors[47]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "@endo/env-options", 3);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./compartment.js", 46);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            getAnonymousIntrinsics: cells[47].getAnonymousIntrinsics.set,
+            makeAlias: cells[47].makeAlias.set,
+            load: cells[47].load.set,
+            loadNow: cells[47].loadNow.set,
         },
         importMeta: {},
     });
     functors[48]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./module-load.js", 47);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./error/assert.js", 13);
         },
         liveVar: {},
         onceVar: {
-            tameHarden: cells[48].tameHarden.set,
+            deferExports: cells[48].deferExports.set,
+            getDeferredExports: cells[48].getDeferredExports.set,
         },
         importMeta: {},
     });
@@ -1205,33 +1242,42 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./transforms.js", 35);
+            observeImports(map, "./make-safe-evaluator.js", 38);
         },
         liveVar: {},
         onceVar: {
-            tameSymbolConstructor: cells[49].tameSymbolConstructor.set,
+            provideCompartmentEvaluator: cells[49].provideCompartmentEvaluator.set,
+            compartmentEvaluate: cells[49].compartmentEvaluate.set,
         },
         importMeta: {},
     });
     functors[50]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./error/assert.js", 13);
+            observeImports(map, "./module-proxy.js", 48);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./compartment-evaluate.js", 49);
         },
         liveVar: {},
         onceVar: {
-            tameFauxDataProperty: cells[50].tameFauxDataProperty.set,
-            tameFauxDataProperties: cells[50].tameFauxDataProperties.set,
+            makeVirtualModuleInstance: cells[50].makeVirtualModuleInstance.set,
+            makeModuleInstance: cells[50].makeModuleInstance.set,
         },
         importMeta: {},
     });
     functors[51]({
         imports(entries) {
             const map = new Map(entries);
+            observeImports(map, "./error/assert.js", 13);
+            observeImports(map, "./module-instance.js", 50);
             observeImports(map, "./commons.js", 0);
         },
         liveVar: {},
         onceVar: {
-            tameRegeneratorRuntime: cells[51].tameRegeneratorRuntime.set,
+            link: cells[51].link.set,
+            instantiate: cells[51].instantiate.set,
         },
         importMeta: {},
     });
@@ -1239,10 +1285,21 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
+            observeImports(map, "./global-object.js", 30);
+            observeImports(map, "./error/assert.js", 13);
+            observeImports(map, "./permits.js", 16);
+            observeImports(map, "./module-load.js", 47);
+            observeImports(map, "./module-link.js", 51);
+            observeImports(map, "./module-proxy.js", 48);
+            observeImports(map, "./compartment-evaluate.js", 49);
+            observeImports(map, "./make-safe-evaluator.js", 38);
         },
         liveVar: {},
         onceVar: {
-            shimArrayBufferTransfer: cells[52].shimArrayBufferTransfer.set,
+            InertCompartment: cells[52].InertCompartment.set,
+            CompartmentPrototype: cells[52].CompartmentPrototype.set,
+            compartmentOptions: cells[52].compartmentOptions.set,
+            makeCompartmentConstructor: cells[52].makeCompartmentConstructor.set,
         },
         importMeta: {},
     });
@@ -1250,105 +1307,176 @@
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
+            observeImports(map, "./compartment.js", 52);
         },
         liveVar: {},
         onceVar: {
-            chooseReporter: cells[53].chooseReporter.set,
-            reportInGroup: cells[53].reportInGroup.set,
+            getAnonymousIntrinsics: cells[53].getAnonymousIntrinsics.set,
         },
         importMeta: {},
     });
     functors[54]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "@endo/env-options", 3);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./make-hardener.js", 10);
-            observeImports(map, "./intrinsics.js", 13);
-            observeImports(map, "./permits-intrinsics.js", 14);
-            observeImports(map, "./tame-function-constructors.js", 15);
-            observeImports(map, "./tame-date-constructor.js", 16);
-            observeImports(map, "./tame-math-object.js", 17);
-            observeImports(map, "./tame-regexp-constructor.js", 18);
-            observeImports(map, "./enable-property-overrides.js", 20);
-            observeImports(map, "./tame-locale-methods.js", 21);
-            observeImports(map, "./global-object.js", 24);
-            observeImports(map, "./make-safe-evaluator.js", 32);
-            observeImports(map, "./permits.js", 12);
-            observeImports(map, "./tame-function-tostring.js", 33);
-            observeImports(map, "./tame-domains.js", 34);
-            observeImports(map, "./tame-module-source.js", 35);
-            observeImports(map, "./error/tame-console.js", 38);
-            observeImports(map, "./error/tame-error-constructor.js", 40);
-            observeImports(map, "./error/assert.js", 9);
-            observeImports(map, "./get-anonymous-intrinsics.js", 47);
-            observeImports(map, "./compartment.js", 46);
-            observeImports(map, "./tame-harden.js", 48);
-            observeImports(map, "./tame-symbol-constructor.js", 49);
-            observeImports(map, "./tame-faux-data-properties.js", 50);
-            observeImports(map, "./tame-regenerator-runtime.js", 51);
-            observeImports(map, "./shim-arraybuffer-transfer.js", 52);
-            observeImports(map, "./reporting.js", 53);
         },
         liveVar: {},
         onceVar: {
-            repairIntrinsics: cells[54].repairIntrinsics.set,
+            tameHarden: cells[54].tameHarden.set,
         },
         importMeta: {},
     });
     functors[55]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./assert-sloppy-mode.js", 1);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./lockdown.js", 54);
         },
         liveVar: {},
-        onceVar: {},
+        onceVar: {
+            tameSymbolConstructor: cells[55].tameSymbolConstructor.set,
+        },
         importMeta: {},
     });
     functors[56]({
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./compartment.js", 46);
-            observeImports(map, "./tame-function-tostring.js", 33);
-            observeImports(map, "./intrinsics.js", 13);
-            observeImports(map, "./reporting.js", 53);
         },
         liveVar: {},
-        onceVar: {},
+        onceVar: {
+            tameFauxDataProperty: cells[56].tameFauxDataProperty.set,
+            tameFauxDataProperties: cells[56].tameFauxDataProperties.set,
+        },
         importMeta: {},
     });
     functors[57]({
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
-        onceVar: {},
+        onceVar: {
+            tameRegeneratorRuntime: cells[57].tameRegeneratorRuntime.set,
+        },
         importMeta: {},
     });
     functors[58]({
         imports(entries) {
             const map = new Map(entries);
             observeImports(map, "./commons.js", 0);
-            observeImports(map, "./error/console.js", 36);
-            observeImports(map, "./error/assert.js", 9);
         },
         liveVar: {},
-        onceVar: {},
+        onceVar: {
+            shimArrayBufferTransfer: cells[58].shimArrayBufferTransfer.set,
+        },
         importMeta: {},
     });
     functors[59]({
         imports(entries) {
             const map = new Map(entries);
-            observeImports(map, "./src/lockdown-shim.js", 55);
-            observeImports(map, "./src/compartment-shim.js", 56);
-            observeImports(map, "./src/assert-shim.js", 57);
-            observeImports(map, "./src/console-shim.js", 58);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./error/assert.js", 13);
+        },
+        liveVar: {},
+        onceVar: {
+            chooseReporter: cells[59].chooseReporter.set,
+            reportInGroup: cells[59].reportInGroup.set,
+        },
+        importMeta: {},
+    });
+    functors[60]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "@endo/env-options", 3);
+            observeImports(map, "@endo/immutable-arraybuffer/shim.js", 6);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./make-hardener.js", 14);
+            observeImports(map, "./intrinsics.js", 17);
+            observeImports(map, "./permits-intrinsics.js", 18);
+            observeImports(map, "./tame-function-constructors.js", 19);
+            observeImports(map, "./tame-date-constructor.js", 20);
+            observeImports(map, "./tame-math-object.js", 21);
+            observeImports(map, "./tame-temporal-object.js", 22);
+            observeImports(map, "./tame-nan-sidechannel.js", 23);
+            observeImports(map, "./tame-regexp-constructor.js", 24);
+            observeImports(map, "./enable-property-overrides.js", 26);
+            observeImports(map, "./tame-locale-methods.js", 27);
+            observeImports(map, "./global-object.js", 30);
+            observeImports(map, "./make-safe-evaluator.js", 38);
+            observeImports(map, "./permits.js", 16);
+            observeImports(map, "./tame-function-tostring.js", 39);
+            observeImports(map, "./tame-domains.js", 40);
+            observeImports(map, "./tame-module-source.js", 41);
+            observeImports(map, "./error/tame-console.js", 44);
+            observeImports(map, "./error/tame-error-constructor.js", 46);
+            observeImports(map, "./error/assert.js", 13);
+            observeImports(map, "./get-anonymous-intrinsics.js", 53);
+            observeImports(map, "./compartment.js", 52);
+            observeImports(map, "./tame-harden.js", 54);
+            observeImports(map, "./tame-symbol-constructor.js", 55);
+            observeImports(map, "./tame-faux-data-properties.js", 56);
+            observeImports(map, "./tame-regenerator-runtime.js", 57);
+            observeImports(map, "./shim-arraybuffer-transfer.js", 58);
+            observeImports(map, "./reporting.js", 59);
+        },
+        liveVar: {},
+        onceVar: {
+            repairIntrinsics: cells[60].repairIntrinsics.set,
+        },
+        importMeta: {},
+    });
+    functors[61]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "./assert-sloppy-mode.js", 1);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./lockdown.js", 60);
+        },
+        liveVar: {},
+        onceVar: {},
+        importMeta: {},
+    });
+    functors[62]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./compartment.js", 52);
+            observeImports(map, "./tame-function-tostring.js", 39);
+            observeImports(map, "./intrinsics.js", 17);
+            observeImports(map, "./reporting.js", 59);
+        },
+        liveVar: {},
+        onceVar: {},
+        importMeta: {},
+    });
+    functors[63]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./error/assert.js", 13);
+        },
+        liveVar: {},
+        onceVar: {},
+        importMeta: {},
+    });
+    functors[64]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "./commons.js", 0);
+            observeImports(map, "./error/console.js", 42);
+            observeImports(map, "./error/assert.js", 13);
+        },
+        liveVar: {},
+        onceVar: {},
+        importMeta: {},
+    });
+    functors[65]({
+        imports(entries) {
+            const map = new Map(entries);
+            observeImports(map, "./src/lockdown-shim.js", 61);
+            observeImports(map, "./src/compartment-shim.js", 62);
+            observeImports(map, "./src/assert-shim.js", 63);
+            observeImports(map, "./src/console-shim.js", 64);
         },
         liveVar: {},
         onceVar: {},
@@ -1356,17 +1484,18 @@
     });
 
     return cells[cells.length - 1]['*'].get();
-})([// === functors[0] ===
+})([
+// === 0. ses ./src/commons.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        $h͏_imports([]);   /**
-         * @module Captures native intrinsics during initialization, so vetted shims
+        $h͏_imports([]);/**
+         * Captures native intrinsics during initialization, so vetted shims
          * (running between initialization of SES and calling lockdown) are free to
          * modify the environment without compromising the integrity of SES. For
          * example, a vetted shim can modify Object.assign because we capture and
@@ -1376,6 +1505,8 @@
          * This pattern of use is enforced by eslint rules no-restricted-globals and
          * no-polymorphic-call.
          * We maintain the list of restricted globals in ../package.json.
+         *
+         * @module
          */
 
         /* global globalThis */
@@ -1392,11 +1523,14 @@
             ArrayBuffer,
             Date,
             FinalizationRegistry,
-            Float32Array,
+            // Renamed to FERAL_* because it enables the NaN side-channel
+            Float64Array: FERAL_FLOAT64_ARRAY,
+            DataView,
             JSON,
             Map,
             Math,
             Number,
+            BigInt,
             Object,
             Promise,
             Proxy,
@@ -1407,18 +1541,20 @@
             Symbol,
             Uint8Array,
             WeakMap,
-            WeakSet
-        } =
-            globalThis;
+            WeakSet,
+            Temporal  // may be undefined on old JS engines
+        } = globalThis;
         $h͏_once.Array(Array);
         $h͏_once.ArrayBuffer(ArrayBuffer);
         $h͏_once.Date(Date);
         $h͏_once.FinalizationRegistry(FinalizationRegistry);
-        $h͏_once.Float32Array(Float32Array);
+        $h͏_once.FERAL_FLOAT64_ARRAY(FERAL_FLOAT64_ARRAY);
+        $h͏_once.DataView(DataView);
         $h͏_once.JSON(JSON);
         $h͏_once.Map(Map);
         $h͏_once.Math(Math);
         $h͏_once.Number(Number);
+        $h͏_once.BigInt(BigInt);
         $h͏_once.Object(Object);
         $h͏_once.Promise(Promise);
         $h͏_once.Proxy(Proxy);
@@ -1430,6 +1566,7 @@
         $h͏_once.Uint8Array(Uint8Array);
         $h͏_once.WeakMap(WeakMap);
         $h͏_once.WeakSet(WeakSet);
+        $h͏_once.Temporal(Temporal);
 
         const {
             // The feral Error constructor is safe for internal use, but must not be
@@ -1440,9 +1577,8 @@
             ReferenceError,
             SyntaxError,
             TypeError,
-            AggregateError
-        } =
-            globalThis;
+            AggregateError,
+        } = globalThis;
         $h͏_once.FERAL_ERROR(FERAL_ERROR);
         $h͏_once.RangeError(RangeError);
         $h͏_once.ReferenceError(ReferenceError);
@@ -1455,7 +1591,6 @@
             create,
             defineProperties,
             entries,
-            freeze,
             getOwnPropertyDescriptor,
             getOwnPropertyDescriptors,
             getOwnPropertyNames,
@@ -1470,14 +1605,21 @@
             preventExtensions,
             setPrototypeOf,
             values,
-            fromEntries
-        } =
-            Object;
-        $h͏_once.assign(assign);
+            fromEntries,
+        } = Object;
+
+        /**
+         * For use with any value except a regular expression (@see {@link sealRegexp}
+         * and {@link freezeRegexp}).
+         *
+         * @type { &
+         *   ((obj: RegExp) => void) &
+         *   typeof Object.freeze
+         * }
+         */$h͏_once.assign(assign);
         $h͏_once.create(create);
         $h͏_once.defineProperties(defineProperties);
         $h͏_once.entries(entries);
-        $h͏_once.freeze(freeze);
         $h͏_once.getOwnPropertyDescriptor(getOwnPropertyDescriptor);
         $h͏_once.getOwnPropertyDescriptors(getOwnPropertyDescriptors);
         $h͏_once.getOwnPropertyNames(getOwnPropertyNames);
@@ -1493,26 +1635,37 @@
         $h͏_once.setPrototypeOf(setPrototypeOf);
         $h͏_once.values(values);
         $h͏_once.fromEntries(fromEntries);
+        const freeze = /** @type {any} */ (Object.freeze);
+        $h͏_once.freeze(freeze);
 
         const {
             species: speciesSymbol,
             toStringTag: toStringTagSymbol,
             iterator: iteratorSymbol,
             matchAll: matchAllSymbol,
+            replace: replaceSymbol,
+            search: searchSymbol,
             unscopables: unscopablesSymbol,
             keyFor: symbolKeyFor,
-            for: symbolFor
-        } =
-            Symbol;
+            for: symbolFor,
+        } = Symbol;
         $h͏_once.speciesSymbol(speciesSymbol);
         $h͏_once.toStringTagSymbol(toStringTagSymbol);
         $h͏_once.iteratorSymbol(iteratorSymbol);
         $h͏_once.matchAllSymbol(matchAllSymbol);
+        $h͏_once.replaceSymbol(replaceSymbol);
+        $h͏_once.searchSymbol(searchSymbol);
         $h͏_once.unscopablesSymbol(unscopablesSymbol);
         $h͏_once.symbolKeyFor(symbolKeyFor);
         $h͏_once.symbolFor(symbolFor);
 
-        const {isInteger} = Number;
+        const {max, min, trunc} = Math;
+        $h͏_once.max(max);
+        $h͏_once.min(min);
+        $h͏_once.trunc(trunc);
+
+        const {MAX_SAFE_INTEGER, isInteger} = Number;
+        $h͏_once.MAX_SAFE_INTEGER(MAX_SAFE_INTEGER);
         $h͏_once.isInteger(isInteger);
 
         const {stringify: stringifyJson} = JSON;
@@ -1535,9 +1688,9 @@
                 // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_DEFINE_PROPERTY_FAILED_SILENTLY.md
                 throw TypeError(
                     `Please report that the original defineProperty silently failed to set ${stringifyJson(
-                        String(prop))
-                    }. (SES_DEFINE_PROPERTY_FAILED_SILENTLY)`);
-
+                        String(prop),
+                    )}. (SES_DEFINE_PROPERTY_FAILED_SILENTLY)`,
+                );
             }
             return result;
         };
@@ -1552,9 +1705,8 @@
             isExtensible: reflectIsExtensible,
             ownKeys,
             preventExtensions: reflectPreventExtensions,
-            set: reflectSet
-        } =
-            Reflect;
+            set: reflectSet,
+        } = Reflect;
         $h͏_once.apply(apply);
         $h͏_once.construct(construct);
         $h͏_once.reflectGet(reflectGet);
@@ -1570,6 +1722,8 @@
         $h͏_once.arrayPrototype(arrayPrototype);
         const {prototype: arrayBufferPrototype} = ArrayBuffer;
         $h͏_once.arrayBufferPrototype(arrayBufferPrototype);
+        const {prototype: dataViewPrototype} = DataView;
+        $h͏_once.dataViewPrototype(dataViewPrototype);
         const {prototype: mapPrototype} = Map;
         $h͏_once.mapPrototype(mapPrototype);
         const {revocable: proxyRevocable} = Proxy;
@@ -1591,14 +1745,14 @@
         const {prototype: generatorPrototype} = getPrototypeOf(
             // eslint-disable-next-line no-empty-function, func-names
             function* () {
-            });
+            },
+        );
         $h͏_once.generatorPrototype(generatorPrototype);
-
         const iteratorPrototype = getPrototypeOf(
             // eslint-disable-next-line @endo/no-polymorphic-call
-            getPrototypeOf(arrayPrototype.values()));
+            getPrototypeOf(arrayPrototype.values()),
+        );
         $h͏_once.iteratorPrototype(iteratorPrototype);
-
 
         const typedArrayPrototype = getPrototypeOf(Uint8Array.prototype);
         $h͏_once.typedArrayPrototype(typedArrayPrototype);
@@ -1617,10 +1771,31 @@
          * @type {<F extends (this: any, ...args: any[]) => any>(fn: F) => ((thisArg: ThisParameterType<F>, ...args: Parameters<F>) => ReturnType<F>)}
          */
         const uncurryThis = bind.bind(bind.call); // eslint-disable-line @endo/no-polymorphic-call
+
+// See https://github.com/endojs/endo/issues/2930
         $h͏_once.uncurryThis(uncurryThis);
-        const objectHasOwnProperty = uncurryThis(objectPrototype.hasOwnProperty);
+        if (!('hasOwn' in Object)) {
+            const ObjectPrototypeHasOwnProperty = objectPrototype.hasOwnProperty;
+            const hasOwnShim = (obj, key) => {
+                if (obj === undefined || obj === null) {
+                    // We need to add this extra test because of differences in
+                    // the order in which `hasOwn` vs `hasOwnProperty` validates
+                    // arguments.
+                    throw TypeError('Cannot convert undefined or null to object');
+                }
+                return apply(ObjectPrototypeHasOwnProperty, obj, [key]);
+            };
+            defineProperty(Object, 'hasOwn', {
+                value: hasOwnShim,
+                writable: true,
+                enumerable: false,
+                configurable: true,
+            });
+        }
+
+        const {hasOwn} = Object;
 //
-        $h͏_once.objectHasOwnProperty(objectHasOwnProperty);
+        $h͏_once.hasOwn(hasOwn);
         const arrayFilter = uncurryThis(arrayPrototype.filter);
         $h͏_once.arrayFilter(arrayFilter);
         const arrayForEach = uncurryThis(arrayPrototype.forEach);
@@ -1629,12 +1804,12 @@
         $h͏_once.arrayIncludes(arrayIncludes);
         const arrayJoin = uncurryThis(arrayPrototype.join);
         /** @type {<T, U>(thisArg: readonly T[], callbackfn: (value: T, index: number, array: T[]) => U, cbThisArg?: any) => U[]} */$h͏_once.arrayJoin(arrayJoin);
-        const arrayMap =  /** @type {any} */  uncurryThis(arrayPrototype.map);
+        const arrayMap = /** @type {any} */ (uncurryThis(arrayPrototype.map));
         $h͏_once.arrayMap(arrayMap);
-        const arrayFlatMap =  /** @type {any} */
-            uncurryThis(arrayPrototype.flatMap);
+        const arrayFlatMap = /** @type {any} */ (
+            uncurryThis(arrayPrototype.flatMap)
+        );
         $h͏_once.arrayFlatMap(arrayFlatMap);
-
         const arrayPop = uncurryThis(arrayPrototype.pop);
         /** @type {<T>(thisArg: T[], ...items: T[]) => number} */$h͏_once.arrayPop(arrayPop);
         const arrayPush = uncurryThis(arrayPrototype.push);
@@ -1652,8 +1827,8 @@
         /** @type {(b: ArrayBuffer) => number} */$h͏_once.arrayBufferSlice(arrayBufferSlice);
         const arrayBufferGetByteLength = uncurryThis(
             // @ts-expect-error we know it is there on all conforming platforms
-            getOwnPropertyDescriptor(arrayBufferPrototype, 'byteLength').get);
-
+            getOwnPropertyDescriptor(arrayBufferPrototype, 'byteLength').get,
+        );
 //
         $h͏_once.arrayBufferGetByteLength(arrayBufferGetByteLength);
         const typedArraySet = uncurryThis(typedArrayPrototype.set);
@@ -1682,14 +1857,75 @@
         $h͏_once.setHas(setHas);
         const iterateSet = uncurryThis(setPrototype[iteratorSymbol]);
 //
-        $h͏_once.iterateSet(iterateSet);
-        const regexpTest = uncurryThis(regexpPrototype.test);
-        $h͏_once.regexpTest(regexpTest);
+        /**
+         * `regexpExec` is provided in exclusion of `regexpTest`, which would be
+         * vulnerable to RegExp.prototype poisoning.
+         */$h͏_once.iterateSet(iterateSet);
         const regexpExec = uncurryThis(regexpPrototype.exec);
-        $h͏_once.regexpExec(regexpExec);
+
+        /**
+         * @type { &
+         *   ((thisArg: RegExp, string: string, replaceValue: string) => string) &
+         *   ((thisArg: RegExp, string: string, replacer: (substring: string, ...args: any[]) => string) => string)
+         * }
+         */$h͏_once.regexpExec(regexpExec);
+        const regexpReplace = /** @type {any} */ (
+            uncurryThis(regexpPrototype[replaceSymbol])
+        );
+
+        /**
+         * `regexpSearch` can be used with a frozen non-global non-sticky RegExp.
+         *
+         * @type {(thisArg: RegExp, string: string) => number}
+         */$h͏_once.regexpReplace(regexpReplace);
+        const regexpSearch = uncurryThis(regexpPrototype[searchSymbol]);
+
+        /**
+         * `matchAll` internally creates a new RegExp vulnerable to prototype poisoning,
+         * but this function is still needed to reach %RegExpStringIteratorPrototype%.
+         * @private
+         */$h͏_once.regexpSearch(regexpSearch);
         const matchAllRegExp = uncurryThis(regexpPrototype[matchAllSymbol]);
-//
         $h͏_once.matchAllRegExp(matchAllRegExp);
+
+        const regexpDescriptors = getOwnPropertyDescriptors(regexpPrototype);
+        arrayForEach(ownKeys(regexpDescriptors), key => {
+            const desc = regexpDescriptors[/** @type {any} */ (key)];
+            desc.configurable = false;
+            if (desc.writable) desc.writable = false;
+        });
+// Don't follow Symbol.species
+// https://tc39.es/ecma262/multipage/abstract-operations.html#sec-speciesconstructor
+        defineProperty(regexpDescriptors, 'constructor', {
+            value: undefined,
+            enumerable: false,
+            configurable: false,
+            writable: false,
+        });
+
+        /**
+         * Protect a RegExp instance against RegExp.prototype poisoning ("exec",
+         * "flags", Symbol.replace, etc.) while still maintaining mutability of its
+         * "lastIndex" property (which is necessary with flags "g" and/or "y" for some
+         * operations, most notably {@link regexpReplace}).
+         *
+         * @type {<T extends RegExp>(regexp: T) => T}
+         */
+        const sealRegexp = regexp =>
+            seal(defineProperties(regexp, regexpDescriptors));
+
+        /**
+         * Protect a RegExp instance against RegExp.prototype poisoning ("exec",
+         * "flags", Symbol.replace, etc.) and freeze its "lastIndex" property, rendering
+         * it fully inert but (absent flags "g" and/or "y") still usable by
+         * {@link regexpExec} and {@link regexpSearch}.
+         *
+         * @type {<T extends RegExp>(regexp: T) => T}
+         */$h͏_once.sealRegexp(sealRegexp);
+        const freezeRegexp = regexp =>
+            freeze(/** @type {any} */ (defineProperties(regexp, regexpDescriptors)));
+//
+        $h͏_once.freezeRegexp(freezeRegexp);
         const stringEndsWith = uncurryThis(stringPrototype.endsWith);
         $h͏_once.stringEndsWith(stringEndsWith);
         const stringIncludes = uncurryThis(stringPrototype.includes);
@@ -1697,30 +1933,22 @@
         const stringIndexOf = uncurryThis(stringPrototype.indexOf);
         $h͏_once.stringIndexOf(stringIndexOf);
         const stringMatch = uncurryThis(stringPrototype.match);
+// `stringReplace` is intentionally omitted because it would be vulnerable to
+// RegExp.prototype poisoning; use `regexpReplace(re, str, replacer)` instead
+// (and `sealRegexp` on its regular expressions).
         $h͏_once.stringMatch(stringMatch);
-        const generatorNext = uncurryThis(generatorPrototype.next);
-        $h͏_once.generatorNext(generatorNext);
-        const generatorThrow = uncurryThis(generatorPrototype.throw);
-
-        /**
-         * @type { &
-         *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replaceValue: string): string; }, replaceValue: string) => string) &
-         *   ((thisArg: string, searchValue: { [Symbol.replace](string: string, replacer: (substring: string, ...args: any[]) => string): string; }, replacer: (substring: string, ...args: any[]) => string) => string)
-         * }
-         */$h͏_once.generatorThrow(generatorThrow);
-        const stringReplace =  /** @type {any} */
-            uncurryThis(stringPrototype.replace);
-        $h͏_once.stringReplace(stringReplace);
-
         const stringSearch = uncurryThis(stringPrototype.search);
         $h͏_once.stringSearch(stringSearch);
         const stringSlice = uncurryThis(stringPrototype.slice);
-        $h͏_once.stringSlice(stringSlice);
-        const stringSplit =
-            /** @type {(thisArg: string, splitter: string | RegExp | { [Symbol.split](string: string, limit?: number): string[]; }, limit?: number) => string[]} */
-            uncurryThis(stringPrototype.split);
+        /**
+         * `stringSplit` should only be used with a string separator; regular
+         * expressions are vulnerable to RegExp.prototype poisoning.
+         * @type {(thisArg: string, separator: string, limit?: number) => string[]}
+         */$h͏_once.stringSlice(stringSlice);
+        const stringSplit = /** @type {any} */ (
+            uncurryThis(stringPrototype.split)
+        );
         $h͏_once.stringSplit(stringSplit);
-
         const stringStartsWith = uncurryThis(stringPrototype.startsWith);
         $h͏_once.stringStartsWith(stringStartsWith);
         const iterateString = uncurryThis(stringPrototype[iteratorSymbol]);
@@ -1745,14 +1973,19 @@
         const functionBind = uncurryThis(bind);
 //
         $h͏_once.functionBind(functionBind);
+        const generatorNext = uncurryThis(generatorPrototype.next);
+        $h͏_once.generatorNext(generatorNext);
+        const generatorThrow = uncurryThis(generatorPrototype.throw);
+//
+        $h͏_once.generatorThrow(generatorThrow);
         const {all} = Promise;
-        const promiseAll = (promises) => apply(all, Promise, [promises]);
+        const promiseAll = promises => apply(all, Promise, [promises]);
         $h͏_once.promiseAll(promiseAll);
         const promiseCatch = uncurryThis(promisePrototype.catch);
         /** @type {<T, TResult1 = T, TResult2 = never>(thisArg: T, onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null) => Promise<TResult1 | TResult2>} */$h͏_once.promiseCatch(promiseCatch);
-        const promiseThen =  /** @type {any} */
-            uncurryThis(promisePrototype.then);
-
+        const promiseThen = /** @type {any} */ (
+            uncurryThis(promisePrototype.then)
+        );
 //
         $h͏_once.promiseThen(promiseThen);
         const finalizationRegistryRegister =
@@ -1763,32 +1996,20 @@
             uncurryThis(FinalizationRegistry.prototype.unregister);
 
         /**
-         * getConstructorOf()
-         * Return the constructor from an instance.
+         * TODO Consolidate with `isPrimitive` that's currently in `@endo/pass-style`.
+         * Layering constraints make this tricky, which is why we haven't yet figured
+         * out how to do this.
          *
-         * @param {Function} fn
+         * @type {(val: unknown) => val is (undefined
+         * | null
+         * | boolean
+         * | number
+         * | bigint
+         * | string
+         * | symbol)}
          */$h͏_once.finalizationRegistryUnregister(finalizationRegistryUnregister);
-        const getConstructorOf = (fn) =>
-            reflectGet(getPrototypeOf(fn), 'constructor');
-
-        /**
-         * isObject tests whether a value is an object.
-         * Today, this is equivalent to:
-         *
-         *   const isObject = value => {
-         *     if (value === null) return false;
-         *     const type = typeof value;
-         *     return type === 'object' || type === 'function';
-         *   };
-         *
-         * But this is not safe in the face of possible evolution of the language, for
-         * example new types or semantics of records and tuples.
-         * We use this implementation despite the unnecessary allocation implied by
-         * attempting to box a primitive.
-         *
-         * @param {any} value
-         */$h͏_once.getConstructorOf(getConstructorOf);
-        const isObject = (value) => Object(value) === value;
+        const isPrimitive = val =>
+            !val || (typeof val !== 'object' && typeof val !== 'function');
 
         /**
          * isError tests whether an object inherits from the intrinsic
@@ -1800,14 +2021,14 @@
          * for such a trivial case outside commons.js, we provide a utility function.
          *
          * @param {any} value
-         */$h͏_once.isObject(isObject);
-        const isError = (value) => value instanceof FERAL_ERROR;
+         */$h͏_once.isPrimitive(isPrimitive);
+        const isError = value => value instanceof FERAL_ERROR;
 
         /**
          * @template T
          * @param {T} x
          */$h͏_once.isError(isError);
-        const identity = (x) => x;
+        const identity = x => x;
 
 // The original unsafe untamed eval function, which must not escape.
 // Sample at module initialization time, which is before lockdown can
@@ -1825,17 +2046,44 @@
 
         const noEvalEvaluate = () => {
             // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_NO_EVAL.md
-            throw TypeError('Cannot eval with evalTaming set to "noEval" (SES_NO_EVAL)');
+            throw TypeError('Cannot eval with evalTaming set to "no-eval" (SES_NO_EVAL)');
         };
 
 // ////////////////// FERAL_STACK_GETTER FERAL_STACK_SETTER ////////////////////
-        $h͏_once.noEvalEvaluate(noEvalEvaluate);
-        const er1StackDesc = getOwnPropertyDescriptor(Error('er1'), 'stack');
-        const er2StackDesc = getOwnPropertyDescriptor(TypeError('er2'), 'stack');
+
+// The error repair mechanism is very similar to code in
+// pass-style/src/error.js and these implementations should be kept in sync.
+
+        /**
+         * We gratuitiously construct a TypeError instance using syntax in order to
+         * obviate the possibility that code that ran before SES (for which we are
+         * irreducable vulnerable) may have replaced the global TypeError constructor.
+         * We treat the nature of this error instance as the source of truth for the
+         * nature of runtime constructed errors on the platform, particularly whether
+         * such errors will have an own "stack" property with getters and setters.
+         * At time of writing (2025) we know of no comparable mechanism for obtaining a
+         * host-generated base Error instance, but we corroborate the nature of the
+         * global Error constructor's instances and refuse to initialize SES in an
+         * environment where the syntactic TypeError and global Error produce
+         * inconsistent "stack" properties.
+         * @returns {TypeError}
+         */$h͏_once.noEvalEvaluate(noEvalEvaluate);
+        const makeTypeError = () => {
+            try {
+                // @ts-expect-error deliberate TypeError
+                null.null;
+                throw TypeError('obligatory'); // To convince the type flow inferrence.
+            } catch (error) {
+                return /** @type {TypeError} */ (error);
+            }
+        };
+
+        const errorStackDesc = getOwnPropertyDescriptor(Error('obligatory'), 'stack');
+        const typeErrorStackDesc = getOwnPropertyDescriptor(makeTypeError(), 'stack');
 
         let feralStackGetter;
         let feralStackSetter;
-        if (er1StackDesc && er2StackDesc && er1StackDesc.get) {
+        if (typeErrorStackDesc && typeErrorStackDesc.get) {
             // We should only encounter this case on v8 because of its problematic
             // error own stack accessor behavior.
             // Note that FF/SpiderMonkey, Moddable/XS, and the error stack proposal
@@ -1846,20 +2094,22 @@
                 // accessor property, but within the same realm, all these accessor
                 // properties have the same getter and have the same setter.
                 // This is therefore the case that we repair.
-                typeof er1StackDesc.get === 'function' &&
-                er1StackDesc.get === er2StackDesc.get &&
-                typeof er1StackDesc.set === 'function' &&
-                er1StackDesc.set === er2StackDesc.set) {
+                errorStackDesc &&
+                typeof typeErrorStackDesc.get === 'function' &&
+                typeErrorStackDesc.get === errorStackDesc.get &&
+                typeof typeErrorStackDesc.set === 'function' &&
+                typeErrorStackDesc.set === errorStackDesc.set
+            ) {
                 // Otherwise, we have own stack accessor properties that are outside
                 // our expectations, that therefore need to be understood better
                 // before we know how to repair them.
-                feralStackGetter = freeze(er1StackDesc.get);
-                feralStackSetter = freeze(er1StackDesc.set);
+                feralStackGetter = freeze(typeErrorStackDesc.get);
+                feralStackSetter = freeze(typeErrorStackDesc.set);
             } else {
                 // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR.md
                 throw TypeError(
-                    'Unexpected Error own stack accessor functions (SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR)');
-
+                    'Unexpected Error own stack accessor functions (SES_UNEXPECTED_ERROR_OWN_STACK_ACCESSOR)',
+                );
             }
         }
 
@@ -1885,21 +2135,65 @@
          */$h͏_once.FERAL_STACK_GETTER(FERAL_STACK_GETTER);
         const FERAL_STACK_SETTER = feralStackSetter;
         $h͏_once.FERAL_STACK_SETTER(FERAL_STACK_SETTER);
+
+        const getAsyncGeneratorFunctionInstance = () => {
+            // Test for async generator function syntax support.
+            try {
+                // Wrapping one in an new Function lets the `hermesc` binary file
+                // parse the Metro js bundle without SyntaxError, to generate the
+                // optimised Hermes bytecode bundle, when `gradlew` is called to
+                // assemble the release build APK for React Native prod Android apps.
+                // Delaying the error until runtime lets us customise lockdown behaviour.
+                return new FERAL_FUNCTION(
+                    'return (async function* AsyncGeneratorFunctionInstance() {})',
+                )();
+            } catch (error) {
+                const err = /** @type {Error} */ (error);
+                // Note: `Error.prototype.jsEngine` is only set by React Native runtime, not Hermes:
+                // https://github.com/facebook/react-native/blob/main/packages/react-native/ReactCommon/hermes/executor/HermesExecutorFactory.cpp#L224-L230
+                if (err.name === 'SyntaxError') {
+                    // Swallows Hermes error `async generators are unsupported` at runtime.
+                    // Note: `console` is not a JS built-in, so Hermes engine throws:
+                    // Uncaught ReferenceError: Property 'console' doesn't exist
+                    // See: https://github.com/facebook/hermes/issues/675
+                    // However React Native provides a `console` implementation when setting up error handling:
+                    // https://github.com/facebook/react-native/blob/main/packages/react-native/Libraries/Core/InitializeCore.js
+                    return undefined;
+                } else if (err.name === 'EvalError') {
+                    // eslint-disable-next-line no-empty-function
+                    return async function* AsyncGeneratorFunctionInstance() {
+                    };
+                } else {
+                    throw err;
+                }
+            }
+        };
+
+        /**
+         * If the platform supports async generator functions, this will be an
+         * async generator function instance. Otherwise, it will be `undefined`.
+         *
+         * @type {AsyncGeneratorFunction | undefined}
+         */
+        const AsyncGeneratorFunctionInstance =
+            getAsyncGeneratorFunctionInstance();
+        $h͏_once.AsyncGeneratorFunctionInstance(AsyncGeneratorFunctionInstance);
     })()
     ,
-// === functors[1] ===
+// === 1. ses ./src/assert-sloppy-mode.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let TypeError;
         $h͏_imports([["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]]]]]);
 
-        /** getThis returns globalThis in sloppy mode or undefined in strict mode. */
+        /** @this {unknown} */
+// getThis returns globalThis in sloppy mode or undefined in strict mode.
         function getThis() {
             return this;
         }
@@ -1910,16 +2204,16 @@
         }
     })()
     ,
-// === functors[2] ===
+// === 2. env-options ./src/env-options.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        $h͏_imports([]);   /* global globalThis */
+        $h͏_imports([]);/* global globalThis */
 // @ts-check
 
 // `@endo/env-options` needs to be imported quite early, and so should
@@ -1929,13 +2223,17 @@
 // Prelude of cheap good - enough imitations of things we'd use or
 // do differently if we could depend on ses
 
+// eslint-disable-next-line no-restricted-globals
+        const localThis = globalThis;
+
+        const {Object, Reflect, Array, String, JSON, Error} = localThis;
         const {freeze} = Object;
         const {apply} = Reflect;
 
 // Should be equivalent to the one in ses' commons.js even though it
 // uses the other technique.
         const uncurryThis =
-            (fn) =>
+            fn =>
                 (receiver, ...args) =>
                     apply(fn, receiver, args);
         const arrayPush = uncurryThis(Array.prototype.push);
@@ -1965,6 +2263,7 @@
          * names used.
          */
         const makeEnvironmentCaptor = (aGlobal, dropNames = false) => {
+            /** @type {string[]} */
             const capturedEnvironmentOptionNames = [];
 
             /**
@@ -1980,19 +2279,20 @@
             const getEnvironmentOption = (
                 optionName,
                 defaultSetting,
-                optOtherValues = undefined) => {
+                optOtherValues = undefined,
+            ) => {
                 typeof optionName === 'string' ||
                 Fail`Environment option name ${q(optionName)} must be a string.`;
                 typeof defaultSetting === 'string' ||
                 Fail`Environment option default setting ${q(
-                    defaultSetting)
-                } must be a string.`;
+                    defaultSetting,
+                )} must be a string.`;
 
                 /** @type {string} */
                 let setting = defaultSetting;
                 const globalProcess = aGlobal.process || undefined;
                 const globalEnv =
-                    typeof globalProcess === 'object' && globalProcess.env || undefined;
+                    (typeof globalProcess === 'object' && globalProcess.env) || undefined;
                 if (typeof globalEnv === 'object') {
                     if (optionName in globalEnv) {
                         if (!dropNames) {
@@ -2002,10 +2302,10 @@
                         // eslint-disable-next-line @endo/no-polymorphic-call
                         typeof optionValue === 'string' ||
                         Fail`Environment option named ${q(
-                            optionName)
-                        }, if present, must have a corresponding string value, got ${q(
-                            optionValue)
-                        }`;
+                            optionName,
+                        )}, if present, must have a corresponding string value, got ${q(
+                            optionValue,
+                        )}`;
                         setting = optionValue;
                     }
                 }
@@ -2013,22 +2313,29 @@
                 setting === defaultSetting ||
                 arrayIncludes(optOtherValues, setting) ||
                 Fail`Unrecognized ${q(optionName)} value ${q(
-                    setting)
-                }. Expected one of ${q([defaultSetting, ...optOtherValues])}`;
+                    setting,
+                )}. Expected one of ${q([defaultSetting, ...optOtherValues])}`;
                 return setting;
             };
             freeze(getEnvironmentOption);
 
             /**
+             * @template {string} [T=string]
              * @param {string} optionName
-             * @returns {string[]}
+             * @returns {T[]}
              */
-            const getEnvironmentOptionsList = (optionName) => {
+            const getEnvironmentOptionsList = optionName => {
                 const option = getEnvironmentOption(optionName, '');
                 return freeze(option === '' ? [] : stringSplit(option, ','));
             };
             freeze(getEnvironmentOptionsList);
 
+            /**
+             * @template {string} [T=string]
+             * @param {string} optionName
+             * @param {T} element
+             * @returns {boolean}
+             */
             const environmentOptionsListHas = (optionName, element) =>
                 arrayIncludes(getEnvironmentOptionsList(optionName), element);
 
@@ -2041,9 +2348,8 @@
                 getEnvironmentOption,
                 getEnvironmentOptionsList,
                 environmentOptionsListHas,
-                getCapturedEnvironmentOptionNames
+                getCapturedEnvironmentOptionNames,
             });
-
         };
         $h͏_once.makeEnvironmentCaptor(makeEnvironmentCaptor);
         freeze(makeEnvironmentCaptor);
@@ -2055,33 +2361,414 @@
         const {
             getEnvironmentOption,
             getEnvironmentOptionsList,
-            environmentOptionsListHas
-        } =
-            makeEnvironmentCaptor(globalThis, true);
+            environmentOptionsListHas,
+        } = makeEnvironmentCaptor(localThis, true);
         $h͏_once.getEnvironmentOption(getEnvironmentOption);
         $h͏_once.getEnvironmentOptionsList(getEnvironmentOptionsList);
         $h͏_once.environmentOptionsListHas(environmentOptionsListHas);
     })()
     ,
-// === functors[3] ===
+// === 3. env-options ./index.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         $h͏_imports([["./src/env-options.js", []]]);
     })()
     ,
-// === functors[4] ===
+// === 4. immutable-arraybuffer ./src/immutable-arraybuffer-pony.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        $h͏_imports([]);/* global globalThis */
+
+        const {
+            ArrayBuffer,
+            Object,
+            Reflect,
+            Symbol,
+            TypeError,
+            Uint8Array,
+            WeakMap,
+            // Capture structuredClone before it can be scuttled.
+            structuredClone: optStructuredClone
+            // eslint-disable-next-line no-restricted-globals
+        } = globalThis;
+
+        const {freeze, defineProperty, getPrototypeOf, getOwnPropertyDescriptor} =
+            Object;
+        const {apply, ownKeys} = Reflect;
+        const {toStringTag} = Symbol;
+
+        const {prototype: arrayBufferPrototype} = ArrayBuffer;
+        const {slice, transfer: optTransfer} = arrayBufferPrototype;
+// @ts-expect-error TS doesn't know it'll be there
+        const {get: arrayBufferByteLength} = getOwnPropertyDescriptor(
+            arrayBufferPrototype,
+            'byteLength',
+        );
+
+        const typedArrayPrototype = getPrototypeOf(Uint8Array.prototype);
+        const {set: uint8ArraySet} = typedArrayPrototype;
+// @ts-expect-error TS doesn't know it'll be there
+        const {get: uint8ArrayBuffer} = getOwnPropertyDescriptor(
+            typedArrayPrototype,
+            'buffer',
+        );
+
+        /**
+         * Copy a range of values from a genuine ArrayBuffer exotic object into a new
+         * ArrayBuffer.
+         *
+         * @param {ArrayBuffer} realBuffer
+         * @param {number} [start]
+         * @param {number} [end]
+         * @returns {ArrayBuffer}
+         */
+        const arrayBufferSlice = (realBuffer, start = undefined, end = undefined) =>
+            apply(slice, realBuffer, [start, end]);
+
+        /**
+         * Move the contents of a genuine ArrayBuffer exotic object into a new fresh
+         * ArrayBuffer and detach the original source.
+         * We can only do this on platforms that support `structuredClone` or
+         * `ArrayBuffer.prototype.transfer`.
+         * On other platforms, we can still emulate
+         * `ArrayBuffer.prototoype.sliceToImmutable`, but not
+         * `ArrayBuffer.prototype.transferToImmutable`.
+         * Currently, these known-deficient platforms are
+         * - Hermes
+         * - Node.js <= 16
+         * - Apparently some versions of JavaScriptCore that are still of concern.
+         *
+         * @param {ArrayBuffer} arrayBuffer
+         * @returns {ArrayBuffer}
+         */
+        let optArrayBufferTransfer;
+
+        if (optTransfer) {
+            optArrayBufferTransfer = arrayBuffer => apply(optTransfer, arrayBuffer, []);
+        } else if (optStructuredClone) {
+            optArrayBufferTransfer = arrayBuffer => {
+                // Hopefully, a zero-length slice is cheap, but still enforces that
+                // `arrayBuffer` is a genuine `ArrayBuffer` exotic object.
+                arrayBufferSlice(arrayBuffer, 0, 0);
+                return optStructuredClone(arrayBuffer, {
+                    transfer: [arrayBuffer],
+                });
+            };
+        } else {
+            // Assignment is redundant, but remains for clarity.
+            optArrayBufferTransfer = undefined;
+        }
+
+        /**
+         * If we could use classes with private fields everywhere, this would have
+         * been a `this.#buffer` private field on an `ImmutableArrayBufferInternal`
+         * class. But we cannot do so on Hermes. So, instead, we
+         * emulate the `this.#buffer` private field, including its use as a brand check.
+         * Maps from all and only emulated Immutable ArrayBuffers to real ArrayBuffers.
+         *
+         * @type {Pick<WeakMap<ArrayBuffer, ArrayBuffer>, 'get' | 'has' | 'set'>}
+         */
+        const buffers = new WeakMap();
+// Avoid post-hoc prototype lookups.
+        for (const methodName of ['get', 'has', 'set']) {
+            defineProperty(buffers, methodName, {value: buffers[methodName]});
+        }
+        const getBuffer = immuAB => {
+            // Safe because this WeakMap owns its get method.
+            // eslint-disable-next-line @endo/no-polymorphic-call
+            const result = buffers.get(immuAB);
+            if (result) {
+                return result;
+            }
+            throw TypeError('Not an emulated Immutable ArrayBuffer');
+        };
+
+// Omits `constructor` so `Array.prototype.constructor` is inherited.
+        const ImmutableArrayBufferInternalPrototype = {
+            __proto__: arrayBufferPrototype,
+            get byteLength() {
+                return apply(arrayBufferByteLength, getBuffer(this), []);
+            },
+            get detached() {
+                getBuffer(this); // shim brand check
+                return false;
+            },
+            get maxByteLength() {
+                // Not underlying maxByteLength, which is irrelevant
+                return apply(arrayBufferByteLength, getBuffer(this), []);
+            },
+            get resizable() {
+                getBuffer(this); // shim brand check
+                return false;
+            },
+            get immutable() {
+                getBuffer(this); // shim brand check
+                return true;
+            },
+            slice(start = undefined, end = undefined) {
+                return arrayBufferSlice(getBuffer(this), start, end);
+            },
+            sliceToImmutable(start = undefined, end = undefined) {
+                // eslint-disable-next-line no-use-before-define
+                return sliceBufferToImmutable(getBuffer(this), start, end);
+            },
+            resize(_newByteLength = undefined) {
+                getBuffer(this); // shim brand check
+                throw TypeError('Cannot resize an immutable ArrayBuffer');
+            },
+            transfer(_newLength = undefined) {
+                getBuffer(this); // shim brand check
+                throw TypeError('Cannot detach an immutable ArrayBuffer');
+            },
+            transferToFixedLength(_newLength = undefined) {
+                getBuffer(this); // shim brand check
+                throw TypeError('Cannot detach an immutable ArrayBuffer');
+            },
+            transferToImmutable(_newLength = undefined) {
+                getBuffer(this); // shim brand check
+                throw TypeError('Cannot detach an immutable ArrayBuffer');
+            },
+            /**
+             * See https://github.com/endojs/endo/tree/master/packages/immutable-arraybuffer#purposeful-violation
+             */
+            [toStringTag]: 'ImmutableArrayBuffer',
+        };
+
+// Better fidelity emulation of a class prototype
+        for (const key of ownKeys(ImmutableArrayBufferInternalPrototype)) {
+            defineProperty(ImmutableArrayBufferInternalPrototype, key, {
+                enumerable: false,
+            });
+        }
+
+        /**
+         * Emulates what would have been the encapsulated `ImmutableArrayBufferInternal`
+         * class constructor. This function takes the `realBuffer` which its
+         * result encapsulates. Security demands that this result has exclusive access
+         * to the `realBuffer` it is given, which its callers must ensure.
+         *
+         * @param {ArrayBuffer} realBuffer
+         * @returns {ArrayBuffer}
+         */
+        const makeImmutableArrayBufferInternal = realBuffer => {
+            const result = /** @type {ArrayBuffer} */ (
+                /** @type {unknown} */ ({
+                    __proto__: ImmutableArrayBufferInternalPrototype,
+                })
+            );
+            // Safe because this WeakMap owns its set method.
+            // eslint-disable-next-line @endo/no-polymorphic-call
+            buffers.set(result, realBuffer);
+            return result;
+        };
+// Since `makeImmutableArrayBufferInternal` MUST not escape,
+// this `freeze` is just belt-and-suspenders.
+        freeze(makeImmutableArrayBufferInternal);
+
+        /**
+         * @param {ArrayBuffer} buffer
+         * @returns {boolean}
+         */
+// eslint-disable-next-line @endo/no-polymorphic-call
+        const isBufferImmutable = buffer => buffers.has(buffer);
+
+        /**
+         * Creates an immutable slice of the given buffer.
+         * @param {ArrayBuffer} buffer The original buffer.
+         * @param {number} [start] The start index.
+         * @param {number} [end] The end index.
+         * @returns {ArrayBuffer} The sliced immutable ArrayBuffer.
+         */$h͏_once.isBufferImmutable(isBufferImmutable);
+        const sliceBufferToImmutable = (
+            buffer,
+            start = undefined,
+            end = undefined,
+        ) => {
+            // Safe because this WeakMap owns its get method.
+            // eslint-disable-next-line @endo/no-polymorphic-call
+            let realBuffer = buffers.get(buffer);
+            if (realBuffer === undefined) {
+                realBuffer = buffer;
+            }
+            return makeImmutableArrayBufferInternal(
+                arrayBufferSlice(realBuffer, start, end),
+            );
+        };
+        $h͏_once.sliceBufferToImmutable(sliceBufferToImmutable);
+
+        let transferBufferToImmutable;
+        if (optArrayBufferTransfer) {
+            /**
+             * Transfer the contents to a new Immutable ArrayBuffer
+             *
+             * @param {ArrayBuffer} buffer The original buffer.
+             * @param {number} [newLength] The start index.
+             * @returns {ArrayBuffer}
+             */
+            transferBufferToImmutable = (buffer, newLength = undefined) => {
+                if (newLength === undefined) {
+                    buffer = optArrayBufferTransfer(buffer);
+                } else if (optTransfer) {
+                    buffer = apply(optTransfer, buffer, [newLength]);
+                } else {
+                    buffer = optArrayBufferTransfer(buffer);
+                    const oldLength = buffer.byteLength;
+                    // eslint-disable-next-line @endo/restrict-comparison-operands
+                    if (newLength <= oldLength) {
+                        buffer = arrayBufferSlice(buffer, 0, newLength);
+                    } else {
+                        const oldTA = new Uint8Array(buffer);
+                        const newTA = new Uint8Array(newLength);
+                        apply(uint8ArraySet, newTA, [oldTA]);
+                        buffer = apply(uint8ArrayBuffer, newTA, []);
+                    }
+                }
+                const result = makeImmutableArrayBufferInternal(buffer);
+                return /** @type {ArrayBuffer} */ (/** @type {unknown} */ (result));
+            };
+        } else {
+            transferBufferToImmutable = undefined;
+        }
+
+        const optTransferBufferToImmutable = transferBufferToImmutable;
+        $h͏_once.optTransferBufferToImmutable(optTransferBufferToImmutable);
+    })()
+    ,
+// === 5. immutable-arraybuffer ./src/immutable-arraybuffer-shim.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        let isBufferImmutable, sliceBufferToImmutable, optXferBuf2Immu;
+        $h͏_imports([["./immutable-arraybuffer-pony.js", [["isBufferImmutable", [$h͏_a => (isBufferImmutable = $h͏_a)]], ["sliceBufferToImmutable", [$h͏_a => (sliceBufferToImmutable = $h͏_a)]], ["optTransferBufferToImmutable", [$h͏_a => (optXferBuf2Immu = $h͏_a)]]]]]);
+
+
+        const {
+            ArrayBuffer,
+            JSON,
+            Object,
+            Reflect
+            // eslint-disable-next-line no-restricted-globals
+        } = globalThis;
+
+// Even though the imported one is not exported by the pony as a live binding,
+// TS doesn't know that,
+// so it cannot do its normal flow-based inference. By making and using a local
+// copy, no problem.
+        const optTransferBufferToImmutable = optXferBuf2Immu;
+
+        const {getOwnPropertyDescriptors, defineProperties, defineProperty} = Object;
+        const {ownKeys} = Reflect;
+        const {prototype: arrayBufferPrototype} = ArrayBuffer;
+        const {stringify} = JSON;
+
+        const arrayBufferMethods = {
+            /**
+             * Creates an immutable slice of the given buffer.
+             *
+             * @this {ArrayBuffer} buffer The original buffer.
+             * @param {number} [start] The start index.
+             * @param {number} [end] The end index.
+             * @returns {ArrayBuffer} The sliced immutable ArrayBuffer.
+             */
+            sliceToImmutable(start = undefined, end = undefined) {
+                return sliceBufferToImmutable(this, start, end);
+            },
+
+            /**
+             * @this {ArrayBuffer}
+             */
+            get immutable() {
+                return isBufferImmutable(this);
+            },
+
+            ...(optTransferBufferToImmutable
+                ? {
+                    /**
+                     * Transfer the contents to a new immutable ArrayBuffer
+                     *
+                     * @this {ArrayBuffer} buffer The original buffer.
+                     * @param {number} [newLength] The start index.
+                     * @returns {ArrayBuffer} The new immutable ArrayBuffer.
+                     */
+                    transferToImmutable(newLength = undefined) {
+                        return optTransferBufferToImmutable(this, newLength);
+                    },
+                }
+                : {}),
+        };
+
+// Better fidelity emulation of a class prototype
+        for (const key of ownKeys(arrayBufferMethods)) {
+            defineProperty(arrayBufferMethods, key, {
+                enumerable: false,
+            });
+        }
+
+// Modern shim practice frowns on conditional installation, at least for
+// proposals prior to stage 3. This is so changes to the proposal since
+// an old shim was distributed don't need to worry about the proposal
+// breaking old code depending on the old shim. Thus, if we detect that
+// we're about to overwrite a prior installation, we simply issue this
+// warning and continue.
+//
+// TODO, if the primordials are frozen after the prior implementation, such as
+// by `lockdown`, then this precludes overwriting as expected. However, for
+// this case, the following warning text will be confusing.
+//
+// Allowing polymorphic calls because these occur during initialization.
+// eslint-disable-next-line @endo/no-polymorphic-call
+        const overwrites = ownKeys(arrayBufferMethods).filter(
+            key => key in arrayBufferPrototype,
+        );
+        if (overwrites.length > 0) {
+            // eslint-disable-next-line @endo/no-polymorphic-call
+            console.warn(
+                `About to overwrite ArrayBuffer.prototype properties ${stringify(overwrites)}`,
+            );
+        }
+
+        defineProperties(
+            arrayBufferPrototype,
+            getOwnPropertyDescriptors(arrayBufferMethods),
+        );
+    })()
+    ,
+// === 6. immutable-arraybuffer ./shim.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        $h͏_imports([["./src/immutable-arraybuffer-shim.js", []]]);
+    })()
+    ,
+// === 7. ses ./src/error/stringify-utils.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Set, String, isArray, arrayJoin, arraySlice, arraySort, arrayMap, keys, fromEntries, freeze, is, isError,
@@ -2089,12 +2776,12 @@
         $h͏_imports([["../commons.js", [["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["isArray", [$h͏_a => (isArray = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arraySlice", [$h͏_a => (arraySlice = $h͏_a)]], ["arraySort", [$h͏_a => (arraySort = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["keys", [$h͏_a => (keys = $h͏_a)]], ["fromEntries", [$h͏_a => (fromEntries = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["isError", [$h͏_a => (isError = $h͏_a)]], ["setAdd", [$h͏_a => (setAdd = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]], ["stringIncludes", [$h͏_a => (stringIncludes = $h͏_a)]], ["stringStartsWith", [$h͏_a => (stringStartsWith = $h͏_a)]], ["stringifyJson", [$h͏_a => (stringifyJson = $h͏_a)]], ["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]]]]]);
 
 
-        /** @import {StringablePayload} from '../../types.js' */
+        /** @import {Stringable} from '../../types.js' */
 
         /**
          * Joins English terms with commas and an optional conjunction.
          *
-         * @param {(string | StringablePayload)[]} terms
+         * @param {(string | Stringable)[]} terms
          * @param {"and" | "or"} conjunction
          */
         const enJoin = (terms, conjunction) => {
@@ -2119,7 +2806,7 @@
          * @param {string} str The noun to prepend
          * @returns {string} The noun prepended with a/an
          */$h͏_once.enJoin(enJoin);
-        const an = (str) => {
+        const an = str => {
             str = `${str}`;
             if (str.length >= 1 && stringIncludes('aeiouAEIOU', str[0])) {
                 return `an ${str}`;
@@ -2214,7 +2901,7 @@
                             return val;
                         }
                         arraySort(names);
-                        const entries = arrayMap(names, (name) => [name, val[name]]);
+                        const entries = arrayMap(names, name => [name, val[name]]);
                         return fromEntries(entries);
                     }
                     case 'function': {
@@ -2247,7 +2934,6 @@
                         return val;
                     }
                 }
-
             };
             try {
                 return stringifyJson(payload, replacer, spaces);
@@ -2265,18 +2951,18 @@
         freeze(bestEffortStringify);
     })()
     ,
-// === functors[5] ===
+// === 8. ses ./src/error/types.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        $h͏_imports([]);   // @ts-check
+        $h͏_imports([]);// @ts-check
 
-        /** @import {GenericErrorConstructor, AssertMakeErrorOptions, DetailsToken, StringablePayload} from '../../types.js' */
+        /** @import {GenericErrorConstructor, AssertMakeErrorOptions, DetailsToken, Stringable} from '../../types.js' */
 
         /**
          * @typedef {object} VirtualConsole
@@ -2335,16 +3021,16 @@
          */
     })()
     ,
-// === functors[6] ===
+// === 9. ses ./src/error/internal-types.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        $h͏_imports([]);   // @ts-check
+        $h͏_imports([]);// @ts-check
 
         /**
          * @import {VirtualConsole} from './types.js'
@@ -2444,18 +3130,23 @@
          */
     })()
     ,
-// === functors[7] ===
+// === 10. cache-map ./src/cachemap.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        $h͏_imports([]);   // @ts-check
+        $h͏_imports([]);// @ts-check
+        /* global globalThis */
         /* eslint-disable @endo/no-polymorphic-call */
 
+// eslint-disable-next-line no-restricted-globals
+        const {Error, TypeError, WeakMap} = globalThis;
+// eslint-disable-next-line no-restricted-globals
+        const {parse, stringify} = JSON;
 // eslint-disable-next-line no-restricted-globals
         const {isSafeInteger} = Number;
 // eslint-disable-next-line no-restricted-globals
@@ -2463,236 +3154,338 @@
 // eslint-disable-next-line no-restricted-globals
         const {toStringTag: toStringTagSymbol} = Symbol;
 
+// eslint-disable-next-line no-restricted-globals
+        const UNKNOWN_KEY = Symbol('UNKNOWN_KEY');
+
         /**
-         * @template Data
-         * @typedef {object} DoublyLinkedCell
-         * A cell of a doubly-linked ring, i.e., a doubly-linked circular list.
-         * DoublyLinkedCells are not frozen, and so should be closely encapsulated by
-         * any abstraction that uses them.
-         * @property {DoublyLinkedCell<Data>} next
-         * @property {DoublyLinkedCell<Data>} prev
-         * @property {Data} data
+         * @template T
+         * @typedef {T extends object ? { -readonly [K in keyof T]: T[K] } : never} WritableDeep
+         *   Intentionally limited to local needs; refer to
+         *   https://github.com/sindresorhus/type-fest if insufficient.
          */
 
         /**
-         * Makes a new self-linked cell. There are two reasons to do so:
-         *    * To make the head sigil of a new initially-empty doubly-linked ring.
-         *    * To make a non-sigil cell to be `spliceAfter`ed.
-         *
-         * @template Data
-         * @param {Data} data
-         * @returns {DoublyLinkedCell<Data>}
+         * @template T
+         * @param {T} value
+         * @param {<U,>(name: string, value: U) => U} [reviver]
+         * @returns {WritableDeep<T>}
          */
-        const makeSelfCell = (data) => {
-            /** @type {Partial<DoublyLinkedCell<Data>>} */
-            const incompleteCell = {
-                next: undefined,
-                prev: undefined,
-                data
-            };
-
-            const selfCell =  /** @type {DoublyLinkedCell<Data>} */  incompleteCell;
-            selfCell.next = selfCell;
-            selfCell.prev = selfCell;
-            // Not frozen!
-            return selfCell;
+        const deepCopyJsonable = (value, reviver) => {
+            const encoded = stringify(value);
+            const decoded = parse(encoded, reviver);
+            return decoded;
         };
 
-        /**
-         * Splices a self-linked non-sigil cell into a ring after `prev`.
-         * `prev` could be the head sigil, or it could be some other non-sigil
-         * cell within a ring.
-         *
-         * @template Data
-         * @param {DoublyLinkedCell<Data>} prev
-         * @param {DoublyLinkedCell<Data>} selfCell
-         */
-        const spliceAfter = (prev, selfCell) => {
-            if (prev === selfCell) {
-                // eslint-disable-next-line no-restricted-globals
-                throw TypeError('Cannot splice a cell into itself');
-            }
-            if (selfCell.next !== selfCell || selfCell.prev !== selfCell) {
-                // eslint-disable-next-line no-restricted-globals
-                throw TypeError('Expected self-linked cell');
-            }
-            const cell = selfCell;
-            // rename variable cause it isn't self-linked after this point.
+        const freezingReviver = (_name, value) => freeze(value);
 
-            const next = prev.next;
-            cell.prev = prev;
-            cell.next = next;
+        /** @type {<T,>(value: T) => T} */
+        const deepCopyAndFreezeJsonable = value =>
+            deepCopyJsonable(value, freezingReviver);
+
+        /**
+         * A cache of bounded size, implementing the WeakMap interface but holding keys
+         * strongly if created with a non-weak `makeMap` option of
+         * {@link makeCacheMapKit}.
+         *
+         * @template K
+         * @template V
+         * @typedef {Pick<Map<K, V>, Exclude<keyof WeakMap<WeakKey, *>, 'set'>> & {set: (key: K, value: V) => WeakMapAPI<K, V>}} WeakMapAPI
+         */
+
+        /**
+         * @template K
+         * @template V
+         * @typedef {WeakMapAPI<K, V> & ({clear?: undefined} | Pick<Map<K, V>, 'clear'>)} SingleEntryMap
+         */
+
+        /**
+         * A cell of a doubly-linked ring (circular list) for a cache map.
+         * Instances are not frozen, and so should be closely encapsulated.
+         *
+         * @template K
+         * @template V
+         * @typedef {object} CacheMapCell
+         * @property {number} id for debugging
+         * @property {CacheMapCell<K, V>} next
+         * @property {CacheMapCell<K, V>} prev
+         * @property {SingleEntryMap<K, V>} data
+         */
+
+        /**
+         * @template K
+         * @template V
+         * @param {CacheMapCell<K, V>} prev
+         * @param {number} id
+         * @param {SingleEntryMap<K, V>} data
+         * @returns {CacheMapCell<K, V>}
+         */
+        const appendNewCell = (prev, id, data) => {
+            const next = prev?.next;
+            const cell = {id, next, prev, data};
             prev.next = cell;
             next.prev = cell;
-            // Not frozen!
             return cell;
         };
 
         /**
-         * @template Data
-         * @param {DoublyLinkedCell<Data>} cell
-         * No-op if the cell is self-linked.
+         * @template K
+         * @template V
+         * @param {CacheMapCell<K, V>} cell
+         * @param {CacheMapCell<K, V>} prev
+         * @param {CacheMapCell<K, V>} [next]
          */
-        const spliceOut = (cell) => {
-            const {prev, next} = cell;
-            prev.next = next;
-            next.prev = prev;
-            cell.prev = cell;
-            cell.next = cell;
+        const moveCellAfter = (cell, prev, next = prev.next) => {
+            if (cell === prev || cell === next) return; // already in position
+
+            // Splice out cell.
+            const {prev: oldPrev, next: oldNext} = cell;
+            oldPrev.next = oldNext;
+            oldNext.prev = oldPrev;
+
+            // Splice in cell after prev.
+            cell.prev = prev;
+            cell.next = next;
+            prev.next = cell;
+            next.prev = cell;
         };
 
         /**
-         * The LRUCacheMap is used within the implementation of `assert` and so
-         * at a layer below SES or harden. Thus, we give it a `WeakMap`-like interface
-         * rather than a `WeakMapStore`-like interface. To work before `lockdown`,
-         * the implementation must use `freeze` manually, but still exhaustively.
+         * Clear out a cell to prepare it for future use. Its map is preserved when
+         * possible, but must instead be replaced if the associated key is not known.
          *
-         * It implements the WeakMap interface, and holds its keys weakly.  Cached
-         * values are only held while the key is held by the user and the key/value
-         * bookkeeping cell has not been pushed off the end of the cache by `budget`
-         * number of more recently referenced cells.  If the key is dropped by the user,
-         * the value will no longer be held by the cache, but the bookkeeping cell
-         * itself will stay in memory.
-         *
-         * @template {{}} K
-         * @template {unknown} V
-         * @param {number} keysBudget
-         * @returns {WeakMap<K,V>}
+         * @template K
+         * @template V
+         * @param {CacheMapCell<K, V>} cell
+         * @param {K | UNKNOWN_KEY} oldKey
+         * @param {() => SingleEntryMap<K, V>} [makeMap] required when the key is unknown
          */
-        const makeLRUCacheMap = (keysBudget) => {
-            if (!isSafeInteger(keysBudget) || keysBudget < 0) {
-                // eslint-disable-next-line no-restricted-globals
-                throw TypeError('keysBudget must be a safe non-negative integer number');
+        const resetCell = (cell, oldKey, makeMap) => {
+            if (oldKey !== UNKNOWN_KEY) {
+                cell.data.delete(oldKey);
+                return;
             }
-            /** @typedef {DoublyLinkedCell<WeakMap<K, V> | undefined>} LRUCacheCell */
-            /** @type {WeakMap<K, LRUCacheCell>} */
-                // eslint-disable-next-line no-restricted-globals
-            const keyToCell = new WeakMap();
-            let size = 0; // `size` must remain <= `keysBudget`
-            // As a sigil, `head` uniquely is not in the `keyToCell` map.
-            /** @type {LRUCacheCell} */
-            const head = makeSelfCell(undefined);
+            if (cell.data.clear) {
+                cell.data.clear();
+                return;
+            }
+            // WeakMap instances must be replaced when the key is unknown.
+            if (!makeMap) {
+                throw Error('internal: makeMap is required with UNKNOWN_KEY');
+            }
+            cell.data = makeMap();
+        };
 
-            const touchCell = (key) => {
-                const cell = keyToCell.get(key);
-                if (cell === undefined || cell.data === undefined) {
-                    // Either the key was GCed, or the cell was condemned.
-                    return undefined;
+        const zeroMetrics = freeze({
+            totalQueryCount: 0,
+            totalHitCount: 0
+            // TODO?
+            // * method-specific counts
+            // * liveTouchStats/evictedTouchStats { count, sum, mean, min, max }
+            //   * p50/p90/p95/p99 via Ben-Haim/Tom-Tov streaming histograms
+        });
+        /** @typedef {typeof zeroMetrics} CacheMapMetrics */
+
+        /**
+         * @template {MapConstructor | WeakMapConstructor} [C=WeakMapConstructor]
+         * @template {Parameters<InstanceType<C>['set']>[0]} [K=Parameters<InstanceType<C>['set']>[0]]
+         * @template {unknown} [V=unknown]
+         * @typedef {object} CacheMapKit
+         * @property {WeakMapAPI<K, V>} cache
+         * @property {() => CacheMapMetrics} getMetrics
+         */
+
+        /**
+         * Create a bounded-size cache having WeakMap-compatible
+         * `has`/`get`/`set`/`delete` methods, capable of supporting SES (specifically
+         * `assert` error notes).
+         * Key validity, comparison, and referential strength are controlled by the
+         * `makeMap` option, which defaults to `WeakMap` but can be set to any producer
+         * of objects with those methods (e.g., using `Map` allows for arbitrary keys
+         * which will be strongly held).
+         * Cache eviction policy is not currently configurable, but strives for a hit
+         * ratio at least as good as
+         * [LRU](https://en.wikipedia.org/wiki/Cache_replacement_policies#LRU) (e.g., it
+         * might be
+         * [CLOCK](https://en.wikipedia.org/wiki/Page_replacement_algorithm#Clock)
+         * or [SIEVE](https://sievecache.com/)).
+         *
+         * @template {MapConstructor | WeakMapConstructor} [C=WeakMapConstructor]
+         * @template {Parameters<InstanceType<C>['set']>[0]} [K=Parameters<InstanceType<C>['set']>[0]]
+         * @template {unknown} [V=unknown]
+         * @param {number} capacity
+         * @param {object} [options]
+         * @param {C | (() => SingleEntryMap<K, V>)} [options.makeMap]
+         * @returns {CacheMapKit<C, K, V>}
+         */
+        const makeCacheMapKit = (capacity, options = {}) => {
+            if (!isSafeInteger(capacity) || capacity < 0) {
+                throw TypeError(
+                    'capacity must be a non-negative safe integer number <= 2**53 - 1',
+                );
+            }
+
+            /**
+             * @template V
+             * @type {<V,>() => SingleEntryMap<K, V>}
+             */
+            const makeMap = (MaybeCtor => {
+                try {
+                    // @ts-expect-error
+                    MaybeCtor();
+                    return /** @type {any} */ (MaybeCtor);
+                } catch (err) {
+                    // @ts-expect-error
+                    const constructNewMap = () => new MaybeCtor();
+                    return constructNewMap;
                 }
-                // Becomes most recently used
-                spliceOut(cell);
-                spliceAfter(head, cell);
+            })(options.makeMap ?? WeakMap);
+            const tag =
+                /** @type {any} */ (makeMap()).clear === undefined
+                ? 'WeakCacheMap'
+                : 'CacheMap';
+
+            /** @type {WeakMapAPI<K, CacheMapCell<K, V>>} */
+            const keyToCell = makeMap();
+            // @ts-expect-error this sentinel head is special
+            const head = /** @type {CacheMapCell<K, V>} */ ({
+                id: 0,
+                // next and prev are established below as self-referential.
+                next: undefined,
+                prev: undefined,
+                data: {
+                    has: () => {
+                        throw Error('internal: sentinel head cell has no data');
+                    },
+                },
+            });
+            head.next = head;
+            head.prev = head;
+            let cellCount = 0;
+
+            const metrics = deepCopyJsonable(zeroMetrics);
+            const getMetrics = () => deepCopyAndFreezeJsonable(metrics);
+
+            /**
+             * Touching moves a cell to first position so LRU eviction can target the last
+             * cell (`head.prev`).
+             *
+             * @type {(key: K) => (CacheMapCell<K, V> | undefined)}
+             */
+            const touchKey = key => {
+                metrics.totalQueryCount += 1;
+                const cell = keyToCell.get(key);
+                if (!cell?.data.has(key)) return undefined;
+
+                metrics.totalHitCount += 1;
+                moveCellAfter(cell, head);
                 return cell;
             };
 
-            /**
-             * @param {K} key
-             */
-            const has = (key) => touchCell(key) !== undefined;
+            /** @type {WeakMapAPI<K, V>['has']} */
+            const has = key => {
+                const cell = touchKey(key);
+                return cell !== undefined;
+            };
             freeze(has);
 
-            /**
-             * @param {K} key
-             */
-                // UNTIL https://github.com/endojs/endo/issues/1514
-                // Prefer: const get = key => touchCell(key)?.data?.get(key);
-            const get = (key) => {
-                    const cell = touchCell(key);
-                    return cell && cell.data && cell.data.get(key);
-                };
+            /** @type {WeakMapAPI<K, V>['get']} */
+            const get = key => {
+                const cell = touchKey(key);
+                return cell?.data.get(key);
+            };
             freeze(get);
 
-            /**
-             * @param {K} key
-             * @param {V} value
-             */
+            /** @type {WeakMapAPI<K, V>['set']} */
             const set = (key, value) => {
-                if (keysBudget < 1) {
+                let cell = touchKey(key);
+                if (cell) {
+                    cell.data.set(key, value);
                     // eslint-disable-next-line no-use-before-define
-                    return lruCacheMap; // Implements WeakMap.set
+                    return implementation;
                 }
 
-                let cell = touchCell(key);
-                if (cell === undefined) {
-                    cell = makeSelfCell(undefined);
-                    spliceAfter(head, cell); // start most recently used
-                }
-                if (!cell.data) {
-                    // Either a fresh cell or a reused condemned cell.
-                    size += 1;
-                    // Add its data.
-                    // eslint-disable-next-line no-restricted-globals
-                    cell.data = new WeakMap();
-                    // Advertise the cell for this key.
-                    keyToCell.set(key, cell);
-                    while (size > keysBudget) {
-                        const condemned = head.prev;
-                        spliceOut(condemned); // Drop least recently used
-                        condemned.data = undefined;
-                        size -= 1;
-                    }
+                if (cellCount < capacity) {
+                    // Add and use a new cell at first position.
+                    cell = appendNewCell(head, cellCount + 1, makeMap());
+                    cellCount += 1; // intentionally follows cell creation
+                    cell.data.set(key, value);
+                } else if (capacity > 0) {
+                    // Reuse the current tail, moving it to first position.
+                    cell = head.prev;
+                    resetCell(/** @type {any} */ (cell), UNKNOWN_KEY, makeMap);
+                    cell.data.set(key, value);
+                    moveCellAfter(cell, head);
                 }
 
-                // Update the data.
-                cell.data.set(key, value);
+                // Don't establish this entry until prior steps succeed.
+                if (cell) keyToCell.set(key, cell);
 
                 // eslint-disable-next-line no-use-before-define
-                return lruCacheMap; // Implements WeakMap.set
+                return implementation;
             };
             freeze(set);
 
             // "delete" is a keyword.
-            /**
-             * @param {K} key
-             */
-            const deleteIt = (key) => {
-                const cell = keyToCell.get(key);
-                if (cell === undefined) {
-                    return false;
-                }
-                spliceOut(cell);
-                keyToCell.delete(key);
-                if (cell.data === undefined) {
-                    // Already condemned.
-                    return false;
-                }
-
-                cell.data = undefined;
-                size -= 1;
-                return true;
+            const {delete: deleteEntry} = {
+                /** @type {WeakMapAPI<K, V>['delete']} */
+                delete: key => {
+                    const cell = keyToCell.get(key);
+                    if (!cell?.data.has(key)) {
+                        keyToCell.delete(key);
+                        return false;
+                    }
+                    moveCellAfter(cell, head.prev);
+                    resetCell(cell, key);
+                    keyToCell.delete(key);
+                    return true;
+                },
             };
-            freeze(deleteIt);
+            freeze(deleteEntry);
 
-            const lruCacheMap = freeze({
+            const implementation = /** @type {WeakMapAPI<K, V>} */ ({
                 has,
                 get,
                 set,
-                delete: deleteIt,
+                delete: deleteEntry,
                 // eslint-disable-next-line jsdoc/check-types
-                [/** @type {typeof Symbol.toStringTag} */  toStringTagSymbol]:
-                    'LRUCacheMap'
+                [/** @type {typeof Symbol.toStringTag} */ (toStringTagSymbol)]: tag,
             });
+            freeze(implementation);
 
-            return lruCacheMap;
+            const kit = {cache: implementation, getMetrics};
+            return freeze(kit);
         };
-        $h͏_once.makeLRUCacheMap(makeLRUCacheMap);
-        freeze(makeLRUCacheMap);
+        $h͏_once.makeCacheMapKit(makeCacheMapKit);
+        freeze(makeCacheMapKit);
     })()
     ,
-// === functors[8] ===
+// === 11. cache-map ./index.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let makeLRUCacheMap;
-        $h͏_imports([["../make-lru-cachemap.js", [["makeLRUCacheMap", [$h͏_a => (makeLRUCacheMap = $h͏_a)]]]]]);
+        $h͏_imports([["./src/cachemap.js", []]]);
+    })()
+    ,
+// === 12. ses ./src/error/note-log-args.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        let makeCacheMapKit;
+        $h͏_imports([["@endo/cache-map", [["makeCacheMapKit", [$h͏_a => (makeCacheMapKit = $h͏_a)]]]]]);
 
 
         /**
+         * @import {CacheMapKit} from '@endo/cache-map';
          * @import {LogArgs} from './internal-types.js';
          */
 
@@ -2708,24 +3501,25 @@
          */
         const makeNoteLogArgsArrayKit = (
             errorsBudget = defaultLoggedErrorsBudget,
-            argsPerErrorBudget = defaultArgsPerErrorBudget) => {
+            argsPerErrorBudget = defaultArgsPerErrorBudget,
+        ) => {
             if (!isSafeInteger(argsPerErrorBudget) || argsPerErrorBudget < 1) {
                 throw TypeError(
-                    'argsPerErrorBudget must be a safe positive integer number');
-
+                    'argsPerErrorBudget must be a safe positive integer number',
+                );
             }
 
             /**
-             * @type {WeakMap<Error, LogArgs[]>}
-             *
              * Maps from an error to an array of log args, where each log args is
              * remembered as an annotation on that error. This can be used, for example,
              * to keep track of additional causes of the error. The elements of any
              * log args may include errors which are associated with further annotations.
              * An augmented console, like the causal console of `console.js`, could
              * then retrieve the graph of such annotations.
+             *
+             * @type {CacheMapKit<WeakMapConstructor, Error, LogArgs[]>}
              */
-            const noteLogArgsArrayMap = makeLRUCacheMap(errorsBudget);
+            const {cache: noteLogArgsArrayMap} = makeCacheMapKit(errorsBudget);
 
             /**
              * @param {Error} error
@@ -2748,7 +3542,7 @@
              * @param {Error} error
              * @returns {LogArgs[] | undefined}
              */
-            const takeLogArgsArray = (error) => {
+            const takeLogArgsArray = error => {
                 const result = noteLogArgsArrayMap.get(error);
                 noteLogArgsArrayMap.delete(error);
                 return result;
@@ -2757,69 +3551,71 @@
 
             return freeze({
                 addLogArgs,
-                takeLogArgsArray
+                takeLogArgsArray,
             });
-
         };
         $h͏_once.makeNoteLogArgsArrayKit(makeNoteLogArgsArrayKit);
         freeze(makeNoteLogArgsArrayKit);
     })()
     ,
-// === functors[9] ===
+// === 13. ses ./src/error/assert.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let RangeError, TypeError, WeakMap, arrayJoin, arrayMap, arrayPop, arrayPush, assign, freeze, defineProperty,
-            globalThis, is, isError, regexpTest, stringIndexOf, stringReplace, stringSlice, stringStartsWith,
-            weakmapDelete, weakmapGet, weakmapHas, weakmapSet, AggregateError, getOwnPropertyDescriptors, ownKeys,
-            create, objectPrototype, objectHasOwnProperty, an, bestEffortStringify, makeNoteLogArgsArrayKit;
-        $h͏_imports([["../commons.js", [["RangeError", [$h͏_a => (RangeError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakMap", [$h͏_a => (WeakMap = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arrayPop", [$h͏_a => (arrayPop = $h͏_a)]], ["arrayPush", [$h͏_a => (arrayPush = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["isError", [$h͏_a => (isError = $h͏_a)]], ["regexpTest", [$h͏_a => (regexpTest = $h͏_a)]], ["stringIndexOf", [$h͏_a => (stringIndexOf = $h͏_a)]], ["stringReplace", [$h͏_a => (stringReplace = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]], ["stringStartsWith", [$h͏_a => (stringStartsWith = $h͏_a)]], ["weakmapDelete", [$h͏_a => (weakmapDelete = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapHas", [$h͏_a => (weakmapHas = $h͏_a)]], ["weakmapSet", [$h͏_a => (weakmapSet = $h͏_a)]], ["AggregateError", [$h͏_a => (AggregateError = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["objectPrototype", [$h͏_a => (objectPrototype = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]]]], ["./stringify-utils.js", [["an", [$h͏_a => (an = $h͏_a)]], ["bestEffortStringify", [$h͏_a => (bestEffortStringify = $h͏_a)]]]], ["./types.js", []], ["./internal-types.js", []], ["./note-log-args.js", [["makeNoteLogArgsArrayKit", [$h͏_a => (makeNoteLogArgsArrayKit = $h͏_a)]]]]]);
+            freezeRegexp, globalThis, is, isError, regexpSearch, stringEndsWith, stringIndexOf, stringSlice,
+            stringStartsWith, weakmapDelete, weakmapGet, weakmapHas, weakmapSet, AggregateError,
+            getOwnPropertyDescriptors, ownKeys, create, objectPrototype, hasOwn, an, bestEffortStringify,
+            makeNoteLogArgsArrayKit;
+        $h͏_imports([["../commons.js", [["RangeError", [$h͏_a => (RangeError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakMap", [$h͏_a => (WeakMap = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arrayPop", [$h͏_a => (arrayPop = $h͏_a)]], ["arrayPush", [$h͏_a => (arrayPush = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["isError", [$h͏_a => (isError = $h͏_a)]], ["regexpSearch", [$h͏_a => (regexpSearch = $h͏_a)]], ["stringEndsWith", [$h͏_a => (stringEndsWith = $h͏_a)]], ["stringIndexOf", [$h͏_a => (stringIndexOf = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]], ["stringStartsWith", [$h͏_a => (stringStartsWith = $h͏_a)]], ["weakmapDelete", [$h͏_a => (weakmapDelete = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapHas", [$h͏_a => (weakmapHas = $h͏_a)]], ["weakmapSet", [$h͏_a => (weakmapSet = $h͏_a)]], ["AggregateError", [$h͏_a => (AggregateError = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["objectPrototype", [$h͏_a => (objectPrototype = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]]]], ["./stringify-utils.js", [["an", [$h͏_a => (an = $h͏_a)]], ["bestEffortStringify", [$h͏_a => (bestEffortStringify = $h͏_a)]]]], ["./types.js", []], ["./internal-types.js", []], ["./note-log-args.js", [["makeNoteLogArgsArrayKit", [$h͏_a => (makeNoteLogArgsArrayKit = $h͏_a)]]]]]);
 
 
         /**
-         * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, StringablePayload, DetailsToken, MakeAssert} from '../../types.js'
-         * @import {LogArgs, NoteCallback, LoggedErrorHandler} from "./internal-types.js";
+         * @import {BaseAssert, Assert, AssertionFunctions, AssertionUtilities, DeprecatedAssertionUtilities, Stringable, DetailsToken, MakeAssert} from '../../types.js';
+         * @import {LogArgs, NoteCallback, LoggedErrorHandler} from './internal-types.js';
          */
 
-// For our internal debugging purposes, uncomment
+// For internal debugging purposes, uncomment
 // const internalDebugConsole = console;
 
 // /////////////////////////////////////////////////////////////////////////////
 
-        /** @type {WeakMap<StringablePayload, any>} */
+        /**
+         * Maps the result of a `quote` or `bare` call back to its input value.
+         *
+         * @type {WeakMap<Stringable, any>}
+         */
         const declassifiers = new WeakMap();
 
         /** @type {AssertionUtilities['quote']} */
-        const quote = (payload, spaces = undefined) => {
+        const quote = (value, spaces = undefined) => {
             const result = freeze({
-                toString: freeze(() => bestEffortStringify(payload, spaces))
+                toString: freeze(() => bestEffortStringify(value, spaces)),
             });
-
-            weakmapSet(declassifiers, result, payload);
+            weakmapSet(declassifiers, result, value);
             return result;
         };
         $h͏_once.quote(quote);
         freeze(quote);
 
-        const canBeBare = freeze(/^[\w:-]( ?[\w:-])*$/);
+        const canBeBare = freezeRegexp(/^[\w:-]( ?[\w:-])*$/);
 
         /**
          * @type {AssertionUtilities['bare']}
          */
-        const bare = (payload, spaces = undefined) => {
-            if (typeof payload !== 'string' || !regexpTest(canBeBare, payload)) {
-                return quote(payload, spaces);
+        const bare = (text, spaces = undefined) => {
+            if (typeof text !== 'string' || regexpSearch(canBeBare, text) === -1) {
+                return quote(text, spaces);
             }
             const result = freeze({
-                toString: freeze(() => payload)
+                toString: freeze(() => text),
             });
-
-            weakmapSet(declassifiers, result, payload);
+            weakmapSet(declassifiers, result, text);
             return result;
         };
         $h͏_once.bare(bare);
@@ -2828,24 +3624,28 @@
 // /////////////////////////////////////////////////////////////////////////////
 
         /**
-         * @typedef {object} HiddenDetails
+         * @typedef {{ template: TemplateStringsArray | string[], args: any[] }} DetailsParts
          *
-         * Captures the arguments passed to the `details` template string tag.
+         * The contents of a `details` template literal tag: literal strings (always at
+         * least one) and arbitrary substitution values from in between them.
          *
-         * @property {TemplateStringsArray | string[]} template
-         * @property {any[]} args
+         * Unquoted substitution values are sensitive (and are redacted in error
+         * `message` strings), so a DetailsPart must not leak outside of this file.
          */
 
         /**
-         * @type {WeakMap<DetailsToken, HiddenDetails>}
+         * Maps the result of a `details` tagged template literal back to a record of
+         * that template literal's contents.
          *
-         * Maps from a details token which a `details` template literal returned
-         * to a record of the contents of that template literal expression.
+         * @type {WeakMap<DetailsToken, DetailsParts>}
          */
         const hiddenDetailsMap = new WeakMap();
 
         /**
-         * @param {HiddenDetails} hiddenDetails
+         * Construct an error message string from `details` template literal contents,
+         * replacing unquoted substitution values with redactions.
+         *
+         * @param {DetailsParts} hiddenDetails
          * @returns {string}
          */
         const getMessageString = ({template, args}) => {
@@ -2866,16 +3666,14 @@
         };
 
         /**
-         * Give detailsTokens a toString behavior. To minimize the overhead of
-         * creating new detailsTokens, we do this with an
-         * inherited `this` sensitive `toString` method, even though we normally
-         * avoid `this` sensitivity. To protect the method from inappropriate
-         * `this` application, it does something interesting only for objects
-         * registered in `redactedDetails`, which should be exactly the detailsTokens.
+         * Define `toString` behavior for DetailsToken. To minimize the overhead of
+         * creating new instances, we do this with an inherited `this`-sensitive method,
+         * even though we normally avoid such sensitivity. To protect the method from
+         * inappropriate application, it verifies that `this` is registered in
+         * `redactedDetails` before doing interesting work.
          *
-         * The printing behavior must not reveal anything redacted, so we just use
-         * the same `getMessageString` we use to construct the redacted message
-         * string for a thrown assertion error.
+         * The behavior must not reveal anything redacted, so we use `getMessageString`
+         * to return the same value as the message for a thrown assertion-failure error.
          */
         const DetailsTokenProto = freeze({
             toString() {
@@ -2884,9 +3682,8 @@
                     return '[Not a DetailsToken]';
                 }
                 return getMessageString(hiddenDetails);
-            }
+            },
         });
-
         freeze(DetailsTokenProto.toString);
 
         /**
@@ -2896,19 +3693,18 @@
          * given to `lockdown`, then `unredactedDetails` is used instead.
          *
          * There are some unconditional uses of `redactedDetails` in this module. All
-         * of them should be uses where the template literal has no redacted
-         * substitution values. In those cases, the two are equivalent.
+         * of them should be uses where the template literal has no redacted (unquoted)
+         * substitution values. In those cases, `redactedDetails` is equivalent to
+         * `unredactedDetails`.
          *
          * @type {AssertionUtilities['details']}
          */
         const redactedDetails = (template, ...args) => {
-            // Keep in mind that the vast majority of calls to `details` creates
-            // a details token that is never used, so this path must remain as fast as
-            // possible. Hence we store what we've got with little processing, postponing
-            // all the work to happen only if needed, for example, if an assertion fails.
+            // In case the result of this call is never used, perform as little processing
+            // as possible here to keep things fast.
             const detailsToken = freeze({__proto__: DetailsTokenProto});
             weakmapSet(hiddenDetailsMap, detailsToken, {template, args});
-            return (/** @type {DetailsToken} */ /** @type {unknown} */  detailsToken);
+            return /** @type {DetailsToken} */ (/** @type {unknown} */ (detailsToken));
         };
         $h͏_once.redactedDetails(redactedDetails);
         freeze(redactedDetails);
@@ -2928,9 +3724,9 @@
          * @type {AssertionUtilities['details']}
          */
         const unredactedDetails = (template, ...args) => {
-            args = arrayMap(args, (arg) =>
-                weakmapHas(declassifiers, arg) ? arg : quote(arg));
-
+            args = arrayMap(args, arg =>
+                weakmapHas(declassifiers, arg) ? arg : quote(arg),
+            );
             return redactedDetails(template, ...args);
         };
         $h͏_once.unredactedDetails(unredactedDetails);
@@ -2938,7 +3734,11 @@
 
 
         /**
-         * @param {HiddenDetails} hiddenDetails
+         * Get arguments suitable for a console logger function (e.g., `console.error`)
+         * from `details` template literal contents, unquoting quoted substitution
+         * values.
+         *
+         * @param {DetailsParts} hiddenDetails
          * @returns {LogArgs}
          */
         const getLogArgs = ({template, args}) => {
@@ -2948,14 +3748,20 @@
                 if (weakmapHas(declassifiers, arg)) {
                     arg = weakmapGet(declassifiers, arg);
                 }
-                // Remove the extra spaces (since console.error puts them
-                // between each cause).
-                const priorWithoutSpace = stringReplace(arrayPop(logArgs) || '', / $/, '');
-                if (priorWithoutSpace !== '') {
-                    arrayPush(logArgs, priorWithoutSpace);
+                // Remove substitution-adjacent spaces from template fixed-string parts
+                // (since console logging inserts its own argument-separating spaces).
+                const prevLiteralPart = arrayPop(logArgs) || '';
+                const trimmedPrev = stringEndsWith(prevLiteralPart, ' ')
+                    ? stringSlice(prevLiteralPart, 0, -1)
+                    : prevLiteralPart;
+                if (trimmedPrev !== '') {
+                    arrayPush(logArgs, trimmedPrev);
                 }
-                const nextWithoutSpace = stringReplace(template[i + 1], /^ /, '');
-                arrayPush(logArgs, arg, nextWithoutSpace);
+                const nextLiteralPart = template[i + 1];
+                const trimmedNext = stringStartsWith(nextLiteralPart, ' ')
+                    ? stringSlice(nextLiteralPart, 1)
+                    : nextLiteralPart;
+                arrayPush(logArgs, arg, trimmedNext);
             }
             if (logArgs[logArgs.length - 1] === '') {
                 arrayPop(logArgs);
@@ -2964,11 +3770,11 @@
         };
 
         /**
-         * @type {WeakMap<Error, LogArgs>}
+         * Maps from an error object to arguments suitable for a privileged console
+         * logger function such as `console.error`, including values that may be
+         * redacted in the error's `message`.
          *
-         * Maps from an error object to the log args that are a more informative
-         * alternative message for that error. When logging the error, these
-         * log args should be preferred to `error.message`.
+         * @type {WeakMap<Error, LogArgs>}
          */
         const hiddenMessageLogArgs = new WeakMap();
 
@@ -3023,7 +3829,7 @@
          *
          * @param {Error} error
          */
-        const sanitizeError = (error) => {
+        const sanitizeError = error => {
             const descs = getOwnPropertyDescriptors(error);
             const {
                 name: _nameDesc,
@@ -3032,35 +3838,31 @@
                 cause: _causeDesc = undefined,
                 stack: _stackDesc = undefined,
                 ...restDescs
-            } =
-                descs;
+            } = descs;
 
             const restNames = ownKeys(restDescs);
             if (restNames.length >= 1) {
                 for (const name of restNames) {
                     delete error[name];
                 }
-                const droppedNote = create(objectPrototype, restDescs);
+                const dropped = create(objectPrototype, restDescs);
+                const droppedDetails = redactedDetails`originally with properties ${quote(dropped)}`;
                 // eslint-disable-next-line no-use-before-define
-                note(
-                    error,
-                    redactedDetails`originally with properties ${quote(droppedNote)}`);
-
+                note(error, droppedDetails);
             }
             for (const name of ownKeys(error)) {
-                // @ts-expect-error TS still confused by symbols as property names
+                // @ts-expect-error TypeScript is still confused by symbols as property keys
                 const desc = descs[name];
-                if (desc && objectHasOwnProperty(desc, 'get')) {
-                    defineProperty(error, name, {
-                        value: error[name]  // invoke the getter to convert to data property
-                    });
+                if (desc && hasOwn(desc, 'get')) {
+                    const value = error[name]; // invokes the getter
+                    defineProperty(error, name, {value});
                 }
             }
             freeze(error);
         };
 
         /**
-         * @type {AssertionUtilities['error']}
+         * @type {AssertionUtilities['makeError']}
          */$h͏_once.sanitizeError(sanitizeError);
         const makeError = (
             optDetails = redactedDetails`Assert failed`,
@@ -3069,12 +3871,12 @@
                 errorName = undefined,
                 cause = undefined,
                 errors = undefined,
-                sanitize = true
-            } =
-                {}) => {
+                sanitize = true,
+            } = {},
+        ) => {
+            // Promote string-valued `optDetails` into a minimal DetailsParts
+            // consisting of that string as the sole literal part with no substitutions.
             if (typeof optDetails === 'string') {
-                // If it is a string, use it as the literal part of the template so
-                // it doesn't get quoted.
                 optDetails = redactedDetails([optDetails]);
             }
             const hiddenDetails = weakmapGet(hiddenDetailsMap, optDetails);
@@ -3086,23 +3888,21 @@
             let error;
             if (
                 typeof AggregateError !== 'undefined' &&
-                errConstructor === AggregateError) {
+                errConstructor === AggregateError
+            ) {
                 error = AggregateError(errors || [], messageString, opts);
             } else {
-                error =  /** @type {ErrorConstructor} */  errConstructor(
-                    messageString,
-                    opts);
-
+                const ErrorCtor = /** @type {ErrorConstructor} */ (errConstructor);
+                error = ErrorCtor(messageString, opts);
+                // Since we need to tolerate `errors` on an AggregateError, we may as well
+                // tolerate it on all errors.
                 if (errors !== undefined) {
-                    // Since we need to tolerate `errors` on an AggregateError, may as
-                    // well tolerate it on all errors.
                     defineProperty(error, 'errors', {
                         value: errors,
                         writable: true,
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     });
-
                 }
             }
             weakmapSet(hiddenMessageLogArgs, error, getLogArgs(hiddenDetails));
@@ -3120,11 +3920,10 @@
 
 // /////////////////////////////////////////////////////////////////////////////
 
-        const {addLogArgs, takeLogArgsArray} = makeNoteLogArgsArrayKit();
+        const {addLogArgs: addNoteLogArgs, takeLogArgsArray: takeAllNoteLogArgs} =
+            makeNoteLogArgsArrayKit();
 
         /**
-         * @type {WeakMap<Error, NoteCallback[]>}
-         *
          * An augmented console will normally only take the hidden noteArgs array once,
          * when it logs the error being annotated. Once that happens, further
          * annotations of that error should go to the console immediately. We arrange
@@ -3133,14 +3932,16 @@
          * callback per error, but that depends on console behavior which we should not
          * assume. We make this an array of callbacks so multiple registrations
          * are independent.
+         *
+         * @type {WeakMap<Error, NoteCallback[]>}
          */
-        const hiddenNoteCallbackArrays = new WeakMap();
+        const hiddenNoteCallbacks = new WeakMap();
 
         /** @type {AssertionUtilities['note']} */
         const note = (error, detailsNote) => {
+            // Promote string-valued `detailsNote` into a minimal DetailsParts consisting
+            // of that string as the sole literal part with no substitutions.
             if (typeof detailsNote === 'string') {
-                // If it is a string, use it as the literal part of the template so
-                // it doesn't get quoted.
                 detailsNote = redactedDetails([detailsNote]);
             }
             const hiddenDetails = weakmapGet(hiddenDetailsMap, detailsNote);
@@ -3148,13 +3949,13 @@
                 throw TypeError(`unrecognized details ${quote(detailsNote)}`);
             }
             const logArgs = getLogArgs(hiddenDetails);
-            const callbacks = weakmapGet(hiddenNoteCallbackArrays, error);
+            const callbacks = weakmapGet(hiddenNoteCallbacks, error);
             if (callbacks !== undefined) {
                 for (const callback of callbacks) {
                     callback(error, logArgs);
                 }
             } else {
-                addLogArgs(error, logArgs);
+                addNoteLogArgs(error, logArgs);
             }
         };
         $h͏_once.note(note);
@@ -3168,7 +3969,7 @@
          * @param {Error} error
          * @returns {string}
          */
-        const defaultGetStackString = (error) => {
+        const defaultGetStackString = error => {
             if (!('stack' in error)) {
                 return '';
             }
@@ -3183,31 +3984,30 @@
         /** @type {LoggedErrorHandler} */
         const loggedErrorHandler = {
             getStackString: globalThis.getStackString || defaultGetStackString,
-            tagError: (error) => tagError(error),
+            tagError: error => tagError(error),
             resetErrorTagNum: () => {
                 errorTagNum = 0;
             },
-            getMessageLogArgs: (error) => weakmapGet(hiddenMessageLogArgs, error),
-            takeMessageLogArgs: (error) => {
-                const result = weakmapGet(hiddenMessageLogArgs, error);
+            getMessageLogArgs: error => weakmapGet(hiddenMessageLogArgs, error),
+            takeMessageLogArgs: error => {
+                const logArgs = weakmapGet(hiddenMessageLogArgs, error);
                 weakmapDelete(hiddenMessageLogArgs, error);
-                return result;
+                return logArgs;
             },
             takeNoteLogArgsArray: (error, callback) => {
-                const result = takeLogArgsArray(error);
+                const logArgsArray = takeAllNoteLogArgs(error);
                 if (callback !== undefined) {
-                    const callbacks = weakmapGet(hiddenNoteCallbackArrays, error);
+                    const callbacks = weakmapGet(hiddenNoteCallbacks, error);
                     if (callbacks) {
                         arrayPush(callbacks, callback);
                     } else {
-                        weakmapSet(hiddenNoteCallbackArrays, error, [callback]);
+                        weakmapSet(hiddenNoteCallbacks, error, [callback]);
                     }
                 }
-                return result || [];
-            }
+                return logArgsArray || [];
+            },
         };
         $h͏_once.loggedErrorHandler(loggedErrorHandler);
-
         freeze(loggedErrorHandler);
 
 
@@ -3224,10 +4024,10 @@
             const fail = (
                 optDetails = assertFailedDetails,
                 errConstructor = undefined,
-                options = undefined) => {
+                options = undefined,
+            ) => {
                 const reason = makeError(optDetails, errConstructor, options);
                 if (optRaise !== undefined) {
-                    // @ts-ignore returns `never` doesn't mean it isn't callable
                     optRaise(reason);
                 }
                 throw reason;
@@ -3237,17 +4037,16 @@
             /** @type {AssertionUtilities['Fail']} */
             const Fail = (template, ...args) => fail(details(template, ...args));
 
-            // Don't freeze or export `baseAssert` until we add methods.
-            // TODO If I change this from a `function` function to an arrow
-            // function, I seem to get type errors from TypeScript. Why?
+            // Don't freeze or export `assert` until we add methods.
             /** @type {BaseAssert} */
-            function baseAssert(
-                flag,
+            const assert = (
+                condition,
                 optDetails = undefined,
                 errConstructor = undefined,
-                options = undefined) {
-                flag || fail(optDetails, errConstructor, options);
-            }
+                options = undefined,
+            ) => {
+                condition || fail(optDetails, errConstructor, options);
+            };
 
             /** @type {AssertionFunctions['equal']} */
             const equal = (
@@ -3255,13 +4054,14 @@
                 expected,
                 optDetails = undefined,
                 errConstructor = undefined,
-                options = undefined) => {
+                options = undefined,
+            ) => {
                 is(actual, expected) ||
                 fail(
                     optDetails || details`Expected ${actual} is same as ${expected}`,
                     errConstructor || RangeError,
-                    options);
-
+                    options,
+                );
             };
             freeze(equal);
 
@@ -3288,27 +4088,37 @@
             const assertString = (specimen, optDetails = undefined) =>
                 assertTypeof(specimen, 'string', optDetails);
 
-            // Note that "assert === baseAssert"
-            /** @type {Assert} */
-            const assert = assign(baseAssert, {
-                error: makeError,
-                fail,
+            /** @type {Pick<AssertionFunctions, keyof AssertionFunctions>} */
+            const assertionFunctions = {
                 equal,
                 typeof: assertTypeof,
                 string: assertString,
+                fail,
+            };
+
+            /** @type {AssertionUtilities} */
+            const assertionUtilities = {
+                makeError,
                 note,
                 details,
                 Fail,
                 quote,
                 bare,
-                makeAssert
-            });
+            };
 
-            return freeze(assert);
+            /** @type {DeprecatedAssertionUtilities} */
+            const deprecated = {error: makeError, makeAssert};
+
+            /** @type {Assert} */
+            const finishedAssert = assign(assert, {
+                ...assertionFunctions,
+                ...assertionUtilities,
+                ...deprecated,
+            });
+            return freeze(finishedAssert);
         };
         $h͏_once.makeAssert(makeAssert);
         freeze(makeAssert);
-
 
         /** @type {Assert} */
         const assert = makeAssert();
@@ -3323,20 +4133,20 @@
         $h͏_once.assertEqual(assertEqual);
     })()
     ,
-// === functors[10] ===
+// === 14. ses ./src/make-hardener.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Set, String, TypeError, WeakSet, globalThis, apply, arrayForEach, defineProperty, freeze,
-            getOwnPropertyDescriptor, getOwnPropertyDescriptors, getPrototypeOf, isInteger, isObject,
-            objectHasOwnProperty, ownKeys, preventExtensions, setAdd, setForEach, setHas, toStringTagSymbol,
-            typedArrayPrototype, weaksetAdd, weaksetHas, FERAL_STACK_GETTER, FERAL_STACK_SETTER, isError, assert;
-        $h͏_imports([["./commons.js", [["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["arrayForEach", [$h͏_a => (arrayForEach = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["isInteger", [$h͏_a => (isInteger = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["preventExtensions", [$h͏_a => (preventExtensions = $h͏_a)]], ["setAdd", [$h͏_a => (setAdd = $h͏_a)]], ["setForEach", [$h͏_a => (setForEach = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]], ["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]], ["typedArrayPrototype", [$h͏_a => (typedArrayPrototype = $h͏_a)]], ["weaksetAdd", [$h͏_a => (weaksetAdd = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]], ["FERAL_STACK_GETTER", [$h͏_a => (FERAL_STACK_GETTER = $h͏_a)]], ["FERAL_STACK_SETTER", [$h͏_a => (FERAL_STACK_SETTER = $h͏_a)]], ["isError", [$h͏_a => (isError = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
+            getOwnPropertyDescriptor, getOwnPropertyDescriptors, getPrototypeOf, isInteger, isPrimitive, hasOwn,
+            ownKeys, preventExtensions, setAdd, setForEach, setHas, toStringTagSymbol, typedArrayPrototype, weaksetAdd,
+            weaksetHas, FERAL_STACK_GETTER, FERAL_STACK_SETTER, isError, assert;
+        $h͏_imports([["./commons.js", [["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["arrayForEach", [$h͏_a => (arrayForEach = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["isInteger", [$h͏_a => (isInteger = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["preventExtensions", [$h͏_a => (preventExtensions = $h͏_a)]], ["setAdd", [$h͏_a => (setAdd = $h͏_a)]], ["setForEach", [$h͏_a => (setForEach = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]], ["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]], ["typedArrayPrototype", [$h͏_a => (typedArrayPrototype = $h͏_a)]], ["weaksetAdd", [$h͏_a => (weaksetAdd = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]], ["FERAL_STACK_GETTER", [$h͏_a => (FERAL_STACK_GETTER = $h͏_a)]], ["FERAL_STACK_SETTER", [$h͏_a => (FERAL_STACK_SETTER = $h͏_a)]], ["isError", [$h͏_a => (isError = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
 
 
         /**
@@ -3347,8 +4157,8 @@
 // TypedArray brand check it employs.
         const typedArrayToStringTag = getOwnPropertyDescriptor(
             typedArrayPrototype,
-            toStringTagSymbol);
-
+            toStringTagSymbol,
+        );
         assert(typedArrayToStringTag);
         const getTypedArrayToStringTag = typedArrayToStringTag.get;
         assert(getTypedArrayToStringTag);
@@ -3359,7 +4169,7 @@
          *
          * @param {unknown} object
          */
-        const isTypedArray = (object) => {
+        const isTypedArray = object => {
             // The object must pass a brand check or toStringTag will return undefined.
             const tag = apply(getTypedArrayToStringTag, object, []);
             return tag !== undefined;
@@ -3371,7 +4181,7 @@
          *
          * @param {string | symbol} propertyKey
          */$h͏_once.isTypedArray(isTypedArray);
-        const isCanonicalIntegerIndexString = (propertyKey) => {
+        const isCanonicalIntegerIndexString = propertyKey => {
             const n = +String(propertyKey);
             return isInteger(n) && String(n) === propertyKey;
         };
@@ -3380,7 +4190,7 @@
          * @template T
          * @param {ArrayLike<T>} array
          */
-        const freezeTypedArray = (array) => {
+        const freezeTypedArray = array => {
             preventExtensions(array);
 
             // Downgrade writable expandos to readonly, even if non-configurable.
@@ -3403,9 +4213,8 @@
                     defineProperty(array, name, {
                         ...desc,
                         writable: false,
-                        configurable: false
+                        configurable: false,
                     });
-
                 }
             });
         };
@@ -3439,7 +4248,7 @@
                      * @param {any} val
                      */
                     function enqueue(val) {
-                        if (!isObject(val)) {
+                        if (isPrimitive(val)) {
                             // ignore primitives
                             return;
                         }
@@ -3459,7 +4268,7 @@
                     /**
                      * @param {any} obj
                      */
-                    const baseFreezeAndTraverse = (obj) => {
+                    const baseFreezeAndTraverse = obj => {
                         // Now freeze the object to ensure reactive
                         // objects such as proxies won't add properties
                         // during traversal, before they get frozen.
@@ -3486,7 +4295,7 @@
                             // The 'name' may be a symbol, and TypeScript doesn't like us to
                             // index arbitrary symbols on objects, so we pretend they're just
                             // strings.
-                            const desc = descs[/** @type {string} */  name];
+                            const desc = descs[/** @type {string} */ (name)];
                             // getOwnPropertyDescriptors is guaranteed to return well-formed
                             // descriptors, but they still inherit from Object.prototype. If
                             // someone has poisoned Object.prototype to add 'value' or 'get'
@@ -3494,7 +4303,7 @@
                             // test could be confused. We use hasOwnProperty to be sure about
                             // whether 'value' is present or not, which tells us for sure that
                             // this is a data property.
-                            if (objectHasOwnProperty(desc, 'value')) {
+                            if (hasOwn(desc, 'value')) {
                                 enqueue(desc.value);
                             } else {
                                 enqueue(desc.get);
@@ -3504,11 +4313,11 @@
                     };
 
                     const freezeAndTraverse =
-                        FERAL_STACK_GETTER === undefined && FERAL_STACK_SETTER === undefined ?
-                            // On platforms without v8's error own stack accessor problem,
-                            // don't pay for any extra overhead.
-                            baseFreezeAndTraverse :
-                            (obj) => {
+                        FERAL_STACK_GETTER === undefined && FERAL_STACK_SETTER === undefined
+                            ? // On platforms without v8's error own stack accessor problem,
+                              // don't pay for any extra overhead.
+                            baseFreezeAndTraverse
+                            : obj => {
                                 if (isError(obj)) {
                                     // Only pay the overhead if it first passes this cheap isError
                                     // check. Otherwise, it will be unrepaired, but won't be judged
@@ -3517,7 +4326,8 @@
                                     if (
                                         stackDesc &&
                                         stackDesc.get === FERAL_STACK_GETTER &&
-                                        stackDesc.configurable) {
+                                        stackDesc.configurable
+                                    ) {
                                         // Can only repair if it is configurable. Otherwise, leave
                                         // unrepaired, in which case it will not be judged passable,
                                         // avoiding a safety problem.
@@ -3528,9 +4338,8 @@
                                             // @ts-expect-error TS should know FERAL_STACK_GETTER
                                             // cannot be `undefined` here.
                                             // See https://github.com/endojs/endo/pull/2232#discussion_r1575179471
-                                            value: apply(FERAL_STACK_GETTER, obj, [])
+                                            value: apply(FERAL_STACK_GETTER, obj, []),
                                         });
-
                                     }
                                 }
                                 return baseFreezeAndTraverse(obj);
@@ -3542,7 +4351,7 @@
                     };
 
                     /** @param {any} value */
-                    const markHardened = (value) => {
+                    const markHardened = value => {
                         weaksetAdd(hardened, value);
                     };
 
@@ -3556,26 +4365,25 @@
                     commit();
 
                     return root;
-                }
+                },
             };
-
 
             return harden;
         };
         $h͏_once.makeHardener(makeHardener);
     })()
     ,
-// === functors[11] ===
+// === 15. ses ./src/cauterize-property.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let objectHasOwnProperty;
-        $h͏_imports([["./commons.js", [["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]]]]]);
+        let hasOwn;
+        $h͏_imports([["./commons.js", [["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]]]]]);
 
         /**
          * @import {Reporter} from './reporting-types.js'
@@ -3613,7 +4421,8 @@
             prop,
             known,
             subPath,
-            {warn, error}) => {
+            {warn, error},
+        ) => {
             // Either the object lacks a permit or the object doesn't match the
             // permit.
             // If the permit is specifically false, not merely undefined,
@@ -3628,7 +4437,8 @@
             try {
                 delete obj[prop];
             } catch (err) {
-                if (objectHasOwnProperty(obj, prop)) {
+                const reason = /** @type {string | object} */ (err);
+                if (hasOwn(obj, prop)) {
                     if (typeof obj === 'function' && prop === 'prototype') {
                         obj.prototype = undefined;
                         if (obj.prototype === undefined) {
@@ -3636,9 +4446,9 @@
                             return;
                         }
                     }
-                    error(`failed to delete ${subPath}`, err);
+                    error(`failed to delete ${subPath}`, reason);
                 } else {
-                    error(`deleting ${subPath} threw`, err);
+                    error(`deleting ${subPath} threw`, reason);
                 }
                 throw err;
             }
@@ -3646,13 +4456,13 @@
         $h͏_once.cauterizeProperty(cauterizeProperty);
     })()
     ,
-// === functors[12] ===
+// === 16. ses ./src/permits.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let arrayPush, arrayForEach;
@@ -3662,12 +4472,14 @@
         /** @import {GenericErrorConstructor} from '../types.js' */
 
         /**
-         * @module Exports {@code permits}, a recursively defined
+         * Exports {@code permits}, a recursively defined
          * JSON record enumerating all intrinsics and their properties
          * according to ECMA specs.
          *
          * @author JF Paradis
          * @author Mark S. Miller
+         *
+         * @module
          */
 
         /**
@@ -3681,9 +4493,8 @@
 
             Infinity,
             NaN,
-            undefined
+            undefined,
         };
-
 
         /**
          * universalPropertyNames
@@ -3714,10 +4525,7 @@
             Boolean: 'Boolean',
             DataView: 'DataView',
             EvalError: 'EvalError',
-            // https://github.com/tc39/proposal-float16array
-            Float16Array: 'Float16Array',
-            Float32Array: 'Float32Array',
-            Float64Array: 'Float64Array',
+
             Int8Array: 'Int8Array',
             Int16Array: 'Int16Array',
             Int32Array: 'Int32Array',
@@ -3798,6 +4606,19 @@
             // *** Other Properties of the Global Object
 
             Math: '%InitialMath%',
+            Temporal: '%InitialTemporal%',
+
+            // We move these from universalPropertyNames because the NaN side channel
+            // means that they are not quite harmless.
+            // We move them to initialGlobalPropertyNames so that they'll still be
+            // included in the primordials, repaired, and hardened. Thus, they
+            // can be endowed into compartments without hazard beyond the
+            // NaN side channel.
+            //
+            // // https://github.com/tc39/proposal-float16array
+            Float16Array: 'Float16Array',
+            Float32Array: 'Float32Array',
+            Float64Array: 'Float64Array',
 
             // ESNext
 
@@ -3831,7 +4652,8 @@
 
             // *** Other Properties of the Global Object
 
-            Math: '%SharedMath%'
+            Math: '%SharedMath%',
+            Temporal: '%SharedTemporal%'
 
             // TODO Temporal
             // https://github.com/tc39/proposal-temporal
@@ -3951,9 +4773,8 @@
         const AsyncFunctionInstance = {
             // This property is not mentioned in ECMA 262, but is present in V8 and
             // necessary for lockdown to succeed.
-            '[[Proto]]': '%AsyncFunctionPrototype%'
+            '[[Proto]]': '%AsyncFunctionPrototype%',
         };
-
 
 // Aliases
         $h͏_once.AsyncFunctionInstance(AsyncFunctionInstance);
@@ -3962,9 +4783,8 @@
 
         const getter = {
             get: fn,
-            set: 'undefined'
+            set: 'undefined',
         };
-
 
 // Possible but not encountered in the specs
 // export const setter = {
@@ -3974,9 +4794,8 @@
 
         const accessor = {
             get: fn,
-            set: fn
+            set: fn,
         };
-
 
 // eslint-disable-next-line func-names
         const strict = function () {
@@ -3984,19 +4803,19 @@
         };
 
 // TODO Remove this once we no longer support the Hermes that needed this.
-        arrayForEach(['caller', 'arguments'], (prop) => {
+        arrayForEach(['caller', 'arguments'], prop => {
             try {
                 strict[prop];
             } catch (e) {
                 // https://github.com/facebook/hermes/blob/main/test/hermes/function-non-strict.js
-                if (e.message === 'Restricted in strict mode') {
+                if (/** @type {Error} */ (e).message === 'Restricted in strict mode') {
                     // Fixed in Static Hermes: https://github.com/facebook/hermes/issues/1582
                     FunctionInstance[prop] = accessor;
                 }
             }
         });
 
-        const isAccessorPermit = (permit) => {
+        const isAccessorPermit = permit => {
             return permit === getter || permit === accessor;
         };
 
@@ -4009,9 +4828,8 @@
                 '[[Proto]]': '%SharedError%',
 
                 // NativeError.prototype
-                prototype
+                prototype,
             };
-
         }
 
         function NativeErrorPrototype(constructor) {
@@ -4025,9 +4843,8 @@
                 toString: false,
                 // Superfluously present in some versions of V8.
                 // https://github.com/tc39/notes/blob/master/meetings/2021-10/oct-26.md#:~:text=However%2C%20Chrome%2093,and%20node%2016.11.
-                cause: false
+                cause: false,
             };
-
         }
 
 // The TypedArray Constructors
@@ -4036,9 +4853,8 @@
                 // Properties of the TypedArray Constructors
                 '[[Proto]]': '%TypedArray%',
                 BYTES_PER_ELEMENT: 'number',
-                prototype
+                prototype,
             };
-
         }
 
         function TypedArrayPrototype(constructor) {
@@ -4046,9 +4862,8 @@
                 // Properties of the TypedArray Prototype Objects
                 '[[Proto]]': '%TypedArrayPrototype%',
                 BYTES_PER_ELEMENT: 'number',
-                constructor
+                constructor,
             };
-
         }
 
 // Without Math.random
@@ -4114,9 +4929,8 @@
             // See https://github.com/Moddable-OpenSource/moddable/issues/523
             mod: false,
             // See https://github.com/Moddable-OpenSource/moddable/issues/523#issuecomment-1942904505
-            irandom: false
+            irandom: false,
         };
-
 
         const permitted = {
             // ECMA https://tc39.es/ecma262
@@ -4174,14 +4988,18 @@
                 seal: fn,
                 setPrototypeOf: fn,
                 values: fn,
+                'RegisteredSymbol(harden)': {
+                    ...fn,
+                    // Installed with hardenTaming: 'unsafe'
+                    isFake: 'boolean',
+                },
                 // https://github.com/tc39/proposal-accessible-object-hasownproperty
                 hasOwn: fn,
                 // https://github.com/tc39/proposal-array-grouping
                 groupBy: fn,
                 // Seen on QuickJS
-                __getClass: false
+                __getClass: false,
             },
-
 
             '%ObjectPrototype%': {
                 // Properties of the Object Prototype Object
@@ -4202,22 +5020,19 @@
                 __defineGetter__: fn,
                 __defineSetter__: fn,
                 __lookupGetter__: fn,
-                __lookupSetter__: fn
+                __lookupSetter__: fn,
             },
-
 
             '%UniqueFunction%': {
                 // Properties of the Function Constructor
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%FunctionPrototype%'
+                prototype: '%FunctionPrototype%',
             },
-
 
             '%InertFunction%': {
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%FunctionPrototype%'
+                prototype: '%FunctionPrototype%',
             },
-
 
             '%FunctionPrototype%': {
                 apply: fn,
@@ -4233,23 +5048,20 @@
                 // Seen on QuickJS. TODO grab getter for use by console
                 fileName: false,
                 // Seen on QuickJS. TODO grab getter for use by console
-                lineNumber: false
+                lineNumber: false,
             },
-
 
             Boolean: {
                 // Properties of the Boolean Constructor
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%BooleanPrototype%'
+                prototype: '%BooleanPrototype%',
             },
-
 
             '%BooleanPrototype%': {
                 constructor: 'Boolean',
                 toString: fn,
-                valueOf: fn
+                valueOf: fn,
             },
-
 
             '%SharedSymbol%': {
                 // Properties of the Symbol Constructor
@@ -4279,9 +5091,8 @@
                 // Seen at core-js https://github.com/zloirock/core-js#ecmascript-symbol
                 useSetter: false,
                 // Seen on QuickJS
-                operatorSet: false
+                operatorSet: false,
             },
-
 
             '%SymbolPrototype%': {
                 // Properties of the Symbol Prototype Object
@@ -4290,9 +5101,8 @@
                 toString: fn,
                 valueOf: fn,
                 '@@toPrimitive': fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%InitialError%': {
                 // Properties of the Error Constructor
@@ -4305,9 +5115,8 @@
                 // Non standard, v8 only, used by several, tamed to accessor
                 prepareStackTrace: accessor,
                 // https://github.com/tc39/proposal-is-error
-                isError: fn
+                isError: fn,
             },
-
 
             '%SharedError%': {
                 // Properties of the Error Constructor
@@ -4320,9 +5129,8 @@
                 // Non standard, v8 only, used by several, tamed to accessor
                 prepareStackTrace: accessor,
                 // https://github.com/tc39/proposal-is-error
-                isError: fn
+                isError: fn,
             },
-
 
             '%ErrorPrototype%': {
                 constructor: '%SharedError%',
@@ -4336,9 +5144,8 @@
                 stack: accessor,
                 // Superfluously present in some versions of V8.
                 // https://github.com/tc39/notes/blob/master/meetings/2021-10/oct-26.md#:~:text=However%2C%20Chrome%2093,and%20node%2016.11.
-                cause: false
+                cause: false,
             },
-
 
             // NativeError
 
@@ -4390,9 +5197,8 @@
                 parseFloat: fn,
                 parseInt: fn,
                 POSITIVE_INFINITY: 'number',
-                prototype: '%NumberPrototype%'
+                prototype: '%NumberPrototype%',
             },
-
 
             '%NumberPrototype%': {
                 // Properties of the Number Prototype Object
@@ -4402,9 +5208,8 @@
                 toLocaleString: fn,
                 toPrecision: fn,
                 toString: fn,
-                valueOf: fn
+                valueOf: fn,
             },
-
 
             BigInt: {
                 // Properties of the BigInt Constructor
@@ -4439,32 +5244,28 @@
                 // Seen on QuickJS
                 floorLog2: false,
                 // Seen on QuickJS
-                ctz: false
+                ctz: false,
             },
-
 
             '%BigIntPrototype%': {
                 constructor: 'BigInt',
                 toLocaleString: fn,
                 toString: fn,
                 valueOf: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%InitialMath%': {
                 ...CommonMath,
                 // `%InitialMath%.random()` has the standard unsafe behavior
-                random: fn
+                random: fn,
             },
-
 
             '%SharedMath%': {
                 ...CommonMath,
                 // `%SharedMath%.random()` is tamed to always throw
-                random: fn
+                random: fn,
             },
-
 
             '%InitialDate%': {
                 // Properties of the Date Constructor
@@ -4472,9 +5273,8 @@
                 now: fn,
                 parse: fn,
                 prototype: '%DatePrototype%',
-                UTC: fn
+                UTC: fn,
             },
-
 
             '%SharedDate%': {
                 // Properties of the Date Constructor
@@ -4483,9 +5283,8 @@
                 now: fn,
                 parse: fn,
                 prototype: '%DatePrototype%',
-                UTC: fn
+                UTC: fn,
             },
-
 
             '%DatePrototype%': {
                 constructor: '%SharedDate%',
@@ -4537,9 +5336,10 @@
                 // Annex B: Additional Properties of the Date.prototype Object
                 getYear: fn,
                 setYear: fn,
-                toGMTString: fn
-            },
+                toGMTString: fn,
 
+                toTemporalInstant: fn,
+            },
 
             // Text Processing
 
@@ -4551,9 +5351,8 @@
                 prototype: '%StringPrototype%',
                 raw: fn,
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523
-                fromArrayBuffer: false
+                fromArrayBuffer: false,
             },
-
 
             '%StringPrototype%': {
                 // Properties of the String Prototype Object
@@ -4619,16 +5418,14 @@
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523
                 compare: false,
                 // Seen on QuickJS
-                __quote: false
+                __quote: false,
             },
-
 
             '%StringIteratorPrototype%': {
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%InitialRegExp%': {
                 // Properties of the RegExp Constructor
@@ -4658,9 +5455,8 @@
                 $6: false,
                 $7: false,
                 $8: false,
-                $9: false
+                $9: false,
             },
-
 
             '%SharedRegExp%': {
                 // Properties of the RegExp Constructor
@@ -4668,9 +5464,8 @@
                 prototype: '%RegExpPrototype%',
                 '@@species': getter,
                 // https://github.com/tc39/proposal-regex-escaping
-                escape: fn
+                escape: fn,
             },
-
 
             '%RegExpPrototype%': {
                 // Properties of the RegExp Prototype Object
@@ -4702,9 +5497,8 @@
                 // The %RegExpStringIteratorPrototype% Object
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // Indexed Collections
 
@@ -4721,9 +5515,8 @@
                 // https://tc39.es/proposal-relative-indexing-method/
                 at: fn,
                 // https://tc39.es/proposal-array-from-async/
-                fromAsync: fn
+                fromAsync: fn,
             },
-
 
             '%ArrayPrototype%': {
                 // Properties of the Array Prototype Object
@@ -4788,9 +5581,8 @@
                     // https://github.com/tc39/proposal-array-grouping
                     group: 'boolean',
                     groupToMap: 'boolean',
-                    groupBy: 'boolean'
+                    groupBy: 'boolean',
                 },
-
                 // See https://github.com/tc39/proposal-array-find-from-last
                 findLast: fn,
                 findLastIndex: fn,
@@ -4805,17 +5597,15 @@
                 groupBy: fn,
                 // Failed tc39 proposal
                 // https://tc39.es/proposal-relative-indexing-method/
-                at: fn
+                at: fn,
             },
-
 
             '%ArrayIteratorPrototype%': {
                 // The %ArrayIteratorPrototype% Object
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // *** TypedArray Objects
 
@@ -4825,9 +5615,8 @@
                 from: fn,
                 of: fn,
                 prototype: '%TypedArrayPrototype%',
-                '@@species': getter
+                '@@species': getter,
             },
-
 
             '%TypedArrayPrototype%': {
                 buffer: getter,
@@ -4871,9 +5660,8 @@
                 // https://github.com/tc39/proposal-change-array-by-copy
                 toReversed: fn,
                 toSorted: fn,
-                with: fn
+                with: fn,
             },
-
 
             // The TypedArray Constructors
 
@@ -4894,9 +5682,8 @@
                 // https://github.com/tc39/proposal-arraybuffer-base64
                 fromBase64: fn,
                 // https://github.com/tc39/proposal-arraybuffer-base64
-                fromHex: fn
+                fromHex: fn,
             },
-
 
             '%BigInt64ArrayPrototype%': TypedArrayPrototype('BigInt64Array'),
             '%BigUint64ArrayPrototype%': TypedArrayPrototype('BigUint64Array'),
@@ -4919,9 +5706,8 @@
                 // https://github.com/tc39/proposal-arraybuffer-base64
                 toBase64: fn,
                 // https://github.com/tc39/proposal-arraybuffer-base64
-                toHex: fn
+                toHex: fn,
             },
-
 
             // *** Keyed Collections
 
@@ -4931,9 +5717,8 @@
                 '@@species': getter,
                 prototype: '%MapPrototype%',
                 // https://github.com/tc39/proposal-array-grouping
-                groupBy: fn
+                groupBy: fn,
             },
-
 
             '%MapPrototype%': {
                 clear: fn,
@@ -4942,23 +5727,23 @@
                 entries: fn,
                 forEach: fn,
                 get: fn,
+                getOrInsert: fn,
+                getOrInsertComputed: fn,
                 has: fn,
                 keys: fn,
                 set: fn,
                 size: getter,
                 values: fn,
                 '@@iterator': fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%MapIteratorPrototype%': {
                 // The %MapIteratorPrototype% Object
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             Set: {
                 // Properties of the Set Constructor
@@ -4966,9 +5751,8 @@
                 prototype: '%SetPrototype%',
                 '@@species': getter,
                 // Seen on QuickJS
-                groupBy: false
+                groupBy: false,
             },
-
 
             '%SetPrototype%': {
                 add: fn,
@@ -4996,50 +5780,46 @@
                 // See https://github.com/tc39/proposal-set-methods
                 isSupersetOf: fn,
                 // See https://github.com/tc39/proposal-set-methods
-                isDisjointFrom: fn
+                isDisjointFrom: fn,
             },
-
 
             '%SetIteratorPrototype%': {
                 // The %SetIteratorPrototype% Object
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             WeakMap: {
                 // Properties of the WeakMap Constructor
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%WeakMapPrototype%'
+                prototype: '%WeakMapPrototype%',
             },
-
 
             '%WeakMapPrototype%': {
                 constructor: 'WeakMap',
                 delete: fn,
                 get: fn,
+                getOrInsert: fn,
+                getOrInsertComputed: fn,
                 has: fn,
                 set: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             WeakSet: {
                 // Properties of the WeakSet Constructor
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%WeakSetPrototype%'
+                prototype: '%WeakSetPrototype%',
             },
-
 
             '%WeakSetPrototype%': {
                 add: fn,
                 constructor: 'WeakSet',
                 delete: fn,
                 has: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // *** Structured Data
 
@@ -5052,9 +5832,8 @@
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523
                 fromString: false,
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523
-                fromBigInt: false
+                fromBigInt: false,
             },
-
 
             '%ArrayBufferPrototype%': {
                 byteLength: getter,
@@ -5070,9 +5849,37 @@
                 maxByteLength: getter,
                 // https://github.com/tc39/proposal-arraybuffer-transfer
                 transferToFixedLength: fn,
-                detached: getter
+                detached: getter,
+                // https://github.com/endojs/endo/pull/2309#issuecomment-2155513240
+                // to be proposed
+                transferToImmutable: fn,
+                sliceToImmutable: fn,
+                immutable: getter,
             },
 
+            // If this exists, it is purely an artifact of how we currently shim
+            // `transferToImmutable`. As natively implemented, there would be no
+            // such extra prototype.
+            '%ImmutableArrayBufferPrototype%': {
+                '[[Proto]]': '%ArrayBufferPrototype%',
+                byteLength: getter,
+                slice: fn,
+                // See https://github.com/endojs/endo/tree/master/packages/immutable-arraybuffer#purposeful-violation
+                '@@toStringTag': 'string',
+                // See https://github.com/tc39/proposal-resizablearraybuffer
+                transfer: fn,
+                resize: fn,
+                resizable: getter,
+                maxByteLength: getter,
+                // https://github.com/tc39/proposal-arraybuffer-transfer
+                transferToFixedLength: fn,
+                detached: getter,
+                // https://github.com/endojs/endo/pull/2309#issuecomment-2155513240
+                // to be proposed
+                transferToImmutable: fn,
+                sliceToImmutable: fn,
+                immutable: getter,
+            },
 
             // SharedArrayBuffer Objects
             SharedArrayBuffer: false, // UNSAFE and purposely suppressed.
@@ -5082,9 +5889,8 @@
                 // Properties of the DataView Constructor
                 '[[Proto]]': '%FunctionPrototype%',
                 BYTES_PER_ELEMENT: 'number', // Non std but undeletable on Safari.
-                prototype: '%DataViewPrototype%'
+                prototype: '%DataViewPrototype%',
             },
-
 
             '%DataViewPrototype%': {
                 buffer: getter,
@@ -5115,9 +5921,8 @@
                 setUint8: fn,
                 setUint16: fn,
                 setUint32: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // Atomics
             Atomics: false, // UNSAFE and suppressed.
@@ -5128,9 +5933,8 @@
                 '@@toStringTag': 'string',
                 // https://github.com/tc39/proposal-json-parse-with-source/
                 rawJSON: fn,
-                isRawJSON: fn
+                isRawJSON: fn,
             },
-
 
             // *** Control Abstraction Objects
 
@@ -5144,9 +5948,8 @@
                 zip: fn,
                 zipKeyed: fn,
                 // https://github.com/tc39/proposal-iterator-sequencing
-                concat: fn
+                concat: fn,
             },
-
 
             '%IteratorPrototype%': {
                 // The %IteratorPrototype% Object
@@ -5169,35 +5972,31 @@
                 toAsync: fn,
                 // https://github.com/tc39/proposal-explicit-resource-management
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523#issuecomment-1942904505
-                '@@dispose': false
+                '@@dispose': false,
             },
-
 
             // https://github.com/tc39/proposal-iterator-helpers
             '%WrapForValidIteratorPrototype%': {
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
-                return: fn
+                return: fn,
             },
-
 
             // https://github.com/tc39/proposal-iterator-helpers
             '%IteratorHelperPrototype%': {
                 '[[Proto]]': '%IteratorPrototype%',
                 next: fn,
                 return: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // https://github.com/tc39/proposal-async-iterator-helpers
             AsyncIterator: {
                 // Properties of the Iterator Constructor
                 '[[Proto]]': '%FunctionPrototype%',
                 prototype: '%AsyncIteratorPrototype%',
-                from: fn
+                from: fn,
             },
-
 
             '%AsyncIteratorPrototype%': {
                 // The %AsyncIteratorPrototype% Object
@@ -5218,49 +6017,43 @@
                 '@@toStringTag': 'string',
                 // https://github.com/tc39/proposal-explicit-resource-management
                 // See https://github.com/Moddable-OpenSource/moddable/issues/523#issuecomment-1942904505
-                '@@asyncDispose': false
+                '@@asyncDispose': false,
             },
-
 
             // https://github.com/tc39/proposal-async-iterator-helpers
             '%WrapForValidAsyncIteratorPrototype%': {
                 '[[Proto]]': '%AsyncIteratorPrototype%',
                 next: fn,
-                return: fn
+                return: fn,
             },
-
 
             // https://github.com/tc39/proposal-async-iterator-helpers
             '%AsyncIteratorHelperPrototype%': {
                 '[[Proto]]': '%AsyncIteratorPrototype%',
                 next: fn,
                 return: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%InertGeneratorFunction%': {
                 // Properties of the GeneratorFunction Constructor
                 '[[Proto]]': '%InertFunction%',
-                prototype: '%Generator%'
+                prototype: '%Generator%',
             },
-
 
             '%Generator%': {
                 // Properties of the GeneratorFunction Prototype Object
                 '[[Proto]]': '%FunctionPrototype%',
                 constructor: '%InertGeneratorFunction%',
                 prototype: '%GeneratorPrototype%',
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%InertAsyncGeneratorFunction%': {
                 // Properties of the AsyncGeneratorFunction Constructor
                 '[[Proto]]': '%InertFunction%',
-                prototype: '%AsyncGenerator%'
+                prototype: '%AsyncGenerator%',
             },
-
 
             '%AsyncGenerator%': {
                 // Properties of the AsyncGeneratorFunction Prototype Object
@@ -5271,9 +6064,8 @@
                 // https://github.com/endojs/endo/issues/660
                 // https://github.com/react-native-community/jsc-android-buildscripts/issues/181
                 length: 'number',
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%GeneratorPrototype%': {
                 // Properties of the Generator Prototype Object
@@ -5282,9 +6074,8 @@
                 next: fn,
                 return: fn,
                 throw: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             '%AsyncGeneratorPrototype%': {
                 // Properties of the AsyncGenerator Prototype Object
@@ -5293,9 +6084,8 @@
                 next: fn,
                 return: fn,
                 throw: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // TODO: To be replaced with Promise.delegate
             //
@@ -5315,17 +6105,15 @@
                 get: fn,
                 getSendOnly: fn,
                 prototype: '%PromisePrototype%',
-                resolve: fn
+                resolve: fn,
             },
-
 
             // https://github.com/tc39/proposal-source-phase-imports?tab=readme-ov-file#js-module-source
 
             ModuleSource: {
                 '[[Proto]]': '%AbstractModuleSource%',
-                prototype: '%ModuleSourcePrototype%'
+                prototype: '%ModuleSourcePrototype%',
             },
-
 
             '%ModuleSourcePrototype%': {
                 '[[Proto]]': '%AbstractModuleSourcePrototype%',
@@ -5338,20 +6126,17 @@
                 // @endo/module-source provides a legacy interface
                 imports: getter,
                 exports: getter,
-                reexports: getter
+                reexports: getter,
             },
-
 
             '%AbstractModuleSource%': {
                 '[[Proto]]': '%FunctionPrototype%',
-                prototype: '%AbstractModuleSourcePrototype%'
+                prototype: '%AbstractModuleSourcePrototype%',
             },
-
 
             '%AbstractModuleSourcePrototype%': {
-                constructor: '%AbstractModuleSource%'
+                constructor: '%AbstractModuleSource%',
             },
-
 
             Promise: {
                 // Properties of the Promise Constructor
@@ -5368,9 +6153,8 @@
                 withResolvers: fn,
                 '@@species': getter,
                 // https://github.com/tc39/proposal-promise-try
-                try: fn
+                try: fn,
             },
-
 
             '%PromisePrototype%': {
                 // Properties of the Promise Prototype Object
@@ -5382,16 +6166,14 @@
                 // Non-standard, used in node to prevent async_hooks from breaking
                 'UniqueSymbol(async_id_symbol)': accessor,
                 'UniqueSymbol(trigger_async_id_symbol)': accessor,
-                'UniqueSymbol(destroyed)': accessor
+                'UniqueSymbol(destroyed)': accessor,
             },
-
 
             '%InertAsyncFunction%': {
                 // Properties of the AsyncFunction Constructor
                 '[[Proto]]': '%InertFunction%',
-                prototype: '%AsyncFunctionPrototype%'
+                prototype: '%AsyncFunctionPrototype%',
             },
-
 
             '%AsyncFunctionPrototype%': {
                 // Properties of the AsyncFunction Prototype Object
@@ -5401,9 +6183,8 @@
                 // https://github.com/endojs/endo/issues/660
                 // https://github.com/react-native-community/jsc-android-buildscripts/issues/181
                 length: 'number',
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             // Reflection
 
@@ -5423,16 +6204,354 @@
                 preventExtensions: fn,
                 set: fn,
                 setPrototypeOf: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             Proxy: {
                 // Properties of the Proxy Constructor
                 '[[Proto]]': '%FunctionPrototype%',
-                revocable: fn
+                revocable: fn,
             },
 
+            '%Temporal.PlainDatePrototype%': {
+                constructor: '%Temporal.PlainDate%',
+                era: accessor,
+                eraYear: accessor,
+                calendarId: accessor,
+                year: accessor,
+                month: accessor,
+                monthCode: accessor,
+                day: accessor,
+                dayOfWeek: accessor,
+                dayOfYear: accessor,
+                weekOfYear: accessor,
+                yearOfWeek: accessor,
+                daysInWeek: accessor,
+                daysInMonth: accessor,
+                daysInYear: accessor,
+                monthsInYear: accessor,
+                inLeapYear: accessor,
+                toPlainYearMonth: fn,
+                toPlainMonthDay: fn,
+                add: fn,
+                subtract: fn,
+                with: fn,
+                withCalendar: fn,
+                until: fn,
+                since: fn,
+                equals: fn,
+                toPlainDateTime: fn,
+                toZonedDateTime: fn,
+                toString: fn,
+                toLocaleString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.PlainDate%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.PlainDatePrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.PlainTimePrototype%': {
+                constructor: '%Temporal.PlainTime%',
+                hour: accessor,
+                minute: accessor,
+                second: accessor,
+                millisecond: accessor,
+                microsecond: accessor,
+                nanosecond: accessor,
+                add: fn,
+                subtract: fn,
+                with: fn,
+                until: fn,
+                since: fn,
+                round: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.PlainTime%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.PlainTimePrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.PlainDateTimePrototype%': {
+                constructor: '%Temporal.PlainDateTime%',
+                calendarId: accessor,
+                era: accessor,
+                eraYear: accessor,
+                year: accessor,
+                month: accessor,
+                monthCode: accessor,
+                day: accessor,
+                hour: accessor,
+                minute: accessor,
+                second: accessor,
+                millisecond: accessor,
+                microsecond: accessor,
+                nanosecond: accessor,
+                dayOfWeek: accessor,
+                dayOfYear: accessor,
+                weekOfYear: accessor,
+                yearOfWeek: accessor,
+                daysInWeek: accessor,
+                daysInMonth: accessor,
+                daysInYear: accessor,
+                monthsInYear: accessor,
+                inLeapYear: accessor,
+                with: fn,
+                withCalendar: fn,
+                withPlainTime: fn,
+                add: fn,
+                subtract: fn,
+                until: fn,
+                since: fn,
+                round: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toJSON: fn,
+                toString: fn,
+                valueOf: fn,
+                toZonedDateTime: fn,
+                toPlainDate: fn,
+                toPlainTime: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.PlainDateTime%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.PlainDateTimePrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.ZonedDateTimePrototype%': {
+                constructor: '%Temporal.ZonedDateTime%',
+                timeZoneId: accessor,
+                calendarId: accessor,
+                era: accessor,
+                eraYear: accessor,
+                year: accessor,
+                month: accessor,
+                monthCode: accessor,
+                day: accessor,
+                hour: accessor,
+                minute: accessor,
+                second: accessor,
+                millisecond: accessor,
+                microsecond: accessor,
+                nanosecond: accessor,
+                epochMilliseconds: accessor,
+                epochNanoseconds: accessor,
+                dayOfWeek: accessor,
+                dayOfYear: accessor,
+                weekOfYear: accessor,
+                yearOfWeek: accessor,
+                hoursInDay: accessor,
+                daysInWeek: accessor,
+                daysInMonth: accessor,
+                daysInYear: accessor,
+                monthsInYear: accessor,
+                inLeapYear: accessor,
+                offsetNanoseconds: accessor,
+                offset: accessor,
+                with: fn,
+                withCalendar: fn,
+                withPlainTime: fn,
+                withTimeZone: fn,
+                add: fn,
+                subtract: fn,
+                until: fn,
+                since: fn,
+                round: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                startOfDay: fn,
+                getTimeZoneTransition: fn,
+                toInstant: fn,
+                toPlainDate: fn,
+                toPlainTime: fn,
+                toPlainDateTime: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.ZonedDateTime%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.ZonedDateTimePrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.DurationPrototype%': {
+                constructor: '%Temporal.Duration%',
+                years: accessor,
+                months: accessor,
+                weeks: accessor,
+                days: accessor,
+                hours: accessor,
+                minutes: accessor,
+                seconds: accessor,
+                milliseconds: accessor,
+                microseconds: accessor,
+                nanoseconds: accessor,
+                sign: accessor,
+                blank: accessor,
+                with: fn,
+                negated: fn,
+                abs: fn,
+                add: fn,
+                subtract: fn,
+                round: fn,
+                total: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.Duration%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.DurationPrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.InstantPrototype%': {
+                constructor: '%Temporal.Instant%',
+                epochMilliseconds: accessor,
+                epochNanoseconds: accessor,
+                add: fn,
+                subtract: fn,
+                until: fn,
+                since: fn,
+                round: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                toZonedDateTimeISO: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.Instant%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.InstantPrototype%',
+                from: fn,
+                fromEpochMilliseconds: fn,
+                fromEpochNanoseconds: fn,
+                compare: fn,
+            },
+
+            '%Temporal.PlainYearMonthPrototype%': {
+                constructor: '%Temporal.PlainYearMonth%',
+                calendarId: accessor,
+                era: accessor,
+                eraYear: accessor,
+                year: accessor,
+                month: accessor,
+                monthCode: accessor,
+                daysInYear: accessor,
+                daysInMonth: accessor,
+                monthsInYear: accessor,
+                inLeapYear: accessor,
+                with: fn,
+                add: fn,
+                subtract: fn,
+                until: fn,
+                since: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                toPlainDate: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.PlainYearMonth%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.PlainYearMonthPrototype%',
+                from: fn,
+                compare: fn,
+            },
+
+            '%Temporal.PlainMonthDayPrototype%': {
+                constructor: '%Temporal.PlainMonthDay%',
+                calendarId: accessor,
+                monthCode: accessor,
+                day: accessor,
+                with: fn,
+                equals: fn,
+                toLocaleString: fn,
+                toString: fn,
+                toJSON: fn,
+                valueOf: fn,
+                toPlainDate: fn,
+                '@@toStringTag': 'string',
+            },
+            '%Temporal.PlainMonthDay%': {
+                '[[Proto]]': '%FunctionPrototype%',
+                length: 'number',
+                name: 'string',
+                prototype: '%Temporal.PlainMonthDayPrototype%',
+                from: fn,
+            },
+
+            '%Temporal.Now%': {
+                instant: fn,
+                timeZoneId: fn,
+                plainDateTimeISO: fn,
+                zonedDateTimeISO: fn,
+                plainDateISO: fn,
+                plainTimeISO: fn,
+                '@@toStringTag': 'string',
+            },
+
+            '%InitialTemporal%': {
+                Now: '%Temporal.Now%',
+                PlainDate: '%Temporal.PlainDate%',
+                PlainTime: '%Temporal.PlainTime%',
+                PlainDateTime: '%Temporal.PlainDateTime%',
+                ZonedDateTime: '%Temporal.ZonedDateTime%',
+                Duration: '%Temporal.Duration%',
+                Instant: '%Temporal.Instant%',
+                PlainYearMonth: '%Temporal.PlainYearMonth%',
+                PlainMonthDay: '%Temporal.PlainMonthDay%',
+                '@@toStringTag': 'string',
+            },
+            '%SharedTemporal%': {
+                PlainDate: '%Temporal.PlainDate%',
+                PlainTime: '%Temporal.PlainTime%',
+                PlainDateTime: '%Temporal.PlainDateTime%',
+                ZonedDateTime: '%Temporal.ZonedDateTime%',
+                Duration: '%Temporal.Duration%',
+                Instant: '%Temporal.Instant%',
+                PlainYearMonth: '%Temporal.PlainYearMonth%',
+                PlainMonthDay: '%Temporal.PlainMonthDay%',
+                '@@toStringTag': 'string',
+            },
 
             // Appendix B
 
@@ -5446,16 +6565,14 @@
             '%UniqueCompartment%': {
                 '[[Proto]]': '%FunctionPrototype%',
                 prototype: '%CompartmentPrototype%',
-                toString: fn
+                toString: fn,
             },
-
 
             '%InertCompartment%': {
                 '[[Proto]]': '%FunctionPrototype%',
                 prototype: '%CompartmentPrototype%',
-                toString: fn
+                toString: fn,
             },
-
 
             '%CompartmentPrototype%': {
                 constructor: '%InertCompartment%',
@@ -5466,38 +6583,37 @@
                 load: asyncFn,
                 importNow: fn,
                 module: fn,
-                '@@toStringTag': 'string'
+                '@@toStringTag': 'string',
             },
-
 
             lockdown: fn,
             harden: {...fn, isFake: 'boolean'},
 
-            '%InitialGetStackString%': fn
+            '%InitialGetStackString%': fn,
         };
         $h͏_once.permitted(permitted);
     })()
     ,
-// === functors[13] ===
+// === 17. ses ./src/intrinsics.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let cauterizeProperty, TypeError, WeakSet, arrayFilter, create, defineProperty, entries, freeze,
-            getOwnPropertyDescriptor, getOwnPropertyDescriptors, globalThis, is, isObject, objectHasOwnProperty, values,
+            getOwnPropertyDescriptor, getOwnPropertyDescriptors, globalThis, is, isPrimitive, hasOwn, values,
             weaksetHas, constantProperties, sharedGlobalPropertyNames, universalPropertyNames, permitted;
-        $h͏_imports([["./cauterize-property.js", [["cauterizeProperty", [$h͏_a => (cauterizeProperty = $h͏_a)]]]], ["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["values", [$h͏_a => (values = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]]]], ["./permits.js", [["constantProperties", [$h͏_a => (constantProperties = $h͏_a)]], ["sharedGlobalPropertyNames", [$h͏_a => (sharedGlobalPropertyNames = $h͏_a)]], ["universalPropertyNames", [$h͏_a => (universalPropertyNames = $h͏_a)]], ["permitted", [$h͏_a => (permitted = $h͏_a)]]]]]);
+        $h͏_imports([["./cauterize-property.js", [["cauterizeProperty", [$h͏_a => (cauterizeProperty = $h͏_a)]]]], ["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["values", [$h͏_a => (values = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]]]], ["./permits.js", [["constantProperties", [$h͏_a => (constantProperties = $h͏_a)]], ["sharedGlobalPropertyNames", [$h͏_a => (sharedGlobalPropertyNames = $h͏_a)]], ["universalPropertyNames", [$h͏_a => (universalPropertyNames = $h͏_a)]], ["permitted", [$h͏_a => (permitted = $h͏_a)]]]]]);
 
 
         /**
          * @import {Reporter} from './reporting-types.js'
          */
 
-        const isFunction = (obj) => typeof obj === 'function';
+        const isFunction = obj => typeof obj === 'function';
 
 // Like defineProperty, but throws if it would modify an existing property.
 // We use this to ensure that two conflicting attempts to define the same
@@ -5506,7 +6622,7 @@
 // get masked as one overwrites the other. Accordingly, the thrown error
 // complains of a "Conflicting definition".
         function initProperty(obj, name, desc) {
-            if (objectHasOwnProperty(obj, name)) {
+            if (hasOwn(obj, name)) {
                 const preDesc = getOwnPropertyDescriptor(obj, name);
                 if (
                     !preDesc ||
@@ -5515,7 +6631,8 @@
                     preDesc.set !== desc.set ||
                     preDesc.writable !== desc.writable ||
                     preDesc.enumerable !== desc.enumerable ||
-                    preDesc.configurable !== desc.configurable) {
+                    preDesc.configurable !== desc.configurable
+                ) {
                     throw TypeError(`Conflicting definitions of ${name}`);
                 }
             }
@@ -5537,7 +6654,7 @@
         function sampleGlobals(globalObject, newPropertyNames) {
             const newIntrinsics = {__proto__: null};
             for (const [globalName, intrinsicName] of entries(newPropertyNames)) {
-                if (objectHasOwnProperty(globalObject, globalName)) {
+                if (hasOwn(globalObject, globalName)) {
                     newIntrinsics[intrinsicName] = globalObject[globalName];
                 }
             }
@@ -5547,12 +6664,12 @@
         /**
          * @param {Reporter} reporter
          */
-        const makeIntrinsicsCollector = (reporter) => {
+        const makeIntrinsicsCollector = reporter => {
             /** @type {Record<any, any>} */
             const intrinsics = create(null);
             let pseudoNatives;
 
-            const addIntrinsics = (newIntrinsics) => {
+            const addIntrinsics = newIntrinsics => {
                 initProperties(intrinsics, getOwnPropertyDescriptors(newIntrinsics));
             };
             freeze(addIntrinsics);
@@ -5562,11 +6679,11 @@
             // to the intrinsics.
             const completePrototypes = () => {
                 for (const [name, intrinsic] of entries(intrinsics)) {
-                    if (!isObject(intrinsic)) {
+                    if (isPrimitive(intrinsic)) {
                         // eslint-disable-next-line no-continue
                         continue;
                     }
-                    if (!objectHasOwnProperty(intrinsic, 'prototype')) {
+                    if (!hasOwn(intrinsic, 'prototype')) {
                         // eslint-disable-next-line no-continue
                         continue;
                     }
@@ -5581,18 +6698,19 @@
                             'prototype',
                             false,
                             `${name}.prototype`,
-                            reporter);
-
+                            reporter,
+                        );
                         // eslint-disable-next-line no-continue
                         continue;
                     }
                     if (
                         typeof namePrototype !== 'string' ||
-                        !objectHasOwnProperty(permitted, namePrototype)) {
+                        !hasOwn(permitted, namePrototype)
+                    ) {
                         throw TypeError(`Unrecognized ${name}.prototype permits entry`);
                     }
                     const intrinsicPrototype = intrinsic.prototype;
-                    if (objectHasOwnProperty(intrinsics, namePrototype)) {
+                    if (hasOwn(intrinsics, namePrototype)) {
                         if (intrinsics[namePrototype] !== intrinsicPrototype) {
                             throw TypeError(`Conflicting bindings of ${namePrototype}`);
                         }
@@ -5611,11 +6729,11 @@
             };
             freeze(finalIntrinsics);
 
-            const isPseudoNative = (obj) => {
+            const isPseudoNative = obj => {
                 if (!pseudoNatives) {
                     throw TypeError(
-                        'isPseudoNative can only be called after finalIntrinsics');
-
+                        'isPseudoNative can only be called after finalIntrinsics',
+                    );
                 }
                 return weaksetHas(pseudoNatives, obj);
             };
@@ -5625,9 +6743,8 @@
                 addIntrinsics,
                 completePrototypes,
                 finalIntrinsics,
-                isPseudoNative
+                isPseudoNative,
             };
-
             freeze(intrinsicsCollector);
 
             addIntrinsics(constantProperties);
@@ -5661,19 +6778,19 @@
         $h͏_once.getGlobalIntrinsics(getGlobalIntrinsics);
     })()
     ,
-// === functors[14] ===
+// === 18. ses ./src/permits-intrinsics.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let permitted, FunctionInstance, isAccessorPermit, Map, String, Symbol, TypeError, arrayFilter, arrayIncludes,
-            arrayMap, entries, getOwnPropertyDescriptor, getPrototypeOf, isObject, mapGet, objectHasOwnProperty,
-            ownKeys, symbolKeyFor, cauterizeProperty;
-        $h͏_imports([["./permits.js", [["permitted", [$h͏_a => (permitted = $h͏_a)]], ["FunctionInstance", [$h͏_a => (FunctionInstance = $h͏_a)]], ["isAccessorPermit", [$h͏_a => (isAccessorPermit = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["Symbol", [$h͏_a => (Symbol = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayIncludes", [$h͏_a => (arrayIncludes = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["symbolKeyFor", [$h͏_a => (symbolKeyFor = $h͏_a)]]]], ["./cauterize-property.js", [["cauterizeProperty", [$h͏_a => (cauterizeProperty = $h͏_a)]]]]]);
+            arrayMap, entries, getOwnPropertyDescriptor, getPrototypeOf, isPrimitive, mapGet, hasOwn, ownKeys,
+            symbolKeyFor, cauterizeProperty;
+        $h͏_imports([["./permits.js", [["permitted", [$h͏_a => (permitted = $h͏_a)]], ["FunctionInstance", [$h͏_a => (FunctionInstance = $h͏_a)]], ["isAccessorPermit", [$h͏_a => (isAccessorPermit = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["Symbol", [$h͏_a => (Symbol = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayIncludes", [$h͏_a => (arrayIncludes = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["symbolKeyFor", [$h͏_a => (symbolKeyFor = $h͏_a)]]]], ["./cauterize-property.js", [["cauterizeProperty", [$h͏_a => (cauterizeProperty = $h͏_a)]]]]]);
 
 
         /**
@@ -5691,23 +6808,24 @@
         function removeUnpermittedIntrinsics(
             intrinsics,
             markVirtualizedNativeFunction,
-            reporter) {
+            reporter,
+        ) {
             // These primitives are allowed for permits.
             const primitives = ['undefined', 'boolean', 'number', 'string', 'symbol'];
 
             // These symbols are allowed as well-known symbols
             const wellKnownSymbolNames = new Map(
-                Symbol ?
-                    arrayMap(
+                Symbol
+                    ? arrayMap(
                         arrayFilter(
                             entries(permitted['%SharedSymbol%']),
                             ([name, permit]) =>
-                                permit === 'symbol' && typeof Symbol[name] === 'symbol'),
-
-                        ([name]) => [Symbol[name], `@@${name}`]) :
-
-                    []);
-
+                                permit === 'symbol' && typeof Symbol[name] === 'symbol',
+                        ),
+                        ([name]) => [Symbol[name], `@@${name}`],
+                    )
+                    : [],
+            );
 
             /**
              * asStringPropertyName()
@@ -5743,8 +6861,8 @@
    * Validate the object's [[prototype]] against a permit.
    */
             function visitPrototype(path, obj, protoName) {
-                if (!isObject(obj)) {
-                    throw TypeError(`Object expected: ${path}, ${obj}, ${protoName}`);
+                if (isPrimitive(obj)) {
+                    throw TypeError(`Object expected: ${path}, ${String(obj)}, ${protoName}`);
                 }
                 const proto = getPrototypeOf(obj);
 
@@ -5765,8 +6883,8 @@
 
                 // We can't clean [[Prototype]], therefore abort.
                 throw TypeError(
-                    `Unexpected [[Prototype]] at ${path}.__proto__ (expected ${protoName || '%ObjectPrototype%'})`);
-
+                    `Unexpected [[Prototype]] at ${path}.__proto__ (expected ${protoName || '%ObjectPrototype%'})`,
+                );
             }
 
             /*
@@ -5790,40 +6908,32 @@
                 if (typeof permit === 'string') {
                     // A string permit can have one of two meanings:
 
-                    if (prop === 'prototype' || prop === 'constructor') {
-                        // For prototype and constructor value properties, the permit
-                        // is the name of an intrinsic.
-                        // Assumption: prototype and constructor cannot be primitives.
-                        // Assert: the permit is the name of an intrinsic.
-                        // Assert: the property value is equal to that intrinsic.
+                    if (arrayIncludes(primitives, permit)) {
+                        // The permit is the name of a primitive.
 
-                        if (objectHasOwnProperty(intrinsics, permit)) {
-                            if (value !== intrinsics[permit]) {
-                                throw TypeError(`Does not match permit for ${path}`);
-                            }
-                            return true;
+                        if (prop === 'prototype' || prop === 'constructor') {
+                            throw new TypeError(`At ${path} expected intrinsic, not ${permit}`);
                         }
-                    } else {
-                        // For all other properties, the permit is the name of a primitive.
-                        // Assert: the permit is the name of a primitive.
-                        // Assert: the property value type is equal to that primitive.
-
-                        // eslint-disable-next-line no-lonely-if
-                        if (arrayIncludes(primitives, permit)) {
-                            // eslint-disable-next-line valid-typeof
-                            if (typeof value !== permit) {
-                                throw TypeError(
-                                    `At ${path} expected ${permit} not ${typeof value}`);
-
-                            }
-                            return true;
+                        // eslint wants to compare typeof only to string literals
+                        // eslint-disable-next-line valid-typeof
+                        if (typeof value !== permit) {
+                            throw TypeError(`At ${path} expected ${permit} not ${typeof value}`);
                         }
+                        return true;
+                    }
+
+                    if (hasOwn(intrinsics, permit)) {
+                        // the permit is the name of an intrinsic.
+                        if (value !== intrinsics[permit]) {
+                            throw TypeError(`Does not match permit for ${path}`);
+                        }
+                        return true;
                     }
                 }
 
                 throw TypeError(
-                    `Unexpected property ${prop} with permit ${permit} at ${path}`);
-
+                    `Unexpected property ${prop} with permit ${permit} at ${path}`,
+                );
             }
 
             /*
@@ -5837,7 +6947,7 @@
                 }
 
                 // Is this a value property?
-                if (objectHasOwnProperty(desc, 'value')) {
+                if (hasOwn(desc, 'value')) {
                     if (isAccessorPermit(permit)) {
                         throw TypeError(`Accessor expected at ${path}`);
                     }
@@ -5848,8 +6958,8 @@
                 }
                 return (
                     isAllowedPropertyValue(`${path}<get>`, desc.get, prop, permit.get) &&
-                    isAllowedPropertyValue(`${path}<set>`, desc.set, prop, permit.set));
-
+                    isAllowedPropertyValue(`${path}<set>`, desc.set, prop, permit.set)
+                );
             }
 
             /*
@@ -5857,12 +6967,12 @@
    */
             function getSubPermit(obj, permit, prop) {
                 const permitProp = prop === '__proto__' ? '--proto--' : prop;
-                if (objectHasOwnProperty(permit, permitProp)) {
+                if (hasOwn(permit, permitProp)) {
                     return permit[permitProp];
                 }
 
                 if (typeof obj === 'function') {
-                    if (objectHasOwnProperty(FunctionInstance, permitProp)) {
+                    if (hasOwn(FunctionInstance, permitProp)) {
                         return FunctionInstance[permitProp];
                     }
                 }
@@ -5905,17 +7015,18 @@
         $h͏_once.default(removeUnpermittedIntrinsics);
     })()
     ,
-// === functors[15] ===
+// === 19. ses ./src/tame-function-constructors.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let FERAL_FUNCTION, SyntaxError, TypeError, defineProperties, getPrototypeOf, setPrototypeOf, freeze;
-        $h͏_imports([["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["SyntaxError", [$h͏_a => (SyntaxError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["setPrototypeOf", [$h͏_a => (setPrototypeOf = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]]]]]);
+        let FERAL_FUNCTION, SyntaxError, TypeError, defineProperties, getPrototypeOf, setPrototypeOf, freeze,
+            AsyncGeneratorFunctionInstance;
+        $h͏_imports([["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["SyntaxError", [$h͏_a => (SyntaxError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["setPrototypeOf", [$h͏_a => (setPrototypeOf = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["AsyncGeneratorFunctionInstance", [$h͏_a => (AsyncGeneratorFunctionInstance = $h͏_a)]]]]]);
 
 
 // This module replaces the original `Function` constructor, and the original
@@ -5995,8 +7106,8 @@
                 // eslint-disable-next-line func-names
                 const InertConstructor = function () {
                     throw TypeError(
-                        'Function.prototype.constructor is not a valid constructor.');
-
+                        'Function.prototype.constructor is not a valid constructor.',
+                    );
                 };
                 defineProperties(InertConstructor, {
                     prototype: {value: FunctionPrototype},
@@ -6004,15 +7115,13 @@
                         value: name,
                         writable: false,
                         enumerable: false,
-                        configurable: true
-                    }
+                        configurable: true,
+                    },
                 });
-
 
                 defineProperties(FunctionPrototype, {
-                    constructor: {value: InertConstructor}
+                    constructor: {value: InertConstructor},
                 });
-
 
                 // Reconstructs the inheritance among the new tamed constructors
                 // to mirror the original specified in normal JS.
@@ -6031,18 +7140,21 @@
             repairFunction(
                 'GeneratorFunction',
                 '%InertGeneratorFunction%',
-                '(function*(){})');
-
+                '(function*(){})',
+            );
             repairFunction(
                 'AsyncFunction',
                 '%InertAsyncFunction%',
-                '(async function(){})');
+                '(async function(){})',
+            );
 
-            repairFunction(
-                'AsyncGeneratorFunction',
-                '%InertAsyncGeneratorFunction%',
-                '(async function*(){})');
-
+            if (AsyncGeneratorFunctionInstance !== undefined) {
+                repairFunction(
+                    'AsyncGeneratorFunction',
+                    '%InertAsyncGeneratorFunction%',
+                    '(async function*(){})',
+                );
+            }
 
             return newIntrinsics;
         }
@@ -6050,13 +7162,13 @@
         $h͏_once.default(tameFunctionConstructors);
     })()
     ,
-// === functors[16] ===
+// === 20. ses ./src/tame-date-constructor.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Date, TypeError, apply, construct, defineProperties;
@@ -6075,9 +7187,8 @@
                  */
                 now() {
                     throw TypeError('secure mode Calling %SharedDate%.now() throws');
-                }
+                },
             };
-
 
             /**
              * Tame the Date constructor.
@@ -6117,13 +7228,13 @@
                     ResultDate = function Date(...rest) {
                         if (new.target === undefined) {
                             throw TypeError(
-                                'secure mode Calling %SharedDate% constructor as a function throws');
-
+                                'secure mode Calling %SharedDate% constructor as a function throws',
+                            );
                         }
                         if (rest.length === 0) {
                             throw TypeError(
-                                'secure mode Calling new %SharedDate%() with no arguments throws');
-
+                                'secure mode Calling new %SharedDate%() with no arguments throws',
+                            );
                         }
                         return construct(OriginalDate, rest, new.target);
                     };
@@ -6135,25 +7246,21 @@
                         value: DatePrototype,
                         writable: false,
                         enumerable: false,
-                        configurable: false
+                        configurable: false,
                     },
-
                     parse: {
                         value: OriginalDate.parse,
                         writable: true,
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     },
-
                     UTC: {
                         value: OriginalDate.UTC,
                         writable: true,
                         enumerable: false,
-                        configurable: true
-                    }
+                        configurable: true,
+                    },
                 });
-
-
                 return ResultDate;
             };
             const InitialDate = makeDateConstructor({powers: 'original'});
@@ -6164,43 +7271,38 @@
                     value: OriginalDate.now,
                     writable: true,
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
-
             defineProperties(SharedDate, {
                 now: {
                     value: tamedMethods.now,
                     writable: true,
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             defineProperties(DatePrototype, {
-                constructor: {value: SharedDate}
+                constructor: {value: SharedDate},
             });
-
 
             return {
                 '%InitialDate%': InitialDate,
-                '%SharedDate%': SharedDate
+                '%SharedDate%': SharedDate,
             };
-
         }
 
         $h͏_once.default(tameDateConstructor);
     })()
     ,
-// === functors[17] ===
+// === 21. ses ./src/tame-math-object.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Math, TypeError, create, getOwnPropertyDescriptors, objectPrototype;
@@ -6222,9 +7324,8 @@
                  */
                 random() {
                     throw TypeError('secure mode %SharedMath%.random() throws');
-                }
+                },
             };
-
 
             const sharedMath = create(objectPrototype, {
                 ...otherDescriptors,
@@ -6232,28 +7333,358 @@
                     value: tamedMethods.random,
                     writable: true,
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             return {
                 '%InitialMath%': initialMath,
-                '%SharedMath%': sharedMath
+                '%SharedMath%': sharedMath,
             };
-
         }
 
         $h͏_once.default(tameMathObject);
     })()
     ,
-// === functors[18] ===
+// === 22. ses ./src/tame-temporal-object.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        let freeze, getOwnPropertyDescriptors, create, objectPrototype, getPrototypeOf, ownKeys, fromEntries, TypeError,
+            arrayPush, Temporal, permitted;
+        $h͏_imports([["./commons.js", [["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["objectPrototype", [$h͏_a => (objectPrototype = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["fromEntries", [$h͏_a => (fromEntries = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayPush", [$h͏_a => (arrayPush = $h͏_a)]], ["Temporal", [$h͏_a => (Temporal = $h͏_a)]]]], ["./permits.js", [["permitted", [$h͏_a => (permitted = $h͏_a)]]]]]);
+
+
+        /**
+         * Tame the `Temporal` namespace object.
+         *
+         * The `%InitialTemporal%` is indeed the original `Temporal` namespace
+         * object, to remain present on the start compartment.
+         *
+         * The `%SharedTemporal%` is the safe shared `Temporal` namespace object,
+         * to be endowed by default on the gloabl of all constructed compartments.
+         * This differs only by the omission of `Temporal.Now`, which is the source of
+         * the dynamic non-determinism of the ever-changing current time, and the
+         * glacial dynamic non-determinism of current timezone and UTC offset (daylight
+         * savings time).
+         *
+         * The remaining source of glacial dynamic non-determinism is locale
+         * sensitivity, which `Temporal` provides only via `toLocaleString` methods.
+         * This is handled by `tame-locale-methods.js` in the same way as all other
+         * `*Locale*` methods.
+         *
+         * `tameTemporalObject` is modeletd on `tameMathObject` and `tameDateConstructor`
+         */
+        const tameTemporalObject = () => {
+            if (Temporal === undefined) {
+                return {};
+            }
+
+            if (typeof Temporal !== 'object') {
+                throw new TypeError(`unexpected typeof Temporal: ${typeof Temporal}`);
+            }
+            if (getPrototypeOf(Temporal) !== objectPrototype) {
+                throw new TypeError(
+                    `unexpected Temporal __proto__: ${getPrototypeOf(Temporal)}`,
+                );
+            }
+
+            const initialTemporal = Temporal;
+            const {Now: _, ...otherDescriptors} =
+                getOwnPropertyDescriptors(initialTemporal);
+            const sharedTemporal = create(objectPrototype, otherDescriptors);
+
+            const initialTemporalPermit = permitted['%InitialTemporal%'];
+            const intrinsicEntries = [];
+            for (const topName of ownKeys(Temporal)) {
+                const topPermitName = initialTemporalPermit[topName];
+                const topPermit = permitted[topPermitName];
+                if (typeof topPermit === 'object') {
+                    const topVal = initialTemporal[topName];
+                    arrayPush(intrinsicEntries, [topPermitName, topVal]);
+                }
+            }
+
+            const result = {
+                ...fromEntries(intrinsicEntries),
+                '%InitialTemporal%': initialTemporal,
+                '%SharedTemporal%': sharedTemporal,
+            };
+            return result;
+        };
+        freeze(tameTemporalObject);
+
+        const {default: $c͏_default} = {default: tameTemporalObject};
+        $h͏_once.default($c͏_default);
+    })()
+    ,
+// === 23. ses ./src/tame-nan-sidechannel.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
+     }) => (function () {
+        'use strict';
+        let RangeError, dataViewPrototype, MAX_SAFE_INTEGER, apply, defineProperty, entries, getOwnPropertyDescriptor,
+            hasOwn, is, max, trunc, uncurryThis;
+        $h͏_imports([["./commons.js", [["RangeError", [$h͏_a => (RangeError = $h͏_a)]], ["dataViewPrototype", [$h͏_a => (dataViewPrototype = $h͏_a)]], ["MAX_SAFE_INTEGER", [$h͏_a => (MAX_SAFE_INTEGER = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["max", [$h͏_a => (max = $h͏_a)]], ["trunc", [$h͏_a => (trunc = $h͏_a)]], ["uncurryThis", [$h͏_a => (uncurryThis = $h͏_a)]]]]]);
+
+
+        /**
+         * These `FERAL*` methods open up the NaN side-channel on some platforms,
+         * like v8. Thus, we need to encapsulate them and replace them with wrappers
+         * that canonicalize NaNs.
+         */
+        const {
+            setFloat16: FERAL_SET_FLOAT16,
+            setFloat32: FERAL_SET_FLOAT32,
+            setFloat64: FERAL_SET_FLOAT64,
+
+            setUint16,
+            setUint32,
+            setBigUint64,
+        } = dataViewPrototype;
+
+        const dataViewGetBuffer = uncurryThis(
+            // @ts-expect-error we know it is there on all conforming platforms
+            getOwnPropertyDescriptor(dataViewPrototype, 'buffer').get,
+        );
+
+        /**
+         * See https://webidl.spec.whatwg.org/#js-unrestricted-double which implies
+         * that this is the canonical NaN for web standards.
+         * Casual googling strongly suggests that this is also the cosmWasm
+         * canonical NaN. But I have not yet found an authoritative page stating this.
+         *
+         * As noted there, WebIDL choses this value because
+         * > The `NaN` value ... is chosen simply because it is the quiet NaN
+         * > with the lowest value when its bit pattern is interpreted as an 64-bit
+         * > unsigned integer.
+         *
+         * See https://github.com/endojs/endo/pull/3214#discussion_r3155852021
+         */
+        const canonicalNaN64Encoding = 0x7ff8_0000_0000_0000n;
+
+        /**
+         * As of this writing (April 29, 2026) all implementations agree that a
+         * ***literal*** `NaN` seems to encode in 32 bits as `0x7fc00000`.
+         * See https://github.com/endojs/endo/pull/3214#discussion_r3162974396
+         *
+         * Applying WebIDL's rationale for the 64 bit float
+         * > The `NaN` value ... is chosen simply because it is the quiet NaN
+         * > with the lowest value when its bit pattern is interpreted as an 64-bit
+         * > unsigned integer.
+         *
+         * to the 32 bit case agrees with the choice the implementations make
+         * for the 32 bit encoding of a ***literal*** `NaN`.
+         *
+         * See https://github.com/endojs/endo/pull/3214#discussion_r3155852021
+         */
+        const canonicalNaN32Encoding = 0x7fc0_0000;
+
+        /**
+         * As of this writing (April 29, 2026) all implementations that implement
+         * float16 (with the almost surely unintentional exception of QuickJS),
+         * agree that a ***literal*** `NaN` seems to encode in 16 bits as `0x7e00`.
+         * See https://github.com/endojs/endo/pull/3214#discussion_r3162974396
+         *
+         * Applying WebIDL's rationale for the 64 bit float
+         * > The `NaN` value ... is chosen simply because it is the quiet NaN
+         * > with the lowest value when its bit pattern is interpreted as an 64-bit
+         * > unsigned integer.
+         *
+         * to the 16 bit case agrees with the choice those implementations make
+         * for the 16 bit encoding of a ***literal*** `NaN`.
+         *
+         * See https://github.com/endojs/endo/pull/3214#discussion_r3155852021
+         */
+        const canonicalNaN16Encoding = 0x7e00;
+
+        /**
+         * Perform `RequireInternalSlot(obj, [[DataView]])` as needed in
+         * SetViewValue.
+         * https://tc39.es/ecma262/multipage/structured-data.html#sec-setviewvalue
+         * https://tc39.es/ecma262/#sec-get-dataview.prototype.buffer
+         *
+         * @param {unknown} obj
+         * @returns {void}
+         */
+        const requireDataView = obj => {
+            dataViewGetBuffer(obj);
+        };
+
+        /**
+         * Emulate the internal `ToIndex` from
+         * https://tc39.es/ecma262/multipage/abstract-operations.html#sec-toindex
+         *
+         * @param {unknown} v
+         * @returns {number}
+         */
+        const toIndex = v => {
+            // @ts-expect-error Math.trunc uses the internal `ToNumber` to coerce its
+            // argument, whatever it is, to an integer number.
+            const n = trunc(v);
+            if (n === 0 || is(n, NaN)) {
+                return 0;
+            }
+            if (n < 0 || n > MAX_SAFE_INTEGER) {
+                throw RangeError('Invalid offset');
+            }
+            return n;
+        };
+
+        /**
+         * Expose the internal `ToNumber` from
+         * https://tc39.es/ecma262/multipage/abstract-operations.html#sec-tonumber
+         * We can't just use `Number(value)` because that is backed by `ToNumeric`,
+         * which coerces bigint output from `ToPrimitive` rather than throwing a
+         * TypeError as required of `ToNumber` (e.g., `Number({ valueOf: () => 42n })`
+         * returns 42).
+         *
+         * @param {unknown} v
+         * @returns {number}
+         */
+        const toNumber = v =>
+            // @ts-expect-error Math.max uses the internal `ToNumber` to coerce its
+            // argument, whatever it is, to a number.
+            max(v);
+
+        /**
+         * Correctly guarding the `setFloat*` built-ins requires performing
+         * `ToNumber(value)` ourselves, because a non-NaN value such as
+         * `{ valueOf: () => {} }` gets coerced **to** NaN. But, according to
+         * [SetViewValue](https://tc39.es/ecma262/multipage/structured-data.html#sec-setviewvalue),
+         * we must first perform the observable
+         * `RequireInternalSlot(view, [[DataView]])` and `ToIndex(requestIndex)` steps
+         * (in that order). If those steps complete successfully, we have number-coerced
+         * `byteOffset` and `value` values that will pass those same steps internal to
+         * the implementation without incurring further observable interactions.
+         *
+         * We added these coercions to defend against an attack noticed by
+         * https://github.com/deepview-autofix .
+         * We were vulnerable to `value` being an
+         * object with a `valueOf` method that returns a (bad) NaN, since it
+         * would bypass the is NaN check. See where the
+         * `tame-nan*-sidechannel.test.js test cases mention "coercion attack".
+         *
+         * Uses method shorthand syntax to be `this`-sensitive but not be constructable
+         * nor have a `prototype` property.
+         */
+        const methods = {
+            /**
+             * @param {number} byteOffset
+             * @param {number} value
+             * @param {boolean} [isLittleEndian]
+             */
+            setFloat16(byteOffset, value, isLittleEndian = undefined) {
+                requireDataView(this);
+                byteOffset = toIndex(byteOffset);
+                value = toNumber(value);
+                if (is(value, NaN)) {
+                    return apply(setUint16, this, [
+                        byteOffset,
+                        canonicalNaN16Encoding,
+                        isLittleEndian,
+                    ]);
+                } else {
+                    return apply(FERAL_SET_FLOAT16, this, [
+                        byteOffset,
+                        value,
+                        isLittleEndian,
+                    ]);
+                }
+            },
+
+            /**
+             * @param {number} byteOffset
+             * @param {number} value
+             * @param {boolean} [isLittleEndian]
+             */
+            setFloat32(byteOffset, value, isLittleEndian = undefined) {
+                requireDataView(this);
+                byteOffset = toIndex(byteOffset);
+                value = toNumber(value);
+                if (is(value, NaN)) {
+                    return apply(setUint32, this, [
+                        byteOffset,
+                        canonicalNaN32Encoding,
+                        isLittleEndian,
+                    ]);
+                } else {
+                    return apply(FERAL_SET_FLOAT32, this, [
+                        byteOffset,
+                        value,
+                        isLittleEndian,
+                    ]);
+                }
+            },
+
+            /**
+             * @param {number} byteOffset
+             * @param {number} value
+             * @param {boolean} [isLittleEndian]
+             */
+            setFloat64(byteOffset, value, isLittleEndian = undefined) {
+                requireDataView(this);
+                byteOffset = toIndex(byteOffset);
+                value = toNumber(value);
+                if (is(value, NaN)) {
+                    return apply(setBigUint64, this, [
+                        byteOffset,
+                        canonicalNaN64Encoding,
+                        isLittleEndian,
+                    ]);
+                } else {
+                    return apply(FERAL_SET_FLOAT64, this, [
+                        byteOffset,
+                        value,
+                        isLittleEndian,
+                    ]);
+                }
+            },
+        };
+
+        /**
+         * Replaces the dangerous `setFloat*` methods on `DataView.prototype`
+         * with safe wrappers that first canonicalize NaNs before calling the
+         * original hidden methods.
+         * By itself, this does not make us safe against the NaN side channel.
+         * Separately, we do not include the `Float*Array` constructors on the
+         * list of universal safe globals. Thus, constructed compartments do not
+         * get these by default.
+         *
+         * These replacement `setFloat*` methods canonicalize NaN, but they
+         * do not canonicalize `-0` to `0`. If callers wish to do so, they should do
+         * it themselves before calling these
+         */
+        const tameNaNSideChannel = () => {
+            for (const [name, method] of entries(methods)) {
+                if (hasOwn(dataViewPrototype, name)) {
+                    defineProperty(dataViewPrototype, name, {
+                        // Since we're redefining properties that already exist, by omitting the
+                        // other descriptor attributes here, they are unchanged.
+                        value: method,
+                    });
+                }
+            }
+        };
+        $h͏_once.tameNaNSideChannel(tameNaNSideChannel);
+    })()
+    ,
+// === 24. ses ./src/tame-regexp-constructor.js ===
+    ({
+         imports: $h͏_imports,
+         liveVar: $h͏_live,
+         onceVar: $h͏_once,
+         import: $h͏_import,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let FERAL_REG_EXP, TypeError, construct, defineProperties, getOwnPropertyDescriptor, speciesSymbol;
@@ -6261,9 +7692,6 @@
 
 
         function tameRegExpConstructor(regExpTaming = 'safe') {
-            if (regExpTaming !== 'safe' && regExpTaming !== 'unsafe') {
-                throw TypeError(`unrecognized regExpTaming ${regExpTaming}`);
-            }
             const RegExpPrototype = FERAL_REG_EXP.prototype;
 
             const makeRegExpConstructor = (_ = {}) => {
@@ -6284,24 +7712,21 @@
                         value: RegExpPrototype,
                         writable: false,
                         enumerable: false,
-                        configurable: false
-                    }
+                        configurable: false,
+                    },
                 });
-
-
                 // Hermes does not have `Symbol.species`. We should support such platforms.
                 if (speciesSymbol) {
                     const speciesDesc = getOwnPropertyDescriptor(
                         FERAL_REG_EXP,
-                        speciesSymbol);
-
+                        speciesSymbol,
+                    );
                     if (!speciesDesc) {
                         throw TypeError('no RegExp[Symbol.species] descriptor');
                     }
                     defineProperties(ResultRegExp, {
-                        [speciesSymbol]: speciesDesc
+                        [speciesSymbol]: speciesDesc,
                     });
-
                 }
                 return ResultRegExp;
             };
@@ -6314,40 +7739,40 @@
                 delete RegExpPrototype.compile;
             }
             defineProperties(RegExpPrototype, {
-                constructor: {value: SharedRegExp}
+                constructor: {value: SharedRegExp},
             });
-
 
             return {
                 '%InitialRegExp%': InitialRegExp,
-                '%SharedRegExp%': SharedRegExp
+                '%SharedRegExp%': SharedRegExp,
             };
-
         }
 
         $h͏_once.default(tameRegExpConstructor);
     })()
     ,
-// === functors[19] ===
+// === 25. ses ./src/enablements.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let toStringTagSymbol, iteratorSymbol;
         $h͏_imports([["./commons.js", [["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]], ["iteratorSymbol", [$h͏_a => (iteratorSymbol = $h͏_a)]]]]]);
 
         /**
-         * @module Exports {@code enablements}, a recursively defined
+         * Exports {@code enablements}, a recursively defined
          * JSON record defining the optimum set of intrinsics properties
          * that need to be "repaired" before hardening is applied on
          * enviromments subject to the override mistake.
          *
          * @author JF Paradis
          * @author Mark S. Miller
+         *
+         * @module
          */
 
         /**
@@ -6406,9 +7831,8 @@
          */
         const minEnablements = {
             '%ObjectPrototype%': {
-                toString: true
+                toString: true,
             },
-
 
             '%FunctionPrototype%': {
                 toString: true  // set by "rollup"
@@ -6417,31 +7841,25 @@
             '%ErrorPrototype%': {
                 name: true  // set by "precond", "ava", "node-fetch"
             },
+
             '%IteratorPrototype%': {
                 toString: true,
                 // https://github.com/tc39/proposal-iterator-helpers
                 constructor: true,
                 // https://github.com/tc39/proposal-iterator-helpers
-                [toStringTagSymbol]: true
-            }
+                [toStringTagSymbol]: true,
+            },
         };
-
 
         /**
          * Moderate enablements are usually good enough for legacy compat.
          */$h͏_once.minEnablements(minEnablements);
         const moderateEnablements = {
+            ...minEnablements,
+
             '%ObjectPrototype%': {
-                toString: true,
-                valueOf: true
-            },
-
-
-            '%ArrayPrototype%': {
-                toString: true,
-                push: true, // set by "Google Analytics"
-                concat: true, // set by mobx generated code (old TS compiler?)
-                [iteratorSymbol]: true  // set by mobx generated code (old TS compiler?)
+                ...minEnablements['%ObjectPrototype%'],
+                valueOf: true,
             },
 
             // Function.prototype has no 'prototype' property to enable.
@@ -6449,16 +7867,28 @@
             // which are configurable and non-writable. Thus, they are already
             // non-assignable anyway.
             '%FunctionPrototype%': {
+                ...minEnablements['%FunctionPrototype%'],
                 constructor: true, // set by "regenerator-runtime"
-                bind: true, // set by "underscore", "express"
-                toString: true  // set by "rollup"
+                bind: true  // set by "underscore", "express"
             },
 
             '%ErrorPrototype%': {
+                ...minEnablements['%ErrorPrototype%'],
                 constructor: true, // set by "fast-json-patch", "node-fetch"
                 message: true,
-                name: true, // set by "precond", "ava", "node-fetch", "node 14"
                 toString: true  // set by "bluebird"
+            },
+
+            '%IteratorPrototype%': {
+                ...minEnablements['%IteratorPrototype%'],
+                [iteratorSymbol]: true  // is sometimes used in custom iterators and generators implementations eg. @rive-app/canvas
+            },
+
+            '%ArrayPrototype%': {
+                toString: true,
+                push: true, // set by "Google Analytics"
+                concat: true, // set by mobx generated code (old TS compiler?)
+                [iteratorSymbol]: true  // set by mobx generated code (old TS compiler?)
             },
 
             '%TypeErrorPrototype%': {
@@ -6507,19 +7937,9 @@
             '%Generator%': {
                 constructor: true,
                 name: true,
-                toString: true
-            },
-
-
-            '%IteratorPrototype%': {
                 toString: true,
-                // https://github.com/tc39/proposal-iterator-helpers
-                constructor: true,
-                // https://github.com/tc39/proposal-iterator-helpers
-                [toStringTagSymbol]: true
-            }
+            },
         };
-
 
         /**
          * The 'severe' enablement are needed because of issues tracked at
@@ -6583,23 +8003,23 @@
              * Needed to work with Immer before https://github.com/immerjs/immer/pull/914
              * is accepted.
              */
-            '%SetPrototype%': '*'
+            '%SetPrototype%': '*',
         };
         $h͏_once.severeEnablements(severeEnablements);
     })()
     ,
-// === functors[20] ===
+// === 26. ses ./src/enable-property-overrides.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Set, String, TypeError, arrayForEach, defineProperty, getOwnPropertyDescriptor, getOwnPropertyDescriptors,
-            isObject, objectHasOwnProperty, ownKeys, setHas, minEnablements, moderateEnablements, severeEnablements;
-        $h͏_imports([["./commons.js", [["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayForEach", [$h͏_a => (arrayForEach = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]]]], ["./enablements.js", [["minEnablements", [$h͏_a => (minEnablements = $h͏_a)]], ["moderateEnablements", [$h͏_a => (moderateEnablements = $h͏_a)]], ["severeEnablements", [$h͏_a => (severeEnablements = $h͏_a)]]]]]);
+            isPrimitive, hasOwn, ownKeys, setHas, minEnablements, moderateEnablements, severeEnablements;
+        $h͏_imports([["./commons.js", [["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayForEach", [$h͏_a => (arrayForEach = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]]]], ["./enablements.js", [["minEnablements", [$h͏_a => (minEnablements = $h͏_a)]], ["moderateEnablements", [$h͏_a => (moderateEnablements = $h͏_a)]], ["severeEnablements", [$h͏_a => (severeEnablements = $h͏_a)]]]]]);
 
 
         /** @import {Reporter} from './reporting-types.js' */
@@ -6663,7 +8083,8 @@
             intrinsics,
             overrideTaming,
             {warn},
-            overrideDebug = []) {
+            overrideDebug = [],
+        ) {
             const debugProperties = new Set(overrideDebug);
 
             function enable(path, obj, prop, desc) {
@@ -6684,11 +8105,11 @@
                                 if (obj === this) {
                                     throw TypeError(
                                         `Cannot assign to read only property '${String(
-                                            prop)
-                                        }' of '${path}'`);
-
+                                            prop,
+                                        )}' of '${path}'`,
+                                    );
                                 }
-                                if (objectHasOwnProperty(this, prop)) {
+                                if (hasOwn(this, prop)) {
                                     this[prop] = newValue;
                                 } else {
                                     if (isDebug) {
@@ -6698,31 +8119,27 @@
                                         value: newValue,
                                         writable: true,
                                         enumerable: true,
-                                        configurable: true
+                                        configurable: true,
                                     });
-
                                 }
-                            }
+                            },
                         },
-
-                        prop);
-
+                        prop,
+                    );
 
                     defineProperty(getter, 'originalValue', {
                         value,
                         writable: false,
                         enumerable: false,
-                        configurable: false
+                        configurable: false,
                     });
-
 
                     defineProperty(obj, prop, {
                         get: getter,
                         set: setter,
                         enumerable: desc.enumerable,
-                        configurable: desc.configurable
+                        configurable: desc.configurable,
                     });
-
                 }
             }
 
@@ -6741,7 +8158,7 @@
                 }
                 // TypeScript does not allow symbols to be used as indexes because it
                 // cannot recokon types of symbolized properties.
-                arrayForEach(ownKeys(descs), (prop) => enable(path, obj, prop, descs[prop]));
+                arrayForEach(ownKeys(descs), prop => enable(path, obj, prop, descs[prop]));
             }
 
             function enableProperties(path, obj, plan) {
@@ -6762,7 +8179,7 @@
                         enableProperty(subPath, obj, prop);
                     } else if (subPlan === '*') {
                         enableAllProperties(subPath, desc.value);
-                    } else if (isObject(subPlan)) {
+                    } else if (!isPrimitive(subPlan)) {
                         enableProperties(subPath, desc.value, subPlan);
                     } else {
                         throw TypeError(`Unexpected override enablement plan ${subPath}`);
@@ -6789,7 +8206,6 @@
                 }
             }
 
-
             // Do the repair.
             enableProperties('root', intrinsics, plan);
         }
@@ -6797,22 +8213,23 @@
         $h͏_once.default(enablePropertyOverrides);
     })()
     ,
-// === functors[21] ===
+// === 27. ses ./src/tame-locale-methods.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let Number, String, TypeError, defineProperty, getOwnPropertyNames, isObject, regexpExec, assert;
-        $h͏_imports([["./commons.js", [["Number", [$h͏_a => (Number = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
+        let Number, String, TypeError, defineProperty, freezeRegexp, getOwnPropertyNames, isPrimitive, regexpExec,
+            assert;
+        $h͏_imports([["./commons.js", [["Number", [$h͏_a => (Number = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
 
 
         const {Fail, quote: q} = assert;
 
-        const localePattern = /^(\w*[a-z])Locale([A-Z]\w*)$/;
+        const localePattern = freezeRegexp(/^(\w*[a-z])Locale([A-Z]\w*)$/);
 
 // Use concise methods to obtain named functions without constructor
 // behavior or `.prototype` property.
@@ -6821,8 +8238,8 @@
             localeCompare(arg) {
                 if (this === null || this === undefined) {
                     throw TypeError(
-                        'Cannot localeCompare with null or undefined "this" value');
-
+                        'Cannot localeCompare with null or undefined "this" value',
+                    );
                 }
                 const s = `${this}`;
                 const that = `${arg}`;
@@ -6838,29 +8255,24 @@
 
             toString() {
                 return `${this}`;
-            }
+            },
         };
-
 
         const nonLocaleCompare = tamedMethods.localeCompare;
         const numberToString = tamedMethods.toString;
 
         function tameLocaleMethods(intrinsics, localeTaming = 'safe') {
-            if (localeTaming !== 'safe' && localeTaming !== 'unsafe') {
-                throw TypeError(`unrecognized localeTaming ${localeTaming}`);
-            }
             if (localeTaming === 'unsafe') {
                 return;
             }
 
             defineProperty(String.prototype, 'localeCompare', {
-                value: nonLocaleCompare
+                value: nonLocaleCompare,
             });
-
 
             for (const intrinsicName of getOwnPropertyNames(intrinsics)) {
                 const intrinsic = intrinsics[intrinsicName];
-                if (isObject(intrinsic)) {
+                if (!isPrimitive(intrinsic)) {
                     for (const methodName of getOwnPropertyNames(intrinsic)) {
                         const match = regexpExec(localePattern, methodName);
                         if (match) {
@@ -6879,32 +8291,32 @@
             // Numbers are special because toString accepts a radix instead of ignoring
             // all of the arguments that we would otherwise forward.
             defineProperty(Number.prototype, 'toLocaleString', {
-                value: numberToString
+                value: numberToString,
             });
-
         }
 
         $h͏_once.default(tameLocaleMethods);
     })()
     ,
-// === functors[22] ===
+// === 28. ses ./src/make-eval-function.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         $h͏_imports([]);
         /**
          * makeEvalFunction()
          * A safe version of the native eval function which relies on
-         * the safety of safeEvaluate for confinement.
+         * the safety of `safe-eval` for confinement, unless `no-eval`
+         * is specified (then a TypeError is thrown on use).
          *
-         * @param {Function} safeEvaluate
+         * @param {Function} evaluator
          */
-        const makeEvalFunction = (safeEvaluate) => {
+        const makeEvalFunction = evaluator => {
             // We use the concise method syntax to create an eval without a
             // [[Construct]] behavior (such that the invocation "new eval()" throws
             // TypeError: eval is not a constructor"), but which still accepts a
@@ -6918,8 +8330,8 @@
                         // rule. Track.
                         return source;
                     }
-                    return safeEvaluate(source);
-                }
+                    return evaluator(source);
+                },
             }.eval;
 
             return newEval;
@@ -6927,13 +8339,13 @@
         $h͏_once.makeEvalFunction(makeEvalFunction);
     })()
     ,
-// === functors[23] ===
+// === 29. ses ./src/make-function-constructor.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let FERAL_FUNCTION, arrayJoin, arrayPop, defineProperties, getPrototypeOf, assert;
@@ -6945,9 +8357,10 @@
         /*
  * makeFunctionConstructor()
  * A safe version of the native Function which relies on
- * the safety of safeEvaluate for confinement.
+ * the safety of `safe-eval` for confinement, unless `no-eval`
+ * is specified (then a TypeError is thrown on use).
  */
-        const makeFunctionConstructor = (safeEvaluate) => {
+        const makeFunctionConstructor = evaluator => {
             // Define an unused parameter to ensure Function.length === 1
             const newFunction = function Function(_body) {
                 // Sanitize all parameters at the entry point.
@@ -6987,7 +8400,7 @@
                 // TODO: since we create an anonymous function, the 'this' value
                 // isn't bound to the global object as per specs, but set as undefined.
                 const src = `(function anonymous(${parameters}\n) {\n${bodyText}\n})`;
-                return safeEvaluate(src);
+                return evaluator(src);
             };
 
             defineProperties(newFunction, {
@@ -6997,34 +8410,33 @@
                     value: FERAL_FUNCTION.prototype,
                     writable: false,
                     enumerable: false,
-                    configurable: false
-                }
+                    configurable: false,
+                },
             });
-
 
             // Assert identity of Function.__proto__ accross all compartments
             getPrototypeOf(FERAL_FUNCTION) === FERAL_FUNCTION.prototype ||
             Fail`Function prototype is the same accross compartments`;
             getPrototypeOf(newFunction) === FERAL_FUNCTION.prototype ||
-            Fail`Function constructor prototype is the same accross compartments`;
+            Fail`Function constructor prototype is the same across compartments`;
 
             return newFunction;
         };
         $h͏_once.makeFunctionConstructor(makeFunctionConstructor);
     })()
     ,
-// === functors[24] ===
+// === 30. ses ./src/global-object.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let TypeError, assign, create, defineProperty, entries, freeze, objectHasOwnProperty, unscopablesSymbol,
-            makeEvalFunction, makeFunctionConstructor, constantProperties, universalPropertyNames;
-        $h͏_imports([["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["unscopablesSymbol", [$h͏_a => (unscopablesSymbol = $h͏_a)]]]], ["./make-eval-function.js", [["makeEvalFunction", [$h͏_a => (makeEvalFunction = $h͏_a)]]]], ["./make-function-constructor.js", [["makeFunctionConstructor", [$h͏_a => (makeFunctionConstructor = $h͏_a)]]]], ["./permits.js", [["constantProperties", [$h͏_a => (constantProperties = $h͏_a)]], ["universalPropertyNames", [$h͏_a => (universalPropertyNames = $h͏_a)]]]]]);
+        let TypeError, assign, create, defineProperty, entries, freeze, hasOwn, unscopablesSymbol, makeEvalFunction,
+            makeFunctionConstructor, constantProperties, universalPropertyNames;
+        $h͏_imports([["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["unscopablesSymbol", [$h͏_a => (unscopablesSymbol = $h͏_a)]]]], ["./make-eval-function.js", [["makeEvalFunction", [$h͏_a => (makeEvalFunction = $h͏_a)]]]], ["./make-function-constructor.js", [["makeFunctionConstructor", [$h͏_a => (makeFunctionConstructor = $h͏_a)]]]], ["./permits.js", [["constantProperties", [$h͏_a => (constantProperties = $h͏_a)]], ["universalPropertyNames", [$h͏_a => (universalPropertyNames = $h͏_a)]]]]]);
 
 
         /**
@@ -7039,7 +8451,7 @@
          *
          * @param {object} globalObject
          */
-        const setGlobalObjectSymbolUnscopables = (globalObject) => {
+        const setGlobalObjectSymbolUnscopables = globalObject => {
             defineProperty(
                 globalObject,
                 unscopablesSymbol,
@@ -7047,14 +8459,14 @@
                     assign(create(null), {
                         set: freeze(() => {
                             throw TypeError(
-                                `Cannot set Symbol.unscopables of a Compartment's globalThis`);
-
+                                `Cannot set Symbol.unscopables of a Compartment's globalThis`,
+                            );
                         }),
                         enumerable: false,
-                        configurable: false
-                    })));
-
-
+                        configurable: false,
+                    }),
+                ),
+            );
         };
 
         /**
@@ -7065,15 +8477,14 @@
          *
          * @param {object} globalObject
          */$h͏_once.setGlobalObjectSymbolUnscopables(setGlobalObjectSymbolUnscopables);
-        const setGlobalObjectConstantProperties = (globalObject) => {
+        const setGlobalObjectConstantProperties = globalObject => {
             for (const [name, constant] of entries(constantProperties)) {
                 defineProperty(globalObject, name, {
                     value: constant,
                     writable: false,
                     enumerable: false,
-                    configurable: false
+                    configurable: false,
                 });
-
             }
         };
 
@@ -7099,36 +8510,34 @@
                 newGlobalPropertyNames,
                 makeCompartmentConstructor,
                 markVirtualizedNativeFunction,
-                parentCompartment
-            }) => {
+                parentCompartment,
+            },
+        ) => {
             for (const [name, intrinsicName] of entries(universalPropertyNames)) {
-                if (objectHasOwnProperty(intrinsics, intrinsicName)) {
+                if (hasOwn(intrinsics, intrinsicName)) {
                     defineProperty(globalObject, name, {
                         value: intrinsics[intrinsicName],
                         writable: true,
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     });
-
                 }
             }
 
             for (const [name, intrinsicName] of entries(newGlobalPropertyNames)) {
-                if (objectHasOwnProperty(intrinsics, intrinsicName)) {
+                if (hasOwn(intrinsics, intrinsicName)) {
                     defineProperty(globalObject, name, {
                         value: intrinsics[intrinsicName],
                         writable: true,
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     });
-
                 }
             }
 
             const perCompartmentGlobals = {
-                globalThis: globalObject
+                globalThis: globalObject,
             };
-
 
             perCompartmentGlobals.Compartment = freeze(
                 makeCompartmentConstructor(
@@ -7137,9 +8546,10 @@
                     markVirtualizedNativeFunction,
                     {
                         parentCompartment,
-                        enforceNew: true
-                    }));
-
+                        enforceNew: true,
+                    },
+                ),
+            );
 
             // TODO These should still be tamed according to the permits before
             // being made available.
@@ -7148,9 +8558,8 @@
                     value,
                     writable: true,
                     enumerable: false,
-                    configurable: true
+                    configurable: true,
                 });
-
                 if (typeof value === 'function') {
                     markVirtualizedNativeFunction(value);
                 }
@@ -7168,7 +8577,8 @@
         const setGlobalObjectEvaluators = (
             globalObject,
             evaluator,
-            markVirtualizedNativeFunction) => {
+            markVirtualizedNativeFunction,
+        ) => {
             {
                 const f = freeze(makeEvalFunction(evaluator));
                 markVirtualizedNativeFunction(f);
@@ -7176,9 +8586,8 @@
                     value: f,
                     writable: true,
                     enumerable: false,
-                    configurable: true
+                    configurable: true,
                 });
-
             }
             {
                 const f = freeze(makeFunctionConstructor(evaluator));
@@ -7187,25 +8596,24 @@
                     value: f,
                     writable: true,
                     enumerable: false,
-                    configurable: true
+                    configurable: true,
                 });
-
             }
         };
         $h͏_once.setGlobalObjectEvaluators(setGlobalObjectEvaluators);
     })()
     ,
-// === functors[25] ===
+// === 31. ses ./src/strict-scope-terminator.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let Proxy, String, TypeError, ReferenceError, create, freeze, getOwnPropertyDescriptors, globalThis, assert;
-        $h͏_imports([["./commons.js", [["Proxy", [$h͏_a => (Proxy = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["ReferenceError", [$h͏_a => (ReferenceError = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
+        let Proxy, String, TypeError, ReferenceError, create, freeze, getOwnPropertyDescriptors, assert;
+        $h͏_imports([["./commons.js", [["Proxy", [$h͏_a => (Proxy = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["ReferenceError", [$h͏_a => (ReferenceError = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
 
 
         const {Fail, quote: q} = assert;
@@ -7230,9 +8638,9 @@
             freeze({
                 get(_shadow, prop) {
                     Fail`Please report unexpected scope handler trap: ${q(String(prop))}`;
-                }
-            }));
-
+                },
+            }),
+        );
 
         /*
  * scopeProxyHandlerProperties
@@ -7254,7 +8662,7 @@
 
             has(_shadow, prop) {
                 // we must at least return true for all properties on the realm globalThis
-                return prop in globalThis;
+                return true;
             },
 
             // note: this is likely a bug of safari
@@ -7271,8 +8679,8 @@
                 // eslint-disable-next-line @endo/no-polymorphic-call
                 console.warn(
                     `getOwnPropertyDescriptor trap on scopeTerminatorHandler for ${quotedProp}`,
-                    TypeError().stack);
-
+                    TypeError().stack,
+                );
                 return undefined;
             },
 
@@ -7280,9 +8688,8 @@
             // TODO Report bug to JSC or Safari
             ownKeys(_shadow) {
                 return [];
-            }
+            },
         };
-
 
 // The scope handler's prototype is a proxy that throws if any trap other
 // than get/set/has are run (like getOwnPropertyDescriptors, apply,
@@ -7290,23 +8697,25 @@
         const strictScopeTerminatorHandler = freeze(
             create(
                 alwaysThrowHandler,
-                getOwnPropertyDescriptors(scopeProxyHandlerProperties)));
+                getOwnPropertyDescriptors(scopeProxyHandlerProperties),
+            ),
+        );
         $h͏_once.strictScopeTerminatorHandler(strictScopeTerminatorHandler);
-
 
         const strictScopeTerminator = new Proxy(
             objTarget,
-            strictScopeTerminatorHandler);
+            strictScopeTerminatorHandler,
+        );
         $h͏_once.strictScopeTerminator(strictScopeTerminator);
     })()
     ,
-// === functors[26] ===
+// === 32. ses ./src/sloppy-globals-scope-terminator.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Proxy, create, freeze, getOwnPropertyDescriptors, reflectSet, strictScopeTerminatorHandler,
@@ -7329,7 +8738,7 @@
  * to prevent access to "start compartment globals". When "sloppyGlobalsMode"
  * is true, the Proxy will perform sets on the "globalObject".
  */
-        const createSloppyGlobalsScopeTerminator = (globalObject) => {
+        const createSloppyGlobalsScopeTerminator = globalObject => {
             const scopeProxyHandlerProperties = {
                 // inherit scopeTerminator behavior
                 ...strictScopeTerminatorHandler,
@@ -7342,9 +8751,8 @@
                 // Always claim to have a potential property in order to be the recipient of a set
                 has(_shadow, _prop) {
                     return true;
-                }
+                },
             };
-
 
             // The scope handler's prototype is a proxy that throws if any trap other
             // than get/set/has are run (like getOwnPropertyDescriptors, apply,
@@ -7352,13 +8760,14 @@
             const sloppyGlobalsScopeTerminatorHandler = freeze(
                 create(
                     alwaysThrowHandler,
-                    getOwnPropertyDescriptors(scopeProxyHandlerProperties)));
-
+                    getOwnPropertyDescriptors(scopeProxyHandlerProperties),
+                ),
+            );
 
             const sloppyGlobalsScopeTerminator = new Proxy(
                 objTarget,
-                sloppyGlobalsScopeTerminatorHandler);
-
+                sloppyGlobalsScopeTerminatorHandler,
+            );
 
             return sloppyGlobalsScopeTerminator;
         };
@@ -7366,13 +8775,13 @@
         freeze(createSloppyGlobalsScopeTerminator);
     })()
     ,
-// === functors[27] ===
+// === 33. ses ./src/eval-scope.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let FERAL_EVAL, create, defineProperties, freeze, assert;
@@ -7442,10 +8851,9 @@
                         return FERAL_EVAL;
                     },
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             const evalScopeKit = {
                 evalScope,
@@ -7460,26 +8868,26 @@
                     defineProperties(evalScope, oneTimeEvalProperties);
                 },
                 /** @type {null | { err: any }} */
-                revoked: null
+                revoked: null,
             };
-
 
             return evalScopeKit;
         };
         $h͏_once.makeEvalScopeKit(makeEvalScopeKit);
     })()
     ,
-// === functors[28] ===
+// === 34. ses ./src/get-source-url.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let FERAL_REG_EXP, regexpExec, stringSlice;
-        $h͏_imports([["./commons.js", [["FERAL_REG_EXP", [$h͏_a => (FERAL_REG_EXP = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]]]]]);
+        let FERAL_REG_EXP, freezeRegexp, regexpExec, stringSlice;
+        $h͏_imports([["./commons.js", [["FERAL_REG_EXP", [$h͏_a => (FERAL_REG_EXP = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]]]]]);
+
 
 // Captures a key and value of the form #key=value or @key=value
         const sourceMetaEntryRegExp =
@@ -7490,14 +8898,16 @@
 // On account of the mechanics of regular expressions, scanning from the end
 // does not allow us to capture every pair, so getSourceURL must capture and
 // trim until there are no matching comments.
-        const sourceMetaEntriesRegExp = new FERAL_REG_EXP(
-            `(?:\\s*//${sourceMetaEntryRegExp}|/\\*${sourceMetaEntryRegExp}\\s*\\*/)\\s*$`);
-
+        const sourceMetaEntriesRegExp = freezeRegexp(
+            new FERAL_REG_EXP(
+                `(?:\\s*//${sourceMetaEntryRegExp}|/\\*${sourceMetaEntryRegExp}\\s*\\*/)\\s*$`,
+            ),
+        );
 
         /**
          * @param {string} src
          */
-        const getSourceURL = (src) => {
+        const getSourceURL = src => {
             let sourceURL = '<unknown>';
 
             // Our regular expression matches the last one or two comments with key value
@@ -7512,7 +8922,7 @@
                 if (match === null) {
                     break;
                 }
-                src = stringSlice(src, 0, src.length - match[0].length);
+                src = stringSlice(src, 0, -match[0].length);
 
                 // We skip $0 since it contains the entire match.
                 // The match contains four capture groups,
@@ -7532,17 +8942,18 @@
         $h͏_once.getSourceURL(getSourceURL);
     })()
     ,
-// === functors[29] ===
+// === 35. ses ./src/transforms.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let FERAL_REG_EXP, SyntaxError, stringReplace, stringSearch, stringSlice, stringSplit, freeze, getSourceURL;
-        $h͏_imports([["./commons.js", [["FERAL_REG_EXP", [$h͏_a => (FERAL_REG_EXP = $h͏_a)]], ["SyntaxError", [$h͏_a => (SyntaxError = $h͏_a)]], ["stringReplace", [$h͏_a => (stringReplace = $h͏_a)]], ["stringSearch", [$h͏_a => (stringSearch = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]], ["stringSplit", [$h͏_a => (stringSplit = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]]]], ["./get-source-url.js", [["getSourceURL", [$h͏_a => (getSourceURL = $h͏_a)]]]]]);
+        let FERAL_REG_EXP, SyntaxError, freezeRegexp, regexpReplace, regexpSearch, sealRegexp, stringSlice, stringSplit,
+            freeze, getSourceURL;
+        $h͏_imports([["./commons.js", [["FERAL_REG_EXP", [$h͏_a => (FERAL_REG_EXP = $h͏_a)]], ["SyntaxError", [$h͏_a => (SyntaxError = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["regexpReplace", [$h͏_a => (regexpReplace = $h͏_a)]], ["regexpSearch", [$h͏_a => (regexpSearch = $h͏_a)]], ["sealRegexp", [$h͏_a => (sealRegexp = $h͏_a)]], ["stringSlice", [$h͏_a => (stringSlice = $h͏_a)]], ["stringSplit", [$h͏_a => (stringSplit = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]]]], ["./get-source-url.js", [["getSourceURL", [$h͏_a => (getSourceURL = $h͏_a)]]]]]);
 
 
         /**
@@ -7554,7 +8965,7 @@
          * @returns {number}
          */
         function getLineNumber(src, pattern) {
-            const index = stringSearch(src, pattern);
+            const index = regexpSearch(pattern, src);
             if (index < 0) {
                 return -1;
             }
@@ -7569,7 +8980,9 @@
 
 // /////////////////////////////////////////////////////////////////////////////
 
-        const htmlCommentPattern = new FERAL_REG_EXP(`(?:${'<'}!--|--${'>'})`, 'g');
+        const htmlCommentPattern = sealRegexp(
+            new FERAL_REG_EXP(`(?:${'<'}!--|--${'>'})`, 'g'),
+        );
 
         /**
          * Conservatively reject the source text if it may contain text that some
@@ -7598,7 +9011,7 @@
          * @param {string} src
          * @returns {string}
          */
-        const rejectHtmlComments = (src) => {
+        const rejectHtmlComments = src => {
             const lineNumber = getLineNumber(src, htmlCommentPattern);
             if (lineNumber < 0) {
                 return src;
@@ -7606,8 +9019,8 @@
             const name = getSourceURL(src);
             // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_HTML_COMMENT_REJECTED.md
             throw SyntaxError(
-                `Possible HTML comment rejected at ${name}:${lineNumber}. (SES_HTML_COMMENT_REJECTED)`);
-
+                `Possible HTML comment rejected at ${name}:${lineNumber}. (SES_HTML_COMMENT_REJECTED)`,
+            );
         };
 
         /**
@@ -7632,17 +9045,16 @@
          * @param {string} src
          * @returns {string}
          */$h͏_once.rejectHtmlComments(rejectHtmlComments);
-        const evadeHtmlCommentTest = (src) => {
-            const replaceFn = (match) => match[0] === '<' ? '< ! --' : '-- >';
-            return stringReplace(src, htmlCommentPattern, replaceFn);
+        const evadeHtmlCommentTest = src => {
+            const replaceFn = match => (match[0] === '<' ? '< ! --' : '-- >');
+            return regexpReplace(htmlCommentPattern, src, replaceFn);
         };
 
 // /////////////////////////////////////////////////////////////////////////////
         $h͏_once.evadeHtmlCommentTest(evadeHtmlCommentTest);
-        const importPattern = new FERAL_REG_EXP(
-            '(^|[^.]|\\.\\.\\.)\\bimport(\\s*(?:\\(|/[/*]))',
-            'g');
-
+        const importPattern = sealRegexp(
+            new FERAL_REG_EXP('(^|[^.]|\\.\\.\\.)\\bimport(\\s*(?:\\(|/[/*]))', 'g'),
+        );
 
         /**
          * Conservatively reject the source text if it may contain a dynamic
@@ -7674,7 +9086,7 @@
          * @param {string} src
          * @returns {string}
          */
-        const rejectImportExpressions = (src) => {
+        const rejectImportExpressions = src => {
             const lineNumber = getLineNumber(src, importPattern);
             if (lineNumber < 0) {
                 return src;
@@ -7682,8 +9094,8 @@
             const name = getSourceURL(src);
             // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_IMPORT_REJECTED.md
             throw SyntaxError(
-                `Possible import expression rejected at ${name}:${lineNumber}. (SES_IMPORT_REJECTED)`);
-
+                `Possible import expression rejected at ${name}:${lineNumber}. (SES_IMPORT_REJECTED)`,
+            );
         };
 
         /**
@@ -7702,17 +9114,16 @@
          * @param {string} src
          * @returns {string}
          */$h͏_once.rejectImportExpressions(rejectImportExpressions);
-        const evadeImportExpressionTest = (src) => {
+        const evadeImportExpressionTest = src => {
             const replaceFn = (_, p1, p2) => `${p1}__import__${p2}`;
-            return stringReplace(src, importPattern, replaceFn);
+            return regexpReplace(importPattern, src, replaceFn);
         };
 
 // /////////////////////////////////////////////////////////////////////////////
         $h͏_once.evadeImportExpressionTest(evadeImportExpressionTest);
-        const someDirectEvalPattern = new FERAL_REG_EXP(
-            '(^|[^.])\\beval(\\s*\\()',
-            'g');
-
+        const someDirectEvalPattern = freezeRegexp(
+            new FERAL_REG_EXP('(^|[^.])\\beval(\\s*\\()'),
+        );
 
         /**
          * Heuristically reject some text that seems to contain a direct eval
@@ -7746,7 +9157,7 @@
          * @param {string} src
          * @returns {string}
          */
-        const rejectSomeDirectEvalExpressions = (src) => {
+        const rejectSomeDirectEvalExpressions = src => {
             const lineNumber = getLineNumber(src, someDirectEvalPattern);
             if (lineNumber < 0) {
                 return src;
@@ -7754,8 +9165,8 @@
             const name = getSourceURL(src);
             // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_EVAL_REJECTED.md
             throw SyntaxError(
-                `Possible direct eval expression rejected at ${name}:${lineNumber}. (SES_EVAL_REJECTED)`);
-
+                `Possible direct eval expression rejected at ${name}:${lineNumber}. (SES_EVAL_REJECTED)`,
+            );
         };
 
 // /////////////////////////////////////////////////////////////////////////////
@@ -7767,7 +9178,7 @@
          * @param {string} source
          * @returns {string}
          */$h͏_once.rejectSomeDirectEvalExpressions(rejectSomeDirectEvalExpressions);
-        const mandatoryTransforms = (source) => {
+        const mandatoryTransforms = source => {
             source = rejectHtmlComments(source);
             source = rejectImportExpressions(source);
             return source;
@@ -7798,30 +9209,32 @@
             evadeImportExpressionTest: freeze(evadeImportExpressionTest),
             rejectSomeDirectEvalExpressions: freeze(rejectSomeDirectEvalExpressions),
             mandatoryTransforms: freeze(mandatoryTransforms),
-            applyTransforms: freeze(applyTransforms)
+            applyTransforms: freeze(applyTransforms),
         });
         $h͏_once.transforms(transforms);
     })()
     ,
-// === functors[30] ===
+// === 36. ses ./src/scope-constants.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let arrayFilter, arrayIncludes, getOwnPropertyDescriptor, getOwnPropertyNames, objectHasOwnProperty, regexpTest;
-        $h͏_imports([["./commons.js", [["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayIncludes", [$h͏_a => (arrayIncludes = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]], ["regexpTest", [$h͏_a => (regexpTest = $h͏_a)]]]]]);
+        let arrayFilter, arrayIncludes, freezeRegexp, getOwnPropertyDescriptor, getOwnPropertyNames, hasOwn,
+            regexpSearch, Set, setHas;
+        $h͏_imports([["./commons.js", [["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayIncludes", [$h͏_a => (arrayIncludes = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]], ["regexpSearch", [$h͏_a => (regexpSearch = $h͏_a)]], ["Set", [$h͏_a => (Set = $h͏_a)]], ["setHas", [$h͏_a => (setHas = $h͏_a)]]]]]);
 
 
         /**
-         * keywords
-         * In JavaScript you cannot use these reserved words as variables.
-         * See 11.6.1 Identifier Names
+         * reservedNames
+         * In JavaScript you cannot use reserved words as variable names (except for
+         * "eval", which is specially reserved to prevent shadowing).
+         * https://tc39.es/ecma262/multipage/ecmascript-language-lexical-grammar.html#sec-identifier-names
          */
-        const keywords = [
+        const reservedNames = new Set([
             // 11.6.2.1 Keywords
             'await',
             'break',
@@ -7881,8 +9294,11 @@
             'false',
 
             'this',
-            'arguments'];
+            'arguments',
 
+            // Reserved by us
+            'eval',
+        ]);
 
         /**
          * identifierPattern
@@ -7894,28 +9310,16 @@
          * Note: \w is equivalent [a-zA-Z_0-9]
          * See 11.6.1 Identifier Names
          */
-        const identifierPattern = /^[a-zA-Z_$][\w$]*$/;
+        const identifierPattern = freezeRegexp(/^[a-zA-Z_$][\w$]*$/);
 
         /**
          * isValidIdentifierName()
-         * What variable names might it bring into scope? These include all
-         * property names which can be variable names, including the names
-         * of inherited properties. It excludes symbols and names which are
-         * keywords. We drop symbols safely. Currently, this shim refuses
-         * service if any of the names are keywords or keyword-like. This is
-         * safe and only prevent performance optimization.
+         * Is a value allowed as an arbitrary identifier name?
          *
          * @param {string} name
          */
-        const isValidIdentifierName = (name) => {
-            // Ensure we have a valid identifier. We use regexpTest rather than
-            // /../.test() to guard against the case where RegExp has been poisoned.
-            return (
-                name !== 'eval' &&
-                !arrayIncludes(keywords, name) &&
-                regexpTest(identifierPattern, name));
-
-        };
+        const isValidIdentifierName = name =>
+            !setHas(reservedNames, name) && regexpSearch(identifierPattern, name) !== -1;
 
         /*
  * isImmutableDataProperty
@@ -7941,18 +9345,18 @@
                 // can't have accessors and value properties at the same time, therefore
                 // this check is sufficient. Using explicit own property deal with the
                 // case where Object.prototype has been poisoned.
-                objectHasOwnProperty(desc, 'value'));
-
+                hasOwn(desc, 'value')
+            );
         }
 
         /**
          * getScopeConstants()
-         * What variable names might it bring into scope? These include all
+         * What variable names might be brought into scope? These include all
          * property names which can be variable names, including the names
          * of inherited properties. It excludes symbols and names which are
          * keywords. We drop symbols safely. Currently, this shim refuses
          * service if any of the names are keywords or keyword-like. This is
-         * safe and only prevent performance optimization.
+         * safe and only affects performance optimization.
          *
          * @param {object} globalObject
          * @param {object} moduleLexicals
@@ -7966,39 +9370,38 @@
             // Collect all valid & immutable identifiers from the endowments.
             const moduleLexicalConstants = arrayFilter(
                 moduleLexicalNames,
-                (name) =>
+                name =>
                     isValidIdentifierName(name) &&
-                    isImmutableDataProperty(moduleLexicals, name));
-
+                    isImmutableDataProperty(moduleLexicals, name),
+            );
 
             // Collect all valid & immutable identifiers from the global that
             // are also not present in the endowments (immutable or not).
             const globalObjectConstants = arrayFilter(
                 globalObjectNames,
-                (name) =>
+                name =>
                     // Can't define a constant: it would prevent a
                     // lookup on the endowments.
                     !arrayIncludes(moduleLexicalNames, name) &&
                     isValidIdentifierName(name) &&
-                    isImmutableDataProperty(globalObject, name));
-
+                    isImmutableDataProperty(globalObject, name),
+            );
 
             return {
                 globalObjectConstants,
-                moduleLexicalConstants
+                moduleLexicalConstants,
             };
-
         };
         $h͏_once.getScopeConstants(getScopeConstants);
     })()
     ,
-// === functors[31] ===
+// === 37. ses ./src/make-evaluate.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let FERAL_FUNCTION, arrayJoin, apply, getScopeConstants;
@@ -8032,19 +9435,19 @@
          * @param {object} context.globalObject
          * @param {object} context.scopeTerminator
          */
-        const makeEvaluate = (context) => {
+        const makeEvaluate = context => {
             const {globalObjectConstants, moduleLexicalConstants} = getScopeConstants(
                 context.globalObject,
-                context.moduleLexicals);
-
+                context.moduleLexicals,
+            );
             const globalObjectOptimizer = buildOptimizer(
                 globalObjectConstants,
-                'globalObject');
-
+                'globalObject',
+            );
             const moduleLexicalOptimizer = buildOptimizer(
                 moduleLexicalConstants,
-                'moduleLexicals');
-
+                'moduleLexicals',
+            );
 
             // Create a function in sloppy mode, so that we can use 'with'. It returns
             // a function in strict mode that evaluates the provided code using direct
@@ -8113,13 +9516,13 @@
         $h͏_once.makeEvaluate(makeEvaluate);
     })()
     ,
-// === functors[32] ===
+// === 38. ses ./src/make-safe-evaluator.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let apply, arrayFlatMap, freeze, identity, strictScopeTerminator, createSloppyGlobalsScopeTerminator,
@@ -8144,11 +9547,11 @@
                                        globalObject,
                                        moduleLexicals = {},
                                        globalTransforms = [],
-                                       sloppyGlobalsMode = false
+                                       sloppyGlobalsMode = false,
                                    }) => {
-            const scopeTerminator = sloppyGlobalsMode ?
-                createSloppyGlobalsScopeTerminator(globalObject) :
-                strictScopeTerminator;
+            const scopeTerminator = sloppyGlobalsMode
+                ? createSloppyGlobalsScopeTerminator(globalObject)
+                : strictScopeTerminator;
             const evalScopeKit = makeEvalScopeKit();
             const {evalScope} = evalScopeKit;
 
@@ -8156,9 +9559,8 @@
                 evalScope,
                 moduleLexicals,
                 globalObject,
-                scopeTerminator
+                scopeTerminator,
             });
-
 
             // Defer creating the actual evaluator to first use.
             // Creating a compartment should be possible in no-eval environments
@@ -8185,8 +9587,9 @@
                     source,
                     arrayFlatMap(
                         [localTransforms, globalTransforms, [mandatoryTransforms]],
-                        identity));
-
+                        identity,
+                    ),
+                );
 
                 let err;
                 try {
@@ -8201,7 +9604,7 @@
                     err = e;
                     throw e;
                 } finally {
-                    const unsafeEvalWasStillExposed = ('eval' in evalScope);
+                    const unsafeEvalWasStillExposed = 'eval' in evalScope;
                     delete evalScope.eval;
                     if (unsafeEvalWasStillExposed) {
                         // Barring a defect in the SES shim, the evalScope should allow the
@@ -8231,13 +9634,13 @@
         $h͏_once.makeSafeEvaluator(makeSafeEvaluator);
     })()
     ,
-// === functors[33] ===
+// === 39. ses ./src/tame-function-tostring.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let WeakSet, defineProperty, freeze, functionPrototype, functionToString, stringEndsWith, weaksetAdd,
@@ -8266,35 +9669,34 @@
                         const str = functionToString(this);
                         if (
                             stringEndsWith(str, nativeSuffix) ||
-                            !weaksetHas(virtualizedNativeFunctions, this)) {
+                            !weaksetHas(virtualizedNativeFunctions, this)
+                        ) {
                             return str;
                         }
                         return `function ${this.name}() { [native code] }`;
-                    }
+                    },
                 };
 
-
                 defineProperty(functionPrototype, 'toString', {
-                    value: tamingMethods.toString
+                    value: tamingMethods.toString,
                 });
 
-
-                markVirtualizedNativeFunction = freeze((func) =>
-                    weaksetAdd(virtualizedNativeFunctions, func));
-
+                markVirtualizedNativeFunction = freeze(func =>
+                    weaksetAdd(virtualizedNativeFunctions, func),
+                );
             }
             return markVirtualizedNativeFunction;
         };
         $h͏_once.tameFunctionToString(tameFunctionToString);
     })()
     ,
-// === functors[34] ===
+// === 40. ses ./src/tame-domains.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let TypeError, globalThis, getOwnPropertyDescriptor, defineProperty;
@@ -8304,10 +9706,6 @@
 
 
         function tameDomains(domainTaming = 'safe') {
-            if (domainTaming !== 'safe' && domainTaming !== 'unsafe') {
-                throw TypeError(`unrecognized domainTaming ${domainTaming}`);
-            }
-
             if (domainTaming === 'unsafe') {
                 return;
             }
@@ -8322,8 +9720,8 @@
                     // becomes a get, set pair after domains initialize.
                     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_NO_DOMAINS.md
                     throw TypeError(
-                        `SES failed to lockdown, Node.js domains have been initialized (SES_NO_DOMAINS)`);
-
+                        `SES failed to lockdown, Node.js domains have been initialized (SES_NO_DOMAINS)`,
+                    );
                 }
                 // Prevent domains from initializing.
                 // This is clunky because the exception thrown from the domains package does
@@ -8335,20 +9733,19 @@
                     value: null,
                     configurable: false,
                     writable: false,
-                    enumerable: false
+                    enumerable: false,
                 });
-
             }
         }
     })()
     ,
-// === functors[35] ===
+// === 41. ses ./src/tame-module-source.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let functionPrototype, getPrototypeOf, globalThis, objectPrototype, setPrototypeOf;
@@ -8401,13 +9798,13 @@
         $h͏_once.tameModuleSource(tameModuleSource);
     })()
     ,
-// === functors[36] ===
+// === 42. ses ./src/error/console.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let WeakSet, arrayFilter, arrayFlatMap, arrayMap, arrayPop, arrayPush, defineProperty, freeze, fromEntries,
@@ -8518,8 +9915,8 @@
         /** @type {readonly [ConsoleProps, LogSeverity | undefined][]} */$h͏_once.consoleOtherMethods(consoleOtherMethods);
         const consoleMethodPermits = freeze([
             ...consoleLevelMethods,
-            ...consoleOtherMethods]);
-
+            ...consoleOtherMethods,
+        ]);
 
         /**
          * consoleOmittedProperties is currently unused. I record and maintain it here
@@ -8553,7 +9950,8 @@
         /** @type {MakeLoggingConsoleKit} */
         const makeLoggingConsoleKit = (
             loggedErrorHandler,
-            {shouldResetForDebugging = false} = {}) => {
+            {shouldResetForDebugging = false} = {},
+        ) => {
             if (shouldResetForDebugging) {
                 // eslint-disable-next-line @endo/no-polymorphic-call
                 loggedErrorHandler.resetErrorTagNum();
@@ -8571,8 +9969,8 @@
                         arrayPush(logArray, [name, ...args]);
                     });
                     return [name, freeze(method)];
-                }));
-
+                }),
+            );
             freeze(loggingConsole);
 
             const takeLog = () => {
@@ -8582,7 +9980,7 @@
             };
             freeze(takeLog);
 
-            const typedLoggingConsole =  /** @type {VirtualConsole} */  loggingConsole;
+            const typedLoggingConsole = /** @type {VirtualConsole} */ (loggingConsole);
 
             return freeze({loggingConsole: typedLoggingConsole, takeLog});
         };
@@ -8611,9 +10009,8 @@
             NOTE: 'ERROR_NOTE:',
             MESSAGE: 'ERROR_MESSAGE:',
             CAUSE: 'cause:',
-            ERRORS: 'errors:'
+            ERRORS: 'errors:',
         };
-
         freeze(ErrorInfo);
 
         /** @type {MakeCausalConsole} */
@@ -8631,7 +10028,7 @@
              * @returns {any}
              */
             const extractErrorArgs = (logArgs, subErrorsSink) => {
-                const argTags = arrayMap(logArgs, (arg) => {
+                const argTags = arrayMap(logArgs, arg => {
                     if (isError(arg)) {
                         arrayPush(subErrorsSink, arg);
                         return `(${tagError(arg)})`;
@@ -8701,7 +10098,7 @@
             const errorsLogged = new WeakSet();
 
             /** @type {(severity: LogSeverity) => NoteCallback} */
-            const makeNoteCallback = (severity) => (error, noteLogArgs) => {
+            const makeNoteCallback = severity => (error, noteLogArgs) => {
                 const subErrors = [];
                 // Annotation arrived after the error has already been logged,
                 // so just log the annotation immediately, rather than remembering it.
@@ -8723,8 +10120,8 @@
                 const messageLogArgs = takeMessageLogArgs(error);
                 const noteLogArgsArray = takeNoteLogArgsArray(
                     error,
-                    makeNoteCallback(severity));
-
+                    makeNoteCallback(severity),
+                );
                 // Show the error's most informative error message
                 if (messageLogArgs === undefined) {
                     // If there is no message log args, then just show the message that
@@ -8739,15 +10136,16 @@
                         error,
                         ErrorInfo.MESSAGE,
                         messageLogArgs,
-                        subErrors);
-
+                        subErrors,
+                    );
                 }
                 // After the message but before any other annotations, show the stack.
                 let stackString = getStackString(error);
                 if (
                     typeof stackString === 'string' &&
                     stackString.length >= 1 &&
-                    !stringEndsWith(stackString, '\n')) {
+                    !stringEndsWith(stackString, '\n')
+                ) {
                     stackString += '\n';
                 }
                 // eslint-disable-next-line @endo/no-polymorphic-call
@@ -8786,8 +10184,8 @@
             });
             const otherMethodNames = arrayFilter(
                 consoleOtherMethods,
-                ([name, _]) => name in baseConsole);
-
+                ([name, _]) => name in baseConsole,
+            );
             const otherMethods = arrayMap(otherMethodNames, ([name, _]) => {
                 /**
                  * @param {...any} args
@@ -8802,7 +10200,7 @@
             });
 
             const causalConsole = fromEntries([...levelMethods, ...otherMethods]);
-            return (/** @type {VirtualConsole} */ freeze(causalConsole));
+            return /** @type {VirtualConsole} */ (freeze(causalConsole));
         };
         $h͏_once.makeCausalConsole(makeCausalConsole);
         freeze(makeCausalConsole);
@@ -8829,14 +10227,14 @@
          */
         const indentAfterAllSeps = (str, sep, indents) => {
             const [firstLine, ...restLines] = stringSplit(str, sep);
-            const indentedRest = arrayFlatMap(restLines, (line) => [sep, ...indents, line]);
+            const indentedRest = arrayFlatMap(restLines, line => [sep, ...indents, line]);
             return ['', firstLine, ...indentedRest];
         };
 
         /**
          * @param {LoggedErrorHandler} loggedErrorHandler
          */
-        const defineCausalConsoleFromLogger = (loggedErrorHandler) => {
+        const defineCausalConsoleFromLogger = loggedErrorHandler => {
             /**
              * Implement the `VirtualConsole` API badly by turning all calls into
              * calls on `tlogger`. We need to do this to have `console` logging
@@ -8846,15 +10244,15 @@
              * @param {Logger} tlogger
              * @returns {VirtualConsole}
              */
-            const makeCausalConsoleFromLogger = (tlogger) => {
+            const makeCausalConsoleFromLogger = tlogger => {
                 const indents = [];
                 const logWithIndent = (...args) => {
                     if (indents.length > 0) {
-                        args = arrayFlatMap(args, (arg) =>
-                            typeof arg === 'string' && stringIncludes(arg, '\n') ?
-                                indentAfterAllSeps(arg, '\n', indents) :
-                                [arg]);
-
+                        args = arrayFlatMap(args, arg =>
+                            typeof arg === 'string' && stringIncludes(arg, '\n')
+                                ? indentAfterAllSeps(arg, '\n', indents)
+                                : [arg],
+                        );
                         args = [...indents, ...args];
                     }
                     return tlogger(...args);
@@ -8863,13 +10261,13 @@
                 const baseConsole = fromEntries([
                     ...arrayMap(consoleLevelMethods, ([name]) => [
                         name,
-                        defineName(name, (...args) => logWithIndent(...args))]),
-
+                        defineName(name, (...args) => logWithIndent(...args)),
+                    ]),
                     ...arrayMap(consoleOtherMethods, ([name]) => [
                         name,
-                        defineName(name, (...args) => logWithIndent(name, ...args))])]);
-
-
+                        defineName(name, (...args) => logWithIndent(name, ...args)),
+                    ]),
+                ]);
                 // https://console.spec.whatwg.org/#grouping
                 for (const name of ['group', 'groupCollapsed']) {
                     if (baseConsole[name]) {
@@ -8889,19 +10287,19 @@
                 }
                 baseConsole.groupEnd = defineName(
                     'groupEnd',
-                    baseConsole.groupEnd ?
-                        (...args) => {
+                    baseConsole.groupEnd
+                        ? (...args) => {
                             arrayPop(indents);
-                        } :
-                        () => {
-                        });
-
+                        }
+                        : () => {
+                        },
+                );
                 harden(baseConsole);
                 const causalConsole = makeCausalConsole(
-                    /** @type {VirtualConsole} */  baseConsole,
-                    loggedErrorHandler);
-
-                return (/** @type {VirtualConsole} */ causalConsole);
+                    /** @type {VirtualConsole} */ (baseConsole),
+                    loggedErrorHandler,
+                );
+                return /** @type {VirtualConsole} */ (causalConsole);
             };
             return freeze(makeCausalConsoleFromLogger);
         };
@@ -8915,8 +10313,8 @@
             // TODO do something with optional topic string
             const methodPermits = arrayFilter(
                 consoleMethodPermits,
-                ([name, _]) => name in baseConsole);
-
+                ([name, _]) => name in baseConsole,
+            );
             const methods = arrayMap(methodPermits, ([name, severity]) => {
                 /**
                  * @param {...any} args
@@ -8932,19 +10330,19 @@
                 return [name, freeze(method)];
             });
             const filteringConsole = fromEntries(methods);
-            return (/** @type {VirtualConsole} */ freeze(filteringConsole));
+            return /** @type {VirtualConsole} */ (freeze(filteringConsole));
         };
         $h͏_once.filterConsole(filterConsole);
         freeze(filterConsole);
     })()
     ,
-// === functors[37] ===
+// === 43. ses ./src/error/unhandled-rejection.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let FinalizationRegistry, Map, mapGet, mapDelete, WeakMap, mapSet, finalizationRegistryRegister, weakmapSet,
@@ -8970,7 +10368,7 @@
          * @param {(reason: unknown) => void} reportReason report the reason for an
          * unhandled rejection.
          */
-        const makeRejectionHandlers = (reportReason) => {
+        const makeRejectionHandlers = reportReason => {
             if (FinalizationRegistry === undefined) {
                 return undefined;
             }
@@ -8984,7 +10382,7 @@
             /** @type {(() => void) | undefined} */
             let cancelChecking;
 
-            const removeReasonId = (reasonId) => {
+            const removeReasonId = reasonId => {
                 mapDelete(idToReason, reasonId);
                 if (cancelChecking && idToReason.size === 0) {
                     // No more unhandled rejections to check, just cancel the check.
@@ -9001,7 +10399,7 @@
              *
              * @param {ReasonId} heldReasonId
              */
-            const finalizeDroppedPromise = (heldReasonId) => {
+            const finalizeDroppedPromise = heldReasonId => {
                 if (mapHas(idToReason, heldReasonId)) {
                     const reason = mapGet(idToReason, heldReasonId);
                     removeReasonId(heldReasonId);
@@ -9037,7 +10435,7 @@
              *
              * @param {Promise} pr
              */
-            const rejectionHandledHandler = (pr) => {
+            const rejectionHandledHandler = pr => {
                 const reasonId = weakmapGet(promiseToReasonId, pr);
                 removeReasonId(reasonId);
             };
@@ -9056,20 +10454,19 @@
             return {
                 rejectionHandledHandler,
                 unhandledRejectionHandler,
-                processTerminationHandler
+                processTerminationHandler,
             };
-
         };
         $h͏_once.makeRejectionHandlers(makeRejectionHandlers);
     })()
     ,
-// === functors[38] ===
+// === 44. ses ./src/error/tame-console.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let TypeError, apply, defineProperty, freeze, globalThis, defaultHandler, makeCausalConsole,
@@ -9082,7 +10479,7 @@
          * @import {GetStackString} from './internal-types.js';
          */
 
-        const failFast = (message) => {
+        const failFast = message => {
             throw TypeError(message);
         };
 
@@ -9104,55 +10501,50 @@
             consoleTaming = 'safe',
             errorTrapping = 'platform',
             unhandledRejectionTrapping = 'report',
-            optGetStackString = undefined) => {
-            consoleTaming === 'safe' ||
-            consoleTaming === 'unsafe' ||
-            failFast(`unrecognized consoleTaming ${consoleTaming}`);
-
+            optGetStackString = undefined,
+        ) => {
             let loggedErrorHandler;
             if (optGetStackString === undefined) {
                 loggedErrorHandler = defaultHandler;
             } else {
                 loggedErrorHandler = {
                     ...defaultHandler,
-                    getStackString: optGetStackString
+                    getStackString: optGetStackString,
                 };
-
             }
 
             // eslint-disable-next-line no-restricted-globals
-            const originalConsole =  /** @type {VirtualConsole} */
+            const originalConsole = /** @type {VirtualConsole} */ (
                 // eslint-disable-next-line no-nested-ternary
-                typeof globalThis.console !== 'undefined' ?
-                    globalThis.console :
-                    typeof globalThis.print === 'function' ?
-                        // Make a good-enough console for eshost (including only functions that
-                        // log at a specific level with no special argument interpretation).
-                        // https://console.spec.whatwg.org/#logging
-                        ((p) => freeze({debug: p, log: p, info: p, warn: p, error: p}))(
+                typeof globalThis.console !== 'undefined'
+                    ? globalThis.console
+                    : typeof globalThis.print === 'function'
+                        ? // Make a good-enough console for eshost (including only functions that
+                          // log at a specific level with no special argument interpretation).
+                          // https://console.spec.whatwg.org/#logging
+                        (p => freeze({debug: p, log: p, info: p, warn: p, error: p}))(
                             // eslint-disable-next-line no-undef
-                            wrapLogger(globalThis.print)) :
-
-                        undefined;
-
+                            wrapLogger(globalThis.print),
+                        )
+                        : undefined
+            );
 
             // Upgrade a log-only console (as in `eshost -h SpiderMonkey`).
             if (originalConsole && originalConsole.log) {
                 for (const methodName of ['warn', 'error']) {
                     if (!originalConsole[methodName]) {
                         defineProperty(originalConsole, methodName, {
-                            value: wrapLogger(originalConsole.log, originalConsole)
+                            value: wrapLogger(originalConsole.log, originalConsole),
                         });
-
                     }
                 }
             }
 
-            const ourConsole =  /** @type {VirtualConsole} */
-                consoleTaming === 'unsafe' ?
-                    originalConsole :
-                    makeCausalConsole(originalConsole, loggedErrorHandler);
-
+            const ourConsole = /** @type {VirtualConsole} */ (
+                consoleTaming === 'unsafe'
+                    ? originalConsole
+                    : makeCausalConsole(originalConsole, loggedErrorHandler)
+            );
 
             // Attach platform-specific error traps such that any error that gets thrown
             // at top-of-turn (the bottom of stack) will get logged by our causal
@@ -9174,7 +10566,8 @@
             if (
                 errorTrapping !== 'none' &&
                 typeof globalProcess === 'object' &&
-                typeof globalProcess.on === 'function') {
+                typeof globalProcess.on === 'function'
+            ) {
                 let terminate;
                 if (errorTrapping === 'platform' || errorTrapping === 'exit') {
                     const {exit} = globalProcess;
@@ -9187,7 +10580,7 @@
                     typeof terminate === 'function' || failFast('missing process.abort');
                 }
 
-                globalProcess.on('uncaughtException', (error) => {
+                globalProcess.on('uncaughtException', error => {
                     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
                     ourConsole.error('SES_UNCAUGHT_EXCEPTION:', error);
                     if (terminate) {
@@ -9198,8 +10591,9 @@
             if (
                 unhandledRejectionTrapping !== 'none' &&
                 typeof globalProcess === 'object' &&
-                typeof globalProcess.on === 'function') {
-                const handleRejection = (reason) => {
+                typeof globalProcess.on === 'function'
+            ) {
+                const handleRejection = reason => {
                     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
                     ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
                     // 'platform' and 'report' just log the reason.
@@ -9219,8 +10613,9 @@
             if (
                 errorTrapping !== 'none' &&
                 typeof globalWindow === 'object' &&
-                typeof globalWindow.addEventListener === 'function') {
-                globalWindow.addEventListener('error', (event) => {
+                typeof globalWindow.addEventListener === 'function'
+            ) {
+                globalWindow.addEventListener('error', event => {
                     event.preventDefault();
                     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNCAUGHT_EXCEPTION.md
                     ourConsole.error('SES_UNCAUGHT_EXCEPTION:', event.error);
@@ -9233,8 +10628,9 @@
             if (
                 unhandledRejectionTrapping !== 'none' &&
                 typeof globalWindow === 'object' &&
-                typeof globalWindow.addEventListener === 'function') {
-                const handleRejection = (reason) => {
+                typeof globalWindow.addEventListener === 'function'
+            ) {
+                const handleRejection = reason => {
                     // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_UNHANDLED_REJECTION.md
                     ourConsole.error('SES_UNHANDLED_REJECTION:', reason);
                 };
@@ -9242,17 +10638,17 @@
                 const h = makeRejectionHandlers(handleRejection);
                 if (h) {
                     // Rejection handlers are supported.
-                    globalWindow.addEventListener('unhandledrejection', (event) => {
+                    globalWindow.addEventListener('unhandledrejection', event => {
                         event.preventDefault();
                         h.unhandledRejectionHandler(event.reason, event.promise);
                     });
 
-                    globalWindow.addEventListener('rejectionhandled', (event) => {
+                    globalWindow.addEventListener('rejectionhandled', event => {
                         event.preventDefault();
                         h.rejectionHandledHandler(event.promise);
                     });
 
-                    globalWindow.addEventListener('beforeunload', (_event) => {
+                    globalWindow.addEventListener('beforeunload', _event => {
                         h.processTerminationHandler();
                     });
                 }
@@ -9264,18 +10660,19 @@
         $h͏_once.tameConsole(tameConsole);
     })()
     ,
-// === functors[39] ===
+// === 45. ses ./src/error/tame-v8-error-constructor.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let WeakMap, WeakSet, apply, arrayFilter, arrayJoin, arrayMap, arraySlice, create, defineProperties,
-            fromEntries, reflectSet, regexpExec, regexpTest, weakmapGet, weakmapSet, weaksetAdd, weaksetHas, TypeError;
-        $h͏_imports([["../commons.js", [["WeakMap", [$h͏_a => (WeakMap = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arraySlice", [$h͏_a => (arraySlice = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["fromEntries", [$h͏_a => (fromEntries = $h͏_a)]], ["reflectSet", [$h͏_a => (reflectSet = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]], ["regexpTest", [$h͏_a => (regexpTest = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapSet", [$h͏_a => (weakmapSet = $h͏_a)]], ["weaksetAdd", [$h͏_a => (weaksetAdd = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]]]]]);
+            freezeRegexp, fromEntries, reflectSet, regexpExec, regexpSearch, weakmapGet, weakmapSet, weaksetAdd,
+            weaksetHas, TypeError;
+        $h͏_imports([["../commons.js", [["WeakMap", [$h͏_a => (WeakMap = $h͏_a)]], ["WeakSet", [$h͏_a => (WeakSet = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arraySlice", [$h͏_a => (arraySlice = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["freezeRegexp", [$h͏_a => (freezeRegexp = $h͏_a)]], ["fromEntries", [$h͏_a => (fromEntries = $h͏_a)]], ["reflectSet", [$h͏_a => (reflectSet = $h͏_a)]], ["regexpExec", [$h͏_a => (regexpExec = $h͏_a)]], ["regexpSearch", [$h͏_a => (regexpSearch = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapSet", [$h͏_a => (weakmapSet = $h͏_a)]], ["weaksetAdd", [$h͏_a => (weaksetAdd = $h͏_a)]], ["weaksetHas", [$h͏_a => (weaksetHas = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]]]]]);
 
 
 // Permit names from https://v8.dev/docs/stack-trace-api
@@ -9309,8 +10706,8 @@
 
 // TODO this is a ridiculously expensive way to attenuate callsites.
 // Before that matters, we should switch to a reasonable representation.
-        const safeV8CallSiteFacet = (callSite) => {
-            const methodEntry = (name) => {
+        const safeV8CallSiteFacet = callSite => {
+            const methodEntry = name => {
                 const method = callSite[name];
                 return [name, () => apply(method, callSite, [])];
             };
@@ -9318,29 +10715,38 @@
             return create(o, {});
         };
 
-        const safeV8SST = (sst) => arrayMap(sst, safeV8CallSiteFacet);
+        const safeV8SST = sst => arrayMap(sst, safeV8CallSiteFacet);
 
 // If it has `/node_modules/` anywhere in it, on Node it is likely
 // to be a dependent package of the current package, and so to
 // be an infrastructure frame to be dropped from concise stack traces.
-        const FILENAME_NODE_DEPENDENTS_CENSOR = /\/node_modules\//;
+        const FILENAME_NODE_DEPENDENTS_CENSOR = freezeRegexp(/\/node_modules\//);
 
 // If it begins with `internal/` or `node:internal` then it is likely
 // part of the node infrustructre itself, to be dropped from concise
 // stack traces.
-        const FILENAME_NODE_INTERNALS_CENSOR = /^(?:node:)?internal\//;
+        const FILENAME_NODE_INTERNALS_CENSOR = freezeRegexp(/^(?:node:)?internal\//);
 
-// Frames within the `assert.js` package should be dropped from
-// concise stack traces, as these are just steps towards creating the
-// error object in question.
-        const FILENAME_ASSERT_CENSOR = /\/packages\/ses\/src\/error\/assert.js$/;
+// Frames within SES `assert.js` should be dropped from concise stack traces, as
+// these are just steps towards creating the error object in question.
+        const FILENAME_ASSERT_CENSOR = freezeRegexp(
+            /\/packages\/ses\/src\/error\/assert\.js$/,
+        );
 
 // Frames within the `eventual-send` shim should be dropped so that concise
 // deep stacks omit the internals of the eventual-sending mechanism causing
 // asynchronous messages to be sent.
 // Note that the eventual-send package will move from agoric-sdk to
 // Endo, so this rule will be of general interest.
-        const FILENAME_EVENTUAL_SEND_CENSOR = /\/packages\/eventual-send\/src\//;
+        const FILENAME_EVENTUAL_SEND_CENSOR = freezeRegexp(
+            /\/packages\/eventual-send\/src\//,
+        );
+
+// Frames within the `ses-ava` package should be dropped from concise stack
+// traces, as they just support exposing error details to AVA.
+        const FILENAME_SES_AVA_CENSOR = freezeRegexp(
+            /\/packages\/ses-ava\/src\/ses-ava-test\.js$/,
+        );
 
 // Any stack frame whose `fileName` matches any of these censor patterns
 // will be omitted from concise stacks.
@@ -9349,20 +10755,21 @@
             FILENAME_NODE_DEPENDENTS_CENSOR,
             FILENAME_NODE_INTERNALS_CENSOR,
             FILENAME_ASSERT_CENSOR,
-            FILENAME_EVENTUAL_SEND_CENSOR];
-
+            FILENAME_EVENTUAL_SEND_CENSOR,
+            FILENAME_SES_AVA_CENSOR,
+        ];
 
 // Should a stack frame with this as its fileName be included in a concise
 // stack trace?
 // Exported only so it can be unit tested.
 // TODO Move so that it applies not just to v8.
-        const filterFileName = (fileName) => {
-            if (!fileName) {
-                // Stack frames with no fileName should appear in concise stack traces.
-                return true;
+        const filterFileName = fileName => {
+            if (fileName === null) {
+                // Seems to suppress builtins like `Array.every (<anonymous>)`
+                return false;
             }
             for (const filter of FILENAME_CENSORS) {
-                if (regexpTest(filter, fileName)) {
+                if (regexpSearch(filter, fileName) !== -1) {
                     return false;
                 }
             }
@@ -9373,26 +10780,60 @@
 // likely url-path prefix, ending in a `/.../` should get dropped.
 // Anything to the left of the likely path text is kept.
 // Everything to the right of `/.../` is kept. Thus
-// `'Object.bar (/vat-v1/.../eventual-send/test/test-deep-send.js:13:21)'`
+// `'Object.bar (/vat-v1/.../errors/test/deep-send.test.js:13:21)'`
 // simplifies to
-// `'Object.bar (eventual-send/test/test-deep-send.js:13:21)'`.
+// `'Object.bar (errors/test/deep-send.test.js:13:21)'`.
 //
 // See thread starting at
 // https://github.com/Agoric/agoric-sdk/issues/2326#issuecomment-773020389
         $h͏_once.filterFileName(filterFileName);
-        const CALLSITE_ELLIPSES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/\.\.\.\/(.+)$/;
+        const CALLSITE_ELLIPSIS_PATTERN1 = freezeRegexp(
+            /^((?:.*[( ])?)[:/\w_-]*\/\.\.\.\/(.+)$/,
+        );
+
+// The ad-hoc rule of the current pattern is that any likely-file-path or
+// likely url-path prefix consisting of `.../` should get dropped.
+// Anything to the left of the likely path text is kept.
+// Everything to the right of `.../` is kept. Thus
+// `'Object.bar (.../errors/test/deep-send.test.js:13:21)'`
+// simplifies to
+// `'Object.bar (errors/test/deep-send.test.js:13:21)'`.
+//
+// See thread starting at
+// https://github.com/Agoric/agoric-sdk/issues/2326#issuecomment-773020389
+        const CALLSITE_ELLIPSIS_PATTERN2 = freezeRegexp(/^((?:.*[( ])?)\.\.\.\/(.+)$/);
 
 // The ad-hoc rule of the current pattern is that any likely-file-path or
 // likely url-path prefix, ending in a `/` and prior to `package/` should get
 // dropped.
 // Anything to the left of the likely path prefix text is kept. `package/` and
 // everything to its right is kept. Thus
-// `'Object.bar (/Users/markmiller/src/ongithub/agoric/agoric-sdk/packages/eventual-send/test/test-deep-send.js:13:21)'`
+// `'Object.bar (/Users/markmiller/src/ongithub/agoric/agoric-sdk/packages/errors/test/deep-send.test.js:13:21)'`
 // simplifies to
-// `'Object.bar (packages/eventual-send/test/test-deep-send.js:13:21)'`.
+// `'Object.bar (packages/errors/test/deep-send.test.js:13:21)'`.
 // Note that `/packages/` is a convention for monorepos encouraged by
 // lerna.
-        const CALLSITE_PACKAGES_PATTERN = /^((?:.*[( ])?)[:/\w_-]*\/(packages\/.+)$/;
+        const CALLSITE_PACKAGES_PATTERN = freezeRegexp(
+            /^((?:.*[( ])?)[:/\w_-]*\/(packages\/.+)$/,
+        );
+
+// The ad-hoc rule of the current pattern is that any likely-file-path or
+// likely url-path prefix of the form `file://` but not `file:///` gets
+// dropped.
+// Anything to the left of the likely path prefix text is kept. Everything to
+// the right of `file://` is kept. Thus
+// `'Object.bar (file:///Users/markmiller/src/ongithub/endojs/endo/packages/errors/test/deep-send.test.js:13:21)'` is unchanged but
+// `'Object.bar (file://test/deep-send.test.js:13:21)'`
+
+// simplifies to
+// `'Object.bar (test/deep-send.test.js:13:21)'`.
+// The reason is that `file:///` usually precedes an absolute path which is
+// clickable without removing the `file:///`, whereas `file://` usually precedes
+// a relative path which, for whatever vscode reason, is not clickable until the
+// `file://` is removed.
+        const CALLSITE_FILE_2SLASH_PATTERN = freezeRegexp(
+            /^((?:.*[( ])?)file:\/\/([^/].*)$/,
+        );
 
 // The use of these callSite patterns below assumes that any match will bind
 // capture groups containing the parts of the original string we want
@@ -9400,16 +10841,21 @@
 // stacks.
 // TODO Enable users to configure CALLSITE_PATTERNS via `lockdown` options.
         const CALLSITE_PATTERNS = [
-            CALLSITE_ELLIPSES_PATTERN,
-            CALLSITE_PACKAGES_PATTERN];
-
+            CALLSITE_ELLIPSIS_PATTERN1,
+            CALLSITE_ELLIPSIS_PATTERN2,
+            CALLSITE_PACKAGES_PATTERN,
+            CALLSITE_FILE_2SLASH_PATTERN,
+        ];
 
 // For a stack frame that should be included in a concise stack trace, if
 // `callSiteString` is the original stringified stack frame, return the
 // possibly-shorter stringified stack frame that should be shown instead.
 // Exported only so it can be unit tested.
 // TODO Move so that it applies not just to v8.
-        const shortenCallSiteString = (callSiteString) => {
+        /**
+         * @param {string} callSiteString
+         */
+        const shortenCallSiteString = callSiteString => {
             for (const filter of CALLSITE_PATTERNS) {
                 const match = regexpExec(filter, callSiteString);
                 if (match) {
@@ -9424,29 +10870,40 @@
             OriginalError,
             InitialError,
             errorTaming,
-            stackFiltering) => {
+            stackFiltering,
+        ) => {
             if (errorTaming === 'unsafe-debug') {
                 throw TypeError(
-                    'internal: v8+unsafe-debug special case should already be done');
-
+                    'internal: v8+unsafe-debug special case should already be done',
+                );
             }
             // TODO: Proper CallSite types
             /** @typedef {{}} CallSite */
 
             const originalCaptureStackTrace = OriginalError.captureStackTrace;
 
+            const omitFrames =
+                stackFiltering === 'concise' || stackFiltering === 'omit-frames';
+
+            const shortenPaths =
+                stackFiltering === 'concise' || stackFiltering === 'shorten-paths';
+
             // const callSiteFilter = _callSite => true;
-            const callSiteFilter = (callSite) => {
-                if (stackFiltering === 'verbose') {
-                    return true;
+            const callSiteFilter = callSite => {
+                if (omitFrames) {
+                    // eslint-disable-next-line @endo/no-polymorphic-call
+                    if (callSite.getFunctionName()?.startsWith('__HIDE_')) {
+                        return false;
+                    }
+                    // eslint-disable-next-line @endo/no-polymorphic-call
+                    return filterFileName(callSite.getFileName());
                 }
-                // eslint-disable-next-line @endo/no-polymorphic-call
-                return filterFileName(callSite.getFileName());
+                return true;
             };
 
-            const callSiteStringifier = (callSite) => {
+            const callSiteStringifier = callSite => {
                 let callSiteString = `${callSite}`;
-                if (stackFiltering === 'concise') {
+                if (shortenPaths) {
                     callSiteString = shortenCallSiteString(callSiteString);
                 }
                 return `\n  at ${callSiteString}`;
@@ -9455,8 +10912,8 @@
             const stackStringFromSST = (_error, sst) =>
                 arrayJoin(
                     arrayMap(arrayFilter(sst, callSiteFilter), callSiteStringifier),
-                    '');
-
+                    '',
+                );
 
             /**
              * @typedef {object} StructuredStackInfo
@@ -9531,9 +10988,8 @@
                         weakmapSet(stackInfos, error, {callSites: sst});
                         return '';
                     }
-                }
+                },
             };
-
 
             // A prepareFn is a prepareStackTrace function.
             // An sst is a `structuredStackTrace`, which is an array of
@@ -9559,7 +11015,7 @@
             // unattenuated sst.
             const systemPrepareFnSet = new WeakSet([defaultPrepareFn]);
 
-            const systemPrepareFnFor = (inputPrepareFn) => {
+            const systemPrepareFnFor = inputPrepareFn => {
                 if (weaksetHas(systemPrepareFnSet, inputPrepareFn)) {
                     return inputPrepareFn;
                 }
@@ -9568,9 +11024,8 @@
                     prepareStackTrace(error, sst) {
                         weakmapSet(stackInfos, error, {callSites: sst});
                         return inputPrepareFn(error, safeV8SST(sst));
-                    }
+                    },
                 };
-
                 weaksetAdd(systemPrepareFnSet, systemMethods.prepareStackTrace);
                 return systemMethods.prepareStackTrace;
             };
@@ -9582,9 +11037,8 @@
                     value: tamedMethods.captureStackTrace,
                     writable: true,
                     enumerable: false,
-                    configurable: true
+                    configurable: true,
                 },
-
                 prepareStackTrace: {
                     get() {
                         return OriginalError.prepareStackTrace;
@@ -9598,28 +11052,27 @@
                         }
                     },
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             return tamedMethods.getStackString;
         };
         $h͏_once.tameV8ErrorConstructor(tameV8ErrorConstructor);
     })()
     ,
-// === functors[40] ===
+// === 46. ses ./src/error/tame-error-constructor.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let FERAL_ERROR, TypeError, apply, construct, defineProperties, setPrototypeOf, getOwnPropertyDescriptor,
-            defineProperty, getOwnPropertyDescriptors, NativeErrors, tameV8ErrorConstructor;
-        $h͏_imports([["../commons.js", [["FERAL_ERROR", [$h͏_a => (FERAL_ERROR = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["construct", [$h͏_a => (construct = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["setPrototypeOf", [$h͏_a => (setPrototypeOf = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]]]], ["../permits.js", [["NativeErrors", [$h͏_a => (NativeErrors = $h͏_a)]]]], ["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h͏_a => (tameV8ErrorConstructor = $h͏_a)]]]]]);
+        let FERAL_ERROR, apply, construct, defineProperties, setPrototypeOf, getOwnPropertyDescriptor, defineProperty,
+            getOwnPropertyDescriptors, NativeErrors, tameV8ErrorConstructor;
+        $h͏_imports([["../commons.js", [["FERAL_ERROR", [$h͏_a => (FERAL_ERROR = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["construct", [$h͏_a => (construct = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["setPrototypeOf", [$h͏_a => (setPrototypeOf = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["getOwnPropertyDescriptors", [$h͏_a => (getOwnPropertyDescriptors = $h͏_a)]]]], ["../permits.js", [["NativeErrors", [$h͏_a => (NativeErrors = $h͏_a)]]]], ["./tame-v8-error-constructor.js", [["tameV8ErrorConstructor", [$h͏_a => (tameV8ErrorConstructor = $h͏_a)]]]]]);
 
 
 // Present on at least FF and XS. Proposed by Error-proposal. The original
@@ -9638,23 +11091,14 @@
                     return `${error.stack}`;
                 }
                 return '';
-            }
+            },
         };
-
         let initialGetStackString = tamedMethods.getStackString;
 
         function tameErrorConstructor(
             errorTaming = 'safe',
-            stackFiltering = 'concise') {
-            if (
-                errorTaming !== 'safe' &&
-                errorTaming !== 'unsafe' &&
-                errorTaming !== 'unsafe-debug') {
-                throw TypeError(`unrecognized errorTaming ${errorTaming}`);
-            }
-            if (stackFiltering !== 'concise' && stackFiltering !== 'verbose') {
-                throw TypeError(`unrecognized stackFiltering ${stackFiltering}`);
-            }
+            stackFiltering = 'concise',
+        ) {
             const ErrorPrototype = FERAL_ERROR.prototype;
 
             const {captureStackTrace: originalCaptureStackTrace} = FERAL_ERROR;
@@ -9662,39 +11106,42 @@
                 typeof originalCaptureStackTrace === 'function' ? 'v8' : 'unknown';
 
             const makeErrorConstructor = (_ = {}) => {
-                // eslint-disable-next-line no-shadow
+                /**
+                 * @this {ErrorConstructor}
+                 * @param {...any} rest
+                 */
+                    // eslint-disable-next-line no-shadow
                 const ResultError = function Error(...rest) {
-                    let error;
-                    if (new.target === undefined) {
-                        error = apply(FERAL_ERROR, this, rest);
-                    } else {
-                        error = construct(FERAL_ERROR, rest, new.target);
-                    }
-                    if (platform === 'v8') {
-                        // TODO Likely expensive!
-                        apply(originalCaptureStackTrace, FERAL_ERROR, [error, ResultError]);
-                    }
-                    return error;
-                };
+                        let error;
+                        if (new.target === undefined) {
+                            // Forward caller's `this` to FERAL_ERROR to keep the shim transparent.
+                            // Error() as a function ignores `this` per spec, but do not narrow it.
+                            error = apply(FERAL_ERROR, this, rest);
+                        } else {
+                            error = construct(FERAL_ERROR, rest, new.target);
+                        }
+                        if (platform === 'v8') {
+                            // TODO Likely expensive!
+                            apply(originalCaptureStackTrace, FERAL_ERROR, [error, ResultError]);
+                        }
+                        return error;
+                    };
                 defineProperties(ResultError, {
                     length: {value: 1},
                     prototype: {
                         value: ErrorPrototype,
                         writable: false,
                         enumerable: false,
-                        configurable: false
-                    }
+                        configurable: false,
+                    },
                 });
-
-
                 return ResultError;
             };
             const InitialError = makeErrorConstructor({powers: 'original'});
             const SharedError = makeErrorConstructor({powers: 'none'});
             defineProperties(ErrorPrototype, {
-                constructor: {value: SharedError}
+                constructor: {value: SharedError},
             });
-
 
             for (const NativeError of NativeErrors) {
                 setPrototypeOf(NativeError, SharedError);
@@ -9736,10 +11183,9 @@
                     },
                     // WTF on v8 stackTraceLimit is enumerable
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             if (errorTaming === 'unsafe-debug' && platform === 'v8') {
                 // This case is a kludge to work around
@@ -9756,32 +11202,28 @@
                             FERAL_ERROR.prepareStackTrace = newPrepareStackTrace;
                         },
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     },
-
                     captureStackTrace: {
                         value: FERAL_ERROR.captureStackTrace,
                         writable: true,
                         enumerable: false,
-                        configurable: true
-                    }
+                        configurable: true,
+                    },
                 });
-
 
                 const descs = getOwnPropertyDescriptors(InitialError);
                 defineProperties(SharedError, {
                     stackTraceLimit: descs.stackTraceLimit,
                     prepareStackTrace: descs.prepareStackTrace,
-                    captureStackTrace: descs.captureStackTrace
+                    captureStackTrace: descs.captureStackTrace,
                 });
-
 
                 return {
                     '%InitialGetStackString%': initialGetStackString,
                     '%InitialError%': InitialError,
-                    '%SharedError%': SharedError
+                    '%SharedError%': SharedError,
                 };
-
             }
 
             // The default SharedError much be completely powerless even on v8,
@@ -9796,10 +11238,9 @@
                         // do nothing
                     },
                     enumerable: false,
-                    configurable: true
-                }
+                    configurable: true,
+                },
             });
-
 
             if (platform === 'v8') {
                 // `SharedError.prepareStackTrace`, if it exists, must also be
@@ -9819,23 +11260,19 @@
                             // do nothing
                         },
                         enumerable: false,
-                        configurable: true
+                        configurable: true,
                     },
-
                     captureStackTrace: {
                         value: (errorish, _constructorOpt) => {
                             defineProperty(errorish, 'stack', {
-                                value: ''
+                                value: '',
                             });
-
                         },
                         writable: false,
                         enumerable: false,
-                        configurable: true
-                    }
+                        configurable: true,
+                    },
                 });
-
-
             }
 
             if (platform === 'v8') {
@@ -9843,8 +11280,8 @@
                     FERAL_ERROR,
                     InitialError,
                     errorTaming,
-                    stackFiltering);
-
+                    stackFiltering,
+                );
             } else if (errorTaming === 'unsafe' || errorTaming === 'unsafe-debug') {
                 // v8 has too much magic around their 'stack' own property for it to
                 // coexist cleanly with this accessor. So only install it on non-v8
@@ -9878,16 +11315,12 @@
                                     value: newValue,
                                     writable: true,
                                     enumerable: true,
-                                    configurable: true
-                                }
+                                    configurable: true,
+                                },
                             });
-
-
-                        }
-                    }
+                        },
+                    },
                 });
-
-
             } else {
                 // v8 has too much magic around their 'stack' own property for it to
                 // coexist cleanly with this accessor. So only install it on non-v8
@@ -9905,42 +11338,37 @@
                                     value: newValue,
                                     writable: true,
                                     enumerable: true,
-                                    configurable: true
-                                }
+                                    configurable: true,
+                                },
                             });
-
-
-                        }
-                    }
+                        },
+                    },
                 });
-
-
             }
 
             return {
                 '%InitialGetStackString%': initialGetStackString,
                 '%InitialError%': InitialError,
-                '%SharedError%': SharedError
+                '%SharedError%': SharedError,
             };
-
         }
 
         $h͏_once.default(tameErrorConstructor);
     })()
     ,
-// === functors[41] ===
+// === 47. ses ./src/module-load.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let getenv, Map, Set, TypeError, arrayJoin, arrayMap, arrayPush, arraySome, create, freeze, generatorNext,
-            generatorThrow, getOwnPropertyNames, isArray, isObject, mapGet, mapHas, mapSet, promiseThen, setAdd, values,
-            weakmapGet, weakmapHas, makeError, annotateError, q, b, X;
-        $h͏_imports([["@endo/env-options", [["getEnvironmentOption", [$h͏_a => (getenv = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["Set", [$h͏_a => (Set = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arrayPush", [$h͏_a => (arrayPush = $h͏_a)]], ["arraySome", [$h͏_a => (arraySome = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["generatorNext", [$h͏_a => (generatorNext = $h͏_a)]], ["generatorThrow", [$h͏_a => (generatorThrow = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["isArray", [$h͏_a => (isArray = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["mapHas", [$h͏_a => (mapHas = $h͏_a)]], ["mapSet", [$h͏_a => (mapSet = $h͏_a)]], ["promiseThen", [$h͏_a => (promiseThen = $h͏_a)]], ["setAdd", [$h͏_a => (setAdd = $h͏_a)]], ["values", [$h͏_a => (values = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapHas", [$h͏_a => (weakmapHas = $h͏_a)]]]], ["./error/assert.js", [["makeError", [$h͏_a => (makeError = $h͏_a)]], ["annotateError", [$h͏_a => (annotateError = $h͏_a)]], ["q", [$h͏_a => (q = $h͏_a)]], ["b", [$h͏_a => (b = $h͏_a)]], ["X", [$h͏_a => (X = $h͏_a)]]]]]);
+            generatorThrow, getOwnPropertyNames, isArray, isPrimitive, mapGet, mapHas, mapSet, promiseThen, setAdd,
+            values, weakmapGet, weakmapHas, makeError, annotateError, q, b, X;
+        $h͏_imports([["@endo/env-options", [["getEnvironmentOption", [$h͏_a => (getenv = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["Set", [$h͏_a => (Set = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayJoin", [$h͏_a => (arrayJoin = $h͏_a)]], ["arrayMap", [$h͏_a => (arrayMap = $h͏_a)]], ["arrayPush", [$h͏_a => (arrayPush = $h͏_a)]], ["arraySome", [$h͏_a => (arraySome = $h͏_a)]], ["create", [$h͏_a => (create = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]], ["generatorNext", [$h͏_a => (generatorNext = $h͏_a)]], ["generatorThrow", [$h͏_a => (generatorThrow = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["isArray", [$h͏_a => (isArray = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["mapHas", [$h͏_a => (mapHas = $h͏_a)]], ["mapSet", [$h͏_a => (mapSet = $h͏_a)]], ["promiseThen", [$h͏_a => (promiseThen = $h͏_a)]], ["setAdd", [$h͏_a => (setAdd = $h͏_a)]], ["values", [$h͏_a => (values = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapHas", [$h͏_a => (weakmapHas = $h͏_a)]]]], ["./error/assert.js", [["makeError", [$h͏_a => (makeError = $h͏_a)]], ["annotateError", [$h͏_a => (annotateError = $h͏_a)]], ["q", [$h͏_a => (q = $h͏_a)]], ["b", [$h͏_a => (b = $h͏_a)]], ["X", [$h͏_a => (X = $h͏_a)]]]]]);
 
 
         const noop = () => {
@@ -10005,19 +11433,21 @@
             enqueueJob,
             selectImplementation,
             moduleLoads,
-            importMeta) => {
+            importMeta,
+        ) => {
             const {resolveHook, name: compartmentName} = weakmapGet(
                 compartmentPrivateFields,
-                compartment);
-
+                compartment,
+            );
 
             const {imports} = moduleSource;
             if (
                 !isArray(imports) ||
-                arraySome(imports, (specifier) => typeof specifier !== 'string')) {
+                arraySome(imports, specifier => typeof specifier !== 'string')
+            ) {
                 throw makeError(
-                    X`Invalid module source: 'imports' must be an array of strings, got ${imports} for module ${q(moduleSpecifier)} of compartment ${q(compartmentName)}`);
-
+                    X`Invalid module source: 'imports' must be an array of strings, got ${imports} for module ${q(moduleSpecifier)} of compartment ${q(compartmentName)}`,
+                );
             }
 
             // resolve all imports relative to this referrer module.
@@ -10027,9 +11457,8 @@
                 moduleSource,
                 moduleSpecifier,
                 resolvedImports,
-                importMeta
+                importMeta,
             });
-
 
             // Enqueue jobs to load this module's shallow dependencies.
             for (const fullSpecifier of values(resolvedImports)) {
@@ -10042,8 +11471,8 @@
                     fullSpecifier,
                     enqueueJob,
                     selectImplementation,
-                    moduleLoads]);
-
+                    moduleLoads,
+                ]);
             }
 
             return moduleRecord;
@@ -10056,16 +11485,16 @@
             moduleSpecifier,
             enqueueJob,
             selectImplementation,
-            moduleLoads) {
+            moduleLoads,
+        ) {
             const {
                 importHook,
                 importNowHook,
                 moduleMap,
                 moduleMapHook,
                 moduleRecords,
-                parentCompartment
-            } =
-                weakmapGet(compartmentPrivateFields, compartment);
+                parentCompartment,
+            } = weakmapGet(compartmentPrivateFields, compartment);
 
             if (mapHas(moduleRecords, moduleSpecifier)) {
                 return mapGet(moduleRecords, moduleSpecifier);
@@ -10081,13 +11510,13 @@
                 if (moduleHook === undefined) {
                     const moduleHookName = selectImplementation(
                         'importHook',
-                        'importNowHook');
-
+                        'importNowHook',
+                    );
                     throw makeError(
                         X`${b(moduleHookName)} needed to load module ${q(
-                            moduleSpecifier)
-                        } in compartment ${q(compartment.name)}`);
-
+                            moduleSpecifier,
+                        )} in compartment ${q(compartment.name)}`,
+                    );
                 }
                 moduleDescriptor = moduleHook(moduleSpecifier);
                 // Uninitialized module namespaces throw if we attempt to coerce them into
@@ -10101,11 +11530,11 @@
                 // eslint-disable-next-line @endo/no-polymorphic-call
                 throw makeError(
                     X`Cannot map module ${q(moduleSpecifier)} to ${q(
-                        moduleDescriptor)
-                    } in parent compartment, use {source} module descriptor`,
-                    TypeError);
-
-            } else if (isObject(moduleDescriptor)) {
+                        moduleDescriptor,
+                    )} in parent compartment, use {source} module descriptor`,
+                    TypeError,
+                );
+            } else if (!isPrimitive(moduleDescriptor)) {
                 // In this shim (and not in XS, and not in the standard we imagine), we
                 // allow a module namespace object to stand in for a module descriptor that
                 // describes its original {compartment, specifier} so that it can be used
@@ -10125,15 +11554,15 @@
                         // descriptor.
                         const {
                             compartment: aliasCompartment = parentCompartment,
-                            namespace: aliasSpecifier
-                        } =
-                            moduleDescriptor;
+                            namespace: aliasSpecifier,
+                        } = moduleDescriptor;
                         if (
-                            !isObject(aliasCompartment) ||
-                            !weakmapHas(compartmentPrivateFields, aliasCompartment)) {
+                            isPrimitive(aliasCompartment) ||
+                            !weakmapHas(compartmentPrivateFields, aliasCompartment)
+                        ) {
                             throw makeError(
-                                X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
-
+                                X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`,
+                            );
                         }
                         // Behold: recursion.
                         // eslint-disable-next-line no-use-before-define
@@ -10144,15 +11573,15 @@
                             aliasSpecifier,
                             enqueueJob,
                             selectImplementation,
-                            moduleLoads);
-
+                            moduleLoads,
+                        );
                         mapSet(moduleRecords, moduleSpecifier, aliasRecord);
                         return aliasRecord;
                     }
 
                     // All remaining objects must either be a module namespace, or be
                     // promoted into a module namespace with a virtual module source.
-                    if (isObject(moduleDescriptor.namespace)) {
+                    if (!isPrimitive(moduleDescriptor.namespace)) {
                         const {namespace} = moduleDescriptor;
                         // Brand-check SES shim module exports namespaces:
                         aliasDescriptor = weakmapGet(moduleAliases, namespace);
@@ -10173,9 +11602,8 @@
                                     for (const name of exports) {
                                         env[name] = namespace[name];
                                     }
-                                }
+                                },
                             };
-
                             const importMeta = undefined;
                             const moduleRecord = loadModuleSource(
                                 compartmentPrivateFields,
@@ -10186,15 +11614,15 @@
                                 enqueueJob,
                                 selectImplementation,
                                 moduleLoads,
-                                importMeta);
-
+                                importMeta,
+                            );
                             mapSet(moduleRecords, moduleSpecifier, moduleRecord);
                             return moduleRecord;
                         }
                     } else {
                         throw makeError(
-                            X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
-
+                            X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`,
+                        );
                     }
                 }
 
@@ -10214,9 +11642,8 @@
                             source: loaderSpecifier,
                             specifier: instanceSpecifier = moduleSpecifier,
                             compartment: loaderCompartment = parentCompartment,
-                            importMeta = undefined
-                        } =
-                            moduleDescriptor;
+                            importMeta = undefined,
+                        } = moduleDescriptor;
 
                         // Induce the compartment, possibly a different compartment
                         // to load a module source.
@@ -10230,8 +11657,8 @@
                             loaderSpecifier,
                             enqueueJob,
                             selectImplementation,
-                            moduleLoads);
-
+                            moduleLoads,
+                        );
 
                         // Extract the source of the module from the loader compartment's
                         // record.
@@ -10248,8 +11675,8 @@
                             enqueueJob,
                             selectImplementation,
                             moduleLoads,
-                            importMeta);
-
+                            importMeta,
+                        );
                         mapSet(moduleRecords, moduleSpecifier, moduleRecord);
                         return moduleRecord;
                     } else {
@@ -10261,9 +11688,8 @@
                         const {
                             source: moduleSource,
                             specifier: aliasSpecifier = moduleSpecifier,
-                            importMeta
-                        } =
-                            moduleDescriptor;
+                            importMeta,
+                        } = moduleDescriptor;
 
                         const aliasRecord = loadModuleSource(
                             compartmentPrivateFields,
@@ -10274,8 +11700,8 @@
                             enqueueJob,
                             selectImplementation,
                             moduleLoads,
-                            importMeta);
-
+                            importMeta,
+                        );
                         mapSet(moduleRecords, moduleSpecifier, aliasRecord);
                         return aliasRecord;
                     }
@@ -10285,8 +11711,8 @@
                     // { archive: Archive, path: string }
                     // We do not support this XS-native module descriptor.
                     throw makeError(
-                        X`Unsupported archive module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
-
+                        X`Unsupported archive module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`,
+                    );
                 }
 
                 // { record, specifier?, compartment?, importMeta? }
@@ -10301,9 +11727,8 @@
                         compartment: aliasCompartment = compartment,
                         specifier: aliasSpecifier = moduleSpecifier,
                         record: moduleSource,
-                        importMeta
-                    } =
-                        moduleDescriptor;
+                        importMeta,
+                    } = moduleDescriptor;
 
                     const aliasRecord = loadModuleSource(
                         compartmentPrivateFields,
@@ -10314,8 +11739,8 @@
                         enqueueJob,
                         selectImplementation,
                         moduleLoads,
-                        importMeta);
-
+                        importMeta,
+                    );
                     mapSet(moduleRecords, moduleSpecifier, aliasRecord);
                     mapSet(moduleRecords, aliasSpecifier, aliasRecord);
                     return aliasRecord;
@@ -10326,14 +11751,16 @@
                 // in a specified compartment.
                 if (
                     moduleDescriptor.compartment !== undefined &&
-                    moduleDescriptor.specifier !== undefined) {
+                    moduleDescriptor.specifier !== undefined
+                ) {
                     if (
-                        !isObject(moduleDescriptor.compartment) ||
+                        isPrimitive(moduleDescriptor.compartment) ||
                         !weakmapHas(compartmentPrivateFields, moduleDescriptor.compartment) ||
-                        typeof moduleDescriptor.specifier !== 'string') {
+                        typeof moduleDescriptor.specifier !== 'string'
+                    ) {
                         throw makeError(
-                            X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`);
-
+                            X`Invalid compartment in module descriptor for specifier ${q(moduleSpecifier)} in compartment ${q(compartment.name)}`,
+                        );
                     }
                     // Behold: recursion.
                     // eslint-disable-next-line no-use-before-define
@@ -10344,8 +11771,8 @@
                         moduleDescriptor.specifier,
                         enqueueJob,
                         selectImplementation,
-                        moduleLoads);
-
+                        moduleLoads,
+                    );
                     mapSet(moduleRecords, moduleSpecifier, aliasRecord);
                     return aliasRecord;
                 }
@@ -10361,17 +11788,17 @@
                     moduleSource,
                     enqueueJob,
                     selectImplementation,
-                    moduleLoads);
-
+                    moduleLoads,
+                );
                 // Memoize.
                 mapSet(moduleRecords, moduleSpecifier, moduleRecord);
                 return moduleRecord;
             } else {
                 throw makeError(
                     X`module descriptor must be a string or object for specifier ${q(
-                        moduleSpecifier)
-                    } in compartment ${q(compartment.name)}`);
-
+                        moduleSpecifier,
+                    )} in compartment ${q(compartment.name)}`,
+                );
             }
         }
 
@@ -10382,11 +11809,12 @@
             moduleSpecifier,
             enqueueJob,
             selectImplementation,
-            moduleLoads) => {
+            moduleLoads,
+        ) => {
             const {name: compartmentName} = weakmapGet(
                 compartmentPrivateFields,
-                compartment);
-
+                compartment,
+            );
 
             // Prevent data-lock from recursion into branches visited in dependent loads.
             let compartmentLoading = mapGet(moduleLoads, compartment);
@@ -10408,50 +11836,56 @@
                     moduleSpecifier,
                     enqueueJob,
                     selectImplementation,
-                    moduleLoads],
-
-                (error) => {
+                    moduleLoads,
+                ],
+                error => {
                     // eslint-disable-next-line @endo/no-polymorphic-call
                     annotateError(
                         error,
                         X`${error.message}, loading ${q(moduleSpecifier)} in compartment ${q(
-                            compartmentName)
-                        }`);
-
+                            compartmentName,
+                        )}`,
+                    );
                     throw error;
-                });
-
+                },
+            );
 
             mapSet(compartmentLoading, moduleSpecifier, moduleLoading);
 
             return moduleLoading;
         };
 
-        const asyncJobQueue = () => {
+        /**
+         * If `aggregateErrors` is `false`, the `errors` property of the fulfilled object
+         * will always be empty.
+         * @param {{errors?: Error[], noAggregateErrors?: boolean | undefined}} [options]
+         */
+        const asyncJobQueue = ({errors = [], noAggregateErrors = false} = {}) => {
             /** @type {Set<Promise<undefined>>} */
             const pendingJobs = new Set();
-            /** @type {Array<Error>} */
-            const errors = [];
 
             /**
              * Enqueues a job that starts immediately but won't be awaited until drainQueue is called.
              *
-             * @template {any[]} T
-             * @param {(...args: T)=>Promise<*>} func
-             * @param {T} args
+             * @template {(...args: any[]) => Promise<void>} F
+             * @param {F} func - An async function to execute
+             * @param {Parameters<F>} args - Arguments to pass to the function
+             * @returns {void}
              */
             const enqueueJob = (func, args) => {
                 setAdd(
                     pendingJobs,
-                    promiseThen(func(...args), noop, (error) => {
-                        arrayPush(errors, error);
-                    }));
-
+                    promiseThen(func(...args), noop, error => {
+                        if (noAggregateErrors) {
+                            throw error;
+                        } else {
+                            arrayPush(errors, error);
+                        }
+                    }),
+                );
             };
             /**
              * Sequentially awaits pending jobs and returns an array of errors
-             *
-             * @returns {Promise<Array<Error>>}
              */
             const drainQueue = async () => {
                 await null;
@@ -10459,9 +11893,51 @@
                     // eslint-disable-next-line no-await-in-loop
                     await job;
                 }
-                return errors;
             };
-            return {enqueueJob, drainQueue};
+            return {enqueueJob, drainQueue, errors};
+        };
+
+        /**
+         * If `aggregateErrors` is `false`, the `errors` property of the returned object
+         * will always be empty.
+         * @param {{errors?: Error[], noAggregateErrors?: boolean | undefined}} [options]
+         */
+        const syncJobQueue = ({errors = [], noAggregateErrors = false} = {}) => {
+            let current = [];
+            let next = [];
+
+            /**
+             * Enqueues a job
+             *
+             * @template {(...args: any[]) => void} F
+             * @param {F} func - An async function to execute
+             * @param {Parameters<F>} args - Arguments to pass to the function
+             * @returns {void}
+             */
+            const enqueueJob = (func, args) => {
+                arrayPush(next, [func, args]);
+            };
+            const drainQueue = () => {
+                // Attention: load bearing flow order. Calling another enqueued function in the
+                // synchronous usecase must happen after the one that enqueued it has finished.
+                // Jobs enqueued in one pass do not interleave with jobs resulting from them.
+                // It's necessary for efficient memoization and to break cycles.
+                for (const [func, args] of current) {
+                    try {
+                        func(...args);
+                    } catch (error) {
+                        if (noAggregateErrors) {
+                            throw error;
+                        } else {
+                            arrayPush(errors, error);
+                        }
+                    }
+                }
+                current = next;
+                next = [];
+                if (current.length > 0) drainQueue();
+            };
+            return {enqueueJob, drainQueue, errors};
         };
 
         /**
@@ -10473,40 +11949,50 @@
             // Throw an aggregate error if there were any errors.
             if (errors.length > 0) {
                 const verbose =
-                    getenv('COMPARTMENT_LOAD_ERRORS', '', ['verbose']) === 'verbose';
+                    /** @type {'' | 'verbose'} */
+                    (getenv('COMPARTMENT_LOAD_ERRORS', '', ['verbose'])) === 'verbose';
                 throw TypeError(
                     `${errorPrefix} (${errors.length} underlying failures: ${arrayJoin(
-                        arrayMap(errors, (error) => error.message + (verbose ? error.stack : '')),
-                        ', ')
-                    }`);
-
+                        arrayMap(errors, error => error.message + (verbose ? error.stack : '')),
+                        ', ',
+                    )}`,
+                );
             }
         };
 
         const preferSync = (_asyncImpl, syncImpl) => syncImpl;
         const preferAsync = (asyncImpl, _syncImpl) => asyncImpl;
 
-        /*
- * `load` asynchronously gathers the module records for a module and its
- * transitive dependencies.
- * The module records refer to each other by a reference to the dependency's
- * compartment and the specifier of the module within its own compartment.
- * This graph is then ready to be synchronously linked and executed.
- */
+        /**
+         * `load` asynchronously gathers the module records for a module and its
+         * transitive dependencies.
+         * The module records refer to each other by a reference to the dependency's
+         * compartment and the specifier of the module within its own compartment.
+         * This graph is then ready to be synchronously linked and executed.
+         * @param {WeakMap<Compartment, any>} compartmentPrivateFields
+         * @param {WeakMap<object, object>} moduleAliases
+         * @param {Compartment} compartment
+         * @param {string} moduleSpecifier - The module specifier to load.
+         * @param {{ noAggregateErrors?: boolean | undefined}} options
+         */
         const load = async (
             compartmentPrivateFields,
             moduleAliases,
             compartment,
-            moduleSpecifier) => {
+            moduleSpecifier,
+            {noAggregateErrors = false} = {},
+        ) => {
             const {name: compartmentName} = weakmapGet(
                 compartmentPrivateFields,
-                compartment);
-
+                compartment,
+            );
 
             /** @type {Map<object, Map<string, Promise<Record<any, any>>>>} */
             const moduleLoads = new Map();
 
-            const {enqueueJob, drainQueue} = asyncJobQueue();
+            const {enqueueJob, drainQueue, errors} = asyncJobQueue({
+                noAggregateErrors,
+            });
 
             enqueueJob(memoizedLoadWithErrorAnnotation, [
                 compartmentPrivateFields,
@@ -10515,52 +12001,50 @@
                 moduleSpecifier,
                 enqueueJob,
                 preferAsync,
-                moduleLoads]);
+                moduleLoads,
+            ]);
 
-
-            // Drain pending jobs queue and throw an aggregate error
-            const errors = await drainQueue();
+            await drainQueue();
 
             throwAggregateError({
                 errors,
                 errorPrefix: `Failed to load module ${q(moduleSpecifier)} in package ${q(
-                    compartmentName)
-                }`
+                    compartmentName,
+                )}`,
             });
-
         };
 
-        /*
- * `loadNow` synchronously gathers the module records for a specified module
- * and its transitive dependencies.
- * The module records refer to each other by a reference to the dependency's
- * compartment and the specifier of the module within its own compartment.
- * This graph is then ready to be synchronously linked and executed.
- */
-        $h͏_once.load(load);
+        /**
+         * `loadNow` synchronously gathers the module records for a specified module
+         * and its transitive dependencies.
+         * The module records refer to each other by a reference to the dependency's
+         * compartment and the specifier of the module within its own compartment.
+         * This graph is then ready to be synchronously linked and executed.
+         * @param {WeakMap<Compartment, any>} compartmentPrivateFields
+         * @param {WeakMap<object, object>} moduleAliases
+         * @param {Compartment} compartment
+         * @param {string} moduleSpecifier - The module specifier to load.
+         * @param {{ noAggregateErrors?: boolean | undefined}} options
+         */$h͏_once.load(load);
+
         const loadNow = (
             compartmentPrivateFields,
             moduleAliases,
             compartment,
-            moduleSpecifier) => {
+            moduleSpecifier,
+            {noAggregateErrors = false} = {},
+        ) => {
             const {name: compartmentName} = weakmapGet(
                 compartmentPrivateFields,
-                compartment);
-
+                compartment,
+            );
 
             /** @type {Map<object, Map<string, Promise<Record<any, any>>>>} */
             const moduleLoads = new Map();
 
-            /** @type {Array<Error>} */
-            const errors = [];
-
-            const enqueueJob = (func, args) => {
-                try {
-                    func(...args);
-                } catch (error) {
-                    arrayPush(errors, error);
-                }
-            };
+            const {enqueueJob, drainQueue, errors} = syncJobQueue({
+                noAggregateErrors,
+            });
 
             enqueueJob(memoizedLoadWithErrorAnnotation, [
                 compartmentPrivateFields,
@@ -10569,27 +12053,28 @@
                 moduleSpecifier,
                 enqueueJob,
                 preferSync,
-                moduleLoads]);
+                moduleLoads,
+            ]);
 
+            drainQueue();
 
             throwAggregateError({
                 errors,
                 errorPrefix: `Failed to load module ${q(moduleSpecifier)} in package ${q(
-                    compartmentName)
-                }`
+                    compartmentName,
+                )}`,
             });
-
         };
         $h͏_once.loadNow(loadNow);
     })()
     ,
-// === functors[42] ===
+// === 48. ses ./src/module-proxy.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let makeAlias, Proxy, TypeError, create, freeze, mapGet, mapHas, mapSet, ownKeys, reflectGet,
@@ -10626,11 +12111,9 @@
                     value: 'Module',
                     writable: false,
                     enumerable: false,
-                    configurable: false
-                }
+                    configurable: false,
+                },
             });
-
-
             return freeze({
                 activate() {
                     active = true;
@@ -10641,37 +12124,37 @@
                         if (!active) {
                             throw TypeError(
                                 `Cannot get property ${q(
-                                    name)
-                                } of module exports namespace, the module has not yet begun to execute`);
-
+                                    name,
+                                )} of module exports namespace, the module has not yet begun to execute`,
+                            );
                         }
                         return reflectGet(exportsTarget, name, receiver);
                     },
                     set(_target, name, _value) {
                         throw TypeError(
-                            `Cannot set property ${q(name)} of module exports namespace`);
-
+                            `Cannot set property ${q(name)} of module exports namespace`,
+                        );
                     },
                     has(_target, name) {
                         if (!active) {
                             throw TypeError(
                                 `Cannot check property ${q(
-                                    name)
-                                }, the module has not yet begun to execute`);
-
+                                    name,
+                                )}, the module has not yet begun to execute`,
+                            );
                         }
                         return reflectHas(exportsTarget, name);
                     },
                     deleteProperty(_target, name) {
                         throw TypeError(
-                            `Cannot delete property ${q(name)}s of module exports namespace`);
-
+                            `Cannot delete property ${q(name)}s of module exports namespace`,
+                        );
                     },
                     ownKeys(_target) {
                         if (!active) {
                             throw TypeError(
-                                'Cannot enumerate keys, the module has not yet begun to execute');
-
+                                'Cannot enumerate keys, the module has not yet begun to execute',
+                            );
                         }
                         return ownKeys(exportsTarget);
                     },
@@ -10679,25 +12162,25 @@
                         if (!active) {
                             throw TypeError(
                                 `Cannot get own property descriptor ${q(
-                                    name)
-                                }, the module has not yet begun to execute`);
-
+                                    name,
+                                )}, the module has not yet begun to execute`,
+                            );
                         }
                         return reflectGetOwnPropertyDescriptor(exportsTarget, name);
                     },
                     preventExtensions(_target) {
                         if (!active) {
                             throw TypeError(
-                                'Cannot prevent extensions of module exports namespace, the module has not yet begun to execute');
-
+                                'Cannot prevent extensions of module exports namespace, the module has not yet begun to execute',
+                            );
                         }
                         return reflectPreventExtensions(exportsTarget);
                     },
                     isExtensible() {
                         if (!active) {
                             throw TypeError(
-                                'Cannot check extensibility of module exports namespace, the module has not yet begun to execute');
-
+                                'Cannot check extensibility of module exports namespace, the module has not yet begun to execute',
+                            );
                         }
                         return reflectIsExtensible(exportsTarget);
                     },
@@ -10709,23 +12192,21 @@
                     },
                     defineProperty(_target, name, _descriptor) {
                         throw TypeError(
-                            `Cannot define property ${q(name)} of module exports namespace`);
-
+                            `Cannot define property ${q(name)} of module exports namespace`,
+                        );
                     },
                     apply(_target, _thisArg, _args) {
                         throw TypeError(
-                            'Cannot call module exports namespace, it is not a function');
-
+                            'Cannot call module exports namespace, it is not a function',
+                        );
                     },
                     construct(_target, _args) {
                         throw TypeError(
-                            'Cannot construct module exports namespace, it is not a constructor');
-
-                    }
-                })
+                            'Cannot construct module exports namespace, it is not a constructor',
+                        );
+                    },
+                }),
             });
-
-
         };
 
         /**
@@ -10756,15 +12237,16 @@
             compartment,
             compartmentPrivateFields,
             moduleAliases,
-            specifier) => {
+            specifier,
+        ) => {
             const {deferredExports} = compartmentPrivateFields;
             if (!mapHas(deferredExports, specifier)) {
                 const deferred = deferExports();
                 weakmapSet(
                     moduleAliases,
                     deferred.exportsProxy,
-                    makeAlias(compartment, specifier));
-
+                    makeAlias(compartment, specifier),
+                );
                 mapSet(deferredExports, specifier, deferred);
             }
             return mapGet(deferredExports, specifier);
@@ -10772,13 +12254,13 @@
         $h͏_once.getDeferredExports(getDeferredExports);
     })()
     ,
-// === functors[43] ===
+// === 49. ses ./src/compartment-evaluate.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let TypeError, arrayPush, create, getOwnPropertyDescriptors, evadeHtmlCommentTest, evadeImportExpressionTest,
@@ -10815,17 +12297,16 @@
 
                     moduleLexicals = create(
                         null,
-                        getOwnPropertyDescriptors(__moduleShimLexicals__));
-
+                        getOwnPropertyDescriptors(__moduleShimLexicals__),
+                    );
                 }
 
                 ({safeEvaluate} = makeSafeEvaluator({
                     globalObject,
                     moduleLexicals,
                     globalTransforms,
-                    sloppyGlobalsMode
+                    sloppyGlobalsMode,
                 }));
-
             }
 
             return {safeEvaluate};
@@ -10860,24 +12341,23 @@
 
             const {safeEvaluate} = provideCompartmentEvaluator(
                 compartmentFields,
-                options);
-
+                options,
+            );
 
             return safeEvaluate(source, {
-                localTransforms
+                localTransforms,
             });
-
         };
         $h͏_once.compartmentEvaluate(compartmentEvaluate);
     })()
     ,
-// === functors[44] ===
+// === 50. ses ./src/module-instance.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let assert, getDeferredExports, ReferenceError, SyntaxError, TypeError, arrayForEach, arrayIncludes, arrayPush,
@@ -10894,31 +12374,33 @@
             compartment,
             moduleAliases,
             moduleSpecifier,
-            resolvedImports) => {
+            resolvedImports,
+        ) => {
             const {exportsProxy, exportsTarget, activate} = getDeferredExports(
                 compartment,
                 weakmapGet(compartmentPrivateFields, compartment),
                 moduleAliases,
-                moduleSpecifier);
-
+                moduleSpecifier,
+            );
 
             const notifiers = create(null);
 
             if (moduleSource.exports) {
                 if (
                     !isArray(moduleSource.exports) ||
-                    arraySome(moduleSource.exports, (name) => typeof name !== 'string')) {
+                    arraySome(moduleSource.exports, name => typeof name !== 'string')
+                ) {
                     throw TypeError(
-                        `SES virtual module source "exports" property must be an array of strings for module ${moduleSpecifier}`);
-
+                        `SES virtual module source "exports" property must be an array of strings for module ${moduleSpecifier}`,
+                    );
                 }
-                arrayForEach(moduleSource.exports, (name) => {
+                arrayForEach(moduleSource.exports, name => {
                     let value = exportsTarget[name];
                     const updaters = [];
 
                     const get = () => value;
 
-                    const set = (newValue) => {
+                    const set = newValue => {
                         value = newValue;
                         for (const updater of updaters) {
                             updater(newValue);
@@ -10929,25 +12411,23 @@
                         get,
                         set,
                         enumerable: true,
-                        configurable: false
+                        configurable: false,
                     });
 
-
-                    notifiers[name] = (update) => {
+                    notifiers[name] = update => {
                         arrayPush(updaters, update);
                         update(value);
                     };
                 });
                 // This is enough to support import * from cjs - the '*' field doesn't need to be in exports nor exportsTarget because import will only ever access it via notifiers
-                notifiers['*'] = (update) => {
+                notifiers['*'] = update => {
                     update(exportsTarget);
                 };
             }
 
             const localState = {
-                activated: false
+                activated: false,
             };
-
             return freeze({
                 notifiers,
                 exportsProxy,
@@ -10966,9 +12446,8 @@
                             throw err;
                         }
                     }
-                }
+                },
             });
-
         };
 
 // `makeModuleInstance` takes a module's compartment record, the live import
@@ -10983,14 +12462,14 @@
             privateFields,
             moduleAliases,
             moduleRecord,
-            importedInstances) => {
+            importedInstances,
+        ) => {
             const {
                 compartment,
                 moduleSpecifier,
                 moduleSource,
-                importMeta: moduleRecordMeta
-            } =
-                moduleRecord;
+                importMeta: moduleRecordMeta,
+            } = moduleRecord;
             const {
                 reexports: exportAlls = [],
                 __syncModuleProgram__: functorSource,
@@ -10999,9 +12478,8 @@
                 __reexportMap__: reexportMap = {},
                 __needsImport__: needsImport = false,
                 __needsImportMeta__: needsImportMeta = false,
-                __syncModuleFunctor__
-            } =
-                moduleSource;
+                __syncModuleFunctor__,
+            } = moduleSource;
 
             const compartmentFields = weakmapGet(privateFields, compartment);
 
@@ -11012,8 +12490,8 @@
                 compartment,
                 compartmentFields,
                 moduleAliases,
-                moduleSpecifier);
-
+                moduleSpecifier,
+            );
 
             // {_exportName_: getter} module exports namespace
             // object (eventually proxied).
@@ -11044,7 +12522,7 @@
             let dynamicImport;
             if (needsImport) {
                 /** @param {string} importSpecifier */
-                dynamicImport = async (importSpecifier) =>
+                dynamicImport = async importSpecifier =>
                     compartmentImport(resolveHook(importSpecifier, moduleSpecifier));
             }
 
@@ -11074,13 +12552,13 @@
                     };
 
                     // leave tdz once
-                    const init = freeze((initValue) => {
+                    const init = freeze(initValue => {
                         // init with initValue of a declared const binding, and return
                         // it.
                         if (!tdz) {
                             throw TypeError(
-                                `Internal: binding ${q(localName)} already initialized`);
-
+                                `Internal: binding ${q(localName)} already initialized`,
+                            );
                         }
                         value = initValue;
                         const updaters = optUpdaters;
@@ -11094,7 +12572,7 @@
 
                     // If still tdz, register update for notification later.
                     // Otherwise, update now.
-                    const notify = (updater) => {
+                    const notify = updater => {
                         if (updater === init) {
                             // Prevent recursion.
                             return;
@@ -11109,9 +12587,8 @@
                     // Need these for additional exports of the local variable.
                     fixedGetNotify = {
                         get,
-                        notify
+                        notify,
                     };
-
                     localGetNotify[localName] = fixedGetNotify;
                     onceVar[localName] = init;
                 }
@@ -11120,9 +12597,8 @@
                     get: fixedGetNotify.get,
                     set: undefined,
                     enumerable: true,
-                    configurable: false
+                    configurable: false,
                 };
-
 
                 notifiers[fixedExportName] = fixedGetNotify.notify;
             });
@@ -11141,8 +12617,8 @@
                         const get = () => {
                             if (tdz) {
                                 throw ReferenceError(
-                                    `binding ${q(liveExportName)} not yet initialized`);
-
+                                    `binding ${q(liveExportName)} not yet initialized`,
+                                );
                             }
                             return value;
                         };
@@ -11156,7 +12632,7 @@
                         // tdz but always leaves tdz. Such reexporting creates a tree of
                         // bindings. This lets the tree be hooked up even if the imported
                         // module instance isn't initialized yet, as may happen in cycles.
-                        const update = freeze((newValue) => {
+                        const update = freeze(newValue => {
                             value = newValue;
                             tdz = false;
                             for (const updater of updaters) {
@@ -11165,7 +12641,7 @@
                         });
 
                         // tdz sensitive setter
-                        const set = (newValue) => {
+                        const set = newValue => {
                             if (tdz) {
                                 throw ReferenceError(`binding ${q(localName)} not yet initialized`);
                             }
@@ -11177,7 +12653,7 @@
 
                         // Always register the updater function.
                         // If not in tdz, also update now.
-                        const notify = (updater) => {
+                        const notify = updater => {
                             if (updater === update) {
                                 // Prevent recursion.
                                 return;
@@ -11190,9 +12666,8 @@
 
                         liveGetNotify = {
                             get,
-                            notify
+                            notify,
                         };
-
 
                         localGetNotify[localName] = liveGetNotify;
                         if (setProxyTrap) {
@@ -11200,9 +12675,8 @@
                                 get,
                                 set,
                                 enumerable: true,
-                                configurable: false
+                                configurable: false,
                             });
-
                         }
                         liveVar[localName] = update;
                     }
@@ -11211,18 +12685,36 @@
                         get: liveGetNotify.get,
                         set: undefined,
                         enumerable: true,
-                        configurable: false
+                        configurable: false,
                     };
 
-
                     notifiers[liveExportName] = liveGetNotify.notify;
-                });
+                },
+            );
 
-
-            const notifyStar = (update) => {
+            const notifyStar = update => {
                 update(exportsTarget);
             };
             notifiers['*'] = notifyStar;
+
+            const wireUpExportNotifier = (exportName, notify) => {
+                if (!notifiers[exportName] && notify !== false) {
+                    notifiers[exportName] = notify;
+
+                    // exported live binding state
+                    let value;
+                    const update = newValue => (value = newValue);
+                    notify(update);
+                    exportsProps[exportName] = {
+                        get() {
+                            return value;
+                        },
+                        set: undefined,
+                        enumerable: true,
+                        configurable: false,
+                    };
+                }
+            };
 
             // Per the calling convention for the moduleFunctor generated from
             // an ESM, the `imports` function gets called once up front
@@ -11255,8 +12747,8 @@
                         const importNotify = importNotifiers[importName];
                         if (!importNotify) {
                             throw SyntaxError(
-                                `The requested module '${specifier}' does not provide an export named '${importName}'`);
-
+                                `The requested module '${specifier}' does not provide an export named '${importName}'`,
+                            );
                         }
                         for (const updater of updaters) {
                             importNotify(updater);
@@ -11266,7 +12758,8 @@
                         // Make all these imports candidates.
                         // Note names don't change in reexporting all
                         for (const [importAndExportName, importNotify] of entries(
-                            importNotifiers)) {
+                            importNotifiers,
+                        )) {
                             if (candidateAll[importAndExportName] === undefined) {
                                 candidateAll[importAndExportName] = importNotify;
                             } else {
@@ -11276,31 +12769,15 @@
                         }
                     }
                     if (reexportMap[specifier]) {
-                        // Make named reexports candidates too.
+                        // Set up reexport notifiers instantly so they are available in cycles.
                         for (const [localName, exportedName] of reexportMap[specifier]) {
-                            candidateAll[exportedName] = importNotifiers[localName];
+                            wireUpExportNotifier(exportedName, importNotifiers[localName]);
                         }
                     }
                 }
 
                 for (const [exportName, notify] of entries(candidateAll)) {
-                    if (!notifiers[exportName] && notify !== false) {
-                        notifiers[exportName] = notify;
-
-                        // exported live binding state
-                        let value;
-                        const update = (newValue) => value = newValue;
-                        notify(update);
-                        exportsProps[exportName] = {
-                            get() {
-                                return value;
-                            },
-                            set: undefined,
-                            enumerable: true,
-                            configurable: false
-                        };
-
-                    }
+                    wireUpExportNotifier(exportName, notify);
                 }
 
                 // Sort the module exports namespace as per spec.
@@ -11312,9 +12789,9 @@
                 // since all properties of the exports namespace must be keyed by a string
                 // and the string must correspond to a valid identifier, sorting these
                 // properties works for this specific case.
-                arrayForEach(arraySort(keys(exportsProps)), (k) =>
-                    defineProperty(exportsTarget, k, exportsProps[k]));
-
+                arrayForEach(arraySort(keys(exportsProps)), k =>
+                    defineProperty(exportsTarget, k, exportsProps[k]),
+                );
 
                 freeze(exportsTarget);
                 activate();
@@ -11327,9 +12804,8 @@
                 optFunctor = compartmentEvaluate(compartmentFields, functorSource, {
                     globalObject: compartment.globalThis,
                     transforms: __shimTransforms__,
-                    __moduleShimLexicals__: moduleLexicals
+                    __moduleShimLexicals__: moduleLexicals,
                 });
-
             }
             let didThrow = false;
             let thrownError;
@@ -11347,10 +12823,9 @@
                                 onceVar: freeze(onceVar),
                                 liveVar: freeze(liveVar),
                                 import: dynamicImport,
-                                importMeta
-                            }));
-
-
+                                importMeta,
+                            }),
+                        );
                     } catch (e) {
                         didThrow = true;
                         thrownError = e;
@@ -11365,25 +12840,24 @@
             return freeze({
                 notifiers,
                 exportsProxy,
-                execute
+                execute,
             });
-
         };
         $h͏_once.makeModuleInstance(makeModuleInstance);
     })()
     ,
-// === functors[45] ===
+// === 51. ses ./src/module-link.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let assert, makeModuleInstance, makeVirtualModuleInstance, Map, ReferenceError, TypeError, entries, isArray,
-            isObject, mapGet, mapHas, mapSet, weakmapGet;
-        $h͏_imports([["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]], ["./module-instance.js", [["makeModuleInstance", [$h͏_a => (makeModuleInstance = $h͏_a)]], ["makeVirtualModuleInstance", [$h͏_a => (makeVirtualModuleInstance = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["ReferenceError", [$h͏_a => (ReferenceError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["isArray", [$h͏_a => (isArray = $h͏_a)]], ["isObject", [$h͏_a => (isObject = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["mapHas", [$h͏_a => (mapHas = $h͏_a)]], ["mapSet", [$h͏_a => (mapSet = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]]]]]);
+            isPrimitive, mapGet, mapHas, mapSet, weakmapGet;
+        $h͏_imports([["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]], ["./module-instance.js", [["makeModuleInstance", [$h͏_a => (makeModuleInstance = $h͏_a)]], ["makeVirtualModuleInstance", [$h͏_a => (makeVirtualModuleInstance = $h͏_a)]]]], ["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["ReferenceError", [$h͏_a => (ReferenceError = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["entries", [$h͏_a => (entries = $h͏_a)]], ["isArray", [$h͏_a => (isArray = $h͏_a)]], ["isPrimitive", [$h͏_a => (isPrimitive = $h͏_a)]], ["mapGet", [$h͏_a => (mapGet = $h͏_a)]], ["mapHas", [$h͏_a => (mapHas = $h͏_a)]], ["mapSet", [$h͏_a => (mapSet = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]]]]]);
 
 
         const {Fail, quote: q} = assert;
@@ -11398,19 +12872,20 @@
             compartmentPrivateFields,
             moduleAliases,
             compartment,
-            moduleSpecifier) => {
+            moduleSpecifier,
+        ) => {
             const {name: compartmentName, moduleRecords} = weakmapGet(
                 compartmentPrivateFields,
-                compartment);
-
+                compartment,
+            );
 
             const moduleRecord = mapGet(moduleRecords, moduleSpecifier);
             if (moduleRecord === undefined) {
                 throw ReferenceError(
                     `Missing link to module ${q(moduleSpecifier)} from compartment ${q(
-                        compartmentName)
-                    }`);
-
+                        compartmentName,
+                    )}`,
+                );
             }
 
             // Mutual recursion so there's no confusion about which
@@ -11427,14 +12902,14 @@
 
         function validatePrecompiledModuleSource(moduleSource, moduleSpecifier) {
             const {__fixedExportMap__, __liveExportMap__} = moduleSource;
-            isObject(__fixedExportMap__) ||
+            !isPrimitive(__fixedExportMap__) ||
             Fail`Property '__fixedExportMap__' of a precompiled module source must be an object, got ${q(
-                __fixedExportMap__)
-            }, for module ${q(moduleSpecifier)}`;
-            isObject(__liveExportMap__) ||
+                __fixedExportMap__,
+            )}, for module ${q(moduleSpecifier)}`;
+            !isPrimitive(__liveExportMap__) ||
             Fail`Property '__liveExportMap__' of a precompiled module source must be an object, got ${q(
-                __liveExportMap__)
-            }, for module ${q(moduleSpecifier)}`;
+                __liveExportMap__,
+            )}, for module ${q(moduleSpecifier)}`;
         }
 
         function mayBeVirtualModuleSource(moduleSource) {
@@ -11445,34 +12920,35 @@
             const {exports} = moduleSource;
             isArray(exports) ||
             Fail`Invalid module source: 'exports' of a virtual module source must be an array, got ${q(
-                exports)
-            }, for module ${q(moduleSpecifier)}`;
+                exports,
+            )}, for module ${q(moduleSpecifier)}`;
         }
 
         function validateModuleSource(moduleSource, moduleSpecifier) {
-            isObject(moduleSource) ||
+            !isPrimitive(moduleSource) ||
             Fail`Invalid module source: must be of type object, got ${q(
-                moduleSource)
-            }, for module ${q(moduleSpecifier)}`;
+                moduleSource,
+            )}, for module ${q(moduleSpecifier)}`;
             const {imports, exports, reexports = []} = moduleSource;
             isArray(imports) ||
             Fail`Invalid module source: 'imports' must be an array, got ${q(
-                imports)
-            }, for module ${q(moduleSpecifier)}`;
+                imports,
+            )}, for module ${q(moduleSpecifier)}`;
             isArray(exports) ||
             Fail`Invalid module source: 'exports' must be an array, got ${q(
-                exports)
-            }, for module ${q(moduleSpecifier)}`;
+                exports,
+            )}, for module ${q(moduleSpecifier)}`;
             isArray(reexports) ||
             Fail`Invalid module source: 'reexports' must be an array if present, got ${q(
-                reexports)
-            }, for module ${q(moduleSpecifier)}`;
+                reexports,
+            )}, for module ${q(moduleSpecifier)}`;
         }
 
         const instantiate = (
             compartmentPrivateFields,
             moduleAliases,
-            moduleRecord) => {
+            moduleRecord,
+        ) => {
             const {compartment, moduleSpecifier, resolvedImports, moduleSource} =
                 moduleRecord;
             const {instances} = weakmapGet(compartmentPrivateFields, compartment);
@@ -11492,8 +12968,8 @@
                     compartmentPrivateFields,
                     moduleAliases,
                     moduleRecord,
-                    importedInstances);
-
+                    importedInstances,
+                );
             } else if (mayBeVirtualModuleSource(moduleSource)) {
                 validateVirtualModuleSource(moduleSource, moduleSpecifier);
                 moduleInstance = makeVirtualModuleInstance(
@@ -11502,8 +12978,8 @@
                     compartment,
                     moduleAliases,
                     moduleSpecifier,
-                    resolvedImports);
-
+                    resolvedImports,
+                );
             } else {
                 throw TypeError(`Invalid module source, got ${q(moduleSource)}`);
             }
@@ -11517,8 +12993,8 @@
                     compartmentPrivateFields,
                     moduleAliases,
                     compartment,
-                    resolvedSpecifier);
-
+                    resolvedSpecifier,
+                );
                 mapSet(importedInstances, importSpecifier, importedInstance);
             }
 
@@ -11527,13 +13003,13 @@
         $h͏_once.instantiate(instantiate);
     })()
     ,
-// === functors[46] ===
+// === 52. ses ./src/compartment.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Map, TypeError, WeakMap, arrayFlatMap, assign, defineProperties, identity, promiseThen, toStringTagSymbol,
@@ -11543,64 +13019,92 @@
         $h͏_imports([["./commons.js", [["Map", [$h͏_a => (Map = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["WeakMap", [$h͏_a => (WeakMap = $h͏_a)]], ["arrayFlatMap", [$h͏_a => (arrayFlatMap = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["defineProperties", [$h͏_a => (defineProperties = $h͏_a)]], ["identity", [$h͏_a => (identity = $h͏_a)]], ["promiseThen", [$h͏_a => (promiseThen = $h͏_a)]], ["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]], ["weakmapGet", [$h͏_a => (weakmapGet = $h͏_a)]], ["weakmapSet", [$h͏_a => (weakmapSet = $h͏_a)]]]], ["./global-object.js", [["setGlobalObjectSymbolUnscopables", [$h͏_a => (setGlobalObjectSymbolUnscopables = $h͏_a)]], ["setGlobalObjectConstantProperties", [$h͏_a => (setGlobalObjectConstantProperties = $h͏_a)]], ["setGlobalObjectMutableProperties", [$h͏_a => (setGlobalObjectMutableProperties = $h͏_a)]], ["setGlobalObjectEvaluators", [$h͏_a => (setGlobalObjectEvaluators = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]], ["assertEqual", [$h͏_a => (assertEqual = $h͏_a)]], ["q", [$h͏_a => (q = $h͏_a)]]]], ["./permits.js", [["sharedGlobalPropertyNames", [$h͏_a => (sharedGlobalPropertyNames = $h͏_a)]]]], ["./module-load.js", [["load", [$h͏_a => (load = $h͏_a)]], ["loadNow", [$h͏_a => (loadNow = $h͏_a)]]]], ["./module-link.js", [["link", [$h͏_a => (link = $h͏_a)]]]], ["./module-proxy.js", [["getDeferredExports", [$h͏_a => (getDeferredExports = $h͏_a)]]]], ["./compartment-evaluate.js", [["compartmentEvaluate", [$h͏_a => (compartmentEvaluate = $h͏_a)]]]], ["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h͏_a => (makeSafeEvaluator = $h͏_a)]]]]]);
 
 
-        /** @import {ModuleDescriptor, ModuleExportsNamespace} from '../types.js' */
+        /**
+         * @import {ImportHook, ImportMetaHook, ImportNowHook, ModuleDescriptor, ModuleExportsNamespace, ModuleMap, ModuleMapHook, ResolveHook, ModuleSource, CompartmentOptions} from '../types.js'
+         * @import {Transform} from './lockdown.js'
+         * @import {DeferredExports} from './module-proxy.js'
+         */
 
-// moduleAliases associates every public module exports namespace with its
-// corresponding compartment and specifier so they can be used to link modules
-// across compartments.
-// The mechanism to thread an alias is to use the compartment.module function
-// to obtain the exports namespace of a foreign module and pass it into another
-// compartment's moduleMap constructor option.
+        /**
+         * Associates every public module exports namespace with its corresponding
+         * compartment and specifier so they can be used to link modules across
+         * compartments. The mechanism to thread an alias is to use the
+         * {@link Compartment.module} function to obtain the exports namespace of a foreign
+         * module and pass it into another compartment's `moduleMap` constructor option
+         * @type {WeakMap<ModuleExportsNamespace, Compartment>}
+         *
+         */
         const moduleAliases = new WeakMap();
 
-// privateFields captures the private state for each compartment.
+        /**
+         * Private fields for `Compartment` instances
+         * @typedef {object} CompartmentFields
+         * @property {string} name
+         * @property {object} globalObject
+         * @property {Array<Transform>} globalTransforms
+         * @property {(source: string, options?: {localTransforms?: Array<Transform>}) => void} safeEvaluate
+         * @property {ResolveHook} resolveHook
+         * @property {ImportHook} importHook
+         * @property {ImportNowHook} importNowHook
+         * @property {ModuleMap} moduleMap
+         * @property {ModuleMapHook} moduleMapHook
+         * @property {ImportMetaHook} importMetaHook
+         * @property {Map<string, ModuleSource>} moduleRecords
+         * @property {Array<Transform>} __shimTransforms__
+         * @property {DeferredExports} deferredExports
+         * @property {Map<string, ModuleDescriptor>} instances
+         * @property {Compartment} [parentCompartment]
+         * @property {boolean} noNamespaceBox
+         * @property {(fullSpecifier: string) => Promise<ModuleExportsNamespace>} compartmentImport
+         * @property {boolean} [noAggregateLoadErrors]
+         */
+
+        /**
+         * Captures the private state for each {@link Compartment}
+         * @type {WeakMap<Compartment, CompartmentFields>}
+         */
         const privateFields = new WeakMap();
 
         const InertCompartment = function Compartment(
             _endowments = {},
             _modules = {},
-            _options = {}) {
+            _options = {},
+        ) {
             throw TypeError(
-                'Compartment.prototype.constructor is not a valid constructor.');
-
+                'Compartment.prototype.constructor is not a valid constructor.',
+            );
         };
 
         /**
          * @param {Compartment} compartment
          * @param {string} specifier
+         * @returns {{namespace: ModuleExportsNamespace}}
          */$h͏_once.InertCompartment(InertCompartment);
         const compartmentImportNow = (compartment, specifier) => {
             const {execute, exportsProxy} = link(
                 privateFields,
                 moduleAliases,
                 compartment,
-                specifier);
-
+                specifier,
+            );
             execute();
             return exportsProxy;
         };
 
+        /** @type {Compartment & {constructor: typeof InertCompartment}} */
         const CompartmentPrototype = {
             constructor: InertCompartment,
 
             get globalThis() {
-                return weakmapGet(privateFields, this).globalObject;
+                return /** @type {CompartmentFields} */ (weakmapGet(privateFields, this))
+                    .globalObject;
             },
 
             get name() {
-                return weakmapGet(privateFields, this).name;
+                return /** @type {CompartmentFields} */ (weakmapGet(privateFields, this))
+                    .name;
             },
 
-            /**
-             * @param {string} source is a JavaScript program grammar construction.
-             * @param {object} [options]
-             * @param {Array<import('./lockdown-shim').Transform>} [options.transforms]
-             * @param {boolean} [options.sloppyGlobalsMode]
-             * @param {object} [options.__moduleShimLexicals__]
-             * @param {boolean} [options.__evadeHtmlCommentTest__]
-             * @param {boolean} [options.__evadeImportExpressionTest__]
-             * @param {boolean} [options.__rejectSomeDirectEvalExpressions__]
-             */
             evaluate(source, options = {}) {
                 const compartmentFields = weakmapGet(privateFields, this);
                 return compartmentEvaluate(compartmentFields, source, options);
@@ -11615,36 +13119,39 @@
                     this,
                     weakmapGet(privateFields, this),
                     moduleAliases,
-                    specifier);
-
+                    specifier,
+                );
 
                 return exportsProxy;
             },
 
             async import(specifier) {
-                const {noNamespaceBox} = weakmapGet(privateFields, this);
+                const {noNamespaceBox, noAggregateLoadErrors} =
+                    /** @type {CompartmentFields} */ (weakmapGet(privateFields, this));
 
                 if (typeof specifier !== 'string') {
                     throw TypeError('first argument of import() must be a string');
                 }
 
                 return promiseThen(
-                    load(privateFields, moduleAliases, this, specifier),
+                    load(privateFields, moduleAliases, this, specifier, {
+                        noAggregateErrors: noAggregateLoadErrors,
+                    }),
                     () => {
                         // The namespace box is a contentious design and likely to be a breaking
                         // change in an appropriately numbered future version.
                         const namespace = compartmentImportNow(
-                            /** @type {Compartment} */  this,
-                            specifier);
-
+                            /** @type {Compartment} */ (this),
+                            specifier,
+                        );
                         if (noNamespaceBox) {
                             return namespace;
                         }
                         // Legacy behavior: box the namespace object so that thenable modules
                         // do not get coerced into a promise accidentally.
                         return {namespace};
-                    });
-
+                    },
+                );
             },
 
             async load(specifier) {
@@ -11652,19 +13159,29 @@
                     throw TypeError('first argument of load() must be a string');
                 }
 
-                return load(privateFields, moduleAliases, this, specifier);
+                const {noAggregateLoadErrors} = /** @type {CompartmentFields} */ (
+                    weakmapGet(privateFields, this)
+                );
+
+                return load(privateFields, moduleAliases, this, specifier, {
+                    noAggregateErrors: noAggregateLoadErrors,
+                });
             },
 
             importNow(specifier) {
                 if (typeof specifier !== 'string') {
                     throw TypeError('first argument of importNow() must be a string');
                 }
+                const {noAggregateLoadErrors} = /** @type {CompartmentFields} */ (
+                    weakmapGet(privateFields, this)
+                );
 
-                loadNow(privateFields, moduleAliases, this, specifier);
-                return compartmentImportNow(/** @type {Compartment} */  this, specifier);
-            }
+                loadNow(privateFields, moduleAliases, this, specifier, {
+                    noAggregateErrors: noAggregateLoadErrors,
+                });
+                return compartmentImportNow(/** @type {Compartment} */ (this), specifier);
+            },
         };
-
 
 // This causes `String(new Compartment())` to evaluate to `[object Compartment]`.
 // The descriptor follows the conventions of other globals with @@toStringTag
@@ -11675,15 +13192,13 @@
                 value: 'Compartment',
                 writable: false,
                 enumerable: false,
-                configurable: true
-            }
+                configurable: true,
+            },
         });
-
 
         defineProperties(InertCompartment, {
-            prototype: {value: CompartmentPrototype}
+            prototype: {value: CompartmentPrototype},
         });
-
 
         /**
          * @callback MakeCompartmentConstructor
@@ -11696,15 +13211,35 @@
          * @returns {Compartment['constructor']}
          */
 
-// In order to facilitate migration from the deprecated signature
-// of the compartment constructor,
-//   new Compartent(globals?, modules?, options?)
-// to the new signature:
-//   new Compartment(options?)
-// where globals and modules are expressed in the options bag instead of
-// positional arguments, this function detects the temporary sigil __options__
-// on the first argument and coerces compartments arguments into a single
-// compartments object.
+        /**
+         * "Options bag"-style `Compartment` constructor arguments.
+         * @typedef {[options?: CompartmentOptions & { __options__: true }]} CompartmentOptionsArgs
+         */
+
+        /**
+         * Legacy `Compartment` constructor arguments.
+         *
+         * @deprecated
+         * @typedef {[globals?: Map<string, any>, modules?: Map<string, ModuleDescriptor>, options?: CompartmentOptions]} LegacyCompartmentOptionsArgs
+         */
+
+        /**
+         * In order to facilitate migration from the deprecated signature of the
+         * compartment constructor,
+         *
+         * `new Compartent(globals?, modules?, options?)`
+         *
+         * to the new signature:
+         *
+         * `new Compartment(options?)`
+         *
+         * ...where globals and modules are expressed in the options bag instead of
+         * positional arguments, this function detects the temporary sigil __options__
+         * on the first argument and coerces compartments arguments into a single
+         * compartments object.
+         * @param {CompartmentOptionsArgs|LegacyCompartmentOptionsArgs} args
+         * @returns {CompartmentOptions}
+         */
         const compartmentOptions = (...args) => {
             if (args.length === 0) {
                 return {};
@@ -11713,35 +13248,35 @@
                 args.length === 1 &&
                 typeof args[0] === 'object' &&
                 args[0] !== null &&
-                '__options__' in args[0]) {
+                '__options__' in args[0]
+            ) {
                 const {__options__, ...options} = args[0];
                 assert(
                     __options__ === true,
-                    `Compartment constructor only supports true __options__ sigil, got ${__options__}`);
-
+                    `Compartment constructor only supports true __options__ sigil, got ${__options__}`,
+                );
                 return options;
             } else {
                 const [
-                    globals =  /** @type {Map<string, any>} */  {},
-                    modules =  /** @type {Map<string, ModuleDescriptor>} */  {},
-                    options = {}] =
-                    args;
+                    globals = /** @type {Map<string, any>} */ ({}),
+                    modules = /** @type {Map<string, ModuleDescriptor>} */ ({}),
+                    options = {},
+                ] = /** @type {LegacyCompartmentOptionsArgs} */ (args);
                 assertEqual(
                     options.modules,
                     undefined,
-                    `Compartment constructor must receive either a module map argument or modules option, not both`);
-
+                    `Compartment constructor must receive either a module map argument or modules option, not both`,
+                );
                 assertEqual(
                     options.globals,
                     undefined,
-                    `Compartment constructor must receive either globals argument or option, not both`);
-
+                    `Compartment constructor must receive either globals argument or option, not both`,
+                );
                 return {
                     ...options,
                     globals,
-                    modules
+                    modules,
                 };
-
             }
         };
 
@@ -11750,12 +13285,17 @@
             targetMakeCompartmentConstructor,
             intrinsics,
             markVirtualizedNativeFunction,
-            {parentCompartment = undefined, enforceNew = false} = {}) => {
+            {parentCompartment = undefined, enforceNew = false} = {},
+        ) => {
+            /**
+             * @this {Compartment}
+             * @param {CompartmentOptionsArgs|LegacyCompartmentOptionsArgs} args
+             */
             function Compartment(...args) {
                 if (enforceNew && new.target === undefined) {
                     throw TypeError(
-                        "Class constructor Compartment cannot be invoked without 'new'");
-
+                        "Class constructor Compartment cannot be invoked without 'new'",
+                    );
                 }
 
                 // Extract options, and shallow-clone transforms.
@@ -11770,13 +13310,15 @@
                     importNowHook,
                     moduleMapHook,
                     importMetaHook,
-                    __noNamespaceBox__: noNamespaceBox = false
-                } =
-                    compartmentOptions(...args);
+                    __noNamespaceBox__: noNamespaceBox = false,
+                    noAggregateLoadErrors = false,
+                } = compartmentOptions(
+                    .../** @type {Parameters<typeof compartmentOptions>} */ (args),
+                );
                 const globalTransforms = arrayFlatMap(
                     [transforms, __shimTransforms__],
-                    identity);
-
+                    identity,
+                );
                 const endowments = {__proto__: null, ...endowmentsOption};
                 const moduleMap = {__proto__: null, ...moduleMapOption};
 
@@ -11788,6 +13330,8 @@
                 const deferredExports = new Map();
 
                 const globalObject = {};
+
+                const compartment = /** @type {Compartment} */ (this);
 
                 setGlobalObjectSymbolUnscopables(globalObject);
 
@@ -11801,25 +13345,23 @@
                 const {safeEvaluate} = makeSafeEvaluator({
                     globalObject,
                     globalTransforms,
-                    sloppyGlobalsMode: false
+                    sloppyGlobalsMode: false,
                 });
-
 
                 setGlobalObjectMutableProperties(globalObject, {
                     intrinsics,
                     newGlobalPropertyNames: sharedGlobalPropertyNames,
                     makeCompartmentConstructor: targetMakeCompartmentConstructor,
-                    parentCompartment: this,
-                    markVirtualizedNativeFunction
+                    parentCompartment: compartment,
+                    markVirtualizedNativeFunction,
                 });
-
 
                 // TODO: maybe add evalTaming to the Compartment constructor 3rd options?
                 setGlobalObjectEvaluators(
                     globalObject,
                     safeEvaluate,
-                    markVirtualizedNativeFunction);
-
+                    markVirtualizedNativeFunction,
+                );
 
                 assign(globalObject, endowments);
 
@@ -11843,24 +13385,26 @@
                  * relative to the calling module's full specifier.
                  * @returns {Promise<ModuleExportsNamespace>}
                  */
-                const compartmentImport = async (fullSpecifier) => {
+                const compartmentImport = async fullSpecifier => {
                     if (typeof resolveHook !== 'function') {
                         throw TypeError(
-                            `Compartment does not support dynamic import: no configured resolveHook for compartment ${q(name)}`);
-
+                            `Compartment does not support dynamic import: no configured resolveHook for compartment ${q(name)}`,
+                        );
                     }
-                    await load(privateFields, moduleAliases, this, fullSpecifier);
+                    await load(privateFields, moduleAliases, compartment, fullSpecifier, {
+                        noAggregateErrors: noAggregateLoadErrors,
+                    });
                     const {execute, exportsProxy} = link(
                         privateFields,
                         moduleAliases,
-                        this,
-                        fullSpecifier);
-
+                        compartment,
+                        fullSpecifier,
+                    );
                     execute();
                     return exportsProxy;
                 };
 
-                weakmapSet(privateFields, this, {
+                weakmapSet(privateFields, compartment, {
                     name: `${name}`,
                     globalTransforms,
                     globalObject,
@@ -11877,9 +13421,9 @@
                     instances,
                     parentCompartment,
                     noNamespaceBox,
-                    compartmentImport
+                    compartmentImport,
+                    noAggregateLoadErrors,
                 });
-
             }
 
             Compartment.prototype = CompartmentPrototype;
@@ -11889,19 +13433,19 @@
         $h͏_once.makeCompartmentConstructor(makeCompartmentConstructor);
     })()
     ,
-// === functors[47] ===
+// === 53. ses ./src/get-anonymous-intrinsics.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let FERAL_FUNCTION, Float32Array, Map, Set, String, getOwnPropertyDescriptor, getPrototypeOf, iterateArray,
-            iterateMap, iterateSet, iterateString, matchAllRegExp, matchAllSymbol, regexpPrototype, globalThis,
-            InertCompartment;
-        $h͏_imports([["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["Float32Array", [$h͏_a => (Float32Array = $h͏_a)]], ["Map", [$h͏_a => (Map = $h͏_a)]], ["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["iterateArray", [$h͏_a => (iterateArray = $h͏_a)]], ["iterateMap", [$h͏_a => (iterateMap = $h͏_a)]], ["iterateSet", [$h͏_a => (iterateSet = $h͏_a)]], ["iterateString", [$h͏_a => (iterateString = $h͏_a)]], ["matchAllRegExp", [$h͏_a => (matchAllRegExp = $h͏_a)]], ["matchAllSymbol", [$h͏_a => (matchAllSymbol = $h͏_a)]], ["regexpPrototype", [$h͏_a => (regexpPrototype = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./compartment.js", [["InertCompartment", [$h͏_a => (InertCompartment = $h͏_a)]]]]]);
+        let FERAL_FUNCTION, FERAL_FLOAT64_ARRAY, Map, Set, String, getOwnPropertyDescriptor, getPrototypeOf,
+            iterateArray, iterateMap, iterateSet, iterateString, matchAllRegExp, matchAllSymbol, regexpPrototype,
+            globalThis, assign, AsyncGeneratorFunctionInstance, ArrayBuffer, InertCompartment;
+        $h͏_imports([["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["FERAL_FLOAT64_ARRAY", [$h͏_a => (FERAL_FLOAT64_ARRAY = $h͏_a)]], ["Map", [$h͏_a => (Map = $h͏_a)]], ["Set", [$h͏_a => (Set = $h͏_a)]], ["String", [$h͏_a => (String = $h͏_a)]], ["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]], ["iterateArray", [$h͏_a => (iterateArray = $h͏_a)]], ["iterateMap", [$h͏_a => (iterateMap = $h͏_a)]], ["iterateSet", [$h͏_a => (iterateSet = $h͏_a)]], ["iterateString", [$h͏_a => (iterateString = $h͏_a)]], ["matchAllRegExp", [$h͏_a => (matchAllRegExp = $h͏_a)]], ["matchAllSymbol", [$h͏_a => (matchAllSymbol = $h͏_a)]], ["regexpPrototype", [$h͏_a => (regexpPrototype = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["assign", [$h͏_a => (assign = $h͏_a)]], ["AsyncGeneratorFunctionInstance", [$h͏_a => (AsyncGeneratorFunctionInstance = $h͏_a)]], ["ArrayBuffer", [$h͏_a => (ArrayBuffer = $h͏_a)]]]], ["./compartment.js", [["InertCompartment", [$h͏_a => (InertCompartment = $h͏_a)]]]]]);
 
 
         /**
@@ -11944,7 +13488,7 @@
 
             // 21.2.7.1 The %RegExpStringIteratorPrototype% Object
             const RegExpStringIterator =
-                regexpPrototype[matchAllSymbol] && matchAllRegExp(/./);
+                regexpPrototype[matchAllSymbol] && matchAllRegExp(/./, '');
             const RegExpStringIteratorPrototype =
                 RegExpStringIterator && getPrototypeOf(RegExpStringIterator);
 
@@ -11956,7 +13500,7 @@
 
             // 22.2.1 The %TypedArray% Intrinsic Object
 
-            const TypedArray = getPrototypeOf(Float32Array);
+            const TypedArray = getPrototypeOf(FERAL_FLOAT64_ARRAY);
 
             // 23.1.5.2 The %MapIteratorPrototype% Object
 
@@ -11984,22 +13528,6 @@
 
             const Generator = GeneratorFunction.prototype;
 
-            // 25.3.1 The AsyncGeneratorFunction Constructor
-
-            // eslint-disable-next-line no-empty-function
-            async function* AsyncGeneratorFunctionInstance() {
-            }
-
-            const AsyncGeneratorFunction = getConstructorOf(
-                AsyncGeneratorFunctionInstance);
-
-
-            // 25.3.2.2 AsyncGeneratorFunction.prototype
-            const AsyncGenerator = AsyncGeneratorFunction.prototype;
-            // 25.5.1 Properties of the AsyncGenerator Prototype Object
-            const AsyncGeneratorPrototype = AsyncGenerator.prototype;
-            const AsyncIteratorPrototype = getPrototypeOf(AsyncGeneratorPrototype);
-
             // 25.7.1 The AsyncFunction Constructor
 
             // eslint-disable-next-line no-empty-function
@@ -12012,10 +13540,6 @@
                 '%InertFunction%': InertFunction,
                 '%ArrayIteratorPrototype%': ArrayIteratorPrototype,
                 '%InertAsyncFunction%': AsyncFunction,
-                '%AsyncGenerator%': AsyncGenerator,
-                '%InertAsyncGeneratorFunction%': AsyncGeneratorFunction,
-                '%AsyncGeneratorPrototype%': AsyncGeneratorPrototype,
-                '%AsyncIteratorPrototype%': AsyncIteratorPrototype,
                 '%Generator%': Generator,
                 '%InertGeneratorFunction%': GeneratorFunction,
                 '%IteratorPrototype%': IteratorPrototype,
@@ -12025,38 +13549,66 @@
                 '%StringIteratorPrototype%': StringIteratorPrototype,
                 '%ThrowTypeError%': ThrowTypeError,
                 '%TypedArray%': TypedArray,
-                '%InertCompartment%': InertCompartment
+                '%InertCompartment%': InertCompartment,
             };
 
+            if (AsyncGeneratorFunctionInstance !== undefined) {
+                // 25.3.1 The AsyncGeneratorFunction Constructor
+
+                const AsyncGeneratorFunction = getConstructorOf(
+                    AsyncGeneratorFunctionInstance,
+                );
+
+                // 25.3.2.2 AsyncGeneratorFunction.prototype
+                const AsyncGenerator = AsyncGeneratorFunction.prototype;
+                // 25.5.1 Properties of the AsyncGenerator Prototype Object
+                const AsyncGeneratorPrototype = AsyncGenerator.prototype;
+                const AsyncIteratorPrototype = getPrototypeOf(AsyncGeneratorPrototype);
+
+                assign(intrinsics, {
+                    '%AsyncGenerator%': AsyncGenerator,
+                    '%InertAsyncGeneratorFunction%': AsyncGeneratorFunction,
+                    '%AsyncGeneratorPrototype%': AsyncGeneratorPrototype,
+                    '%AsyncIteratorPrototype%': AsyncIteratorPrototype,
+                });
+            }
 
             if (globalThis.Iterator) {
                 intrinsics['%IteratorHelperPrototype%'] = getPrototypeOf(
                     // eslint-disable-next-line @endo/no-polymorphic-call
-                    globalThis.Iterator.from([]).take(0));
-
+                    globalThis.Iterator.from([]).take(0),
+                );
                 intrinsics['%WrapForValidIteratorPrototype%'] = getPrototypeOf(
                     // eslint-disable-next-line @endo/no-polymorphic-call
                     globalThis.Iterator.from({
                         next() {
                             return {value: undefined};
-                        }
-                    }));
-
-
+                        },
+                    }),
+                );
             }
 
             if (globalThis.AsyncIterator) {
                 intrinsics['%AsyncIteratorHelperPrototype%'] = getPrototypeOf(
                     // eslint-disable-next-line @endo/no-polymorphic-call
-                    globalThis.AsyncIterator.from([]).take(0));
-
+                    globalThis.AsyncIterator.from([]).take(0),
+                );
                 intrinsics['%WrapForValidAsyncIteratorPrototype%'] = getPrototypeOf(
                     // eslint-disable-next-line @endo/no-polymorphic-call
                     globalThis.AsyncIterator.from({
                         next() {
                         }
-                    }));
+                    }),
+                );
+            }
 
+            const ab = new ArrayBuffer(0);
+            // eslint-disable-next-line @endo/no-polymorphic-call
+            const iab = ab.sliceToImmutable();
+            const iabProto = getPrototypeOf(iab);
+            if (iabProto !== ArrayBuffer.prototype) {
+                // In a native implementation, these will be the same prototype
+                intrinsics['%ImmutableArrayBufferPrototype%'] = iabProto;
             }
 
             return intrinsics;
@@ -12064,27 +13616,23 @@
         $h͏_once.getAnonymousIntrinsics(getAnonymousIntrinsics);
     })()
     ,
-// === functors[48] ===
+// === 54. ses ./src/tame-harden.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let TypeError, freeze;
-        $h͏_imports([["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["freeze", [$h͏_a => (freeze = $h͏_a)]]]]]);
+        let freeze;
+        $h͏_imports([["./commons.js", [["freeze", [$h͏_a => (freeze = $h͏_a)]]]]]);
 
 
         /** @import {Harden} from '../types.js'; */
 
         /** @type {(safeHarden: Harden, hardenTaming: 'safe' | 'unsafe') => Harden} */
         const tameHarden = (safeHarden, hardenTaming) => {
-            if (hardenTaming !== 'safe' && hardenTaming !== 'unsafe') {
-                throw TypeError(`unrecognized fakeHardenOption ${hardenTaming}`);
-            }
-
             if (hardenTaming === 'safe') {
                 return safeHarden;
             }
@@ -12102,7 +13650,7 @@
                 return safeHarden;
             }
 
-            const fakeHarden = (arg) => arg;
+            const fakeHarden = arg => arg;
             fakeHarden.isFake = true;
             return freeze(fakeHarden);
         };
@@ -12110,13 +13658,13 @@
         freeze(tameHarden);
     })()
     ,
-// === functors[49] ===
+// === 55. ses ./src/tame-symbol-constructor.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let Symbol, entries, fromEntries, getOwnPropertyDescriptors, defineProperties, arrayMap, functionBind;
@@ -12161,19 +13709,18 @@
                 constructor: {
                     value: SharedSymbol
                     // leave other `constructor` attributes as is
-                }
+                },
             });
 
-
             const originalDescsEntries = entries(
-                getOwnPropertyDescriptors(OriginalSymbol));
-
+                getOwnPropertyDescriptors(OriginalSymbol),
+            );
             const descs = fromEntries(
                 arrayMap(originalDescsEntries, ([name, desc]) => [
                     name,
-                    {...desc, configurable: true}]));
-
-
+                    {...desc, configurable: true},
+                ]),
+            );
             defineProperties(SharedSymbol, descs);
 
             return {'%SharedSymbol%': SharedSymbol};
@@ -12181,20 +13728,20 @@
         $h͏_once.tameSymbolConstructor(tameSymbolConstructor);
     })()
     ,
-// === functors[50] ===
+// === 56. ses ./src/tame-faux-data-properties.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let getOwnPropertyDescriptor, apply, defineProperty, toStringTagSymbol;
         $h͏_imports([["./commons.js", [["getOwnPropertyDescriptor", [$h͏_a => (getOwnPropertyDescriptor = $h͏_a)]], ["apply", [$h͏_a => (apply = $h͏_a)]], ["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["toStringTagSymbol", [$h͏_a => (toStringTagSymbol = $h͏_a)]]]]]);
 
 
-        const throws = (thunk) => {
+        const throws = thunk => {
             try {
                 thunk();
                 return false;
@@ -12316,9 +13863,8 @@
                 value: expectedValue,
                 writable: true,
                 enumerable: desc.enumerable,
-                configurable: true
+                configurable: true,
             });
-
 
             return true;
         };
@@ -12384,34 +13930,34 @@
          *
          * @param {Record<any,any>} intrinsics
          */$h͏_once.tameFauxDataProperty(tameFauxDataProperty);
-        const tameFauxDataProperties = (intrinsics) => {
+        const tameFauxDataProperties = intrinsics => {
             // https://github.com/tc39/proposal-iterator-helpers
             tameFauxDataProperty(
                 intrinsics['%IteratorPrototype%'],
                 'constructor',
-                intrinsics.Iterator);
-
+                intrinsics.Iterator,
+            );
             // https://github.com/tc39/proposal-iterator-helpers
             tameFauxDataProperty(
                 intrinsics['%IteratorPrototype%'],
                 toStringTagSymbol,
-                'Iterator');
-
+                'Iterator',
+            );
         };
         $h͏_once.tameFauxDataProperties(tameFauxDataProperties);
     })()
     ,
-// === functors[51] ===
+// === 57. ses ./src/tame-regenerator-runtime.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let defineProperty, iteratorPrototype, iteratorSymbol, objectHasOwnProperty;
-        $h͏_imports([["./commons.js", [["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["iteratorPrototype", [$h͏_a => (iteratorPrototype = $h͏_a)]], ["iteratorSymbol", [$h͏_a => (iteratorSymbol = $h͏_a)]], ["objectHasOwnProperty", [$h͏_a => (objectHasOwnProperty = $h͏_a)]]]]]);
+        let defineProperty, iteratorPrototype, iteratorSymbol, hasOwn;
+        $h͏_imports([["./commons.js", [["defineProperty", [$h͏_a => (defineProperty = $h͏_a)]], ["iteratorPrototype", [$h͏_a => (iteratorPrototype = $h͏_a)]], ["iteratorSymbol", [$h͏_a => (iteratorSymbol = $h͏_a)]], ["hasOwn", [$h͏_a => (hasOwn = $h͏_a)]]]]]);
 
 
         const tameRegeneratorRuntime = () => {
@@ -12424,30 +13970,28 @@
                 set(value) {
                     // ignore the assignment on IteratorPrototype
                     if (this === iteratorPrototype) return;
-                    if (objectHasOwnProperty(this, iteratorSymbol)) {
+                    if (hasOwn(this, iteratorSymbol)) {
                         this[iteratorSymbol] = value;
                     }
                     defineProperty(this, iteratorSymbol, {
                         value,
                         writable: true,
                         enumerable: true,
-                        configurable: true
+                        configurable: true,
                     });
-
-                }
+                },
             });
-
         };
         $h͏_once.tameRegeneratorRuntime(tameRegeneratorRuntime);
     })()
     ,
-// === functors[52] ===
+// === 58. ses ./src/shim-arraybuffer-transfer.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let ArrayBuffer, arrayBufferPrototype, arrayBufferSlice, arrayBufferGetByteLength, Uint8Array, typedArraySet,
@@ -12456,7 +14000,6 @@
 
 
         const shimArrayBufferTransfer = () => {
-            // @ts-expect-error TODO extend ArrayBuffer type to include transfer, etc.
             if (typeof arrayBufferPrototype.transfer === 'function') {
                 // Assume already exists so does not need to be shimmed.
                 // Such conditional shimming is ok in this case since ArrayBuffer.p.transfer
@@ -12515,18 +14058,16 @@
                         clone(this, {transfer: [this]});
                         return result;
                     }
-                }
+                },
             };
-
 
             defineProperty(arrayBufferPrototype, 'transfer', {
                 // @ts-expect-error
                 value: methods.transfer,
                 writable: true,
                 enumerable: false,
-                configurable: true
+                configurable: true,
             });
-
 
             // Empty object because this shim has nothing for `addIntrinsics` to add.
             return {};
@@ -12534,33 +14075,65 @@
         $h͏_once.shimArrayBufferTransfer(shimArrayBufferTransfer);
     })()
     ,
-// === functors[53] ===
+// === 59. ses ./src/reporting.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let TypeError, functionBind, globalThis, assert;
-        $h͏_imports([["./commons.js", [["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["functionBind", [$h͏_a => (functionBind = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
+        let globalThis, assert;
+        $h͏_imports([["./commons.js", [["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
 
 
         /**
          * @import {Reporter, GroupReporter} from './reporting-types.js'
          */
 
+        /* eslint-disable @endo/no-polymorphic-call */
+        /**
+         * To address https://github.com/endojs/endo/issues/2908,
+         * the `consoleReporter` uses the current `console` rather
+         * than the original one.
+         *
+         * @type {GroupReporter}
+         */
+        const consoleReporter = {
+            warn(...args) {
+                globalThis.console.warn(...args);
+            },
+            error(...args) {
+                globalThis.console.error(...args);
+            },
+            ...(globalThis.console?.groupCollapsed
+                ? {
+                    groupCollapsed(...args) {
+                        globalThis.console.groupCollapsed(...args);
+                    },
+                }
+                : undefined),
+            ...(globalThis.console?.groupEnd
+                ? {
+                    groupEnd() {
+                        globalThis.console.groupEnd();
+                    },
+                }
+                : undefined),
+        };
+        /* eslint-enable @endo/no-polymorphic-call */
+
         /**
          * Creates a suitable reporter for internal errors and warnings out of the
-         * Node.js console.error to ensure all messages to go stderr, including the
+         * Node.js console.error to ensure all messages go to stderr, including the
          * group label.
          * Accounts for the extra space introduced by console.error as a delimiter
          * between the indent and subsequent arguments.
          *
          * @param {(...message: Array<any>) => void} print
          */
-        const makeReportPrinter = (print) => {
+        const makeReportPrinter = print => {
             let indent = false;
             /** @param {Array<any>} args */
             const printIndent = (...args) => {
@@ -12570,7 +14143,7 @@
                     print(...args);
                 }
             };
-            return (/** @type {GroupReporter} */ {
+            return /** @type {GroupReporter} */ ({
                 warn(...args) {
                     printIndent(...args);
                 },
@@ -12584,9 +14157,8 @@
                 },
                 groupEnd() {
                     indent = false;
-                }
+                },
             });
-
         };
 
         const mute = () => {
@@ -12595,24 +14167,26 @@
         /**
          * @param {"platform" | "console" | "none"} reporting
          */
-        const chooseReporter = (reporting) => {
+        const chooseReporter = reporting => {
             if (reporting === 'none') {
                 return makeReportPrinter(mute);
             }
-            if (reporting !== 'platform' && reporting !== 'console') {
-                throw new TypeError(`Invalid lockdown reporting option: ${reporting}`);
-            }
-            if (
-                reporting === 'console' ||
-                globalThis.window === globalThis ||
-                globalThis.importScripts !== undefined) {
-                return console;
-            }
             if (globalThis.console !== undefined) {
+                if (
+                    reporting === 'console' || // asks for console explicitly
+                    globalThis.window === globalThis || // likely on browser
+                    globalThis.importScripts !== undefined // likely on worker
+                ) {
+                    // reporter just delegates directly to the current console
+                    return consoleReporter;
+                }
+                assert(reporting === 'platform');
                 // On Node.js, we send all feedback to stderr, regardless of purported level.
-                const console = globalThis.console;
-                const error = functionBind(console.error, console);
-                return makeReportPrinter(error);
+                // This uses `consoleReporter.error` instead of `console.error` because we
+                // want the constructed reporter to use the `console.error` of the current
+                // `console`, not the `console` that was installed when the reporter
+                // was created.
+                return makeReportPrinter(consoleReporter.error);
             }
             if (globalThis.print !== undefined) {
                 return makeReportPrinter(globalThis.print);
@@ -12644,9 +14218,8 @@
                             groupStarted = true;
                         }
                         error(...args);
-                    }
+                    },
                 });
-
             } finally {
                 if (grouping && groupStarted) {
                     groupEnd();
@@ -12657,24 +14230,25 @@
         $h͏_once.reportInGroup(reportInGroup);
     })()
     ,
-// === functors[54] ===
+// === 60. ses ./src/lockdown.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let getenv, FERAL_FUNCTION, FERAL_EVAL, TypeError, arrayFilter, globalThis, is, ownKeys, stringSplit,
+        let getenv, FERAL_FUNCTION, FERAL_EVAL, TypeError, arrayFilter, globalThis, is, ownKeys, stringSplit, symbolFor,
             noEvalEvaluate, getOwnPropertyNames, getPrototypeOf, makeHardener, makeIntrinsicsCollector,
             removeUnpermittedIntrinsics, tameFunctionConstructors, tameDateConstructor, tameMathObject,
-            tameRegExpConstructor, enablePropertyOverrides, tameLocaleMethods, setGlobalObjectConstantProperties,
-            setGlobalObjectMutableProperties, setGlobalObjectEvaluators, makeSafeEvaluator, initialGlobalPropertyNames,
-            tameFunctionToString, tameDomains, tameModuleSource, tameConsole, tameErrorConstructor, assert, makeAssert,
-            getAnonymousIntrinsics, makeCompartmentConstructor, tameHarden, tameSymbolConstructor,
-            tameFauxDataProperties, tameRegeneratorRuntime, shimArrayBufferTransfer, reportInGroup, chooseReporter;
-        $h͏_imports([["@endo/env-options", [["getEnvironmentOption", [$h͏_a => (getenv = $h͏_a)]]]], ["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["FERAL_EVAL", [$h͏_a => (FERAL_EVAL = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["stringSplit", [$h͏_a => (stringSplit = $h͏_a)]], ["noEvalEvaluate", [$h͏_a => (noEvalEvaluate = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]]]], ["./make-hardener.js", [["makeHardener", [$h͏_a => (makeHardener = $h͏_a)]]]], ["./intrinsics.js", [["makeIntrinsicsCollector", [$h͏_a => (makeIntrinsicsCollector = $h͏_a)]]]], ["./permits-intrinsics.js", [["default", [$h͏_a => (removeUnpermittedIntrinsics = $h͏_a)]]]], ["./tame-function-constructors.js", [["default", [$h͏_a => (tameFunctionConstructors = $h͏_a)]]]], ["./tame-date-constructor.js", [["default", [$h͏_a => (tameDateConstructor = $h͏_a)]]]], ["./tame-math-object.js", [["default", [$h͏_a => (tameMathObject = $h͏_a)]]]], ["./tame-regexp-constructor.js", [["default", [$h͏_a => (tameRegExpConstructor = $h͏_a)]]]], ["./enable-property-overrides.js", [["default", [$h͏_a => (enablePropertyOverrides = $h͏_a)]]]], ["./tame-locale-methods.js", [["default", [$h͏_a => (tameLocaleMethods = $h͏_a)]]]], ["./global-object.js", [["setGlobalObjectConstantProperties", [$h͏_a => (setGlobalObjectConstantProperties = $h͏_a)]], ["setGlobalObjectMutableProperties", [$h͏_a => (setGlobalObjectMutableProperties = $h͏_a)]], ["setGlobalObjectEvaluators", [$h͏_a => (setGlobalObjectEvaluators = $h͏_a)]]]], ["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h͏_a => (makeSafeEvaluator = $h͏_a)]]]], ["./permits.js", [["initialGlobalPropertyNames", [$h͏_a => (initialGlobalPropertyNames = $h͏_a)]]]], ["./tame-function-tostring.js", [["tameFunctionToString", [$h͏_a => (tameFunctionToString = $h͏_a)]]]], ["./tame-domains.js", [["tameDomains", [$h͏_a => (tameDomains = $h͏_a)]]]], ["./tame-module-source.js", [["tameModuleSource", [$h͏_a => (tameModuleSource = $h͏_a)]]]], ["./error/tame-console.js", [["tameConsole", [$h͏_a => (tameConsole = $h͏_a)]]]], ["./error/tame-error-constructor.js", [["default", [$h͏_a => (tameErrorConstructor = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]], ["makeAssert", [$h͏_a => (makeAssert = $h͏_a)]]]], ["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h͏_a => (getAnonymousIntrinsics = $h͏_a)]]]], ["./compartment.js", [["makeCompartmentConstructor", [$h͏_a => (makeCompartmentConstructor = $h͏_a)]]]], ["./tame-harden.js", [["tameHarden", [$h͏_a => (tameHarden = $h͏_a)]]]], ["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h͏_a => (tameSymbolConstructor = $h͏_a)]]]], ["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h͏_a => (tameFauxDataProperties = $h͏_a)]]]], ["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime", [$h͏_a => (tameRegeneratorRuntime = $h͏_a)]]]], ["./shim-arraybuffer-transfer.js", [["shimArrayBufferTransfer", [$h͏_a => (shimArrayBufferTransfer = $h͏_a)]]]], ["./reporting.js", [["reportInGroup", [$h͏_a => (reportInGroup = $h͏_a)]], ["chooseReporter", [$h͏_a => (chooseReporter = $h͏_a)]]]]]);
+            tameTemporalObject, tameNaNSideChannel, tameRegExpConstructor, enablePropertyOverrides, tameLocaleMethods,
+            setGlobalObjectConstantProperties, setGlobalObjectMutableProperties, setGlobalObjectEvaluators,
+            makeSafeEvaluator, initialGlobalPropertyNames, tameFunctionToString, tameDomains, tameModuleSource,
+            tameConsole, tameErrorConstructor, assert, makeAssert, getAnonymousIntrinsics, makeCompartmentConstructor,
+            tameHarden, tameSymbolConstructor, tameFauxDataProperties, tameRegeneratorRuntime, shimArrayBufferTransfer,
+            reportInGroup, chooseReporter;
+        $h͏_imports([["@endo/env-options", [["getEnvironmentOption", [$h͏_a => (getenv = $h͏_a)]]]], ["@endo/immutable-arraybuffer/shim.js", []], ["./commons.js", [["FERAL_FUNCTION", [$h͏_a => (FERAL_FUNCTION = $h͏_a)]], ["FERAL_EVAL", [$h͏_a => (FERAL_EVAL = $h͏_a)]], ["TypeError", [$h͏_a => (TypeError = $h͏_a)]], ["arrayFilter", [$h͏_a => (arrayFilter = $h͏_a)]], ["globalThis", [$h͏_a => (globalThis = $h͏_a)]], ["is", [$h͏_a => (is = $h͏_a)]], ["ownKeys", [$h͏_a => (ownKeys = $h͏_a)]], ["stringSplit", [$h͏_a => (stringSplit = $h͏_a)]], ["symbolFor", [$h͏_a => (symbolFor = $h͏_a)]], ["noEvalEvaluate", [$h͏_a => (noEvalEvaluate = $h͏_a)]], ["getOwnPropertyNames", [$h͏_a => (getOwnPropertyNames = $h͏_a)]], ["getPrototypeOf", [$h͏_a => (getPrototypeOf = $h͏_a)]]]], ["./make-hardener.js", [["makeHardener", [$h͏_a => (makeHardener = $h͏_a)]]]], ["./intrinsics.js", [["makeIntrinsicsCollector", [$h͏_a => (makeIntrinsicsCollector = $h͏_a)]]]], ["./permits-intrinsics.js", [["default", [$h͏_a => (removeUnpermittedIntrinsics = $h͏_a)]]]], ["./tame-function-constructors.js", [["default", [$h͏_a => (tameFunctionConstructors = $h͏_a)]]]], ["./tame-date-constructor.js", [["default", [$h͏_a => (tameDateConstructor = $h͏_a)]]]], ["./tame-math-object.js", [["default", [$h͏_a => (tameMathObject = $h͏_a)]]]], ["./tame-temporal-object.js", [["default", [$h͏_a => (tameTemporalObject = $h͏_a)]]]], ["./tame-nan-sidechannel.js", [["tameNaNSideChannel", [$h͏_a => (tameNaNSideChannel = $h͏_a)]]]], ["./tame-regexp-constructor.js", [["default", [$h͏_a => (tameRegExpConstructor = $h͏_a)]]]], ["./enable-property-overrides.js", [["default", [$h͏_a => (enablePropertyOverrides = $h͏_a)]]]], ["./tame-locale-methods.js", [["default", [$h͏_a => (tameLocaleMethods = $h͏_a)]]]], ["./global-object.js", [["setGlobalObjectConstantProperties", [$h͏_a => (setGlobalObjectConstantProperties = $h͏_a)]], ["setGlobalObjectMutableProperties", [$h͏_a => (setGlobalObjectMutableProperties = $h͏_a)]], ["setGlobalObjectEvaluators", [$h͏_a => (setGlobalObjectEvaluators = $h͏_a)]]]], ["./make-safe-evaluator.js", [["makeSafeEvaluator", [$h͏_a => (makeSafeEvaluator = $h͏_a)]]]], ["./permits.js", [["initialGlobalPropertyNames", [$h͏_a => (initialGlobalPropertyNames = $h͏_a)]]]], ["./tame-function-tostring.js", [["tameFunctionToString", [$h͏_a => (tameFunctionToString = $h͏_a)]]]], ["./tame-domains.js", [["tameDomains", [$h͏_a => (tameDomains = $h͏_a)]]]], ["./tame-module-source.js", [["tameModuleSource", [$h͏_a => (tameModuleSource = $h͏_a)]]]], ["./error/tame-console.js", [["tameConsole", [$h͏_a => (tameConsole = $h͏_a)]]]], ["./error/tame-error-constructor.js", [["default", [$h͏_a => (tameErrorConstructor = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]], ["makeAssert", [$h͏_a => (makeAssert = $h͏_a)]]]], ["./get-anonymous-intrinsics.js", [["getAnonymousIntrinsics", [$h͏_a => (getAnonymousIntrinsics = $h͏_a)]]]], ["./compartment.js", [["makeCompartmentConstructor", [$h͏_a => (makeCompartmentConstructor = $h͏_a)]]]], ["./tame-harden.js", [["tameHarden", [$h͏_a => (tameHarden = $h͏_a)]]]], ["./tame-symbol-constructor.js", [["tameSymbolConstructor", [$h͏_a => (tameSymbolConstructor = $h͏_a)]]]], ["./tame-faux-data-properties.js", [["tameFauxDataProperties", [$h͏_a => (tameFauxDataProperties = $h͏_a)]]]], ["./tame-regenerator-runtime.js", [["tameRegeneratorRuntime", [$h͏_a => (tameRegeneratorRuntime = $h͏_a)]]]], ["./shim-arraybuffer-transfer.js", [["shimArrayBufferTransfer", [$h͏_a => (shimArrayBufferTransfer = $h͏_a)]]]], ["./reporting.js", [["reportInGroup", [$h͏_a => (reportInGroup = $h͏_a)]], ["chooseReporter", [$h͏_a => (chooseReporter = $h͏_a)]]]]]);
 
 
         /** @import {LockdownOptions} from '../types.js' */
@@ -12717,36 +14291,49 @@
 // only ever need to be called once and that simplifying lockdown will improve
 // the quality of audits.
 
-        const assertDirectEvalAvailable = () => {
-            let allowed = false;
+        const probeHostEvaluators = () => {
+            let functionAllowed;
             try {
-                allowed = FERAL_FUNCTION(
+                functionAllowed = FERAL_FUNCTION('return true')();
+            } catch (_error) {
+                // We reach here if the Function() constructor is outright forbidden by a
+                // strict Content Security Policy (containing either a `default-src` or a
+                // `script-src` directive), not been implemented in the host, or the host
+                // is configured to throw an exception instead of `new Function`.
+                functionAllowed = false;
+            }
+
+            let evalAllowed;
+            try {
+                evalAllowed = FERAL_EVAL('true');
+            } catch (_error) {
+                // We reach here if `eval` is outright forbidden by a strict Content Security Policy,
+                // not implemented in the host, or the host is configured to throw an exception.
+                // We allow this for SES usage that delegates the responsibility to isolate
+                // guest code to production code generation.
+                evalAllowed = false;
+            }
+
+            let directEvalAllowed;
+            if (functionAllowed && evalAllowed) {
+                directEvalAllowed = FERAL_FUNCTION(
                     'eval',
                     'SES_changed',
                     `\
         eval("SES_changed = true");
         return SES_changed;
-      `)(
-                    FERAL_EVAL, false);
+      `,
+                )(FERAL_EVAL, false);
                 // If we get here and SES_changed stayed false, that means the eval was sloppy
                 // and indirect, which generally creates a new global.
                 // We are going to throw an exception for failing to initialize SES, but
                 // good neighbors clean up.
-                if (!allowed) {
+                if (!directEvalAllowed) {
                     delete globalThis.SES_changed;
                 }
-            } catch (_error) {
-                // We reach here if eval is outright forbidden by a Content Security Policy.
-                // We allow this for SES usage that delegates the responsibility to isolate
-                // guest code to production code generation.
-                allowed = true;
             }
-            if (!allowed) {
-                // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_DIRECT_EVAL.md
-                throw TypeError(
-                    `SES cannot initialize unless 'eval' is the original intrinsic 'eval', suitable for direct-eval (dynamically scoped eval) (SES_DIRECT_EVAL)`);
 
-            }
+            return {functionAllowed, evalAllowed, directEvalAllowed};
         };
 
         /**
@@ -12769,62 +14356,84 @@
             // The `stackFiltering` is not a safety issue. Rather it is a tradeoff
             // between relevance and completeness of the stack frames shown on the
             // console. Setting`stackFiltering` to `'verbose'` applies no filters, providing
-            // the raw stack frames that can be quite versbose. Setting
+            // the raw stack frames that can be quite verbose. Setting
             // `stackFrameFiltering` to`'concise'` limits the display to the stack frame
             // information most likely to be relevant, eliminating distracting frames
             // such as those from the infrastructure. However, the bug you're trying to
-            // track down might be in the infrastrure, in which case the `'verbose'` setting
+            // track down might be in the infrastructure, in which case the `'verbose'` setting
             // is useful. See
             // [`stackFiltering` options](https://github.com/Agoric/SES-shim/blob/master/packages/ses/docs/lockdown.md#stackfiltering-options)
             // for an explanation.
 
             const {
-                errorTaming = getenv('LOCKDOWN_ERROR_TAMING', 'safe'),
-                errorTrapping =  /** @type {"platform" | "none" | "report" | "abort" | "exit"} */
-                    getenv('LOCKDOWN_ERROR_TRAPPING', 'platform'),
-
-                reporting =  /** @type {"platform" | "console" | "none"} */
-                    getenv('LOCKDOWN_REPORTING', 'platform'),
-
-                unhandledRejectionTrapping =  /** @type {"none" | "report"} */
-                    getenv('LOCKDOWN_UNHANDLED_REJECTION_TRAPPING', 'report'),
-
-                regExpTaming = getenv('LOCKDOWN_REGEXP_TAMING', 'safe'),
-                localeTaming = getenv('LOCKDOWN_LOCALE_TAMING', 'safe'),
-
-                consoleTaming =  /** @type {'unsafe' | 'safe'} */
-                    getenv('LOCKDOWN_CONSOLE_TAMING', 'safe'),
-
-                overrideTaming =  /** @type {'moderate' | 'min' | 'severe'} */
-                    getenv('LOCKDOWN_OVERRIDE_TAMING', 'moderate'),
-
-                stackFiltering = getenv('LOCKDOWN_STACK_FILTERING', 'concise'),
-                domainTaming = getenv('LOCKDOWN_DOMAIN_TAMING', 'safe'),
-                evalTaming = getenv('LOCKDOWN_EVAL_TAMING', 'safeEval'),
-                overrideDebug = arrayFilter(
-                    stringSplit(getenv('LOCKDOWN_OVERRIDE_DEBUG', ''), ','),
-                    /** @param {string} debugName */
-                    (debugName) => debugName !== ''),
-
-                legacyRegeneratorRuntimeTaming = getenv(
-                    'LOCKDOWN_LEGACY_REGENERATOR_RUNTIME_TAMING',
-                    'safe'),
-
-                __hardenTaming__ = getenv('LOCKDOWN_HARDEN_TAMING', 'safe'),
+                errorTaming = /** @type {'safe' | 'unsafe' | 'unsafe-debug'} */ (
+                    getenv('LOCKDOWN_ERROR_TAMING', 'safe', ['unsafe', 'unsafe-debug'])
+                ),
+                errorTrapping = /** @type {'platform' | 'none' | 'report' | 'abort' | 'exit'} */ (
+                    getenv('LOCKDOWN_ERROR_TRAPPING', 'platform', [
+                        'none',
+                        'report',
+                        'abort',
+                        'exit',
+                    ])
+                ),
+                reporting = /** @type {'platform' | 'console' | 'none'} */ (
+                    getenv('LOCKDOWN_REPORTING', 'platform', ['console', 'none'])
+                ),
+                unhandledRejectionTrapping = /** @type {'none' | 'report'} */ (
+                    getenv('LOCKDOWN_UNHANDLED_REJECTION_TRAPPING', 'report', ['none'])
+                ),
+                regExpTaming = /** @type {'safe' | 'unsafe'} */ (
+                    getenv('LOCKDOWN_REGEXP_TAMING', 'safe', ['unsafe'])
+                ),
+                localeTaming = /** @type {'safe' | 'unsafe'} */ (
+                    getenv('LOCKDOWN_LOCALE_TAMING', 'safe', ['unsafe'])
+                ),
+                consoleTaming = /** @type {'unsafe' | 'safe'} */ (
+                    getenv('LOCKDOWN_CONSOLE_TAMING', 'safe', ['unsafe'])
+                ),
+                overrideTaming = /** @type {'moderate' | 'min' | 'severe'} */ (
+                    getenv('LOCKDOWN_OVERRIDE_TAMING', 'moderate', ['min', 'severe'])
+                ),
+                stackFiltering = /** @type {'concise' | 'omit-frames' | 'shorten-paths' | 'verbose'} */ (
+                    getenv('LOCKDOWN_STACK_FILTERING', 'concise', [
+                        'omit-frames',
+                        'shorten-paths',
+                        'verbose',
+                    ])
+                ),
+                domainTaming = /** @type {'safe' | 'unsafe'} */ (
+                    getenv('LOCKDOWN_DOMAIN_TAMING', 'safe', ['unsafe'])
+                ),
+                evalTaming = /** @type {'safe-eval' | 'unsafe-eval' | 'no-eval'} */ (
+                    getenv('LOCKDOWN_EVAL_TAMING', 'safe-eval', [
+                        'unsafe-eval',
+                        'no-eval',
+                        // deprecated
+                        'safeEval',
+                        'unsafeEval',
+                        'noEval',
+                    ])
+                ),
+                overrideDebug = /** @type {string[]} */ (
+                    arrayFilter(
+                        stringSplit(getenv('LOCKDOWN_OVERRIDE_DEBUG', ''), ','),
+                        /** @param {string} debugName */
+                        debugName => debugName !== '',
+                    )
+                ),
+                legacyRegeneratorRuntimeTaming = /** @type {'safe' | 'unsafe-ignore'} */ (
+                    getenv('LOCKDOWN_LEGACY_REGENERATOR_RUNTIME_TAMING', 'safe', [
+                        'unsafe-ignore',
+                    ])
+                ),
+                __hardenTaming__ = /** @type {'safe' | 'unsafe'} */ (
+                    getenv('LOCKDOWN_HARDEN_TAMING', 'safe', ['unsafe'])
+                ),
                 dateTaming, // deprecated
                 mathTaming, // deprecated
                 ...extraOptions
-            } =
-                options;
-
-            legacyRegeneratorRuntimeTaming === 'safe' ||
-            legacyRegeneratorRuntimeTaming === 'unsafe-ignore' ||
-            Fail`lockdown(): non supported option legacyRegeneratorRuntimeTaming: ${q(legacyRegeneratorRuntimeTaming)}`;
-
-            evalTaming === 'unsafeEval' ||
-            evalTaming === 'safeEval' ||
-            evalTaming === 'noEval' ||
-            Fail`lockdown(): non supported option evalTaming: ${q(evalTaming)}`;
+            } = options;
 
             // Assert that only supported options were passed.
             // Use Reflect.ownKeys to reject symbol-named properties as well.
@@ -12836,31 +14445,41 @@
             const {warn} = reporter;
 
             if (dateTaming !== undefined) {
-                // eslint-disable-next-line no-console
                 warn(
-                    `SES The 'dateTaming' option is deprecated and does nothing. In the future specifying it will be an error.`);
-
+                    `SES The 'dateTaming' option is deprecated and does nothing. In the future specifying it will be an error.`,
+                );
             }
             if (mathTaming !== undefined) {
-                // eslint-disable-next-line no-console
                 warn(
-                    `SES The 'mathTaming' option is deprecated and does nothing. In the future specifying it will be an error.`);
-
+                    `SES The 'mathTaming' option is deprecated and does nothing. In the future specifying it will be an error.`,
+                );
             }
 
             priorRepairIntrinsics === undefined ||
             // eslint-disable-next-line @endo/no-polymorphic-call
             assert.fail(
                 X`Already locked down at ${priorRepairIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
-                TypeError);
-
+                TypeError,
+            );
             // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_ALREADY_LOCKED_DOWN.md
             priorRepairIntrinsics = TypeError('Prior lockdown (SES_ALREADY_LOCKED_DOWN)');
             // Tease V8 to generate the stack string and release the closures the stack
             // trace retained:
             priorRepairIntrinsics.stack;
 
-            assertDirectEvalAvailable();
+            const {functionAllowed, evalAllowed, directEvalAllowed} =
+                probeHostEvaluators();
+
+            if (
+                directEvalAllowed === false &&
+                evalTaming === 'safe-eval' &&
+                (functionAllowed || evalAllowed)
+            ) {
+                // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_DIRECT_EVAL.md
+                throw TypeError(
+                    "SES cannot initialize unless 'eval' is the original intrinsic 'eval', suitable for direct eval (dynamically scoped eval) (SES_DIRECT_EVAL)",
+                );
+            }
 
             /**
              * Because of packagers and bundlers, etc, multiple invocations of lockdown
@@ -12891,15 +14510,15 @@
                     // @ts-ignore does not recognize that Date constructor is a special
                     // Function.
                     // eslint-disable-next-line @endo/no-polymorphic-call
-                    is(globalThis.Date.prototype.constructor.now(), NaN));
-
+                    is(globalThis.Date.prototype.constructor.now(), NaN)
+                );
             };
 
             if (seemsToBeLockedDown()) {
                 // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_MULTIPLE_INSTANCES.md
                 throw TypeError(
-                    `Already locked down but not by this SES instance (SES_MULTIPLE_INSTANCES)`);
-
+                    `Already locked down but not by this SES instance (SES_MULTIPLE_INSTANCES)`,
+                );
             }
 
             /**
@@ -12915,7 +14534,6 @@
             const {addIntrinsics, completePrototypes, finalIntrinsics} =
                 makeIntrinsicsCollector(reporter);
 
-            // @ts-expect-error __hardenTaming__ could be any string
             const tamedHarden = tameHarden(safeHarden, __hardenTaming__);
             addIntrinsics({harden: tamedHarden});
 
@@ -12924,6 +14542,8 @@
             addIntrinsics(tameDateConstructor());
             addIntrinsics(tameErrorConstructor(errorTaming, stackFiltering));
             addIntrinsics(tameMathObject());
+            addIntrinsics(tameTemporalObject());
+            tameNaNSideChannel();
             addIntrinsics(tameRegExpConstructor(regExpTaming));
             addIntrinsics(tameSymbolConstructor());
             addIntrinsics(shimArrayBufferTransfer());
@@ -12934,6 +14554,30 @@
             completePrototypes();
 
             const intrinsics = finalIntrinsics();
+
+            // Install Object[@harden] or abort.
+            const symbolForHarden = symbolFor('harden');
+            const priorHarden = intrinsics.Object[symbolForHarden];
+            if (priorHarden) {
+                // By convention, if a module like @endo/harden gets used before lockdown,
+                // it will install itself as a non-configurable, non-writable property over
+                // Object[@harden] so that versions of SES predating the introduction of
+                // Object[@harden] will fail to lockdown because they cannot remove an
+                // unknown intrinsic.
+                // All newer versions explicitly check for Object[@harden] (here).
+                // The @endo/harden implementation additionally captures a stack trace
+                // where harden was first used to assist developers in tracking down the
+                // hardened module that was initialized before lockdown.
+                if (priorHarden.lockdownError) {
+                    throw priorHarden.lockdownError;
+                }
+                // And in the event a library installs Object[@harden] without leaving a
+                // hint, we fall back to a generic lockdown error.
+                throw new TypeError(
+                    'Cannot lockdown (repairIntrinsics) if a prior harden implementation has been used and installed. Check for libraries using @endo/harden before lockdown.',
+                );
+            }
+            intrinsics.Object[symbolForHarden] = tamedHarden;
 
             const hostIntrinsics = {__proto__: null};
 
@@ -12959,35 +14603,33 @@
                 consoleTaming,
                 errorTrapping,
                 unhandledRejectionTrapping,
-                optGetStackString);
-
-            globalThis.console =  /** @type {Console} */  consoleRecord.console;
+                optGetStackString,
+            );
+            globalThis.console = /** @type {Console} */ (consoleRecord.console);
 
             // The untamed Node.js console cannot itself be hardened as it has mutable
             // internal properties, but some of these properties expose internal versions
             // of classes from node's "primordials" concept.
             // eslint-disable-next-line no-underscore-dangle
-            if (typeof  /** @type {any} */  consoleRecord.console._times === 'object') {
+            if (typeof (/** @type {any} */ (consoleRecord.console)._times) === 'object') {
                 // SafeMap is a derived Map class used internally by Node
                 // There doesn't seem to be a cleaner way to reach it.
                 hostIntrinsics.SafeMap = getPrototypeOf(
                     // eslint-disable-next-line no-underscore-dangle
-                    /** @type {any} */  consoleRecord.console._times);
-
+                    /** @type {any} */ (consoleRecord.console)._times,
+                );
             }
 
+            // The default `assert` installed by `assert-shim.js` does not redact errors,
+            // leaving `lockdown` or `repairIntrinsics` with the obligation to replace it
+            // with a redacting version, unless the caller opts-out with errorTaming set
+            // to `unsafe` or `unsafe-debug`.
+            // The inverse was true through version 1.13.0, except the configuration
+            // was disregarded and the redacting `assert` left in place if lexical
+            // `assert` differed from `globalThis.assert`.
             // @ts-ignore assert is absent on globalThis type def.
-            if (
-                (errorTaming === 'unsafe' || errorTaming === 'unsafe-debug') &&
-                globalThis.assert === assert) {
-                // If errorTaming is 'unsafe' or 'unsafe-debug' we replace the
-                // global assert with
-                // one whose `details` template literal tag does not redact
-                // unmarked substitution values. IOW, it blabs information that
-                // was supposed to be secret from callers, as an aid to debugging
-                // at a further cost in safety.
-                // @ts-ignore assert is absent on globalThis type def.
-                globalThis.assert = makeAssert(undefined, true);
+            if (errorTaming !== 'unsafe' && errorTaming !== 'unsafe-debug') {
+                globalThis.assert = makeAssert();
             }
 
             // Replace *Locale* methods with their non-locale equivalents
@@ -13005,12 +14647,13 @@
             reportInGroup(
                 'SES Removing unpermitted intrinsics',
                 reporter,
-                (groupReporter) =>
+                groupReporter =>
                     removeUnpermittedIntrinsics(
                         intrinsics,
                         markVirtualizedNativeFunction,
-                        groupReporter));
-
+                        groupReporter,
+                    ),
+            );
 
             // Initialize the powerful initial global, i.e., the global of the
             // start compartment, from the intrinsics.
@@ -13021,27 +14664,39 @@
                 intrinsics,
                 newGlobalPropertyNames: initialGlobalPropertyNames,
                 makeCompartmentConstructor,
-                markVirtualizedNativeFunction
+                markVirtualizedNativeFunction,
             });
 
-
-            if (evalTaming === 'noEval') {
+            if (
+                evalTaming === 'no-eval' ||
+                // deprecated
+                evalTaming === 'noEval'
+            ) {
                 setGlobalObjectEvaluators(
                     globalThis,
                     noEvalEvaluate,
-                    markVirtualizedNativeFunction);
-
-            } else if (evalTaming === 'safeEval') {
+                    markVirtualizedNativeFunction,
+                );
+            } else if (
+                evalTaming === 'safe-eval' ||
+                // deprecated
+                evalTaming === 'safeEval'
+            ) {
                 const {safeEvaluate} = makeSafeEvaluator({globalObject: globalThis});
                 setGlobalObjectEvaluators(
                     globalThis,
                     safeEvaluate,
-                    markVirtualizedNativeFunction);
-
-            } else if (evalTaming === 'unsafeEval') {
-                // Leave eval function and Function constructor of the initial compartment in-tact.
-                // Other compartments will not have access to these evaluators unless a guest program
-                // escapes containment.
+                    markVirtualizedNativeFunction,
+                );
+            } else if (
+                evalTaming === 'unsafe-eval' ||
+                // deprecated
+                evalTaming === 'unsafeEval'
+            ) {
+                // Leave eval function and Function constructor of the initial
+                // compartment intact.
+                // Other compartments will not have access to these evaluators unless a
+                // guest program escapes containment.
             }
 
             /**
@@ -13058,12 +14713,12 @@
                 // eslint-disable-next-line @endo/no-polymorphic-call
                 assert.fail(
                     X`Already locked down at ${priorHardenIntrinsics} (SES_ALREADY_LOCKED_DOWN)`,
-                    TypeError);
-
+                    TypeError,
+                );
                 // See https://github.com/endojs/endo/blob/master/packages/ses/error-codes/SES_ALREADY_LOCKED_DOWN.md
                 priorHardenIntrinsics = TypeError(
-                    'Prior lockdown (SES_ALREADY_LOCKED_DOWN)');
-
+                    'Prior lockdown (SES_ALREADY_LOCKED_DOWN)',
+                );
                 // Tease V8 to generate the stack string and release the closures the stack
                 // trace retained:
                 priorHardenIntrinsics.stack;
@@ -13073,14 +14728,14 @@
                 // therefore before vetted shims rather than afterwards. It is not
                 // clear yet which is better.
                 // @ts-ignore enablePropertyOverrides does its own input validation
-                reportInGroup('SES Enabling property overrides', reporter, (groupReporter) =>
+                reportInGroup('SES Enabling property overrides', reporter, groupReporter =>
                     enablePropertyOverrides(
                         intrinsics,
                         overrideTaming,
                         groupReporter,
-                        overrideDebug));
-
-
+                        overrideDebug,
+                    ),
+                );
                 if (legacyRegeneratorRuntimeTaming === 'unsafe-ignore') {
                     tameRegeneratorRuntime();
                 }
@@ -13098,10 +14753,9 @@
                         Compartment: globalThis.Compartment,
 
                         // Harden Symbol
-                        Symbol: globalThis.Symbol
-                    }
+                        Symbol: globalThis.Symbol,
+                    },
                 };
-
 
                 // Harden Symbol and properties for initialGlobalPropertyNames in the host realm
                 for (const prop of getOwnPropertyNames(initialGlobalPropertyNames)) {
@@ -13118,13 +14772,13 @@
         $h͏_once.repairIntrinsics(repairIntrinsics);
     })()
     ,
-// === functors[55] ===
+// === 61. ses ./src/lockdown-shim.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let globalThis, repairIntrinsics;
@@ -13136,7 +14790,7 @@
         /**
          * @param {LockdownOptions} [options]
          */
-        globalThis.lockdown = (options) => {
+        globalThis.lockdown = options => {
             const hardenIntrinsics = repairIntrinsics(options);
             globalThis.harden = hardenIntrinsics();
         };
@@ -13144,7 +14798,7 @@
         /**
          * @param {LockdownOptions} [options]
          */
-        globalThis.repairIntrinsics = (options) => {
+        globalThis.repairIntrinsics = options => {
             const hardenIntrinsics = repairIntrinsics(options);
             // Reveal hardenIntrinsics after repairs.
             globalThis.hardenIntrinsics = () => {
@@ -13161,13 +14815,13 @@
         };
     })()
     ,
-// === functors[56] ===
+// === 62. ses ./src/compartment-shim.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let globalThis, makeCompartmentConstructor, tameFunctionToString, getGlobalIntrinsics, chooseReporter;
@@ -13187,33 +14841,34 @@
             getGlobalIntrinsics(globalThis, muteReporter),
             markVirtualizedNativeFunction,
             {
-                enforceNew: true
-            });
+                enforceNew: true,
+            },
+        );
     })()
     ,
-// === functors[57] ===
+// === 63. ses ./src/assert-shim.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
-        let globalThis, assert;
-        $h͏_imports([["./commons.js", [["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./error/assert.js", [["assert", [$h͏_a => (assert = $h͏_a)]]]]]);
+        let globalThis, makeAssert;
+        $h͏_imports([["./commons.js", [["globalThis", [$h͏_a => (globalThis = $h͏_a)]]]], ["./error/assert.js", [["makeAssert", [$h͏_a => (makeAssert = $h͏_a)]]]]]);
 
 
-        globalThis.assert = assert;
+        globalThis.assert = makeAssert(undefined, true);
     })()
     ,
-// === functors[58] ===
+// === 64. ses ./src/console-shim.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         let symbolFor, globalThis, defineCausalConsoleFromLogger, loggedErrorHandler;
@@ -13261,23 +14916,23 @@
          * versions of the ses-shim.
          */
         const MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA = symbolFor(
-            'MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA');
-
+            'MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA',
+        );
 
         globalThis[MAKE_CAUSAL_CONSOLE_FROM_LOGGER_KEY_FOR_SES_AVA] =
             makeCausalConsoleFromLoggerForSesAva;
     })()
     ,
-// === functors[59] ===
+// === 65. ses ./index.js ===
     ({
          imports: $h͏_imports,
          liveVar: $h͏_live,
          onceVar: $h͏_once,
          import: $h͏_import,
-         importMeta: $h͏____meta,
+         importMeta: $h͏____meta
      }) => (function () {
         'use strict';
         $h͏_imports([["./src/lockdown-shim.js", []], ["./src/compartment-shim.js", []], ["./src/assert-shim.js", []], ["./src/console-shim.js", []]]);
     })()
     ,
-]);
+])()

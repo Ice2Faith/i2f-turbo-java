@@ -89,7 +89,7 @@
 
     <script src="../lib/echarts-5/echarts.min.js"></script>
 
-    <script src="../lib/ses@1.11.0/dist/ses.umd.js"></script>
+    <script src="../lib/ses@2.2.0/dist/ses.umd.js"></script>
     <script src="../lib/common/SesSetup.js"></script>
 
     <link rel="stylesheet" href="../lib/katex@0.16.9/dist/katex.min.css">
@@ -3033,6 +3033,33 @@
 
                 };
                 setTimeout(applyFunc, 300);
+            } else if (lang == 'canvas' && !window.app.$responsing) {
+
+                let chartId = 'canvas_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<canvas id="${chartId}" width="480" height="360" class="canvas-code-block"></canvas>`;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+                    dom.chartCode = str;
+
+                    let json = str.trim();
+                    json = json.replace(/^\s*(function\s+)?drawCanvas\s*\(\s*dom\s*\)\s*\{/, '{');
+                    json = json.replace(/\}\s*(;)?\s*$/, '}');
+                    ses_eval('return (dom)=>' + json).then(fn => {
+                        renderCanvas(dom, fn)
+                    })
+
+                };
+                setTimeout(applyFunc, 300);
             } else if (lang && hljs.getLanguage(lang)) {
                 // 检查语言是否受支持
                 try {
@@ -3099,6 +3126,10 @@
         }
         let text = findDom.innerText;
         let echartDom = findDom.querySelector('.echart-code-block');
+        if (echartDom) {
+            text = echartDom.chartCode;
+        }
+        echartDom = findDom.querySelector('.canvas-code-block');
         if (echartDom) {
             text = echartDom.chartCode;
         }
@@ -3177,6 +3208,27 @@
             chart.setOption(options);
         }
         window.addEventListener('resize', chart.resize);
+    }
+
+    function renderCanvas(dom, fn) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderCanvas(dom, fn);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            fn(dom)
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
     }
 
 

@@ -29,6 +29,11 @@
     "url": "./role-echarts-painter.md"
   },
   {
+    "label": "JsCanvas图像绘制",
+    "icon": "el-icon-picture-outline",
+    "url": "./role-js-canvas-painter.md"
+  },
+  {
     "label": "易学命理大师",
     "icon": "el-icon-discover",
     "url": "./role-sizubazi.md"
