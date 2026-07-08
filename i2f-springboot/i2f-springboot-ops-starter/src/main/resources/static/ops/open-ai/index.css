@@ -660,7 +660,7 @@ html, body {
 .echart-code-block {
     width: 100%;
     min-width: 360px;
-    height: 320px;
+    min-height: 320px;
     background: white;
 }
 
@@ -670,6 +670,13 @@ html, body {
     min-height: 320px;
     max-height: 1280px;
     max-width: 1080px;
+    background: white;
+}
+
+.svg-code-block {
+    width: 100%;
+    min-width: 360px;
+    min-height: 320px;
     background: white;
 }
 
@@ -736,5 +743,9 @@ html, body {
 
     .canvas-code-block {
 
+    }
+
+    .svg-code-block {
+        width: 480px;
     }
 }

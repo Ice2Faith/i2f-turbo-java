@@ -3009,7 +3009,7 @@
             if (lang == 'echarts' && !window.app.$responsing) {
 
                 let chartId = 'chart_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
-                innerHtml = `<div id="${chartId}" class="echart-code-block"></div>`;
+                innerHtml = `<div id="${chartId}" class="rich-code-block echart-code-block"></div>`;
                 let count = 10;
                 let applyFunc = () => {
                     let dom = document.querySelector('#' + chartId);
@@ -3036,7 +3036,7 @@
             } else if (lang == 'canvas' && !window.app.$responsing) {
 
                 let chartId = 'canvas_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
-                innerHtml = `<canvas id="${chartId}" width="480" height="360" class="canvas-code-block"></canvas>`;
+                innerHtml = `<canvas id="${chartId}" width="480" height="360" class="rich-code-block canvas-code-block"></canvas>`;
                 let count = 10;
                 let applyFunc = () => {
                     let dom = document.querySelector('#' + chartId);
@@ -3057,6 +3057,28 @@
                     ses_eval('return (dom)=>' + json).then(fn => {
                         renderCanvas(dom, fn)
                     })
+
+                };
+                setTimeout(applyFunc, 300);
+            } else if (lang == 'svg' && !window.app.$responsing) {
+
+                let chartId = 'svg_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<div id="${chartId}" class="rich-code-block svg-code-block"></div>`;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+                    dom.chartCode = str;
+
+                    renderSvg(dom, str);
 
                 };
                 setTimeout(applyFunc, 300);
@@ -3125,11 +3147,7 @@
             return
         }
         let text = findDom.innerText;
-        let echartDom = findDom.querySelector('.echart-code-block');
-        if (echartDom) {
-            text = echartDom.chartCode;
-        }
-        echartDom = findDom.querySelector('.canvas-code-block');
+        let echartDom = findDom.querySelector('.rich-code-block');
         if (echartDom) {
             text = echartDom.chartCode;
         }
@@ -3231,6 +3249,90 @@
         }, 0)
     }
 
+    function renderSvg(dom, html) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderSvg(dom, fn);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            safeSvgPurifier(html).then((text) => {
+                dom.innerHTML = text;
+            })
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
+    }
 
+
+    /**
+     * 使用 DOMParser 提取并净化 SVG
+     * @param {string} html - 后端返回的原始字符串
+     * @returns {Promise<string>} - 净化后的 SVG 字符串
+     */
+    function safeSvgPurifier(html) {
+        return new Promise((resolve, reject) => {
+            if (!html || typeof html !== 'string') {
+                reject('empty content or not string!')
+                return;
+            }
+
+            // 1. 提取 SVG 标签 (防止后端返回了整段 HTML 导致 DOMParser 解析异常)
+            const svgMatch = html.match(/<svg[\s\S]*?<\/svg>/i);
+            if (!svgMatch) {
+                reject('未在返回内容中找到 SVG 标签');
+                return;
+            }
+
+            try {
+                // 2. 使用 DOMParser 将字符串解析为 XML 文档
+                // 注意：这里使用 'image/svg+xml' 而不是 'text/html'
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(svgMatch[0], 'image/svg+xml');
+                const svgElement = doc.querySelector('svg');
+
+                // 检查是否解析失败 (DOMParser 不会抛出异常，而是返回包含 <parsererror> 的文档)
+                const parseError = doc.querySelector('parsererror');
+                if (!svgElement || parseError) {
+                    reject('SVG 解析失败，内容不符合 XML 规范');
+                    return;
+                }
+
+                // --- 3. 安全清洗 ---
+
+                // A. 移除 SVG 内部的所有 <script> 标签
+                const scripts = svgElement.querySelectorAll('script,iframe');
+                scripts.forEach(script => script.remove());
+
+                // B. 移除根元素及所有子元素的 on* 事件属性
+                const allElements = [svgElement, ...svgElement.querySelectorAll('*')];
+                allElements.forEach(el => {
+                    Array.from(el.attributes).forEach(attr => {
+                        if (attr.name.toLowerCase().startsWith('on')) {
+                            el.removeAttribute(attr.name);
+                        }
+                    });
+                });
+
+                // --- 4. 规范化输出 ---
+                if (!svgElement.hasAttribute('xmlns')) {
+                    svgElement.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                }
+
+                resolve(svgElement.outerHTML);
+            } catch (error) {
+                reject('处理 SVG 时发生异常');
+            }
+        })
+
+    }
 </script>
 </html>

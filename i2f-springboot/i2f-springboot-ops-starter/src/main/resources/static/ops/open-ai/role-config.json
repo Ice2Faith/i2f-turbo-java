@@ -34,6 +34,11 @@
     "url": "./role-js-canvas-painter.md"
   },
   {
+    "label": "HtmlSvg矢量图像绘制",
+    "icon": "el-icon-picture-outline",
+    "url": "./role-html-svg-painter.md"
+  },
+  {
     "label": "易学命理大师",
     "icon": "el-icon-discover",
     "url": "./role-sizubazi.md"
