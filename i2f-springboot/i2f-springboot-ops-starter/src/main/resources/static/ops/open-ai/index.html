@@ -3150,6 +3150,7 @@
                         <span class="markdown-header-actions">
                             {{actionsHtml}}
                             <i class="el-icon-sold-out" onclick="onSaveMarkdownCodeBlock(event,'${lang}')"></i>
+                            <i class="el-icon-view" onclick="onViewMarkdownCodeBlock(event,'${lang}')"></i>
                             <i class="el-icon-copy-document" onclick="onCopyMarkdownCodeBlock(event,'${lang}')"></i>
                         </span>
                     </div>
@@ -3233,6 +3234,30 @@
         }).catch(() => {
             app.$message.error('未找到代码块，保存失败')
         })
+    }
+
+    function onViewMarkdownCodeBlock(event, lang) {
+        let _this = window.app;
+        getMarkdownCodeBlockText(event).then(text => {
+            if (['json', 'js', 'ts', 'typescript', 'canvas', 'echarts'].includes(lang)) {
+                lang = 'javascript';
+            }
+            if (['svg'].includes(lang)) {
+                lang = 'htmlmixed';
+            }
+
+            _this.dialog.messageEditor.type = 'view';
+            _this.dialog.messageEditor.text = text;
+            _this.dialog.messageEditor.lang = lang || 'text';
+            _this.dialog.messageEditor.show = true;
+            setTimeout(() => {
+                _this.initMessageEditor();
+            }, 200)
+        }).catch(() => {
+            app.$message.error('未找到代码块，查看失败')
+        })
+
+
     }
 
     function copy2clipboard(text) {
