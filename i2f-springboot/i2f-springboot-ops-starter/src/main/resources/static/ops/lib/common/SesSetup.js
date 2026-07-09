@@ -7,9 +7,13 @@ function ses_eval(code) {
     return new Promise((resolve, reject) => {
         try {
             // 创建安全沙箱
-            const sandbox = new Compartment({
+            let config = {
                 Math: Math // 允许访问Math, 主要是 Math.random() 存在攻击面
-            });
+            }
+            if (typeof echarts != 'undefined') {
+                config.echarts = echarts; // 如果有echarts，则开放到沙箱中
+            }
+            const sandbox = new Compartment(config);
 
             // 在沙箱中安全执行
             const option = sandbox.evaluate(`function f(){${code}};f();`);
