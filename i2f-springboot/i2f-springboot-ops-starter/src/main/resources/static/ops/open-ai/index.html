@@ -870,6 +870,7 @@
                 devicePixelRatio: window.devicePixelRatio,
                 addEventListener: window.addEventListener,
             },
+            performance: performance,
             Float32Array: Float32Array,
             requestAnimationFrame: (callback) => requestAnimationFrame(callback)
         })
@@ -3173,7 +3174,7 @@
             } else if (lang == 'threejs' && !window.app.$responsing) {
 
                 let chartId = 'threejs_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
-                innerHtml = `<div id="${chartId}" style="width: 720px;height: 480px;" class="rich-code-block threejs-code-block"></div>`;
+                innerHtml = `<div id="${chartId}" class="rich-code-block threejs-code-block"></div>`;
                 actionsHtml = `<i class="el-icon-download" onclick="onDownloadThreejsBlock(event,'${chartId}')"></i>`;
                 let count = 10;
                 let applyFunc = () => {
@@ -3192,17 +3193,7 @@
                     let json = str.trim();
                     json = json.replace(/^\s*(function\s+)?renderThreeJs\s*\(\s*dom\s*\)\s*\{/, '{');
                     json = json.replace(/\}\s*(;)?\s*$/, '}');
-                    ses_eval('return (dom)=>' + json, {
-                        THREE: window.THREE,
-                        OrbitControls: window.OrbitControls,
-                        CANNON: window.CANNON,
-                        window: {
-                            devicePixelRatio: window.devicePixelRatio,
-                            addEventListener: window.addEventListener,
-                        },
-                        Float32Array: Float32Array,
-                        requestAnimationFrame: (callback) => requestAnimationFrame(callback)
-                    }).then(fn => {
+                    ses_eval_threejs('return (dom)=>' + json).then(fn => {
                         renderThreejs(dom, fn)
                     })
 
