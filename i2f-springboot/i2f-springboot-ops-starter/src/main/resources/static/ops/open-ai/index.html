@@ -845,6 +845,44 @@
     </el-dialog>
 </div>
 </body>
+<!-- 引入 ES Module 类型的 Three.js 和 Cannon-es -->
+<script type="importmap">
+    {
+    "imports": {
+    "three": "../lib/three@0.164.0/build/three.module.js",
+    "three/addons/": "../lib/three@0.164.0/examples/jsm/",
+    "cannon-es": "../lib/cannon-es@0.20.0/dist/cannon-es.js"
+    }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+    import * as CANNON from 'cannon-es';
+
+    function ses_eval_threejs(code) {
+        return ses_eval(code, {
+            THREE: THREE,
+            OrbitControls: OrbitControls,
+            CANNON: CANNON,
+            window: {
+                devicePixelRatio: window.devicePixelRatio,
+                addEventListener: window.addEventListener,
+            },
+            Float32Array: Float32Array,
+            requestAnimationFrame: (callback) => requestAnimationFrame(callback)
+        })
+    }
+
+    window.THREE = THREE;
+    window.OrbitControls = OrbitControls;
+    window.CANNON = CANNON;
+
+    // 暴露函数出去给普通 script 使用
+    window.ses_eval_threejs = ses_eval_threejs;
+</script>
+
 <script>
     Vue.use(VueVirtualScroller.default);
     window.app = new Vue({
@@ -3132,6 +3170,44 @@
 
                 };
                 setTimeout(applyFunc, 300);
+            } else if (lang == 'threejs' && !window.app.$responsing) {
+
+                let chartId = 'threejs_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<div id="${chartId}" style="width: 720px;height: 480px;" class="rich-code-block threejs-code-block"></div>`;
+                actionsHtml = `<i class="el-icon-download" onclick="onDownloadThreejsBlock(event,'${chartId}')"></i>`;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+                    dom.chartCode = str;
+
+                    let json = str.trim();
+                    json = json.replace(/^\s*(function\s+)?renderThreeJs\s*\(\s*dom\s*\)\s*\{/, '{');
+                    json = json.replace(/\}\s*(;)?\s*$/, '}');
+                    ses_eval('return (dom)=>' + json, {
+                        THREE: window.THREE,
+                        OrbitControls: window.OrbitControls,
+                        CANNON: window.CANNON,
+                        window: {
+                            devicePixelRatio: window.devicePixelRatio,
+                            addEventListener: window.addEventListener,
+                        },
+                        Float32Array: Float32Array,
+                        requestAnimationFrame: (callback) => requestAnimationFrame(callback)
+                    }).then(fn => {
+                        renderThreejs(dom, fn)
+                    })
+
+                };
+                setTimeout(applyFunc, 300);
             } else if (lang && hljs.getLanguage(lang)) {
                 // 检查语言是否受支持
                 try {
@@ -3239,7 +3315,7 @@
     function onViewMarkdownCodeBlock(event, lang) {
         let _this = window.app;
         getMarkdownCodeBlockText(event).then(text => {
-            if (['json', 'js', 'ts', 'typescript', 'canvas', 'echarts'].includes(lang)) {
+            if (['json', 'js', 'ts', 'typescript', 'canvas', 'echarts', 'threejs'].includes(lang)) {
                 lang = 'javascript';
             }
             if (['svg'].includes(lang)) {
@@ -3430,6 +3506,44 @@
 
         // 清理内存
         URL.revokeObjectURL(url);
+    }
+
+    function renderThreejs(dom, fn) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderThreejs(dom, fn);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            fn(dom)
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
+    }
+
+    function onDownloadThreejsBlock(event, domId) {
+        let dom = document.querySelector('#' + domId);
+        let canvas = dom.querySelector('canvas');
+        canvas.toBlob(function (blob) {
+            // 将 Blob 对象转换为本地 URL
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'threejs_' + new Date().getTime() + '.png';
+            link.click();
+
+            // 释放内存
+            URL.revokeObjectURL(url);
+        }, 'image/png', 0.9); // 指定格式和画质
     }
 
 

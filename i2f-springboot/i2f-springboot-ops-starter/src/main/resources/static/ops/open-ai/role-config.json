@@ -35,8 +35,13 @@
   },
   {
     "label": "HtmlSvg矢量图像绘制",
-    "icon": "el-icon-picture-outline",
+    "icon": "el-icon-picture-outline-round",
     "url": "./role-html-svg-painter.md"
+  },
+  {
+    "label": "ThreeJs构建3D场景",
+    "icon": "el-icon-camera",
+    "url": "./role-threejs-3d-scene-creator.md"
   },
   {
     "label": "易学命理大师",

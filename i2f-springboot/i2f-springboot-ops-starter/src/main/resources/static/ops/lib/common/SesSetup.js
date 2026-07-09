@@ -1,4 +1,4 @@
-function ses_eval(code) {
+function ses_eval(code, userConfig) {
     if (!window._init_ses) {
         // 1. 初始化 SES 安全环境（必须在所有代码之前执行）
         lockdown();
@@ -13,6 +13,7 @@ function ses_eval(code) {
             if (typeof echarts != 'undefined') {
                 config.echarts = echarts; // 如果有echarts，则开放到沙箱中
             }
+            config = {...config, ...userConfig}
             const sandbox = new Compartment(config);
 
             // 在沙箱中安全执行
