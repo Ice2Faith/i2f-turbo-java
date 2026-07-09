@@ -253,7 +253,7 @@
         <div class="chat-container">
             <!-- 消息列表 -->
     <div class="message-list center-message-list" id="mainMessageList" ref="messageList"
-         @contextmenu.prevent="onContextMenuMessageListPanel">
+         @contextmenu="onContextMenuMessageListPanel">
         <span class="scroll-top-mark" style="width:0;height:0;opacity: 0;"></span>
 
         <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
@@ -2293,9 +2293,25 @@
                 });
             },
             onContextMenuMessageListPanel() {
+                let evt = event;
+                if (window.disabledUserCustomContextMenus) {
+                    return;
+                }
+                evt.preventDefault();
+
                 let _this = this;
                 this.$contextmenu({
                     items: [
+                        {
+                            label: `默认菜单(8s)`,
+                            icon: 'el-icon-guide',
+                            onClick: () => {
+                                window.disabledUserCustomContextMenus = true;
+                                setTimeout(() => {
+                                    window.disabledUserCustomContextMenus = false;
+                                }, 8000)
+                            }
+                        },
                         {
                             label: `中断输出`,
                             icon: 'el-icon-circle-close',
