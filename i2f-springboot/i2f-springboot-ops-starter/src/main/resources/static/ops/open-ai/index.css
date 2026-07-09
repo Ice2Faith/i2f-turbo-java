@@ -183,6 +183,10 @@ html, body {
     flex-direction: row-reverse;
 }
 
+.message-row-history-hidden {
+    filter: grayscale(1);
+}
+
 .message-avatar {
     width: 36px;
     height: 36px;
@@ -709,6 +713,10 @@ html, body {
     .message-list {
         display: unset;
         overflow-y: unset;
+    }
+
+    .message-row-history-hidden {
+        filter: unset;
     }
 
     body, html {

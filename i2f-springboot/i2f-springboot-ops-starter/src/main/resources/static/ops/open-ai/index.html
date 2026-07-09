@@ -268,9 +268,13 @@
             </el-divider>
 
             <div
+                    v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes(msg.type)) :true"
                     class="message-row"
-                    :class="msg.type==='user' ? 'message-row-right' : 'message-row-left'"
-                    :style="msg.hidden? 'filter: grayscale(1);': ''"
+                    :class="{
+                    'message-row-right' : msg.type==='user',
+                    'message-row-left': msg.type!=='user',
+                    'message-row-history-hidden': msg.hidden
+                    }"
             >
                 <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
                     <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
@@ -299,7 +303,7 @@
                                     'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
                                     'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
                                     }"
-                         v-html="renderMarkdown(msg[msg.type].content)"></div>
+                         v-html="renderMarkdown(msg[msg.type].content || '[未收到任何内容]')"></div>
                     <div class="bubble-actions">
                         <el-popover
                                 v-if="msg.usage && msg.usage.total_tokens>=0"
@@ -438,6 +442,30 @@
                                 width="720"
                                 trigger="hover">
                         <div>
+
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    定制显示，你可以控制显示消息的类型。<br/>
+                                    如果开启，你可以根据自己的使用习惯，定制选择哪些消息不进行显示。<br/>
+                                <hr/>
+                                <el-checkbox-group v-model="metas.hiddenMessageTypes">
+                                    <el-checkbox v-for="item in metas.roleList"
+                                                 :key="item.value"
+                                                 :label="item.value">
+                                        {{item.label}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
+
+                                </p>
+                                <el-checkbox slot="reference"
+                                             v-model="metas.enableCustomDisplay">
+                                    定制显示
+                                </el-checkbox>
+                            </el-popover>
                             <el-popover
                                     placement="top-start"
                                     title="说明"
@@ -1311,6 +1339,8 @@
                             {label: '工具请求', value: 'request_tool', std: false},
                             {label: '技能注入', value: 'echo_skill', std: false},
                         ],
+                        enableCustomDisplay: false,
+                        hiddenMessageTypes: [],
                     },
                     drawer: {},
                     dialog: {
@@ -1847,10 +1877,10 @@
                                     let msg = list[i];
                                     if (msg.type == 'user') {
                                         let title = msg[msg.type].content
-                                        if (text.startsWith('- [send time]')) {
-                                            let arr = text.split('---', 2);
+                                        if (title.startsWith('- [send time]')) {
+                                            let arr = title.split('---', 2);
                                             if (arr.length == 2) {
-                                                text = arr[1].trim();
+                                                title = arr[1].trim();
                                             }
                                         }
                                         if (title && title.length > 20) {
@@ -2798,7 +2828,7 @@
                     this.$responsing = false;
 
                     if (!assistantMsg.assistant.content) {
-                        assistantMsg.assistant.content = '[未收到任何内容]';
+                        assistantMsg.assistant.content = '';
                     }
 
                     if (this.form.enableAutoTts) {
