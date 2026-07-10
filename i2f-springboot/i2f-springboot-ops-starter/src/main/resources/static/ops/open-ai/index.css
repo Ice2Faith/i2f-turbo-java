@@ -693,6 +693,15 @@ html, body {
     background: white;
 }
 
+.drawio-code-block {
+    width: 100%;
+    min-width: 480px;
+    min-height: 480px;
+    max-height: 1280px;
+    max-width: 1080px;
+    background: white;
+}
+
 /**
  * style for print action
  */

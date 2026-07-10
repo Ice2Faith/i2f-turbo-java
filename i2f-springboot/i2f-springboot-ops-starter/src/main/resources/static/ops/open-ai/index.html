@@ -3171,6 +3171,42 @@
 
                 };
                 setTimeout(applyFunc, 300);
+            } else if (lang == 'drawio' && !window.app.$responsing) {
+
+                let chartId = 'drawio_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<div id="${chartId}" class="rich-code-block drawio-code-block"></div>`;
+                actionsHtml = `<i class="el-icon-download" onclick="onDownloadDrawioBlock(event,'${chartId}')"></i>`;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+
+                    // 大模型可能属性不会转义，这里进行处理转义
+                    str = str.replace(/[a-zA-Z0-9\_\-@\.\:]+\s*=\s*\"[^\"]*\"/g, (match, offset) => {
+                        let arr = match.split("=", 2);
+                        let attrName = arr[0].trim();
+                        let attrValue = arr[1].trim();
+                        attrValue = attrValue.substring(1, attrValue.length - 1);
+                        attrValue = attrValue.replace('&', '&amp;');
+                        attrValue = attrValue.replace('<', '&lt;');
+                        attrValue = attrValue.replace('>', '&gt;');
+                        return `${attrName}="${attrValue}"`;
+                    })
+
+                    dom.chartCode = str;
+
+                    renderDrawIo(dom, str);
+
+                };
+                setTimeout(applyFunc, 300);
             } else if (lang == 'threejs' && !window.app.$responsing) {
 
                 let chartId = 'threejs_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
@@ -3309,7 +3345,7 @@
             if (['json', 'js', 'ts', 'typescript', 'canvas', 'echarts', 'threejs'].includes(lang)) {
                 lang = 'javascript';
             }
-            if (['svg'].includes(lang)) {
+            if (['svg', 'drawio'].includes(lang)) {
                 lang = 'htmlmixed';
             }
 
@@ -3535,6 +3571,89 @@
             // 释放内存
             URL.revokeObjectURL(url);
         }, 'image/png', 0.9); // 指定格式和画质
+    }
+
+
+    function renderDrawIo(dom, xml) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderDrawIo(dom, xml);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(() => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            renderDrawIoDiagrams(dom, xml);
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
+    }
+
+    function renderDrawIoDiagrams(dom, xmlContent) {
+        window.addEventListener('message', function (evt) {
+            console.log('evt', evt, dom, xmlContent)
+            // 1. 通过 origin 判断：只处理来自 diagrams.net 的消息
+            if (evt.origin !== 'https://embed.diagrams.net') {
+                return;
+            }
+
+            // 2. 或者通过 evt.source 判断：确认消息来自你指定的那个 iframe
+            const drawioFrame = dom.querySelector('iframe');
+            if (!drawioFrame) {
+                return;
+            }
+            if (evt.source !== drawioFrame.contentWindow) {
+                return;
+            }
+
+            if (evt.data.length > 0) {
+                let msg;
+                try {
+                    msg = JSON.parse(evt.data);
+                } catch (e) {
+                    return;
+                }
+
+                // 当 iframe 准备就绪后，加载你的 XML
+                if (msg.event === 'init') {
+                    drawioFrame.contentWindow.postMessage(JSON.stringify({
+                        action: 'load',
+                        xml: xmlContent,
+                        autosave: 0 // 关闭自动保存，因为不需要编辑
+                    }), '*');
+                }
+            }
+        });
+
+        dom.innerHTML = `<iframe
+                        src="https://embed.diagrams.net/?embed=1&modified=0&libraries=0&spin=1&saveAndExit=0&noSaveBtn=1&noExitBtn=1&proto=json"
+                        class="drawio-code-block"
+                        >
+                </iframe>`;
+    }
+
+    function onDownloadDrawioBlock(event, domId) {
+        getMarkdownCodeBlockText(event).then(text => {
+            // 创建 Blob 并触发下载
+            const blob = new Blob([text], {type: 'plain/text;charset=utf-8'});
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'drawio_' + new Date().getTime() + '.xml.drawio';
+            link.click();
+
+            // 清理内存
+            URL.revokeObjectURL(url);
+        }).catch(() => {
+            app.$message.error('未找到代码块，保存失败')
+        })
     }
 
 

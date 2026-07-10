@@ -44,6 +44,11 @@
     "url": "./role-threejs-3d-scene-creator.md"
   },
   {
+    "label": "Draw.io流程图绘制",
+    "icon": "el-icon-paperclip",
+    "url": "./role-js-drawio-diagram.md"
+  },
+  {
     "label": "易学命理大师",
     "icon": "el-icon-discover",
     "url": "./role-sizubazi.md"
