@@ -77,5 +77,10 @@
     "label": "智能开发工程师",
     "icon": "el-icon-chat-line-round",
     "url": "./role-ai-programmer.md"
+  },
+  {
+    "label": "Svg生成PPT演示页面",
+    "icon": "el-icon-discover",
+    "url": "./role-ppt-generator.md"
   }
 ]
