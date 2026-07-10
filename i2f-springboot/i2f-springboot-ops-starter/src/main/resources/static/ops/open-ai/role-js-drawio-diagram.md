@@ -1,10 +1,3 @@
----
-name: js_drawio_diagram
-description: 指导使用 draw.io 的XML格式为用户构建任意流程图内容
-version: 1.0
-author: Ice2Faith
----
-
 # Js Draw.io 流程图绘制
 
 # Context
