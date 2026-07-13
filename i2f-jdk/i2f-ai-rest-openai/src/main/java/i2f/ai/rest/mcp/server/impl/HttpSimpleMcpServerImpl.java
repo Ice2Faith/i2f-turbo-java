@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor
 public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator<HttpSimpleMcpServerImpl> {
     protected IContext context;
+    protected long expireWindowMinutes = 30;
     protected IExpireCache<String, Object> expireCache;
     protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
@@ -72,8 +73,7 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
         }
         String timestamp = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_DATE);
         long ts = Long.parseLong(timestamp, 16);
-        long diffWindowMinutes = 30;
-        if (Math.abs(System.currentTimeMillis() / 1000 - ts) > TimeUnit.MINUTES.toSeconds(diffWindowMinutes)) {
+        if (Math.abs(System.currentTimeMillis() / 1000 - ts) > TimeUnit.MINUTES.toSeconds(expireWindowMinutes)) {
             throw new IllegalArgumentException("request timestamp too old!");
         }
         String nonce = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_NONCE);
@@ -123,7 +123,7 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
 
         // 验签通过在存入nonce，避免网络波动的情况下，误杀正常请求
         if (expireCache != null) {
-            expireCache.set(nonceKey, nonce, diffWindowMinutes * 2, TimeUnit.MINUTES);
+            expireCache.set(nonceKey, nonce, expireWindowMinutes * 2, TimeUnit.MINUTES);
         }
     }
 
