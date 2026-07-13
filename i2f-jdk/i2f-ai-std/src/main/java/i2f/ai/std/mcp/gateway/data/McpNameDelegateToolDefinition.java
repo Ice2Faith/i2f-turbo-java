@@ -2,10 +2,7 @@ package i2f.ai.std.mcp.gateway.data;
 
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DelegateToolDefinition;
-import i2f.ai.std.tool.schema.JsonSchema;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 
 /**
  * @author Ice2Faith
@@ -26,10 +23,10 @@ public class McpNameDelegateToolDefinition extends DelegateToolDefinition {
     }
 
     @Override
-    public Map<String, Object> getJsonSchema() {
-        Map<String, Object> raw = super.getJsonSchema();
-        Map<String, Object> ret = new LinkedHashMap<>(raw);
-        ret.put(JsonSchema.SchemaField.NAME, name);
+    public FunctionJsonSchema getJsonSchema() {
+        FunctionJsonSchema raw = super.getJsonSchema();
+        FunctionJsonSchema ret = raw.copyOf();
+        ret.setName(name);
         return ret;
     }
 }

@@ -12,6 +12,7 @@ import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
@@ -567,8 +568,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
                         List<OpenAiToolsDefinition> tools = completion.getTools();
                         tools = tools.stream().filter(e -> {
-                            Map<String, Object> function = e.getFunction();
-                            String name = (String) function.get("name");
+                            FunctionJsonSchema function = e.getFunction();
+                            String name = function.getName();
                             Set<String> checkNames = McpProviderTools.toolNames();
                             for (String checkName : checkNames) {
                                 if (name.contains(checkName)) {

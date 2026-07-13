@@ -1,5 +1,6 @@
 package i2f.ai.std.tool.schema;
 
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.typeof.TypeOf;
 import i2f.typeof.token.TypeToken;
 
@@ -41,12 +42,11 @@ public class JsonSchema {
         String PROPERTIES = "properties";
     }
 
-    public static Map<String, Object> getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method) {
+    public static FunctionJsonSchema getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method) {
         return getFunctionJsonSchema(resolver, method, null);
     }
 
-    public static Map<String, Object> getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method, List<String> parameterNames) {
-        Map<String, Object> functionSchema = new LinkedHashMap<>();
+    public static FunctionJsonSchema getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method, List<String> parameterNames) {
 
         if (resolver == null) {
             resolver = JsonSchemaAnnotationResolver.INSTANCE;
@@ -75,12 +75,13 @@ public class JsonSchema {
             }
         }
 
-        functionSchema.put(SchemaField.NAME, name);
-        functionSchema.put(SchemaField.DESCRIPTION, description);
-        functionSchema.put(SchemaField.STRICT, true);
-        functionSchema.put(SchemaField.PARAMETERS, jsonSchema);
+        FunctionJsonSchema ret = new FunctionJsonSchema();
+        ret.setName(name);
+        ret.setDescription(description);
+        ret.setStrict(true);
+        ret.setParameters(jsonSchema);
 
-        return functionSchema;
+        return ret;
     }
 
     public static String addParameterJsonSchema(JsonSchemaAnnotationResolver resolver, Map<String, Object> jsonSchema, Parameter parameter) {

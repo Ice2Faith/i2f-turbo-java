@@ -1,8 +1,7 @@
 package i2f.ai.std.tool.definition.impl;
 
 import i2f.ai.std.tool.definition.ToolDefinition;
-
-import java.util.Map;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 
 /**
  * @author Ice2Faith
@@ -27,7 +26,7 @@ public class DelegateToolDefinition implements ToolDefinition {
     }
 
     @Override
-    public Map<String, Object> getJsonSchema() {
+    public FunctionJsonSchema getJsonSchema() {
         return delegate.getJsonSchema();
     }
 

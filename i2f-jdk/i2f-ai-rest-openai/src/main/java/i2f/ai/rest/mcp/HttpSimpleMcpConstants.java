@@ -12,6 +12,7 @@ public interface HttpSimpleMcpConstants {
     String HEADER_APP_SIGN = "X-App-Sign";
     String DEFAULT_HMAC_NAME = "HmacSHA256";
 
-    String URL_PATH_GET_TOOLS = "/mcp/tool/list";
-    String URL_PATH_CALL_TOOL = "/mcp/tool/call";
+    String URL_BASE_PATH = "/mcp";
+    String URL_PATH_GET_TOOLS = URL_BASE_PATH + "/tool/list";
+    String URL_PATH_CALL_TOOL = URL_BASE_PATH + "/tool/call";
 }

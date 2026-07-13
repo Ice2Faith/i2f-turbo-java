@@ -1,6 +1,6 @@
 package i2f.ai.std.tool.definition;
 
-import java.util.Map;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 
 /**
  * @author Ice2Faith
@@ -12,5 +12,5 @@ public interface ToolDefinition {
 
     String getDescription();
 
-    Map<String, Object> getJsonSchema();
+    FunctionJsonSchema getJsonSchema();
 }
