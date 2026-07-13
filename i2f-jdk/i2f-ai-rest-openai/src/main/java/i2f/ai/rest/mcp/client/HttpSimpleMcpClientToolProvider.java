@@ -3,6 +3,7 @@ package i2f.ai.rest.mcp.client;
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.client.data.SimpleMcpToolDefinition;
 import i2f.ai.rest.mcp.client.data.SimpleMcpToolListRespDto;
+import i2f.ai.rest.mcp.data.AppPayloadDto;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
@@ -15,6 +16,8 @@ import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import i2f.resp.ApiCode;
 import i2f.resp.ApiResp;
+import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -37,6 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMutator<HttpSimpleMcpClientToolProvider> {
     protected IRestClient restClient = new HttpProcessorRestClient();
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected String baseUrl;
 
     protected String appId;
@@ -78,7 +82,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
         }
     }
 
-    protected void applyHeader(HttpHeaders headers) {
+    protected void applyHeader(HttpHeaders headers, AppPayloadDto payloadDto) {
         try {
             headers.add(HttpSimpleMcpConstants.HEADER_APP_ID, appId);
 
@@ -92,6 +96,11 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
             Mac mac = Mac.getInstance(hmacName);
             mac.init(skey);
             String payload = appId + "#" + timestamp + "#" + nonce;
+            if (payloadDto != null) {
+                if (payloadDto.getContent() != null && !payloadDto.getContent().isEmpty()) {
+                    payload += "#" + payloadDto.getContent();
+                }
+            }
             mac.update(payload.getBytes(StandardCharsets.UTF_8));
             byte[] bytes = mac.doFinal();
             String sign = Base64.getEncoder().encodeToString(bytes);
@@ -112,7 +121,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
                     .set(u -> u::setUrl, mergeUrl(baseUrl, HttpSimpleMcpConstants.URL_PATH_GET_TOOLS))
                     .set(u -> u::setMethod, HttpMethodConstants.GET)
                     .set(u -> u::setHeaders, HttpHeaders.create()
-                            .apply(this::applyHeader)
+                            .apply(headers -> applyHeader(headers, null))
                     )
                     .done(), SimpleMcpToolListRespDto.class);
             SimpleMcpToolListRespDto dto = resp.getBody();
@@ -151,17 +160,22 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
         try {
+            ToolBaseCallRequest reqBody = new ToolBaseCallRequest().toMutator()
+                    .set(e -> e::setId, request.getId())
+                    .set(e -> e::setName, request.getName())
+                    .set(e -> e::setArguments, request.getArguments())
+                    .done();
+            String content = jsonSerializer.serialize(reqBody);
+            AppPayloadDto payloadDto = new AppPayloadDto();
+            payloadDto.setContent(content);
+
             RestHttpResponse<ApiResp> resp = restClient.rest(new RestHttpRequest().toMutator()
                     .set(u -> u::setUrl, mergeUrl(baseUrl, HttpSimpleMcpConstants.URL_PATH_CALL_TOOL))
                     .set(u -> u::setMethod, HttpMethodConstants.POST)
                     .set(u -> u::setHeaders, HttpHeaders.create()
-                            .apply(this::applyHeader)
+                            .apply(headers -> applyHeader(headers, payloadDto))
                     )
-                    .set(u -> u::setBody, new ToolBaseCallRequest().toMutator()
-                            .set(e -> e::setId, request.getId())
-                            .set(e -> e::setName, request.getName())
-                            .set(e -> e::setArguments, request.getArguments())
-                            .done())
+                    .set(u -> u::setBody, payloadDto)
                     .done(), ApiResp.class);
             ApiResp<?> dto = resp.getBody();
             if (dto.getCode() != ApiCode.SUCCESS) {

@@ -1,6 +1,7 @@
 package i2f.ai.rest.mcp.server.springmvc;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
+import i2f.ai.rest.mcp.data.AppPayloadDto;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
@@ -8,6 +9,8 @@ import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import i2f.resp.ApiResp;
+import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,11 +32,13 @@ import java.util.List;
 public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimpleMcpController> {
 
     protected HttpSimpleMcpServer server;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     @GetMapping(HttpSimpleMcpConstants.URL_PATH_GET_TOOLS)
     public ApiResp<?> getTools(HttpServletRequest request) {
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
+        mcpRequest.setPayloadDto(null);
 
         Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
@@ -51,9 +56,10 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
 
     @GetMapping(HttpSimpleMcpConstants.URL_PATH_CALL_TOOL)
     public ApiResp<?> getTools(HttpServletRequest request,
-                               @RequestBody ToolBaseCallRequest callRequest) {
+                               @RequestBody AppPayloadDto payloadDto) {
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
+        mcpRequest.setPayloadDto(payloadDto);
 
         Enumeration<String> names = request.getHeaderNames();
         while (names.hasMoreElements()) {
@@ -64,6 +70,9 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
                 mcpRequest.getHeaders().add(name, value);
             }
         }
+
+        String content = payloadDto.getContent();
+        ToolBaseCallRequest callRequest = (ToolBaseCallRequest) jsonSerializer.deserialize(content, ToolBaseCallRequest.class);
 
         ApiResp<?> ret = server.callTool(callRequest, mcpRequest);
         return ret;

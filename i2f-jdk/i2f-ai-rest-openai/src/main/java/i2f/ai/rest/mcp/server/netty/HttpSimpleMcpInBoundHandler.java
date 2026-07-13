@@ -1,6 +1,7 @@
 package i2f.ai.rest.mcp.server.netty;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
+import i2f.ai.rest.mcp.data.AppPayloadDto;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
@@ -41,6 +42,7 @@ public class HttpSimpleMcpInBoundHandler extends SimpleChannelInboundHandler<Ful
 
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
+        mcpRequest.setPayloadDto(null);
 
         io.netty.handler.codec.http.HttpHeaders nettyHeaders = request.headers();
         Set<String> names = nettyHeaders.names();
@@ -65,7 +67,11 @@ public class HttpSimpleMcpInBoundHandler extends SimpleChannelInboundHandler<Ful
             }
             ByteBuf contentBuf = request.content();
             String requestJson = contentBuf.toString(java.nio.charset.StandardCharsets.UTF_8);
-            ToolBaseCallRequest callRequest = (ToolBaseCallRequest) jsonSerializer.deserialize(requestJson, ToolBaseCallRequest.class);
+            AppPayloadDto payloadDto = (AppPayloadDto) jsonSerializer.deserialize(requestJson, AppPayloadDto.class);
+            mcpRequest.setPayloadDto(payloadDto);
+
+            String content = payloadDto.getContent();
+            ToolBaseCallRequest callRequest = (ToolBaseCallRequest) jsonSerializer.deserialize(content, ToolBaseCallRequest.class);
 
             ApiResp<?> resp = server.callTool(callRequest, mcpRequest);
             responseInJson(ctx, resp);
