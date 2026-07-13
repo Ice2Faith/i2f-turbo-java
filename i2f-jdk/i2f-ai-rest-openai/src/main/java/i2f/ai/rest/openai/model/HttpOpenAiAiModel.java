@@ -56,7 +56,7 @@ public class HttpOpenAiAiModel implements AiModel, BaseMutator<HttpOpenAiAiModel
         if (toolMap != null) {
             for (Map.Entry<String, ToolRawDefinition> entry : toolMap.entrySet()) {
                 ToolRawDefinition tool = entry.getValue();
-                OpenAiToolsDefinition def = new OpenAiToolsDefinition(tool.getJsonSchema().toJsonSchemaMap());
+                OpenAiToolsDefinition def = new OpenAiToolsDefinition(tool.getJsonSchema());
                 reqDto.getTools().add(def);
             }
         }

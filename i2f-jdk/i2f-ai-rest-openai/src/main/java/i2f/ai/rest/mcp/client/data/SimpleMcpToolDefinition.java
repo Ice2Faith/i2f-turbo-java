@@ -1,10 +1,10 @@
 package i2f.ai.rest.mcp.client.data;
 
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -17,6 +17,6 @@ import java.util.Set;
 public class SimpleMcpToolDefinition implements ToolDefinition {
     protected String name;
     protected String description;
-    protected Map<String, Object> jsonSchema;
+    protected FunctionJsonSchema jsonSchema;
     protected Set<String> tags;
 }
