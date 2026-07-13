@@ -85,7 +85,6 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
             if (exVal != null) {
                 throw new IllegalArgumentException("request nonce was invalid!");
             }
-            expireCache.set(nonceKey, nonce, diffWindowMinutes * 2, TimeUnit.MINUTES);
         }
 
         String sign = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_SIGN);
@@ -120,6 +119,11 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
         String calcSign = Base64.getEncoder().encodeToString(bytes);
         if (!calcSign.equalsIgnoreCase(sign)) {
             throw new IllegalArgumentException("sign verify failure!");
+        }
+
+        // 验签通过在存入nonce，避免网络波动的情况下，误杀正常请求
+        if (expireCache != null) {
+            expireCache.set(nonceKey, nonce, diffWindowMinutes * 2, TimeUnit.MINUTES);
         }
     }
 
