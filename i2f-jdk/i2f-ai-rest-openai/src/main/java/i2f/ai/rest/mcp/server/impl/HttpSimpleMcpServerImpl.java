@@ -10,6 +10,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.cache.std.expire.IExpireCache;
 import i2f.context.std.IContext;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor
 public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator<HttpSimpleMcpServerImpl> {
     protected IContext context;
+    protected IExpireCache<String, Object> expireCache;
     protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IProxyInvocationHandler invocationHandler;
@@ -70,11 +72,21 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
         }
         String timestamp = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_DATE);
         long ts = Long.parseLong(timestamp, 16);
-        if (Math.abs(System.currentTimeMillis() / 1000 - ts) > TimeUnit.MINUTES.toSeconds(30)) {
+        long diffWindowMinutes = 30;
+        if (Math.abs(System.currentTimeMillis() / 1000 - ts) > TimeUnit.MINUTES.toSeconds(diffWindowMinutes)) {
             throw new IllegalArgumentException("request timestamp too old!");
         }
         String nonce = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_NONCE);
-        // todo check nonce
+
+        // 根据是否初始化配置了缓存次，决定nonce是否进行检查
+        String nonceKey = "mcp:nonce:" + appId + ":" + nonce;
+        if (expireCache != null) {
+            Object exVal = expireCache.get(nonceKey);
+            if (exVal != null) {
+                throw new IllegalArgumentException("request nonce was invalid!");
+            }
+            expireCache.set(nonceKey, nonce, diffWindowMinutes * 2, TimeUnit.MINUTES);
+        }
 
         String sign = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_SIGN);
         if (sign == null || sign.isEmpty()) {
