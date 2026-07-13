@@ -37,6 +37,18 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-mutator</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-resp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+            <version>4.1.65.Final</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>

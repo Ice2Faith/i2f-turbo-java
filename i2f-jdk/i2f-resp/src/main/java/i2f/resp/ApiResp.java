@@ -50,6 +50,10 @@ public class ApiResp<T> {
         return this;
     }
 
+    public boolean isSuccess() {
+        return code == ApiCode.SUCCESS;
+    }
+
     public static <T> ApiResp<T> success(T data) {
         return new ApiResp<>(ApiCode.SUCCESS, "success", data);
     }
