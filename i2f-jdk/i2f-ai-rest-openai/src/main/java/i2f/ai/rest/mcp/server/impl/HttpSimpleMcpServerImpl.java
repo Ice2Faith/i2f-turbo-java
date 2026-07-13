@@ -70,7 +70,7 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
         }
         String timestamp = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_DATE);
         long ts = Long.parseLong(timestamp, 16);
-        if (Math.abs(System.currentTimeMillis() / 1000 - ts) < TimeUnit.MINUTES.toSeconds(30)) {
+        if (Math.abs(System.currentTimeMillis() / 1000 - ts) > TimeUnit.MINUTES.toSeconds(30)) {
             throw new IllegalArgumentException("request timestamp too old!");
         }
         String nonce = headers.getFirstHeader(HttpSimpleMcpConstants.HEADER_APP_NONCE);
