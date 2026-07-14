@@ -67,27 +67,38 @@ public class RagHelper {
                 .fieldIfAbsentV(u -> u::getTextFileFilter, RagHelper::isTextFile)
                 .done();
         if (path.isFile()) {
+            boolean supportProcess = false;
+            boolean useCustomReader = false;
             if (options.getTextFileFilter() == null || options.getTextFileFilter().test(path)) {
-                String text = StreamUtil.readString(path);
-                List<String> list = options.getSplitter().split(text);
-                if (options.getStoreBatchSize() > 0) {
-                    List<String> once = new ArrayList<>();
-                    int count = 0;
-                    for (String str : list) {
-                        once.add(str);
-                        count++;
-                        if (count == options.getStoreBatchSize()) {
-                            List<RagEmbedding> embeddings = worker.storeAll(once);
-                            if (options.getListener() != null) {
-                                for (RagEmbedding item : embeddings) {
-                                    options.getListener().accept(item);
-                                }
-                            }
-                            once.clear();
-                            count = 0;
-                        }
-                    }
-                    if (count > 0) {
+                supportProcess = true;
+            }
+            if (options.getFileReader() != null && options.getFileReader().support(path)) {
+                useCustomReader = true;
+                supportProcess = true;
+            }
+            if (!supportProcess) {
+                return;
+            }
+            String text = null;
+            if (useCustomReader) {
+                text = options.getFileReader().read(path);
+            } else {
+                text = StreamUtil.readString(path);
+            }
+            if (text == null) {
+                return;
+            }
+            if (text.trim().isEmpty()) {
+                return;
+            }
+            List<String> list = options.getSplitter().split(text);
+            if (options.getStoreBatchSize() > 0) {
+                List<String> once = new ArrayList<>();
+                int count = 0;
+                for (String str : list) {
+                    once.add(str);
+                    count++;
+                    if (count == options.getStoreBatchSize()) {
                         List<RagEmbedding> embeddings = worker.storeAll(once);
                         if (options.getListener() != null) {
                             for (RagEmbedding item : embeddings) {
@@ -97,16 +108,27 @@ public class RagHelper {
                         once.clear();
                         count = 0;
                     }
-                } else {
-                    List<RagEmbedding> embeddings = worker.storeAll(list);
+                }
+                if (count > 0) {
+                    List<RagEmbedding> embeddings = worker.storeAll(once);
                     if (options.getListener() != null) {
                         for (RagEmbedding item : embeddings) {
                             options.getListener().accept(item);
                         }
                     }
+                    once.clear();
+                    count = 0;
                 }
-
+            } else {
+                List<RagEmbedding> embeddings = worker.storeAll(list);
+                if (options.getListener() != null) {
+                    for (RagEmbedding item : embeddings) {
+                        options.getListener().accept(item);
+                    }
+                }
             }
+
+
         }
         if (path.isDirectory()) {
             File[] files = path.listFiles();
