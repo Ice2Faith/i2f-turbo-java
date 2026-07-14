@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.rag.HttpOpenAiRagEmbeddingModel;
 import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
+import i2f.ai.std.rag.impl.MarkitdownCmdRagFileReader;
+import i2f.ai.std.rag.impl.PandocCmdRagFileReader;
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
@@ -95,6 +97,13 @@ public class RagAutoConfiguration {
                         .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toMutator()
                                 .set(u -> u::setMaxSegmentSizeInChars, properties.getMaxSegmentSizeInChars())
                                 .set(u -> u::setMaxOverlapRate, properties.getMaxOverlapRate())
+                                .apply(options -> {
+                                    if (properties.isEnableMarkitdownDocReader()) {
+                                        options.setFileReader(MarkitdownCmdRagFileReader.INSTANCE);
+                                    } else if (properties.isEnablePandocDocReader()) {
+                                        options.setFileReader(PandocCmdRagFileReader.INSTANCE);
+                                    }
+                                })
                                 .done())
                         .set(u -> u::setStoreBatchSize, properties.getDocsEmbedBatchSize())
                         .done()
