@@ -2296,14 +2296,20 @@
                         "url": "./role-unicode-emoji.md"
                     },
                     {
-                        "label": "易学命理大师",
+                        "label": "文学",
                         "icon": "el-icon-discover",
-                        "url": "./role-sizubazi.md"
-                    },
-                    {
-                        "label": "文学泰斗",
-                        "icon": "el-icon-collection",
-                        "url": "./role-poetry.md"
+                        "children": [
+                            {
+                                "label": "易学命理大师",
+                                "icon": "el-icon-discover",
+                                "url": "./role-sizubazi.md"
+                            },
+                            {
+                                "label": "文学泰斗",
+                                "icon": "el-icon-collection",
+                                "url": "./role-poetry.md"
+                            },
+                        ]
                     },
                     {
                         "label": "爱莉希雅",
@@ -2321,17 +2327,30 @@
                     menus = defaultMenus;
                 }
                 let list = []
-                menus.forEach(e => {
-                    let item = {
-                        ...e
+                let initMenus = (configMenus, resultMenus) => {
+                    if (!configMenus) {
+                        return
                     }
-                    if (item.url) {
-                        item.onClick = () => {
-                            loadSystemRoleByMarkdownUrl(item.url)
+                    configMenus.forEach(e => {
+                        let item = {
+                            ...e
                         }
-                    }
-                    list.push(item)
-                })
+                        if (item.url) {
+                            item.onClick = () => {
+                                loadSystemRoleByMarkdownUrl(item.url)
+                            }
+                        }
+                        if (item.children) {
+                            let nextMenus = item.children;
+                            let nextResults = [];
+                            initMenus(nextMenus, nextResults);
+                            item.children = nextResults;
+                        }
+                        resultMenus.push(item)
+                    })
+                }
+
+                initMenus(menus, list);
 
                 this.$contextmenu({
                     items: list,

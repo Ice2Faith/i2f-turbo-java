@@ -2,7 +2,7 @@
   {
     "label": "默认角色",
     "icon": "el-icon-odometer",
-    "url": "./role-default.md"
+    "url": "./roles/role-default.md"
   },
   {
     "label": "",
@@ -11,76 +11,122 @@
   {
     "label": "中外语翻译官",
     "icon": "el-icon-microphone",
-    "url": "./role-translator.md"
-  },
-  {
-    "label": "资深开发工程师",
-    "icon": "el-icon-mouse",
-    "url": "./role-developer.md"
+    "url": "./roles/role-translator.md"
   },
   {
     "label": "Emoji表情大师",
     "icon": "el-icon-mouse",
-    "url": "./role-unicode-emoji.md"
+    "url": "./roles/role-unicode-emoji.md"
   },
   {
-    "label": "Echarts图表绘制",
+    "label": "开发/技术",
+    "icon": "el-icon-mouse",
+    "children": [
+      {
+        "label": "资深开发工程师",
+        "icon": "el-icon-mouse",
+        "url": "./roles/develop/role-developer.md"
+      },
+      {
+        "label": "实施规划师",
+        "icon": "el-icon-chat-line-round",
+        "url": "./roles/develop/role-guideline.md"
+      },
+      {
+        "label": "智能开发工程师",
+        "icon": "el-icon-chat-line-round",
+        "url": "./roles/develop/role-ai-programmer.md"
+      }
+    ]
+  },
+  {
+    "label": "绘图/可视化",
     "icon": "el-icon-pie-chart",
-    "url": "./role-echarts-painter.md"
+    "children": [
+      {
+        "label": "Echarts图表绘制",
+        "icon": "el-icon-pie-chart",
+        "url": "./roles/visual/role-echarts-painter.md"
+      },
+      {
+        "label": "JsCanvas图像绘制",
+        "icon": "el-icon-picture-outline",
+        "url": "./roles/visual/role-js-canvas-painter.md"
+      },
+      {
+        "label": "HtmlSvg矢量图像绘制",
+        "icon": "el-icon-picture-outline-round",
+        "url": "./roles/visual/role-html-svg-painter.md"
+      },
+      {
+        "label": "ThreeJs构建3D场景",
+        "icon": "el-icon-camera",
+        "url": "./roles/visual/role-threejs-3d-scene-creator.md"
+      },
+      {
+        "label": "Draw.io流程图绘制",
+        "icon": "el-icon-paperclip",
+        "url": "./roles/visual/role-js-drawio-diagram.md"
+      }
+    ]
   },
   {
-    "label": "JsCanvas图像绘制",
-    "icon": "el-icon-picture-outline",
-    "url": "./role-js-canvas-painter.md"
+    "label": "音视频/多媒体",
+    "icon": "el-icon-video-camera",
+    "children": [
+      {
+        "label": "FFMPEG多媒体处理",
+        "icon": "el-icon-video-camera",
+        "url": "./roles/media/role-ffmpeg-assistant.md"
+      }
+    ]
   },
   {
-    "label": "HtmlSvg矢量图像绘制",
-    "icon": "el-icon-picture-outline-round",
-    "url": "./role-html-svg-painter.md"
-  },
-  {
-    "label": "ThreeJs构建3D场景",
-    "icon": "el-icon-camera",
-    "url": "./role-threejs-3d-scene-creator.md"
-  },
-  {
-    "label": "Draw.io流程图绘制",
-    "icon": "el-icon-paperclip",
-    "url": "./role-js-drawio-diagram.md"
-  },
-  {
-    "label": "易学命理大师",
-    "icon": "el-icon-discover",
-    "url": "./role-sizubazi.md"
-  },
-  {
-    "label": "文学泰斗",
+    "label": "文化/文学",
     "icon": "el-icon-collection",
-    "url": "./role-poetry.md"
+    "children": [
+      {
+        "label": "易学命理大师",
+        "icon": "el-icon-discover",
+        "url": "./roles/poetry/role-sizubazi.md"
+      },
+      {
+        "label": "文学泰斗",
+        "icon": "el-icon-collection",
+        "url": "./roles/poetry/role-poetry.md"
+      }
+    ]
   },
   {
-    "label": "爱莉希雅",
+    "label": "聊天/陪聊",
     "icon": "el-icon-chat-line-round",
-    "url": "./role-elysia.md"
+    "children": [
+      {
+        "label": "爱莉希雅",
+        "icon": "el-icon-chat-line-round",
+        "url": "./roles/chat/role-elysia.md"
+      },
+      {
+        "label": "Api聊天女友",
+        "icon": "el-icon-chat-line-round",
+        "url": "./roles/chat/role-api-girlfirend.md"
+      }
+    ]
   },
   {
-    "label": "Api聊天女友",
-    "icon": "el-icon-chat-line-round",
-    "url": "./role-api-girlfirend.md"
-  },
-  {
-    "label": "实施规划师",
-    "icon": "el-icon-chat-line-round",
-    "url": "./role-guideline.md"
-  },
-  {
-    "label": "智能开发工程师",
-    "icon": "el-icon-chat-line-round",
-    "url": "./role-ai-programmer.md"
-  },
-  {
-    "label": "Svg生成PPT演示页面",
+    "label": "文档/办公",
     "icon": "el-icon-discover",
-    "url": "./role-ppt-generator.md"
+    "children": [
+      {
+        "label": "Svg生成PPT演示页面",
+        "icon": "el-icon-discover",
+        "url": "./roles/office/role-ppt-generator.md"
+      },
+      {
+        "label": "Markitdown文档提取/转换",
+        "icon": "el-icon-discover",
+        "url": "./roles/office/role-doc-assistant.md"
+      }
+    ]
   }
 ]
