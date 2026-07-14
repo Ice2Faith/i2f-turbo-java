@@ -128,5 +128,16 @@
         "url": "./roles/office/role-doc-assistant.md"
       }
     ]
+  },
+  {
+    "label": "娱乐/放松",
+    "icon": "el-icon-bicycle",
+    "children": [
+      {
+        "label": "短视频舞蹈规划师",
+        "icon": "el-icon-bicycle",
+        "url": "./roles/play/role-dance-guide.md"
+      }
+    ]
   }
 ]
