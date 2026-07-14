@@ -98,17 +98,17 @@ public class RagAutoConfiguration {
                         .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toMutator()
                                 .set(u -> u::setMaxSegmentSizeInChars, properties.getMaxSegmentSizeInChars())
                                 .set(u -> u::setMaxOverlapRate, properties.getMaxOverlapRate())
-                                .apply(options -> {
-                                    ListableRagFileReader reader = new ListableRagFileReader();
-                                    if (properties.isEnableMarkitdownDocReader()) {
-                                        reader.getReaders().add(MarkitdownCmdRagFileReader.INSTANCE);
-                                    } else if (properties.isEnablePandocDocReader()) {
-                                        reader.getReaders().add(PandocCmdRagFileReader.INSTANCE);
-                                    }
-                                    options.setFileReader(reader);
-                                })
                                 .done())
                         .set(u -> u::setStoreBatchSize, properties.getDocsEmbedBatchSize())
+                        .apply(options -> {
+                            ListableRagFileReader reader = new ListableRagFileReader();
+                            if (properties.isEnableMarkitdownDocReader()) {
+                                reader.getReaders().add(MarkitdownCmdRagFileReader.INSTANCE);
+                            } else if (properties.isEnablePandocDocReader()) {
+                                reader.getReaders().add(PandocCmdRagFileReader.INSTANCE);
+                            }
+                            options.setFileReader(reader);
+                        })
                         .done()
         );
 
