@@ -104,7 +104,8 @@ public class RagAutoConfiguration {
                             ListableRagFileReader reader = new ListableRagFileReader();
                             if (properties.isEnableMarkitdownDocReader()) {
                                 reader.getReaders().add(MarkitdownCmdRagFileReader.INSTANCE);
-                            } else if (properties.isEnablePandocDocReader()) {
+                            }
+                            if (properties.isEnablePandocDocReader()) {
                                 reader.getReaders().add(PandocCmdRagFileReader.INSTANCE);
                             }
                             options.setFileReader(reader);
