@@ -30,3 +30,6 @@ ai:
       maxSegmentSizeInChars: 512
       docsEmbedBatchSize: 10
       maxOverlapRate: 0.15
+      enableMarkitdownDocReader: false
+      enableEasyocrDocReader: false
+      enablePandocDocReader: false
