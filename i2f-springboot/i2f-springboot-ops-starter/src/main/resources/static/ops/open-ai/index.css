@@ -702,6 +702,48 @@ html, body {
     background: white;
 }
 
+.input-attach-files {
+    width: 100%;
+    display: inline-block;
+    font-size: 14px;
+    color: #444;
+    padding: 5px;
+}
+
+.input-attach-files__message {
+    border: solid 1px #bbb;
+    border-radius: 5px;
+    margin-top: 8px;
+    box-shadow: 0 0 5px #bbb;
+}
+
+.input-attach-file-item {
+    width: 100%;
+    overflow-wrap: anywhere;
+    border-bottom: solid 1px #bbb;
+    padding-top: 3px;
+    display: inline-block;
+}
+
+.input-attach-file-item:hover {
+    background: lightblue;
+}
+
+.input-attach-file-item > * {
+    display: inline-block;
+}
+
+.input-attach-file-item > span {
+    width: 80%;
+}
+
+.input-attach-file-item > i {
+    width: 15%;
+    color: orangered;
+    text-align: right;
+}
+
+
 /**
  * style for print action
  */
@@ -777,5 +819,9 @@ html, body {
 
     .threejs-code-block {
 
+    }
+
+    .input-attach-files__message {
+        box-shadow: unset;
     }
 }

@@ -304,6 +304,15 @@
                                     'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
                                     }"
                          v-html="renderMarkdown(msg[msg.type].content || '[未收到任何内容]')"></div>
+                    <div class="input-attach-files input-attach-files__message"
+                         v-if="msg.attachFiles && msg.attachFiles.length>0">
+                                <span v-for="(item,index) in msg.attachFiles"
+                                      class="input-attach-file-item"
+                                      :key="index">
+                                    <span>{{item.fileName}}</span>
+                                    <i class="el-icon-circle-close" @click="msg.attachFiles.splice(index,1)"></i>
+                                </span>
+                    </div>
                     <div class="bubble-actions">
                         <el-popover
                                 v-if="msg.usage && msg.usage.total_tokens>=0"
@@ -1466,17 +1475,7 @@
                         lruToolMaxSize: 20,
                         lruToolNames: [],
                         enableEchoRequestPayload: false,
-                        attachFiles: [{
-                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
-                        }, {
-                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
-                        }, {
-                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
-                        }, {
-                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
-                        }, {
-                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
-                        }]
+                        attachFiles: []
                     }
                 }
             },
@@ -2563,6 +2562,13 @@
                     type: this.form.messageType,
                     hidden: false,
                 }
+                item.attachFiles = [{
+                    fileName: 'aaaaaaaaaaaaaaaaaaaa.txt'
+                }, {
+                    fileName: 'bbbbbbbbbbbbbbb.txt'
+                }, {
+                    fileName: 'cccccccccc.txt'
+                }]
                 if (item.type == 'user') {
                     // 如果开启了附加时间，则将当前时间附加到用户消息中
                     if (this.form.enableUserSendTime) {
@@ -3882,35 +3888,6 @@
     }
 </script>
 <style>
-    .input-attach-files {
-        width: 100%;
-        display: inline-block;
-        font-size: 14px;
-        color: #444;
-        padding: 5px;
-    }
-
-    .input-attach-file-item {
-        width: 100%;
-        overflow-wrap: anywhere;
-        border-bottom: solid 1px #bbb;
-        padding-top: 3px;
-        display: inline-block;
-    }
-
-    .input-attach-file-item > * {
-        display: inline-block;
-    }
-
-    .input-attach-file-item > span {
-        width: 80%;
-    }
-
-    .input-attach-file-item > i {
-        width: 15%;
-        color: orangered;
-        text-align: right;
-    }
 
 </style>
 </html>
