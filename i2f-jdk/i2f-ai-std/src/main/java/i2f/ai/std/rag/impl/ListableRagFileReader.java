@@ -42,7 +42,14 @@ public class ListableRagFileReader implements RagFileReader {
     public String read(File file) throws IOException {
         for (RagFileReader reader : readers) {
             if (reader.support(file)) {
-                return reader.read(file);
+                try {
+                    String str = reader.read(file);
+                    if (str != null && !str.isEmpty()) {
+                        return str;
+                    }
+                } catch (Exception e) {
+
+                }
             }
         }
         return null;

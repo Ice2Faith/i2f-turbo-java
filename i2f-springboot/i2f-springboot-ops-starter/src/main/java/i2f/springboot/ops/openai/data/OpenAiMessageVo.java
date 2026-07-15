@@ -10,6 +10,9 @@ import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author Ice2Faith
  * @date 2026/6/2 9:22
@@ -26,4 +29,5 @@ public class OpenAiMessageVo implements BaseMutator<OpenAiMessageVo> {
     protected EchoOpenAiToolMessage echo_tool;
     protected RequestOpenAiToolMessage request_tool;
     protected OpenAiSystemMessage echo_skill;
+    protected List<Map<String, Object>> attachFiles;
 }

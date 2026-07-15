@@ -2,11 +2,13 @@ package i2f.ai.std.rag;
 
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
+import i2f.ai.std.rag.impl.TextFileRagFileReader;
 import i2f.io.stream.StreamUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -14,29 +16,7 @@ import java.util.*;
  * @desc
  */
 public class RagHelper {
-    public static final String[] TEXT_FILE_SUFFIXES = {
-            ".txt", ".md",
-            ".xml", ".json", ".html",
-            ".java", ".py", ".groovy",
-            ".js", ".css", ".vue", ".ts",
-            ".sql", ".sh", ".bash", ".cmd",
-            ".properties", ".yaml", ".yml"
-    };
-    public static final Set<String> TEXT_FILE_SUFFIXES_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(TEXT_FILE_SUFFIXES)));
     public static final String DEFAULT_RAG_DIR = "./rags";
-
-    public static boolean isTextFile(File file) {
-        String name = file.getName();
-        String suffix = "";
-        int idx = name.lastIndexOf(".");
-        if (idx >= 0) {
-            suffix = name.substring(idx).toLowerCase();
-        }
-        if (TEXT_FILE_SUFFIXES_SET.contains(suffix)) {
-            return true;
-        }
-        return false;
-    }
 
     public static void loadDocuments(RagWorker worker,
                                      RagTextSplitter splitter) throws IOException {
@@ -58,18 +38,18 @@ public class RagHelper {
         if (options == null) {
             options = new RagLoadDocumentsOptions().toMutator()
                     .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
-                    .set(u -> u::setTextFileFilter, RagHelper::isTextFile)
+                    .set(u -> u::setFileFilter, TextFileRagFileReader::isTextFile)
                     .set(u -> u::setStoreBatchSize, -1)
                     .done();
         }
         options.toMutator()
                 .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
-                .fieldIfAbsentV(u -> u::getTextFileFilter, RagHelper::isTextFile)
+                .fieldIfAbsentV(u -> u::getFileFilter, TextFileRagFileReader::isTextFile)
                 .done();
         if (path.isFile()) {
             boolean supportProcess = false;
             boolean useCustomReader = false;
-            if (options.getTextFileFilter() == null || options.getTextFileFilter().test(path)) {
+            if (options.getFileFilter() == null || options.getFileFilter().test(path)) {
                 supportProcess = true;
             }
             if (options.getFileReader() != null && options.getFileReader().support(path)) {

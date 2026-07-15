@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 public class RagLoadDocumentsOptions implements BaseMutator<RagLoadDocumentsOptions> {
     protected RagTextSplitter splitter;
     protected int storeBatchSize;
-    protected Predicate<File> textFileFilter;
+    protected Predicate<File> fileFilter;
     protected Consumer<RagEmbedding> listener;
     protected RagFileReader fileReader;
 }

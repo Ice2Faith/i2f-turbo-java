@@ -26,4 +26,6 @@ public class OpenAiOperateDto {
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
     protected List<ToolDefinition> loadedTools;
+
+    protected String md5;
 }

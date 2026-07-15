@@ -17,6 +17,7 @@ import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
 import i2f.springboot.ops.app.data.AppOperationDto;
+import i2f.springboot.ops.awss3.data.AwsS3OperateDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
@@ -26,6 +27,7 @@ import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
+import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -45,18 +47,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
@@ -101,6 +104,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private McpProviderTools mcpProviderTools;
+
+    @Autowired(required = false)
+    private TmpFileTools tmpFileTools;
 
     protected SecureRandom random = new SecureRandom();
 
@@ -177,10 +183,55 @@ public class OpenAiOpsController implements IOpsProvider {
         }
     }
 
+    @PostMapping("/tmp-file/upload")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> uploadTmpFile(MultipartFile file, OpsSecureDto reqDto,
+                                                       HttpServletRequest request) throws Exception {
+        try {
+            if (tmpFileTools == null) {
+                throw new IllegalStateException("manager not enable tmp file upload feature.");
+            }
+            AwsS3OperateDto req = transfer.recv(reqDto, AwsS3OperateDto.class);
+
+            File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")), ".tmp");
+            try {
+                MessageDigest digest = MessageDigest.getInstance("MD5");
+                OutputStream os = new FileOutputStream(tmpFile);
+                byte[] buffer = new byte[2048];
+                int len = 0;
+                InputStream is = file.getInputStream();
+                while ((len = is.read(buffer)) > 0) {
+                    digest.update(buffer, 0, len);
+                    os.write(buffer, 0, len);
+                }
+                os.close();
+                byte[] bytes = digest.digest();
+                StringBuilder builder = new StringBuilder();
+                for (byte bt : bytes) {
+                    builder.append(String.format("%02x", (int) (bt & 0x0ff)));
+                }
+                String calcMd5 = builder.toString();
+                if (!calcMd5.equalsIgnoreCase(req.getMd5())) {
+                    throw new OpsException("file check sum error");
+                }
+                Map<String, Object> resp = tmpFileTools.saveFile(new FileInputStream(tmpFile), file.getOriginalFilename());
+                return transfer.success(resp);
+            } finally {
+                if (tmpFile != null && tmpFile.exists()) {
+                    tmpFile.delete();
+                }
+            }
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e);
+        }
+    }
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
         AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
+        AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
@@ -204,7 +255,18 @@ public class OpenAiOpsController implements IOpsProvider {
                         for (OpenAiMessageVo item : voMsgList) {
                             if (OpenAiConsts.USER.equals(item.getType())) {
                                 injectMsg = item;
-                                completion.getMessages().add(item.getUser());
+                                OpenAiUserMessage user = item.getUser();
+                                List<Map<String, Object>> attachFiles = item.getAttachFiles();
+                                if (attachFiles != null && !attachFiles.isEmpty()) {
+                                    // 如果有上传文件，则动态追加到用户消息中
+                                    user.setContent(user.getContent()
+                                            + "\n\n<upload_files>\n"
+                                            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(attachFiles)
+                                            + "\n</upload_files>"
+                                    );
+                                    hasAttachFiles.set(true);
+                                }
+                                completion.getMessages().add(user);
                             } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
                                 injectMsg = item;
                                 completion.getMessages().add(item.getSystem());
@@ -570,10 +632,20 @@ public class OpenAiOpsController implements IOpsProvider {
                         tools = tools.stream().filter(e -> {
                             FunctionJsonSchema function = e.getFunction();
                             String name = function.getName();
-                            Set<String> checkNames = McpProviderTools.toolNames();
-                            for (String checkName : checkNames) {
-                                if (name.contains(checkName)) {
-                                    return true;
+                            if (true) {
+                                Set<String> checkNames = McpProviderTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                            if (hasAttachFiles.get()) {
+                                Set<String> checkNames = TmpFileTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
                                 }
                             }
                             if (unqToolNames.contains(name)) {
