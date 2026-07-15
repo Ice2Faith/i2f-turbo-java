@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.rag.HttpOpenAiRagEmbeddingModel;
 import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
-import i2f.ai.std.rag.impl.ListableRagFileReader;
-import i2f.ai.std.rag.impl.MarkitdownCmdRagFileReader;
-import i2f.ai.std.rag.impl.PandocCmdRagFileReader;
-import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
+import i2f.ai.std.rag.impl.*;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.io.file.FileUtil;
@@ -104,6 +101,9 @@ public class RagAutoConfiguration {
                             ListableRagFileReader reader = new ListableRagFileReader();
                             if (properties.isEnableMarkitdownDocReader()) {
                                 reader.getReaders().add(MarkitdownCmdRagFileReader.INSTANCE);
+                            }
+                            if (properties.isEnableEasyocrDocReader()) {
+                                reader.getReaders().add(EasyOcrCmdRagFileReader.INSTANCE);
                             }
                             if (properties.isEnablePandocDocReader()) {
                                 reader.getReaders().add(PandocCmdRagFileReader.INSTANCE);

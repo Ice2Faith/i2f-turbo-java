@@ -24,5 +24,6 @@ public class RagEmbeddingModelProperties {
     protected int docsEmbedBatchSize = -1;
     protected double maxOverlapRate = 0.15;
     protected boolean enableMarkitdownDocReader = false;
+    protected boolean enableEasyocrDocReader = false;
     protected boolean enablePandocDocReader = false;
 }
