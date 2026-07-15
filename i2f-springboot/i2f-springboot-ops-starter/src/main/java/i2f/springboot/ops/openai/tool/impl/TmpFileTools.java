@@ -87,7 +87,7 @@ public class TmpFileTools {
 
     public void cleanTmpFiles() {
         File rootDir = getRootFile();
-        if (rootDir.exists()) {
+        if (!rootDir.exists()) {
             return;
         }
         File[] files = rootDir.listFiles();
