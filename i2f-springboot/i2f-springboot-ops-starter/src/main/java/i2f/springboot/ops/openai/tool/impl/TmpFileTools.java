@@ -231,7 +231,7 @@ public class TmpFileTools {
             throw new IllegalArgumentException("un-support parse as text content file type.");
         }
         file = FileToolUtils.normalizeFile(file);
-        File ret = new File(file.getParentFile(), file.getName() + ".parsed");
+        File ret = new File(file.getParentFile(), file.getName() + ".parsed.txt");
         if (ret.exists()) {
             return ret;
         }
