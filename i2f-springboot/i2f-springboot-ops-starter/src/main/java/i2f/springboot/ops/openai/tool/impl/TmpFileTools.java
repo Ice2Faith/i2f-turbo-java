@@ -6,6 +6,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
@@ -23,6 +24,9 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ice2Faith
@@ -36,6 +40,7 @@ import java.util.*;
 @Tools
 public class TmpFileTools {
     private static final Set<String> exposeTools;
+    private final ScheduledExecutorService pool = Executors.newSingleThreadScheduledExecutor();
 
     static {
         Set<String> names = new HashSet<>();
@@ -55,12 +60,19 @@ public class TmpFileTools {
         exposeTools = Collections.unmodifiableSet(names);
     }
 
+    {
+        pool.scheduleWithFixedDelay(this::cleanTmpFiles, 0, 3, TimeUnit.HOURS);
+    }
+
     public static Set<String> toolNames() {
         return new HashSet<>(exposeTools);
     }
 
     @Value("${ai.tools.tmp-file.root-path:./tmp-files}")
     protected String rootPath = "./tmp-files";
+
+    @Value("${ai.tools.tmp-file.keep-days:15}")
+    protected int keepDays = 15;
 
     public static final DateTimeFormatter DIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final DateTimeFormatter CREATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -72,6 +84,30 @@ public class TmpFileTools {
             EasyOcrCmdRagFileReader.INSTANCE,
             PandocCmdRagFileReader.INSTANCE
     );
+
+    public void cleanTmpFiles() {
+        File rootDir = getRootFile();
+        if (rootDir.exists()) {
+            return;
+        }
+        File[] files = rootDir.listFiles();
+        if (files == null) {
+            return;
+        }
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime clearDate = now.plusDays(-keepDays);
+        for (File file : files) {
+            String name = file.getName();
+            try {
+                LocalDateTime fileDate = LocalDateTime.parse(name, DIR_FORMATTER);
+                if (fileDate.isBefore(clearDate)) {
+                    FileUtil.delete(file);
+                }
+            } catch (Exception e) {
+
+            }
+        }
+    }
 
     @Tool(
             tags = {
