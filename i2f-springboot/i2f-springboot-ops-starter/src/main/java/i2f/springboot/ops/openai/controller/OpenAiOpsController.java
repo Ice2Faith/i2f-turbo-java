@@ -17,7 +17,6 @@ import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
 import i2f.springboot.ops.app.data.AppOperationDto;
-import i2f.springboot.ops.awss3.data.AwsS3OperateDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
@@ -191,7 +190,7 @@ public class OpenAiOpsController implements IOpsProvider {
             if (tmpFileTools == null) {
                 throw new IllegalStateException("manager not enable tmp file upload feature.");
             }
-            AwsS3OperateDto req = transfer.recv(reqDto, AwsS3OperateDto.class);
+            OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
 
             File tmpFile = File.createTempFile("upload-" + (UUID.randomUUID().toString().replace("-", "")), ".tmp");
             try {
