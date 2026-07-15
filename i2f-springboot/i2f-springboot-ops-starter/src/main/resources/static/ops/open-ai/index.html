@@ -671,12 +671,56 @@
                         <i class="el-icon-delete"></i> 清空会话
                     </el-button>
 
+                    <el-popover
+                            placement="top-start"
+                            title="文件列表"
+                            width="380"
+                            trigger="hover">
+                        <p>
+                            附件，使用临时文件存储，【非视觉模型】。<br/>
+                            后台使用相关工具进行上传文件的文本化，提供给模型自行查阅的能力。<br/>
+                            因此，为不支持视觉的模型，提供了一定的多模态输入能力。<br/>
+                            但是，因为是文本化的关系，输入质量就受到文本化的限制。<br/>
+                            此方式，模型将会根据需要主动使用工具读取上传的文件内容。<br/>
+                        <hr/>
+                        <div class="input-attach-files" v-if="form.attachFiles && form.attachFiles.length>0">
+                                <span v-for="(item,index) in form.attachFiles"
+                                      class="input-attach-file-item"
+                                      :key="index">
+                                    <span>{{item.fileName}}</span>
+                                    <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                </span>
+                        </div>
+                        </p>
+                        <el-upload
+                                slot="reference"
+                                ref="upload"
+                                style="display: inline-block;"
+                                action="#"
+                                :file-list="metas.uploadList"
+                                :auto-upload="false"
+                                :on-change="onUploadFileChange"
+                                :show-file-list="false"
+                        >
+                            <el-badge slot="trigger"
+                                      :value="form.attachFiles?.length || 0"
+                                      :hidden="(form.attachFiles?.length || 0)==0"
+                                      type="primary">
+                                <el-button
+                                        type="success"
+                                        size="small"
+                                        :loading="metas.uploadLoading">
+                                    附件 <i class="el-icon-upload"></i>
+                                </el-button>
+                            </el-badge>
+                        </el-upload>
+                    </el-popover>
                     <span @contextmenu.prevent="onContextMenuMoreSendOptions">
                         <el-button type="primary" size="small" @click="sendMessage"
                                    :loading="currentSession?.sending"
                                    :disabled="!form.inputText || !form.inputText.trim()">
-                        发送 <i class="el-icon-s-promotion"></i>
-                    </el-button>
+                            发送 <i class="el-icon-s-promotion"></i>
+                        </el-button>
                         <el-popover
                                 placement="top-start"
                                 title="说明"
@@ -1060,6 +1104,8 @@
                         activeSessionId: null, // 当前活跃的会话ID
                         sessionList: [],        // 会话列表 [{sessionId, title}]
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
+                        uploadLoading: false,
+                        uploadList: [],
                         maxHistoryCount: 20,
                         enableTruncOverflowHistory: true,
                         showConfig: false,
@@ -1420,6 +1466,17 @@
                         lruToolMaxSize: 20,
                         lruToolNames: [],
                         enableEchoRequestPayload: false,
+                        attachFiles: [{
+                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
+                        }, {
+                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
+                        }, {
+                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
+                        }, {
+                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
+                        }, {
+                            fileName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt'
+                        }]
                     }
                 }
             },
@@ -2511,6 +2568,8 @@
                     if (this.form.enableUserSendTime) {
                         text = '- [send time] ' + (moment(new Date()).format('YYYY-MM-DD HH:mm:ss dddd')) + '\n\n---\n\n' + text;
                     }
+                    item.attachFiles = [...this.form.attachFiles];
+                    this.form.attachFiles = [];
                 }
                 item[this.form.messageType] = {
                     role: this.form.messageType,
@@ -3090,6 +3149,90 @@
             },
             stopTts() {
                 this.$tts.stop()
+            },
+            onUploadFileChange(file) {
+                this.metas.uploadList = []
+                this.metas.uploadList.push(file)
+                this.$confirm('即将上传附件，是否继续？<br/>' + file.name, '操作提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning',
+                    dangerouslyUseHTMLString: true
+                }).then(() => {
+                    this.doUploadFile(file)
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消执行'
+                    });
+                });
+            },
+            md5ForFile(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader()
+
+                    reader.onload = function (e) {
+                        const resultBuffer = reader.result
+                        const wordArray = CryptoJS.lib.WordArray.create(resultBuffer)
+                        const md5Hash = CryptoJS.MD5(wordArray)
+
+                        resolve(md5Hash.toString())
+                    }
+
+                    reader.onerror = function (e) {
+                        reject(reader.error)
+                    }
+
+                    reader.readAsArrayBuffer(file)
+                })
+            },
+            doUploadFile(file) {
+                this.metas.uploadLoading = true;
+                try {
+                    this.md5ForFile(file.raw)
+                        .then(md5 => {
+                            let form = new FormData();
+                            form.append('file', file.raw, file.name);
+
+                            let req = this.assignOpenAiMeta({
+                                md5: md5
+                            })
+                            let reqData = this.transferSend(req);
+                            Object.keys(reqData).forEach(k => {
+                                form.append(k, reqData[k])
+                            })
+
+                            this.$axios({
+                                url: `/tmp-file/upload`,
+                                method: 'post',
+                                headers: {
+                                    'Content-Type': 'multipart/form-data'
+                                },
+                                data: form
+                            }).then(res => {
+                                if (res.data.code == 200) {
+                                    //console.log(res.data)
+                                    let resp = this.transferRecv(res.data.data);
+                                    this.form.attachFiles.push(resp);
+                                    // console.log(resp)
+                                    this.$message.success('操作成功')
+                                } else {
+                                    this.messageError(res.data.msg, 300)
+                                }
+                            }).catch(err => {
+                                this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            }).finally(() => {
+                                this.metas.uploadLoading = false;
+                            })
+                        }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.uploadLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.uploadLoading = false;
+                }
             }
         }
     });
@@ -3738,4 +3881,36 @@
 
     }
 </script>
+<style>
+    .input-attach-files {
+        width: 100%;
+        display: inline-block;
+        font-size: 14px;
+        color: #444;
+        padding: 5px;
+    }
+
+    .input-attach-file-item {
+        width: 100%;
+        overflow-wrap: anywhere;
+        border-bottom: solid 1px #bbb;
+        padding-top: 3px;
+        display: inline-block;
+    }
+
+    .input-attach-file-item > * {
+        display: inline-block;
+    }
+
+    .input-attach-file-item > span {
+        width: 80%;
+    }
+
+    .input-attach-file-item > i {
+        width: 15%;
+        color: orangered;
+        text-align: right;
+    }
+
+</style>
 </html>
