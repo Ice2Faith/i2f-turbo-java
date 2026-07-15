@@ -686,7 +686,7 @@
                             width="380"
                             trigger="hover">
                         <p>
-                            附件，使用临时文件存储，【非视觉模型】。<br/>
+                            附件，使用临时文件存储，【非视觉模型】，基于工具调用，因此需要启用工具。<br/>
                             后台使用相关工具进行上传文件的文本化，提供给模型自行查阅的能力。<br/>
                             因此，为不支持视觉的模型，提供了一定的多模态输入能力。<br/>
                             但是，因为是文本化的关系，输入质量就受到文本化的限制。<br/>
@@ -716,6 +716,7 @@
                                       :hidden="(form.attachFiles?.length || 0)==0"
                                       type="primary">
                                 <el-button
+                                        :disabled="!form.enableTools"
                                         type="success"
                                         size="small"
                                         :loading="metas.uploadLoading">
