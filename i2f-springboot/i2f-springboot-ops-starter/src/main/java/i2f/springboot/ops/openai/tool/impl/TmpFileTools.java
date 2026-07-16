@@ -76,6 +76,7 @@ public class TmpFileTools {
     protected int keepDays = 15;
 
     public static final DateTimeFormatter DIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter FILE_FORMATTER = DateTimeFormatter.ofPattern("HHmmss");
     public static final DateTimeFormatter CREATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     public static final String PROTOCOL = "upload";
 
@@ -183,7 +184,8 @@ public class TmpFileTools {
         File dateDir = getFile(datePath);
 
         String uid = UUID.randomUUID().toString().replace("-", "");
-        File uidDir = new File(dateDir, uid);
+        String uidFileName = FILE_FORMATTER.format(LocalDateTime.now()) + "-" + uid;
+        File uidDir = new File(dateDir, uidFileName);
         uidDir.mkdirs();
 
         fileName = fileName.replace("\\", "/");
@@ -256,6 +258,37 @@ public class TmpFileTools {
             return getFile(realPath);
         }
         throw new IllegalArgumentException("un-support protocol: " + protocol + "://");
+    }
+
+    public String getRealFileNameByUrl(String fileUrl) {
+        if (fileUrl == null || fileUrl.isEmpty()) {
+            throw new IllegalArgumentException("fileUrl required.");
+        }
+        int idx = fileUrl.indexOf("://");
+        if (idx < 0) {
+            return null;
+        }
+        String protocol = fileUrl.substring(0, idx);
+        if (PROTOCOL.equals(protocol)) {
+            try {
+                String realPath = fileUrl.substring(idx + 3);
+                File file = getFile(realPath);
+                if (!file.exists()) {
+                    return null;
+                }
+                File metaFile = new File(file.getParentFile(), "metadata.json");
+                if (!metaFile.exists()) {
+                    return null;
+                }
+                String json = StreamUtil.readString(metaFile);
+                Map<String, Object> map = (Map<String, Object>) jsonSerializer.deserialize(json);
+                Object ret = map.get("fileName");
+                return ret == null ? null : String.valueOf(ret);
+            } catch (Exception e) {
+
+            }
+        }
+        return null;
     }
 
 

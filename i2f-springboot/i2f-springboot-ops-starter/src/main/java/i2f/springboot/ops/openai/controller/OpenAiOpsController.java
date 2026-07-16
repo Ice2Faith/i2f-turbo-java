@@ -28,6 +28,7 @@ import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
+import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Controller;
@@ -223,6 +225,44 @@ public class OpenAiOpsController implements IOpsProvider {
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e);
+        }
+    }
+
+    @PostMapping("/tmp-file/download")
+    public void downloadTmpFile(@RequestBody OpsSecureDto reqDto,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        try {
+            if (tmpFileTools == null) {
+                throw new IllegalStateException("manager not enable tmp file upload feature.");
+            }
+            OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
+            String fileUrl = req.getFileUrl();
+            File file = tmpFileTools.getFileByUrl(fileUrl);
+            if (req.isParsedText()) {
+                file = tmpFileTools.parseAsTextFile(file);
+            }
+            String realName = null;
+            try {
+                realName = tmpFileTools.getRealFileNameByUrl(fileUrl);
+            } catch (Throwable e) {
+
+            }
+            if (realName == null || realName.isEmpty()) {
+                realName = file.getName();
+            }
+            if (realName == null || realName.isEmpty()) {
+                realName = "download.data";
+            }
+
+            ServletFileUtil.responseAsFileAttachment(new FileInputStream(file), true, realName, null, true, response);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            PrintWriter writer = response.getWriter();
+            writer.write("Internal Server Error");
+            writer.flush();
+            return;
         }
     }
 

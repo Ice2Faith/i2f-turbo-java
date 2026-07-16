@@ -704,6 +704,7 @@ html, body {
 
 .input-attach-files {
     width: 100%;
+    min-width: 240px;
     display: inline-block;
     font-size: 14px;
     color: #444;
@@ -729,16 +730,21 @@ html, body {
     background: lightblue;
 }
 
+.input-attach-file-item:hover > .input-attach-file-item__actions {
+    display: unset;
+}
+
 .input-attach-file-item > * {
     display: inline-block;
 }
 
-.input-attach-file-item > span {
-    width: 80%;
+.input-attach-file-item > .input-attach-file-item__label {
+    width: 70%;
 }
 
-.input-attach-file-item > i {
-    width: 15%;
+.input-attach-file-item > .input-attach-file-item__actions {
+    width: 25%;
+    display: none;
     color: orangered;
     text-align: right;
 }

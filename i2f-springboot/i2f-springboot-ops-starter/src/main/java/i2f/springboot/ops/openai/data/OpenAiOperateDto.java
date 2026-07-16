@@ -28,4 +28,6 @@ public class OpenAiOperateDto {
     protected List<ToolDefinition> loadedTools;
 
     protected String md5;
+    protected String fileUrl;
+    protected boolean parsedText;
 }

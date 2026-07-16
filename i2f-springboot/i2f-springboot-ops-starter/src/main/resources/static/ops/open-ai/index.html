@@ -309,8 +309,12 @@
                                 <span v-for="(item,index) in msg.attachFiles"
                                       class="input-attach-file-item"
                                       :key="index">
-                                    <span>{{item.fileName}}</span>
-                                    <i class="el-icon-circle-close" @click="msg.attachFiles.splice(index,1)"></i>
+                                    <span class="input-attach-file-item__label">{{item.fileName}}</span>
+                                    <span class="input-attach-file-item__actions">
+                                        <i class="el-icon-download" onclick="downloadUploadDocument(item)"></i>
+                                        <i class="el-icon-sold-out" onclick="downloadUploadParsedDocument(item)"></i>
+                                        <i class="el-icon-circle-close" @click="msg.attachFiles.splice(index,1)"></i>
+                                    </span>
                                 </span>
                     </div>
                     <div class="bubble-actions">
@@ -696,8 +700,12 @@
                                 <span v-for="(item,index) in form.attachFiles"
                                       class="input-attach-file-item"
                                       :key="index">
-                                    <span>{{item.fileName}}</span>
-                                    <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                    <span class="input-attach-file-item__label">{{item.fileName}}</span>
+                                    <span class="input-attach-file-item__actions">
+                                        <i class="el-icon-download" onclick="downloadUploadDocument(item)"></i>
+                                        <i class="el-icon-sold-out" onclick="downloadUploadParsedDocument(item)"></i>
+                                        <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                    </span>
                                 </span>
                         </div>
                         </p>
@@ -3233,7 +3241,106 @@
                     this.messageError(err.errorMessage || err.message || '操作失败', 300)
                     this.metas.uploadLoading = false;
                 }
-            }
+            },
+            downloadUploadDocument(item) {
+                this.metas.resultLoading = true;
+                try {
+                    this.callDownloadTmpFile(item.fileUrl, false).then(res => {
+                        const blob = new Blob([res.data], {type: res.contentType})
+                        const dom = document.createElement('a')
+                        const downUrl = window.URL.createObjectURL(blob)
+                        dom.href = downUrl
+                        dom.download = decodeURIComponent(res.fileName)
+                        dom.style.display = 'none'
+                        document.body.appendChild(dom)
+                        dom.click()
+                        dom.parentNode.removeChild(dom)
+                        window.URL.revokeObjectURL(downUrl)
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultLoading = false;
+                }
+            },
+            downloadUploadParsedDocument(item) {
+                this.metas.resultLoading = true;
+                try {
+                    this.callDownloadTmpFile(item.fileUrl, true).then(res => {
+                        const blob = new Blob([res.data], {type: res.contentType})
+                        const dom = document.createElement('a')
+                        const downUrl = window.URL.createObjectURL(blob)
+                        dom.href = downUrl
+                        dom.download = decodeURIComponent(res.fileName)
+                        dom.style.display = 'none'
+                        document.body.appendChild(dom)
+                        dom.click()
+                        dom.parentNode.removeChild(dom)
+                        window.URL.revokeObjectURL(downUrl)
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    }).finally(() => {
+                        this.metas.resultLoading = false;
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    this.metas.resultLoading = false;
+                }
+            },
+            callDownloadTmpFile(fileUrl, parsed) {
+                let req = this.assignOpenAiMeta({
+                    fileUrl: fileUrl,
+                    parsedText: parsed
+                });
+                return this.$axios({
+                    url: `/tmp-file/download`,
+                    method: 'post',
+                    responseType: 'blob',
+                    data: this.transferSend(req)
+                }).then(res => {
+                    let contentDisposition = ''
+                    let contentType = ''
+
+                    Object.keys(res.headers).forEach(k => {
+                        if ('content-disposition' == k.toLowerCase()) {
+                            contentDisposition = res.headers[k]
+                        }
+                        if ('content-type' == k.toLowerCase()) {
+                            contentType = res.headers[k]
+                        }
+                    })
+
+                    let fileName = 'download.data'
+                    if (contentDisposition && contentDisposition != '') {
+                        let arr = contentDisposition.split(';');
+                        arr.forEach(item => {
+                            item = item.trim();
+                            let pair = item.split("=", 2);
+                            let key = pair[0].trim();
+                            if ('filename' == key.toLowerCase()) {
+                                if (pair.length == 2) {
+                                    let val = decodeURIComponent(pair[1].trim());
+                                    fileName = val;
+                                }
+                            }
+                        })
+                    }
+
+                    if (!contentType || contentType == '') {
+                        contentType = 'application/octet-stream'
+                    }
+
+
+                    return {
+                        fileName: fileName,
+                        data: res.data,
+                        contentType: contentType
+                    }
+                })
+            },
         }
     });
     let defaultConfig = {
