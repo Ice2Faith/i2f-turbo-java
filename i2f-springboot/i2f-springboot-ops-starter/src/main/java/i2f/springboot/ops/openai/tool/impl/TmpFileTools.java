@@ -6,6 +6,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.extension.document.pdf.PdfConvertUtil;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.serialize.std.str.json.IJsonSerializer;
@@ -82,7 +83,8 @@ public class TmpFileTools {
     protected RagFileReader fileReader = new ListableRagFileReader(
             MarkitdownCmdRagFileReader.INSTANCE,
             EasyOcrCmdRagFileReader.INSTANCE,
-            PandocCmdRagFileReader.INSTANCE
+            PandocCmdRagFileReader.INSTANCE,
+            new PdfEasyOcrCmdRagFileReader(PdfConvertUtil::pdf2images)
     );
 
     public void cleanTmpFiles() {

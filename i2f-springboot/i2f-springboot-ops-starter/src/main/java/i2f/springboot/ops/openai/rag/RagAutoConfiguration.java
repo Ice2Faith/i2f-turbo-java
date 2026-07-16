@@ -6,6 +6,7 @@ import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.*;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
+import i2f.extension.document.pdf.PdfConvertUtil;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.io.file.FileUtil;
 import i2f.spring.web.rest.SpringWebRestClient;
@@ -104,6 +105,7 @@ public class RagAutoConfiguration {
                             }
                             if (properties.isEnableEasyocrDocReader()) {
                                 reader.getReaders().add(EasyOcrCmdRagFileReader.INSTANCE);
+                                reader.getReaders().add(new PdfEasyOcrCmdRagFileReader(PdfConvertUtil::pdf2images));
                             }
                             if (properties.isEnablePandocDocReader()) {
                                 reader.getReaders().add(PandocCmdRagFileReader.INSTANCE);
