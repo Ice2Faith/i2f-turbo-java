@@ -311,9 +311,9 @@
                                       :key="index">
                                     <span class="input-attach-file-item__label">{{item.fileName}}</span>
                                     <span class="input-attach-file-item__actions">
-                                        <i class="el-icon-download" onclick="downloadUploadDocument(item)"></i>
-                                        <i class="el-icon-sold-out" onclick="downloadUploadParsedDocument(item)"></i>
-                                        <i class="el-icon-circle-close" @click="msg.attachFiles.splice(index,1)"></i>
+                                        <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
+                                        <i class="el-icon-circle-close" style="color: orangered;" @click="msg.attachFiles.splice(index,1)"></i>
                                     </span>
                                 </span>
                     </div>
@@ -702,8 +702,8 @@
                                       :key="index">
                                     <span class="input-attach-file-item__label">{{item.fileName}}</span>
                                     <span class="input-attach-file-item__actions">
-                                        <i class="el-icon-download" onclick="downloadUploadDocument(item)"></i>
-                                        <i class="el-icon-sold-out" onclick="downloadUploadParsedDocument(item)"></i>
+                                        <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
                                         <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
                                     </span>
                                 </span>
@@ -3233,8 +3233,7 @@
                                 this.metas.uploadLoading = false;
                             })
                         }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                    }).finally(() => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300);
                         this.metas.uploadLoading = false;
                     })
                 } catch (err) {
