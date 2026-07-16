@@ -254,6 +254,9 @@ public class OpenAiOpsController implements IOpsProvider {
             if (realName == null || realName.isEmpty()) {
                 realName = "download.data";
             }
+            if (req.isParsedText()) {
+                realName = realName + ".parsed.txt";
+            }
 
             ServletFileUtil.responseAsFileAttachment(new FileInputStream(file), true, realName, null, true, response);
         } catch (Throwable e) {
