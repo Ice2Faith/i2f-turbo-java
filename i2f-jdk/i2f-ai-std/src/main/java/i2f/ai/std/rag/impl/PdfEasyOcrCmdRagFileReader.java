@@ -45,6 +45,9 @@ public class PdfEasyOcrCmdRagFileReader implements RagFileReader {
         if (idx >= 0) {
             suffix = name.substring(idx).toLowerCase();
         }
+        if (extractor == null) {
+            return false;
+        }
         if (SUFFIXES.contains(suffix)) {
             return true;
         }
