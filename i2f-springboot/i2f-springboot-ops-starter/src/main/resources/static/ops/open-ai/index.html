@@ -455,7 +455,6 @@
                                 width="720"
                                 trigger="hover">
                         <div>
-
                             <el-popover
                                     placement="top-start"
                                     title="说明"
@@ -477,6 +476,110 @@
                                 <el-checkbox slot="reference"
                                              v-model="metas.enableCustomDisplay">
                                     定制显示
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
+                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具，并使用LRU策略淘汰最久未使用的工具。<br/>
+                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
+                                <hr/>
+                                <el-tag v-for="(tn,ti) in form.lruToolNames"
+                                        size="mini"
+                                        style="margin-left: 3px;"
+                                        closable
+                                        @close="form.lruToolNames.splice(ti,1)">
+                                    {{tn}}
+                                </el-tag>
+                                <hr/>
+                                最大工具个数：
+                                <el-input-number v-model="form.lruToolMaxSize"
+                                                 size="mini"
+                                                 :min="1"
+                                                 :max="99999"></el-input-number>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools"
+                                             v-model="form.enableLruTools">
+                                    动态工具
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
+                                    如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
+                                    如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
+                                <hr/>
+                                准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
+                                特别的<br/>
+                                如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
+                                <el-button size="mini"
+                                           icon="el-icon-refresh"
+                                           @click="loadToolTags"></el-button>
+                                <hr/>
+                                <el-checkbox-group v-model="form.autoApprovalToolTags">
+                                    <el-checkbox v-for="item in metas.toolTags"
+                                                 :key="item"
+                                                 :label="item">
+                                        {{item}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    知识库，是否允许连接使用知识库。<br/>
+                                    如果开启，模型将根据需要连接使用知识库工具，检索知识库内容。<br/>
+                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools"
+                                             v-model="form.enableRags">
+                                    知识库
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
+                                    如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
+                                    如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
+                                    注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
+                                    注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
+                                    技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
+                                    文件的内容格式要求如下，案例为：<br/>
+                                    <br/>
+                                    --- <br/>
+                                    name: weather_analysis_skill <br/>
+                                    description: 获取指定城市天气并分析是否适合户外运动 <br/>
+                                    tags: [ weather, sports, analysis ] <br/>
+                                    version: 1.0.0 <br/>
+                                    author: your_name <br/>
+                                    --- <br/>
+                                    <br/>
+                                    # 第一步：... <br/>
+                                    <br/>
+                                </p>
+                                <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
+                                    技能调用
                                 </el-checkbox>
                             </el-popover>
                             <el-popover
@@ -534,110 +637,6 @@
                                 <el-checkbox slot="reference" v-model="form.enableEchoRequestPayload">
                                     回显请求
                                 </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
-                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具，并使用LRU策略淘汰最久未使用的工具。<br/>
-                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
-                                <hr/>
-                                <el-tag v-for="(tn,ti) in form.lruToolNames"
-                                        size="mini"
-                                        style="margin-left: 3px;"
-                                        closable
-                                        @close="form.lruToolNames.splice(ti,1)">
-                                    {{tn}}
-                                </el-tag>
-                                <hr/>
-                                最大工具个数：
-                                <el-input-number v-model="form.lruToolMaxSize"
-                                                 size="mini"
-                                                 :min="1"
-                                                 :max="99999"></el-input-number>
-                                <el-divider direction="vertical"></el-divider>
-                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools"
-                                             v-model="form.enableLruTools">
-                                    动态工具
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    知识库，是否允许连接使用知识库。<br/>
-                                    如果开启，模型将根据需要连接使用知识库工具，检索知识库内容。<br/>
-                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools"
-                                             v-model="form.enableRags">
-                                    知识库
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
-                                    如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
-                                    如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
-                                    注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
-                                    注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
-                                    技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
-                                    文件的内容格式要求如下，案例为：<br/>
-                                    <br/>
-                                    --- <br/>
-                                    name: weather_analysis_skill <br/>
-                                    description: 获取指定城市天气并分析是否适合户外运动 <br/>
-                                    tags: [ weather, sports, analysis ] <br/>
-                                    version: 1.0.0 <br/>
-                                    author: your_name <br/>
-                                    --- <br/>
-                                    <br/>
-                                    # 第一步：... <br/>
-                                    <br/>
-                                </p>
-                                <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
-                                    技能调用
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
-                                    如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
-                                    如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
-                                <hr/>
-                                准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
-                                特别的<br/>
-                                如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
-                                <el-button size="mini"
-                                           icon="el-icon-refresh"
-                                           @click="loadToolTags"></el-button>
-                                <hr/>
-                                <el-checkbox-group v-model="form.autoApprovalToolTags">
-                                    <el-checkbox v-for="item in metas.toolTags"
-                                                 :key="item"
-                                                 :label="item">
-                                        {{item}}
-                                    </el-checkbox>
-                                </el-checkbox-group>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
                             </el-popover>
                             <el-popover
                                     placement="top-start"
