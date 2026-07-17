@@ -1,4 +1,4 @@
-package i2f.ai.rest.mcp.server.netty;
+package i2f.springboot.ai.mcp.server.netty.impl;
 
 import i2f.mutator.BaseMutator;
 import io.netty.bootstrap.ServerBootstrap;

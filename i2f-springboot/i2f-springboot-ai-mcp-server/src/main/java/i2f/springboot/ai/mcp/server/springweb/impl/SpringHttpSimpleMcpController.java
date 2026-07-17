@@ -1,4 +1,4 @@
-package i2f.ai.rest.mcp.server.springmvc;
+package i2f.springboot.ai.mcp.server.springweb.impl;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.data.AppPayloadDto;
