@@ -70,7 +70,8 @@ public class AgentTools {
 
     @Tool(
             tags = {
-                    AiTags.READONLY_VALUE
+                    AiTags.READONLY_VALUE,
+                    AiTags.WEB_VALUE
             },
             description = "判断SQL语句是否符合安全要求"
     )

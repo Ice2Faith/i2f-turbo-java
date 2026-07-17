@@ -34,7 +34,8 @@ public class CommandTools {
     @Tool(
             tags = {
                     AiTags.AUTO_VALUE,
-                    AiTags.READONLY_VALUE
+                    AiTags.READONLY_VALUE,
+                    AiTags.OS_VALUE
             }, description = "get current os type"
     )
     public String get_os_type() {
@@ -55,7 +56,8 @@ public class CommandTools {
     @Tool(
             tags = {
                     AiTags.EXECUTABLE_VALUE,
-                    AiTags.HUMAN_VALUE
+                    AiTags.HUMAN_VALUE,
+                    AiTags.COMMAND_VALUE
             }, description = "run an command line, implements by java process."
     )
     public String run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/k\",\"start\",\"calc\"]")

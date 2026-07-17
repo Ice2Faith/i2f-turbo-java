@@ -18,7 +18,9 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/3/23 14:11
  * @desc
  */
-@Tools
+@Tools(tags = {
+        AiTags.SKILL_VALUE
+})
 public class SkillsTools {
 
     @Tool(
@@ -82,7 +84,8 @@ public class SkillsTools {
     @Tool(
             tags = {
                     AiTags.EXECUTABLE_VALUE,
-                    AiTags.HUMAN_VALUE
+                    AiTags.HUMAN_VALUE,
+                    AiTags.COMMAND_VALUE
             }, description = "执行技能(skill)中的命令行脚本"
     )
     public String run_skill_script(@ToolParam(description = "技能名称，例如：search_website") String skillName,

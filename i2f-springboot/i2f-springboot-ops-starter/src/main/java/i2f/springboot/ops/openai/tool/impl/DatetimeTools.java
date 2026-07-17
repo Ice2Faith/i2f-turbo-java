@@ -18,7 +18,10 @@ import java.time.format.DateTimeFormatter;
  */
 @ConditionalOnExpression("${ai.tools.datetime.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATETIME_VALUE,
+        AiTags.READONLY_VALUE
+})
 public class DatetimeTools {
 
     @Tool(

@@ -17,7 +17,9 @@ import java.security.MessageDigest;
  */
 @ConditionalOnExpression("${ai.tools.jce.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.CODEC_VALUE
+})
 public class JceTools {
 
     @Tool(

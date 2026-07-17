@@ -25,7 +25,9 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.FILE_VALUE
+})
 public class LocalFileTools {
     public static final DateTimeFormatter BACKUP_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
 

@@ -40,7 +40,25 @@ public enum AiTags implements AiTagValues {
     HIGH_COST(HIGH_COST_VALUE, "高成本操作，消耗大量Token、算力或产生直接金钱费用"),
     SLOW_EXEC(SLOW_EXEC_VALUE, "慢速执行，耗时较长，可能导致请求超时，建议异步处理"),
     RATE_LIMITED(RATE_LIMITED_VALUE, "限流敏感，该工具调用频率受限，需谨慎使用"),
-    ;
+
+    // ==========================================
+    // 6. 基础分类
+    // ==========================================
+    DATETIME(DATETIME_VALUE, "日期时间"),
+    RANDOM(RANDOM_VALUE, "随机"),
+    FILE(FILE_VALUE, "文件"),
+    DATABASE(DATABASE_VALUE, "数据库"),
+    OS(OS_VALUE, "操作系统"),
+    COMMAND(COMMAND_VALUE, "命令执行"),
+    WEB(WEB_VALUE, "网页"),
+    DOWNLOAD(DOWNLOAD_VALUE, "下载"),
+    BROWSER(BROWSER_VALUE, "浏览器"),
+    MATH(MATH_VALUE, "数学"),
+    SCRIPT(SCRIPT_VALUE, "脚本执行"),
+    CODEC(CODEC_VALUE, "编解码"),
+    RAG(RAG_VALUE, "知识库"),
+    SKILL(SKILL_VALUE, "技能"),
+    MCP(MCP_VALUE, "工具库");
 
     private String tag;
     private String description;

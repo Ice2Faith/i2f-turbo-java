@@ -38,7 +38,9 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.FILE_VALUE
+})
 public class TmpFileTools {
     private static final Set<String> exposeTools;
     private final ScheduledExecutorService pool = Executors.newSingleThreadScheduledExecutor();

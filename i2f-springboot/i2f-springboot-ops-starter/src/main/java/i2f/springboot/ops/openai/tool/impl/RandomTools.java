@@ -16,7 +16,9 @@ import java.security.SecureRandom;
  */
 @ConditionalOnExpression("${ai.tools.random.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.RANDOM_VALUE
+})
 public class RandomTools {
 
     private SecureRandom random = new SecureRandom();

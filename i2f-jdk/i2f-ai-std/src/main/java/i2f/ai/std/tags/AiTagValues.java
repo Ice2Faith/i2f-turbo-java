@@ -40,4 +40,23 @@ public interface AiTagValues {
     String HIGH_COST_VALUE = "high_cost";
     String SLOW_EXEC_VALUE = "slow_exec";
     String RATE_LIMITED_VALUE = "rate_limited";
+
+    // ==========================================
+    // 6. 基础分类
+    // ==========================================
+    String DATETIME_VALUE = "datetime";
+    String RANDOM_VALUE = "random";
+    String FILE_VALUE = "file";
+    String DATABASE_VALUE = "database";
+    String OS_VALUE = "os";
+    String COMMAND_VALUE = "command";
+    String WEB_VALUE = "web";
+    String DOWNLOAD_VALUE = "download";
+    String BROWSER_VALUE = "browser";
+    String MATH_VALUE = "math";
+    String SCRIPT_VALUE = "script";
+    String CODEC_VALUE = "codec";
+    String RAG_VALUE = "rag";
+    String SKILL_VALUE = "skill";
+    String MCP_VALUE = "mcp";
 }

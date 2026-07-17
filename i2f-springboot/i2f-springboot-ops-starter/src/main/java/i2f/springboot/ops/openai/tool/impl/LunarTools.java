@@ -24,7 +24,9 @@ import java.util.Map;
 @ConditionalOnClass(Lunar.class)
 @ConditionalOnExpression("${ai.tools.lunar.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATETIME_VALUE
+})
 public class LunarTools {
 
     @Tool(

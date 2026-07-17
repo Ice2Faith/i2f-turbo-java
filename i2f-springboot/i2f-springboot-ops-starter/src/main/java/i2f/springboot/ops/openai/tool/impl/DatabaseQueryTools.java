@@ -40,7 +40,9 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATABASE_VALUE
+})
 public class DatabaseQueryTools {
 
     @Autowired

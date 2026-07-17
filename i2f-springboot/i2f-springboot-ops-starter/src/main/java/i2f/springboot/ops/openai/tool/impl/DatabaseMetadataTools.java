@@ -38,7 +38,9 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATABASE_VALUE
+})
 public class DatabaseMetadataTools {
 
     @Autowired
@@ -81,7 +83,9 @@ public class DatabaseMetadataTools {
         }
     }
 
-    @Tool(tags = {AiTags.READONLY_VALUE}, description = "list databases of a given datasource")
+    @Tool(tags = {
+            AiTags.READONLY_VALUE
+    }, description = "list databases of a given datasource")
     public List<String> get_datasource_database_list(@ToolParam(value = "datasourceName", description = "the datasource name, cloud be null means default, for example primary or slave")
                                                      String datasourceName) throws Exception {
         if (datasourceName == null || datasourceName.isEmpty()) {

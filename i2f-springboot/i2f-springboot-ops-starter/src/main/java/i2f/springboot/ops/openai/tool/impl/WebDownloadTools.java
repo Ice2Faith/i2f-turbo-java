@@ -28,7 +28,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Tools
+@Tools(tags = {
+        AiTags.WEB_VALUE,
+        AiTags.DOWNLOAD_VALUE
+})
 public class WebDownloadTools {
 
     @Autowired(required = false)

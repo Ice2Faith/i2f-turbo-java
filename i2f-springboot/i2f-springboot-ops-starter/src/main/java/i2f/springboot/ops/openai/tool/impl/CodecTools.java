@@ -19,7 +19,9 @@ import java.util.Base64;
  */
 @ConditionalOnExpression("${ai.tools.codec.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.CODEC_VALUE
+})
 public class CodecTools {
 
     @Tool(

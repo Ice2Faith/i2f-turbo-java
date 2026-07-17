@@ -16,7 +16,9 @@ import java.util.UUID;
  */
 @ConditionalOnExpression("${ai.tools.uid.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.RANDOM_VALUE
+})
 public class UidTools {
 
     @Tool(

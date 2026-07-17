@@ -21,7 +21,9 @@ import java.util.*;
  * @date 2026/7/5 17:27
  * @desc
  */
-@Tools
+@Tools(tags = {
+        AiTags.MCP_VALUE
+})
 public class McpProviderTools {
     private static final Set<String> exposeTools;
 
