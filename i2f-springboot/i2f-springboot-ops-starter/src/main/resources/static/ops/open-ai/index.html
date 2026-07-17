@@ -2121,7 +2121,7 @@
             },
             loadToolTags() {
                 try {
-                    let req = this.assignOpenAiMeta({})
+                    let req = this.assignOpenAiMeta({}, true)
                     this.$axios({
                         url: '/tool/tags',
                         method: 'post',
@@ -2142,17 +2142,18 @@
                     this.messageError(err.errorMessage || err.message || '操作失败', 300)
                 }
             },
-            assignOpenAiMeta(req) {
+            assignOpenAiMeta(req, uncheckModelMeta) {
                 req.meta = {...this.form.meta};
-                if (!req.meta.baseUrl) {
-                    throw new Error('请先填写 Base URL');
+                if (!uncheckModelMeta) {
+                    if (!req.meta.baseUrl) {
+                        throw new Error('请先填写 Base URL');
+                    }
+                    if (!req.meta.apiKey) {
+                        throw new Error('请先填写 Api Key');
+                    }
+                    let baseUrl = this.extraStandardBaseUrl(req.meta.baseUrl);
+                    req.meta.baseUrl = baseUrl;
                 }
-                if (!req.meta.apiKey) {
-                    throw new Error('请先填写 Api Key');
-                }
-                let baseUrl = this.extraStandardBaseUrl(req.meta.baseUrl);
-                req.meta.baseUrl = baseUrl;
-
                 return req;
             },
             extraStandardBaseUrl(baseUrl) {
@@ -3293,7 +3294,7 @@
 
                             let req = this.assignOpenAiMeta({
                                 md5: md5
-                            })
+                            }, true)
                             let reqData = this.transferSend(req);
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k])
@@ -3382,7 +3383,7 @@
                 let req = this.assignOpenAiMeta({
                     fileUrl: fileUrl,
                     parsedText: parsed
-                });
+                }, true);
                 return this.$axios({
                     url: `/tmp-file/download`,
                     method: 'post',
