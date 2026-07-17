@@ -624,6 +624,9 @@
                                 <hr/>
                                 准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
                                 特别的，如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
+                                <el-button size="mini"
+                                           icon="el-icon-refresh"
+                                           @click="loadToolTags"></el-button>
                                 <hr/>
                                 <el-checkbox-group v-model="form.autoApprovalToolTags">
                                     <el-checkbox v-for="item in metas.toolTags"
