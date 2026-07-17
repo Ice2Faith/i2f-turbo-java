@@ -3054,7 +3054,8 @@
                             let definition = toolDefinitionMap[item.function.name]
                             let needApproval = true;
                             if (definition && definition.tags) {
-                                if (definition.tags.includes('auto')) {
+                                if (definition.tags.includes('auto')
+                                    && this.form.autoApprovalToolTags.includes('auto')) {
                                     needApproval = false;
                                 }
                                 if (needApproval) {
