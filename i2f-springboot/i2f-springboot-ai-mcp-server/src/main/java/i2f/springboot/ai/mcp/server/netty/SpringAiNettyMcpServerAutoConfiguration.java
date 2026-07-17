@@ -1,0 +1,18 @@
+package i2f.springboot.ai.mcp.server.netty;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Configuration;
+
+/**
+ * @author Ice2Faith
+ * @date 2026/7/17 21:01
+ * @desc
+ */
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.netty.enable:false}")
+@Configuration
+@Slf4j
+@Data
+public class SpringAiNettyMcpServerAutoConfiguration {
+}
