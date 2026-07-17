@@ -32,7 +32,9 @@ import org.springframework.util.ClassUtils;
 @Data
 @NoArgsConstructor
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.BROWSER_VALUE
+})
 public class SeleniumWebSearchTools {
 
     public static class WindowsSeleniumCondition implements Condition {

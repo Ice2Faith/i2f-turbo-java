@@ -16,7 +16,9 @@ import org.springframework.stereotype.Component;
  */
 @ConditionalOnExpression("${ai.tools.ba-zi.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATETIME_VALUE
+})
 public class BaZiTools {
     @Tool(
             tags = {

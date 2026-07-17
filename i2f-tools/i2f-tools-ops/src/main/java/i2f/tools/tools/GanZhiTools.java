@@ -18,7 +18,9 @@ import java.time.format.DateTimeFormatter;
  */
 @ConditionalOnExpression("${ai.tools.gan-zhi.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATETIME_VALUE
+})
 public class GanZhiTools {
     public static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 

@@ -4,20 +4,15 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
-import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
-import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
-import i2f.extension.antlr4.script.funic.lang.resolver.impl.SafeFunicResolverProxy;
 import i2f.extension.antlr4.script.funic.lang.resolver.impl.SandboxFunicResolver;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -28,7 +23,10 @@ import java.util.List;
  */
 @ConditionalOnExpression("${ai.tools.math.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.MATH_VALUE,
+        AiTags.SCRIPT_VALUE
+})
 public class MathTools {
     private static final FunicResolver resolver = SandboxFunicResolver.createDefault().toMutator()
             .apply(u->{u.getUseVisitorRegistryGlobalMethods().set(true);})
