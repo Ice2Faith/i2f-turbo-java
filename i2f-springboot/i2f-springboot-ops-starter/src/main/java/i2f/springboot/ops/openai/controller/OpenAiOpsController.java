@@ -27,6 +27,7 @@ import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
+import i2f.springboot.ops.openai.tool.impl.TruthStoreTools;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
@@ -333,6 +334,12 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
+                    if (req.isEnableTruth()) {
+                        String truthContent = req.getTruthContent();
+                        OpenAiSystemMessage system = new OpenAiSystemMessage("# 关键事实\n\n" + truthContent);
+                        completion.getMessages().add(0, system);
+                    }
+
                     if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
                         String content = McpProviderTools.SYSTEM_PROMPT;
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);
@@ -381,6 +388,19 @@ public class OpenAiOpsController implements IOpsProvider {
                         if (toolManager != null) {
                             List<ToolDefinition> tools = toolManager.getTools();
                             if (tools != null) {
+                                if (!req.isEnableTruth()) {
+                                    tools = tools.stream()
+                                            .filter(e -> {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                if (rawTool != null) {
+                                                    if (TruthStoreTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                        return false;
+                                                    }
+                                                }
+                                                return true;
+                                            })
+                                            .collect(Collectors.toList());
+                                }
                                 if (!req.isEnableSkills()) {
                                     tools = tools.stream()
                                             .filter(e -> {
@@ -467,6 +487,19 @@ public class OpenAiOpsController implements IOpsProvider {
                                     Map<String, ToolDefinition> definitionMap = new HashMap<>();
                                     if (toolManager != null) {
                                         List<ToolDefinition> tools = toolManager.getTools();
+                                        if (!req.isEnableTruth()) {
+                                            tools = tools.stream()
+                                                    .filter(e -> {
+                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                        if (rawTool != null) {
+                                                            if (TruthStoreTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                                return false;
+                                                            }
+                                                        }
+                                                        return true;
+                                                    })
+                                                    .collect(Collectors.toList());
+                                        }
                                         if (!req.isEnableSkills()) {
                                             tools = tools.stream()
                                                     .filter(e -> {
@@ -690,6 +723,14 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
+                            if (req.isEnableTruth()) {
+                                Set<String> checkNames = TruthStoreTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
                             if (unqToolNames.contains(name)) {
                                 return true;
                             }
@@ -702,6 +743,26 @@ public class OpenAiOpsController implements IOpsProvider {
                     String url = req.getMeta().getBaseUrl();
                     url = extraStandardBaseUrl(url);
                     url = url + "/chat/completions";
+
+                    if (req.isEnableTruth()) {
+                        String truthContent = req.getTruthContent();
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
+
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
+                        dto.setEcho_truth(system);
+
+                        String defTruthMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defTruthMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defTruthMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+                    }
 
                     if (req.isEnableEchoRequestPayload()) {
                         String emitPayloadMsg = objectMapper.writeValueAsString(completion);

@@ -500,6 +500,19 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
+                                    事实注入，系统为模型提供主动的事实存储与更新。<br/>
+                                    如果开启，系统将会自动与模型配合维护事实，保证时刻提醒模型客观事实，不要遗忘或者幻觉。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableTruth">
+                                    事实注入
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
                                     附加时间，自动为用户消息添加发送时间。<br/>
                                     如果开启，模型将会得到每次发送的时间，对于聊天助手类的应用，可以让模型感知到时间的变化。<br/>
                                     因此，模型的回答将会变得有时间概念，比如会主动答复用户为什么这么久没理人之类的。<br/>
@@ -1441,6 +1454,7 @@
                             {label: '工具结果', value: 'echo_tool', std: false},
                             {label: '工具请求', value: 'request_tool', std: false},
                             {label: '技能注入', value: 'echo_skill', std: false},
+                            {label: '事实注入', value: 'echo_truth', std: false}
                         ],
                         enableCustomDisplay: false,
                         hiddenMessageTypes: [],
@@ -1470,7 +1484,6 @@
                         },
                         presetBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',   // 当前选中的预设地址（仅用于 select 绑定）
                         modelName: 'qwen-plus',
-                        messageList: [],
                         inputText: '',
                         messageType: 'user',
                         encryptOutput: false,
@@ -1484,7 +1497,8 @@
                         lruToolMaxSize: 20,
                         lruToolNames: [],
                         enableEchoRequestPayload: false,
-                        attachFiles: []
+                        attachFiles: [],
+                        enableTruth: false,
                     }
                 }
             },
@@ -2713,6 +2727,15 @@
 
                 let _this = this;
                 let encryptOutput = this.form.encryptOutput;
+                let truthContent = '';
+                // 获取最后一次事实
+                for (let i = messages.length - 1; i >= 0; i--) {
+                    let item = messages[i];
+                    if (item.type == 'echo_truth') {
+                        truthContent = item[item.type].content;
+                        break;
+                    }
+                }
 
                 function insertBeforeLast(arr, item) {
                     // 如果数组为空，插入到首位；否则插入到倒数第二位
@@ -2804,6 +2827,14 @@
                             json.hidden = false;
                             insertBeforeLast(messages, json);
                             // messages.push(json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_truth') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_lru_tools') {
@@ -2907,6 +2938,8 @@
                     req.lruToolNames = this.form.lruToolNames;
                     req.lruToolMaxSize = this.form.lruToolMaxSize;
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
+                    req.enableTruth = this.form.enableTruth;
+                    req.truthContent = truthContent;
                     req = this.transferSend(req);
 
                     this.$responsing = true;

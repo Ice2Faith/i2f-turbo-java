@@ -29,5 +29,6 @@ public class OpenAiMessageVo implements BaseMutator<OpenAiMessageVo> {
     protected EchoOpenAiToolMessage echo_tool;
     protected RequestOpenAiToolMessage request_tool;
     protected OpenAiSystemMessage echo_skill;
+    protected OpenAiSystemMessage echo_truth;
     protected List<Map<String, Object>> attachFiles;
 }

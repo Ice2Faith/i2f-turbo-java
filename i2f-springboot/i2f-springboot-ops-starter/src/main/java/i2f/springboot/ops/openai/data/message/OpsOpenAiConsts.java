@@ -20,4 +20,6 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
     String ECHO_LRU_TOOLS = "echo_lru_tools";
 
     String ECHO_REQUEST_PAYLOAD = "echo_request_payload";
+
+    String ECHO_TRUTH = "echo_truth";
 }
