@@ -270,6 +270,30 @@ public class OpenAiOpsController implements IOpsProvider {
         }
     }
 
+    @PostMapping("/tool/tags")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> toolTags(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
+            Set<String> tags = new TreeSet<>();
+            if (toolManager != null) {
+                List<ToolDefinition> tools = toolManager.getTools();
+                if (tools != null) {
+                    for (ToolDefinition tool : tools) {
+                        Set<String> next = tool.getTags();
+                        if (next != null) {
+                            tags.addAll(next);
+                        }
+                    }
+                }
+            }
+            return transfer.success(tags);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e);
+        }
+    }
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));

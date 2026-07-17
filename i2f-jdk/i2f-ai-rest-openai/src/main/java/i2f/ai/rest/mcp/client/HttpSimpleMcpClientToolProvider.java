@@ -1,12 +1,12 @@
 package i2f.ai.rest.mcp.client;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.client.data.SimpleMcpToolDefinition;
 import i2f.ai.rest.mcp.client.data.SimpleMcpToolListRespDto;
 import i2f.ai.rest.mcp.data.AppPayloadDto;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
@@ -128,7 +128,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
             if (dto.getCode() != ApiCode.SUCCESS) {
                 throw new IllegalStateException("get tools error: " + dto.getMsg());
             }
-            List<SimpleMcpToolDefinition> list = dto.getData();
+            List<DefaultToolDefinition> list = dto.getData();
 
             cache.clear();
             cache.addAll(list);

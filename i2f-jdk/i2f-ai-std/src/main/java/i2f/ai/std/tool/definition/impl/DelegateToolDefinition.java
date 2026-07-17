@@ -3,6 +3,8 @@ package i2f.ai.std.tool.definition.impl;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 
+import java.util.Set;
+
 /**
  * @author Ice2Faith
  * @date 2026/7/5 14:51
@@ -28,6 +30,11 @@ public class DelegateToolDefinition implements ToolDefinition {
     @Override
     public FunctionJsonSchema getJsonSchema() {
         return delegate.getJsonSchema();
+    }
+
+    @Override
+    public Set<String> getTags() {
+        return delegate.getTags();
     }
 
     public ToolDefinition getDelegate() {

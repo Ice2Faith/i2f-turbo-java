@@ -1,5 +1,6 @@
 package i2f.ai.rest.mcp.client.data;
 
+import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
 import i2f.resp.ApiResp;
 
 import java.util.List;
@@ -9,5 +10,5 @@ import java.util.List;
  * @date 2026/7/13 10:31
  * @desc
  */
-public class SimpleMcpToolListRespDto extends ApiResp<List<SimpleMcpToolDefinition>> {
+public class SimpleMcpToolListRespDto extends ApiResp<List<DefaultToolDefinition>> {
 }

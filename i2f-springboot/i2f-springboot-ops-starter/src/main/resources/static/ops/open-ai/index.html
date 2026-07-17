@@ -621,6 +621,17 @@
                                     工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
                                     如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
                                     如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
+                                <hr/>
+                                准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
+                                特别的，如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
+                                <hr/>
+                                <el-checkbox-group v-model="form.autoApprovalToolTags">
+                                    <el-checkbox v-for="item in metas.toolTags"
+                                                 :key="item"
+                                                 :label="item">
+                                        {{item}}
+                                    </el-checkbox>
+                                </el-checkbox-group>
                                 </p>
                                 <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
                             </el-popover>
@@ -1144,6 +1155,7 @@
                         ttsPlaying: false,
                         echoRequestPayload: {},
                         moreSendMenus: [],
+                        toolTags: [],
                         loadModelsLoading: false,
                         loadModels: {
                             // 已加载的模型列表，key=baseUrl,value=模型列表
@@ -1499,6 +1511,7 @@
                         enableEchoRequestPayload: false,
                         attachFiles: [],
                         enableTruth: false,
+                        autoApprovalToolTags: ['auto']
                     }
                 }
             },
@@ -2101,7 +2114,30 @@
                 }
             },
             onCertChange() {
-
+                this.loadToolTags();
+            },
+            loadToolTags() {
+                try {
+                    let req = this.assignOpenAiMeta({})
+                    this.$axios({
+                        url: '/tool/tags',
+                        method: 'post',
+                        data: this.transferSend(req)
+                    }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data) || []
+                            //console.log(resp)
+                            this.metas.toolTags = resp || []
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    })
+                } catch (err) {
+                    this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                }
             },
             assignOpenAiMeta(req) {
                 req.meta = {...this.form.meta};
@@ -3012,17 +3048,34 @@
                             })
 
                             let definition = toolDefinitionMap[item.function.name]
+                            let needApproval = true;
                             if (definition && definition.tags) {
                                 if (!definition.tags.includes('auto')) {
-                                    toolApprovalList.push({
-                                        tool_call_id: item.id,
-                                        functionName: item.function.name,
-                                        reject: false,
-                                        rejectReason: '',
-                                        function: item.function,
-                                        definition: definition
-                                    })
+                                    needApproval = false;
                                 }
+                                if (needApproval) {
+                                    let flag = true;
+                                    for (let i = 0; i < definition.tags.length; i++) {
+                                        let defTag = definition.tags[i];
+                                        if (!this.form.autoApprovalToolTags.includes(defTag)) {
+                                            flag = false;
+                                            break;
+                                        }
+                                    }
+                                    if (flag) {
+                                        needApproval = false;
+                                    }
+                                }
+                            }
+                            if (needApproval) {
+                                toolApprovalList.push({
+                                    tool_call_id: item.id,
+                                    functionName: item.function.name,
+                                    reject: false,
+                                    rejectReason: '',
+                                    function: item.function,
+                                    definition: definition
+                                })
                             }
                         })
 

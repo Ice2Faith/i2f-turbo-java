@@ -142,13 +142,11 @@ public class ToolRawHelper {
 
         String name = functionSchema.getName();
         String description = functionSchema.getDescription();
-        Map<String, Object> parametersSchema = functionSchema.getParameters();
 
         ToolRawDefinition definition = new ToolRawDefinition();
         definition.setJsonSchema(functionSchema);
         definition.setName(name);
         definition.setDescription(description);
-        definition.setParametersJsonSchema(parametersSchema);
         definition.setParameterNames(parameterNames);
         definition.setBindMethod(method);
         definition.setBindClass(method.getDeclaringClass());
