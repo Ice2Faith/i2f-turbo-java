@@ -934,6 +934,16 @@
     </el-dialog>
 </div>
 </body>
+<script type="module">
+    import mermaid from '../lib/mermaid@11/dist/mermaid.esm.min.mjs';
+
+    // 初始化配置：关闭自动加载，因为我们打算手动控制渲染时机
+    mermaid.initialize({
+        startOnLoad: false
+    });
+
+    window.mermaid = mermaid;
+</script>
 <!-- 引入 ES Module 类型的 Three.js 和 Cannon-es -->
 <script type="importmap">
     {
@@ -3479,6 +3489,29 @@
 
                 };
                 setTimeout(applyFunc, 300);
+            } else if (lang == 'mermaid' && !window.app.$responsing) {
+
+                let chartId = 'mermaid_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<div id="${chartId}" class="rich-code-block mermaid-code-block"></div>`;
+                actionsHtml = `<i class="el-icon-download" onclick="onDownloadMermaidBlock(event,'${chartId}')"></i>`;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+                    dom.chartCode = str;
+
+                    let graph = str.trim();
+                    renderMermaid(dom, graph)
+                };
+                setTimeout(applyFunc, 300);
             } else if (lang == 'canvas' && !window.app.$responsing) {
 
                 let chartId = 'canvas_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
@@ -3811,6 +3844,48 @@
             // 释放内存
             URL.revokeObjectURL(url);
         }, 'image/png', 0.9); // 指定格式和画质
+    }
+
+    function renderMermaid(dom, graph) {
+        let bubbleDom = getParentMessageBubbleDom(dom);
+        if (bubbleDom) {
+            if (bubbleDom.rendering) {
+                setTimeout(() => {
+                    renderMermaid(dom, graph);
+                }, 90);
+                return;
+            }
+        }
+        setTimeout(async () => {
+            if (bubbleDom) {
+                bubbleDom.rendering = true;
+            }
+            try {
+                // 核心：调用 render 方法
+                // 参数1: 唯一ID (用于内部生成临时DOM)
+                // 参数2: 图表定义文本
+                const {svg, bindFunctions} = await mermaid.render('render_' + dom.id, graph);
+
+                // 将生成的 SVG 代码插入到目标容器中
+                dom.innerHTML = svg;
+
+                // 如果图表包含交互（如点击事件、工具提示），需要绑定函数
+                if (bindFunctions) {
+                    bindFunctions(dom);
+                }
+            } catch (error) {
+                // 处理语法错误等异常情况
+                console.error('Mermaid 渲染失败:', error);
+                dom.innerHTML = `<p style="color:red;">图表语法错误，请检查代码！</p>`;
+            }
+            if (bubbleDom) {
+                bubbleDom.rendering = false;
+            }
+        }, 0)
+    }
+
+    function onDownloadMermaidBlock(event, domId) {
+        onDownloadSvgBlock(event, domId)
     }
 
     function renderCanvas(dom, fn) {

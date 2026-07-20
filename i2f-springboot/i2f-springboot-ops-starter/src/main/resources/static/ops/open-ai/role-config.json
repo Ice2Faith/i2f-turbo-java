@@ -49,6 +49,11 @@
         "url": "./roles/visual/role-echarts-painter.md"
       },
       {
+        "label": "Mermaid图形绘制",
+        "icon": "el-icon-pie-chart",
+        "url": "./roles/visual/role-js-mermaid-diagram.md"
+      },
+      {
         "label": "JsCanvas图像绘制",
         "icon": "el-icon-picture-outline",
         "url": "./roles/visual/role-js-canvas-painter.md"

@@ -668,6 +668,13 @@ html, body {
     background: white;
 }
 
+.mermaid-code-block {
+    width: 100%;
+    min-width: 360px;
+    min-height: 320px;
+    background: white;
+}
+
 .canvas-code-block {
     width: 100%;
     min-width: 320px;
@@ -812,6 +819,10 @@ html, body {
     }
 
     .echart-code-block {
+        width: 480px;
+    }
+
+    .mermaid-code-block {
         width: 480px;
     }
 
