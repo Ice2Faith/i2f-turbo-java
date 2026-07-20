@@ -1,6 +1,6 @@
 ---
 name: js_mermaid_diagram
-description: 指导使用 mermaid 的 markdown 代码块格式为用户构建任意流程图内容
+description: [ 优先使用 ]指导使用 mermaid 的 markdown 代码块格式为用户构建任意流程图内容
 version: 1.0
 author: Ice2Faith
 ---
