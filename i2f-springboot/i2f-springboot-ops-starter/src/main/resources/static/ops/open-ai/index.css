@@ -663,14 +663,14 @@ html, body {
 
 .echart-code-block {
     width: 100%;
-    min-width: 360px;
+    min-width: 480px;
     min-height: 320px;
     background: white;
 }
 
 .mermaid-code-block {
     width: 100%;
-    min-width: 360px;
+    min-width: 480px;
     min-height: 320px;
     background: white;
 }

@@ -95,6 +95,8 @@
     <link rel="stylesheet" href="../lib/katex@0.16.9/dist/katex.min.css">
     <script src="../lib/katex@0.16.9/dist/katex.min.js"></script>
     <script src="../lib/markdown-it-texmath@1.0.0/texmath.min.js"></script>
+
+    <script src="https://unpkg.com/@panzoom/panzoom@4.4.3/dist/panzoom.min.js"></script>
 <body>
 <div id="app">
     <span class="i2f-back-top-bottom"
@@ -3740,6 +3742,9 @@
             if (['svg', 'drawio'].includes(lang)) {
                 lang = 'htmlmixed';
             }
+            if (['mermaid'].includes(lang)) {
+                lang = 'markdown';
+            }
 
             _this.dialog.messageEditor.type = 'view';
             _this.dialog.messageEditor.text = text;
@@ -3856,6 +3861,12 @@
                 return;
             }
         }
+        if (!window.mermaid) {
+            setTimeout(() => {
+                renderMermaid(dom, graph);
+            }, 90);
+            return;
+        }
         setTimeout(async () => {
             if (bubbleDom) {
                 bubbleDom.rendering = true;
@@ -3877,6 +3888,14 @@
                 // 处理语法错误等异常情况
                 console.error('Mermaid 渲染失败:', error);
                 dom.innerHTML = `<p style="color:red;">图表语法错误，请检查代码！</p>`;
+            } finally {
+                const panzoom = Panzoom(dom, {
+                    maxScale: 5,       // 最大放大倍数
+                    minScale: 0.25,    // 最小缩小倍数
+                    contain: 'outside' // 可选：限制拖拽边界，防止拖出视野
+                });
+
+                dom.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
             }
             if (bubbleDom) {
                 bubbleDom.rendering = false;
@@ -3939,9 +3958,19 @@
             if (bubbleDom) {
                 bubbleDom.rendering = true;
             }
-            safeSvgPurifier(html).then((text) => {
-                dom.innerHTML = text;
-            })
+            try {
+                safeSvgPurifier(html).then((text) => {
+                    dom.innerHTML = text;
+                })
+            } finally {
+                const panzoom = Panzoom(dom, {
+                    maxScale: 5,       // 最大放大倍数
+                    minScale: 0.25,    // 最小缩小倍数
+                    contain: 'outside' // 可选：限制拖拽边界，防止拖出视野
+                });
+
+                dom.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+            }
             if (bubbleDom) {
                 bubbleDom.rendering = false;
             }
@@ -3978,6 +4007,12 @@
                 }, 90);
                 return;
             }
+        }
+        if (!window.THREE) {
+            setTimeout(() => {
+                renderThreejs(dom, fn);
+            }, 90);
+            return;
         }
         setTimeout(() => {
             if (bubbleDom) {
