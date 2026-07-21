@@ -19,6 +19,8 @@ import i2f.resp.ApiCode;
 import i2f.resp.ApiResp;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
@@ -36,6 +38,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2026/7/13 10:23
  * @desc
  */
+@Data
+@NoArgsConstructor
 public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMutator<HttpSimpleMcpClientToolProvider> {
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
