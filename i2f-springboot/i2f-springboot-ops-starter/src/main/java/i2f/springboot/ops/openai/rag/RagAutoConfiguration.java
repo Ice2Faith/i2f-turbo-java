@@ -5,6 +5,7 @@ import i2f.ai.rest.openai.rag.HttpOpenAiRagEmbeddingModel;
 import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.*;
+import i2f.extension.ai.rag.sqlite.SqliteBucketRagMemoryStore;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.document.pdf.PdfConvertUtil;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
@@ -122,6 +123,23 @@ public class RagAutoConfiguration {
         File moveDir = new File(historyDir, "history-" + DateTimeFormatter.ofPattern("yyyyMMddHHmmss").format(LocalDateTime.now()));
         FileUtil.move(moveDir, dir);
         dir.mkdirs();
+    }
+
+    @ConditionalOnExpression("${ai.rags.memory.bucket.enable:true}")
+    @ConditionalOnMissingBean(BucketRagEmbeddingStore.class)
+    @Bean
+    public BucketRagEmbeddingStore bucketRagEmbeddingStore() {
+        return new SqliteBucketRagMemoryStore().toMutator()
+                .set(u -> u::setDimension, properties.getDimension())
+                .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(new ObjectMapper()))
+                .done();
+    }
+
+    @ConditionalOnExpression("${ai.rags.memory.enable:true}")
+    @ConditionalOnMissingBean(MemoryTools.class)
+    public MemoryTools memoryTools(@Autowired RagEmbeddingModel ragEmbeddingModel,
+                                   @Autowired BucketRagEmbeddingStore bucketRagEmbeddingStore) {
+        return new MemoryTools(ragEmbeddingModel, bucketRagEmbeddingStore);
     }
 
 }

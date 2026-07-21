@@ -25,6 +25,7 @@ import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
+import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
@@ -412,6 +413,19 @@ public class OpenAiOpsController implements IOpsProvider {
                         if (toolManager != null) {
                             List<ToolDefinition> tools = toolManager.getTools();
                             if (tools != null) {
+                                if (!req.isEnableMemories()) {
+                                    tools = tools.stream()
+                                            .filter(e -> {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                if (rawTool != null) {
+                                                    if (MemoryTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                        return false;
+                                                    }
+                                                }
+                                                return true;
+                                            })
+                                            .collect(Collectors.toList());
+                                }
                                 if (!req.isEnableTruth()) {
                                     tools = tools.stream()
                                             .filter(e -> {
@@ -511,6 +525,19 @@ public class OpenAiOpsController implements IOpsProvider {
                                     Map<String, ToolDefinition> definitionMap = new HashMap<>();
                                     if (toolManager != null) {
                                         List<ToolDefinition> tools = toolManager.getTools();
+                                        if (!req.isEnableMemories()) {
+                                            tools = tools.stream()
+                                                    .filter(e -> {
+                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                                                        if (rawTool != null) {
+                                                            if (MemoryTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                                                return false;
+                                                            }
+                                                        }
+                                                        return true;
+                                                    })
+                                                    .collect(Collectors.toList());
+                                        }
                                         if (!req.isEnableTruth()) {
                                             tools = tools.stream()
                                                     .filter(e -> {
@@ -749,6 +776,14 @@ public class OpenAiOpsController implements IOpsProvider {
                             }
                             if (req.isEnableTruth()) {
                                 Set<String> checkNames = TruthStoreTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
+                            if (req.isEnableMemories()) {
+                                Set<String> checkNames = MemoryTools.toolNames();
                                 for (String checkName : checkNames) {
                                     if (name.contains(checkName)) {
                                         return true;

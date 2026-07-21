@@ -1,7 +1,7 @@
 package i2f.extension.ai.rag.sqlite;
 
+import i2f.ai.std.rag.BucketRagEmbeddingStore;
 import i2f.ai.std.rag.RagEmbedding;
-import i2f.ai.std.rag.RagEmbeddingStore;
 import i2f.ai.std.rag.RagVector;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
@@ -18,10 +18,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -32,9 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @Data
 @NoArgsConstructor
-public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<SqliteRagEmbeddingStore> {
+public class SqliteBucketRagMemoryStore implements BucketRagEmbeddingStore, BaseMutator<SqliteBucketRagMemoryStore> {
 
-    public static final String DEFAULT_DB_FILE_PATH = StdConst.RUNTIME_PERSIST_DIR + "/" + SqliteVecUtils.DIR_NAME + "/sqlite-vec.db";
+    public static final String DEFAULT_DB_FILE_PATH = StdConst.RUNTIME_PERSIST_DIR + "/" + SqliteVecUtils.DIR_NAME + "/sqlite-memory-vec.db";
     public static final String DEFAULT_TABLE_NAME = "tb_vec";
     public static final int DEFAULT_DIMENSION = 1024;
     public static final DateTimeFormatter SQLITE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -45,16 +42,17 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
     protected final AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Override
-    public String store(RagEmbedding embedding) {
+    public String store(RagEmbedding embedding, String bucket) {
         try (Connection conn = getConnection()) {
             String id = embedding.getId();
             if (id == null || id.isEmpty()) {
                 id = UUID.randomUUID().toString().replace("-", "");
             }
-            JdbcResolver.update(conn, BindSql.of("insert into " + tableName + " (id,content,vector,meta_data,create_time) values (?,?,?,?,?)",
+            JdbcResolver.update(conn, BindSql.of("insert into " + tableName + " (id,content,vector,meta_data,bucket,create_time) values (?,?,?,?,?)",
                     id, embedding.getContent(),
                     jsonSerializer.serialize(embedding.getVector().getArray()),
                     jsonSerializer.serialize(embedding.getMetadata()),
+                    bucket,
                     SQLITE_TIME_FORMATTER.format(LocalDateTime.now())
             ));
             return id;
@@ -75,15 +73,16 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
     }
 
     @Override
-    public List<RagEmbedding> similar(RagVector vector, int topN) {
+    public List<RagEmbedding> similar(RagVector vector, int topN, Collection<String> buckets) {
         try (Connection conn = getConnection()) {
             QueryResult res = JdbcResolver.query(conn,
-                    BindSql.of("SELECT id,content,vector,meta_data,create_time,distance FROM " + tableName + " " +
-                                    "WHERE vector MATCH ? " +
-                                    "ORDER BY distance LIMIT ?",
-                            jsonSerializer.serialize(vector.getArray()),
-                            topN
-                    )
+                    BindSql.of("SELECT id,content,vector,meta_data,bucket,create_time,distance FROM " + tableName + " " +
+                                    "WHERE vector MATCH ? ", jsonSerializer.serialize(vector.getArray())
+                            )
+                            .when(buckets, e -> e != null && !e.isEmpty(), (bql, list) -> {
+                                return bql.and().add("bucket").in(list);
+                            })
+                            .add("ORDER BY distance LIMIT ?", topN)
             );
             List<RagEmbedding> ret = new ArrayList<>();
             List<Map<String, Object>> rows = res.getRows();
@@ -159,6 +158,7 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
                     "   id text primary key,\n" +
                     "   content text,\n" +
                     "   vector float[" + dimension + "] distance_metric=cosine,\n" +
+                    "   bucket text,\n" +
                     "   meta_data text,\n" +
                     "   create_time text\n" +
                     ")"));

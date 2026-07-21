@@ -39,12 +39,8 @@ public class RagTools implements BaseMutator<RagTools> {
             topN = 3;
         }
         List<RagEmbedding> list = worker.similar(text, topN);
-        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
             RagEmbedding rag = list.get(i);
-            if (i > 0) {
-                builder.append("\n");
-            }
 
             RagSearchResultItem item = new RagSearchResultItem();
             item.setRank(i + 1);
