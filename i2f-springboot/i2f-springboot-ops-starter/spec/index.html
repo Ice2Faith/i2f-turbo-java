@@ -1,0 +1,2888 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="i2f-springboot-ops-starter OpenAI 兼容 AI 对话框架 · 技术全景文档">
+    <title>OpenAI 兼容 AI 对话框架 · 技术全景 | i2f-springboot-ops-starter</title>
+    <link rel="stylesheet" href="./assets/style.css">
+</head>
+<body>
+<div class="read-progress" id="readProgress"></div>
+
+<!-- 顶部状态条 -->
+<div class="boot-strip">
+    <span class="led"></span>
+    <span class="led amber"></span>
+    <span class="path">i2f-turbo-java <span style="color:#5f7fa3;">//</span> i2f-springboot-ops-starter <span
+            style="color:#5f7fa3;">//</span> <b>open-ai subsystem</b></span>
+    <span class="right">SPEC v1.0 · i2f.turbo:1.0-jdk8</span>
+</div>
+
+<div class="layout">
+    <!-- 侧边导航 -->
+    <nav class="side-nav" id="sideNav">
+        <div class="brand">
+            OpenAI 对话框架
+            <small>OPS-STARTER · TECH SPEC</small>
+        </div>
+        <ul>
+            <li><a href="#ch01" class="toc"><span class="no">01</span>概述</a></li>
+            <li><a href="#ch02" class="toc"><span class="no">02</span>设计理念</a></li>
+            <li><a href="#ch03" class="toc"><span class="no">03</span>分层架构</a></li>
+            <li><a href="#ch04" class="toc"><span class="no">04</span>核心对话流程</a></li>
+            <li><a href="#ch05" class="toc"><span class="no">05</span>Re-Act 循环</a></li>
+            <li><a href="#ch06" class="toc"><span class="no">06</span>消息模型</a></li>
+            <li><a href="#ch07" class="toc"><span class="no">07</span>工具体系</a></li>
+            <li><a href="#ch08" class="toc"><span class="no">08</span>技能系统</a></li>
+            <li><a href="#ch09" class="toc"><span class="no">09</span>RAG 知识库</a></li>
+            <li><a href="#ch10" class="toc"><span class="no">10</span>MCP 动态工具</a></li>
+            <li><a href="#ch11" class="toc"><span class="no">11</span>安全体系</a></li>
+            <li><a href="#ch12" class="toc"><span class="no">12</span>高级特性</a></li>
+            <li><a href="#ch13" class="toc"><span class="no">13</span>自动装配</a></li>
+            <li><a href="#ch14" class="toc"><span class="no">14</span>前端工程</a></li>
+            <li><a href="#ch15" class="toc"><span class="no">15</span>扩展指南</a></li>
+        </ul>
+    </nav>
+
+    <!-- 主内容 -->
+    <main class="main">
+
+        <!-- ===================== 开场 ===================== -->
+        <header class="masthead">
+            <div class="masthead-grid">
+                <div>
+                    <div class="kicker">i2f.springboot.ops.openai · 技术全景文档</div>
+                    <h1>OpenAI 兼容<br><span class="hl">AI 对话框架</span>设计全景</h1>
+                    <p class="sub">
+                        内嵌于运维控制台的<b>胖客户端式</b> AI 对话子系统：以 OpenAI 兼容协议为骨架，
+                    以 <b>Re-Act 循环</b>为心脏，串联 Function Calling 工具体系、技能系统、RAG 知识库、
+                    MCP 动态工具与国密全链路安全传输，兼容 OpenAI / DashScope / Ollama / vLLM 等一切兼容服务。
+                    </p>
+                    <div class="term-line">
+                        <span class="prompt">ops&gt;</span>
+                        <span>POST /ops/open-ai/stream</span>
+                        <span class="arrow">→</span>
+                        <span class="sse">text/event-stream</span>
+                        <span class="caret"></span>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="diagram-panel" style="margin-top:0;">
+                        <svg viewBox="0 0 560 430" role="img" aria-label="核心消息循环图">
+                            <!-- 连接曲线 -->
+                            <path class="svg-line-acc flow-anim" d="M170,72 Q230,90 262,150" marker-end="url(#ah-o)"/>
+                            <path class="svg-line-teal flow-anim" d="M428,168 Q480,120 500,92" marker-end="url(#ah-t)"/>
+                            <path class="svg-line svg-dash" d="M470,88 Q420,140 400,162" marker-end="url(#ah-k)"/>
+                            <path class="svg-line-acc flow-anim" d="M315,232 L315,306" marker-end="url(#ah-o)"/>
+                            <path class="svg-line svg-dash" d="M288,306 Q262,268 268,234" marker-end="url(#ah-k)"/>
+                            <path class="svg-line-teal flow-anim" d="M238,196 Q150,160 118,96" marker-end="url(#ah-t)"/>
+                            <defs>
+                                <marker id="ah-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                                </marker>
+                                <marker id="ah-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                                </marker>
+                                <marker id="ah-k" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                                    <path d="M0,0 L9,4.5 L0,9 Z" fill="#46607a"/>
+                                </marker>
+                            </defs>
+                            <!-- 节点 -->
+                            <rect class="svg-node" x="20" y="26" width="152" height="62" rx="3"/>
+                            <text class="svg-lbl" x="96" y="52" text-anchor="middle">用户终端</text>
+                            <text class="svg-lbl-sm" x="96" y="70" text-anchor="middle">Vue2 · ElementUI · SM-Crypto
+                            </text>
+
+                            <rect class="svg-node svg-node-dark pulse-node" x="228" y="150" width="176" height="80"
+                                  rx="3"/>
+                            <text class="svg-lbl-w" x="316" y="180" text-anchor="middle">OpenAiOpsController</text>
+                            <text class="svg-lbl-sm" x="316" y="198" text-anchor="middle" style="fill:#8fb3d6;">消息编排
+                                · 提示词注入
+                            </text>
+                            <text class="svg-lbl-sm" x="316" y="214" text-anchor="middle" style="fill:#8fb3d6;">SSE 中继
+                                · 工具调度
+                            </text>
+
+                            <rect class="svg-node svg-node-acc" x="392" y="26" width="150" height="62" rx="3"/>
+                            <text class="svg-lbl" x="467" y="52" text-anchor="middle">LLM 大模型</text>
+                            <text class="svg-lbl-sm" x="467" y="70" text-anchor="middle">OpenAI 兼容协议</text>
+
+                            <rect class="svg-node svg-node-teal" x="212" y="308" width="208" height="62" rx="3"/>
+                            <text class="svg-lbl" x="316" y="334" text-anchor="middle">工具池 ToolManager</text>
+                            <text class="svg-lbl-sm" x="316" y="352" text-anchor="middle">并行执行 · HITL 审批 · LRU
+                            </text>
+
+                            <!-- 序号标签 -->
+                            <text class="svg-lbl-acc" x="196" y="102">①</text>
+                            <text class="svg-lbl-acc" x="452" y="140" style="fill:#0b7285;">②</text>
+                            <text class="svg-lbl-sm" x="452" y="128" style="fill:#46607a;">③</text>
+                            <text class="svg-lbl-acc" x="324" y="276">④</text>
+                            <text class="svg-lbl-sm" x="248" y="276">⑤</text>
+                            <text class="svg-lbl-acc" x="148" y="160" style="fill:#0b7285;">⑥</text>
+                            <!-- 图例 -->
+                            <text class="svg-lbl-sm" x="20" y="404">① 加密请求 ② 组装报文→推理 ③ tool_calls/chunk 返回 ④
+                                契约解析·并行执行 ⑤ ToolMessage 回填 ⑥ SSE 中继
+                            </text>
+                        </svg>
+                        <div class="dg-cap">核心消息循环 — 一次对话即一轮消息列表的维护与推理</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 元信息 -->
+            <div class="meta-table reveal">
+                <div class="cell">
+                    <div class="k">Maven 坐标</div>
+                    <div class="v">i2f.turbo : i2f-springboot-ops-starter</div>
+                </div>
+                <div class="cell">
+                    <div class="k">版本 / 基线</div>
+                    <div class="v acc">1.0-jdk8 · Java 8</div>
+                </div>
+                <div class="cell">
+                    <div class="k">运行框架</div>
+                    <div class="v">Spring Boot 2.7.18</div>
+                </div>
+                <div class="cell">
+                    <div class="k">子系统包名</div>
+                    <div class="v">i2f.springboot.ops.openai</div>
+                </div>
+                <div class="cell">
+                    <div class="k">访问入口</div>
+                    <div class="v">/ops/open-ai/index.html</div>
+                </div>
+                <div class="cell">
+                    <div class="k">安全传输</div>
+                    <div class="v acc">SM2 · SM3 · SM4 国密</div>
+                </div>
+            </div>
+
+            <!-- 统计 -->
+            <div class="stats-strip reveal">
+                <div class="stat" style="--c:#e8590c;">
+                    <div class="num" data-count="35">0</div>
+                    <div class="lab">Java 源文件</div>
+                </div>
+                <div class="stat" style="--c:#0b7285;">
+                    <div class="num" data-count="16">0</div>
+                    <div class="lab">内置工具类</div>
+                </div>
+                <div class="stat" style="--c:#2b8a3e;">
+                    <div class="num" data-count="7">0</div>
+                    <div class="lab">回显消息类型</div>
+                </div>
+                <div class="stat" style="--c:#1971c2;">
+                    <div class="num" data-count="5">0</div>
+                    <div class="lab">REST 端点</div>
+                </div>
+                <div class="stat" style="--c:#e67700;">
+                    <div class="num" data-count="20">0</div>
+                    <div class="lab">角色预设 (Role)</div>
+                </div>
+                <div class="stat" style="--c:#c92a2a;">
+                    <div class="num" data-count="4">0</div>
+                    <div class="lab">AiModel 实现</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ===================== 01 概述 ===================== -->
+        <section class="chapter" id="ch01">
+            <div class="ch-head reveal">
+                <div class="ch-no">01</div>
+                <h2><span class="en">Overview</span>概述
+                ：运维控制台里的 AI 心脏</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                <code>i2f-springboot-ops-starter</code> 是开箱即用的 SpringBoot 运维控制台 Starter，而其中的
+                <b>openai 子系统</b>（包 <code>i2f.springboot.ops.openai</code>）为整个控制台装上了一颗 AI 心脏：
+            引入依赖即自动注册一个完整的、OpenAI 兼容的 AI 对话工作台，前端资源全部打包在 JAR 内，无需额外部署。
+            </p>
+            <p class="body reveal">
+                与常见的"瘦客户端 + 胖服务端"聊天页面不同，本框架将 <b>Agent 状态机搬到了浏览器一侧</b>：
+            前端维护会话列表、消息历史、工具审批与功能开关，后端 <code>OpenAiOpsController</code> 则扮演
+                <b>安全网关 + 工具执行器 + SSE 中继</b>的三重角色——每一次"发送"，都是前端把完整消息列表经国密加密后交给后端，
+            后端完成提示词注入、工具契约执行，再把 LLM 的流式输出原样中继回来。
+            </p>
+
+            <div class="callout quote reveal" style="--c:#0b7285;">
+                <div class="co-title">框架对大模型的本质理解（摘自前端源码注释）</div>
+                <p>大模型就像是一个 <b>CPU</b>，Agent 等就像是<b>程序计数器 + 程序控制块</b>，负责准备输入、处理输出、维护消息循环、决定如何执行下一步。
+                </p>
+                <p>换个例子：大模型就像是一个<b>大脑</b>，Agent 等就像是<b>身体血肉与四肢</b>，负责准备所见所得，处理大脑指令并反馈，维护行为连贯性。
+                </p>
+                <p>大模型本身不具有记忆能力，更像是一个<b>转换器</b>——将一堆不同角色的对话历史作为输入，推理出结果。
+                所谓的 Tools / Function-Calling / MCP / RAG / Skills，本质都是在<b>维护这份对话列表</b>。</p>
+            </div>
+
+            <div class="panel reveal">
+                <div class="panel-title">能力矩阵</div>
+                <div class="card-grid" style="margin:0;">
+                    <div class="card" style="--c:#e8590c;"><span class="idx">A</span>
+                        <h3>流式对话</h3>
+                        <div class="tagline">SSE Streaming</div>
+                        <p>SseEmitter 5 分钟长连接，逐 chunk 中继 LLM 输出；支持
+                            <code>reasoning_content</code> 思考过程独立渲染与流式打字机效果。</p>
+                    </div>
+                    <div class="card" style="--c:#0b7285;"><span class="idx">B</span>
+                        <h3>工具调用</h3>
+                        <div class="tagline">Function Calling</div>
+                        <p>16 个内置工具类经
+                            <code>@Tool</code> 注解自动生成 JSON Schema 注入对话；工具契约并行执行，HITL 人工审批把关危险操作。
+                        </p>
+                    </div>
+                    <div class="card" style="--c:#2b8a3e;"><span class="idx">C</span>
+                        <h3>技能系统</h3>
+                        <div class="tagline">Skills</div>
+                        <p>基于文件系统的 <code>SKILL.md</code> 技能定义，30 秒热扫描；技能提示词与技能工具按需注入，支持脚本执行与资源读取。
+                        </p>
+                    </div>
+                    <div class="card" style="--c:#1971c2;"><span class="idx">D</span>
+                        <h3>RAG 知识库</h3>
+                        <div class="tagline">Retrieval Augmented</div>
+                        <p>Embedding 向量化 + SQLite 向量存储 + 递归文本分割；多格式文档读取器（Markitdown / EasyOCR / Pandoc），支持被动注入与主动检索。</p>
+                    </div>
+                    <div class="card" style="--c:#e67700;"><span class="idx">E</span>
+                        <h3>MCP 动态工具</h3>
+                        <div class="tagline">Dynamic Loading</div>
+                        <p>不全量注入工具声明，模型经"列举供应商→列举工具→加载工具"三步自主发现，LRU 策略淘汰最久未用工具，节省 Token。</p>
+                    </div>
+                    <div class="card" style="--c:#c92a2a;"><span class="idx">F</span>
+                        <h3>国密安全</h3>
+                        <div class="tagline">SM2 · SM3 · SM4</div>
+                        <p>请求报文 SM4 随机密钥加密 + SM2 密钥封装 + SM3 摘要 + SM2 签名，时间戳防重放；输出可选加密传输。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel reveal">
+                <div class="panel-title">供应商无关 — 22+ LLM 服务商开箱预设</div>
+                <p class="body" style="font-size:13.5px;">
+                    前端内置多家主流供应商的预设连接信息，点选即用；亦支持手动填写任意 OpenAI 兼容服务的 Base URL 与 Api Key，
+                    并经 <code>POST /ops/open-ai/models</code> 实时拉取 <code>/v1/models</code> 模型列表。
+                </p>
+                <div class="tag-cloud">
+                    <span class="tc"><b>国内云端</b>：阿里云百炼 DashScope · 字节火山引擎 · 百度千帆 · 腾讯混元 · 讯飞星火 · 智谱 GLM · DeepSeek · Moonshot Kimi · MiniMax</span>
+                    <span class="tc"><b>海外云端</b>：OpenAI · Groq · Together AI · OpenRouter</span>
+                    <span class="tc"><b>本地部署</b>：Ollama · vLLM · LocalAI</span>
+                </div>
+                <p class="body" style="font-size:12.5px;">凡遵循 OpenAI 兼容协议（<code>/v1/chat/completions</code> +
+                    <code>/v1/models</code> + <code>/v1/embeddings</code>）的服务均可接入——协议即边界，供应商完全可替换。
+                </p>
+            </div>
+        </section>
+
+        <!-- ===================== 02 设计理念 ===================== -->
+        <section class="chapter" id="ch02">
+            <div class="ch-head reveal">
+                <div class="ch-no">02</div>
+                <h2><span class="en">Design Philosophy</span>设计理念</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                整个 AI 工具链遵循 i2f-turbo-java 一以贯之的"简练、独立、单一、易用"哲学，并在 AI 领域落地为四条核心原则。
+            </p>
+            <div class="card-grid">
+                <div class="card reveal" style="--c:#e8590c;"><span class="idx">壹</span>
+                    <h3>平台无关化</h3>
+                    <div class="tagline">Platform Agnostic</div>
+                    <p>标准层 <code>i2f-ai-std</code> 不依赖任何 AI 平台 SDK（OpenAI SDK / LangChain4j 等），仅依赖项目内部基础模块。
+                    上层可自由切换 4 种
+                        <code>AiModel</code> 实现：自研零依赖 HTTP 实现、OpenAI 官方 SDK、阿里 DashScope、LangChain4j。</p>
+                </div>
+                <div class="card reveal" style="--c:#0b7285;"><span class="idx">贰</span>
+                    <h3>依赖无关化</h3>
+                    <div class="tagline">Dependency Free</div>
+                    <p>协议实现层 <code>i2f-ai-rest-openai</code> 使用项目自有 HTTP 客户端 <code>i2f-network</code>，
+                    零第三方 AI/HTTP 依赖；Ops 层则复用 Spring 的 <code>RestTemplate</code> 作为 SSE 传输底座。</p>
+                </div>
+                <div class="card reveal" style="--c:#2b8a3e;"><span class="idx">叁</span>
+                    <h3>接口-实现分离</h3>
+                    <div class="tagline">std / impl Split</div>
+                    <p><code>i2f-ai-std</code> 定义全部接口与标准（AiModel / ToolManager / RagWorker / McpToolProvider），
+                    实现散布于各 extension 模块。依赖单向流动，杜绝循环依赖。</p>
+                </div>
+                <div class="card reveal" style="--c:#e67700;"><span class="idx">肆</span>
+                    <h3>胖客户端 + HITL</h3>
+                    <div class="tagline">Fat Client · Human In The Loop</div>
+                    <p>需要用户参与（工具授权、危险操作把关）的场景选择<b>胖客户端</b>：状态维护在浏览器，服务端无状态、可水平扩展。
+                    全自动化场景（Dify / ComfyUI 式）才需要胖服务器——本框架明确选择了前者。</p>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#e8590c;">
+                <div class="co-title">为什么是"消息列表即一切"？</div>
+                <p>多轮对话中，模型会重新读取整个对话列表——这就是模型"记忆"的最初形式。框架源码用
+                    <code>[1u] → [2ac] → [3t] → [4a]</code> 记号法描述一轮 ReAct：
+                    <b>1u</b> 第一条用户消息；<b>2ac</b> 第二条助手消息（c = 携带 tool_calls 契约）；
+                    <b>3t</b> 第三条工具消息；<b>4a</b> 最终归纳答复。第一轮调用仅携带 <code>[1u]</code>（用户触发），
+                    第二轮携带 <code>[1u, 2ac, 3t]</code>（客户端自动触发）——客户端必须维护复杂状态，这正是胖客户端存在的理由。
+                </p>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">AI 工程范式全景 — 15 种范式 · 6 层架构</div>
+                <p class="body" style="font-size:13.5px;">
+                    本模块以一个 OpenAI 兼容的胖客户端对话系统为载体，完整实践了当前 AI Agent 工程的主流范式。
+                    这些范式并非孤立存在，而是<b>层层嵌套、相互协作</b>，共同构成功能完备的 Agent 系统：
+                </p>
+                <div class="diagram-panel" style="margin-top:14px;">
+                    <svg viewBox="0 0 940 386" role="img" aria-label="AI 工程范式六层架构图">
+                        <!-- 引导层 -->
+                        <rect class="svg-node" x="20" y="16" width="900" height="52" rx="3" style="stroke:#e67700;"/>
+                        <rect x="20" y="16" width="8" height="52" fill="#e67700"/>
+                        <text class="svg-lbl" x="44" y="38" style="fill:#e67700;">引导层</text>
+                        <text class="svg-lbl-sm" x="44" y="56">Prompt Engineering · Multi-Agent</text>
+                        <text class="svg-lbl-sm" x="330" y="38">20 角色预设切换人格 · 技能/MCP/事实动态注入</text>
+                        <text class="svg-lbl-sm" x="330" y="56">30% 概率重注入防遗忘 · 时间感知 · 附件 XML 标签追加
+                        </text>
+                        <!-- 执行层 -->
+                        <rect class="svg-node" x="20" y="78" width="900" height="52" rx="3" style="stroke:#1971c2;"/>
+                        <rect x="20" y="78" width="8" height="52" fill="#1971c2"/>
+                        <text class="svg-lbl" x="44" y="100" style="fill:#1971c2;">执行层</text>
+                        <text class="svg-lbl-sm" x="44" y="118">ReAct · Loop Engineering</text>
+                        <text class="svg-lbl-sm" x="330" y="100">推理-行动循环 · 前端递归驱动 directSendMessage</text>
+                        <text class="svg-lbl-sm" x="330" y="118">CountDownLatch 并发执行 · AbortController 中断 ·
+                            错误兜底不中断循环
+                        </text>
+                        <!-- 控制层 -->
+                        <rect class="svg-node" x="20" y="140" width="900" height="52" rx="3" style="stroke:#c92a2a;"/>
+                        <rect x="20" y="140" width="8" height="52" fill="#c92a2a"/>
+                        <text class="svg-lbl" x="44" y="162" style="fill:#c92a2a;">控制层</text>
+                        <text class="svg-lbl-sm" x="44" y="180">HITL · Tool Tags &amp; Auto-Approval</text>
+                        <text class="svg-lbl-sm" x="330" y="162">工具审批弹窗 · 逐个/全部允许/拒绝 + 拒绝原因反馈</text>
+                        <text class="svg-lbl-sm" x="330" y="180">多维语义标签 · autoApprovalToolTags 标签自动审批</text>
+                        <!-- 能力层 -->
+                        <rect class="svg-node" x="20" y="202" width="900" height="52" rx="3" style="stroke:#2b8a3e;"/>
+                        <rect x="20" y="202" width="8" height="52" fill="#2b8a3e"/>
+                        <text class="svg-lbl" x="44" y="224" style="fill:#2b8a3e;">能力层</text>
+                        <text class="svg-lbl-sm" x="44" y="242">MCP · RAG · Skills · A2A</text>
+                        <text class="svg-lbl-sm" x="330" y="224">MCP 动态发现 + LRU 淘汰 · SQLite 向量检索 · SKILL.md
+                            文档技能
+                        </text>
+                        <text class="svg-lbl-sm" x="330" y="242">A2A Agent 嵌套调用（LLM 作为工具 · 独立上下文）</text>
+                        <!-- 记忆层 -->
+                        <rect class="svg-node" x="20" y="264" width="900" height="52" rx="3" style="stroke:#862e9c;"/>
+                        <rect x="20" y="264" width="8" height="52" fill="#862e9c"/>
+                        <text class="svg-lbl" x="44" y="286" style="fill:#862e9c;">记忆层</text>
+                        <text class="svg-lbl-sm" x="44" y="304">Truth Injection · Context Window</text>
+                        <text class="svg-lbl-sm" x="330" y="286">模型主动存储事实（整体替换）· 会话总结压缩 Token</text>
+                        <text class="svg-lbl-sm" x="330" y="304">maxHistoryCount 截断 · 角色消息始终保留 · LRU
+                            控制工具声明占用
+                        </text>
+                        <!-- 基础层 -->
+                        <rect class="svg-node" x="20" y="326" width="900" height="52" rx="3" style="stroke:#e8590c;"/>
+                        <rect x="20" y="326" width="8" height="52" fill="#e8590c"/>
+                        <text class="svg-lbl" x="44" y="348" style="fill:#e8590c;">基础层</text>
+                        <text class="svg-lbl-sm" x="44" y="366">Harness Eng. · Fat Client · SSE Streaming</text>
+                        <text class="svg-lbl-sm" x="330" y="348">4195 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展
+                        </text>
+                        <text class="svg-lbl-sm" x="330" y="366">SSE 逐 Token 流式输出 · SM2/SM4 国密加密传输</text>
+                    </svg>
+                    <div class="dg-cap">范式六层架构 — 执行/控制/能力/记忆/基础/引导层层嵌套协作</div>
+                </div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>范式</th>
+                            <th>英文</th>
+                            <th>本模块的核心定位</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><b>ReAct</b></td>
+                            <td>Reasoning + Acting</td>
+                            <td>推理-行动循环，Agent 的核心执行模式（第 05 章）</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><b>循环工程</b></td>
+                            <td>Loop Engineering</td>
+                            <td>工具调用循环的编排与驱动：何时开始/终止/中断/并发</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><b>脚手架工程</b></td>
+                            <td>Harness Engineering</td>
+                            <td>LLM 外围基础设施：消息管理/状态维护/I/O/安全传输</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td><b>人机协同</b></td>
+                            <td>Human In The Loop</td>
+                            <td>工具执行审批，危险操作人类把关（第 07 章）</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td><b>MCP</b></td>
+                            <td>Model Context Protocol</td>
+                            <td>动态工具发现与加载的桥接网关（第 10 章）</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td><b>RAG</b></td>
+                            <td>Retrieval-Augmented Generation</td>
+                            <td>向量检索增强生成（第 09 章）</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td><b>A2A</b></td>
+                            <td>Agent-to-Agent</td>
+                            <td>Agent 间调用，LLM 作为工具（第 12 章）</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td><b>多智能体</b></td>
+                            <td>Multi-Agent</td>
+                            <td>多角色/多能力体分工协作（角色系统 + 工具分工）</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td><b>技能系统</b></td>
+                            <td>Skill-based Agent</td>
+                            <td>基于文档的可插拔技能（第 08 章）</td>
+                        </tr>
+                        <tr>
+                            <td>10</td>
+                            <td><b>事实注入</b></td>
+                            <td>Truth Injection / Memory</td>
+                            <td>持久化事实存储与自动注入，防遗忘防幻觉（第 12 章）</td>
+                        </tr>
+                        <tr>
+                            <td>11</td>
+                            <td><b>提示词工程</b></td>
+                            <td>Prompt Engineering</td>
+                            <td>角色系统与动态提示词注入策略</td>
+                        </tr>
+                        <tr>
+                            <td>12</td>
+                            <td><b>上下文工程</b></td>
+                            <td>Context Window Management</td>
+                            <td>上下文窗口管理与压缩（截断/总结/LRU）</td>
+                        </tr>
+                        <tr>
+                            <td>13</td>
+                            <td><b>胖客户端</b></td>
+                            <td>Fat Client Architecture</td>
+                            <td>状态驱动的胖客户端架构（第 14 章）</td>
+                        </tr>
+                        <tr>
+                            <td>14</td>
+                            <td><b>流式输出</b></td>
+                            <td>SSE Streaming</td>
+                            <td>Server-Sent Events 逐 Token 实时输出（第 04 章）</td>
+                        </tr>
+                        <tr>
+                            <td>15</td>
+                            <td><b>标签化权限</b></td>
+                            <td>Tool Tags &amp; Auto-Approval</td>
+                            <td>标签化权限与自动审批策略（第 07 章）</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 03 分层架构 ===================== -->
+        <section class="chapter" id="ch03">
+            <div class="ch-head reveal">
+                <div class="ch-no">03</div>
+                <h2><span class="en">Layered Architecture</span>分层架构</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                OpenAI 子系统横跨项目的四个层次：标准定义在 <code>i2f-jdk</code>，协议实现在
+                <code>i2f-ai-rest-openai</code>，
+            Spring 适配在 <code>i2f-spring</code>，应用落地在 <code>i2f-springboot-ops-starter</code>。依赖严格自下而上。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 800 430" role="img" aria-label="分层架构图">
+                    <defs>
+                        <marker id="lay-ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                            <path d="M0,0 L10,5 L0,10 Z" fill="#46607a"/>
+                        </marker>
+                    </defs>
+                    <!-- L4 ops -->
+                    <rect class="svg-node svg-node-acc" x="60" y="20" width="680" height="72" rx="3"/>
+                    <text class="svg-lbl" x="80" y="48">i2f-springboot-ops-starter · openai 子系统</text>
+                    <text class="svg-lbl-sm" x="80" y="70">controller / data / tool.impl(16) / skill / rag — 应用编排 ·
+                        安全网关 · SSE 中继 · HITL 审批
+                    </text>
+                    <!-- L3 spring + extension -->
+                    <rect class="svg-node svg-node-teal" x="60" y="122" width="330" height="72" rx="3"/>
+                    <text class="svg-lbl" x="80" y="150">i2f-spring</text>
+                    <text class="svg-lbl-sm" x="80" y="172">i2f-spring-core · i2f-spring-web（SpringContext /
+                        RestTemplate 适配）
+                    </text>
+                    <rect class="svg-node svg-node-teal" x="410" y="122" width="330" height="72" rx="3"/>
+                    <text class="svg-lbl" x="430" y="150">i2f-extension</text>
+                    <text class="svg-lbl-sm" x="430" y="172">ai-rag-sqlite · document(PDF) · jackson · groovy</text>
+                    <!-- L2 openai impl -->
+                    <rect class="svg-node" x="60" y="224" width="680" height="72" rx="3"/>
+                    <text class="svg-lbl" x="80" y="252">i2f-jdk / i2f-ai-rest-openai — OpenAI 兼容协议 REST 实现</text>
+                    <text class="svg-lbl-sm" x="80" y="274">HttpOpenAiAiModel · HttpOpenAiModelStreamApi(SSE) ·
+                        Embedding · Rerank · ModelsApi · 消息双向转换
+                    </text>
+                    <!-- L1 std -->
+                    <rect class="svg-node svg-node-dark" x="60" y="326" width="680" height="84" rx="3"/>
+                    <text class="svg-lbl-w" x="80" y="354">i2f-jdk / i2f-ai-std — AI 工具链标准定义（平台无关 ·
+                        依赖无关）
+                    </text>
+                    <text class="svg-lbl-sm" x="80" y="376" style="fill:#8fb3d6;">AiAgent(Re-Act) · AiModel ·
+                        ToolManager · SkillsHelper · RagWorker · McpToolProvider · AiTags
+                    </text>
+                    <text class="svg-lbl-sm" x="80" y="394" style="fill:#8fb3d6;">基座：i2f-network(HTTP) ·
+                        i2f-sm-crypto(国密) · i2f-mutator · i2f-proxy · i2f-serialize-std
+                    </text>
+                    <!-- arrows -->
+                    <path class="svg-line" d="M400,326 L400,300" marker-end="url(#lay-ah)"/>
+                    <path class="svg-line" d="M400,224 L400,198" marker-end="url(#lay-ah)"/>
+                    <path class="svg-line" d="M225,122 L225,96" marker-end="url(#lay-ah)"/>
+                    <path class="svg-line" d="M575,122 L575,96" marker-end="url(#lay-ah)"/>
+                    <text class="svg-lbl-sm" x="412" y="316">实现接口</text>
+                    <text class="svg-lbl-sm" x="412" y="214">协议供给</text>
+                </svg>
+                <div class="dg-cap">四层依赖拓扑 — 依赖单向流动，上层可替换、下层零感知</div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">子系统包结构（35 个 Java 文件）</div>
+                    <div class="pkg-tree"><span class="dir">i2f.springboot.ops.openai</span>
+                        ├── <span class="pkg">controller</span>/
+                        │   └── OpenAiOpsController <span class="cm"># 5 个 REST 端点 · SSE 编排核心</span>
+                        ├── <span class="pkg">data</span>/
+                        │   ├── OpenAiOperateDto <span class="cm"># 操作请求：功能开关集合</span>
+                        │   ├── OpenAiCompletionVo / Dto <span class="cm"># 补全请求 VO/DTO</span>
+                        │   ├── OpenAiMessageVo <span class="cm"># 多态消息载体</span>
+                        │   ├── OpenAiMeta <span class="cm"># baseUrl · apiKey</span>
+                        │   ├── OpenAiToolApprovalDto <span class="cm"># 工具审批决定</span>
+                        │   └── <span class="pkg">message</span>/ OpsOpenAiConsts <span
+                                class="cm"># 7 种回显类型常量</span>
+                        ├── <span class="pkg">tool</span>/
+                        │   ├── SpringContextToolAutoConfiguration
+                        │   ├── <span class="pkg">impl</span>/ 16 个工具类 <span class="cm"># @Tool 注解驱动</span>
+                        │   └── <span class="pkg">impl.sql</span>/ SQL 校验器 <span class="cm"># AST + 正则双校验</span>
+                        ├── <span class="pkg">skill</span>/ SkillAutoConfiguration <span class="cm"># 30s 热扫描</span>
+                        └── <span class="pkg">rag</span>/ RagAutoConfiguration <span
+                                class="cm"># 向量化 + SQLite 存储</span></div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">关键依赖（pom.xml 摘录）</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>依赖</th>
+                                <th>职责</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>i2f-ai-std</code></td>
+                                <td>Agent / 工具 / 技能 / RAG / MCP 标准定义</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-ai-rest-openai</code></td>
+                                <td>OpenAI 兼容协议 REST 实现</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-extension-ai-rag-sqlite</code></td>
+                                <td>SQLite 向量存储</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-sm-crypto</code></td>
+                                <td>SM2/SM3/SM4 国密算法</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-spring-core / i2f-spring-web</code></td>
+                                <td>SpringContext · RestTemplate 桥接</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-jdbc-impl / i2f-rowset</code></td>
+                                <td>数据库工具的 SQL 执行底座</td>
+                            </tr>
+                            <tr>
+                                <td><code>i2f-extension-document</code></td>
+                                <td>PDF 转图片（OCR 链路）</td>
+                            </tr>
+                            <tr>
+                                <td><code>jsqlparser 4.9</code> <span class="tag t-t">provided</span></td>
+                                <td>SQL AST 安全校验（可选）</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="body" style="font-size:13px;">大量第三方依赖以
+                        <code>provided + optional</code> 声明——引入 Starter 不会污染宿主应用的依赖树，功能随 classpath 按需激活。
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 04 核心对话流程 ===================== -->
+        <section class="chapter" id="ch04">
+            <div class="ch-head reveal">
+                <div class="ch-no">04</div>
+                <h2><span class="en">Conversation Pipeline</span>核心对话流程</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                <code>POST /ops/open-ai/stream</code> 是整个子系统最核心的端点（<code>OpenAiOpsController#stream</code>，约 600 行编排逻辑）。
+            它返回一个 5 分钟超时的 <code>SseEmitter</code>，真正的编排跑在 work-stealing 线程池中。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 880 620" role="img" aria-label="SSE 对话时序图">
+                    <defs>
+                        <marker id="sq-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#152a42"/>
+                        </marker>
+                        <marker id="sq-ah-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                    </defs>
+                    <!-- 生命线头 -->
+                    <rect class="svg-node" x="40" y="16" width="140" height="40" rx="3"/>
+                    <text class="svg-lbl" x="110" y="41" text-anchor="middle">前端 Vue2</text>
+                    <rect class="svg-node svg-node-dark" x="300" y="16" width="180" height="40" rx="3"/>
+                    <text class="svg-lbl-w" x="390" y="41" text-anchor="middle">OpenAiOpsController</text>
+                    <rect class="svg-node svg-node-teal" x="560" y="16" width="130" height="40" rx="3"/>
+                    <text class="svg-lbl" x="625" y="41" text-anchor="middle">工具池 toolPool</text>
+                    <rect class="svg-node svg-node-acc" x="744" y="16" width="110" height="40" rx="3"/>
+                    <text class="svg-lbl" x="799" y="41" text-anchor="middle">LLM</text>
+                    <!-- 生命线 -->
+                    <line class="svg-line svg-dash" x1="110" y1="56" x2="110" y2="590"/>
+                    <line class="svg-line svg-dash" x1="390" y1="56" x2="390" y2="590"/>
+                    <line class="svg-line svg-dash" x1="625" y1="56" x2="625" y2="590"/>
+                    <line class="svg-line svg-dash" x1="799" y1="56" x2="799" y2="590"/>
+                    <!-- 消息 -->
+                    <line class="svg-line" x1="110" y1="92" x2="384" y2="92" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="130" y="86">1. POST /stream（OpsSecureDto · SM4 加密报文）</text>
+                    <rect x="382" y="104" width="16" height="66" fill="#fff4ec" stroke="#e8590c"/>
+                    <text class="svg-lbl-sm" x="408" y="120">2. 解密 · 组装 CompletionDto</text>
+                    <text class="svg-lbl-sm" x="408" y="138">3. 注入：事实 / 技能 / LRU 系统提示词</text>
+                    <text class="svg-lbl-sm" x="408" y="156">4. 附件 &lt;upload_files&gt; 追加到用户消息</text>
+                    <line class="svg-line" x1="384" y1="190" x2="116" y2="190" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="130" y="184">5. SSE：definition_tool / echo_skill / echo_truth 事件
+                    </text>
+                    <line class="svg-line" x1="390" y1="228" x2="619" y2="228" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="404" y="222">6. 末消息含 tool_calls → 并行提交（审批检查）</text>
+                    <line class="svg-line" x1="619" y1="262" x2="396" y2="262" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="404" y="256">7. 执行结果 → ToolMessage（CountDownLatch 汇聚）</text>
+                    <line class="svg-line" x1="384" y1="296" x2="116" y2="296" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="130" y="290">8. SSE：echo_tool（回显）+ tool（回填消息）</text>
+                    <line class="svg-line-acc" x1="390" y1="336" x2="793" y2="336" marker-end="url(#sq-ah-o)"/>
+                    <text class="svg-lbl-sm" x="470" y="330">9. POST {baseUrl}/chat/completions（SSE 流）</text>
+                    <line class="svg-line svg-dash" x1="793" y1="372" x2="396" y2="372" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="470" y="366">10. data: {"choices":[...]} chunk 流</text>
+                    <line class="svg-line" x1="384" y1="406" x2="116" y2="406" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="130" y="400">11. SSE：assistant chunk 中继（可选 SM4 输出加密）</text>
+                    <line class="svg-line svg-dash" x1="793" y1="444" x2="396" y2="444" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="470" y="438">12. [DONE]</text>
+                    <line class="svg-line" x1="384" y1="478" x2="116" y2="478" marker-end="url(#sq-ah)"/>
+                    <text class="svg-lbl-sm" x="130" y="472">13. SSE：[DONE] → emitter.complete()</text>
+                    <!-- 循环框 -->
+                    <rect x="360" y="208" width="300" height="100" fill="none" stroke="#0b7285" stroke-dasharray="5 4"/>
+                    <text class="svg-lbl-sm" x="366" y="222" style="fill:#0b7285;">loop [ 每个 tool_call 契约 ]</text>
+                    <text class="svg-lbl-sm" x="110" y="530" text-anchor="start" style="fill:#7b90a5;">异常路径：任何阶段抛错
+                        → OpsSecureReturn.error(e) 加密回传 → emitter.completeWithError
+                    </text>
+                    <text class="svg-lbl-sm" x="110" y="552" text-anchor="start" style="fill:#7b90a5;">
+                        生命周期回调：onCompletion / onTimeout / onError 均清理 AgentTools.REQUEST_HOLDER（ThreadLocal
+                        防泄漏）
+                    </text>
+                </svg>
+                <div class="dg-cap">SSE 对话时序 — 后端是"安全网关 + 工具执行器 + 流中继"三位一体</div>
+            </div>
+
+            <div class="panel-title">编排关键决策点</div>
+            <div class="step-list reveal">
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>解密与线程切换 <code>transfer.recv()</code></h4>
+                        <p>请求体 <code>OpsSecureDto</code> 经国密链路解密还原为 <code>OpenAiOperateDto</code>；随后
+                            <code>CompletableFuture.runAsync</code> 切入 work-stealing 池（<code>min(max(CPU×4+2, 16), 512)</code> 线程），HTTP 线程立即返回 SseEmitter。
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>提示词注入时机判定 <code>needInjectSystemPrompt</code></h4>
+                        <p>仅当末消息是 user/system 时注入系统提示词；若末消息是 assistant/tool（多为中间过程）则默认不注入，但保留
+                            <b>30% 概率随机注入</b>，保证长周期对话中提示词引导不丢失。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>工具集动态裁剪</h4>
+                        <p>依据
+                            <code>enableTruth / enableSkills / enableRags / enableLruTools</code> 四开关，按绑定类（<code>TruthStoreTools / SkillsTools / RagTools / McpProviderTools</code>）过滤工具列表——功能开关即工具可见性。
+                        </p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>工具契约执行 <code>HITL 审批</code></h4>
+                        <p>末消息为带
+                            <code>tool_calls</code> 的 assistant 消息时，逐个契约核对前端审批决定（<code>toolApprovalList</code>）：拒绝则注入拒绝原因作为错误结果；允许则提交
+                            <code>toolPool</code> 并行执行，<code>CountDownLatch</code> 汇聚后回填消息列表。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>流式中继 <code>SpringWebHttpProcessor</code></h4>
+                        <p>通过 <code>HttpRequest.doPost(url).json()</code> 携带 Bearer 令牌请求 LLM，逐行读取
+                            <code>data:</code> 前缀的 chunk，封装为 <code>OpsSecureReturn</code>（按
+                            <code>encryptOutput</code> 决定是否加密）后 <code>emitter.send()</code> 中继。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-title">REST 端点一览</div>
+            <div class="spec-table-wrap reveal">
+                <table class="spec">
+                    <thead>
+                    <tr>
+                        <th>端点</th>
+                        <th>方法</th>
+                        <th>职责</th>
+                        <th>返回</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><code>/ops/open-ai/stream</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>SSE 流式对话（编排核心）</td>
+                        <td><code>SseEmitter</code> · text/event-stream</td>
+                    </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/models</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>代理查询 LLM 提供方的模型列表</td>
+                        <td>加密的模型数组</td>
+                    </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/tool/tags</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>聚合全部工具标签（自动审批配置用）</td>
+                        <td>加密的标签集合</td>
+                    </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/tmp-file/upload</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>附件上传（MD5 流式校验防篡改）</td>
+                        <td>文件访问凭据</td>
+                    </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/tmp-file/download</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>附件下载（支持下载解析后的纯文本）</td>
+                        <td>文件附件流</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">/stream 请求体 — 一次请求即一份完整契约</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">request payload — OpsSecureDto 解密后的明文结构</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre>{
+                            <span class="ty">"meta"</span>: {
+                            <span class="ty">"baseUrl"</span>: <span
+                                    class="str">"https://dashscope.aliyuncs.com/compatible-mode/v1"</span>,
+                            <span class="ty">"apiKey"</span>: <span class="str">"sk-***"</span>
+                            },
+                            <span class="ty">"completion"</span>: {
+                            <span class="ty">"model"</span>: <span class="str">"qwen-max"</span>,
+                            <span class="ty">"stream"</span>: <span class="kw">true</span>,
+                            <span class="ty">"messages"</span>: [
+                            { <span class="ty">"role"</span>: <span class="str">"system"</span>, <span
+                                    class="ty">"content"</span>: <span class="str">"..."</span> },
+                            { <span class="ty">"role"</span>: <span class="str">"user"</span>, <span
+                                    class="ty">"content"</span>: <span class="str">"..."</span> }
+                            ],
+                            <span class="ty">"temperature"</span>: <span class="num">0.7</span>, <span
+                                    class="ty">"maxTokens"</span>: <span class="num">2048</span>
+                            },
+                            <span class="ty">"enableTools"</span>: <span class="kw">true</span>, <span
+                                    class="ty">"enableSkills"</span>: <span class="kw">true</span>,
+                            <span class="ty">"enableRags"</span>: <span class="kw">true</span>, <span
+                                    class="ty">"enableLruTools"</span>: <span class="kw">false</span>,
+                            <span class="ty">"enableTruth"</span>: <span class="kw">false</span>, <span
+                                    class="ty">"encryptOutput"</span>: <span class="kw">false</span>,
+                            <span class="ty">"enableMergedSystemMsg"</span>: <span class="kw">false</span>, <span
+                                    class="cm">/* 系统重排 */</span>
+  <span class="ty">"toolApprovalList"</span>: [ <span class="cm">/* HITL 审批决定，见第 06 章 */</span> ]
+                            }</pre>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">SSE 事件格式 — 逐 chunk 中继</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">text/event-stream — 三类 delta + 结束标记</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="kw">event:</span> delta
+                            <span class="kw">data:</span> {<span class="ty">"choices"</span>:[{<span
+                                    class="ty">"delta"</span>:{<span class="ty">"content"</span>:<span
+                                    class="str">"你好"</span>},<span class="ty">"index"</span>:<span
+                                    class="num">0</span>}]}
+
+                            <span class="cm"># 推理过程（思考内容）独立字段推送</span>
+<span class="kw">event:</span> delta
+                            <span class="kw">data:</span> {<span class="ty">"choices"</span>:[{<span
+                                    class="ty">"delta"</span>:{<span class="ty">"reasoning_content"</span>:<span
+                                    class="str">"..."</span>}}]}
+
+                            <span class="cm"># 工具调用契约（流式拼接 arguments）</span>
+<span class="kw">event:</span> delta
+                            <span class="kw">data:</span> {<span class="ty">"choices"</span>:[{<span
+                                    class="ty">"delta"</span>:{<span class="ty">"tool_calls"</span>:[{
+                            <span class="ty">"id"</span>:<span class="str">"call_xxx"</span>,
+                            <span class="ty">"function"</span>:{<span class="ty">"name"</span>:<span
+                                    class="str">"rag_search"</span>,<span class="ty">"arguments"</span>:<span
+                                    class="str">"{}"</span>}}]}}]}
+
+                            <span class="kw">event:</span> done
+                            <span class="kw">data:</span> <span class="str">[DONE]</span></pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">对话状态机 — 一轮对话的完整生命周期</div>
+                <div class="diagram-panel" style="margin-top:12px;">
+                    <svg viewBox="0 0 940 292" role="img" aria-label="对话核心状态机">
+                        <defs>
+                            <marker id="st-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                                <path d="M0,0 L9,4.5 L0,9 Z" fill="#46607a"/>
+                            </marker>
+                            <marker id="st-ah-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                                <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                            </marker>
+                        </defs>
+                        <!-- 主链节点 -->
+                        <rect class="svg-node svg-node-green" x="20" y="40" width="100" height="48" rx="3"/>
+                        <text class="svg-lbl" x="70" y="61" text-anchor="middle">IDLE</text>
+                        <text class="svg-lbl-sm" x="70" y="78" text-anchor="middle">空闲态</text>
+                        <rect class="svg-node" x="150" y="40" width="110" height="48" rx="3"/>
+                        <text class="svg-lbl" x="205" y="61" text-anchor="middle">SENDING</text>
+                        <text class="svg-lbl-sm" x="205" y="78" text-anchor="middle">消息发送态</text>
+                        <rect class="svg-node" x="290" y="40" width="120" height="48" rx="3"/>
+                        <text class="svg-lbl" x="350" y="61" text-anchor="middle">INJECTING</text>
+                        <text class="svg-lbl-sm" x="350" y="78" text-anchor="middle">提示词注入态</text>
+                        <rect class="svg-node svg-node-dark pulse-node" x="440" y="40" width="140" height="48" rx="3"/>
+                        <text class="svg-lbl-w" x="510" y="61" text-anchor="middle">STREAMING</text>
+                        <text class="svg-lbl-sm" x="510" y="78" text-anchor="middle" style="fill:#8fb3d6;">LLM
+                            流式推理态
+                        </text>
+                        <rect class="svg-node" x="660" y="40" width="120" height="48" rx="3"/>
+                        <text class="svg-lbl" x="720" y="61" text-anchor="middle">RENDERING</text>
+                        <text class="svg-lbl-sm" x="720" y="78" text-anchor="middle">响应渲染态</text>
+                        <rect class="svg-node svg-node-acc" x="810" y="40" width="110" height="48" rx="3"/>
+                        <text class="svg-lbl" x="865" y="61" text-anchor="middle">COMPLETED</text>
+                        <text class="svg-lbl-sm" x="865" y="78" text-anchor="middle">完成态</text>
+                        <!-- 工具循环节点 -->
+                        <rect class="svg-node svg-node-acc" x="290" y="180" width="130" height="48" rx="3"/>
+                        <text class="svg-lbl" x="355" y="201" text-anchor="middle">HITL_AWAIT</text>
+                        <text class="svg-lbl-sm" x="355" y="218" text-anchor="middle">工具待授权态</text>
+                        <rect class="svg-node svg-node-teal" x="470" y="180" width="120" height="48" rx="3"/>
+                        <text class="svg-lbl" x="530" y="201" text-anchor="middle">TOOL_EXEC</text>
+                        <text class="svg-lbl-sm" x="530" y="218" text-anchor="middle">工具执行态</text>
+                        <rect class="svg-node svg-node-teal" x="640" y="180" width="120" height="48" rx="3"/>
+                        <text class="svg-lbl" x="700" y="201" text-anchor="middle">FEEDBACK</text>
+                        <text class="svg-lbl-sm" x="700" y="218" text-anchor="middle">结果反馈态</text>
+                        <!-- 主链箭头 -->
+                        <path class="svg-line" d="M120,64 L146,64" marker-end="url(#st-ah)"/>
+                        <path class="svg-line" d="M260,64 L286,64" marker-end="url(#st-ah)"/>
+                        <path class="svg-line" d="M410,64 L436,64" marker-end="url(#st-ah)"/>
+                        <path class="svg-line" d="M580,64 L656,64" marker-end="url(#st-ah)"/>
+                        <path class="svg-line" d="M780,64 L806,64" marker-end="url(#st-ah)"/>
+                        <text class="svg-lbl-sm" x="126" y="56">输入</text>
+                        <text class="svg-lbl-sm" x="262" y="56">解密</text>
+                        <text class="svg-lbl-sm" x="412" y="56">转发</text>
+                        <text class="svg-lbl-sm" x="588" y="56">流结束/无 tool_calls</text>
+                        <text class="svg-lbl-sm" x="782" y="56">渲染完</text>
+                        <!-- 工具循环箭头 -->
+                        <path class="svg-line-acc" d="M480,88 C480,132 355,132 355,176" marker-end="url(#st-ah-o)"/>
+                        <text class="svg-lbl-sm" x="388" y="136" style="fill:#e8590c;">tool_calls 待授权</text>
+                        <path class="svg-line" d="M420,204 L466,204" marker-end="url(#st-ah)"/>
+                        <text class="svg-lbl-sm" x="424" y="196">允许</text>
+                        <path class="svg-line" d="M590,204 L636,204" marker-end="url(#st-ah)"/>
+                        <text class="svg-lbl-sm" x="594" y="196">执行完</text>
+                        <path class="svg-line-acc" d="M700,180 C700,132 560,132 556,92" marker-end="url(#st-ah-o)"/>
+                        <text class="svg-lbl-sm" x="608" y="136" style="fill:#e8590c;">提交 tool 消息→继续推理</text>
+                        <!-- 拒绝虚线 -->
+                        <path class="svg-line svg-dash" d="M310,180 C310,120 448,118 452,92" marker-end="url(#st-ah)"/>
+                        <text class="svg-lbl-sm" x="300" y="118" style="fill:#7b90a5;">拒绝+原因→调整行为</text>
+                        <!-- 循环回到 IDLE -->
+                        <path class="svg-line svg-dash" d="M865,88 L865,262 L70,262 L70,92" marker-end="url(#st-ah)"/>
+                        <text class="svg-lbl-sm" x="440" y="278">Token 统计完毕 → 等待新一轮对话</text>
+                    </svg>
+                    <div class="dg-cap">对话核心状态机 — 工具循环（HITL_AWAIT → TOOL_EXEC → FEEDBACK）可多轮嵌套</div>
+                </div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>子系统</th>
+                            <th>状态轨迹</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><b>会话生命周期</b></td>
+                            <td>NEW → ACTIVE → SUMMARIZING（总结）/ TRIMMED（截断）/ EXPORTED（导出）/ DELETED → 回到 ACTIVE</td>
+                        </tr>
+                        <tr>
+                            <td><b>工具加载</b></td>
+                            <td>DISABLED → ENABLED → FULL_LOAD（全量）/ LRU_MODE（动态）→ READY</td>
+                        </tr>
+                        <tr>
+                            <td><b>RAG 知识库</b></td>
+                            <td>DISABLED → ENABLED → DOC_SCAN（扫描）→ EMBED（向量化）→ READY → QUERYING（检索中）</td>
+                        </tr>
+                        <tr>
+                            <td><b>技能系统</b></td>
+                            <td>DISABLED → ENABLED → FILE_SCAN（30s 循环）→ LOADED → DECLARED（声明注入）→ EXECUTING</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 05 Re-Act 循环 ===================== -->
+        <section class="chapter" id="ch05">
+            <div class="ch-head reveal">
+                <div class="ch-no">05</div>
+                <h2><span class="en">Re-Act Loop</span>Re-Act 循环
+                ：Agent 的心脏</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                标准层 <code>i2f.ai.std.agent.AiAgent</code>（471 行）实现了完整的 <b>Reasoning + Acting</b> 循环。
+            Ops 子系统虽由前端驱动循环节奏，但后端 <code>i2f-ai-std</code> 提供的这套 Agent 引擎是同一套设计哲学的程序化表达，
+            二者共享工具解析（<code>ToolRawHelper</code>）与消息模型。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 820 400" role="img" aria-label="Re-Act 循环图">
+                    <defs>
+                        <marker id="ra-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                        <marker id="ra-ah-g" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#2b8a3e"/>
+                        </marker>
+                    </defs>
+                    <!-- 循环弧 -->
+                    <path class="svg-line-acc flow-anim" d="M300,84 A150,150 0 0 1 480,120" marker-end="url(#ra-ah)"/>
+                    <path class="svg-line-acc flow-anim" d="M520,180 A150,150 0 0 1 480,300" marker-end="url(#ra-ah)"/>
+                    <path class="svg-line-acc flow-anim" d="M400,336 A150,150 0 0 1 240,300" marker-end="url(#ra-ah)"/>
+                    <path class="svg-line-acc flow-anim" d="M200,240 A150,150 0 0 1 230,120" marker-end="url(#ra-ah)"/>
+                    <!-- 节点 -->
+                    <rect class="svg-node" x="230" y="44" width="150" height="44" rx="3"/>
+                    <text class="svg-lbl" x="305" y="71" text-anchor="middle">① 历史压缩 / 截断</text>
+                    <rect class="svg-node svg-node-dark" x="452" y="96" width="168" height="44" rx="3"/>
+                    <text class="svg-lbl-w" x="536" y="123" text-anchor="middle">② 模型推理 generate()</text>
+                    <rect class="svg-node svg-node-acc" x="430" y="276" width="190" height="44" rx="3"/>
+                    <text class="svg-lbl" x="525" y="303" text-anchor="middle">③ finishReason 判定</text>
+                    <rect class="svg-node svg-node-teal" x="150" y="276" width="180" height="44" rx="3"/>
+                    <text class="svg-lbl" x="240" y="303" text-anchor="middle">④ 工具并行执行</text>
+                    <rect class="svg-node" x="140" y="96" width="170" height="44" rx="3"/>
+                    <text class="svg-lbl" x="225" y="123" text-anchor="middle">⑤ ToolMessage 回填</text>
+                    <!-- 中心 -->
+                    <circle cx="380" cy="205" r="58" fill="#fff4ec" stroke="#e8590c" stroke-width="1.6"/>
+                    <text class="svg-lbl" x="380" y="198" text-anchor="middle" style="fill:#e8590c;">Re-Act</text>
+                    <text class="svg-lbl-sm" x="380" y="218" text-anchor="middle">Reasoning</text>
+                    <text class="svg-lbl-sm" x="380" y="233" text-anchor="middle">+ Acting</text>
+                    <!-- 出口 -->
+                    <path class="svg-line" d="M620,298 L700,298" stroke="#2b8a3e" stroke-width="1.8"
+                          marker-end="url(#ra-ah-g)"/>
+                    <rect class="svg-node svg-node-green" x="700" y="276" width="110" height="44" rx="3"/>
+                    <text class="svg-lbl" x="755" y="303" text-anchor="middle">最终答复</text>
+                    <text class="svg-lbl-sm" x="628" y="290" style="fill:#2b8a3e;">STOP</text>
+                    <text class="svg-lbl-sm" x="560" y="270" style="fill:#e8590c;">TOOL_CALL</text>
+                    <!-- 限制说明 -->
+                    <text class="svg-lbl-sm" x="20" y="372">护栏：全局调用上限 100 · 单工具上限 10 · 同参数失败上限 2 ·
+                        消息保留 ≤20 · 16 条触发压缩 · 支持中断标志
+                    </text>
+                </svg>
+                <div class="dg-cap">AiAgent Re-Act 循环 — 直至模型返回 STOP 或触发护栏</div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">消息列表演化记号法</div>
+                    <div class="pkg-tree"><span class="cm"># 一轮完整的工具调用对话</span>
+                        [1u] <span class="cm"># 用户发送消息</span>
+                        ↓ 注入工具声明
+                        [1u] → LLM 推理
+                        ↓ 返回调用契约
+                        [1u, 2ac] <span class="cm"># 2ac = 助手消息 + tool_calls</span>
+                        ↓ 执行工具 · 反馈结果
+                        [1u, 2ac, 3t] <span class="cm"># 3t = 工具消息</span>
+                        ↓ LLM 继续推理（客户端自动触发）
+                        [1u, 2ac, 3t, 4a] <span class="cm"># 4a = 最终归纳答复</span></div>
+                    <p class="body" style="font-size:13px;margin-top:10px;">两轮 LLM 调用：第一轮仅携带
+                        <code>[1u]</code> 由用户触发；第二轮携带三条消息由客户端自动触发——这正是"客户端即 Agent 运行时"的含义。
+                    </p>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">AiAgentContext 护栏配置</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>配置项</th>
+                                <th>默认</th>
+                                <th>说明</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>maxAllToolCallCount</code></td>
+                                <td>100</td>
+                                <td>全局工具调用上限</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxSingleToolCallCount</code></td>
+                                <td>10</td>
+                                <td>单工具调用上限</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxSingleToolSameArgumentFailureCount</code></td>
+                                <td>2</td>
+                                <td>同参数失败上限（防死磕）</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxKeepMessageCount</code></td>
+                                <td>20</td>
+                                <td>最大保留消息数</td>
+                            </tr>
+                            <tr>
+                                <td><code>compressHistoryCount</code></td>
+                                <td>16</td>
+                                <td>触发 LLM 摘要压缩阈值</td>
+                            </tr>
+                            <tr>
+                                <td><code>keepFirstUserMessage</code></td>
+                                <td>true</td>
+                                <td>截断时保留首条用户消息</td>
+                            </tr>
+                            <tr>
+                                <td><code>enableParallelToolCall</code></td>
+                                <td>true</td>
+                                <td>并行执行工具契约</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#2b8a3e;">
+                <div class="co-title">历史压缩策略（compressOrDropHistoryMessage）</div>
+                <p>消息数达到阈值时，将超量历史消息取出并追加一条
+                    <code>"总结上述对话内容"</code> 的用户消息，单独请求 LLM 生成摘要回填——
+                    用一次廉价调用换取上下文瘦身；随后按 <code>maxKeepMessageCount</code> 硬截断，并可选保留首条用户消息以锚定对话主题。
+                    前端页面则以"截断会话历史线"分割线可视化这一过程。</p>
+            </div>
+        </section>
+
+        <!-- ===================== 06 消息模型 ===================== -->
+        <section class="chapter" id="ch06">
+            <div class="ch-head reveal">
+                <div class="ch-no">06</div>
+                <h2><span class="en">Message Model</span>消息模型与回显协议</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                消息是框架的第一公民。标准层定义 4 种角色消息，Ops 层通过 <code>OpenAiMessageVo</code> 多态载体与
+                <code>OpsOpenAiConsts</code> 扩展出 7 种<b>回显消息</b>——让前端不仅能看到对话，还能看到"系统为模型做了什么"。
+            </p>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">OpenAI 标准四角色</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>角色</th>
+                                <th>常量</th>
+                                <th>语义</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><span class="tag t-b">user</span></td>
+                                <td><code>OpenAiConsts.USER</code></td>
+                                <td>用户提示词，一般由用户发送</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag t-g">system</span></td>
+                                <td><code>OpenAiConsts.SYSTEM</code></td>
+                                <td>系统提示词，限定角色 / 职责 / 推理约束</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag t-o">assistant</span></td>
+                                <td><code>OpenAiConsts.ASSISTANT</code></td>
+                                <td>模型答复；特例：携带 <code>tool_calls</code> 契约</td>
+                            </tr>
+                            <tr>
+                                <td><span class="tag t-t">tool</span></td>
+                                <td><code>OpenAiConsts.TOOL</code></td>
+                                <td>工具执行结果，凭 <code>tool_call_id</code> 关联契约</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="body" style="font-size:13px;">前端可按角色定制显示/隐藏；<code>assistant</code> 消息额外支持
+                        <code>reasoning_content</code> 思考过程折叠渲染。</p>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">Ops 扩展回显类型（OpsOpenAiConsts）</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>类型常量</th>
+                                <th>载荷</th>
+                                <th>用途</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>definition_tool</code></td>
+                                <td>工具定义 DTO</td>
+                                <td>告知前端本轮注入了哪些工具（名称/描述/参数/标签/绑定类方法）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_tool</code></td>
+                                <td>EchoOpenAiToolMessage</td>
+                                <td>回显工具执行结果与调用参数</td>
+                            </tr>
+                            <tr>
+                                <td><code>request_tool</code></td>
+                                <td>RequestOpenAiToolMessage</td>
+                                <td>回显工具调用请求</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_skill</code></td>
+                                <td>技能系统提示词</td>
+                                <td>回显注入的技能声明 / LRU 工具提示词</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_lru_tools</code></td>
+                                <td>工具名列表</td>
+                                <td>同步 LRU 淘汰后的存活工具集</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_truth</code></td>
+                                <td>事实系统消息</td>
+                                <td>回显注入的关键事实内容</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_request_payload</code></td>
+                                <td>完整补全报文</td>
+                                <td>回显实际发给 LLM 的请求报文（学习/调试）</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="code-block reveal">
+                <div class="code-head">
+                    <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                               style="background:#ffbd2e;"></span><span
+                        class="dot" style="background:#27c93f;"></span>
+                    <span class="fname">OpenAiOperateDto.java — 一次请求即一份"功能开关清单"</span>
+                    <button class="copy-btn">COPY</button>
+                </div>
+                <pre><span class="kw">public class</span> <span class="ty">OpenAiOperateDto</span> {
+                    <span class="kw">protected</span> OpenAiMeta meta; <span class="cm">// baseUrl · apiKey</span>
+    <span class="kw">protected</span> OpenAiCompletionVo completion; <span
+                            class="cm">// model · messages · stream</span>
+    <span class="kw">protected</span> List&lt;OpenAiToolApprovalDto&gt; toolApprovalList; <span
+                            class="cm">// HITL 审批决定</span>
+
+    <span class="kw">protected boolean</span> encryptOutput; <span class="cm">// 输出是否 SM4 加密</span>
+    <span class="kw">protected boolean</span> enableTools; <span class="cm">// Function Calling 开关</span>
+    <span class="kw">protected boolean</span> enableSkills; <span class="cm">// 技能系统开关</span>
+    <span class="kw">protected boolean</span> enableRags; <span class="cm">// 知识库开关</span>
+    <span class="kw">protected boolean</span> enableLruTools; <span class="cm">// MCP 动态工具开关</span>
+    <span class="kw">protected boolean</span> enableEchoRequestPayload; <span class="cm">// 请求报文回显</span>
+    <span class="kw">protected boolean</span> enableMergedSystemMsg; <span
+                            class="cm">// 系统重排：合并系统消息至首条</span>
+    <span class="kw">protected boolean</span> enableTruth; <span class="cm">// 事实注入开关</span>
+
+    <span class="kw">protected</span> List&lt;String&gt; lruToolNames; <span class="cm">// LRU 存活工具</span>
+    <span class="kw">protected</span> Integer lruToolMaxSize; <span class="cm">// LRU 容量</span>
+    <span class="kw">protected</span> String truthContent; <span class="cm">// 关键事实内容</span>
+                    }</pre>
+            </div>
+        </section>
+
+        <!-- ===================== 07 工具体系 ===================== -->
+        <section class="chapter" id="ch07">
+            <div class="ch-head reveal">
+                <div class="ch-no">07</div>
+                <h2><span class="en">Function Calling</span>工具体系
+                ：注解驱动的能力池</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                如果 LLM 是 CPU，工具就是它的 I/O 设备。框架用<b>声明式注解</b>把普通 Java 方法变成 LLM 能理解的工具能力：
+            一个 <code>@Tool</code> 即完成「反射扫描 → JSON Schema 生成 → OpenAI <code>tools</code> 字段上报」的全链路注册，
+            模型凭描述文本自主决定何时调用、传什么参数。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 940 286" role="img" aria-label="工具注册与调用流程">
+                    <defs>
+                        <marker id="ah7-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                        <marker id="ah7-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                        </marker>
+                    </defs>
+                    <text class="svg-lbl-sm" x="20" y="26" style="fill:#0b7285;letter-spacing:.18em;">REGISTER ·
+                        注册阶段（应用启动，一次完成）
+                    </text>
+                    <text class="svg-lbl-sm" x="20" y="168" style="fill:#e8590c;letter-spacing:.18em;">INVOKE ·
+                        调用阶段（每轮对话，按需触发）
+                    </text>
+                    <line class="svg-line svg-dash" x1="20" y1="142" x2="920" y2="142"/>
+
+                    <rect class="svg-node svg-node-teal" x="20" y="42" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="118" y="68" text-anchor="middle">@Tool 注解方法</text>
+                    <text class="svg-lbl-sm" x="118" y="86" text-anchor="middle">Spring Bean · 反射扫描</text>
+
+                    <rect class="svg-node svg-node-teal" x="256" y="42" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="354" y="68" text-anchor="middle">ToolDefinition</text>
+                    <text class="svg-lbl-sm" x="354" y="86" text-anchor="middle">name · description · tags</text>
+
+                    <rect class="svg-node svg-node-teal" x="492" y="42" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="590" y="68" text-anchor="middle">JSON Schema</text>
+                    <text class="svg-lbl-sm" x="590" y="86" text-anchor="middle">参数类型映射 · required</text>
+
+                    <rect class="svg-node svg-node-teal" x="728" y="42" width="192" height="62" rx="3"/>
+                    <text class="svg-lbl" x="824" y="68" text-anchor="middle">OpenAI tools 字段</text>
+                    <text class="svg-lbl-sm" x="824" y="86" text-anchor="middle">随补全请求上报 LLM</text>
+
+                    <path class="svg-line-teal flow-anim" d="M216,73 L256,73" marker-end="url(#ah7-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M452,73 L492,73" marker-end="url(#ah7-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M688,73 L728,73" marker-end="url(#ah7-t)"/>
+
+                    <path class="svg-line svg-dash" d="M824,104 C824,152 120,132 120,182" marker-end="url(#ah7-o)"/>
+
+                    <rect class="svg-node svg-node-acc" x="20" y="184" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="118" y="210" text-anchor="middle">LLM 返回 tool_calls</text>
+                    <text class="svg-lbl-sm" x="118" y="228" text-anchor="middle">assistant 消息携带契约</text>
+
+                    <rect class="svg-node svg-node-acc" x="256" y="184" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="354" y="210" text-anchor="middle">HITL 人工审批</text>
+                    <text class="svg-lbl-sm" x="354" y="228" text-anchor="middle">批准 · 拒绝 · 编辑参数</text>
+
+                    <rect class="svg-node svg-node-acc" x="492" y="184" width="196" height="62" rx="3"/>
+                    <text class="svg-lbl" x="590" y="210" text-anchor="middle">CountDownLatch 并行执行</text>
+                    <text class="svg-lbl-sm" x="590" y="228" text-anchor="middle">ToolManager.callTool</text>
+
+                    <rect class="svg-node svg-node-dark" x="728" y="184" width="192" height="62" rx="3"/>
+                    <text class="svg-lbl-w" x="824" y="210" text-anchor="middle">ToolMessage 回填</text>
+                    <text class="svg-lbl-sm" x="824" y="228" text-anchor="middle" style="fill:#8fb3d6;">tool_call_id
+                        关联契约
+                    </text>
+
+                    <path class="svg-line-acc flow-anim" d="M216,215 L256,215" marker-end="url(#ah7-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M452,215 L492,215" marker-end="url(#ah7-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M688,215 L728,215" marker-end="url(#ah7-o)"/>
+
+                    <text class="svg-lbl-sm" x="20" y="272">回填后的消息列表进入下一轮推理，直至 LLM 不再返回 tool_calls
+                        —— 这正是第 05 章 Re-Act 循环在工具侧的投影
+                    </text>
+                </svg>
+                <div class="dg-cap">工具注册与调用全链路 — 注册一次，每轮对话按需调用</div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">注解即契约 — 一个方法即一个工具</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">RagTools.java — @Tools / @Tool / @ToolParam</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="ann">@Tools</span>(tags = {<span class="ty">AiTags</span>.RAG_VALUE})
+                            <span class="kw">public class</span> <span class="ty">RagTools</span> {
+
+                            <span class="ann">@Tool</span>(tags = {<span class="ty">AiTags</span>.READONLY_VALUE},
+                            description = <span class="str">"获取与文本内容具有相关性的知识库文档资料"</span>)
+                            <span class="kw">public</span> List&lt;RagSearchResultItem&gt; <span
+                                    class="fn">rag_search</span>(
+                            <span class="ann">@ToolParam</span>(description = <span
+                                    class="str">"检索文本内容"</span>) String text,
+                            <span class="ann">@ToolParam</span>(description = <span
+                                    class="str">"最多返回的条数，默认为 3"</span>) Integer topN) {
+                            <span class="kw">return</span> worker.similar(text, topN == <span class="kw">null</span> ?
+                            <span class="num">3</span> : topN);
+                            }
+                            }</pre>
+                    </div>
+                    <p class="body"
+                       style="font-size:13px;">方法名即工具名，<code>@ToolParam</code> 描述即参数说明——LLM 读到的
+                        <code>tools</code> 字段完全由注解反射生成，<b>零手写 Schema</b>。</p>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">ToolManager — 工具池统一抽象</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">ToolManager.java — i2f-ai-std</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="kw">public interface</span> <span class="ty">ToolManager</span> {
+                            <span class="cm">// 列举全部工具定义 → 注入 tools 字段</span>
+                            List&lt;ToolDefinition&gt; <span class="fn">getTools</span>();
+
+                            <span class="cm">// 判定本管理器能否处理该调用请求</span>
+    <span class="kw">boolean</span> <span class="fn">support</span>(ToolBaseCallRequest request);
+
+                            <span class="cm">// 执行工具调用，结果回填 ToolMessage</span>
+                            Object <span class="fn">callTool</span>(ToolBaseCallRequest request) <span
+                                    class="kw">throws</span> Throwable;
+                            }</pre>
+                    </div>
+                    <p class="body"
+                       style="font-size:13px;">实现双轨：<code>ContextAppToolManager</code> 扫描容器内 @Tool Bean；<code>ContextMcpToolGatewayManager</code> 经 MCP 网关聚合外部工具，二者经
+                        <code>@ConditionalOnMissingBean</code> 互斥装配。</p>
+                </div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">Java 类型 → JSON Schema 映射</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>Java 类型</th>
+                            <th>Schema 类型</th>
+                            <th>细节</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>String / char</code></td>
+                            <td><span class="tag t-t">string</span></td>
+                            <td>直接映射</td>
+                        </tr>
+                        <tr>
+                            <td><code>Integer / Long / int …</code></td>
+                            <td><span class="tag t-t">integer</span></td>
+                            <td>整型族统一</td>
+                        </tr>
+                        <tr>
+                            <td><code>Double / Float / BigDecimal</code></td>
+                            <td><span class="tag t-t">number</span></td>
+                            <td>浮点族统一</td>
+                        </tr>
+                        <tr>
+                            <td><code>Boolean</code></td>
+                            <td><span class="tag t-t">boolean</span></td>
+                            <td>直接映射</td>
+                        </tr>
+                        <tr>
+                            <td><code>List / Set / 数组</code></td>
+                            <td><span class="tag t-t">array</span></td>
+                            <td><code>items</code> 递归推导泛型</td>
+                        </tr>
+                        <tr>
+                            <td><code>Map / POJO</code></td>
+                            <td><span class="tag t-t">object</span></td>
+                            <td><code>properties</code> 递归展开字段</td>
+                        </tr>
+                        <tr>
+                            <td><code>Enum</code></td>
+                            <td><span class="tag t-t">string + enum</span></td>
+                            <td>枚举值列为候选约束</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">内置工具清单 — ops 层 16 类 + 条件装配 2 类</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>工具类</th>
+                            <th>代表工具</th>
+                            <th>能力</th>
+                            <th>关键标签</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>DatabaseQueryTools</code></td>
+                            <td><code>sql_query_datasource</code></td>
+                            <td>SQL 数据查询，双重安全校验</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>DatabaseMetadataTools</code></td>
+                            <td>元数据查询</td>
+                            <td>表结构 / 索引 / 字段信息</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>CommandTools</code></td>
+                            <td>shell 执行</td>
+                            <td>本地命令行执行</td>
+                            <td><span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>LocalFileTools</code></td>
+                            <td>文件读写</td>
+                            <td>本地文件列举 / 读取 / 写入</td>
+                            <td><span class="tag t-o">WRITABLE</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>TmpFileTools</code></td>
+                            <td>临时文件</td>
+                            <td>上传 / 下载临时文件管理</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>TruthStoreTools</code></td>
+                            <td><code>store_truth</code></td>
+                            <td>存储关键事实，注入后续对话</td>
+                            <td><span class="tag t-o">WRITABLE</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>McpProviderTools</code></td>
+                            <td>元工具 ×3</td>
+                            <td>MCP 供应商发现与动态装载</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>AgentTools</code> (a2a)</td>
+                            <td><code>safe_sql_detect</code></td>
+                            <td>Agent 调 Agent 的 SQL 安全检测</td>
+                            <td><span class="tag t-b">A2A</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>CodecTools</code></td>
+                            <td>编解码</td>
+                            <td>Base64 / URL / Unicode 转换</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>JceTools</code></td>
+                            <td>加密哈希</td>
+                            <td>摘要 / 加解密计算</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>DatetimeTools</code></td>
+                            <td>时间转换</td>
+                            <td>时间戳 / 日期格式互转</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>LunarTools</code></td>
+                            <td>农历查询</td>
+                            <td>农历 / 节气 / 干支</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>UidTools</code></td>
+                            <td>唯一 ID</td>
+                            <td>雪花等分布式 ID 生成</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>RandomTools</code></td>
+                            <td>随机采样</td>
+                            <td>随机数 / 抽样</td>
+                            <td><span class="tag t-g">READONLY</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>WebDownloadTools</code></td>
+                            <td>网络下载</td>
+                            <td>下载网络资源到本地</td>
+                            <td><span class="tag t-b">PUBLIC_NET</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>FileFileUtils</code></td>
+                            <td>文件工具</td>
+                            <td>文件处理辅助能力</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td><code>SkillsTools</code> ※</td>
+                            <td>技能三件套</td>
+                            <td>技能文档 / 资源 / 脚本执行</td>
+                            <td><span class="tag t-t">SKILL</span></td>
+                        </tr>
+                        <tr>
+                            <td><code>RagTools</code> ※</td>
+                            <td><code>rag_search</code></td>
+                            <td>知识库相似度检索</td>
+                            <td><span class="tag t-t">RAG</span></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="body" style="font-size:12.5px;">※ 条件装配：随 <code>ai.skills.enable</code> /
+                    <code>ai.rags.enable</code> 开关注入，详见第 13 章。</p>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">AiTags — 工具的「危险品标签」体系</div>
+                <p class="body" style="font-size:13.5px;">每个工具可携带多维标签，供前端审批策略与后端过滤决策使用：</p>
+                <div class="tag-cloud">
+                    <span class="tc"><b>行为</b>：READONLY · WRITABLE · EXECUTABLE · COMMAND</span>
+                    <span class="tc"><b>审批</b>：AUTO · SANDBOX · HUMAN</span>
+                    <span class="tc"><b>网络</b>：PUBLIC_NET · PRIVATE_NET · INTRANET_ONLY</span>
+                    <span class="tc"><b>敏感</b>：SENSIBLE · AUTH · SECRET</span>
+                    <span class="tc"><b>成本</b>：HIGH_COST · SLOW_EXEC · RATE_LIMITED</span>
+                    <span class="tc"><b>领域</b>：SKILL · RAG</span>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">标签自动审批 — 决策流程</div>
+                    <div class="pkg-tree"><span class="cm"># 模型返回 tool_calls 后的前端审批决策</span>
+                        查找工具定义的 <span class="fn">tags</span>
+                        ├── tags 包含 <span class="str">"auto"</span> 且用户勾选了 <span class="str">"auto"</span>
+                        │   └── <span class="dir">→ 自动放行执行</span>
+                        ├── tags 全部被 <span class="fn">autoApprovalToolTags</span> 覆盖
+                        │   └── <span class="dir">→ 自动放行执行</span>
+                        └── 未被覆盖
+                        └── <span class="cm">→ 弹出审批弹窗（HITL 人工确认）</span></div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">配置来源与效果</div>
+                    <div class="callout" style="--c:#0b7285;margin-top:0;">
+                        <div class="co-title">/ops/open-ai/tool/tags — 标签集合接口</div>
+                        <p>前端经 <code>POST /ops/open-ai/tool/tags</code> 拉取全部已注册工具的标签并集，渲染为审批配置面板；用户勾选信任标签（如
+                            <code>auto</code> / <code>readonly</code>）持久化到 <code>autoApprovalToolTags</code>。命中标签的工具调用<b>无需手动确认直接执行</b>——在安全与效率之间按需调节。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#c92a2a;">
+                <div class="co-title">SQL 双重校验 — 给最危险的工具上双保险</div>
+                <p><code>sql_query_datasource</code> 直连数据源，框架用
+                    <code>OpsSqlValidators</code> 做两道拦截：<b>JSqlParser AST 解析</b>为主——将 SQL 解析成语法树后按语句类型白名单放行；解析失败（方言差异等）时回退到
+                    <b>OpsSimpleRegexSqlValidator 正则校验</b>。DROP / TRUNCATE / DELETE 等危险语句在到达数据库之前即被阻断。
+                </p>
+            </div>
+        </section>
+
+        <!-- ===================== 08 技能系统 ===================== -->
+        <section class="chapter" id="ch08">
+            <div class="ch-head reveal">
+                <div class="ch-no">08</div>
+                <h2><span class="en">Skill System</span>技能系统
+                ：懒加载的领域知识包</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                技能（Skill）是<b>按需取用的提示词 + 脚本资产包</b>：与把所有领域知识塞进系统提示词不同，
+            技能只在 LLM 判断「需要」时才被读取——省 token、降干扰、可热插拔。一个 <code>SKILL.md</code> 文件即一个技能。
+            </p>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">技能目录结构</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">skills/ — 文件系统即技能仓库</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre>skills/
+                        ├── search_website/
+                        │   ├── SKILL.md <span class="cm"># 技能声明：YAML 头 + Markdown 正文</span>
+                            │   └── script/
+                            │       └── search.py <span class="cm"># 附带脚本，可被 run_skill_script 执行</span>
+                            └── data_report/
+                            ├── SKILL.md
+                            └── resources/
+                            └── template.md <span class="cm"># 静态资源，可被 get_skill_resource 读取</span></pre>
+                    </div>
+                    <div class="panel-title" style="margin-top:20px;">SKILL.md 格式</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">SKILL.md — 声明式技能定义</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="cm">---</span>
+<span class="ty">name</span>: <span class="str">search_website</span>
+<span class="ty">description</span>: <span class="str">调用搜索引擎检索实时网页信息</span>
+<span class="ty">tags</span>: [<span class="str">search</span>, <span class="str">web</span>]
+                            <span class="ty">version</span>: <span class="str">1.0.0</span>
+<span class="cm">---</span>
+
+<span class="kw"># 网站搜索技能</span>
+
+<span class="kw">## 何时使用</span>
+                            当用户询问实时信息、新闻、天气……
+
+                            <span class="kw">## 使用步骤</span>
+                            1. 调用 <span class="fn">run_skill_script</span>，脚本路径 script/search.py
+                            2. 解析返回的 JSON 结果并归纳回答</pre>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">SkillsTools — 技能三件套</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>工具</th>
+                                <th>能力</th>
+                                <th>标签</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>get_skill_document</code></td>
+                                <td>读取技能 SKILL.md 全文</td>
+                                <td><span class="tag t-g">AUTO</span><span class="tag t-g">READONLY</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>get_skill_resource</code></td>
+                                <td>读取技能内资源 / 脚本内容</td>
+                                <td><span class="tag t-g">AUTO</span><span class="tag t-g">READONLY</span></td>
+                            </tr>
+                            <tr>
+                                <td><code>run_skill_script</code></td>
+                                <td>执行技能内命令行脚本</td>
+                                <td><span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span><span
+                                        class="tag t-r">COMMAND</span></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="panel-title" style="margin-top:20px;">脚本解释器自动识别</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>扩展名</th>
+                                <th>解释器</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>.py</code></td>
+                                <td><code>python</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>.pl</code></td>
+                                <td><code>perl</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>.js</code></td>
+                                <td><code>node</code></td>
+                            </tr>
+                            <tr>
+                                <td>其他（Windows）</td>
+                                <td><code>cmd /c</code></td>
+                            </tr>
+                            <tr>
+                                <td>其他（*nix）</td>
+                                <td><code>sh</code></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="body" style="font-size:12.5px;">脚本执行带 <b>3 分钟超时</b>（OsUtil.execCmd），工作目录为脚本所在目录；<code>run_skill_script</code> 携带 HUMAN 标签，调用前须人工审批。
+                    </p>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#2b8a3e;">
+                <div class="co-title">30 秒热扫描 — 技能即文件，改文件即生效</div>
+                <p><code>SkillAutoConfiguration</code> 实现 <code>ApplicationRunner</code>：启动即全量扫描
+                    <code>SkillsHelper.scanFileSystemSkills()</code>，随后以 <b>30 秒</b>为周期
+                    <code>scheduleWithFixedDelay</code> 增量刷新到 <code>skillDefinitionMap</code>。新增技能无需重启应用——把目录放进
+                    <code>skills/</code>，半分钟内 LLM 即可发现并使用。</p>
+            </div>
+        </section>
+
+        <!-- ===================== 09 RAG 知识库 ===================== -->
+        <section class="chapter" id="ch09">
+            <div class="ch-head reveal">
+                <div class="ch-no">09</div>
+                <h2><span class="en">RAG Pipeline</span>RAG 知识库
+                ：向量检索增强</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                RAG（检索增强生成）让 LLM 基于<b>私有文档</b>作答：文档入库时被切分、向量化、持久化到 SQLite；
+            对话时由
+                <code>rag_search</code> 工具按语义相似度召回片段，作为上下文交给模型。全链路零外部中间件——一个 SQLite 文件即是向量库。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 940 206" role="img" aria-label="RAG 入库与检索双管线">
+                    <defs>
+                        <marker id="ah9-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                        </marker>
+                        <marker id="ah9-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                    </defs>
+                    <text class="svg-lbl-sm" x="20" y="26" style="fill:#0b7285;letter-spacing:.18em;">INDEX ·
+                        入库管线（应用启动，后台线程异步执行）
+                    </text>
+                    <rect class="svg-node svg-node-teal" x="20" y="42" width="150" height="58" rx="3"/>
+                    <text class="svg-lbl" x="95" y="66" text-anchor="middle">docs/ 文档目录</text>
+                    <text class="svg-lbl-sm" x="95" y="84" text-anchor="middle">投放即加载</text>
+
+                    <rect class="svg-node svg-node-teal" x="200" y="42" width="150" height="58" rx="3"/>
+                    <text class="svg-lbl" x="275" y="66" text-anchor="middle">FileReader</text>
+                    <text class="svg-lbl-sm" x="275" y="84" text-anchor="middle">多格式解析</text>
+
+                    <rect class="svg-node svg-node-teal" x="380" y="42" width="160" height="58" rx="3"/>
+                    <text class="svg-lbl" x="460" y="66" text-anchor="middle">TextSplitter</text>
+                    <text class="svg-lbl-sm" x="460" y="84" text-anchor="middle">递归切分 + 重叠</text>
+
+                    <rect class="svg-node svg-node-teal" x="570" y="42" width="160" height="58" rx="3"/>
+                    <text class="svg-lbl" x="650" y="66" text-anchor="middle">EmbeddingModel</text>
+                    <text class="svg-lbl-sm" x="650" y="84" text-anchor="middle">/embeddings 向量化</text>
+
+                    <rect class="svg-node svg-node-teal" x="760" y="42" width="160" height="58" rx="3"/>
+                    <text class="svg-lbl" x="840" y="66" text-anchor="middle">SqliteStore</text>
+                    <text class="svg-lbl-sm" x="840" y="84" text-anchor="middle">向量持久化</text>
+
+                    <path class="svg-line-teal flow-anim" d="M170,71 L200,71" marker-end="url(#ah9-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M350,71 L380,71" marker-end="url(#ah9-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M540,71 L570,71" marker-end="url(#ah9-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M730,71 L760,71" marker-end="url(#ah9-t)"/>
+
+                    <text class="svg-lbl-sm" x="20" y="134" style="fill:#e8590c;letter-spacing:.18em;">RETRIEVE ·
+                        检索管线（对话期间，LLM 主动调用）
+                    </text>
+                    <rect class="svg-node svg-node-acc" x="200" y="148" width="190" height="44" rx="3"/>
+                    <text class="svg-lbl" x="295" y="175" text-anchor="middle">rag_search(text, topN)</text>
+                    <path class="svg-line-acc flow-anim" d="M390,170 L560,170" marker-end="url(#ah9-o)"/>
+                    <rect class="svg-node svg-node-acc" x="560" y="148" width="190" height="44" rx="3"/>
+                    <text class="svg-lbl" x="655" y="175" text-anchor="middle">相似度 Top-N 召回</text>
+                    <path class="svg-line svg-dash" d="M840,100 C840,138 768,148 750,160" marker-end="url(#ah9-o)"/>
+                </svg>
+                <div class="dg-cap">RAG 双管线 — 启动时批量入库，对话时按需检索</div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">组件清单</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>组件</th>
+                            <th>实现</th>
+                            <th>职责</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>向量模型</td>
+                            <td><code>HttpOpenAiRagEmbeddingModel</code></td>
+                            <td>OpenAI 兼容 <code>/embeddings</code> 接口，baseUrl / apiKey / model 可配</td>
+                        </tr>
+                        <tr>
+                            <td>向量存储</td>
+                            <td><code>SqliteRagEmbeddingStore</code></td>
+                            <td>SQLite 单文件向量库，维度可配，零中间件依赖</td>
+                        </tr>
+                        <tr>
+                            <td>调度器</td>
+                            <td><code>RagWorker</code></td>
+                            <td>load 入库 / similar 检索的统一入口</td>
+                        </tr>
+                        <tr>
+                            <td>切分器</td>
+                            <td><code>SimpleRecursiveRagTextSplitter</code></td>
+                            <td>最大分段长度 + 重叠率，递归切分长文</td>
+                        </tr>
+                        <tr>
+                            <td>工具</td>
+                            <td><code>RagTools.rag_search</code></td>
+                            <td>LLM 主动检索知识库，默认 topN=3，建议小于 10</td>
+                        </tr>
+                        <tr>
+                            <td>读取器</td>
+                            <td><code>ListableRagFileReader</code></td>
+                            <td>Markitdown（Office）· EasyOCR（图片 / PDF-OCR）· Pandoc（文档转换）按开关组合</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#0b7285;">
+                <div class="co-title">文档生命周期 — 加载即归档</div>
+                <p>入库完成后，<code>loadDocs</code> 将整个 docs 目录移动到
+                    <code>rags_history/history-{yyyyMMddHHmmss}</code> 并重建空目录——<b>同一文档永不被重复向量化</b>，同时保留完整历史可追溯。入库在后台线程异步执行，不阻塞应用启动。
+                </p>
+            </div>
+        </section>
+
+        <!-- ===================== 10 MCP 动态工具 ===================== -->
+        <section class="chapter" id="ch10">
+            <div class="ch-head reveal">
+                <div class="ch-no">10</div>
+                <h2><span class="en">MCP Dynamic Tools</span>MCP 动态工具
+                ：三步发现 + LRU 装载</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                工具不是越多越好——上百个工具定义全量上报会<b>吞噬 token、分散模型注意力</b>。MCP 动态工具方案的回答是：
+            只上报 3 个「元工具」，让 LLM 像查目录一样<b>先发现、再装载、按需使用</b>，并用 LRU 控制会话内工具总量。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 940 216" role="img" aria-label="MCP 动态工具三步发现与 LRU 流程">
+                    <defs>
+                        <marker id="ah10-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                        <marker id="ah10-k" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#46607a"/>
+                        </marker>
+                    </defs>
+                    <rect class="svg-node svg-node-acc" x="20" y="40" width="200" height="62" rx="3"/>
+                    <text class="svg-lbl" x="120" y="66" text-anchor="middle">① tools_provider_list</text>
+                    <text class="svg-lbl-sm" x="120" y="84" text-anchor="middle">列举 MCP 工具供应商</text>
+
+                    <rect class="svg-node svg-node-acc" x="252" y="40" width="224" height="62" rx="3"/>
+                    <text class="svg-lbl" x="364" y="66" text-anchor="middle">② list_tools_from_providers</text>
+                    <text class="svg-lbl-sm" x="364" y="84" text-anchor="middle">按供应商查看工具清单</text>
+
+                    <rect class="svg-node svg-node-acc" x="508" y="40" width="212" height="62" rx="3"/>
+                    <text class="svg-lbl" x="614" y="66" text-anchor="middle">③ load_tools_by_names</text>
+                    <text class="svg-lbl-sm" x="614" y="84" text-anchor="middle">装载所需工具入当前会话</text>
+
+                    <rect class="svg-node svg-node-dark pulse-node" x="752" y="40" width="168" height="62" rx="3"/>
+                    <text class="svg-lbl-w" x="836" y="66" text-anchor="middle">LRU 队列</text>
+                    <text class="svg-lbl-sm" x="836" y="84" text-anchor="middle" style="fill:#8fb3d6;">容量
+                        lruToolMaxSize
+                    </text>
+
+                    <path class="svg-line-acc flow-anim" d="M220,71 L252,71" marker-end="url(#ah10-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M476,71 L508,71" marker-end="url(#ah10-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M720,71 L752,71" marker-end="url(#ah10-o)"/>
+
+                    <path class="svg-line svg-dash" d="M836,102 L836,140" marker-end="url(#ah10-k)"/>
+                    <rect class="svg-node" x="700" y="142" width="220" height="52" rx="3"/>
+                    <text class="svg-lbl" x="810" y="164" text-anchor="middle">超容量 → 淘汰最久未用</text>
+                    <text class="svg-lbl-sm" x="810" y="182" text-anchor="middle">echo_lru_tools 同步前端</text>
+
+                    <text class="svg-lbl-sm" x="20" y="162">LLM 视角：先「查字典目录」，再「翻到对应页」——</text>
+                    <text class="svg-lbl-sm" x="20" y="180">工具定义按需进入上下文，token 消耗从 O(全部工具) 降为
+                        O(当前任务所需)
+                    </text>
+                </svg>
+                <div class="dg-cap">三步发现 + LRU 淘汰 — 工具装载的「目录-翻页」模型</div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">注入的元提示词（McpProviderTools.SYSTEM_PROMPT）</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">system prompt — 动态工具查找指引</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="cm">当现有工具无法满足任务需求时：</span>
+<span class="num">1.</span> 调用 <span class="fn">tools_provider_list</span> 列举可用的 MCP 工具供应商
+                            <span class="num">2.</span> 调用 <span
+                                    class="fn">list_tools_from_providers</span> 按供应商名查看其工具清单
+                            <span class="num">3.</span> 调用 <span class="fn">load_tools_by_names</span> 将所需工具装载到当前会话
+                            <span class="cm">装载后的工具将参与后续推理；会话内工具数量受 LRU 策略约束，
+                            超容量时最久未使用的工具将被淘汰。</span></pre>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">设计要点</div>
+                    <div class="callout" style="--c:#e8590c;margin-top:0;">
+                        <div class="co-title">常驻工具不可被淘汰</div>
+                        <p>MCP 元工具自身、<code>TmpFileTools</code>、<code>TruthStoreTools</code> 等基础设施类工具被标记为<b>常驻</b>——LRU 淘汰只作用于动态装载的业务工具，保证「查目录的能力」永远在线。
+                        </p>
+                    </div>
+                    <div class="callout" style="--c:#0b7285;">
+                        <div class="co-title">前后端双向同步</div>
+                        <p>每次装载 / 淘汰后，后端经
+                            <code>echo_lru_tools</code> 回显当前存活工具名列表与容量（<code>lruToolNames</code> /
+                            <code>lruToolMaxSize</code>），前端据此渲染工具面板——用户随时可见「模型手里现在有哪些工具」。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 11 安全体系 ===================== -->
+        <section class="chapter" id="ch11">
+            <div class="ch-head reveal">
+                <div class="ch-no">11</div>
+                <h2><span class="en">SM Crypto Transfer</span>安全体系
+                ：国密全链路传输</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                对话报文经 <code>OpsSecureTransfer</code> 封装：SM4 加密载荷、SM2 加密会话密钥、SM3 摘要防篡改、SM2 签名抗抵赖、
+            时间戳窗口防重放——<b>五种机制一次封装</b>，前端 sm-crypto 与后端 i2f-sm-crypto 对称实现。
+            </p>
+
+            <div class="diagram-panel reveal">
+                <svg viewBox="0 0 940 252" role="img" aria-label="国密安全传输流程">
+                    <defs>
+                        <marker id="ah11-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                        </marker>
+                        <marker id="ah11-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                            <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                        </marker>
+                    </defs>
+                    <text class="svg-lbl-sm" x="20" y="26" style="fill:#0b7285;letter-spacing:.18em;">SEND · 发送方封装（前端
+                        sm-crypto / OpsSecureTransfer.send）
+                    </text>
+                    <rect class="svg-node svg-node-teal" x="20" y="40" width="164" height="58" rx="3"/>
+                    <text class="svg-lbl" x="102" y="64" text-anchor="middle">明文 payload</text>
+                    <text class="svg-lbl-sm" x="102" y="82" text-anchor="middle">+ timestamp + nonce</text>
+
+                    <rect class="svg-node svg-node-teal" x="210" y="40" width="164" height="58" rx="3"/>
+                    <text class="svg-lbl" x="292" y="64" text-anchor="middle">SM4 随机会话密钥</text>
+                    <text class="svg-lbl-sm" x="292" y="82" text-anchor="middle">SM2 公钥加密 → key</text>
+
+                    <rect class="svg-node svg-node-teal" x="400" y="40" width="164" height="58" rx="3"/>
+                    <text class="svg-lbl" x="482" y="64" text-anchor="middle">SM4 加密载荷</text>
+                    <text class="svg-lbl-sm" x="482" y="82" text-anchor="middle">payload 密文化</text>
+
+                    <rect class="svg-node svg-node-teal" x="590" y="40" width="164" height="58" rx="3"/>
+                    <text class="svg-lbl" x="672" y="64" text-anchor="middle">SM3 摘要 → sign</text>
+                    <text class="svg-lbl-sm" x="672" y="82" text-anchor="middle">timestamp+nonce+key+payload</text>
+
+                    <rect class="svg-node svg-node-teal" x="780" y="40" width="140" height="58" rx="3"/>
+                    <text class="svg-lbl" x="850" y="64" text-anchor="middle">SM2 私钥签名</text>
+                    <text class="svg-lbl-sm" x="850" y="82" text-anchor="middle">→ digital</text>
+
+                    <path class="svg-line-teal flow-anim" d="M184,69 L210,69" marker-end="url(#ah11-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M374,69 L400,69" marker-end="url(#ah11-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M564,69 L590,69" marker-end="url(#ah11-t)"/>
+                    <path class="svg-line-teal flow-anim" d="M754,69 L780,69" marker-end="url(#ah11-t)"/>
+
+                    <path class="svg-line svg-dash" d="M470,98 L470,136" marker-end="url(#ah11-o)"/>
+                    <text class="svg-lbl-sm" x="482" y="122">OpsSecureDto 经 HTTP 传输</text>
+
+                    <text class="svg-lbl-sm" x="20" y="156" style="fill:#e8590c;letter-spacing:.18em;">RECV ·
+                        接收方校验（OpsSecureTransfer.recv）
+                    </text>
+                    <rect class="svg-node svg-node-acc" x="20" y="170" width="170" height="54" rx="3"/>
+                    <text class="svg-lbl" x="105" y="193" text-anchor="middle">timestamp ±12h</text>
+                    <text class="svg-lbl-sm" x="105" y="210" text-anchor="middle">防重放窗口</text>
+
+                    <rect class="svg-node svg-node-acc" x="222" y="170" width="170" height="54" rx="3"/>
+                    <text class="svg-lbl" x="307" y="193" text-anchor="middle">校验 sign</text>
+                    <text class="svg-lbl-sm" x="307" y="210" text-anchor="middle">SM3 完整性</text>
+
+                    <rect class="svg-node svg-node-acc" x="424" y="170" width="170" height="54" rx="3"/>
+                    <text class="svg-lbl" x="509" y="193" text-anchor="middle">校验 digital</text>
+                    <text class="svg-lbl-sm" x="509" y="210" text-anchor="middle">SM2 公钥验签</text>
+
+                    <rect class="svg-node svg-node-acc" x="626" y="170" width="170" height="54" rx="3"/>
+                    <text class="svg-lbl" x="711" y="193" text-anchor="middle">SM2 私钥解 key</text>
+                    <text class="svg-lbl-sm" x="711" y="210" text-anchor="middle">SM4 解 payload</text>
+
+                    <rect class="svg-node svg-node-dark" x="828" y="170" width="92" height="54" rx="3"/>
+                    <text class="svg-lbl-w" x="874" y="201" text-anchor="middle">明文</text>
+
+                    <path class="svg-line-acc flow-anim" d="M190,197 L222,197" marker-end="url(#ah11-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M392,197 L424,197" marker-end="url(#ah11-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M594,197 L626,197" marker-end="url(#ah11-o)"/>
+                    <path class="svg-line-acc flow-anim" d="M796,197 L828,197" marker-end="url(#ah11-o)"/>
+                </svg>
+                <div class="dg-cap">国密五重封装 — 机密性 · 完整性 · 认证 · 抗抵赖 · 防重放</div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">OpsSecureDto — 安全信封字段</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>字段</th>
+                            <th>来源</th>
+                            <th>安全作用</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>timestamp</code></td>
+                            <td>发送时刻毫秒戳</td>
+                            <td>接收方校验 ±12 小时窗口，阻断重放攻击</td>
+                        </tr>
+                        <tr>
+                            <td><code>nonce</code></td>
+                            <td>随机数</td>
+                            <td>参与摘要计算，增加重放成本</td>
+                        </tr>
+                        <tr>
+                            <td><code>key</code></td>
+                            <td>SM4 密钥经 SM2 公钥加密</td>
+                            <td>只有持私钥的接收方能解出会话密钥</td>
+                        </tr>
+                        <tr>
+                            <td><code>payload</code></td>
+                            <td>业务 JSON 经 SM4 加密</td>
+                            <td>报文机密性——含 apiKey 等敏感信息</td>
+                        </tr>
+                        <tr>
+                            <td><code>sign</code></td>
+                            <td><code>SM3(timestamp+nonce+key+payload)</code></td>
+                            <td>完整性摘要，任何篡改即校验失败</td>
+                        </tr>
+                        <tr>
+                            <td><code>digital</code></td>
+                            <td>SM2 私钥签名</td>
+                            <td>来源认证与抗抵赖</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#c92a2a;">
+                <div class="co-title">为什么值得 — apiKey 在报文里</div>
+                <p>补全请求中携带用户自配的 LLM
+                    <code>apiKey</code>，属于高敏信息。国密封装保证它<b>从不以明文出现在传输链路上</b>；输出侧亦可经
+                    <code>encryptOutput</code> 开关对 SSE 回程加密，形成双向闭环。</p>
+            </div>
+        </section>
+
+        <!-- ===================== 12 高级特性 ===================== -->
+        <section class="chapter" id="ch12">
+            <div class="ch-head reveal">
+                <div class="ch-no">12</div>
+                <h2><span class="en">Advanced Features</span>高级特性
+                ：让对话长出记忆与手脚</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                在「消息循环 + 工具池」的骨架之上，框架叠加了一组<b>正交增强</b>：事实记忆、Agent 协作、报文回显、多模态附件……
+            每一项都由请求级开关独立控制，按需点亮。
+            </p>
+
+            <div class="card-grid">
+                <div class="card reveal" style="--c:#e8590c;">
+                    <div class="idx">A</div>
+                    <h3>关键事实注入 Truth</h3>
+                    <div class="tagline">store_truth → # 关键事实</div>
+                    <p>LLM 调用 <code>store_truth</code> 把关键结论写入
+                        <code>truthContent</code>；后续每轮对话自动拼装为「# 关键事实」系统消息并经
+                        <code>echo_truth</code> 回显——跨轮次的<b>长期记忆</b>由此而来。</p>
+                </div>
+                <div class="card reveal" style="--c:#0b7285;">
+                    <div class="idx">B</div>
+                    <h3>A2A Agent 协作</h3>
+                    <div class="tagline">safe_sql_detect</div>
+                    <p>主 Agent 可把 SQL 安全检测<b>委派给子 Agent</b>：经 <code>HttpOpenAiAiModel</code> 再发起一次独立推理；<code>AgentTools.REQUEST_HOLDER</code>（InheritableThreadLocal）在父子线程间透传请求上下文。
+                    </p>
+                </div>
+                <div class="card reveal" style="--c:#2b8a3e;">
+                    <div class="idx">C</div>
+                    <h3>请求报文回显</h3>
+                    <div class="tagline">echo_request_payload</div>
+                    <p>开启 <code>enableEchoRequestPayload</code> 后，实际发往 LLM 的完整补全报文（含注入的提示词与工具定义）经
+                        <code>echo_request_payload</code> 回显——<b>提示词工程的学习与调试窗口</b>。</p>
+                </div>
+                <div class="card reveal" style="--c:#1971c2;">
+                    <div class="idx">D</div>
+                    <h3>多模态附件</h3>
+                    <div class="tagline">&lt;upload_files&gt;</div>
+                    <p>附件经 <code>/tmp-file/upload</code> 上传并做 <b>MD5 完整性校验</b>，随后以
+                        <code>&lt;upload_files&gt;</code> 块追加到消息尾部，交给视觉 / 多模态模型理解；下载侧提供
+                        <code>/tmp-file/download</code>。</p>
+                </div>
+                <div class="card reveal" style="--c:#e67700;">
+                    <div class="idx">E</div>
+                    <h3>会话截断与总结</h3>
+                    <div class="tagline">前端消息治理</div>
+                    <p>长会话由前端按策略截断或摘要压缩后再提交，控制 token 预算；与后端 <code>AiAgent</code> 的
+                        <code>compressOrDropHistoryMessage</code> 形成前后两道消息治理。</p>
+                </div>
+                <div class="card reveal" style="--c:#c92a2a;">
+                    <div class="idx">F</div>
+                    <h3>TTS 语音播报</h3>
+                    <div class="tagline">speechSynthesis</div>
+                    <p>答复可经浏览器语音合成朗读，配合流式渲染逐段播报——运维场景下的「免盯屏」信息获取方式。</p>
+                </div>
+                <div class="card reveal" style="--c:#862e9c;">
+                    <div class="idx">G</div>
+                    <h3>系统重排</h3>
+                    <div class="tagline">enableMergedSystemMsg</div>
+                    <p>开启后，后端将消息列表中<b>所有系统消息合并为一条</b>并置于列表首位再发送给 LLM；每条原系统消息以
+                        <code>&lt;system_scope&gt;</code> 标签包裹保持边界。专为<b>强制要求「系统消息仅一条且必须在第一条」</b>的严格模型而设。
+                    </p>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">提示词注入优先级 — 从先到后</div>
+                    <div class="pkg-tree"><span class="cm"># 后端组装报文时的注入顺序</span>
+                        <span class="num">1.</span> 事实注入 (Truth) <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">2.</span> MCP 动态工具提示词 <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">3.</span> 技能系统提示词 <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">4.</span> 角色 System Prompt <span class="cm">→ 用户手动添加的角色人设</span>
+                        <span class="num">5.</span> 用户消息 + 附件 <span
+                                class="cm">→ 消息列表末尾（&lt;upload_files&gt;）</span>
+                        <span class="num">6.</span> 系统重排 (可选) <span
+                                class="cm">→ 合并全部 system 为一条置于首位</span></div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">注入时机的工程考量</div>
+                    <div class="callout" style="--c:#e67700;margin-top:0;">
+                        <div class="co-title">为什么系统提示词要「动态拼装」？</div>
+                        <p>技能声明、MCP 指引、关键事实都是<b>随功能开关与运行状态变化</b>的活内容：技能每 30 秒可能新增，事实每轮可能被模型改写，LRU 工具集随调用漂移。因此系统提示词不能写死，而须在每次请求时按优先级重新拼装——配合 30% 概率重注入策略，保证长对话中引导不丢失。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#0b7285;">
+                <div class="co-title">正交开关 — 能力即插即用</div>
+                <p>上述特性分别由 <code>enableTruth</code> /
+                    <code>enableEchoRequestPayload</code> 等<b>请求级布尔开关</b>控制（见 <code>OpenAiOperateDto</code>），前端功能面板一一对应。每个开关独立生效、互不牵连——这是「消息循环为体、能力插件为用」设计哲学的直接体现。
+                </p>
+            </div>
+        </section>
+
+        <!-- ===================== 13 自动装配 ===================== -->
+        <section class="chapter" id="ch13">
+            <div class="ch-head reveal">
+                <div class="ch-no">13</div>
+                <h2><span class="en">Auto Configuration</span>自动装配
+                ：一个依赖即一个工作台</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                整个 AI 子系统遵循 SpringBoot Starter 哲学：<b>引入依赖即自动装配</b>，全部能力默认开启，
+            用 <code>@ConditionalOnExpression</code> 挂接配置开关，用 <code>@ConditionalOnMissingBean</code> 让渡自定义实现。
+            </p>
+
+            <div class="reveal">
+                <div class="panel-title">配置开关一览（默认全部为 true）</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>开关</th>
+                            <th>装配类 / Bean</th>
+                            <th>控制范围</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>ai.tools.enable</code></td>
+                            <td><code>SpringContextToolAutoConfiguration</code></td>
+                            <td>工具体系总开关</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.mcp.app.enable</code></td>
+                            <td><code>ContextAppMcpToolProvider</code></td>
+                            <td>应用内 MCP 工具供应商</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.mcp.manager.enable</code></td>
+                            <td><code>ContextMcpToolGatewayManager</code></td>
+                            <td>MCP 网关 ToolManager</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.app.manager.enable</code></td>
+                            <td><code>ContextAppToolManager</code></td>
+                            <td>应用内 @Tool 扫描 ToolManager</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.mcp-gateway.enable</code></td>
+                            <td><code>McpProviderTools</code></td>
+                            <td>MCP 动态工具元工具</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.skills.enable</code></td>
+                            <td><code>SkillAutoConfiguration</code></td>
+                            <td>技能系统 + 30 秒热扫描</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.skills.tool.enable</code></td>
+                            <td><code>SkillsTools</code></td>
+                            <td>技能三件套工具</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.rags.enable</code></td>
+                            <td><code>RagAutoConfiguration</code></td>
+                            <td>RAG 知识库全链路</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">装配策略</div>
+                    <div class="step-list" style="margin-top:0;">
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>条件表达式门控</h4>
+                                <p><code>@ConditionalOnExpression("${ai.xxx.enable:true}")</code> —— 默认开启，配置即关。
+                                </p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>缺失才装配</h4>
+                                <p><code>@ConditionalOnMissingBean</code> —— 用户自实现同类型 Bean 时自动让渡，扩展不冲突。
+                                </p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>双管理器互斥</h4>
+                                <p>MCP 网关与应用扫描两个 <code>ToolManager</code> 互斥装配，避免工具重复注册。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>启动即预热</h4>
+                                <p>技能首轮全量扫描、RAG 后台线程加载文档，均异步完成，不阻塞应用启动。</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">RAG 可调参数（RagEmbeddingModelProperties）</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>属性</th>
+                                <th>含义</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td><code>baseUrl / apiKey / model</code></td>
+                                <td>Embedding 服务接入点</td>
+                            </tr>
+                            <tr>
+                                <td><code>dimension</code></td>
+                                <td>向量维度（SQLite 存储建表依据）</td>
+                            </tr>
+                            <tr>
+                                <td><code>docsPath</code></td>
+                                <td>文档投放目录</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxSegmentSizeInChars</code></td>
+                                <td>切分器最大分段长度</td>
+                            </tr>
+                            <tr>
+                                <td><code>maxOverlapRate</code></td>
+                                <td>分段重叠率</td>
+                            </tr>
+                            <tr>
+                                <td><code>docsEmbedBatchSize</code></td>
+                                <td>入库批量大小</td>
+                            </tr>
+                            <tr>
+                                <td><code>enableMarkitdownDocReader</code></td>
+                                <td>Office 文档读取器开关</td>
+                            </tr>
+                            <tr>
+                                <td><code>enableEasyocrDocReader</code></td>
+                                <td>图片 / PDF-OCR 读取器开关</td>
+                            </tr>
+                            <tr>
+                                <td><code>enablePandocDocReader</code></td>
+                                <td>Pandoc 转换读取器开关</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 14 前端工程 ===================== -->
+        <section class="chapter" id="ch14">
+            <div class="ch-head reveal">
+                <div class="ch-no">14</div>
+                <h2><span class="en">Fat Client</span>前端工程
+                ：浏览器里的 Agent 状态机</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                <code>/ops/open-ai/index.html</code> 是一个<b>单文件胖客户端</b>：Vue2 驱动、ElementUI 组件化、
+            全部静态资源打包在 JAR 内。它不只是聊天界面——会话管理、消息循环、工具审批、功能开关等
+                <b>Agent 控制面</b>全部运行在浏览器里，后端只是「安全网关 + 执行器 + 中继」。
+            </p>
+
+            <div class="reveal">
+                <div class="panel-title">技术栈矩阵</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>库</th>
+                            <th>职责</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>Vue 2</code></td>
+                            <td>响应式视图层，单文件内联组件</td>
+                        </tr>
+                        <tr>
+                            <td><code>ElementUI</code></td>
+                            <td>对话框 / 开关 / 菜单等 UI 组件库</td>
+                        </tr>
+                        <tr>
+                            <td><code>markdown-it + highlight.js</code></td>
+                            <td>答复 Markdown 渲染与代码高亮</td>
+                        </tr>
+                        <tr>
+                            <td><code>CodeMirror</code></td>
+                            <td>JSON / 提示词编辑器</td>
+                        </tr>
+                        <tr>
+                            <td><code>KaTeX</code></td>
+                            <td>数学公式渲染</td>
+                        </tr>
+                        <tr>
+                            <td><code>mermaid</code></td>
+                            <td>流程图 / 时序图渲染</td>
+                        </tr>
+                        <tr>
+                            <td><code>Three.js + SES</code></td>
+                            <td>3D 场景沙箱（ThreeJs 角色产出物的安全执行环境）</td>
+                        </tr>
+                        <tr>
+                            <td><code>sm-crypto</code></td>
+                            <td>前端 SM2 / SM3 / SM4 国密加解密与签名</td>
+                        </tr>
+                        <tr>
+                            <td><code>echarts</code></td>
+                            <td>图表绘制角色的数据可视化</td>
+                        </tr>
+                        <tr>
+                            <td><code>panzoom</code></td>
+                            <td>图像平移缩放查看</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">角色预设体系（role-config.json）</div>
+                    <p class="body" style="font-size:13.5px;">10 个分类、20 个角色预设，每个角色即一份
+                        <code>roles/**/*.md</code> 系统提示词，菜单点选即切换人格：</p>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>分类</th>
+                                <th>角色</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>独立角色</td>
+                                <td>默认角色 · 中外语翻译官 · Emoji 表情大师</td>
+                            </tr>
+                            <tr>
+                                <td>开发 / 技术</td>
+                                <td>资深开发工程师 · 实施规划师 · 智能开发工程师</td>
+                            </tr>
+                            <tr>
+                                <td>绘图 / 可视化</td>
+                                <td>Echarts 图表 · Mermaid 图形 · JsCanvas 图像 · HtmlSvg 矢量 · ThreeJs 3D 场景 · Draw.io 流程图</td>
+                            </tr>
+                            <tr>
+                                <td>音视频 / 多媒体</td>
+                                <td>FFMPEG 多媒体处理</td>
+                            </tr>
+                            <tr>
+                                <td>文化 / 文学</td>
+                                <td>易学命理大师 · 文学泰斗</td>
+                            </tr>
+                            <tr>
+                                <td>聊天 / 陪聊</td>
+                                <td>爱莉希雅 · Api 聊天女友</td>
+                            </tr>
+                            <tr>
+                                <td>文档 / 办公</td>
+                                <td>Svg 生成 PPT 演示页面 · Markitdown 文档提取/转换</td>
+                            </tr>
+                            <tr>
+                                <td>娱乐 / 放松</td>
+                                <td>短视频舞蹈规划师</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">交互细节 — 为长对话打磨</div>
+                    <div class="step-list" style="margin-top:0;">
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>流式光标</h4>
+                                <p>SSE chunk 逐字追加，打字机光标实时跟随。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>思考折叠</h4>
+                                <p><code>reasoning_content</code> 思考过程独立折叠区，可展开查看模型推理。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>工具审批对话框</h4>
+                                <p>tool_calls 触发审批弹窗：批准 / 拒绝 / 编辑参数后放行（HITL）。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>消息记号渲染</h4>
+                                <p>按 <code>[1u]→[2ac]→[3t]→[4a]</code> 角色记号区分渲染用户 / 助手 / 工具消息。</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>功能开关面板</h4>
+                                <p>工具 / 技能 / 知识库 / LRU / 事实 / 报文回显，六个开关即时生效。</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">Markdown 代码块拓展渲染 — 模型输出即可视化</div>
+                <p class="body" style="font-size:13.5px;">
+                    前端将 6 种语言标记的 fenced code block 渲染为<b>可交互的富媒体组件</b>——绘图角色（Echarts / Mermaid / ThreeJs 等）的产出物由此直接落地为图表、图形与 3D 场景：
+                </p>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>代码块</th>
+                            <th>渲染方式</th>
+                            <th>安全机制</th>
+                            <th>导出</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><code>```echarts</code></td>
+                            <td>ECharts 5 JSON 配置 → 实时图表</td>
+                            <td>SES 沙箱解析配置</td>
+                            <td>PNG 图片</td>
+                        </tr>
+                        <tr>
+                            <td><code>```mermaid</code></td>
+                            <td>流程图 / 时序图 / 类图 / 甘特图</td>
+                            <td>mermaid.render 受控渲染</td>
+                            <td>SVG 矢量</td>
+                        </tr>
+                        <tr>
+                            <td><code>```canvas</code></td>
+                            <td>Canvas 2D 自由绘图（drawCanvas 函数体）</td>
+                            <td>SES 沙箱隔离执行</td>
+                            <td>PNG 图片</td>
+                        </tr>
+                        <tr>
+                            <td><code>```svg</code></td>
+                            <td>SVG 矢量图形直接渲染</td>
+                            <td>DOMParser 净化，移除 script/iframe/on* 事件</td>
+                            <td>SVG 矢量</td>
+                        </tr>
+                        <tr>
+                            <td><code>```drawio</code></td>
+                            <td>Draw.io 专业图表（embed.diagrams.net iframe）</td>
+                            <td>XML 属性自动转义修复</td>
+                            <td>.drawio 文件</td>
+                        </tr>
+                        <tr>
+                            <td><code>```threejs</code></td>
+                            <td>Three.js 3D 场景（renderThreeJs 函数体）</td>
+                            <td>SES 沙箱 + THREE 全局注入</td>
+                            <td>PNG 截图</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="body" style="font-size:12.5px;">通用特性：代码块头部带语言标签与<b>下载 / 查看 / 复制</b>按钮；流式输出完成后才触发渲染（<code>$responsing</code> 守卫）避免半途渲染；气泡渲染锁防并发冲突；highlight.js 语法高亮兜底 + KaTeX 数学公式；mermaid / svg 支持 Panzoom 缩放平移。
+                </p>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">11 大可配置开关 — 细粒度控制 Agent 行为边界</div>
+                <div class="spec-table-wrap">
+                    <table class="spec">
+                        <thead>
+                        <tr>
+                            <th>开关</th>
+                            <th>关键配置项</th>
+                            <th>功能说明</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><b>定制显示</b></td>
+                            <td><code>hiddenMessageTypes</code></td>
+                            <td>按使用习惯控制各类消息（尤其 7 种回显消息）的显示 / 隐藏</td>
+                        </tr>
+                        <tr>
+                            <td><b>动态工具</b></td>
+                            <td><code>enableLruTools</code> · <code>lruToolMaxSize</code></td>
+                            <td>不全量加载工具，LRU 策略按需披露与淘汰（需后端 MCP 网关支持）</td>
+                        </tr>
+                        <tr>
+                            <td><b>工具调用</b></td>
+                            <td><code>enableTools</code> · <code>autoApprovalToolTags</code></td>
+                            <td>Function Calling 总开关 + 标签自动审批</td>
+                        </tr>
+                        <tr>
+                            <td><b>知识库</b></td>
+                            <td><code>enableRags</code></td>
+                            <td>连接 RAG 知识库，模型按需检索知识内容（依赖工具开启）</td>
+                        </tr>
+                        <tr>
+                            <td><b>技能调用</b></td>
+                            <td><code>enableSkills</code></td>
+                            <td>注入 SKILL.md 技能声明与关联工具（占用 Token，依赖工具开启）</td>
+                        </tr>
+                        <tr>
+                            <td><b>语音播报</b></td>
+                            <td>TextToSpeech API</td>
+                            <td>自动 TTS 播报助手消息，浏览器原生语音合成</td>
+                        </tr>
+                        <tr>
+                            <td><b>事实注入</b></td>
+                            <td><code>enableTruth</code> · <code>store_truth</code></td>
+                            <td>模型主动存储 / 更新关键事实，防遗忘防幻觉，echo_truth 回显</td>
+                        </tr>
+                        <tr>
+                            <td><b>附加时间</b></td>
+                            <td><code>enableUserSendTime</code></td>
+                            <td>为用户消息附加发送时间，让模型感知时间变化</td>
+                        </tr>
+                        <tr>
+                            <td><b>回显请求</b></td>
+                            <td><code>enableEchoRequestPayload</code></td>
+                            <td>回显实际发送给 LLM 的报文，右键查看——报文学习与调试</td>
+                        </tr>
+                        <tr>
+                            <td><b>输出加密</b></td>
+                            <td><code>encryptOutput</code></td>
+                            <td>模型输出 SM4 加密传输（会拖慢输出速度，非必要不开启）</td>
+                        </tr>
+                        <tr>
+                            <td><b>系统重排</b></td>
+                            <td><code>enableMergedSystemMsg</code></td>
+                            <td>合并所有系统消息为一条并置于消息列表首位，适配要求系统消息唯一且置顶的严格模型</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="body" style="font-size:12.5px;">所有选项均带 Popover 悬浮说明，零学习成本；状态持久化到
+                    <code>localStorage</code>，按需组合启用。</p>
+            </div>
+
+            <div class="reveal">
+                <div class="panel-title">会话管理 — 4195 行单文件 SPA 的状态底座</div>
+                <div class="step-list" style="margin-top:0;">
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>多会话与自动标题</h4>
+                            <p>左侧边栏会话列表，支持新建 / 删除 / 批量删除；会话标题取首条用户消息自动生成。</p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>每秒自动持久化</h4>
+                            <p>会话数据每 1 秒自动保存到 <code>localStorage</code>，刷新 / 意外关闭不丢历史。</p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>上下文窗口治理</h4>
+                            <p>
+                                <code>maxHistoryCount</code> 限制发送轮数（默认 20），超出丢弃早期历史；亦可让 LLM 将历史总结为简要内容压缩 Token；截断时始终保留首条角色消息，前端本地保留完整历史。
+                            </p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>导入 / 导出 / 打印</h4>
+                            <p>会话历史可导出为 JSON 再导入恢复；集成 print-js 支持打印对话历史。</p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>性能与交互增强</h4>
+                            <p>vue-virtual-scroller 虚拟滚动优化大量消息渲染；vue-contextmenujs 右键菜单（删除 / 编辑 / 重做 / 复制 / TTS 播报）；<code>Ctrl+Enter</code> 快捷发送。
+                            </p></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 15 扩展指南 ===================== -->
+        <section class="chapter" id="ch15">
+            <div class="ch-head reveal">
+                <div class="ch-no">15</div>
+                <h2><span class="en">Extension Guide</span>扩展指南
+                ：三步接入一个新工具</h2>
+                <div class="rule"></div>
+            </div>
+            <p class="lead reveal">
+                框架的扩展面刻意保持极小：加工具只需一个注解类，加技能只需一个 Markdown 文件，加知识只需把文档丢进目录。
+            </p>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">示例：新增一个天气工具</div>
+                    <div class="code-block" style="margin-top:0;">
+                        <div class="code-head">
+                            <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                       style="background:#ffbd2e;"></span><span
+                                class="dot" style="background:#27c93f;"></span>
+                            <span class="fname">WeatherTools.java — 新工具仅需如此</span>
+                            <button class="copy-btn">COPY</button>
+                        </div>
+                        <pre><span class="ann">@Component</span>
+<span class="ann">@Tools</span>(tags = {<span class="ty">AiTags</span>.READONLY_VALUE})
+                            <span class="kw">public class</span> <span class="ty">WeatherTools</span> {
+
+                            <span class="ann">@Tool</span>(description = <span
+                                    class="str">"查询指定城市的实时天气"</span>)
+                            <span class="kw">public</span> String <span class="fn">query_weather</span>(
+                            <span class="ann">@ToolParam</span>(description = <span
+                                    class="str">"城市名称，例如：北京"</span>) String city) {
+                            <span class="kw">return</span> weatherService.query(city);
+                            }
+                            }</pre>
+                    </div>
+                    <div class="step-list" style="margin-top:0;">
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>编写 Bean</h4>
+                                <p>如上：Spring 组件 + <code>@Tools</code> / <code>@Tool</code> /
+                                    <code>@ToolParam</code> 注解。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>确认开关</h4>
+                                <p><code>ai.tools.enable</code> 默认开启，<code>ContextAppToolManager</code> 启动时自动扫描收录。
+                                </p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>前端验证</h4>
+                                <p>开启 <code>enableEchoRequestPayload</code>，在回显报文中确认工具定义已注入
+                                    <code>tools</code> 字段。</p></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">扩展面速查</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>想做什么</th>
+                                <th>怎么做</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>新增工具</td>
+                                <td>编写 <code>@Tool</code> 注解的 Spring Bean</td>
+                            </tr>
+                            <tr>
+                                <td>新增技能</td>
+                                <td>在 <code>skills/{name}/</code> 放置 <code>SKILL.md</code>，30 秒内生效</td>
+                            </tr>
+                            <tr>
+                                <td>新增知识</td>
+                                <td>文档投放到 <code>docsPath</code> 目录，重启后自动向量化</td>
+                            </tr>
+                            <tr>
+                                <td>新增角色</td>
+                                <td>编写 <code>roles/**/*.md</code> 并在 <code>role-config.json</code> 登记</td>
+                            </tr>
+                            <tr>
+                                <td>自定义 ToolManager</td>
+                                <td>自实现 Bean，<code>@ConditionalOnMissingBean</code> 自动让渡</td>
+                            </tr>
+                            <tr>
+                                <td>接入 MCP 供应商</td>
+                                <td>实现 <code>AbstractMcpToolGatewayManager</code> 生态的供应商</td>
+                            </tr>
+                            <tr>
+                                <td>控制台菜单</td>
+                                <td>经 <code>IOpsProvider</code> 注册菜单项挂载入口</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="callout" style="--c:#e67700;margin-top:16px;">
+                        <div class="co-title">描述即接口 — 写给 LLM 的文档</div>
+                        <p>
+                            <code>description</code> 是 LLM 决定「要不要调、怎么调」的唯一依据。写工具描述要像写 API 文档：<b>能力边界、参数格式、返回示例、使用时机</b>，一样都不能少；危险操作务必打上
+                            <code>HUMAN</code> 标签，把最终决定权留给人。</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">启动要求与运行目录</div>
+                    <div class="pkg-tree"><span
+                            class="cm"># 启动要求：JDK 1.8+ · Spring Boot 2.x · 网络连通 LLM API</span>
+                        <span class="cm"># （可选）Embedding 模型服务（RAG）· 数据库连接（数据库工具）</span>
+                        ${base-dir}/
+                        ├── <span class="pkg">tmp-files</span>/ <span
+                                class="cm"># 临时文件存储（keep-days 15 天自动清理）</span>
+                        ├── <span class="pkg">rags-docs</span>/ <span class="cm"># RAG 文档投放目录</span>
+                        │   └── <span class="pkg">rags_history</span>/ <span
+                                class="cm"># 已处理文档归档（自动创建）</span>
+                        └── <span class="pkg">skills</span>/ <span class="cm"># 技能目录（30s 热扫描）</span>
+                        └── {技能名称}/
+                        └── SKILL.md <span class="cm"># 技能定义文件</span></div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">监控指标与部署注意</div>
+                    <div class="spec-table-wrap" style="margin-top:0;">
+                        <table class="spec">
+                            <thead>
+                            <tr>
+                                <th>指标</th>
+                                <th>说明</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>SSE 流式响应时间</td>
+                                <td>LLM 首 token 延迟与整体响应时间</td>
+                            </tr>
+                            <tr>
+                                <td>Token 消耗</td>
+                                <td>每次对话的 prompt / completion / total 用量</td>
+                            </tr>
+                            <tr>
+                                <td>工具调用成功率</td>
+                                <td>工具执行成功 / 失败统计</td>
+                            </tr>
+                            <tr>
+                                <td>工具调用频次</td>
+                                <td>各工具调用频率分布</td>
+                            </tr>
+                            <tr>
+                                <td>HITL 授权率</td>
+                                <td>用户允许 / 拒绝工具调用的比例</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="callout" style="--c:#c92a2a;margin-top:14px;">
+                        <div class="co-title">部署红线</div>
+                        <p>命令行工具默认禁用（<code>ai.tools.command.enable=false</code>）需手动开启；SQL 执行前经安全校验；文件路径规范化防穿越；加密输出拖慢模型输出速度、非必要不开启；工具调用需模型支持 Function-Calling（Qwen / DeepSeek / GPT 等）；技能依赖工具系统，需同时开启
+                            <code>ai.tools.enable</code>。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===================== 页脚 ===================== -->
+        <footer class="footer">
+            <div class="f-grid">
+                <div>
+                    <h5>OpenAI 兼容 AI 对话框架 · 技术全景</h5>
+                    <p style="color:#9db8d2;font-size:13px;line-height:1.8;">
+                        <span style="font-family:var(--font-mono);color:#74c0fc;">i2f.springboot.ops.openai</span><br>
+                        内嵌于运维控制台的胖客户端式 AI 对话子系统：以 OpenAI 兼容协议为骨架、Re-Act 循环为心脏，
+                        串联工具体系、技能、RAG、MCP 与国密安全传输。
+                    </p>
+                </div>
+                <div>
+                    <h5>构建</h5>
+                    <p style="font-size:12.5px;line-height:2;">HTML + SVG 静态站点<br>零外部依赖 · 可离线阅读<br>滚动揭示 · 导航高亮
+                    </p>
+                </div>
+                <div>
+                    <h5>来源</h5>
+                    <p style="font-size:12.5px;line-height:2;">源码逐行核对<br>.wiki/docs/ai-framework.md<br>交叉印证
+                    </p>
+                </div>
+            </div>
+            <div class="f-bottom">
+                <span>i2f-turbo-java · i2f.turbo:1.0-jdk8 · Spring Boot 2.7.18</span>
+                <span>SPEC v1.0 · GPL-3.0 · © Ice2Faith</span>
+            </div>
+        </footer>
+
+    </main>
+</div>
+
+<button class="back-top" id="backTop" title="返回顶部">▲</button>
+<script src="./assets/app.js"></script>
+</body>
+</html>
