@@ -1403,7 +1403,139 @@
                 </div>
             </div>
 
-            <div class="reveal">
+    <!-- ToolManager 三层架构 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">ToolManager 工具管理体系 — 三层架构全景</div>
+        <p class="body" style="font-size:13.5px;">
+            工具并非散落在 Spring 容器中各自为战。框架通过三层架构将它们组织为统一的工具管理体系，
+            由 <code>SpringContextToolAutoConfiguration</code> 在启动时自动装配：
+        </p>
+        <div class="diagram-panel" style="margin-top:14px;">
+            <svg viewBox="0 0 940 460" role="img" aria-label="ToolManager 三层架构图">
+                <defs>
+                    <marker id="tm-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#46607a"/>
+                    </marker>
+                    <marker id="tm-ah-o" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                    </marker>
+                    <marker id="tm-ah-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                    </marker>
+                </defs>
+                <!-- 第一层：本地/远程提供者 -->
+                <rect class="svg-node svg-node-teal" x="20" y="20" width="280" height="68" rx="3"/>
+                <text class="svg-lbl" x="160" y="44" text-anchor="middle">ContextAppMcpToolProvider</text>
+                <text class="svg-lbl-sm" x="160" y="62" text-anchor="middle">name: app_context · 扫描 @Tool Bean</text>
+                <text class="svg-lbl-sm" x="160" y="78" text-anchor="middle">本地工具直接映射为 ToolDefinition</text>
+
+                <rect class="svg-node svg-node-teal" x="330" y="20" width="280" height="68" rx="3"/>
+                <text class="svg-lbl" x="470" y="44" text-anchor="middle">远程 McpToolProvider Bean(s)</text>
+                <text class="svg-lbl-sm" x="470" y="62" text-anchor="middle">name: 由配置决定 (如 file_svr)</text>
+                <text class="svg-lbl-sm" x="470" y="78" text-anchor="middle">HTTP → 远程 MCP Server 拉取工具</text>
+
+                <text class="svg-lbl-sm" x="20" y="14" style="fill:#0b7285;">LAYER 1 · 工具提供者 (McpToolProvider)
+                </text>
+
+                <!-- 第二层：网关管理器 -->
+                <path class="svg-line" d="M160,88 L160,130" marker-end="url(#tm-ah)"/>
+                <path class="svg-line" d="M470,88 L400,130" marker-end="url(#tm-ah)"/>
+
+                <rect class="svg-node svg-node-dark pulse-node" x="130" y="132" width="440" height="68" rx="3"/>
+                <text class="svg-lbl-w" x="350" y="158" text-anchor="middle">ContextMcpToolGatewayManager (ToolManager
+                    实现)
+                </text>
+                <text class="svg-lbl-sm" x="350" y="176" text-anchor="middle" style="fill:#8fb3d6;">聚合所有
+                    McpToolProvider · 工具名加前缀：{providerName}.{toolName}
+                </text>
+                <text class="svg-lbl-sm" x="350" y="192" text-anchor="middle" style="fill:#8fb3d6;">如
+                    app_context.get_current_datetime · file_svr.read_file
+                </text>
+
+                <text class="svg-lbl-sm" x="130" y="124" style="fill:#0b7285;">LAYER 2 · 工具管理器 (ToolManager)</text>
+
+                <!-- 第三层：元工具 -->
+                <path class="svg-line" d="M350,200 L350,242" marker-end="url(#tm-ah)"/>
+
+                <rect class="svg-node svg-node-acc" x="90" y="244" width="520" height="78" rx="3"/>
+                <text class="svg-lbl" x="350" y="270" text-anchor="middle">McpProviderTools — 3 个元工具 (Meta-Tools)
+                </text>
+                <text class="svg-lbl-sm" x="350" y="290" text-anchor="middle">① tools_provider_list →
+                    列出所有工具供应商
+                </text>
+                <text class="svg-lbl-sm" x="350" y="306" text-anchor="middle">② list_tools_from_providers → 列出某供应商提供的工具
+                    ③ load_tools_by_names → 按名称动态加载（LRU 淘汰）
+                </text>
+
+                <text class="svg-lbl-sm" x="90" y="236" style="fill:#e8590c;">LAYER 3 · 元工具 (Meta-Tools)</text>
+
+                <!-- 右侧：ContextAppToolManager 旁路 -->
+                <path class="svg-line svg-dash" d="M640,54 L700,54 L700,160 L574,160" marker-end="url(#tm-ah-t)"/>
+                <rect class="svg-node svg-node-teal" x="640" y="20" width="280" height="68" rx="3"
+                      style="stroke:#2b8a3e;"/>
+                <text class="svg-lbl" x="780" y="44" text-anchor="middle" style="fill:#2b8a3e;">ContextAppToolManager
+                </text>
+                <text class="svg-lbl-sm" x="780" y="62" text-anchor="middle">直接管理 @Tool Bean · 不经过 MCP 聚合
+                </text>
+                <text class="svg-lbl-sm" x="780" y="78" text-anchor="middle">单机场景 · 与 MCP 网关互斥装配</text>
+
+                <text class="svg-lbl-sm" x="640" y="14" style="fill:#2b8a3e;">旁路 · 单机直连模式</text>
+
+                <!-- 底部说明 -->
+                <text class="svg-lbl-sm" x="20" y="362" style="fill:#7b90a5;">装配逻辑：SpringContextToolAutoConfiguration
+                    根据配置开关按需装配上述 4 个 Bean
+                </text>
+                <text class="svg-lbl-sm" x="20" y="380" style="fill:#7b90a5;">数据流向：AI 模型 → ToolManager.getTools()
+                    → McpToolProvider → @Tool 反射 → JSON Schema → OpenAI tools 字段
+                </text>
+            </svg>
+            <div class="dg-cap">ToolManager 三层架构 — 工具从定义到执行的完整数据流</div>
+        </div>
+    </div>
+
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">SpringContextToolAutoConfiguration 装配的四大 Bean</div>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>Bean</th>
+                    <th>类型</th>
+                    <th>开关属性</th>
+                    <th>说明</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>appMcpToolProvider</code></td>
+                    <td><code>ContextAppMcpToolProvider</code></td>
+                    <td><code>ai.tools.mcp.app.enable</code></td>
+                    <td>将 Spring 容器中所有 @Tool/@Tools Bean 包装为名为 app_context 的工具提供者</td>
+                </tr>
+                <tr>
+                    <td><code>mcpToolGatewayManager</code></td>
+                    <td><code>ContextMcpToolGatewayManager</code></td>
+                    <td><code>ai.tools.mcp.manager.enable</code></td>
+                    <td>聚合所有 McpToolProvider Bean（本地 + 远程），实现统一工具路由</td>
+                </tr>
+                <tr>
+                    <td><code>appToolManager</code></td>
+                    <td><code>ContextAppToolManager</code></td>
+                    <td><code>ai.tools.app.manager.enable</code></td>
+                    <td>直接管理 @Tool/@Tools Bean，不经过 MCP 聚合层，与网关互斥</td>
+                </tr>
+                <tr>
+                    <td><code>mcpProviderTools</code></td>
+                    <td><code>McpProviderTools</code></td>
+                    <td><code>ai.tools.mcp-gateway.enable</code></td>
+                    <td>提供 3 个动态工具发现与加载的元工具</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="reveal">
                 <div class="panel-title">Java 类型 → JSON Schema 映射</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
@@ -1602,7 +1734,62 @@
                 </div>
             </div>
 
-            <div class="two-col">
+    <!-- ToolCallContextHolder — 请求级上下文传递 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">ToolCallContextHolder — 请求级上下文线程传递</div>
+        <p class="body" style="font-size:13.5px;">
+            工具执行时需要访问请求级数据（如 <code>OpenAiOperateDto</code>、用户信息、会话配置等）。
+            <code>ToolCallContextHolder</code> 基于
+            <code>InheritableThreadLocal&lt;Map&lt;String, Object&gt;&gt;</code> 实现，
+        提供线程安全的请求上下文存取，并在 MCP 跨服务调用时<b>自动序列化传递</b>——远程工具与本地工具使用完全相同的上下文读取方式。
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>方法</th>
+                    <th>说明</th>
+                    <th>典型场景</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>put(key, value)</code></td>
+                    <td>写入上下文键值</td>
+                    <td>OpenAiOpsController 将 <code>req</code> 放入上下文</td>
+                </tr>
+                <tr>
+                    <td><code>get(key)</code></td>
+                    <td>读取上下文值</td>
+                    <td>工具方法中读取请求对象：<code>ToolCallContextHolder.get("req")</code></td>
+                </tr>
+                <tr>
+                    <td><code>copyOf()</code></td>
+                    <td>获取上下文快照</td>
+                    <td>MCP Client 序列化上下文随 HTTP 发送</td>
+                </tr>
+                <tr>
+                    <td><code>replaceAs(map)</code></td>
+                    <td>整体替换上下文</td>
+                    <td>MCP Server 反序列化后恢复上下文</td>
+                </tr>
+                <tr>
+                    <td><code>clear()</code></td>
+                    <td>清空上下文</td>
+                    <td>工具执行完成后清理，防止泄漏</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="callout" style="--c:#0b7285;margin-top:14px;">
+            <div class="co-title">InheritableThreadLocal — 并行工具执行的基石</div>
+            <p>工具契约在线程池中并行执行时，<code>InheritableThreadLocal</code> 自动将父线程（Controller 线程）的上下文传递给子线程（工具执行线程），
+            无需显式传递——这是 CountDownLatch 并行工具执行模式能够正常工作的底层保障。MCP 跨服务传递的完整链路详见第 10 章。
+            </p>
+        </div>
+    </div>
+
+    <div class="two-col">
                 <div class="reveal">
                     <div class="panel-title">标签自动审批 — 决策流程</div>
                     <div class="pkg-tree"><span class="cm"># 模型返回 tool_calls 后的前端审批决策</span>
@@ -2130,6 +2317,469 @@
                     </div>
                 </div>
             </div>
+
+    <!-- MCP 基础设施模块 -->
+    <div class="reveal" style="margin-top:42px;">
+        <div class="panel-title">MCP 独立模块 — 可脱离 ops-starter 独立部署</div>
+        <p class="body" style="font-size:13.5px;">
+            除了 ops-starter 内嵌的 MCP 动态工具网关，项目还提供了两个独立的 Spring Boot Starter 模块，
+            用于构建<b>分布式 MCP 工具服务网络</b>。它们不依赖 ops-starter，可独立部署在任意微服务中：
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>模块</th>
+                    <th>artifactId</th>
+                    <th>角色</th>
+                    <th>核心类</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>MCP Server</b></td>
+                    <td><code>i2f-springboot-ai-mcp-server</code></td>
+                    <td>将本地 @Tool 工具以 HTTP 接口暴露</td>
+                    <td><code>HttpSimpleMcpServer</code> · <code>SpringAiMcpServerAutoConfiguration</code></td>
+                </tr>
+                <tr>
+                    <td><b>MCP Client</b></td>
+                    <td><code>i2f-springboot-ai-mcp-client</code></td>
+                    <td>注册远程 MCP 工具提供者为 Spring Bean</td>
+                    <td><code>HttpSimpleMcpClientToolProvider</code> · <code>SpringAiMcpClientAutoConfiguration</code>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="spec-table-wrap" style="margin-top:14px;">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th colspan="2">MCP 协议定义（HttpSimpleMcpConstants）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>认证方式</td>
+                    <td>HMAC-SHA256 签名：<code>Base64(HmacSHA256(appId#timestamp#nonce, appKey))</code></td>
+                </tr>
+                <tr>
+                    <td>请求头</td>
+                    <td><code>X-App-Id</code> · <code>X-App-Date</code> · <code>X-App-Nonce</code> ·
+                        <code>X-App-Sign</code></td>
+                </tr>
+                <tr>
+                    <td>工具列表接口</td>
+                    <td><code>GET /mcp/tool/list</code> → 返回工具元信息</td>
+                </tr>
+                <tr>
+                    <td>工具调用接口</td>
+                    <td><code>POST /mcp/tool/call</code> → 转发执行结果</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MCP Server 详解 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">MCP Server — 两种传输模式</div>
+        <p class="body" style="font-size:13.5px;">
+            Server 端提供两种 HTTP 传输实现，通过自动配置按 Classpath 条件激活：
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>模式</th>
+                    <th>自动配置类</th>
+                    <th>条件</th>
+                    <th>端口</th>
+                    <th>适用场景</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>Spring Web MVC</b></td>
+                    <td><code>SpringAiSpringWebMcpServerAutoConfiguration</code></td>
+                    <td>Classpath 含 <code>RestController</code></td>
+                    <td>共享 Web 端口</td>
+                    <td>与 Web 应用共存</td>
+                </tr>
+                <tr>
+                    <td><b>Netty</b></td>
+                    <td><code>SpringAiNettyMcpServerAutoConfiguration</code></td>
+                    <td>Classpath 含 <code>ServerBootstrap</code></td>
+                    <td>独立端口 (默认 23745)</td>
+                    <td>独立 AI 工具服务</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="spec-table-wrap" style="margin-top:14px;">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th colspan="2">Server 配置属性（前缀：i2f.springboot.ai.mcp.server）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>simple-server.app-list</code></td>
+                    <td>授权应用列表（appId / appKey 对，用于 HMAC 签名验证）</td>
+                </tr>
+                <tr>
+                    <td><code>simple-server.expire-window-minutes</code></td>
+                    <td>过期时间窗口，默认 30 分钟</td>
+                </tr>
+                <tr>
+                    <td><code>netty.port</code></td>
+                    <td>Netty 监听端口，默认 23745</td>
+                </tr>
+                <tr>
+                    <td><code>netty.max-content-length</code></td>
+                    <td>HTTP 内容最大长度，默认 65536 字节</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MCP Client 详解 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">MCP Client — 动态 Bean 注册 + 本地缓存</div>
+        <p class="body" style="font-size:13.5px;">
+            Client 端通过 <code>BeanDefinitionRegistryPostProcessor</code> 在启动时动态注册
+            <code>McpToolProvider</code> Bean：
+        每个配置实例对应一个 <code>SimpleMcpClientMcpToolProviderFactoryBean</code>，Bean 名称为
+            <code>{name}_McpToolProvider</code>。
+        首次调用时经 HTTP 拉取远程工具列表，本地缓存 15 秒 TTL，<code>CopyOnWriteArrayList</code> +
+            <code>ReentrantLock</code> 保证并发安全。
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th colspan="2">Client 配置属性（前缀：i2f.springboot.ai.mcp.client.simple.instances）</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>name</code> (必填)</td>
+                    <td>工具提供者名称，同时用作 Bean 名称和工具名前缀</td>
+                </tr>
+                <tr>
+                    <td><code>base-url</code></td>
+                    <td>远程 MCP Server 的 Base URL</td>
+                </tr>
+                <tr>
+                    <td><code>app-id / app-key</code></td>
+                    <td>HMAC 签名认证凭据</td>
+                </tr>
+                <tr>
+                    <td><code>description</code></td>
+                    <td>工具提供者描述信息</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ToolCallContextHolder 跨 MCP 上下文传递 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">请求级上下文透明传递 — 跨 MCP 边界无感知</div>
+        <p class="body" style="font-size:13.5px;">
+            MCP 协议的核心设计目标之一是让远程工具调用<b>与本地工具调用完全一致</b>。借助
+            <code>ToolCallContextHolder</code>（详见第 07 章），
+        请求上下文（如 <code>req</code> 对象）在 MCP Client 端自动序列化，随 HTTP 请求传递到 Server 端后自动恢复——远程工具可以通过
+            <code>ToolCallContextHolder.get("req")</code> 读取与本地工具完全相同的请求数据。
+        </p>
+        <div class="diagram-panel" style="margin-top:14px;">
+            <svg viewBox="0 0 940 310" role="img" aria-label="MCP 上下文传递流程">
+                <defs>
+                    <marker id="ctx-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                    </marker>
+                    <marker id="ctx-ah-t" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                    </marker>
+                </defs>
+                <!-- Client 端 -->
+                <rect class="svg-node svg-node-dark" x="20" y="20" width="420" height="110" rx="3"/>
+                <text class="svg-lbl-w" x="230" y="48" text-anchor="middle">AI 主控服务 (MCP Client)</text>
+                <text class="svg-lbl-sm" x="40" y="72" style="fill:#8fb3d6;">① Controller:
+                    ToolCallContextHolder.put("req", req)
+                </text>
+                <text class="svg-lbl-sm" x="40" y="92" style="fill:#8fb3d6;">②
+                    HttpSimpleMcpClientToolProvider.callTool():
+                </text>
+                <text class="svg-lbl-sm" x="60" y="112" style="fill:#7b90a5;">Map ctx = ToolCallContextHolder.copyOf()
+                </text>
+                <text class="svg-lbl-sm" x="60" y="128" style="fill:#7b90a5;">
+                    payloadDto.setContext(jsonSerializer.serialize(ctx))
+                </text>
+
+                <!-- HTTP 传输 -->
+                <rect class="svg-node svg-node-acc" x="480" y="20" width="440" height="110" rx="3"/>
+                <text class="svg-lbl" x="700" y="48" text-anchor="middle">HTTP POST /mcp/tool/call</text>
+                <text class="svg-lbl-sm" x="500" y="72">Body: {</text>
+                <text class="svg-lbl-sm" x="520" y="92" style="fill:#7b90a5;">"content": "{...tool call request...}",
+                </text>
+                <text class="svg-lbl-sm" x="520" y="112" style="fill:#e8590c;">"context": "{\"req\":{...}}" ←
+                    上下文序列化
+                </text>
+                <text class="svg-lbl-sm" x="500" y="128">}</text>
+
+                <path class="svg-line-acc flow-anim" d="M440,75 L480,75" marker-end="url(#ctx-ah)"/>
+
+                <!-- Server 端 -->
+                <rect class="svg-node svg-node-teal" x="20" y="170" width="420" height="120" rx="3"/>
+                <text class="svg-lbl" x="230" y="198" text-anchor="middle">远程工具服务 (MCP Server)</text>
+                <text class="svg-lbl-sm" x="40" y="222">③ Controller / Handler:</text>
+                <text class="svg-lbl-sm" x="60" y="242" style="fill:#7b90a5;">Map ctx =
+                    jsonSerializer.deserializeAsMap(context)
+                </text>
+                <text class="svg-lbl-sm" x="60" y="262" style="fill:#e8590c;">ToolCallContextHolder.replaceAs(ctx) ←
+                    恢复上下文
+                </text>
+                <text class="svg-lbl-sm" x="40" y="282">④ finally: ToolCallContextHolder.clear() ← 防泄漏</text>
+
+                <path class="svg-line-teal flow-anim" d="M440,225 L480,225" marker-end="url(#ctx-ah-t)"/>
+                <text class="svg-lbl-sm" x="445" y="218" style="fill:#0b7285;">HMAC 签名含 context</text>
+            </svg>
+            <div class="dg-cap">MCP 上下文传递 — Client 端序列化 → HTTP 传输 → Server 端恢复，对工具开发者完全透明</div>
+        </div>
+        <div class="spec-table-wrap" style="margin-top:14px;">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>阶段</th>
+                    <th>位置</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>写入</b></td>
+                    <td><code>OpenAiOpsController.stream()</code></td>
+                    <td><code>ToolCallContextHolder.put("req", req)</code></td>
+                </tr>
+                <tr>
+                    <td><b>快照 &amp; 序列化</b></td>
+                    <td><code>HttpSimpleMcpClientToolProvider.callTool()</code></td>
+                    <td><code>copyOf()</code> → JSON → <code>payloadDto.context</code></td>
+                </tr>
+                <tr>
+                    <td><b>签名保护</b></td>
+                    <td><code>HttpSimpleMcpClientToolProvider.applyHeader()</code></td>
+                    <td>context 参与 HMAC-SHA256 签名，防篡改</td>
+                </tr>
+                <tr>
+                    <td><b>反序列化 &amp; 恢复</b></td>
+                    <td><code>SpringHttpSimpleMcpController</code> / <code>HttpSimpleMcpInBoundHandler</code></td>
+                    <td>JSON → Map → <code>replaceAs(ctx)</code></td>
+                </tr>
+                <tr>
+                    <td><b>清理</b></td>
+                    <td>Server 端 Controller / Handler</td>
+                    <td><code>finally { clear() }</code> 防止 ThreadLocal 泄漏</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="callout" style="--c:#0b7285;margin-top:14px;">
+            <div class="co-title">两种传输模式一致处理</div>
+            <p>无论是 Spring Web MVC（<code>SpringHttpSimpleMcpController</code>）还是 Netty（<code>HttpSimpleMcpInBoundHandler</code>），
+            Server 端对上下文的恢复与清理逻辑完全一致——<code>replaceAs</code> → <code>callTool</code> →
+                <code>clear</code>，
+                工具实现者无需关心底层传输方式。</p>
+        </div>
+        <div class="callout" style="--c:#2b8a3e;margin-top:10px;">
+            <div class="co-title">对工具开发者透明</div>
+            <p>编写远程 MCP 工具时，与本地工具使用完全相同的上下文读取方式：
+                <code>OpenAiOperateDto req = ToolCallContextHolder.get("req");</code> ——
+                无需关心上下文是通过 HTTP 传递的还是本地线程共享的。</p>
+        </div>
+    </div>
+
+    <!-- 场景一：分布式 MCP 工具联邦 -->
+    <div class="reveal" style="margin-top:42px;">
+        <div class="panel-title">场景：分布式 MCP 工具联邦</div>
+        <p class="body" style="font-size:13.5px;">
+            多个微服务各自提供专业工具，通过 MCP 协议组成联邦工具网络。AI 主控服务作为 MCP Client，
+            透明调用分布在文件服务、数据库服务上的远程工具，对 AI 模型而言与本地工具无异：
+        </p>
+        <div class="diagram-panel" style="margin-top:14px;">
+            <svg viewBox="0 0 940 260" role="img" aria-label="MCP 分布式工具联邦架构">
+                <defs>
+                    <marker id="m2-ah" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#0b7285"/>
+                    </marker>
+                </defs>
+                <!-- AI 主控 -->
+                <rect class="svg-node svg-node-dark pulse-node" x="20" y="40" width="300" height="180" rx="3"/>
+                <text class="svg-lbl-w" x="170" y="68" text-anchor="middle">AI 主控服务 (MCP Client)</text>
+                <text class="svg-lbl-sm" x="170" y="88" text-anchor="middle" style="fill:#8fb3d6;">AI 模型 (DashScope /
+                    OpenAI)
+                </text>
+                <line x1="70" y1="100" x2="270" y2="100" stroke="#46607a" stroke-width="0.6"/>
+                <text class="svg-lbl-sm" x="170" y="120" text-anchor="middle" style="fill:#8fb3d6;">ToolManager</text>
+                <text class="svg-lbl-sm" x="90" y="142" style="fill:#8fb3d6;">├─ app_context (本地)</text>
+                <text class="svg-lbl-sm" x="90" y="160" style="fill:#8fb3d6;">├─ file_svr (远程)</text>
+                <text class="svg-lbl-sm" x="90" y="178" style="fill:#8fb3d6;">├─ db_svr (远程)</text>
+                <text class="svg-lbl-sm" x="90" y="196" style="fill:#8fb3d6;">└─ more_svr (远程)</text>
+
+                <!-- 文件服务 -->
+                <rect class="svg-node svg-node-teal" x="380" y="40" width="240" height="90" rx="3"/>
+                <text class="svg-lbl" x="500" y="66" text-anchor="middle">文件工具服务 (MCP Server)</text>
+                <text class="svg-lbl-sm" x="500" y="86" text-anchor="middle">LocalFileTools · TmpFileTools</text>
+                <text class="svg-lbl-sm" x="500" y="104" text-anchor="middle">/mcp/tool/list · /mcp/tool/call</text>
+
+                <!-- 数据库服务 -->
+                <rect class="svg-node svg-node-teal" x="380" y="140" width="240" height="80" rx="3"/>
+                <text class="svg-lbl" x="500" y="166" text-anchor="middle">数据库工具服务 (MCP Server)</text>
+                <text class="svg-lbl-sm" x="500" y="186" text-anchor="middle">DatabaseQueryTools ·
+                    DatabaseMetadataTools
+                </text>
+                <text class="svg-lbl-sm" x="500" y="204" text-anchor="middle">/mcp/tool/list · /mcp/tool/call</text>
+
+                <!-- 连接线 -->
+                <path class="svg-line-teal flow-anim" d="M320,80 L380,80" marker-end="url(#m2-ah)"/>
+                <path class="svg-line-teal flow-anim" d="M320,175 L380,175" marker-end="url(#m2-ah)"/>
+                <text class="svg-lbl-sm" x="340" y="72" style="fill:#0b7285;">HTTP</text>
+                <text class="svg-lbl-sm" x="340" y="167" style="fill:#0b7285;">HTTP</text>
+
+                <text class="svg-lbl-sm" x="20" y="250">对 AI 模型而言：工具名 file_svr.read_file /
+                    db_svr.sql_query_datasource 与本地 app_context.get_current_datetime 毫无区别
+                </text>
+            </svg>
+            <div class="dg-cap">分布式 MCP 联邦 — AI 模型统一调用本地与远程工具</div>
+        </div>
+    </div>
+
+    <!-- 场景二：单机配置示例 -->
+    <div class="two-col" style="margin-top:28px;">
+        <div class="reveal">
+            <div class="panel-title">MCP Server 端配置</div>
+            <div class="code-block" style="margin-top:0;">
+                <div class="code-head"><span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                                  style="background:#ffbd2e;"></span><span
+                        class="dot" style="background:#27c93f;"></span><span
+                        class="fname">application.yml — 文件工具服务</span>
+                    <button class="copy-btn">COPY</button>
+                </div>
+                <pre><span class="kw">i2f</span>:
+                    <span class="kw">springboot</span>:
+                    <span class="kw">ai</span>:
+                    <span class="kw">mcp</span>:
+                    <span class="kw">server</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>
+          <span class="kw">simple-server</span>:
+                    <span class="kw">app-list</span>:
+                    - <span class="kw">app-id</span>: <span class="str">"ai-master"</span>
+                <span class="kw">app-key</span>: <span class="str">"secret-key-1"</span>
+          <span class="kw">netty</span>:
+                    <span class="kw">enable</span>: <span class="kw">false</span>  <span
+                            class="cm"># 使用 Spring Web MVC 模式</span>
+
+<span class="kw">ai</span>:
+                    <span class="kw">tools</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>
+    <span class="kw">file</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>
+      <span class="kw">root-path</span>: <span class="str">"/data/ai-files"</span></pre>
+            </div>
+        </div>
+        <div class="reveal">
+            <div class="panel-title">MCP Client 端配置（AI 主控服务）</div>
+            <div class="code-block" style="margin-top:0;">
+                <div class="code-head"><span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                                  style="background:#ffbd2e;"></span><span
+                        class="dot" style="background:#27c93f;"></span><span
+                        class="fname">application.yml — AI 主控</span>
+                    <button class="copy-btn">COPY</button>
+                </div>
+                <pre><span class="kw">i2f</span>:
+                    <span class="kw">springboot</span>:
+                    <span class="kw">ai</span>:
+                    <span class="kw">mcp</span>:
+                    <span class="kw">client</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>
+          <span class="kw">simple</span>:
+                    <span class="kw">instances</span>:
+                    - <span class="kw">name</span>: <span class="str">"file_svr"</span>
+                <span class="kw">base-url</span>: <span class="str">"http://file-service:8080"</span>
+                <span class="kw">app-id</span>: <span class="str">"ai-master"</span>
+                <span class="kw">app-key</span>: <span class="str">"secret-key-1"</span>
+                <span class="kw">description</span>: <span class="str">"文件操作工具服务"</span>
+                    - <span class="kw">name</span>: <span class="str">"db_svr"</span>
+                <span class="kw">base-url</span>: <span class="str">"http://db-service:8080"</span>
+                <span class="kw">app-id</span>: <span class="str">"ai-master"</span>
+                <span class="kw">app-key</span>: <span class="str">"secret-key-2"</span>
+                <span class="kw">description</span>: <span class="str">"数据库查询工具服务"</span>
+
+<span class="kw">ai</span>:
+                    <span class="kw">tools</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>
+    <span class="kw">mcp-gateway</span>:
+                    <span class="kw">enable</span>: <span class="kw">true</span>  <span
+                            class="cm"># 启用 MCP 动态工具网关</span></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- MCP 工具分类体系 -->
+    <div class="reveal" style="margin-top:28px;">
+        <div class="panel-title">MCP 工具 Tags 分类体系</div>
+        <p class="body" style="font-size:13.5px;">
+            每个
+            <code>@Tool</code> 可携带多维标签，用于前端审批策略与后端过滤决策。以下为 MCP 场景中的关键标签（完整标签见第 07 章）：
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>Tag 常量</th>
+                    <th>含义</th>
+                    <th>MCP 典型场景</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><code>AUTO_VALUE</code></td>
+                    <td>自动加载的常用工具</td>
+                    <td><code>get_current_datetime</code> — AI 随时调用无需审批</td>
+                </tr>
+                <tr>
+                    <td><code>READONLY_VALUE</code></td>
+                    <td>只读操作</td>
+                    <td><code>file_svr.read_file</code> — 远程文件只读</td>
+                </tr>
+                <tr>
+                    <td><code>WRITABLE_VALUE</code></td>
+                    <td>写入操作（需谨慎）</td>
+                    <td><code>file_svr.write_file</code> — 远程文件写入</td>
+                </tr>
+                <tr>
+                    <td><code>EXECUTABLE_VALUE</code></td>
+                    <td>可执行操作（高风险）</td>
+                    <td><code>app_context.run_command_line</code></td>
+                </tr>
+                <tr>
+                    <td><code>HUMAN_VALUE</code></td>
+                    <td>需人工确认</td>
+                    <td>跨网络命令执行，必须 HITL 审批</td>
+                </tr>
+                <tr>
+                    <td><code>MCP_VALUE</code></td>
+                    <td>MCP 元工具</td>
+                    <td><code>McpProviderTools</code> 的三个发现工具</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
         </section>
 
         <!-- ===================== 11 安全体系 ===================== -->
@@ -2972,6 +3622,61 @@
                     </div>
                 </div>
             </div>
+
+    <!-- MCP 扩展专属 -->
+    <div class="reveal" style="margin-top:42px;">
+        <div class="panel-title">MCP 专属扩展 — 自定义传输层与客户端</div>
+        <div class="two-col" style="margin-top:0;">
+            <div>
+                <div class="step-list" style="margin-top:0;">
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>自定义 MCP Server 传输层</h4>
+                            <p>参考 Netty 模式和 Spring Web MVC 模式的实现：创建新 AutoConfiguration 类，使用
+                                <code>@ConditionalOnClass</code> 条件装配；实现请求处理器将 HTTP 请求转换为
+                                <code>HttpSimpleMcpRequest</code>；调用 <code>HttpSimpleMcpServer.getTools()</code> 和
+                                <code>callTool()</code> 完成业务逻辑；在 <code>META-INF/spring.factories</code> 中注册。
+                            </p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>自定义 MCP Client 传输</h4>
+                            <p>客户端 HTTP 通信基于 <code>IRestClient</code> 接口，默认使用
+                                <code>SpringWebRestClient</code>（基于 RestTemplate）。可按需替换为
+                                <code>OkHttpRestClient</code> 或其他实现，通过
+                                <code>HttpSimpleMcpClientToolProvider.setRestClient()</code> 注入。</p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>接入远程 MCP 供应商</h4>
+                            <p>在 <code>application.yml</code> 中配置
+                                <code>i2f.springboot.ai.mcp.client.simple.instances</code> 列表，每个实例指定 name / base-url / app-id / app-key，启动时自动注册为
+                                <code>McpToolProvider</code> Bean，被 <code>ContextMcpToolGatewayManager</code> 聚合。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="callout" style="--c:#0b7285;margin-top:0;">
+                    <div class="co-title">Server 端自动注册清单</div>
+                    <p>三个自动配置类注册在 <code>META-INF/spring.factories</code>：<br>
+                        <code>SpringAiMcpServerAutoConfiguration</code>（主配置）<br>
+                        <code>SpringAiNettyMcpServerAutoConfiguration</code>（Netty 模式）<br>
+                        <code>SpringAiSpringWebMcpServerAutoConfiguration</code>（Web MVC 模式）</p>
+                </div>
+                <div class="callout" style="--c:#e8590c;">
+                    <div class="co-title">Client 端自动注册清单</div>
+                    <p><code>SpringAiMcpClientAutoConfiguration</code> 实现
+                        <code>BeanDefinitionRegistryPostProcessor</code>，按配置动态注册
+                        <code>McpToolProvider</code> Bean 到 Spring 容器。</p>
+                </div>
+                <div class="callout" style="--c:#2b8a3e;">
+                    <div class="co-title">双模式互斥与配置总览</div>
+                    <p>所有配置开关默认启用，按需关闭。MCP Server 的 Spring Web MVC 与 Netty 模式可并存（独立端口）；Client 端每个实例独立注册；ToolManager 单机模式与网关模式互斥装配。详见第 13 章自动装配配置表。</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
             <div class="two-col">
                 <div class="reveal">
