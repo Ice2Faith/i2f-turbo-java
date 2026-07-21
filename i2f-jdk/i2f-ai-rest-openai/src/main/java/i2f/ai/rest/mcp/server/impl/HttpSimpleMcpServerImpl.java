@@ -1,7 +1,7 @@
 package i2f.ai.rest.mcp.server.impl;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.data.AppPayloadDto;
+import i2f.ai.rest.mcp.data.McpCallPayloadDto;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpAppItem;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
@@ -107,10 +107,13 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
             throw new IllegalArgumentException("sign calc failure!");
         }
         String payload = appId + "#" + timestamp + "#" + nonce;
-        AppPayloadDto payloadDto = request.getPayloadDto();
+        McpCallPayloadDto payloadDto = request.getPayloadDto();
         if (payloadDto != null) {
             if (payloadDto.getContent() != null && !payloadDto.getContent().isEmpty()) {
                 payload += "#" + payloadDto.getContent();
+            }
+            if (payloadDto.getContext() != null && !payloadDto.getContext().isEmpty()) {
+                payload += "#" + payloadDto.getContext();
             }
         }
 

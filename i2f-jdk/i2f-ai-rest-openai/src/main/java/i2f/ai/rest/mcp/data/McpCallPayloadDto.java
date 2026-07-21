@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class AppPayloadDto {
+public class McpCallPayloadDto {
     protected String content;
+    protected String context;
 }

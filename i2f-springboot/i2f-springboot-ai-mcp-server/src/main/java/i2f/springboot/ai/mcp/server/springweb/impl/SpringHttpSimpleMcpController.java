@@ -1,10 +1,11 @@
 package i2f.springboot.ai.mcp.server.springweb.impl;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.data.AppPayloadDto;
+import i2f.ai.rest.mcp.data.McpCallPayloadDto;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -56,7 +58,7 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
 
     @GetMapping(HttpSimpleMcpConstants.URL_PATH_CALL_TOOL)
     public ApiResp<?> getTools(HttpServletRequest request,
-                               @RequestBody AppPayloadDto payloadDto) {
+                               @RequestBody McpCallPayloadDto payloadDto) {
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
         mcpRequest.setPayloadDto(payloadDto);
@@ -74,7 +76,14 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
         String content = payloadDto.getContent();
         ToolBaseCallRequest callRequest = (ToolBaseCallRequest) jsonSerializer.deserialize(content, ToolBaseCallRequest.class);
 
-        ApiResp<?> ret = server.callTool(callRequest, mcpRequest);
-        return ret;
+        Map<String, Object> contextMap = jsonSerializer.deserializeAsMap(payloadDto.getContext());
+
+        try {
+            ToolCallContextHolder.replaceAs(contextMap);
+            ApiResp<?> ret = server.callTool(callRequest, mcpRequest);
+            return ret;
+        } finally {
+            ToolCallContextHolder.clear();
+        }
     }
 }

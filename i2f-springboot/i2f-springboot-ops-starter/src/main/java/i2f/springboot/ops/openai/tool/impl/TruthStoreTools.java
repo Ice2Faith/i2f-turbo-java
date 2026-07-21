@@ -1,11 +1,11 @@
 package i2f.springboot.ops.openai.tool.impl;
 
 import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
-import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -60,7 +60,7 @@ public class TruthStoreTools {
             @ToolParam(value = "content", description = "the truth text content, such key information, number, rule, etc. any you want stored.")
             String content
     ) {
-        OpenAiOperateDto req = AgentTools.REQUEST_HOLDER.get();
+        OpenAiOperateDto req = ToolCallContextHolder.get("req");
         req.setTruthContent(content);
         return true;
     }

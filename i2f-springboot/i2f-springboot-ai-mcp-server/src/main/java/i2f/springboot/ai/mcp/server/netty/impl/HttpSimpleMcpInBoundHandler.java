@@ -1,10 +1,11 @@
 package i2f.springboot.ai.mcp.server.netty.impl;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.data.AppPayloadDto;
+import i2f.ai.rest.mcp.data.McpCallPayloadDto;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
@@ -19,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -67,15 +69,22 @@ public class HttpSimpleMcpInBoundHandler extends SimpleChannelInboundHandler<Ful
             }
             ByteBuf contentBuf = request.content();
             String requestJson = contentBuf.toString(java.nio.charset.StandardCharsets.UTF_8);
-            AppPayloadDto payloadDto = (AppPayloadDto) jsonSerializer.deserialize(requestJson, AppPayloadDto.class);
+            McpCallPayloadDto payloadDto = (McpCallPayloadDto) jsonSerializer.deserialize(requestJson, McpCallPayloadDto.class);
             mcpRequest.setPayloadDto(payloadDto);
 
             String content = payloadDto.getContent();
             ToolBaseCallRequest callRequest = (ToolBaseCallRequest) jsonSerializer.deserialize(content, ToolBaseCallRequest.class);
 
-            ApiResp<?> resp = server.callTool(callRequest, mcpRequest);
-            responseInJson(ctx, resp);
-            return;
+            Map<String, Object> contextMap = jsonSerializer.deserializeAsMap(payloadDto.getContext());
+
+            try {
+                ToolCallContextHolder.replaceAs(contextMap);
+                ApiResp<?> resp = server.callTool(callRequest, mcpRequest);
+                responseInJson(ctx, resp);
+                return;
+            } finally {
+                ToolCallContextHolder.clear();
+            }
         }
         ApiResp<?> resp = ApiResp.error("not route found: " + path);
         responseInJson(ctx, resp);

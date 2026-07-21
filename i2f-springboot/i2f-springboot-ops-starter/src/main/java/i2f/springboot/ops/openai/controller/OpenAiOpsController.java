@@ -8,6 +8,7 @@ import i2f.ai.std.rag.RagTools;
 import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
@@ -28,7 +29,6 @@ import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import i2f.springboot.ops.openai.tool.impl.TruthStoreTools;
-import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -302,10 +302,10 @@ public class OpenAiOpsController implements IOpsProvider {
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
-            AgentTools.REQUEST_HOLDER.set(req);
+            ToolCallContextHolder.put("req", req);
 
             CompletableFuture.runAsync(() -> {
-                AgentTools.REQUEST_HOLDER.set(req);
+                ToolCallContextHolder.put("req", req);
                 try {
                     OpenAiCompletionVo vo = req.getCompletion();
                     OpenAiCompletionDto completion = new OpenAiCompletionDto();
@@ -586,7 +586,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                             lruToolNames.add(0, name);
                                         }
                                         Runnable toolTask = () -> {
-                                            AgentTools.REQUEST_HOLDER.set(req);
+                                            ToolCallContextHolder.put("req", req);
                                             try {
                                                 String id = call.getId();
                                                 OpenAiToolCallFunction function = call.getFunction();
@@ -673,7 +673,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                             } catch (Exception e) {
                                                 log.warn(e.getMessage(), e);
                                             } finally {
-                                                AgentTools.REQUEST_HOLDER.remove();
+                                                ToolCallContextHolder.clear();
                                                 latch.countDown();
                                             }
                                         };
@@ -681,7 +681,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
 
                                     latch.await();
-                                    AgentTools.REQUEST_HOLDER.set(req);
+                                    ToolCallContextHolder.put("req", req);
                                 }
                             }
                         }
@@ -891,15 +891,15 @@ public class OpenAiOpsController implements IOpsProvider {
             }, pool);
 
             emitter.onCompletion(() -> {
-                AgentTools.REQUEST_HOLDER.remove();
+                ToolCallContextHolder.clear();
                 // System.out.println("前端 SSE 连接已正常关闭");
             });
             emitter.onTimeout(() -> {
-                AgentTools.REQUEST_HOLDER.remove();
+                ToolCallContextHolder.clear();
                 System.out.println("前端 SSE 连接超时");
             });
             emitter.onError((ex) -> {
-                AgentTools.REQUEST_HOLDER.remove();
+                ToolCallContextHolder.clear();
                 System.err.println("前端 SSE 发生错误: " + ex.getMessage());
             });
 

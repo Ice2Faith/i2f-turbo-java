@@ -7,6 +7,7 @@ import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
@@ -43,8 +44,6 @@ public class AgentTools {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    public static InheritableThreadLocal<OpenAiOperateDto> REQUEST_HOLDER = new InheritableThreadLocal<>();
 
     public String generate(OpenAiMeta meta, OpenAiCompletionDto completion) {
         // 强制关闭流式输出
@@ -112,7 +111,7 @@ public class AgentTools {
                 "    \"errorMessage\": \"无有效的更新条件\"\n" +
                 "}";
 
-        OpenAiOperateDto req = REQUEST_HOLDER.get();
+        OpenAiOperateDto req = ToolCallContextHolder.get("req");
 
         OpenAiCompletionDto completion = new OpenAiCompletionDto();
         completion.setModel(req.getCompletion().getModel());

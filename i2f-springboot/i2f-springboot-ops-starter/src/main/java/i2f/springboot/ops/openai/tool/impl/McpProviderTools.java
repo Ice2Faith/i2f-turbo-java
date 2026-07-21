@@ -4,12 +4,12 @@ import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
 import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
 import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
-import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -162,7 +162,7 @@ public class McpProviderTools {
         }
 
         synchronized (this) {
-            OpenAiOperateDto req = AgentTools.REQUEST_HOLDER.get();
+            OpenAiOperateDto req = ToolCallContextHolder.get("req");
             if (req.getLoadedTools() == null) {
                 req.setLoadedTools(new ArrayList<>());
             }

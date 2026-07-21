@@ -2,9 +2,10 @@ package i2f.ai.rest.mcp.client;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.client.data.SimpleMcpToolListRespDto;
-import i2f.ai.rest.mcp.data.AppPayloadDto;
+import i2f.ai.rest.mcp.data.McpCallPayloadDto;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
 import i2f.mutator.BaseMutator;
@@ -23,10 +24,7 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,7 +80,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
         }
     }
 
-    protected void applyHeader(HttpHeaders headers, AppPayloadDto payloadDto) {
+    protected void applyHeader(HttpHeaders headers, McpCallPayloadDto payloadDto) {
         try {
             headers.add(HttpSimpleMcpConstants.HEADER_APP_ID, appId);
 
@@ -99,6 +97,9 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
             if (payloadDto != null) {
                 if (payloadDto.getContent() != null && !payloadDto.getContent().isEmpty()) {
                     payload += "#" + payloadDto.getContent();
+                }
+                if (payloadDto.getContext() != null && !payloadDto.getContext().isEmpty()) {
+                    payload += "#" + payloadDto.getContext();
                 }
             }
             mac.update(payload.getBytes(StandardCharsets.UTF_8));
@@ -166,8 +167,11 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
                     .set(e -> e::setArguments, request.getArguments())
                     .done();
             String content = jsonSerializer.serialize(reqBody);
-            AppPayloadDto payloadDto = new AppPayloadDto();
+            McpCallPayloadDto payloadDto = new McpCallPayloadDto();
             payloadDto.setContent(content);
+            Map<String, Object> contextMap = ToolCallContextHolder.copyOf();
+            String context = jsonSerializer.serialize(contextMap);
+            payloadDto.setContext(context);
 
             RestHttpResponse<ApiResp> resp = restClient.rest(new RestHttpRequest().toMutator()
                     .set(u -> u::setUrl, mergeUrl(baseUrl, HttpSimpleMcpConstants.URL_PATH_CALL_TOOL))

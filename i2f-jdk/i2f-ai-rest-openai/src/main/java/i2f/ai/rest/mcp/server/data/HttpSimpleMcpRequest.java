@@ -1,6 +1,6 @@
 package i2f.ai.rest.mcp.server.data;
 
-import i2f.ai.rest.mcp.data.AppPayloadDto;
+import i2f.ai.rest.mcp.data.McpCallPayloadDto;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;
@@ -15,5 +15,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class HttpSimpleMcpRequest implements BaseMutator<HttpSimpleMcpRequest> {
     protected HttpHeaders headers;
-    protected AppPayloadDto payloadDto;
+    protected McpCallPayloadDto payloadDto;
 }
