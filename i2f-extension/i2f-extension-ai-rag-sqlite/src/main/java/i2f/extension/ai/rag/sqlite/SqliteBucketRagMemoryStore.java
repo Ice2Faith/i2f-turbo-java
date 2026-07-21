@@ -162,6 +162,9 @@ public class SqliteBucketRagMemoryStore implements BucketRagEmbeddingStore, Base
                     "   meta_data text,\n" +
                     "   create_time text\n" +
                     ")"));
+
+            JdbcResolver.update(conn, BindSql.of("create index IF NOT EXISTS idx" + tableName + "_bucket" +
+                    " on " + tableName + "(bucket)"));
         }
     }
 

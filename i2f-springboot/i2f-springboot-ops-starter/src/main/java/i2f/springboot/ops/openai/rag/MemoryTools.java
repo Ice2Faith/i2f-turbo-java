@@ -63,9 +63,11 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
 
     @Tool(tags = {
             AiTags.READONLY_VALUE
-    }, description = "检索记忆")
-    public List<RagSearchResultItem> memory_search(@ToolParam(description = "检索相关记忆内容") String text,
-                                                   @ToolParam(description = "最多返回的条数，允许为 null 默认为 3，一般建议小于10，例如 3 或者 5") Integer topN) {
+    }, description = "search relative memories from our history conversations(include preferences, hobby, personal info etc.) by similar query. Note: work on user level.")
+    public List<RagSearchResultItem> memory_search(@ToolParam(value = "text", description = "the query content")
+                                                   String text,
+                                                   @ToolParam(value = "topN", description = "max returns count, cloud be null, default is 3, suggest lower than 10, for example 3 or 5")
+                                                   Integer topN) {
         List<RagSearchResultItem> ret = new ArrayList<>();
         if (topN == null) {
             topN = 3;
@@ -83,6 +85,7 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
             RagEmbedding rag = list.get(i);
 
             RagSearchResultItem item = new RagSearchResultItem();
+            item.setId(rag.getId());
             item.setRank(i + 1);
             item.setContent(rag.getContent());
             ret.add(item);
@@ -93,10 +96,10 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
 
     @Tool(tags = {
             AiTags.WRITABLE_VALUE
-    }, description = "保存记忆内容")
-    public String memory_save(@ToolParam(description = "记忆内容") String text) {
+    }, description = "save an memory content. Rule: make it brief and precise. Note: work on user level.")
+    public String memory_save(@ToolParam(value = "text", description = "the content of want save")
+                              String text) {
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
-        RagEmbedding embedding = model.embed(text);
         String bucket = req.getMemoryBucket();
         if (bucket != null) {
             bucket = bucket.trim();
@@ -104,7 +107,20 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
         if (bucket == null || bucket.isEmpty()) {
             bucket = BUCKET_PUBLIC;
         }
+        RagEmbedding embedding = model.embed(text);
         String id = embeddingStore.store(embedding, bucket);
         return "stored memory with id=" + id + " at bucket=" + bucket;
+    }
+
+    @Tool(tags = {
+            AiTags.WRITABLE_VALUE
+    }, description = "delete memory by memory id list. Note: work on user level.")
+    public boolean memory_delete(@ToolParam(value = "idList", description = "the id list which want be delete, for example [\"xxx\",\"yyy\"]")
+                                 List<String> idList) {
+        if (idList == null || idList.isEmpty()) {
+            throw new IllegalArgumentException("require the id list which want be delete.");
+        }
+        embeddingStore.removeAll(idList);
+        return true;
     }
 }

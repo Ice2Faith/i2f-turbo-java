@@ -568,6 +568,30 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
+                                    记忆系统，是否开启记忆系统。<br/>
+                                    如果开启，模型将根据需要自主查询/保存记忆。<br/>
+                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
+                                    记忆根据桶进行隔离，因此你需要填写独属于你的记忆桶。<br/>
+                                <hr/>
+                                记忆桶：<br/>
+                                <el-input v-model="form.memoryBucket"
+                                          size="small"
+                                          placeholder="记忆桶">
+
+                                </el-input>
+                                </p>
+                                <el-checkbox slot="reference"
+                                             :disabled="!form.enableTools || !form.enableRags"
+                                             v-model="form.enableMemories">
+                                    记忆系统
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
                                     技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
                                     如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
                                     如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
@@ -1282,7 +1306,9 @@
                         enableMergedSystemMsg: false,
                         attachFiles: [],
                         enableTruth: false,
-                        autoApprovalToolTags: ['auto']
+                        autoApprovalToolTags: ['auto'],
+                        enableMemories: false,
+                        memoryBucket: ''
                     }
                 }
             },

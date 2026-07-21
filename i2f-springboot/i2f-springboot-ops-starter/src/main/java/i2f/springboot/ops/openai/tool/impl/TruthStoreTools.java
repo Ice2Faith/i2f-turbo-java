@@ -54,7 +54,7 @@ public class TruthStoreTools {
             tags = {
                     AiTags.AUTO_VALUE
             },
-            description = "store the truth content, it will provide as system message on after conversation. Note: old truth content will be replaced."
+            description = "store the truth content, it will provide as system message on after conversation. Rule: make it brief and precise. Note: old truth content will be replaced, work on chat session level."
     )
     public boolean store_truth(
             @ToolParam(value = "content", description = "the truth text content, such key information, number, rule, etc. any you want stored.")
