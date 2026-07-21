@@ -190,7 +190,7 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
         JsonRpcResponse body = rest.getBody();
         Object obj = body.getResult();
         JsonRpcToolCallResult result = RichConverter.convert(obj, JsonRpcToolCallResult.class);
-        if (!result.isError()) {
+        if (result.isError()) {
             throw new IllegalStateException("invoke mcp tool error, cause reason is: ");
         }
         List<Map<String, Object>> contentList = result.getContent();
@@ -209,6 +209,9 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
     }
 
     public void initial() throws IOException {
+        if (initialized.get()) {
+            return;
+        }
         lock.lock();
         try {
             if (initialized.get()) {
@@ -263,8 +266,8 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
             String serverVersion = result.getProtocolVersion();
             // TODO: 可在此处校验 response.get("result") 中的 protocolVersion 是否兼容
         } finally {
-            initialized.set(true);
             lock.unlock();
+            initialized.set(true);
         }
     }
 
@@ -284,6 +287,9 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
         String body = rest.getBody();
 
         mcpSessionId = null;
+        this.initialized.set(false);
+        this.cache.clear();
+        this.hasCache.set(false);
     }
 
     public <T> JsonRpcRequest<T> wrapJsonRpcHttpBody(String method, T params) {
