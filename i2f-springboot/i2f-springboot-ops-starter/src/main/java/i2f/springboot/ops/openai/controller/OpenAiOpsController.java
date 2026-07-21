@@ -788,6 +788,32 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
+                    // 合并重排system消息，用于在一些严格的模型要求下，要求system消息只有一条，且只能在第一条的情况
+                    if (req.isEnableMergedSystemMsg()) {
+
+                        List<OpenAiMessage> messages = completion.getMessages();
+                        completion.setMessages(new ArrayList<>());
+
+                        List<OpenAiSystemMessage> systemMessages = new ArrayList<>();
+                        for (OpenAiMessage item : messages) {
+                            if (item instanceof OpenAiSystemMessage) {
+                                OpenAiSystemMessage sys = (OpenAiSystemMessage) item;
+                                systemMessages.add(sys);
+                            } else {
+                                completion.getMessages().add(item);
+                            }
+                        }
+
+                        if (!systemMessages.isEmpty()) {
+                            String mergedSystem = systemMessages.stream()
+                                    .map(OpenAiSystemMessage::getContent)
+                                    .map(e -> "<system_scope>\n" + e + "</system_scope>")
+                                    .collect(Collectors.joining("\n\n"));
+                            OpenAiSystemMessage sys = new OpenAiSystemMessage(mergedSystem);
+                            completion.getMessages().add(0, sys);
+                        }
+                    }
+
                     if (req.isEnableEchoRequestPayload()) {
                         String emitPayloadMsg = objectMapper.writeValueAsString(completion);
                         OpsSecureReturn<?> resp = null;

@@ -639,6 +639,20 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
+                                    系统重排，实际发送给LLM大模型的消息是否需要对系统消息进行重排。<br/>
+                                    如果开启，后端将会把所有的系统消息合并为一条系统消息并放在消息列表第一位发送给大模型。<br/>
+                                    主要用于在某些模型强制要求的情况下使用：系统消息只能有一条且只能放在消息列表第一条。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableMergedSystemMsg">
+                                    系统重排
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
                                     回显请求，将实际发送给LLM大模型的请求报文回显回来。<br/>
                                     如果开启，后端将会将请求报文回显给前端，前端在[消息列表]页面右键菜单，可以查看请求报文。<br/>
                                     可以用于学习报文、或者观察实际发送报文是否符合预期。<br/>
@@ -1265,6 +1279,7 @@
                         lruToolMaxSize: 20,
                         lruToolNames: [],
                         enableEchoRequestPayload: false,
+                        enableMergedSystemMsg: false,
                         attachFiles: [],
                         enableTruth: false,
                         autoApprovalToolTags: ['auto']
@@ -2227,6 +2242,7 @@
                     req.lruToolNames = this.form.lruToolNames;
                     req.lruToolMaxSize = this.form.lruToolMaxSize;
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
+                    req.enableMergedSystemMsg = this.form.enableMergedSystemMsg;
                     req.enableTruth = this.form.enableTruth;
                     req.truthContent = truthContent;
                     req = this.transferSend(req);

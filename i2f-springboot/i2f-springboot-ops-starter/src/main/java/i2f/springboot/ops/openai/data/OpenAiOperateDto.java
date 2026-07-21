@@ -23,6 +23,7 @@ public class OpenAiOperateDto {
     protected boolean enableRags = false;
     protected boolean enableLruTools = false;
     protected boolean enableEchoRequestPayload = false;
+    protected boolean enableMergedSystemMsg = false;
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
     protected List<ToolDefinition> loadedTools;
