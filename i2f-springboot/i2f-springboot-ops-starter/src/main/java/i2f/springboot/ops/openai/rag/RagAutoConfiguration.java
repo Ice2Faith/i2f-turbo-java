@@ -41,6 +41,7 @@ public class RagAutoConfiguration {
     private RagEmbeddingModelProperties properties;
 
 
+    @ConditionalOnExpression("${ai.rags.model.enable:true}")
     @ConditionalOnMissingBean(RagEmbeddingModel.class)
     @Bean
     public RagEmbeddingModel ragEmbeddingModel() {
@@ -52,6 +53,7 @@ public class RagAutoConfiguration {
                 .done();
     }
 
+    @ConditionalOnExpression("${ai.rags.store.enable:true}")
     @ConditionalOnMissingBean(RagEmbeddingStore.class)
     @Bean
     public RagEmbeddingStore ragEmbeddingStore() {
@@ -61,6 +63,7 @@ public class RagAutoConfiguration {
                 .done();
     }
 
+    @ConditionalOnExpression("${ai.rags.worker.enable:true}")
     @ConditionalOnMissingBean(RagWorker.class)
     @Bean
     public RagWorker ragWorker(@Autowired RagEmbeddingModel ragEmbeddingModel,
@@ -79,6 +82,7 @@ public class RagAutoConfiguration {
         return ret;
     }
 
+    @ConditionalOnExpression("${ai.rags.tool.enable:true}")
     @ConditionalOnMissingBean(RagTools.class)
     @Bean
     public RagTools ragTools(@Autowired RagWorker ragWorker) {
