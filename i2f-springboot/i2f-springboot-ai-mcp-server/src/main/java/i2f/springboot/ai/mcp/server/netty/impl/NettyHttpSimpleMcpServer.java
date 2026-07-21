@@ -22,12 +22,15 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class NettyHttpSimpleMcpServer implements BaseMutator<NettyHttpSimpleMcpServer> {
-    private int port;
+    private int port = 23745;
+    private int bossThread = 4;
+    private int workerThread = 0;
+    private int maxContentLength = 65536;
     private HttpSimpleMcpInBoundHandler handler;
 
     public void start() throws InterruptedException {
-        EventLoopGroup bossGroup = new NioEventLoopGroup(4);
-        EventLoopGroup workerGroup = new NioEventLoopGroup();
+        EventLoopGroup bossGroup = new NioEventLoopGroup(bossThread);
+        EventLoopGroup workerGroup = new NioEventLoopGroup(workerThread);
         try {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
@@ -39,7 +42,7 @@ public class NettyHttpSimpleMcpServer implements BaseMutator<NettyHttpSimpleMcpS
                             // 1. HTTP 请求/响应编解码器
                             p.addLast(new HttpServerCodec());
                             // 2. HTTP 消息聚合器（将 HttpRequest + HttpContent 聚合成 FullHttpRequest）
-                            p.addLast(new HttpObjectAggregator(65536));
+                            p.addLast(new HttpObjectAggregator(maxContentLength));
                             // 3. 自定义的 JSON 业务处理器
                             p.addLast(handler);
                         }

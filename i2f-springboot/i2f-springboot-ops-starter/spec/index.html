@@ -35,7 +35,7 @@
             <li><a href="#ch06" class="toc"><span class="no">06</span>消息模型</a></li>
             <li><a href="#ch07" class="toc"><span class="no">07</span>工具体系</a></li>
             <li><a href="#ch08" class="toc"><span class="no">08</span>技能系统</a></li>
-            <li><a href="#ch09" class="toc"><span class="no">09</span>RAG 知识库</a></li>
+            <li><a href="#ch09" class="toc"><span class="no">09</span>RAG · 记忆系统</a></li>
             <li><a href="#ch10" class="toc"><span class="no">10</span>MCP 动态工具</a></li>
             <li><a href="#ch11" class="toc"><span class="no">11</span>安全体系</a></li>
             <li><a href="#ch12" class="toc"><span class="no">12</span>高级特性</a></li>
@@ -367,8 +367,10 @@
                         <rect class="svg-node" x="20" y="264" width="900" height="52" rx="3" style="stroke:#862e9c;"/>
                         <rect x="20" y="264" width="8" height="52" fill="#862e9c"/>
                         <text class="svg-lbl" x="44" y="286" style="fill:#862e9c;">记忆层</text>
-                        <text class="svg-lbl-sm" x="44" y="304">Truth Injection · Context Window</text>
-                        <text class="svg-lbl-sm" x="330" y="286">模型主动存储事实（整体替换）· 会话总结压缩 Token</text>
+                        <text class="svg-lbl-sm" x="44" y="304">Truth · Memory · Context Window</text>
+                        <text class="svg-lbl-sm" x="330" y="286">Truth 会话级事实（整体替换）· Memory 用户级向量记忆（Bucket
+                            桶隔离）
+                        </text>
                         <text class="svg-lbl-sm" x="330" y="304">maxHistoryCount 截断 · 角色消息始终保留 · LRU
                             控制工具声明占用
                         </text>
@@ -452,7 +454,7 @@
                             <td>10</td>
                             <td><b>事实注入</b></td>
                             <td>Truth Injection / Memory</td>
-                            <td>持久化事实存储与自动注入，防遗忘防幻觉（第 12 章）</td>
+                            <td>三级记忆架构：Truth 会话级 + Memory 用户级 + RAG 系统级（第 09 / 12 章）</td>
                         </tr>
                         <tr>
                             <td>11</td>
@@ -728,7 +730,7 @@
                     <div class="bd">
                         <h4>工具集动态裁剪</h4>
                         <p>依据
-                            <code>enableTruth / enableSkills / enableRags / enableLruTools</code> 四开关，按绑定类（<code>TruthStoreTools / SkillsTools / RagTools / McpProviderTools</code>）过滤工具列表——功能开关即工具可见性。
+                            <code>enableMemories / enableTruth / enableSkills / enableRags / enableLruTools</code> 五开关，按绑定类（<code>MemoryTools / TruthStoreTools / SkillsTools / RagTools / McpProviderTools</code>）过滤工具列表——功能开关即工具可见性。
                         </p>
                     </div>
                 </div>
@@ -833,6 +835,9 @@
                                     class="ty">"enableLruTools"</span>: <span class="kw">false</span>,
                             <span class="ty">"enableTruth"</span>: <span class="kw">false</span>, <span
                                     class="ty">"encryptOutput"</span>: <span class="kw">false</span>,
+                            <span class="ty">"enableMemories"</span>: <span class="kw">false</span>, <span
+                                    class="ty">"memoryBucket"</span>: <span class="str">"user-001"</span>, <span
+                                    class="cm">/* 记忆系统 */</span>
                             <span class="ty">"enableMergedSystemMsg"</span>: <span class="kw">false</span>, <span
                                     class="cm">/* 系统重排 */</span>
   <span class="ty">"toolApprovalList"</span>: [ <span class="cm">/* HITL 审批决定，见第 06 章 */</span> ]
@@ -1246,6 +1251,8 @@
     <span class="kw">protected boolean</span> enableMergedSystemMsg; <span
                             class="cm">// 系统重排：合并系统消息至首条</span>
     <span class="kw">protected boolean</span> enableTruth; <span class="cm">// 事实注入开关</span>
+    <span class="kw">protected boolean</span> enableMemories; <span class="cm">// 记忆系统开关</span>
+    <span class="kw">protected</span> String memoryBucket; <span class="cm">// 记忆桶（用户级隔离）</span>
 
     <span class="kw">protected</span> List&lt;String&gt; lruToolNames; <span class="cm">// LRU 存活工具</span>
     <span class="kw">protected</span> Integer lruToolMaxSize; <span class="cm">// LRU 容量</span>
@@ -1569,11 +1576,17 @@
                             <td>知识库相似度检索</td>
                             <td><span class="tag t-t">RAG</span></td>
                         </tr>
+                        <tr>
+                            <td><code>MemoryTools</code> ※</td>
+                            <td><code>memory_search / save / delete</code></td>
+                            <td>用户级记忆检索 / 保存 / 删除</td>
+                            <td><span class="tag t-t">RAG</span></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
                 <p class="body" style="font-size:12.5px;">※ 条件装配：随 <code>ai.skills.enable</code> /
-                    <code>ai.rags.enable</code> 开关注入，详见第 13 章。</p>
+                    <code>ai.rags.enable</code> / <code>ai.rags.memory.enable</code> 开关注入，详见第 13 章。</p>
             </div>
 
             <div class="reveal">
@@ -1763,8 +1776,10 @@
         <section class="chapter" id="ch09">
             <div class="ch-head reveal">
                 <div class="ch-no">09</div>
-                <h2><span class="en">RAG Pipeline</span>RAG 知识库
-                ：向量检索增强</h2>
+                <h2><span class="en">RAG Pipeline &amp;
+                Memory</span>RAG 知识库
+                · 记忆系统
+                ：向量检索与三级记忆</h2>
                 <div class="rule"></div>
             </div>
             <p class="lead reveal">
@@ -1877,6 +1892,149 @@
                     <code>rags_history/history-{yyyyMMddHHmmss}</code> 并重建空目录——<b>同一文档永不被重复向量化</b>，同时保留完整历史可追溯。入库在后台线程异步执行，不阻塞应用启动。
                 </p>
             </div>
+
+    <!-- 记忆系统 -->
+    <div class="reveal" style="margin-top:42px;">
+        <div class="panel-title">记忆系统 Memory — 跨会话的用户级长期记忆</div>
+        <p class="body" style="font-size:13.5px;">
+            RAG 知识库解决的是<b>组织级文档检索</b>，而记忆系统（<code>MemoryTools</code>）解决的是<b>用户级个性化记忆</b>：
+        模型在对话中主动将用户偏好、个人信息、历史结论等保存为向量记忆，后续会话经语义检索召回——
+        让 AI 真正「认识」用户。记忆以 <b>Bucket 桶</b>隔离：默认 <code>public</code> 桶全局共享，
+        请求经 <code>memoryBucket</code> 字段指定用户专属桶，检索时同时覆盖公共桶与用户桶。
+        </p>
+    </div>
+
+    <div class="two-col">
+        <div class="reveal">
+            <div class="panel-title">MemoryTools — 记忆三件套</div>
+            <div class="spec-table-wrap" style="margin-top:0;">
+                <table class="spec">
+                    <thead>
+                    <tr>
+                        <th>工具</th>
+                        <th>能力</th>
+                        <th>标签</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td><code>memory_search</code></td>
+                        <td>按语义相似度检索历史对话记忆（偏好 / 爱好 / 个人信息等），默认 topN=3</td>
+                        <td><span class="tag t-g">READONLY</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>memory_save</code></td>
+                        <td>保存一条记忆内容，规则：简短精确；写入用户桶（无桶则写 public）</td>
+                        <td><span class="tag t-o">WRITABLE</span></td>
+                    </tr>
+                    <tr>
+                        <td><code>memory_delete</code></td>
+                        <td>按记忆 ID 列表批量删除</td>
+                        <td><span class="tag t-o">WRITABLE</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="body" style="font-size:12.5px;">记忆存储基于
+                <code>SqliteBucketRagMemoryStore</code>（带桶分区的 SQLite 向量库），
+                与 RAG 共享同一个 <code>RagEmbeddingModel</code> 向量化服务——由
+                <code>ai.rags.memory.enable</code> 开关独立控制装配。</p>
+        </div>
+        <div class="reveal">
+            <div class="panel-title">Bucket 桶隔离模型</div>
+            <div class="pkg-tree"><span class="cm"># 记忆桶的读写规则</span>
+                BucketRagEmbeddingStore
+                ├── <span class="str">public</span> 桶 <span class="cm"># 全局共享记忆（默认写入桶）</span>
+                └── <span class="fn">{memoryBucket}</span> 桶 <span class="cm"># 用户专属记忆（请求级指定）</span>
+
+                <span class="cm"># memory_search 检索范围</span>
+                检索桶 = [public] + [memoryBucket]
+                <span class="cm"># 即：公共记忆 + 用户私有记忆一并召回</span>
+
+                <span class="cm"># memory_save 写入规则</span>
+                写入桶 = memoryBucket ?? public
+                <span class="cm"># 有用户桶写用户桶，无则写公共桶</span></div>
+        </div>
+    </div>
+
+    <!-- 三级记忆架构 -->
+    <div class="reveal" style="margin-top:32px;">
+        <div class="panel-title">Memory / RAG / Truth — 三级记忆架构与适用场景</div>
+        <p class="body" style="font-size:13.5px;">
+            框架提供三个层次互补的「记忆」机制，分别对应<b>会话级、用户级、系统级</b>三种信息生命周期——
+        它们共享向量检索底座，但作用域、写入方式与消费方式截然不同：
+        </p>
+        <div class="spec-table-wrap">
+            <table class="spec">
+                <thead>
+                <tr>
+                    <th>维度</th>
+                    <th>Truth 事实注入</th>
+                    <th>Memory 记忆系统</th>
+                    <th>RAG 知识库</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><b>作用域</b></td>
+                    <td><span class="tag t-r">会话级</span> 单次聊天会话</td>
+                    <td><span class="tag t-o">用户级</span> 跨会话持久，按用户桶隔离</td>
+                    <td><span class="tag t-b">系统级</span> 全局共享，所有用户可见</td>
+                </tr>
+                <tr>
+                    <td><b>写入者</b></td>
+                    <td>LLM 主动调用 <code>store_truth</code></td>
+                    <td>LLM 主动调用 <code>memory_save</code></td>
+                    <td>管理员投放文档，启动时批量入库</td>
+                </tr>
+                <tr>
+                    <td><b>存储方式</b></td>
+                    <td>纯文本 <code>truthContent</code>，前端持有</td>
+                    <td>向量化 + SQLite 桶存储，服务端持久</td>
+                    <td>向量化 + SQLite 存储，服务端持久</td>
+                </tr>
+                <tr>
+                    <td><b>更新策略</b></td>
+                    <td><b>整体替换</b>（旧事实被新事实覆盖）</td>
+                    <td><b>增量追加</b>（可逐条删除）</td>
+                    <td><b>只读</b>（LLM 不可写，仅检索）</td>
+                </tr>
+                <tr>
+                    <td><b>消费方式</b></td>
+                    <td>每轮<b>自动注入</b>为系统消息（被动）</td>
+                    <td>LLM 按需调用 <code>memory_search</code>（主动）</td>
+                    <td>LLM 按需调用 <code>rag_search</code>（主动）</td>
+                </tr>
+                <tr>
+                    <td><b>请求开关</b></td>
+                    <td><code>enableTruth</code></td>
+                    <td><code>enableMemories</code> · <code>memoryBucket</code></td>
+                    <td><code>enableRags</code></td>
+                </tr>
+                <tr>
+                    <td><b>适用场景</b></td>
+                    <td>当前任务的关键结论 / 数字 / 规则，防遗忘防幻觉</td>
+                    <td>用户偏好、个人信息、历史结论等跨会话个性化记忆</td>
+                    <td>组织内部文档、规章制度、产品手册等私有知识检索</td>
+                </tr>
+                <tr>
+                    <td><b>类比</b></td>
+                    <td>工作台上的便签纸（随手写、随时换）</td>
+                    <td>个人笔记本（长期积累、按人隔离）</td>
+                    <td>公司图书馆（公共藏书、只读借阅）</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="callout" style="--c:#862e9c;margin-top:16px;">
+            <div class="co-title">协作关系 — 三层记忆如何配合</div>
+            <p>一次典型对话中三层记忆可同时生效：模型从 <b>RAG</b> 检索到公司报销制度（系统级知识），
+            从 <b>Memory</b> 召回「该用户出差偏好高铁二等座」（用户级偏好），
+            再把本轮计算出的报销金额经 <b>Truth</b> 存储（会话级事实）——后续轮次自动注入，不再重复计算。
+            三者由独立开关控制，按需组合：<code>enableRags</code> + <code>enableMemories</code> + <code>enableTruth</code>。
+            </p>
+        </div>
+    </div>
         </section>
 
         <!-- ===================== 10 MCP 动态工具 ===================== -->
@@ -2178,6 +2336,14 @@
                         <code>&lt;system_scope&gt;</code> 标签包裹保持边界。专为<b>强制要求「系统消息仅一条且必须在第一条」</b>的严格模型而设。
                     </p>
                 </div>
+                <div class="card reveal" style="--c:#5c940d;">
+                    <div class="idx">H</div>
+                    <h3>记忆系统 Memory</h3>
+                    <div class="tagline">memory_search / save / delete</div>
+                    <p>LLM 主动将用户偏好、个人信息等保存为<b>向量记忆</b>（Bucket 桶隔离），后续会话经
+                        <code>memory_search</code> 语义召回——跨会话的<b>用户级长期记忆</b>，与 Truth（会话级）、RAG（系统级）构成三级记忆架构（见第 09 章）。
+                    </p>
+                </div>
             </div>
 
             <div class="two-col">
@@ -2275,6 +2441,16 @@
                             <td><code>ai.rags.enable</code></td>
                             <td><code>RagAutoConfiguration</code></td>
                             <td>RAG 知识库全链路</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.rags.memory.bucket.enable</code></td>
+                            <td><code>BucketRagEmbeddingStore</code></td>
+                            <td>记忆桶向量存储（SQLite 桶分区）</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.rags.memory.enable</code></td>
+                            <td><code>MemoryTools</code></td>
+                            <td>记忆三件套工具（search / save / delete）</td>
                         </tr>
                         </tbody>
                     </table>
@@ -2510,7 +2686,7 @@
                         <div class="step">
                             <div class="no"></div>
                             <div class="bd"><h4>功能开关面板</h4>
-                                <p>工具 / 技能 / 知识库 / LRU / 事实 / 报文回显，六个开关即时生效。</p></div>
+                                <p>工具 / 技能 / 知识库 / 记忆 / LRU / 事实 / 报文回显，七个开关即时生效。</p></div>
                         </div>
                     </div>
                 </div>
@@ -2576,7 +2752,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">11 大可配置开关 — 细粒度控制 Agent 行为边界</div>
+                <div class="panel-title">12 大可配置开关 — 细粒度控制 Agent 行为边界</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
                         <thead>
@@ -2641,6 +2817,11 @@
                             <td><b>系统重排</b></td>
                             <td><code>enableMergedSystemMsg</code></td>
                             <td>合并所有系统消息为一条并置于消息列表首位，适配要求系统消息唯一且置顶的严格模型</td>
+                        </tr>
+                        <tr>
+                            <td><b>记忆系统</b></td>
+                            <td><code>enableMemories</code> · <code>memoryBucket</code></td>
+                            <td>用户级跨会话记忆：模型主动存储 / 检索 / 删除记忆，Bucket 桶隔离（依赖工具开启）</td>
                         </tr>
                         </tbody>
                     </table>
