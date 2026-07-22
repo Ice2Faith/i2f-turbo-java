@@ -145,7 +145,7 @@ public class TmpFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "Reads file content by line range [startLine, endLine) using upload file url.  " +
+            description = "Reads file content by line range [startLine, endLine) using upload file url. Note: Inclusive startLine, exclusive endLine." +
                     "Non-text files (documents, images, media, etc.) will be parsed as text for the response." +
                     "Return field `textContent` format is `<line_number> | <text_content>` of every line." +
                     "CRITICAL: The `<line_number> |` prefix is for visual positioning only. " +
@@ -168,7 +168,7 @@ public class TmpFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "search keyword by regex in file, response line range in [1,...] using upload file url. " +
+            description = "search keyword by regex in file, response line range in [1,...] using upload file url." +
                     "Non-text files (documents, images, media, etc.) will be parsed as text for the response."
     )
     public List<Map<String, Object>> regex_search_file_using_url(

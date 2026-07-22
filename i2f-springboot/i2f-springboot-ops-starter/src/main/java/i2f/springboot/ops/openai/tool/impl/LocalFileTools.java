@@ -100,7 +100,7 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "Reads text file content by line range [startLine, endLine). " +
+            description = "Reads text file content by line range [startLine, endLine). Note: Inclusive startLine, exclusive endLine." +
                     "Return field `textContent` format is `<line_number> | <text_content>` of every line." +
                     "CRITICAL: The `<line_number> |` prefix is for visual positioning only. " +
                     "When extracting text for editing, you MUST strictly preserve ALL original whitespace and indentation immediately following the `|` separator."
@@ -136,7 +136,7 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "replace file lines in range [startLine,endLine) with new content"
+            description = "replace file lines in range [startLine,endLine) with new content. Note: Inclusive startLine, exclusive endLine."
     )
     public Map<String, Object> replace_file_lines(@ToolParam(value = "filePath", description = "file path, for example / or /user")
                                                   String filePath,
