@@ -2,6 +2,7 @@ package i2f.io.file;
 
 import i2f.io.file.core.FileMime;
 import i2f.io.file.core.FileSpecies;
+import i2f.io.file.core.FileTrash;
 import i2f.io.stream.StreamUtil;
 import i2f.resources.ResourceUtil;
 import i2f.text.StringUtils;
@@ -650,5 +651,9 @@ public class FileUtil {
             FileUtil.save(is, extraFile);
         }
         return extraFile;
+    }
+
+    public static File moveToTrash(File file) throws IOException {
+        return FileTrash.DEFAULT.moveToTrash(file);
     }
 }

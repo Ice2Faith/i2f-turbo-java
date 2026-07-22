@@ -4,6 +4,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -250,6 +251,19 @@ public class LocalFileTools {
 
         StreamUtil.writeString(content, saveFile);
 
+        return true;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "delete file or directory"
+    )
+    public boolean delete_file(@ToolParam(value = "path", description = "delete path, for example /user or /user/a/b ")
+                               String path) throws IOException {
+        File file = getFile(path);
+        FileUtil.moveToTrash(file);
         return true;
     }
 
