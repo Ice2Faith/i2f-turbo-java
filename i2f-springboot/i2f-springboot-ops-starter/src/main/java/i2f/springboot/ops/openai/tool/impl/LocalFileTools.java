@@ -277,6 +277,10 @@ public class LocalFileTools {
                 suffix = name.substring(idx);
                 name = name.substring(0, idx);
             }
+            dir = new File(dir, ".backup");
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
             File bakFile = new File(dir, name + ".bak" + BACKUP_TIMESTAMP_FORMATTER.format(LocalDateTime.now()) + suffix);
             try (FileInputStream fis = new FileInputStream(saveFile);
                  FileOutputStream fos = new FileOutputStream(bakFile)) {
