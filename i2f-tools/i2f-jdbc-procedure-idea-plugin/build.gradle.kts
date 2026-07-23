@@ -22,7 +22,9 @@ repositories {
 
 dependencies {
     implementation("org.antlr:antlr4-runtime:4.13.2")
-    implementation("org.apache.velocity:velocity-engine-core:2.3")
+    implementation("org.apache.velocity:velocity-engine-core:2.3") {
+        exclude(group = "org.slf4j", module = "slf4j-api")
+    }
     // 核心依赖
     implementation("com.fasterxml.jackson.core:jackson-databind:2.13.5")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5")
@@ -74,7 +76,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("232")
-        untilBuild.set("242.*")
+        untilBuild.set("253.*")
     }
 
     signPlugin {

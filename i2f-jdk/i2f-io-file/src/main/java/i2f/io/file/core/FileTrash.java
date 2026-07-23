@@ -53,12 +53,12 @@ public class FileTrash {
         dir = new File(dir, DIR_FORMATTER.format(now));
         dir.mkdirs();
 
-        String nameOnlu = file.getName();
+        String nameOnly = file.getName();
         String suffix = "";
-        int idx = nameOnlu.lastIndexOf(".");
+        int idx = nameOnly.lastIndexOf(".");
         if (idx >= 0) {
-            nameOnlu = nameOnlu.substring(0, idx);
-            suffix = nameOnlu.substring(idx);
+            suffix = nameOnly.substring(idx);
+            nameOnly = nameOnly.substring(0, idx);
         }
         String name = FILE_FORMATTER.format(now) + "_" + (UUID.randomUUID().toString().replace("-", "")) + suffix;
         File ret = new File(dir, name);
