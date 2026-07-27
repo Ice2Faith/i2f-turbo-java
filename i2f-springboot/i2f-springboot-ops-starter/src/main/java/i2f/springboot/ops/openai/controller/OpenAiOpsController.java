@@ -44,10 +44,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
@@ -261,6 +258,39 @@ public class OpenAiOpsController implements IOpsProvider {
             }
 
             ServletFileUtil.responseAsFileAttachment(new FileInputStream(file), true, realName, null, true, response);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            PrintWriter writer = response.getWriter();
+            writer.write("Internal Server Error");
+            writer.flush();
+            return;
+        }
+    }
+
+    @GetMapping("/tmp-file/inline")
+    public void inlineTmpFile(@RequestParam String fileUrl,
+                                HttpServletRequest request,
+                                HttpServletResponse response) throws Exception {
+        try {
+            if (tmpFileTools == null) {
+                throw new IllegalStateException("manager not enable tmp file upload feature.");
+            }
+            File file = tmpFileTools.getFileByUrl(fileUrl);
+            String realName = null;
+            try {
+                realName = tmpFileTools.getRealFileNameByUrl(fileUrl);
+            } catch (Throwable e) {
+
+            }
+            if (realName == null || realName.isEmpty()) {
+                realName = file.getName();
+            }
+            if (realName == null || realName.isEmpty()) {
+                realName = "download.data";
+            }
+
+            ServletFileUtil.responseAsFileAttachment(new FileInputStream(file), true, realName, null, false, response);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());

@@ -22,6 +22,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -42,6 +45,8 @@ import java.util.concurrent.TimeUnit;
         AiTags.FILE_VALUE
 })
 public class TmpFileTools {
+    public static final String DEFAULT_URL_SIGN_SALT = "abc123def456";
+
     private static final Set<String> exposeTools;
     private final ScheduledExecutorService pool = Executors.newSingleThreadScheduledExecutor();
 
@@ -76,6 +81,9 @@ public class TmpFileTools {
 
     @Value("${ai.tools.tmp-file.keep-days:15}")
     protected int keepDays = 15;
+
+    @Value("${ai.tools.tmp-file.sign-salt:}")
+    protected String signSalt = DEFAULT_URL_SIGN_SALT;
 
     public static final DateTimeFormatter DIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final DateTimeFormatter FILE_FORMATTER = DateTimeFormatter.ofPattern("HHmmss");
@@ -209,7 +217,10 @@ public class TmpFileTools {
         StreamUtil.writeBytes(is, dataFile);
 
         Map<String, Object> metadata = new LinkedHashMap<>();
-        metadata.put("fileUrl", PROTOCOL + "://" + dateDir.getName() + "/" + uidDir.getName() + "/" + dataFile.getName());
+        String url = PROTOCOL + "://" + dateDir.getName() + "/" + uidDir.getName() + "/" + dataFile.getName();
+
+        url = signedUrl(url);
+        metadata.put("fileUrl", url);
         metadata.put("fileName", fullName);
         metadata.put("createTime", CREATE_FORMATTER.format(LocalDateTime.now()));
 
@@ -217,6 +228,44 @@ public class TmpFileTools {
         StreamUtil.writeString(json, metaFile);
 
         return metadata;
+    }
+
+    public String signContent(String content)  {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String payload = signSalt + "@" + content + "#" + signSalt;
+            byte[] data = digest.digest(payload.getBytes(StandardCharsets.UTF_8));
+            StringBuilder builder = new StringBuilder();
+            for (byte b : data) {
+                builder.append(String.format("%02x", (int) (b & 0x0ff)));
+            }
+            String sign = builder.toString();
+            sign = sign.substring(0, 5) + sign.substring(sign.length() - 5);
+            return sign;
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalArgumentException(e.getMessage(),e);
+        }
+    }
+
+    public String signedUrl(String url) {
+        String sign = signContent(url);
+        int idx = url.indexOf("://");
+        return url.substring(0, idx) + "://" + sign + "@" + url.substring(idx + "://".length());
+    }
+
+    public String verifyUrl(String url){
+        int idx=url.indexOf("://");
+        String protocol=url.substring(0,idx);
+        String path=url.substring(idx+"://".length());
+        idx=path.indexOf("@");
+        String sign=path.substring(0,idx);
+        path=path.substring(idx+1);
+        String originUrl=protocol+"://"+path;
+        String reSign = signContent(originUrl);
+        if(!reSign.equalsIgnoreCase(sign)){
+            throw new IllegalArgumentException("illegal url, verify url signature failure!");
+        }
+        return originUrl;
     }
 
     public File parseAsTextFile(File file) throws IOException {
@@ -256,6 +305,7 @@ public class TmpFileTools {
         }
         String protocol = fileUrl.substring(0, idx);
         if (PROTOCOL.equals(protocol)) {
+            fileUrl = verifyUrl(fileUrl);
             String realPath = fileUrl.substring(idx + 3);
             return getFile(realPath);
         }
@@ -273,6 +323,7 @@ public class TmpFileTools {
         String protocol = fileUrl.substring(0, idx);
         if (PROTOCOL.equals(protocol)) {
             try {
+                fileUrl=verifyUrl(fileUrl);
                 String realPath = fileUrl.substring(idx + 3);
                 File file = getFile(realPath);
                 if (!file.exists()) {

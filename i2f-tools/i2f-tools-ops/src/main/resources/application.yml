@@ -33,3 +33,10 @@ ai:
       enableMarkitdownDocReader: false
       enableEasyocrDocReader: false
       enablePandocDocReader: false
+  tts:
+    qwen:
+      enable: false
+      url: wss://llm-xxxx.cn-beijing.maas.aliyuncs.com/api-ws/v1/inference
+      apiKey: sk-xxxx
+      model: qwen-audio-3.0-tts-flash
+      voice: longanhuan_v3.6

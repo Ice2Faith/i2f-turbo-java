@@ -756,6 +756,22 @@ html, body {
     text-align: right;
 }
 
+.audio-tts-play-foo-bar{
+    position: fixed;
+    right: 0;
+    bottom: 30%;
+    overflow: hidden;
+    border-radius: 999px;
+    box-shadow: 2px 3px 5px #777;
+    z-index: 999;
+    max-width: 48px;
+    max-height: 48px;
+    transition: max-width 1.2s ease-in-out;
+}
+.audio-tts-play-foo-bar:hover{
+    max-width: 30%;
+}
+
 
 /**
  * style for print action
@@ -840,5 +856,10 @@ html, body {
 
     .input-attach-files__message {
         box-shadow: unset;
+    }
+
+    .audio-tts-play-foo-bar {
+        display: none;
+        opacity: 0;
     }
 }

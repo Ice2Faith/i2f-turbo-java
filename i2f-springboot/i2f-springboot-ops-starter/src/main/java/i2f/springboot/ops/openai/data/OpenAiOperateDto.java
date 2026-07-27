@@ -37,4 +37,6 @@ public class OpenAiOperateDto {
 
     protected boolean enableMemories = false;
     protected String memoryBucket;
+
+    protected String ttsContent;
 }

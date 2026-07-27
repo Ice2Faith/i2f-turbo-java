@@ -111,6 +111,14 @@
           top-selector=".scroll-top-mark"
           bottom-selector=".scroll-bottom-mark"></span>
 
+    <span class="audio-tts-play-foo-bar"
+          v-if="metas.audioTtsUrl">
+        <audio v-key="metas.audioTtsUrl"
+               :src="metas.audioTtsUrl"
+               controls
+               autoplay></audio>
+    </span>
+
     <!-- 顶部配置栏：鼠标悬浮展开，离开折叠 -->
     <div class="top-config-bar" @mouseenter="metas.showConfig=true" @mouseleave="metas.showConfig=false">
         <div class="top-config-title">
@@ -356,7 +364,7 @@
                                         <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
                                            class="el-icon-copy-document"></i>
                                         <i class="el-icon-microphone"
-                                           v-if="metas.supportTts"
+                                           v-if="metas.supportTts || form.useQwenTts"
                                            style="color: orangered;font-size: 14px;"
                                            @click="onTts(msg)"></i>
                                     </span>
@@ -623,11 +631,17 @@
                                 <p>
                                     语音播报，自动播报助手消息。<br/>
                                     如果开启，将会自动播报助手的答复消息。<br/>
+                                    默认使用浏览器的TTS引擎进行本地合成，本地合成引擎：{{metas.supportTts?'支持':'不支持'}}<br/>
+                                    当然，你也可以选择使用阿里提供的语音合成大模型进行合成，后端需要同步开启配置，最新合成费用查阅【百炼】平台<br/>
+                                    <hr/>
+                                    <el-checkbox v-model="form.useQwenTts">
+                                        使用千问语音合成（1.4元/万字）
+                                    </el-checkbox>
                                 </p>
                                 <el-checkbox slot="reference"
-                                             v-if="metas.supportTts"
                                              v-model="form.enableAutoTts">
                                     语音播报
+                                    <i v-if="!metas.supportTts" class="el-icon-warning-outline"></i>
                                 </el-checkbox>
                             </el-popover>
                             <el-popover
@@ -1226,6 +1240,7 @@
                         echoRequestPayload: {},
                         moreSendMenus: [],
                         toolTags: [],
+                        audioTtsUrl: '',
                         loadModelsLoading: false,
                         loadModels: {
                             // 已加载的模型列表，key=baseUrl,value=模型列表
@@ -1298,6 +1313,7 @@
                         enableRags: false,
                         enableUserSendTime: false,
                         enableAutoTts: false,
+                        useQwenTts: false,
                         toolApprovalList: [],
                         enableLruTools: false,
                         lruToolMaxSize: 20,
@@ -2321,7 +2337,7 @@
                     }
 
                     if (this.form.enableAutoTts) {
-                        this.speakTts(assistantMsg.assistant.content)
+                        this.onTts(assistantMsg)
                     }
 
                     if (Object.keys(toolCallsMap).length > 0) {
@@ -2528,7 +2544,20 @@
             },
             onTts(msg) {
                 let content = msg[msg.type].content;
-                this.speakTts(content)
+                if(this.form.useQwenTts){
+                    if(msg.qwenTts && msg.qwenTts.fileUrl){
+                        let fileUrl=msg.qwenTts.fileUrl;
+                        this.metas.audioTtsUrl='./tmp-file/inline?fileUrl='+encodeURIComponent(fileUrl);
+                    }else{
+                        this.speakTtsByQwen(content)
+                            .then(resp=>{
+                                msg.qwenTts=resp;
+                            })
+                    }
+                }else{
+                    this.speakTts(content)
+                }
+
             },
             speakTts(content) {
                 if (content && content != '') {
@@ -2539,6 +2568,40 @@
             },
             stopTts() {
                 this.$tts.stop()
+            },
+            speakTtsByQwen(content){
+                return new Promise((resolve, reject)=>{
+                    try {
+                        let req = this.assignOpenAiMeta({
+                            ttsContent: content
+                        })
+                        this.$axios({
+                            url: '/tts/qwen/generate',
+                            method: 'post',
+                            data: this.transferSend(req)
+                        }).then(res => {
+                            if (res.data.code == 200) {
+                                //console.log(res.data)
+                                let resp = this.transferRecv(res.data.data) || []
+                                //console.log(resp)
+
+                                let fileUrl=resp.fileUrl
+                                this.metas.audioTtsUrl='./tmp-file/inline?fileUrl='+encodeURIComponent(fileUrl);
+                                resolve(resp)
+                            } else {
+                                this.messageError(res.data.msg, 300)
+                                reject(res.data.msg)
+                            }
+                        }).catch(err => {
+                            this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            reject(err.errorMessage || err.message || '操作失败')
+                        })
+                    } catch (err) {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                        reject(err.errorMessage || err.message || '操作失败')
+                    }
+                })
+
             },
             onUploadFileChange(file) {
                 this.metas.uploadList = []
