@@ -269,7 +269,7 @@ public class OpenAiOpsController implements IOpsProvider {
     }
 
     @GetMapping("/tmp-file/inline")
-    public void inlineTmpFile(@RequestParam String fileUrl,
+    public void inlineTmpFile(@RequestParam("fileUrl") String fileUrl,
                                 HttpServletRequest request,
                                 HttpServletResponse response) throws Exception {
         try {
