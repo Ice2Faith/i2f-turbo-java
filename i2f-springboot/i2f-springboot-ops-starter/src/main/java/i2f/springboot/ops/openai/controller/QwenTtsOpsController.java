@@ -43,7 +43,6 @@ public class QwenTtsOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
 
-
     @Autowired
     private QwenTtsProperties qwenTtsProperties;
 
@@ -54,6 +53,10 @@ public class QwenTtsOpsController {
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> qwenTts(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
+            if (tmpFileTools == null) {
+                throw new IllegalStateException("manager not enable tmp file upload feature.");
+            }
+
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
 
             String ttsContent = req.getTtsContent();
