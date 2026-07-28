@@ -4,10 +4,13 @@ import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
+import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
@@ -752,9 +755,51 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
 
         if (true) {
-            Language ret = findPossibleTagNameLanguage(name);
-            if (ret != null) {
-                return ret;
+            boolean searchByTagName = ApplicationUtil.tryRunReadAction(() -> {
+                try {
+                    PsiFile psiFile = tag.getContainingFile();
+                    if (psiFile == null) {
+                        XmlTag rootTag = CompletionHelper.getRootElement(tag, XmlTag.class);
+                        if (rootTag != null) {
+                            psiFile = rootTag.getContainingFile();
+                        }
+                        if (psiFile == null) {
+                            PsiElement rootElem = CompletionHelper.getRootElement(tag, null);
+                            if (rootElem != null) {
+                                psiFile = rootElem.getContainingFile();
+                            }
+                        }
+                    }
+                    if (psiFile == null) {
+                        return true;
+                    }
+                    VirtualFile virtualFile = psiFile.getVirtualFile();
+                    if (virtualFile == null) {
+                        return true;
+                    }
+                    String extension = virtualFile.getExtension();
+                    if (extension == null || !extension.isEmpty()) {
+                        return true;
+                    }
+                    if (extension.startsWith(".")) {
+                        extension = extension.substring(1);
+                    }
+                    extension = extension.toLowerCase();
+                    if (!"xml".equals(extension)) {
+                        return false;
+                    }
+
+                } catch (Exception e) {
+                    log.debug(e.getMessage(), e);
+                }
+                return true;
+            });
+
+            if (searchByTagName) {
+                Language ret = findPossibleTagNameLanguage(name);
+                if (ret != null) {
+                    return ret;
+                }
             }
         }
 

@@ -1,15 +1,16 @@
 // This is a generated file. Not intended for manual editing.
 package i2f.turbo.idea.plugin.funic.grammar.parser;
 
-import com.intellij.lang.ASTNode;
-import com.intellij.lang.LightPsiParser;
 import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
-import com.intellij.lang.PsiParser;
-import com.intellij.psi.tree.IElementType;
-
 import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.*;
 import static i2f.turbo.idea.plugin.funic.lang.parser.FunicParserUtil.*;
+
+import com.intellij.psi.tree.IElementType;
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.tree.TokenSet;
+import com.intellij.lang.PsiParser;
+import com.intellij.lang.LightPsiParser;
 
 @SuppressWarnings({"SimplifiableIfStatement", "UnusedAssignment"})
 public class FunicParser implements PsiParser, LightPsiParser {
@@ -339,8 +340,8 @@ public class FunicParser implements PsiParser, LightPsiParser {
   //     |TERM_CONST_STRING_MULTILINE_QUOTE
   public static boolean constMultiString(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "constMultiString")) return false;
-    if (!nextTokenIs(b, "<const multi string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
-      return false;
+      if (!nextTokenIs(b, "<const multi string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
+          return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONST_MULTI_STRING, "<const multi string>");
     r = consumeToken(b, TERM_CONST_STRING_MULTILINE);
@@ -396,8 +397,8 @@ public class FunicParser implements PsiParser, LightPsiParser {
   //     |TERM_CONST_STRING_RENDER_SINGLE
   public static boolean constRenderString(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "constRenderString")) return false;
-    if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
-      return false;
+      if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
+          return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONST_RENDER_STRING, "<const render string>");
     r = consumeToken(b, TERM_CONST_STRING_RENDER);

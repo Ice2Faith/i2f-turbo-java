@@ -160,7 +160,7 @@ public interface FunicTypes {
   IElementType OP_GT = new FunicTokenType(">");
   IElementType OP_GTE = new FunicTokenType(">=");
   IElementType OP_INCR = new FunicTokenType("++");
-  IElementType OP_INT_DIV = new FunicTokenType("//");
+    IElementType OP_INT_DIV = new FunicTokenType("\\\\");
   IElementType OP_LT = new FunicTokenType("<");
   IElementType OP_LTE = new FunicTokenType("<=");
   IElementType OP_MOD = new FunicTokenType("%");

@@ -27,8 +27,8 @@ WHITE_SPACE=\s+
 
 TERM_COMMENT_SINGLE_LINE="//"[^\n]*(\n|\$)
 TERM_COMMENT_MULTI_LINE="/"\*([^*]|(\*+([^*/])))*\*+"/"
-TERM_CONST_STRING_MULTILINE=```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)```
-TERM_CONST_STRING_MULTILINE_QUOTE=\"\"\"(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\\]|(\\.))*?)\"\"\"
+TERM_CONST_STRING_MULTILINE=```(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^`\\]|(\\[`]{1,3})|(\\.))*?)```
+TERM_CONST_STRING_MULTILINE_QUOTE=\"\"\"(([a-zA-Z_][a-zA-Z0-9_]*)(\.[a-zA-Z_][a-zA-Z0-9_]*)*)?[ \t\r]*\n(([^\"\\]|(\\[\"]{1,3})|(\\.))*?)\"\"\"
 TERM_CONST_STRING_RENDER=[rR]\"((\\\")+|[^\"])*\"
 TERM_CONST_STRING_RENDER_SINGLE=[rR]'((\')+|[^'])*'
 TERM_CONST_STRING=\"((\\\")+|[^\"])*\"
@@ -110,7 +110,7 @@ WS=[ \t\r\n]+
   "<?"                                      { return OP_DIAMOND_NAME_L; }
   "?>"                                      { return OP_DIAMOND_NAME_R; }
   "*"                                       { return OP_MUL; }
-  "//"                                      { return OP_INT_DIV; }
+  "\\\\"                                    { return OP_INT_DIV; }
   "/"                                       { return OP_DIV; }
   "%"                                       { return OP_MOD; }
   "++"                                      { return OP_INCR; }

@@ -1,17 +1,18 @@
 // This is a generated file. Not intended for manual editing.
 package i2f.turbo.idea.plugin.funic.grammar.psi.elements.impl;
 
+import java.util.List;
+
+import org.jetbrains.annotations.*;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
-import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicConstRenderString;
-import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicVisitor;
-import i2f.turbo.idea.plugin.funic.lang.psi.FunicPsiElement;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import com.intellij.psi.util.PsiTreeUtil;
 
-import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.TERM_CONST_STRING_RENDER;
-import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.TERM_CONST_STRING_RENDER_SINGLE;
+import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.*;
+import i2f.turbo.idea.plugin.funic.lang.psi.FunicPsiElement;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.*;
+import i2f.turbo.idea.plugin.funic.lang.psi.impl.FunicPsiImplUtil;
 
 public class FunicConstRenderStringImpl extends FunicPsiElement implements FunicConstRenderString {
 
