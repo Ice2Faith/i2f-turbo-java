@@ -757,42 +757,37 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         if (true) {
             boolean searchByTagName = ApplicationUtil.tryRunReadAction(() -> {
                 try {
-                    PsiFile psiFile = tag.getContainingFile();
-                    if (psiFile == null) {
-                        XmlTag rootTag = CompletionHelper.getRootElement(tag, XmlTag.class);
-                        if (rootTag != null) {
-                            psiFile = rootTag.getContainingFile();
-                        }
-                        if (psiFile == null) {
-                            PsiElement rootElem = CompletionHelper.getRootElement(tag, null);
-                            if (rootElem != null) {
-                                psiFile = rootElem.getContainingFile();
-                            }
-                        }
+                    PsiFile psiFile = null;
+                    PsiElement rootElem = CompletionHelper.getRootElement(tag, null);
+                    if (rootElem != null) {
+                        psiFile = rootElem.getContainingFile();
                     }
                     if (psiFile == null) {
-                        return true;
+                        psiFile = tag.getContainingFile();
+                    }
+                    if (psiFile == null) {
+                        return false;
                     }
                     VirtualFile virtualFile = psiFile.getVirtualFile();
                     if (virtualFile == null) {
-                        return true;
+                        return false;
                     }
                     String extension = virtualFile.getExtension();
                     if (extension == null || !extension.isEmpty()) {
-                        return true;
+                        return false;
                     }
                     if (extension.startsWith(".")) {
                         extension = extension.substring(1);
                     }
                     extension = extension.toLowerCase();
-                    if (!"xml".equals(extension)) {
-                        return false;
+                    if ("xml".equals(extension)) {
+                        return true;
                     }
 
                 } catch (Exception e) {
                     log.debug(e.getMessage(), e);
                 }
-                return true;
+                return false;
             });
 
             if (searchByTagName) {
