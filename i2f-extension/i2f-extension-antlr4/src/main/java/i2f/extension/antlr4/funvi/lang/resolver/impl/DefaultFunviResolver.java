@@ -1,15 +1,19 @@
-package i2f.extension.antlr4.funvi.impl;
+package i2f.extension.antlr4.funvi.lang.resolver.impl;
 
 import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
+import i2f.extension.antlr4.funvi.lang.handler.FunviBlockHandler;
+import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
+import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
+import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.extension.antlr4.script.funic.lang.Funic;
-import i2f.extension.antlr4.funvi.impl.debugger.FunviDebugBridgeReporter;
-import i2f.extension.antlr4.funvi.impl.exception.impl.FunviBreakException;
-import i2f.extension.antlr4.funvi.impl.exception.impl.FunviContinueException;
-import i2f.extension.antlr4.funvi.impl.exception.impl.FunviEvaluateException;
-import i2f.extension.antlr4.funvi.impl.value.ParameterValue;
+import i2f.extension.antlr4.funvi.lang.debugger.FunviDebugBridgeReporter;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviBreakException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviContinueException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviEvaluateException;
+import i2f.extension.antlr4.funvi.lang.value.ParameterValue;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -36,6 +40,8 @@ import java.util.function.Supplier;
 public class DefaultFunviResolver implements FunviResolver {
     public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected final AtomicBoolean debug = new AtomicBoolean(true);
+
+    protected FunicResolver funicResolver=new DefaultFunicResolver();
 
     protected final ConcurrentHashMap<String, FunviBlockHandler> blockHandlers = new ConcurrentHashMap<>();
 
@@ -478,7 +484,7 @@ public class DefaultFunviResolver implements FunviResolver {
                 return expression;
             }
 
-            Object ret = Funic.script(expression, context);
+            Object ret = Funic.script(expression, context,funicResolver);
             return ret;
         }
     }

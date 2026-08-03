@@ -1,6 +1,6 @@
-package i2f.extension.antlr4.funvi.impl.exception.impl;
+package i2f.extension.antlr4.funvi.lang.exception.impl;
 
-import i2f.extension.antlr4.funvi.impl.exception.FunviThrowException;
+import i2f.extension.antlr4.funvi.lang.exception.FunviThrowException;
 import lombok.Getter;
 import lombok.Setter;
 

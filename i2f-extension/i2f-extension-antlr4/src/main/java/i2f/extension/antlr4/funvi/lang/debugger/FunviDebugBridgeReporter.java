@@ -1,4 +1,4 @@
-package i2f.extension.antlr4.funvi.impl.debugger;
+package i2f.extension.antlr4.funvi.lang.debugger;
 
 import i2f.jvm.JvmUtil;
 

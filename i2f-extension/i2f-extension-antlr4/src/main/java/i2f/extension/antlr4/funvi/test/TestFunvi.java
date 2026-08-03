@@ -1,8 +1,8 @@
 package i2f.extension.antlr4.funvi.test;
 
-import i2f.extension.antlr4.funvi.impl.BindSqlFunviResolver;
-import i2f.extension.antlr4.funvi.impl.Funvi;
-import i2f.extension.antlr4.funvi.impl.FunviResolver;
+import i2f.extension.antlr4.funvi.lang.resolver.impl.BindSqlFunviResolver;
+import i2f.extension.antlr4.funvi.lang.Funvi;
+import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
 
 import java.util.HashMap;
 

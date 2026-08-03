@@ -1,8 +1,8 @@
-package i2f.extension.antlr4.funvi.impl;
+package i2f.extension.antlr4.funvi.lang.resolver;
 
 import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
-import i2f.extension.antlr4.funvi.impl.value.ParameterValue;
+import i2f.extension.antlr4.funvi.lang.value.ParameterValue;
 
 import java.util.List;
 import java.util.Map;

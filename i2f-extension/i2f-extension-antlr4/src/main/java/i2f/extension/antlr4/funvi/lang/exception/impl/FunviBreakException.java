@@ -1,6 +1,6 @@
-package i2f.extension.antlr4.funvi.impl.exception.impl;
+package i2f.extension.antlr4.funvi.lang.exception.impl;
 
-import i2f.extension.antlr4.funvi.impl.exception.FunviControlException;
+import i2f.extension.antlr4.funvi.lang.exception.FunviControlException;
 
 /**
  * @author Ice2Faith

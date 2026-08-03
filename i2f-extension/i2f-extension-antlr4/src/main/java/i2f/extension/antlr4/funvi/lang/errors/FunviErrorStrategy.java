@@ -1,6 +1,6 @@
-package i2f.extension.antlr4.funvi.impl;
+package i2f.extension.antlr4.funvi.lang.errors;
 
-import i2f.extension.antlr4.funvi.impl.exception.impl.FunviParseException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviParseException;
 import org.antlr.v4.runtime.*;
 
 /**

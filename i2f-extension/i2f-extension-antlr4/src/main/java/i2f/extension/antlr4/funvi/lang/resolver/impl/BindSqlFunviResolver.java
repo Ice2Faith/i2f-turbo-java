@@ -1,8 +1,8 @@
-package i2f.extension.antlr4.funvi.impl;
+package i2f.extension.antlr4.funvi.lang.resolver.impl;
 
 import i2f.bindsql.BindSql;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
-import i2f.extension.antlr4.funvi.impl.exception.impl.FunviEvaluateException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviEvaluateException;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

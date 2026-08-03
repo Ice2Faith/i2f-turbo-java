@@ -1,4 +1,4 @@
-package i2f.extension.antlr4.funvi.impl.exception;
+package i2f.extension.antlr4.funvi.lang.exception;
 
 /**
  * @author Ice2Faith
