@@ -31,7 +31,7 @@
   // 定义终结符，这里目前只会使用regexp来进行正则表达式匹配得到终结符
   // 研究不深，还不知道怎么对终结符进行重用，也就是一个终极符分解为多个终结符的语法
   tokens=[
-    TERM_REF_VALUE="regexp:[$|#][!]?[{]((\\.)+|[^}])*}";
+    TERM_REF_VALUE="regexp:[$|#][!]?[{]((\\.)+|[^}])*[}]";
     TERM_BLOCK_END="regexp:[#][#]";
     TERM_BLOCK_ELSE="regexp:[#]else";
     TERM_BLOCK_IF="regexp:[#]if";

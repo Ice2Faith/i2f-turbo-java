@@ -25,7 +25,7 @@ import static i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes.*;
 EOL=\R
 WHITE_SPACE=\s+
 
-TERM_REF_VALUE=[$|#][!]?[{]((\\.)+|[^}])*}
+TERM_REF_VALUE=[$|#][!]?[{]((\\.)+|[^}])*[}]
 TERM_BLOCK_END=[#][#]
 TERM_BLOCK_ELSE=[#]else
 TERM_BLOCK_IF=[#]if
