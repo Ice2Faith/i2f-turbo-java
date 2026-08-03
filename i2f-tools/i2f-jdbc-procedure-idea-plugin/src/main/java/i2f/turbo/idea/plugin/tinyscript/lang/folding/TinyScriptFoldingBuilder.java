@@ -10,6 +10,8 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptJsonArrayValue;
+import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptJsonMapValue;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.elements.TinyScriptScriptBlock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +47,16 @@ public class TinyScriptFoldingBuilder extends FoldingBuilderEx implements DumbAw
 
                 placeholder = "{...}";
 
+            }else if (child instanceof TinyScriptJsonMapValue) {
+                TinyScriptJsonMapValue block = (TinyScriptJsonMapValue) child;
+
+                placeholder = "{...}";
+
+            }else if (child instanceof TinyScriptJsonArrayValue) {
+                TinyScriptJsonArrayValue block = (TinyScriptJsonArrayValue) child;
+
+                placeholder = "[...]";
+
             }
 
             buildFoldRegionsNext(child, list);
@@ -73,6 +85,10 @@ public class TinyScriptFoldingBuilder extends FoldingBuilderEx implements DumbAw
         }
         IElementType tokenType = child.getElementType();
         if (tokenType.equals(TinyScriptTypes.SCRIPT_BLOCK)) {
+            return "{...}";
+        }else  if (tokenType.equals(TinyScriptTypes.JSON_MAP_VALUE)) {
+            return "{...}";
+        }else  if (tokenType.equals(TinyScriptTypes.JSON_ARRAY_VALUE)) {
             return "{...}";
         }
         return null;

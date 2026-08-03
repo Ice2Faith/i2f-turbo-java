@@ -10,6 +10,8 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicListValueExpress;
+import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicMapValueExpress;
 import i2f.turbo.idea.plugin.funic.grammar.psi.elements.FunicScriptBlock;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -45,6 +47,16 @@ public class FunicFoldingBuilder extends FoldingBuilderEx implements DumbAware {
 
                 placeholder = "{...}";
 
+            }else if (child instanceof FunicMapValueExpress) {
+                FunicMapValueExpress block = (FunicMapValueExpress) child;
+
+                placeholder = "{...}";
+
+            }else if (child instanceof FunicListValueExpress) {
+                FunicListValueExpress block = (FunicListValueExpress) child;
+
+                placeholder = "[...]";
+
             }
 
             buildFoldRegionsNext(child, list);
@@ -74,6 +86,10 @@ public class FunicFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         IElementType tokenType = child.getElementType();
         if (tokenType.equals(FunicTypes.SCRIPT_BLOCK)) {
             return "{...}";
+        }else if (tokenType.equals(FunicTypes.MAP_VALUE_EXPRESS)) {
+            return "{...}";
+        }else if (tokenType.equals(FunicTypes.LIST_VALUE_EXPRESS)) {
+            return "[...]";
         }
         return null;
     }
