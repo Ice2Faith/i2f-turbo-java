@@ -32,12 +32,36 @@ public interface StringMixins {
         return "\n";
     }
 
+    default String newline(int count) {
+        String ret="";
+        for (int i = 0; i < count; i++) {
+            ret+="\n";
+        }
+        return ret;
+    }
+
     default String sharp() {
         return "#";
     }
 
     default String dollar() {
         return "$";
+    }
+
+    default String sharp(int count) {
+        String ret="";
+        for (int i = 0; i < count; i++) {
+            ret+="#";
+        }
+        return ret;
+    }
+
+    default String dollar(int count) {
+        String ret="";
+        for (int i = 0; i < count; i++) {
+            ret+="$";
+        }
+        return ret;
     }
 
     default boolean is_empty(String str) {
