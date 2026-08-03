@@ -290,6 +290,10 @@
                 language="Funvi"
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.funvi.lang.completion.FunviCompletionContributor"/>
+
+        <lang.foldingBuilder
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.folding.FunviFoldingBuilder"/>
         <!-- *************************** funvi  end *************************** -->
     </extensions>
 
