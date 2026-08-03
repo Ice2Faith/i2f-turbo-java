@@ -278,6 +278,13 @@
         <lang.braceMatcher language="Funvi"
                            implementationClass="i2f.turbo.idea.plugin.funvi.lang.bracket.FunviPairedBraceMatcher"/>
 
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                                      implementation="i2f.turbo.idea.plugin.funvi.lang.live.templates.FunviLiveTemplatesProvider"/>
+
+        <!-- 注册 Live Templates 上下文类型，使 Funic 在 Live Templates 设置中可选 -->
+        <liveTemplateContextProvider
+                implementation="i2f.turbo.idea.plugin.funvi.lang.live.templates.FunviLiveTemplateContextProvider"/>
 
         <completion.contributor
                 language="Funvi"
