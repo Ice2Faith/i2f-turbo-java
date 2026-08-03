@@ -273,6 +273,16 @@
         <colorSettingsPage
                 implementation="i2f.turbo.idea.plugin.funvi.lang.highlighter.FunviColorSettingsPage"/>
 
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="Funvi"
+                           implementationClass="i2f.turbo.idea.plugin.funvi.lang.bracket.FunviPairedBraceMatcher"/>
+
+
+        <completion.contributor
+                language="Funvi"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.completion.FunviCompletionContributor"/>
         <!-- *************************** funvi  end *************************** -->
     </extensions>
 
