@@ -10,6 +10,7 @@ import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes;
+import i2f.turbo.idea.plugin.funvi.grammar.psi.elements.FunviBlockBody;
 import i2f.turbo.idea.plugin.funvi.grammar.psi.elements.FunviCommonBlock;
 import i2f.turbo.idea.plugin.funvi.grammar.psi.elements.FunviIfBlock;
 import org.jetbrains.annotations.NotNull;
@@ -41,23 +42,10 @@ public class FunviFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         }
         for (PsiElement child = root.getFirstChild(); child != null; child = child.getNextSibling()) {
             String placeholder = "";
-            if (child instanceof FunviIfBlock) {
-                FunviIfBlock block = (FunviIfBlock) child;
+            if(child instanceof FunviBlockBody){
+                FunviBlockBody block = (FunviBlockBody) child;
 
-                PsiElement curr = child.getFirstChild();
-                for (int i = 0; i < 4 && curr != null; i++) {
-                    placeholder += curr.getText();
-                    curr = curr.getNextSibling();
-                }
-
-            } else if (child instanceof FunviCommonBlock) {
-                FunviCommonBlock block = (FunviCommonBlock) child;
-
-                PsiElement curr = child.getFirstChild();
-                for (int i = 0; i < 4 && curr != null; i++) {
-                    placeholder += curr.getText();
-                    curr = curr.getNextSibling();
-                }
+                placeholder="...";
             }
 
             buildFoldRegionsNext(child, list);
@@ -65,7 +53,6 @@ public class FunviFoldingBuilder extends FoldingBuilderEx implements DumbAware {
             if (!placeholder.isEmpty()) {
                 ASTNode node = child.getNode();
                 TextRange range = node.getTextRange();
-                placeholder += "...##";
                 list.add(new FoldingDescriptor(
                         node,
                         range,
@@ -86,11 +73,8 @@ public class FunviFoldingBuilder extends FoldingBuilderEx implements DumbAware {
             return null;
         }
         IElementType tokenType = child.getElementType();
-        if (tokenType.equals(FunviTypes.IF_BLOCK)) {
-            return "#if...##";
-        } else if (tokenType.equals(FunviTypes.COMMON_BLOCK)) {
-            String text = child.getFirstChildNode().getText();
-            return text + "...##";
+        if (tokenType.equals(FunviTypes.BLOCK_BODY)) {
+            return "...";
         }
         return null;
     }
