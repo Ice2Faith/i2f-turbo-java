@@ -32,7 +32,7 @@ TERM_BLOCK_IF=[#]if
 TERM_BLOCK_HEAD=[#][a-zA-Z0-9_\\.]+
 TERM_IDENTIFIER=[a-zA-Z0-9_\\.]+
 TERM_WHITESPACE=[ \t\n\r]+
-TERM_TEXT=.+?
+TERM_TEXT=.
 
 %%
 <YYINITIAL> {
@@ -57,4 +57,4 @@ TERM_TEXT=.+?
 
 }
 
-[^] { return BAD_CHARACTER; }
+[^] { return TERM_TEXT; }

@@ -5,7 +5,6 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes.*;
 import static i2f.turbo.idea.plugin.funvi.lang.parser.FunviParserUtil.*;
-
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;

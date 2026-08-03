@@ -45,7 +45,7 @@
     OP_DOLLAR= '$';
     OP_EXCLAIM= '!';
     OP_COLON= ':';
-    TERM_TEXT="regexp:.+?";
+    TERM_TEXT="regexp:.";
   ]
 }
 

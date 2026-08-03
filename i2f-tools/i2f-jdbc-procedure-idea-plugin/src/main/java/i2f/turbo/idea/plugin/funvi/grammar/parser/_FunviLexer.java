@@ -6,16 +6,15 @@ package i2f.turbo.idea.plugin.funvi.grammar.parser;
 import com.intellij.lexer.FlexLexer;
 import com.intellij.psi.tree.IElementType;
 
-import static com.intellij.psi.TokenType.BAD_CHARACTER;
 import static com.intellij.psi.TokenType.WHITE_SPACE;
 import static i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes.*;
 
 
 public class _FunviLexer implements FlexLexer {
 
-  /**
-   * This character denotes the end of file
-   */
+    /**
+     * This character denotes the end of file
+     */
   public static final int YYEOF = -1;
 
   /** initial size of the lookahead buffer */
@@ -43,14 +42,14 @@ public class _FunviLexer implements FlexLexer {
           "\1\0\25\u0100\1\u0200\11\u0100\1\u0300\17\u0100\1\u0400\247\u0100" +
                   "\10\u0500\u1020\u0100";
 
-  private static int[] zzUnpackcmap_top() {
-    int[] result = new int[4352];
+    private static int[] zzUnpackcmap_top() {
+        int[] result = new int[4352];
     int offset = 0;
     offset = zzUnpackcmap_top(ZZ_CMAP_TOP_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpackcmap_top(String packed, int offset, int[] result) {
+    private static int zzUnpackcmap_top(String packed, int offset, int[] result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -69,23 +68,22 @@ public class _FunviLexer implements FlexLexer {
   private static final int[] ZZ_CMAP_BLOCKS = zzUnpackcmap_blocks();
 
   private static final String ZZ_CMAP_BLOCKS_PACKED_0 =
-          "\11\0\1\1\4\2\22\0\1\1\1\3\1\0\1\4" +
-                  "\1\5\3\0\1\6\1\7\2\0\1\10\1\0\1\11" +
-                  "\1\0\12\11\1\12\6\0\32\11\1\0\1\13\2\0" +
-                  "\1\11\1\0\4\11\1\14\1\15\2\11\1\16\2\11" +
-                  "\1\17\6\11\1\20\7\11\1\21\1\22\1\23\7\0" +
-                  "\1\2\32\0\1\1\u01df\0\1\1\177\0\13\1\35\0" +
-                  "\2\2\5\0\1\1\57\0\1\1\240\0\1\1\377\0" +
-                  "\u0100\24";
+          "\11\0\5\1\22\0\1\1\1\2\1\0\1\3\1\4" +
+                  "\3\0\1\5\1\6\2\0\1\7\1\0\1\10\1\0" +
+                  "\12\10\1\11\6\0\32\10\1\0\1\12\2\0\1\10" +
+                  "\1\0\4\10\1\13\1\14\2\10\1\15\2\10\1\16" +
+                  "\6\10\1\17\7\10\1\20\1\21\1\22\7\0\1\1" +
+                  "\32\0\1\1\u01df\0\1\1\177\0\13\1\35\0\2\1" +
+                  "\5\0\1\1\57\0\1\1\240\0\1\1\u01ff\0";
 
-  private static int[] zzUnpackcmap_blocks() {
-    int[] result = new int[1536];
+    private static int[] zzUnpackcmap_blocks() {
+        int[] result = new int[1536];
     int offset = 0;
     offset = zzUnpackcmap_blocks(ZZ_CMAP_BLOCKS_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpackcmap_blocks(String packed, int offset, int[] result) {
+    private static int zzUnpackcmap_blocks(String packed, int offset, int[] result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -103,19 +101,18 @@ public class _FunviLexer implements FlexLexer {
   private static final int[] ZZ_ACTION = zzUnpackAction();
 
   private static final String ZZ_ACTION_PACKED_0 =
-          "\2\1\2\2\1\3\1\4\1\5\1\6\1\7\1\10" +
-                  "\1\11\1\12\1\1\1\13\1\1\1\14\3\15\1\1" +
-                  "\1\15\1\16\1\0\1\1\1\17\1\15\1\0\2\17" +
-                  "\1\20\1\17";
+          "\1\0\1\1\1\2\1\3\1\4\1\5\1\6\1\7" +
+                  "\1\10\1\11\1\12\1\1\1\0\1\13\3\14\1\0" +
+                  "\1\14\1\15\1\0\1\16\1\14\1\16\1\17";
 
-  private static int[] zzUnpackAction() {
-    int[] result = new int[31];
+    private static int[] zzUnpackAction() {
+        int[] result = new int[25];
     int offset = 0;
     offset = zzUnpackAction(ZZ_ACTION_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpackAction(String packed, int offset, int[] result) {
+    private static int zzUnpackAction(String packed, int offset, int[] result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -134,19 +131,19 @@ public class _FunviLexer implements FlexLexer {
   private static final int[] ZZ_ROWMAP = zzUnpackRowMap();
 
   private static final String ZZ_ROWMAP_PACKED_0 =
-          "\0\0\0\25\0\52\0\77\0\25\0\124\0\151\0\25" +
-                  "\0\25\0\25\0\176\0\25\0\151\0\223\0\250\0\25" +
-                  "\0\275\0\322\0\347\0\374\0\u0111\0\275\0\u0126\0\u013b" +
-                  "\0\25\0\u0150\0\u0165\0\223\0\374\0\275\0\u0126";
+          "\0\0\0\23\0\46\0\23\0\71\0\114\0\23\0\23" +
+                  "\0\23\0\137\0\23\0\114\0\162\0\23\0\205\0\230" +
+                  "\0\253\0\276\0\321\0\205\0\344\0\23\0\367\0\276" +
+                  "\0\205";
 
-  private static int[] zzUnpackRowMap() {
-    int[] result = new int[31];
+    private static int[] zzUnpackRowMap() {
+        int[] result = new int[25];
     int offset = 0;
     offset = zzUnpackRowMap(ZZ_ROWMAP_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpackRowMap(String packed, int offset, int[] result) {
+    private static int zzUnpackRowMap(String packed, int offset, int[] result) {
     int i = 0;  /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length() - 1;
@@ -164,31 +161,24 @@ public class _FunviLexer implements FlexLexer {
 
   private static final String ZZ_TRANS_PACKED_0 =
           "\1\2\1\3\1\4\1\5\1\6\1\7\1\10\1\11" +
-                  "\1\12\1\13\1\14\6\13\1\2\1\15\1\2\1\16" +
-                  "\2\2\1\0\21\2\1\0\1\2\1\3\1\4\21\2" +
-                  "\2\0\2\4\22\0\2\2\1\0\1\17\1\20\4\2" +
-                  "\1\21\1\2\1\21\1\22\1\21\1\23\2\21\1\24" +
-                  "\2\2\1\0\2\2\1\0\1\17\15\2\1\24\2\2" +
-                  "\1\0\2\2\1\0\6\2\1\13\1\2\6\13\3\2" +
-                  "\26\0\2\2\1\0\16\2\1\24\2\2\1\0\2\2" +
-                  "\1\0\6\2\1\21\1\2\6\21\3\2\1\0\2\2" +
-                  "\1\0\6\2\1\21\1\2\4\21\1\25\1\21\3\2" +
-                  "\1\0\2\2\1\0\6\2\1\21\1\2\2\21\1\26" +
-                  "\3\21\3\2\1\0\2\24\1\27\10\24\1\30\7\24" +
-                  "\1\31\1\27\2\2\1\0\6\2\1\21\1\2\5\21" +
-                  "\1\32\3\2\1\0\13\27\1\33\7\27\1\34\1\27" +
-                  "\2\24\1\27\10\24\1\30\7\24\1\35\1\27\2\2" +
-                  "\1\0\6\2\1\21\1\2\1\21\1\36\4\21\3\2" +
-                  "\1\0\13\27\1\33\7\27\1\37\1\27";
+                  "\1\12\1\13\6\12\1\2\1\14\1\2\24\0\1\3" +
+                  "\23\0\1\15\1\16\4\0\1\17\1\0\1\17\1\20" +
+                  "\1\17\1\21\2\17\1\22\4\0\1\15\15\0\1\22" +
+                  "\12\0\1\12\1\0\6\12\23\0\1\22\12\0\1\17" +
+                  "\1\0\6\17\13\0\1\17\1\0\4\17\1\23\1\17" +
+                  "\13\0\1\17\1\0\2\17\1\24\3\17\3\0\12\22" +
+                  "\1\25\7\22\1\26\10\0\1\17\1\0\5\17\1\27" +
+                  "\3\0\12\22\1\25\7\22\1\30\10\0\1\17\1\0" +
+                  "\1\17\1\31\4\17\3\0";
 
-  private static int[] zzUnpacktrans() {
-    int[] result = new int[378];
+    private static int[] zzUnpacktrans() {
+        int[] result = new int[266];
     int offset = 0;
     offset = zzUnpacktrans(ZZ_TRANS_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpacktrans(String packed, int offset, int[] result) {
+    private static int zzUnpacktrans(String packed, int offset, int[] result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -220,16 +210,18 @@ public class _FunviLexer implements FlexLexer {
   private static final int[] ZZ_ATTRIBUTE = zzUnpackAttribute();
 
   private static final String ZZ_ATTRIBUTE_PACKED_0 =
-          "\15\1\1\11\10\1\1\0\3\1\1\0\1\11\3\1";
+          "\1\0\1\11\1\1\1\11\2\1\3\11\1\1\1\11" +
+                  "\1\1\1\0\1\11\3\1\1\0\2\1\1\0\1\11" +
+                  "\3\1";
 
-  private static int[] zzUnpackAttribute() {
-    int[] result = new int[31];
+    private static int[] zzUnpackAttribute() {
+        int[] result = new int[25];
     int offset = 0;
     offset = zzUnpackAttribute(ZZ_ATTRIBUTE_PACKED_0, offset, result);
     return result;
-  }
+    }
 
-  private static int zzUnpackAttribute(String packed, int offset, int[] result) {
+    private static int zzUnpackAttribute(String packed, int offset, int[] result) {
     int i = 0;       /* index in packed string  */
     int j = offset;  /* index in unpacked array */
     int l = packed.length();
@@ -399,7 +391,7 @@ public class _FunviLexer implements FlexLexer {
    * Returns the length of the matched text region.
    */
   public final int yylength() {
-    return zzMarkedPos -zzStartRead;
+      return zzMarkedPos -zzStartRead;
   }
 
 
@@ -438,7 +430,7 @@ public class _FunviLexer implements FlexLexer {
    *                This number must not be greater than yylength()!
    */
   public void yypushback(int number) {
-    if (number > yylength() )
+      if (number > yylength() )
       zzScanError(ZZ_PUSHBACK_2BIG);
 
     zzMarkedPos -= number;
@@ -463,9 +455,9 @@ public class _FunviLexer implements FlexLexer {
     int zzEndReadL = zzEndRead;
     CharSequence zzBufferL = zzBuffer;
 
-    int[] zzTransL = ZZ_TRANS;
-    int[] zzRowMapL = ZZ_ROWMAP;
-    int[] zzAttrL = ZZ_ATTRIBUTE;
+      int[] zzTransL = ZZ_TRANS;
+      int[] zzRowMapL = ZZ_ROWMAP;
+      int[] zzAttrL = ZZ_ATTRIBUTE;
 
     while (true) {
       zzMarkedPosL = zzMarkedPos;
@@ -478,7 +470,7 @@ public class _FunviLexer implements FlexLexer {
 
       // set up zzAction for empty match case:
       int zzAttributes = zzAttrL[zzState];
-      if ((zzAttributes & 1) == 1 ) {
+        if ((zzAttributes & 1) == 1 ) {
         zzAction = zzState;
       }
 
@@ -494,14 +486,14 @@ public class _FunviLexer implements FlexLexer {
             break zzForAction;
           } else {
             // store back cached positions
-            zzCurrentPos = zzCurrentPosL;
-            zzMarkedPos = zzMarkedPosL;
+              zzCurrentPos = zzCurrentPosL;
+              zzMarkedPos = zzMarkedPosL;
             boolean eof = zzRefill();
             // get translated positions and possibly new buffer
-            zzCurrentPosL = zzCurrentPos;
-            zzMarkedPosL = zzMarkedPos;
-            zzBufferL = zzBuffer;
-            zzEndReadL = zzEndRead;
+              zzCurrentPosL = zzCurrentPos;
+              zzMarkedPosL = zzMarkedPos;
+              zzBufferL = zzBuffer;
+              zzEndReadL = zzEndRead;
             if (eof) {
               zzInput = YYEOF;
               break zzForAction;
@@ -510,15 +502,15 @@ public class _FunviLexer implements FlexLexer {
               zzCurrentPosL += Character.charCount(zzInput);
             }
           }
-          int zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput) ];
+            int zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput) ];
           if (zzNext == -1) break zzForAction;
           zzState = zzNext;
 
           zzAttributes = zzAttrL[zzState];
-          if ((zzAttributes & 1) == 1 ) {
+            if ((zzAttributes & 1) == 1 ) {
             zzAction = zzState;
             zzMarkedPosL = zzCurrentPosL;
-            if ((zzAttributes & 8) == 8) break zzForAction;
+                if ((zzAttributes & 8) == 8) break zzForAction;
           }
 
         }
@@ -532,101 +524,95 @@ public class _FunviLexer implements FlexLexer {
         return null;
       } else {
         switch (zzAction < 0 ? zzAction : ZZ_ACTION[zzAction]) {
-          case 1: {
-            return TERM_TEXT;
-          }
+            case 1: {
+                return TERM_TEXT;
+            }
           // fall through
-          case 17:
-            break;
-          case 2: {
-            return WHITE_SPACE;
-          }
+            case 16:
+                break;
+            case 2: {
+                return WHITE_SPACE;
+            }
           // fall through
-          case 18:
-            break;
-          case 3: {
-            return OP_EXCLAIM;
-          }
+            case 17:
+                break;
+            case 3: {
+                return OP_EXCLAIM;
+            }
           // fall through
-          case 19:
-            break;
-          case 4: {
-            return OP_SHARP;
-          }
+            case 18:
+                break;
+            case 4: {
+                return OP_SHARP;
+            }
           // fall through
-          case 20:
-            break;
-          case 5: {
-            return OP_DOLLAR;
-          }
+            case 19:
+                break;
+            case 5: {
+                return OP_DOLLAR;
+            }
           // fall through
-          case 21:
-            break;
-          case 6: {
-            return OP_PAREN_L;
-          }
+            case 20:
+                break;
+            case 6: {
+                return OP_PAREN_L;
+            }
           // fall through
-          case 22:
-            break;
-          case 7: {
-            return OP_PAREN_R;
-          }
+            case 21:
+                break;
+            case 7: {
+                return OP_PAREN_R;
+            }
           // fall through
-          case 23:
-            break;
-          case 8: {
-            return OP_COMMA;
-          }
+            case 22:
+                break;
+            case 8: {
+                return OP_COMMA;
+            }
           // fall through
-          case 24:
-            break;
-          case 9: {
-            return TERM_IDENTIFIER;
-          }
+            case 23:
+                break;
+            case 9: {
+                return TERM_IDENTIFIER;
+            }
           // fall through
-          case 25:
-            break;
-          case 10: {
-            return OP_COLON;
-          }
+            case 24:
+                break;
+            case 10: {
+                return OP_COLON;
+            }
           // fall through
-          case 26:
-            break;
-          case 11: {
-            return BAD_CHARACTER;
-          }
+            case 25:
+                break;
+            case 11: {
+                return TERM_BLOCK_END;
+            }
           // fall through
-          case 27:
-            break;
-          case 12: {
-            return TERM_BLOCK_END;
-          }
+            case 26:
+                break;
+            case 12: {
+                return TERM_BLOCK_HEAD;
+            }
           // fall through
-          case 28:
-            break;
-          case 13: {
-            return TERM_BLOCK_HEAD;
-          }
+            case 27:
+                break;
+            case 13: {
+                return TERM_BLOCK_IF;
+            }
           // fall through
-          case 29:
-            break;
-          case 14: {
-            return TERM_BLOCK_IF;
-          }
+            case 28:
+                break;
+            case 14: {
+                return TERM_REF_VALUE;
+            }
           // fall through
-          case 30:
-            break;
-          case 15: {
-            return TERM_REF_VALUE;
-          }
+            case 29:
+                break;
+            case 15: {
+                return TERM_BLOCK_ELSE;
+            }
           // fall through
-          case 31:
-            break;
-          case 16: {
-            return TERM_BLOCK_ELSE;
-          }
-          // fall through
-          case 32: break;
+            case 30: break;
           default:
             zzScanError(ZZ_NO_MATCH);
           }
