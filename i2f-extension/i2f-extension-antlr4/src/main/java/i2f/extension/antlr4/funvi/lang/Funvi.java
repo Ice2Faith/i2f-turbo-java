@@ -3,7 +3,7 @@ package i2f.extension.antlr4.funvi.lang;
 import i2f.extension.antlr4.funvi.grammar.FunviLexer;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
 import i2f.extension.antlr4.funvi.lang.errors.FunviErrorStrategy;
-import i2f.extension.antlr4.funvi.lang.impl.FunviVisitorImpl;
+import i2f.extension.antlr4.funvi.lang.impl.DefaultFunviVisitor;
 import i2f.extension.antlr4.funvi.lang.listener.DefaultAntlrErrorListener;
 import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
 import i2f.io.stream.StreamUtil;
@@ -75,7 +75,7 @@ public class Funvi {
     public static Object render(FunviParser.RootContext tree, Object context,
                                 String scriptFileName, int scriptLineOffset,
                                 FunviResolver resolver) {
-        FunviVisitor<Object> visitor = new FunviVisitorImpl(context, scriptFileName, scriptLineOffset, resolver);
+        FunviVisitor<Object> visitor = new DefaultFunviVisitor(context, scriptFileName, scriptLineOffset, resolver);
         Object ret = visitor.visit(tree);
         return ret;
     }

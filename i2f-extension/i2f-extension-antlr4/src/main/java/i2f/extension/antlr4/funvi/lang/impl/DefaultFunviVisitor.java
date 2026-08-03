@@ -28,24 +28,24 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class FunviVisitorImpl implements FunviVisitor<Object> {
+public class DefaultFunviVisitor implements FunviVisitor<Object> {
     protected Object context = new HashMap<>();
     protected String scriptFileName;
     protected int scriptLineOffset;
     protected FunviResolver resolver = new DefaultFunviResolver();
 
-    public FunviVisitorImpl(Object context) {
+    public DefaultFunviVisitor(Object context) {
         this.context = context;
     }
 
-    public FunviVisitorImpl(Object context, FunviResolver resolver) {
+    public DefaultFunviVisitor(Object context, FunviResolver resolver) {
         this.context = context;
         if (resolver != null) {
             this.resolver = resolver;
         }
     }
 
-    public FunviVisitorImpl(Object context, String scriptFileName, FunviResolver resolver) {
+    public DefaultFunviVisitor(Object context, String scriptFileName, FunviResolver resolver) {
         this.context = context;
         this.scriptFileName = scriptFileName;
         if (resolver != null) {
@@ -53,7 +53,7 @@ public class FunviVisitorImpl implements FunviVisitor<Object> {
         }
     }
 
-    public FunviVisitorImpl(Object context, String scriptFileName, int scriptLineOffset, FunviResolver resolver) {
+    public DefaultFunviVisitor(Object context, String scriptFileName, int scriptLineOffset, FunviResolver resolver) {
         this.context = context;
         this.scriptFileName = scriptFileName;
         this.scriptLineOffset = scriptLineOffset;
@@ -176,7 +176,7 @@ public class FunviVisitorImpl implements FunviVisitor<Object> {
             ret = resolver.block(blockName == null ? null : String.valueOf(blockName),
                     parameterList,
                     bodyCtx,
-                    context, this);
+                     this);
 
             return ret;
         } catch (Throwable e) {
@@ -223,7 +223,7 @@ public class FunviVisitorImpl implements FunviVisitor<Object> {
                 if (parameterCtx != null) {
                     List<ParameterValue> elseParameterList = (List<ParameterValue>) visitParameters(parameterCtx);
                     ParameterValue elseParameter = elseParameterList.get(0);
-                    Object elseVal = resolver.parameter(elseParameter.getExpression(), context, this);
+                    Object elseVal = resolver.parameter(elseParameter.getExpression(),  this);
                     cond = resolver.toBoolean(elseVal);
                 } else {
                     cond = true;
@@ -396,7 +396,7 @@ public class FunviVisitorImpl implements FunviVisitor<Object> {
                 TerminalNode nextCtx = (TerminalNode) next;
                 Object nextValue = visitTerminal(nextCtx);
                 ret = resolver.value(nextValue == null ? null : String.valueOf(nextValue),
-                        context, this);
+                         this);
             }
             return ret;
         } catch (Throwable e) {

@@ -1,6 +1,9 @@
 package i2f.extension.antlr4.script.funic.lang.resolver.impl;
 
 import i2f.convert.obj.ObjectConvertor;
+import i2f.extension.antlr4.funvi.lang.Funvi;
+import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
+import i2f.extension.antlr4.funvi.lang.resolver.impl.DefaultFunviResolver;
 import i2f.extension.antlr4.script.funic.grammar.FunicParser;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.context.FunicFunctionCallContext;
@@ -57,6 +60,7 @@ public class DefaultFunicResolver implements FunicResolver {
     protected AtomicBoolean debug = new AtomicBoolean(false);
     protected DateTimeFormatter logDateFmt = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss.SSS");
 
+    protected AtomicBoolean enableFunviRender = new AtomicBoolean(false);
 
     {
         initPrefixOperatorFunctions();
@@ -686,6 +690,11 @@ public class DefaultFunicResolver implements FunicResolver {
     public String renderString(String text, DefaultFunicVisitor visitor) {
         if (text == null) {
             return text;
+        }
+        if (enableFunviRender.get()) {
+            FunviResolver resolver = new DefaultFunviResolver(this);
+            Object ret = Funvi.render(text, visitor.getContext(), resolver);
+            return ret == null ? null : String.valueOf(ret);
         }
         return RegexUtil.regexFindAndReplace(text, "\\$\\!?\\{[^\\}]+\\}", s -> {
             boolean emptyFlag = false;

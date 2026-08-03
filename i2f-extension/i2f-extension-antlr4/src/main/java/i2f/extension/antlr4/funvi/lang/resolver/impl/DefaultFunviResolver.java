@@ -1,19 +1,22 @@
 package i2f.extension.antlr4.funvi.lang.resolver.impl;
 
-import i2f.extension.antlr4.funvi.grammar.FunviParser;
-import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
-import i2f.extension.antlr4.funvi.lang.handler.FunviBlockHandler;
-import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
-import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
-import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
-import i2f.reflect.vistor.Visitor;
 import i2f.convert.obj.ObjectConvertor;
-import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import i2f.extension.antlr4.funvi.lang.debugger.FunviDebugBridgeReporter;
 import i2f.extension.antlr4.funvi.lang.exception.impl.FunviBreakException;
 import i2f.extension.antlr4.funvi.lang.exception.impl.FunviContinueException;
 import i2f.extension.antlr4.funvi.lang.exception.impl.FunviEvaluateException;
+import i2f.extension.antlr4.funvi.lang.handler.FunviBlockHandler;
+import i2f.extension.antlr4.funvi.lang.impl.DefaultFunviVisitor;
+import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
 import i2f.extension.antlr4.funvi.lang.value.ParameterValue;
+import i2f.extension.antlr4.script.funic.grammar.FunicParser;
+import i2f.extension.antlr4.script.funic.lang.Funic;
+import i2f.extension.antlr4.script.funic.lang.impl.DefaultFunicVisitor;
+import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
+import i2f.extension.antlr4.script.funic.lang.resolver.impl.DefaultFunicResolver;
+import i2f.extension.antlr4.script.funic.lang.value.FunicValue;
+import i2f.reflect.vistor.Visitor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -41,12 +44,16 @@ public class DefaultFunviResolver implements FunviResolver {
     public static final DateTimeFormatter LOG_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM-dd HH:mm:ss");
     protected final AtomicBoolean debug = new AtomicBoolean(true);
 
-    protected FunicResolver funicResolver=new DefaultFunicResolver();
+    protected FunicResolver funicResolver = new DefaultFunicResolver();
 
     protected final ConcurrentHashMap<String, FunviBlockHandler> blockHandlers = new ConcurrentHashMap<>();
 
     {
         initBlockHandlers();
+    }
+
+    public DefaultFunviResolver(FunicResolver funicResolver) {
+        this.funicResolver = funicResolver;
     }
 
     @Override
@@ -91,45 +98,45 @@ public class DefaultFunviResolver implements FunviResolver {
     }
 
     protected void initBlockHandlers() {
-        blockHandlers.put("sharp", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("sharp", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx != null) {
                 throw new FunviEvaluateException("sharp block not require body!");
             }
-            int count=1;
+            int count = 1;
 
-            if(!parameterList.isEmpty()) {
+            if (!parameterList.isEmpty()) {
                 ParameterValue parameter = parameterList.get(0);
-                Object cnt = parameter(parameter.getExpression(), context, visitor);
-                count=(Integer) ObjectConvertor.tryConvertAsType(cnt,Integer.class);
+                Object cnt = parameter(parameter.getExpression(), visitor);
+                count = (Integer) ObjectConvertor.tryConvertAsType(cnt, Integer.class);
             }
 
-            String ret="";
+            String ret = "";
             for (int i = 0; i < count; i++) {
-                ret+="#";
+                ret += "#";
             }
             return ret;
         });
 
-        blockHandlers.put("dollar", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("dollar", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx != null) {
                 throw new FunviEvaluateException("dollar block not require body!");
             }
-            int count=1;
+            int count = 1;
 
-            if(!parameterList.isEmpty()) {
+            if (!parameterList.isEmpty()) {
                 ParameterValue parameter = parameterList.get(0);
-                Object cnt = parameter(parameter.getExpression(), context, visitor);
-                count=(Integer) ObjectConvertor.tryConvertAsType(cnt,Integer.class);
+                Object cnt = parameter(parameter.getExpression(), visitor);
+                count = (Integer) ObjectConvertor.tryConvertAsType(cnt, Integer.class);
             }
 
-            String ret="";
+            String ret = "";
             for (int i = 0; i < count; i++) {
-                ret+="$";
+                ret += "$";
             }
             return ret;
         });
 
-        blockHandlers.put("foreach", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("foreach", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx == null) {
                 throw new FunviEvaluateException("foreach block require body!");
             }
@@ -138,17 +145,17 @@ public class DefaultFunviResolver implements FunviResolver {
                 ParameterValue iterNameParameter = parameterList.get(0);
                 ParameterValue collectionParameter = parameterList.get(1);
 
-                Object iterName = parameter(iterNameParameter.getExpression(), context, visitor);
-                Object collection = parameter(collectionParameter.getExpression(), context, visitor);
+                Object iterName = parameter(iterNameParameter.getExpression(), visitor);
+                Object collection = parameter(collectionParameter.getExpression(), visitor);
 
                 String name = iterName == null ? "item" : String.valueOf(iterName);
                 if (collection != null) {
-                    Object bakItem = valueGet(context, name);
+                    Object bakItem = valueGet(visitor.getContext(), name);
                     try {
                         if (collection instanceof Iterable) {
                             Iterable<?> iterable = (Iterable<?>) collection;
                             for (Object item : iterable) {
-                                valueSet(context, name, item);
+                                valueSet(visitor.getContext(), name, item);
                                 try {
                                     Object nextValue = visitor.visitBlockBody(bodyCtx);
                                     ret = concat(ret, nextValue);
@@ -160,7 +167,7 @@ public class DefaultFunviResolver implements FunviResolver {
                             Iterator<?> iterator = (Iterator<?>) collection;
                             while (iterator.hasNext()) {
                                 Object item = iterator.next();
-                                valueSet(context, name, item);
+                                valueSet(visitor.getContext(), name, item);
                                 try {
                                     Object nextValue = visitor.visitBlockBody(bodyCtx);
                                     ret = concat(ret, nextValue);
@@ -173,7 +180,7 @@ public class DefaultFunviResolver implements FunviResolver {
                             int i = 0;
                             while (i < len) {
                                 Object item = Array.get(collection, i++);
-                                valueSet(context, name, item);
+                                valueSet(visitor.getContext(), name, item);
                                 try {
                                     Object nextValue = visitor.visitBlockBody(bodyCtx);
                                     ret = concat(ret, nextValue);
@@ -185,7 +192,7 @@ public class DefaultFunviResolver implements FunviResolver {
                             throw new FunviEvaluateException("foreach block require iterable object, but found type: " + collection.getClass());
                         }
                     } finally {
-                        valueSet(context, name, bakItem);
+                        valueSet(visitor.getContext(), name, bakItem);
                     }
                 }
             } catch (FunviBreakException e) {
@@ -194,60 +201,60 @@ public class DefaultFunviResolver implements FunviResolver {
             return ret;
         });
 
-        blockHandlers.put("for", (parameterList, bodyCtx, context, visitor) ->{
+        blockHandlers.put("for", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx == null) {
                 throw new FunviEvaluateException("for block require body!");
             }
             ParameterValue beginParameter = parameterList.get(0);
             ParameterValue condParameter = parameterList.get(1);
             ParameterValue incrParameter = parameterList.get(2);
-            Object begin = parameter(beginParameter.getExpression(), context, visitor);
+            Object begin = parameter(beginParameter.getExpression(), visitor);
 
-            Object ret=null;
-            while(true){
-                Object cond = parameter(condParameter.getExpression(), context, visitor);
-                if(!toBoolean(cond)){
+            Object ret = null;
+            while (true) {
+                Object cond = parameter(condParameter.getExpression(), visitor);
+                if (!toBoolean(cond)) {
                     break;
                 }
                 Object next = visitor.visitBlockBody(bodyCtx);
-                ret=concat(ret,next);
+                ret = concat(ret, next);
 
-                Object incr=parameter(incrParameter.getExpression(), context,visitor);
+                Object incr = parameter(incrParameter.getExpression(), visitor);
             }
 
             return ret;
         });
 
-        blockHandlers.put("while", (parameterList, bodyCtx, context, visitor) ->{
+        blockHandlers.put("while", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx == null) {
                 throw new FunviEvaluateException("while block require body!");
             }
 
             ParameterValue condParameter = parameterList.get(0);
 
-            Object ret=null;
-            while(true){
-                Object cond = parameter(condParameter.getExpression(), context, visitor);
-                if(!toBoolean(cond)){
+            Object ret = null;
+            while (true) {
+                Object cond = parameter(condParameter.getExpression(), visitor);
+                if (!toBoolean(cond)) {
                     break;
                 }
                 Object next = visitor.visitBlockBody(bodyCtx);
-                ret=concat(ret,next);
+                ret = concat(ret, next);
 
             }
 
             return ret;
         });
 
-        blockHandlers.put("bind", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("bind", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx != null) {
                 throw new FunviEvaluateException("set block not require body!");
             }
             ParameterValue nameObjParameter = parameterList.get(0);
             ParameterValue valueParameter = parameterList.get(1);
-            Object nameObj = parameter(nameObjParameter.getExpression(), context, visitor);
-            Object value = parameter(valueParameter.getExpression(), context, visitor);
-            valueSet(context, nameObj == null ? null : String.valueOf(nameObj), value);
+            Object nameObj = parameter(nameObjParameter.getExpression(), visitor);
+            Object value = parameter(valueParameter.getExpression(), visitor);
+            valueSet(visitor.getContext(), nameObj == null ? null : String.valueOf(nameObj), value);
             return null;
         });
 
@@ -261,26 +268,26 @@ public class DefaultFunviResolver implements FunviResolver {
          *
          * #end
          */
-        blockHandlers.put("trim", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("trim", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx == null) {
                 throw new FunviEvaluateException("trim block require body!");
             }
-            ParameterValue prefixParameter=null;
-            ParameterValue suffixParameter=null;
-            ParameterValue prefixOverridesParameter=null;
-            ParameterValue suffixOverridesParameter=null;
+            ParameterValue prefixParameter = null;
+            ParameterValue suffixParameter = null;
+            ParameterValue prefixOverridesParameter = null;
+            ParameterValue suffixOverridesParameter = null;
             for (ParameterValue value : parameterList) {
-                if("prefix".equals(value.getName())){
-                    prefixParameter=value;
+                if ("prefix".equals(value.getName())) {
+                    prefixParameter = value;
                 }
-                if("suffix".equals(value.getName())){
-                    suffixParameter=value;
+                if ("suffix".equals(value.getName())) {
+                    suffixParameter = value;
                 }
-                if("prefixOverrides".equals(value.getName())){
-                    prefixOverridesParameter=value;
+                if ("prefixOverrides".equals(value.getName())) {
+                    prefixOverridesParameter = value;
                 }
-                if("suffixOverrides".equals(value.getName())){
-                    suffixOverridesParameter=value;
+                if ("suffixOverrides".equals(value.getName())) {
+                    suffixOverridesParameter = value;
                 }
             }
 
@@ -289,31 +296,31 @@ public class DefaultFunviResolver implements FunviResolver {
                 String text = String.valueOf(ret);
                 String trim = text.trim();
 
-                if(prefixOverridesParameter!=null){
-                    Object prefixOverrides = parameter(prefixOverridesParameter.getExpression(), context, visitor);
-                    if(prefixOverrides!=null) {
-                        trim = trim.replaceFirst("(?i)^" +prefixOverrides,"");
+                if (prefixOverridesParameter != null) {
+                    Object prefixOverrides = parameter(prefixOverridesParameter.getExpression(), visitor);
+                    if (prefixOverrides != null) {
+                        trim = trim.replaceFirst("(?i)^" + prefixOverrides, "");
                     }
                 }
 
-                if(suffixOverridesParameter!=null){
-                    Object suffixOverrides = parameter(suffixOverridesParameter.getExpression(), context, visitor);
-                    if(suffixOverrides!=null) {
-                        trim = trim.replaceFirst("(?i)" +suffixOverrides+"$","");
+                if (suffixOverridesParameter != null) {
+                    Object suffixOverrides = parameter(suffixOverridesParameter.getExpression(), visitor);
+                    if (suffixOverrides != null) {
+                        trim = trim.replaceFirst("(?i)" + suffixOverrides + "$", "");
                     }
                 }
 
-                if(!trim.isEmpty()){
-                    if(prefixParameter!=null){
-                        Object prefix = parameter(prefixParameter.getExpression(), context, visitor);
-                        if(prefix!=null){
-                            trim=prefix+trim;
+                if (!trim.isEmpty()) {
+                    if (prefixParameter != null) {
+                        Object prefix = parameter(prefixParameter.getExpression(), visitor);
+                        if (prefix != null) {
+                            trim = prefix + trim;
                         }
                     }
-                    if(suffixParameter!=null){
-                        Object suffix = parameter(suffixParameter.getExpression(), context, visitor);
-                        if(suffix!=null){
-                            trim=trim+suffix;
+                    if (suffixParameter != null) {
+                        Object suffix = parameter(suffixParameter.getExpression(), visitor);
+                        if (suffix != null) {
+                            trim = trim + suffix;
                         }
                     }
                 }
@@ -322,14 +329,14 @@ public class DefaultFunviResolver implements FunviResolver {
             return null;
         });
 
-        blockHandlers.put("break", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("break", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx != null) {
                 throw new FunviEvaluateException("break block not require body!");
             }
             throw new FunviBreakException();
         });
 
-        blockHandlers.put("continue", (parameterList, bodyCtx, context, visitor) -> {
+        blockHandlers.put("continue", (parameterList, bodyCtx, visitor) -> {
             if (bodyCtx != null) {
                 throw new FunviEvaluateException("continue block not require body!");
             }
@@ -339,30 +346,30 @@ public class DefaultFunviResolver implements FunviResolver {
     }
 
     @Override
-    public Object block(String blockName, List<ParameterValue> parameterList, FunviParser.BlockBodyContext bodyCtx, Object context, FunviVisitor<Object> visitor) {
+    public Object block(String blockName, List<ParameterValue> parameterList, FunviParser.BlockBodyContext bodyCtx, DefaultFunviVisitor visitor) {
         FunviBlockHandler handler = blockHandlers.get(blockName);
         if (handler != null) {
-            return handler.block(parameterList, bodyCtx, context, visitor);
+            return handler.block(parameterList, bodyCtx, visitor);
         }
         throw new FunviEvaluateException("un-support block type [" + blockName + "]");
     }
 
     @Override
-    public Object parameter(String expression, Object context, FunviVisitor<Object> visitor) {
+    public Object parameter(String expression, DefaultFunviVisitor visitor) {
         if (expression.startsWith("$")
                 || expression.startsWith("#")) {
-            return value(true, expression, context, visitor);
+            return value(true, expression, visitor);
         } else {
-            return eval(expression, context, visitor);
+            return eval(expression, visitor);
         }
     }
 
     @Override
-    public Object value(String expression, Object context, FunviVisitor<Object> visitor) {
-        return value(false, expression, context, visitor);
+    public Object value(String expression, DefaultFunviVisitor visitor) {
+        return value(false, expression, visitor);
     }
 
-    public Object value(boolean isParameter, String expression, Object context, FunviVisitor<Object> visitor) {
+    public Object value(boolean isParameter, String expression, DefaultFunviVisitor visitor) {
         boolean isDollar = false;
         boolean isNull2Empty = false;
 
@@ -376,7 +383,7 @@ public class DefaultFunviResolver implements FunviResolver {
             isNull2Empty = true;
         }
 
-        Object val = eval(expr, context, visitor);
+        Object val = eval(expr, visitor);
 
         if (isNull2Empty && val == null) {
             val = "";
@@ -386,10 +393,10 @@ public class DefaultFunviResolver implements FunviResolver {
             return val;
         }
 
-        return postProcessValue(val, isDollar, expression, context, visitor);
+        return postProcessValue(val, isDollar, expression, visitor);
     }
 
-    protected Object postProcessValue(Object ret, boolean isDollar, String expression, Object context, FunviVisitor<Object> visitor) {
+    protected Object postProcessValue(Object ret, boolean isDollar, String expression, DefaultFunviVisitor visitor) {
         return ret;
     }
 
@@ -442,7 +449,7 @@ public class DefaultFunviResolver implements FunviResolver {
         return Visitor.visit(key, context).get();
     }
 
-    public Object eval(String expression, Object context, FunviVisitor<Object> visitor) {
+    public Object eval(String expression, DefaultFunviVisitor visitor) {
         if (expression == null) {
             return null;
         }
@@ -484,7 +491,7 @@ public class DefaultFunviResolver implements FunviResolver {
                 return expression;
             }
 
-            Object ret = Funic.script(expression, context,funicResolver);
+            Object ret = Funic.script(expression, visitor.getContext(), funicResolver);
             return ret;
         }
     }
