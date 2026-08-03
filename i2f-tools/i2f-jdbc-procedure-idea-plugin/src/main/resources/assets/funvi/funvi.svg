@@ -1,0 +1,29 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 定义渐变 -->
+    <defs>
+        <!-- 左侧双竖线及转弯部分的渐变：蓝绿色(#00C9B1) 到 天蓝色(#00B0FF) -->
+        <linearGradient id="leftLineGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00C9B1"/>
+            <stop offset="100%" stop-color="#00B0FF"/>
+        </linearGradient>
+
+        <!-- 右侧括号及中间'f'字母的渐变：天蓝色(#00B0FF) 到 蓝绿色(#00C9B1) -->
+        <linearGradient id="rightGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00B0FF"/>
+            <stop offset="100%" stop-color="#00C9B1"/>
+        </linearGradient>
+    </defs>
+
+
+    <text x="4" y="14" font-size="3.5" fill="url(#leftLineGradient)" font-family="sans-serif">Funic</text>
+
+
+    <path d="M3 13.3 V2.6 H9.3" stroke="url(#leftLineGradient)" stroke-width="1" stroke-linecap="round"/>
+    <path d="M5 10.3 V4.6 H8.3" stroke="url(#leftLineGradient)" stroke-width="1" stroke-linecap="round"/>
+
+    <path d="M4 8 Q6 8.5, 7 8" stroke="url(#rightGradient)" stroke-width="1" stroke-linecap="round"/>
+
+
+    <path d="M13 4 Q14 6, 13 8" stroke="url(#rightGradient)" stroke-width="1" stroke-linecap="round"/>
+    <path d="M11 4 Q10 6, 11 8" stroke="url(#rightGradient)" stroke-width="1" stroke-linecap="round"/>
+</svg>

@@ -249,6 +249,31 @@
 
         <!-- *************************** funic  end *************************** -->
 
+
+        <!-- *************************** funvi  begin *************************** -->
+
+        <!-- 注册文件类型 -->
+        <fileType name="Funvi"
+                  implementationClass="i2f.turbo.idea.plugin.funvi.FunviFileType"
+                  fieldName="INSTANCE"
+                  language="Funvi"
+                  extensions="fvi"/>
+
+        <!-- 注册语言解析器 -->
+        <lang.parserDefinition
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.FunviParserDefinition"/>
+
+        <!-- 定义语法高亮 -->
+        <lang.syntaxHighlighterFactory
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.highlighter.FunviSyntaxHighlighterFactory"/>
+
+        <!-- 定义颜色配置页 -->
+        <colorSettingsPage
+                implementation="i2f.turbo.idea.plugin.funvi.lang.highlighter.FunviColorSettingsPage"/>
+
+        <!-- *************************** funvi  end *************************** -->
     </extensions>
 
 
