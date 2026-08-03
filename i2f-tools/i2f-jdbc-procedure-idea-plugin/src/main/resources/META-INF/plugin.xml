@@ -176,6 +176,10 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.completion.TinyScriptCompletionContributor"/>
 
+        <lang.foldingBuilder
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.folding.TinyScriptFoldingBuilder"/>
+
         <lang.formatter
                 language="TinyScript"
                 implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.formatter.TinyScriptFormattingModelBuilder"/>
@@ -235,6 +239,10 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.funic.lang.completion.FunicCompletionContributor"/>
 
+        <lang.foldingBuilder
+                language="Funic"
+                implementationClass="i2f.turbo.idea.plugin.funic.lang.folding.FunicFoldingBuilder"/>
+
         <lang.formatter
                 language="Funic"
                 implementationClass="i2f.turbo.idea.plugin.funic.lang.formatter.FunicFormattingModelBuilder"/>
@@ -246,6 +254,7 @@
         <!-- 注册位置管理器工厂，实现调试时自动暂停与源码导航 -->
         <debugger.positionManagerFactory
                 implementation="i2f.turbo.idea.plugin.funic.lang.debugger.FunicPositionManagerFactory"/>
+
 
         <!-- *************************** funic  end *************************** -->
 
