@@ -46,6 +46,24 @@ public class FunviFoldingBuilder extends FoldingBuilderEx implements DumbAware {
                 FunviBlockBody block = (FunviBlockBody) child;
 
                 placeholder="...";
+            }else if (child instanceof FunviIfBlock) {
+                FunviIfBlock block = (FunviIfBlock) child;
+
+                PsiElement curr = child.getFirstChild();
+                for (int i = 0; i < 4 && curr != null; i++) {
+                    placeholder += curr.getText();
+                    curr = curr.getNextSibling();
+                }
+                placeholder += "...##";
+            } else if (child instanceof FunviCommonBlock) {
+                FunviCommonBlock block = (FunviCommonBlock) child;
+
+                PsiElement curr = child.getFirstChild();
+                for (int i = 0; i < 4 && curr != null; i++) {
+                    placeholder += curr.getText();
+                    curr = curr.getNextSibling();
+                }
+                placeholder += "...##";
             }
 
             buildFoldRegionsNext(child, list);
@@ -75,6 +93,11 @@ public class FunviFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         IElementType tokenType = child.getElementType();
         if (tokenType.equals(FunviTypes.BLOCK_BODY)) {
             return "...";
+        }else if (tokenType.equals(FunviTypes.IF_BLOCK)) {
+            return "#if...##";
+        } else if (tokenType.equals(FunviTypes.COMMON_BLOCK)) {
+            String text = child.getFirstChildNode().getText();
+            return text + "...##";
         }
         return null;
     }
