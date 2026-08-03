@@ -1,0 +1,115 @@
+// 第七步:定义bnf语法
+// 第八步:右键生成parse code
+// 第九步:右键生成flex文件
+{
+  // 语言解析器,由Grammar-Kit插件根据bnf语法文件自动生成
+  parserClass="i2f.turbo.idea.plugin.funvi.grammar.parser.FunviParser"
+  // 定义辅助类,供 FunviParser 类使用
+  parserUtilClass="i2f.turbo.idea.plugin.funvi.lang.parser.FunviParserUtil"
+
+  // 指定生成的PsiElement子类需要继承的父类
+  extends="i2f.turbo.idea.plugin.funvi.lang.psi.FunviPsiElement"
+
+  // 指定所有生成的PsiElement类的类名前缀
+  psiClassPrefix="Funvi"
+  // 指定所有生成的PsiElement实现类的类名后缀
+  psiImplClassSuffix="Impl"
+  // 指定所有生成的PsiElement类的包位置
+  psiPackage="i2f.turbo.idea.plugin.funvi.grammar.psi.elements"
+  // 指定所有生成的PsiElement实现类的包位置
+  psiImplPackage="i2f.turbo.idea.plugin.funvi.grammar.psi.elements.impl"
+
+  // 指定ElementType所在的类,由Grammar-Kit自动生成
+  elementTypeHolderClass="i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes"
+  // 定义elementType类型,供 FunviTypes 类使用
+  elementTypeClass="i2f.turbo.idea.plugin.funvi.lang.psi.FunviElementType"
+  // 定义tokenType类型,供 FunviTypes 类使用
+  tokenTypeClass="i2f.turbo.idea.plugin.funvi.lang.psi.FunviTokenType"
+  // 定义工具类,供所有PsiElement实现类使用
+  psiImplUtilClass="i2f.turbo.idea.plugin.funvi.lang.psi.impl.FunviPsiImplUtil"
+
+  // 定义终结符，这里目前只会使用regexp来进行正则表达式匹配得到终结符
+  // 研究不深，还不知道怎么对终结符进行重用，也就是一个终极符分解为多个终结符的语法
+  tokens=[
+    TERM_REF_VALUE="regexp:[$|#][!]?[{]((\\.)+|[^}])*}";
+    TERM_BLOCK_END="regexp:[#][#]";
+    TERM_BLOCK_ELSE="regexp:[#]else";
+    TERM_BLOCK_IF="regexp:[#]if";
+    TERM_BLOCK_HEAD="regexp:[#][a-zA-Z0-9_\\.]+";
+    TERM_IDENTIFIER="regexp:[a-zA-Z0-9_\\.]+";
+    TERM_WHITESPACE="regexp:[ \t\n\r]+";
+    OP_PAREN_L= '(';
+    OP_PAREN_R= ')';
+    OP_COMMA= ',';
+    OP_SHARP= '#';
+    OP_DOLLAR= '$';
+    OP_EXCLAIM= '!';
+    OP_COLON= ':';
+    TERM_TEXT="regexp:.+?";
+  ]
+}
+
+root::=
+    segment* <<eof>>
+    ;
+
+segment::=
+    block
+    | value
+    | textSegment
+;
+
+block::=
+    ifBlock // 单独处理 if 多分支块
+    | commonBlock
+;
+
+commonBlock::=
+    blockHeadSegment OP_PAREN_L parameters? OP_PAREN_R (blockBody TERM_BLOCK_END)?
+;
+
+ifBlock::=
+    TERM_BLOCK_IF OP_PAREN_L parameters? OP_PAREN_R blockBody elseBlock* TERM_BLOCK_END
+;
+
+elseBlock::=
+    TERM_BLOCK_ELSE OP_PAREN_L parameters? OP_PAREN_R blockBody
+;
+
+blockHeadSegment::=
+    TERM_BLOCK_HEAD
+;
+
+blockBody::=
+    segment*
+;
+
+parameters::=
+    parameter (OP_COMMA parameter)*
+;
+
+parameter::=
+    (TERM_IDENTIFIER OP_COLON)? (TERM_REF_VALUE | TERM_IDENTIFIER)
+;
+
+
+value::=
+    TERM_REF_VALUE
+    ;
+
+textSegment::=
+    content+
+;
+
+content::=
+    TERM_IDENTIFIER
+    |TERM_TEXT
+    |TERM_WHITESPACE
+    | OP_COMMA
+    | OP_PAREN_L
+    | OP_PAREN_R
+    | OP_DOLLAR
+    | OP_SHARP
+    | OP_EXCLAIM
+    | OP_COLON
+;

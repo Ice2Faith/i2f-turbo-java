@@ -1,0 +1,64 @@
+// This is a generated file. Not intended for manual editing.
+package i2f.turbo.idea.plugin.funvi.grammar.psi.elements.impl;
+
+import com.intellij.lang.ASTNode;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiElementVisitor;
+import com.intellij.psi.util.PsiTreeUtil;
+import i2f.turbo.idea.plugin.funvi.grammar.psi.elements.*;
+import i2f.turbo.idea.plugin.funvi.lang.psi.FunviPsiElement;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+
+import static i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes.TERM_BLOCK_END;
+import static i2f.turbo.idea.plugin.funvi.grammar.psi.FunviTypes.TERM_BLOCK_IF;
+
+public class FunviIfBlockImpl extends FunviPsiElement implements FunviIfBlock {
+
+    public FunviIfBlockImpl(@NotNull ASTNode node) {
+        super(node);
+    }
+
+    public void accept(@NotNull FunviVisitor visitor) {
+        visitor.visitIfBlock(this);
+    }
+
+    @Override
+    public void accept(@NotNull PsiElementVisitor visitor) {
+        if (visitor instanceof FunviVisitor) accept((FunviVisitor) visitor);
+        else super.accept(visitor);
+    }
+
+    @Override
+    @NotNull
+    public FunviBlockBody getBlockBody() {
+        return findNotNullChildByClass(FunviBlockBody.class);
+    }
+
+    @Override
+    @NotNull
+    public List<FunviElseBlock> getElseBlockList() {
+        return PsiTreeUtil.getChildrenOfTypeAsList(this, FunviElseBlock.class);
+    }
+
+    @Override
+    @Nullable
+    public FunviParameters getParameters() {
+        return findChildByClass(FunviParameters.class);
+    }
+
+    @Override
+    @NotNull
+    public PsiElement getTermBlockEnd() {
+        return findNotNullChildByType(TERM_BLOCK_END);
+    }
+
+    @Override
+    @NotNull
+    public PsiElement getTermBlockIf() {
+        return findNotNullChildByType(TERM_BLOCK_IF);
+    }
+
+}
