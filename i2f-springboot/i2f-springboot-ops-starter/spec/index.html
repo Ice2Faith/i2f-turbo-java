@@ -2962,8 +2962,8 @@
                     <h3>多模态附件</h3>
                     <div class="tagline">&lt;upload_files&gt;</div>
                     <p>附件经 <code>/tmp-file/upload</code> 上传并做 <b>MD5 完整性校验</b>，随后以
-                        <code>&lt;upload_files&gt;</code> 块追加到消息尾部，交给视觉 / 多模态模型理解；下载侧提供
-                        <code>/tmp-file/download</code>。</p>
+                        <code>&lt;upload_files&gt;</code> 块追加到消息尾部；下载侧提供
+                        <code>/tmp-file/download</code>。默认经 OCR 文本提取提供非视觉模型的「准多模态」能力。</p>
                 </div>
                 <div class="card reveal" style="--c:#e67700;">
                     <div class="idx">E</div>
@@ -2994,6 +2994,13 @@
                         <code>memory_search</code> 语义召回——跨会话的<b>用户级长期记忆</b>，与 Truth（会话级）、RAG（系统级）构成三级记忆架构（见第 09 章）。
                     </p>
                 </div>
+                <div class="card reveal" style="--c:#0ca678;">
+                    <div class="idx">I</div>
+                    <h3>图片视觉</h3>
+                    <div class="tagline">enableVisionImage</div>
+                    <p>开启后，图片附件将被<b>压缩编码为 base64</b> 直接发送给视觉模型进行推理识别（而非默认 OCR 文本提取），
+                    适合图表结构、非文本类图片的理解场景；压缩策略按像素尺寸与文件大小双重控制，按图片像素消耗 Token。</p>
+                </div>
             </div>
 
             <div class="two-col">
@@ -3005,7 +3012,7 @@
                         <span class="num">3.</span> 技能系统提示词 <span class="cm">→ messages[0] 系统消息</span>
                         <span class="num">4.</span> 角色 System Prompt <span class="cm">→ 用户手动添加的角色人设</span>
                         <span class="num">5.</span> 用户消息 + 附件 <span
-                                class="cm">→ 消息列表末尾（&lt;upload_files&gt;）</span>
+                                class="cm">→ 消息列表末尾（&lt;upload_files&gt;）；若开启图片视觉，图片经压缩后以 base64 内嵌</span>
                         <span class="num">6.</span> 系统重排 (可选) <span
                                 class="cm">→ 合并全部 system 为一条置于首位</span></div>
                 </div>
@@ -3022,7 +3029,7 @@
             <div class="callout reveal" style="--c:#0b7285;">
                 <div class="co-title">正交开关 — 能力即插即用</div>
                 <p>上述特性分别由 <code>enableTruth</code> /
-                    <code>enableEchoRequestPayload</code> 等<b>请求级布尔开关</b>控制（见 <code>OpenAiOperateDto</code>），前端功能面板一一对应。每个开关独立生效、互不牵连——这是「消息循环为体、能力插件为用」设计哲学的直接体现。
+                    <code>enableVisionImage</code> / <code>enableEchoRequestPayload</code> 等<b>请求级布尔开关</b>控制（见 <code>OpenAiOperateDto</code>），前端功能面板一一对应。每个开关独立生效、互不牵连——这是「消息循环为体、能力插件为用」设计哲学的直接体现。
                 </p>
             </div>
         </section>
@@ -3336,7 +3343,7 @@
                         <div class="step">
                             <div class="no"></div>
                             <div class="bd"><h4>功能开关面板</h4>
-                                <p>工具 / 技能 / 知识库 / 记忆 / LRU / 事实 / 报文回显，七个开关即时生效。</p></div>
+                                <p>工具 / 技能 / 知识库 / 记忆 / LRU / 事实 / 图片视觉 / 报文回显，八个开关即时生效。</p></div>
                         </div>
                     </div>
                 </div>
@@ -3402,7 +3409,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">12 大可配置开关 — 细粒度控制 Agent 行为边界</div>
+                <div class="panel-title">13 大可配置开关 — 细粒度控制 Agent 行为边界</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
                         <thead>
@@ -3442,6 +3449,11 @@
                             <td><b>语音播报</b></td>
                             <td>TextToSpeech API</td>
                             <td>自动 TTS 播报助手消息，浏览器原生语音合成</td>
+                        </tr>
+                        <tr>
+                            <td><b>图片视觉</b></td>
+                            <td><code>enableVisionImage</code></td>
+                            <td>开启后图片压缩为 base64 直送视觉模型推理，不进行 OCR 文本提取；压缩策略按像素尺寸与文件大小双重控制，按像素消耗 Token</td>
                         </tr>
                         <tr>
                             <td><b>事实注入</b></td>
