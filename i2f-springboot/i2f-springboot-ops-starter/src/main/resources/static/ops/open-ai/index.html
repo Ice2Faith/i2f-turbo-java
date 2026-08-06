@@ -630,6 +630,27 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
+                                    图片视觉，开启的前提是，所使用的模型支持视觉，也就是模型自身支持识别图片。<br/>
+                                    如果允许，那将会将图片进行压缩编码为base64之后直接发送给模型推理，而不进行默认的文本化提取处理。<br/>
+                                    如果不允许，则进行默认的文本化提取处理。<br/>
+                                    注意，视觉识别，是完整图片内容交给模型进行直接识别。<br/>
+                                    注意，文本化提取则是通过OCR光学字符识别提取文本内容。<br/>
+                                    因此，针对目的是提取文字进行总结类型的，优先考虑默认的文本化，因为不消耗模型推理Token。<br/>
+                                    针对图片结构，非文本类型的图片理解，才开启图片视觉，这样模型才能够正确理解图片，会消耗Token。<br/>
+                                    目前，各大模型厂商针对图片视觉的Token计费规则，是针对图片的像素来定价的，也就是像素越高，Token消耗越高。<br/>
+                                    因此，本系统默认对图片进行像素大小缩放以及文件大小压缩控制，默认缩放到最大边低于960为准，大小控制在256kb以内。<br/>
+                                    当然，也可以通过后台参数，改变这些大小。
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableVisionImage">
+                                    图片视觉
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
                                     语音播报，自动播报助手消息。<br/>
                                     如果开启，将会自动播报助手的答复消息。<br/>
                                     默认使用浏览器的TTS引擎进行本地合成，本地合成引擎：{{metas.supportTts?'支持':'不支持'}}<br/>
@@ -776,14 +797,21 @@
                     <el-popover
                             placement="top-start"
                             title="文件列表"
-                            width="380"
+                            width="420"
                             trigger="hover">
                         <p>
-                            附件，使用临时文件存储，【非视觉模型】，基于工具调用，因此需要启用工具。<br/>
+                            附件，使用临时文件存储，【非视觉模型】，基于工具调用，因此需要启用工具或者启用【图片视觉】功能。<br/>
                             后台使用相关工具进行上传文件的文本化，提供给模型自行查阅的能力。<br/>
                             因此，为不支持视觉的模型，提供了一定的多模态输入能力。<br/>
                             但是，因为是文本化的关系，输入质量就受到文本化的限制。<br/>
                             此方式，模型将会根据需要主动使用工具读取上传的文件内容。<br/>
+                            <hr/>
+                            特别说明，如果启用了【图片视觉】功能，也就是使用了【支持视觉的模型】。<br/>
+                            那么，这些图片将会以压缩大小之后以base64直接发送给模型直接进行视觉推理。<br/>
+                            而不再进行文本化处理，目前各大模型厂商，针对图片的计费规则，基本上都是按照图片像素大小进行的。<br/>
+                            本系统将会对图片最长边超过一定大小的图片，进行等比例缩放到较小的尺寸，默认是缩放到最大边为960大小。<br/>
+                            这个大小，可以通过后台应用配置进行调整。<br/>
+                            因此，你需要根据自己的需求，决定如何处理图片，是文本化嵌入，还是直接进行图片视觉推理。
                         <hr/>
                         <div class="input-attach-files" v-if="form.attachFiles && form.attachFiles.length>0">
                                 <span v-for="(item,index) in form.attachFiles"
@@ -813,7 +841,7 @@
                                       :hidden="(form.attachFiles?.length || 0)==0"
                                       type="primary">
                                 <el-button
-                                        :disabled="!form.enableTools"
+                                        :disabled="!form.enableTools && !form.enableVisionImage"
                                         type="success"
                                         size="small"
                                         :loading="metas.uploadLoading">
@@ -1323,6 +1351,7 @@
                         enableEchoRequestPayload: false,
                         enableMergedSystemMsg: false,
                         attachFiles: [],
+                        enableVisionImage: false,
                         enableTruth: false,
                         autoApprovalToolTags: ['auto'],
                         enableMemories: false,
@@ -2289,6 +2318,7 @@
                     req.enableMergedSystemMsg = this.form.enableMergedSystemMsg;
                     req.enableTruth = this.form.enableTruth;
                     req.truthContent = truthContent;
+                    req.enableVisionImage=this.form.enableVisionImage;
                     req = this.transferSend(req);
 
                     this.$responsing = true;

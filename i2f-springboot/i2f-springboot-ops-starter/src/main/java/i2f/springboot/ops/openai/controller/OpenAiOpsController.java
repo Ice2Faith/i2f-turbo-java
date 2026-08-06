@@ -14,6 +14,7 @@ import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
+import i2f.image.common.ImageCompressor;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
@@ -25,6 +26,7 @@ import i2f.springboot.ops.home.provider.IOpsProvider;
 import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
+import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
@@ -36,6 +38,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -69,6 +72,7 @@ import java.util.stream.Collectors;
  * @desc
  */
 @ConditionalOnClass(RestTemplate.class)
+@EnableConfigurationProperties(OpenAiOpsProperties.class)
 @Slf4j
 @Data
 @NoArgsConstructor
@@ -107,6 +111,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private TmpFileTools tmpFileTools;
+
+    @Autowired
+    private OpenAiOpsProperties properties;
 
     protected SecureRandom random = new SecureRandom();
 
@@ -270,8 +277,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @GetMapping("/tmp-file/inline")
     public void inlineTmpFile(@RequestParam("fileUrl") String fileUrl,
-                                HttpServletRequest request,
-                                HttpServletResponse response) throws Exception {
+                              HttpServletRequest request,
+                              HttpServletResponse response) throws Exception {
         try {
             if (tmpFileTools == null) {
                 throw new IllegalStateException("manager not enable tmp file upload feature.");
@@ -353,15 +360,80 @@ public class OpenAiOpsController implements IOpsProvider {
                         for (OpenAiMessageVo item : voMsgList) {
                             if (OpenAiConsts.USER.equals(item.getType())) {
                                 injectMsg = item;
-                                OpenAiUserMessage user = item.getUser();
+                                OpenAiMessage user = item.getUser();
+
                                 List<Map<String, Object>> attachFiles = item.getAttachFiles();
                                 if (attachFiles != null && !attachFiles.isEmpty()) {
+                                    if (req.isEnableVisionImage()) {
+                                        // 如果是视觉模型，那就是支持直接识别图片，那就直接进行base64编码图片内嵌就行
+                                        List<Map<String, Object>> imageFiles = new ArrayList<>();
+
+                                        for (Map<String, Object> map : attachFiles) {
+                                            String suffix = "";
+                                            String fileName = (String) map.get("fileName");
+                                            int idx = fileName.lastIndexOf(".");
+                                            if (idx >= 0) {
+                                                suffix = fileName.substring(idx).toLowerCase();
+                                            }
+                                            if (Arrays.asList(".png", ".jpg", ".jpeg", ".webp", ".bmp").contains(suffix)) {
+                                                imageFiles.add(map);
+                                            }
+                                        }
+
+                                        if (!imageFiles.isEmpty()) {
+                                            OpenAiRichUserMessage richUser = new OpenAiRichUserMessage(new ArrayList<>());
+
+                                            String content = user.content();
+                                            richUser.getContent().add(new OpenAiUserContentText(content));
+
+                                            for (Map<String, Object> map : imageFiles) {
+                                                // 将消息的位置添加到附件内容中，为了模型能够对应图片
+                                                map.put("imageIndex", richUser.getContent().size());
+
+                                                // 对图片进行压缩编码添加到消息中
+                                                String imageUrl = (String) map.get("fileUrl");
+                                                File imageFile = tmpFileTools.getFileByUrl(imageUrl);
+                                                File outputFile = new File(imageFile.getParentFile(), "compress.jpg");
+                                                File compressFile=outputFile;
+                                                // 如果输出图片不存在，那说明没有被压缩过，才进行压缩
+                                                // 如果输出图片已经存在，那就说明之前已经被压缩过了，直接使用就行
+                                                if(!outputFile.exists()) {
+                                                    OpenAiOpsProperties.VisionOptions vision = properties.getVision();
+                                                    double quality = ImageCompressor.compressImage(imageFile, outputFile,
+                                                            vision.getImageMaxSizeKb(), vision.getImageMaxDimension());
+                                                    compressFile = quality < 0 ? imageFile : outputFile;
+                                                }
+                                                String dataUrl = ImageCompressor.imageFileToBase64DataUrl(compressFile);
+                                                richUser.getContent().add(new OpenAiUserContentImageUrl(dataUrl));
+                                            }
+
+                                            user = richUser;
+                                        }
+                                    }
+
                                     // 如果有上传文件，则动态追加到用户消息中
-                                    user.setContent(user.getContent()
-                                            + "\n\n<upload_files>\n"
+                                    String appendText="\n\n<upload_files>\n"
                                             + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(attachFiles)
-                                            + "\n</upload_files>"
-                                    );
+                                            + "\n</upload_files>";
+
+                                    if (user instanceof OpenAiRichUserMessage) {
+                                        OpenAiRichUserMessage msg = (OpenAiRichUserMessage) user;
+                                        List<OpenAiUserContent> list = msg.getContent();
+                                        for (OpenAiUserContent contentItem : list) {
+                                            if (contentItem instanceof OpenAiUserContentText) {
+                                                OpenAiUserContentText textContent = (OpenAiUserContentText) contentItem;
+                                                textContent.setText(textContent.getText()
+                                                        + appendText
+                                                );
+                                            }
+                                        }
+                                    } else if (user instanceof OpenAiUserMessage) {
+                                        OpenAiUserMessage msg = (OpenAiUserMessage) user;
+                                        msg.setContent(msg.getContent()
+                                                + appendText
+                                        );
+                                    }
+
                                     hasAttachFiles.set(true);
                                 }
                                 completion.getMessages().add(user);

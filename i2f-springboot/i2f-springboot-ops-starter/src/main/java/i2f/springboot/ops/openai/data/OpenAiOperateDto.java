@@ -31,6 +31,7 @@ public class OpenAiOperateDto {
     protected String md5;
     protected String fileUrl;
     protected boolean parsedText;
+    protected boolean enableVisionImage;
 
     protected boolean enableTruth;
     protected String truthContent;
