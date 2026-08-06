@@ -329,9 +329,18 @@
                                       :key="index">
                                     <span class="input-attach-file-item__label">{{item.fileName}}</span>
                                     <span class="input-attach-file-item__actions">
-                                        <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
-                                        <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
-                                        <i class="el-icon-circle-close" style="color: orangered;" @click="msg.attachFiles.splice(index,1)"></i>
+                                        <el-tooltip effect="dark" content="查看原始文件" placement="top-start">
+                                            <i class="el-icon-view" @click="viewUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载原始文件" placement="top-start">
+                                            <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载解析后文件" placement="top-start">
+                                            <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
+                                            <i class="el-icon-circle-close" style="color: orangered;" @click="msg.attachFiles.splice(index,1)"></i>
+                                        </el-tooltip>
                                     </span>
                                 </span>
                     </div>
@@ -356,18 +365,28 @@
                                         </span>
                         </el-popover>
                         <span class="hover-show-child">
-                                        <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
-                                           class="el-icon-circle-close "></i>
-                                        <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
-                                           class="el-icon-edit"></i>
-                                        <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
-                                           class="el-icon-refresh"></i>
-                                        <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
-                                           class="el-icon-copy-document"></i>
-                                        <i class="el-icon-microphone"
-                                           v-if="metas.supportTts || form.useQwenTts"
-                                           style="color: orangered;font-size: 14px;"
-                                           @click="onTts(msg)"></i>
+                                        <el-tooltip effect="dark" content="移除消息" placement="top-start">
+                                            <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                                                class="el-icon-circle-close "></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="编辑消息" placement="top-start">
+                                            <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
+                                               class="el-icon-edit"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="重做消息" placement="top-start">
+                                            <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                                               class="el-icon-refresh"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="复制内容" placement="top-start">
+                                            <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                                               class="el-icon-copy-document"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="语音播报" placement="top-start">
+                                            <i class="el-icon-microphone"
+                                               v-if="metas.supportTts || form.useQwenTts"
+                                               style="color: orangered;font-size: 14px;"
+                                               @click="onTts(msg)"></i>
+                                        </el-tooltip>
                                     </span>
 
                     </div>
@@ -819,9 +838,18 @@
                                       :key="index">
                                     <span class="input-attach-file-item__label">{{item.fileName}}</span>
                                     <span class="input-attach-file-item__actions">
-                                        <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
-                                        <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
-                                        <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                        <el-tooltip effect="dark" content="查看原始文件" placement="top-start">
+                                            <i class="el-icon-view" @click="viewUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载原始文件" placement="top-start">
+                                            <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载解析后文件" placement="top-start">
+                                            <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
+                                            <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                        </el-tooltip>
                                     </span>
                                 </span>
                         </div>
@@ -1021,6 +1049,51 @@
                 <textarea ref="refMessageEditor"></textarea>
             </div>
         </el-card>
+    </el-dialog>
+
+    <el-dialog
+            :title="dialog.fileViewer.title"
+            :visible.sync="dialog.fileViewer.show"
+            :v-if="dialog.fileViewer.show"
+            top="5vh"
+            width="90%">
+        <div style="text-align: center;width: 100%;">
+            <template v-if="dialog.fileViewer.type=='image'">
+                <div style="background: black">
+                    <img :src="dialog.fileViewer.url" style="max-width: 100%;max-height: 75vh;"/>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='audio'">
+                <div style="background: black">
+                    <audio :src="dialog.fileViewer.url"
+                           controls
+                           autoplay
+                           style="width: 100%;padding: 48px 12px; height: 180px;">
+                        您的浏览器不支持 audio 标签。
+                    </audio>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='video'">
+                <div style="background: black">
+                    <video :src="dialog.fileViewer.url"
+                           controls
+                           autoplay
+                           style="width: 100%;height: 75vh;">
+                        您的浏览器不支持 video 标签。
+                    </video>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='pdf'">
+                <embed :src="dialog.fileViewer.url"
+                       type="application/pdf"
+                       style="width: 100%;height: 75vh;"
+                />
+            </template>
+            <template v-else>
+                该文件不支持预览！
+            </template>
+        </div>
+
     </el-dialog>
 </div>
 </body>
@@ -1326,6 +1399,12 @@
                             lang: 'markdown',
                             saveLoading: false,
                             messageIndex: 0
+                        },
+                        fileViewer: {
+                            show: false,
+                            type: 'image',
+                            title: '文件预览器',
+                            url: ''
                         },
                     },
                     form: {
@@ -2821,6 +2900,71 @@
                     }
                 })
             },
+            blobToStringWithFileReader(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    // 以文本形式读取 Blob
+                    reader.readAsText(blob, 'utf-8');
+
+                    reader.onload = function() {
+                        resolve(reader.result); // 读取完成后，结果在 result 属性中
+                    };
+
+                    reader.onerror = function() {
+                        reject(reader.error);
+                    };
+                });
+            },
+            viewUploadDocument(item){
+                console.log(item)
+                let fileUrl=item.fileUrl;
+                this.dialog.fileViewer.title=item.fileName || '文件预览器';
+                this.dialog.fileViewer.url='./tmp-file/inline?fileUrl='+encodeURIComponent(fileUrl);
+                let suffix=''
+                let fileName= item.fileName || 'download.data'
+                let idx=fileName.lastIndexOf('.')
+                if(idx>=0){
+                    suffix=fileName.substring(idx).toLowerCase()
+                }
+                if(['.png','.jpeg','.jpg','.webp','.gif','.bmp','.tiff'].includes(suffix)){
+                    this.dialog.fileViewer.type='image'
+                    this.dialog.fileViewer.show=true;
+                }else if(['.mp3','.ogg'].includes(suffix)){
+                    this.dialog.fileViewer.type='audio'
+                    this.dialog.fileViewer.show=true;
+                }else if(['.mp4','.mkv','.rmvb','.flv','.avi','.wav'].includes(suffix)){
+                    this.dialog.fileViewer.type='video'
+                    this.dialog.fileViewer.show=true;
+                }else if(['.pdf'].includes(suffix)){
+                    this.dialog.fileViewer.type='pdf'
+                    this.dialog.fileViewer.show=true;
+                }else if(['.txt','.text',
+                    '.java','.py','.c','.h','.cpp','.hpp','.php','.go','.cs','.groovy','.scala',
+                    '.json','.xml',
+                    '.yml','.yaml','.properties','.conf','.ini',
+                    '.sql',
+                    '.html','.htm','.htmlx','.css','.sass','.less','.js','.ts'
+                ].includes(suffix)){
+                    this.callDownloadTmpFile(item.fileUrl, false).then(res => {
+                        const blob = new Blob([res.data], {type: res.contentType})
+                        return this.blobToStringWithFileReader(blob)
+                    }).then(text=>{
+                        this.dialog.messageEditor.type = 'view';
+                        this.dialog.messageEditor.text = text;
+                        this.dialog.messageEditor.lang = 'text';
+                        this.dialog.messageEditor.show = true;
+                        setTimeout(() => {
+                            this.initMessageEditor();
+                        }, 200)
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                    })
+                    this.dialog.fileViewer.type='text'
+                }else{
+                    this.$message.warning('不支持语言的类型')
+                    window.open(this.dialog.fileViewer.url,'_blank')
+                }
+            }
         }
     });
     let defaultConfig = {
