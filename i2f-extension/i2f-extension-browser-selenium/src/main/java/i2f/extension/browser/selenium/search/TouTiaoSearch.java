@@ -147,6 +147,7 @@ public class TouTiaoSearch {
                             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                             try {
                                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
+                                break;
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 if(i==2){
@@ -205,7 +206,7 @@ public class TouTiaoSearch {
                     // 百度搜索首页
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         // 最大翻页
-                        int maxPage = 5;
+                        int maxPage = 10;
                         List<WebElement> pageElems = driver.findElements(By.cssSelector(".s-result-list .result-content .cs-pagination a"));
                         for (int i = 0; i < pageElems.size(); i++) {
                             if (i == 0 || i == pageElems.size() - 1) {

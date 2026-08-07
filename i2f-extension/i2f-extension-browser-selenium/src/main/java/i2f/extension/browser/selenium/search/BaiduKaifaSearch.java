@@ -139,13 +139,20 @@ public class BaiduKaifaSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                        try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                            try {
+                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#content-left .ant-list-items .ant-list-item"), 1));
+                                break;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if(i==2){
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
+
                     }
                     // 百度搜索页面
                     if (Arrays.asList(SearchType.SEARCH_FIRST,

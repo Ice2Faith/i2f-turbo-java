@@ -82,14 +82,15 @@ public class BiYingSearch {
                 enterElem.click();
             }
 
-
-            while (true) {
+            int nopCount=0;
+            while (nopCount<1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
                     break;
                 }
                 if (entry == null) {
+                    nopCount++;
                     try {
                         Thread.sleep(1);
                     } catch (InterruptedException e) {
@@ -97,6 +98,7 @@ public class BiYingSearch {
                     }
                     continue;
                 }
+                nopCount=0;
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
@@ -131,13 +133,20 @@ public class BiYingSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        try {
-                            driver.getPage().waitForSelector("#b_results .b_algo", new Page.WaitForSelectorOptions()
-                                    .setTimeout(Duration.ofSeconds(60).toMillis())
-                            );
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            try {
+                                driver.getPage().waitForSelector("#b_results .b_algo", new Page.WaitForSelectorOptions()
+                                        .setTimeout(Duration.ofSeconds(60).toMillis())
+                                );
+                                break;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if (i==2) {
+                                    // 无法加载搜索主页，可能有人机验证，继续加载也无济于事，直接失败返回
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
                     }
                     // 百度搜索页面
@@ -165,11 +174,19 @@ public class BiYingSearch {
                                 String href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
+                                    String itemText = item.innerText();
+                                    if (itemText == null || itemText.isEmpty()) {
+                                        continue;
+                                    }
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
                                     result.setTitle(title);
-                                    result.setDescription(item.innerText());
-                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    result.setDescription(itemText);
+                                    maxFetchCount.decrementAndGet();
+                                    context.getResults().add(result);
+                                    if (maxFetchCount.get() <= 0) {
+                                        return context;
+                                    }
                                 }
                             }
 
@@ -181,7 +198,7 @@ public class BiYingSearch {
                     // 百度搜索首页
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         // 最大翻页
-                        int maxPage = 5;
+                        int maxPage = 10;
                         List<ElementHandle> pageElems = driver.getPage().querySelectorAll("#b_results .b_pag .sb_pagF li a");
                         for (int i = 0; i < pageElems.size(); i++) {
                             if (i == 0 || i == pageElems.size() - 1) {
@@ -189,6 +206,9 @@ public class BiYingSearch {
                             }
                             ElementHandle page = pageElems.get(i);
                             String href = page.getAttribute("href");
+                            if (href == null || href.isEmpty()) {
+                                continue;
+                            }
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
@@ -216,40 +236,14 @@ public class BiYingSearch {
 
                     }
 
-                    // 跳转的具体条目
-                    if (SearchType.ARTICLE == entry.getValue()) {
-                        ElementHandle body = driver.getPage().querySelector("body");
-                        String text = body.innerText();
-                        if (text == null || text.trim().isEmpty()) {
-                            // 无文本，在等几秒
-                            driver.getPage().waitForTimeout(Duration.ofSeconds(5).toMillis());
-                        }
-                        body = driver.getPage().querySelector("body");
-                        text = body.innerText();
-//                        System.out.println("www-article:\n" + text);
-
-                        if (context != null) {
-                            PlaywrightUtil.removeNoContentElements(driver.getPage());
-                            SearchResult result = entry.getKey();
-                            result.setTitle(driver.getPage().title());
-                            result.setHtml(driver.getPage().content());
-                            if (body != null) {
-                                result.setText(body.innerText());
-                            }
-                            context.getResults().add(result);
-                        }
-                        maxFetchCount.decrementAndGet();
-                    }
-
-
                     if (maxFetchCount.get() <= 0) {
-                        break;
+                        return context;
                     }
                 } catch (Exception e) {
+                    e.printStackTrace();
                     if (PlaywrightUtil.isCannotRecoveryException(e)) {
                         break;
                     }
-                    e.printStackTrace();
                 }
             }
         } catch (Exception e) {

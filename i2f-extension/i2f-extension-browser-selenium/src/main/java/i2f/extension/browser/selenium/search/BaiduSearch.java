@@ -142,6 +142,7 @@ public class BaiduSearch {
                             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                             try {
                                 wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("div[tpl=\"www_index\"]"), 1));
+                                break;
                             } catch (Exception e) {
                                 e.printStackTrace();
                                 if(i==2){
