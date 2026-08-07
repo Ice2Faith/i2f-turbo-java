@@ -5,6 +5,7 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.form.dialog.DialogBoxes;
 import i2f.io.file.FileUtil;
+import i2f.os.OsUtil;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -46,6 +47,10 @@ public class RobotTools {
             description = "capture user screen picture"
     )
     public TmpFileTools.FileAttachMessage capture_screen() throws Exception {
+        if (!OsUtil.isWindows()) {
+            throw new IllegalStateException("current OS is not windows, cannot capture screen!");
+        }
+        
         System.setProperty("java.awt.headless", "false");
 
         boolean ok = DialogBoxes.confirm("即将进行屏幕抓取，请准备好要提供的屏幕显示，确认后将立即进行截图");
