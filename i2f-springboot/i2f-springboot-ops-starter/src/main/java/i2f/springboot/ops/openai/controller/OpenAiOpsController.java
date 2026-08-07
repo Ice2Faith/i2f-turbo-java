@@ -221,7 +221,7 @@ public class OpenAiOpsController implements IOpsProvider {
                 if (!calcMd5.equalsIgnoreCase(req.getMd5())) {
                     throw new OpsException("file check sum error");
                 }
-                Map<String, Object> resp = tmpFileTools.saveFile(new FileInputStream(tmpFile), file.getOriginalFilename());
+                TmpFileTools.UploadTmpFileMetadata resp = tmpFileTools.saveFile(new FileInputStream(tmpFile), file.getOriginalFilename());
                 return transfer.success(resp);
             } finally {
                 if (tmpFile != null && tmpFile.exists()) {
@@ -332,11 +332,101 @@ public class OpenAiOpsController implements IOpsProvider {
         }
     }
 
+    public OpenAiMessage convertOpenAiUserMessage(OpenAiMessageVo item,
+                                                  OpenAiOperateDto req,
+                                                  AtomicBoolean hasAttachFiles) throws Exception {
+        OpenAiMessage user = item.getUser();
+
+        List<Map<String, Object>> filesList = new ArrayList<>();
+        List<TmpFileTools.UploadTmpFileMetadata> attachFiles = item.getAttachFiles();
+        if (attachFiles != null && !attachFiles.isEmpty()) {
+            if (req.isEnableVisionImage()) {
+                // 如果是视觉模型，那就是支持直接识别图片，那就直接进行base64编码图片内嵌就行
+                Map<Integer, TmpFileTools.UploadTmpFileMetadata> imageFiles = new HashMap<>();
+
+                for (int i = 0; i < attachFiles.size(); i++) {
+                    TmpFileTools.UploadTmpFileMetadata map = attachFiles.get(i);
+                    filesList.add(map.toMap());
+
+                    String suffix = "";
+                    String fileName = map.getFileName();
+                    int idx = fileName.lastIndexOf(".");
+                    if (idx >= 0) {
+                        suffix = fileName.substring(idx).toLowerCase();
+                    }
+                    if (Arrays.asList(".png", ".jpg", ".jpeg", ".webp", ".bmp").contains(suffix)) {
+                        imageFiles.put(i, map);
+                    }
+                }
+
+                if (!imageFiles.isEmpty()) {
+                    OpenAiRichUserMessage richUser = new OpenAiRichUserMessage(new ArrayList<>());
+
+                    String content = user.content();
+                    richUser.getContent().add(new OpenAiUserContentText(content));
+
+                    for (Map.Entry<Integer, TmpFileTools.UploadTmpFileMetadata> entry : imageFiles.entrySet()) {
+                        Integer index = entry.getKey();
+                        TmpFileTools.UploadTmpFileMetadata metadata = entry.getValue();
+                        Map<String, Object> map = filesList.get(index);
+                        // 将消息的位置添加到附件内容中，为了模型能够对应图片
+                        map.put("imageIndex", richUser.getContent().size());
+
+                        // 对图片进行压缩编码添加到消息中
+                        String imageUrl = metadata.getFileUrl();
+                        File imageFile = tmpFileTools.getFileByUrl(imageUrl);
+                        File outputFile = new File(imageFile.getParentFile(), "compress.jpg");
+                        File compressFile = outputFile;
+                        // 如果输出图片不存在，那说明没有被压缩过，才进行压缩
+                        // 如果输出图片已经存在，那就说明之前已经被压缩过了，直接使用就行
+                        if (!outputFile.exists()) {
+                            OpenAiOpsProperties.VisionOptions vision = properties.getVision();
+                            double quality = ImageCompressor.compressImage(imageFile, outputFile,
+                                    vision.getImageMaxSizeKb(), vision.getImageMaxDimension());
+                            compressFile = quality < 0 ? imageFile : outputFile;
+                        }
+                        String dataUrl = ImageCompressor.imageFileToBase64DataUrl(compressFile);
+                        richUser.getContent().add(new OpenAiUserContentImageUrl(dataUrl));
+                    }
+
+                    user = richUser;
+                }
+            }
+
+            // 如果有上传文件，则动态追加到用户消息中
+            String appendText = "\n\n<upload_files>\n"
+                    + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(filesList)
+                    + "\n</upload_files>";
+
+            if (user instanceof OpenAiRichUserMessage) {
+                OpenAiRichUserMessage msg = (OpenAiRichUserMessage) user;
+                List<OpenAiUserContent> list = msg.getContent();
+                for (OpenAiUserContent contentItem : list) {
+                    if (contentItem instanceof OpenAiUserContentText) {
+                        OpenAiUserContentText textContent = (OpenAiUserContentText) contentItem;
+                        textContent.setText(textContent.getText()
+                                + appendText
+                        );
+                    }
+                }
+            } else if (user instanceof OpenAiUserMessage) {
+                OpenAiUserMessage msg = (OpenAiUserMessage) user;
+                msg.setContent(msg.getContent()
+                        + appendText
+                );
+            }
+
+            hasAttachFiles.set(true);
+        }
+        return user;
+    }
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
         AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
         AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
+        CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
@@ -362,80 +452,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                 injectMsg = item;
                                 OpenAiMessage user = item.getUser();
 
-                                List<Map<String, Object>> attachFiles = item.getAttachFiles();
-                                if (attachFiles != null && !attachFiles.isEmpty()) {
-                                    if (req.isEnableVisionImage()) {
-                                        // 如果是视觉模型，那就是支持直接识别图片，那就直接进行base64编码图片内嵌就行
-                                        List<Map<String, Object>> imageFiles = new ArrayList<>();
-
-                                        for (Map<String, Object> map : attachFiles) {
-                                            String suffix = "";
-                                            String fileName = (String) map.get("fileName");
-                                            int idx = fileName.lastIndexOf(".");
-                                            if (idx >= 0) {
-                                                suffix = fileName.substring(idx).toLowerCase();
-                                            }
-                                            if (Arrays.asList(".png", ".jpg", ".jpeg", ".webp", ".bmp").contains(suffix)) {
-                                                imageFiles.add(map);
-                                            }
-                                        }
-
-                                        if (!imageFiles.isEmpty()) {
-                                            OpenAiRichUserMessage richUser = new OpenAiRichUserMessage(new ArrayList<>());
-
-                                            String content = user.content();
-                                            richUser.getContent().add(new OpenAiUserContentText(content));
-
-                                            for (Map<String, Object> map : imageFiles) {
-                                                // 将消息的位置添加到附件内容中，为了模型能够对应图片
-                                                map.put("imageIndex", richUser.getContent().size());
-
-                                                // 对图片进行压缩编码添加到消息中
-                                                String imageUrl = (String) map.get("fileUrl");
-                                                File imageFile = tmpFileTools.getFileByUrl(imageUrl);
-                                                File outputFile = new File(imageFile.getParentFile(), "compress.jpg");
-                                                File compressFile=outputFile;
-                                                // 如果输出图片不存在，那说明没有被压缩过，才进行压缩
-                                                // 如果输出图片已经存在，那就说明之前已经被压缩过了，直接使用就行
-                                                if(!outputFile.exists()) {
-                                                    OpenAiOpsProperties.VisionOptions vision = properties.getVision();
-                                                    double quality = ImageCompressor.compressImage(imageFile, outputFile,
-                                                            vision.getImageMaxSizeKb(), vision.getImageMaxDimension());
-                                                    compressFile = quality < 0 ? imageFile : outputFile;
-                                                }
-                                                String dataUrl = ImageCompressor.imageFileToBase64DataUrl(compressFile);
-                                                richUser.getContent().add(new OpenAiUserContentImageUrl(dataUrl));
-                                            }
-
-                                            user = richUser;
-                                        }
-                                    }
-
-                                    // 如果有上传文件，则动态追加到用户消息中
-                                    String appendText="\n\n<upload_files>\n"
-                                            + objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(attachFiles)
-                                            + "\n</upload_files>";
-
-                                    if (user instanceof OpenAiRichUserMessage) {
-                                        OpenAiRichUserMessage msg = (OpenAiRichUserMessage) user;
-                                        List<OpenAiUserContent> list = msg.getContent();
-                                        for (OpenAiUserContent contentItem : list) {
-                                            if (contentItem instanceof OpenAiUserContentText) {
-                                                OpenAiUserContentText textContent = (OpenAiUserContentText) contentItem;
-                                                textContent.setText(textContent.getText()
-                                                        + appendText
-                                                );
-                                            }
-                                        }
-                                    } else if (user instanceof OpenAiUserMessage) {
-                                        OpenAiUserMessage msg = (OpenAiUserMessage) user;
-                                        msg.setContent(msg.getContent()
-                                                + appendText
-                                        );
-                                    }
-
-                                    hasAttachFiles.set(true);
-                                }
+                                user = convertOpenAiUserMessage(item, req, hasAttachFiles);
                                 completion.getMessages().add(user);
                             } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
                                 injectMsg = item;
@@ -750,6 +767,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                                     log.warn(e.getMessage(), e);
                                                 }
+                                                if (callRet instanceof TmpFileTools.FileAttachMessage) {
+                                                    TmpFileTools.FileAttachMessage fileMsg = (TmpFileTools.FileAttachMessage) callRet;
+                                                    toolFileMessages.add(fileMsg);
+                                                    callRet = fileMsg.getContent();
+                                                }
                                                 if (callRet instanceof CharSequence) {
                                                     callRet = String.valueOf(callRet);
                                                 } else {
@@ -814,6 +836,27 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                         }
+                    }
+
+                    if (!toolFileMessages.isEmpty()) {
+                        OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
+                                .set(u -> u::setType, OpenAiConsts.USER)
+                                .set(u -> u::setUser, new OpenAiUserMessage("here is tool returns files"))
+                                .set(u -> u::setAttachFiles, toolFileMessages.stream().map(e -> e.getFile()).collect(Collectors.toList()))
+                                .done();
+                        OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
+                        completion.getMessages().add(user);
+
+                        String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.USER);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (req.isEnableLruTools() && mcpProviderTools != null) {

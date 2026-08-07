@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -77,7 +76,7 @@ public class QwenTtsOpsController {
             File mp3File = socket.start()
                     .await();
 
-            Map<String, Object> metadata = tmpFileTools.saveFile(new FileInputStream(mp3File), mp3File.getName());
+            TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(mp3File), mp3File.getName());
 
             return transfer.success(metadata);
         } catch (Throwable e) {

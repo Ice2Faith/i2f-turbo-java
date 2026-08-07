@@ -47,6 +47,29 @@ import java.util.concurrent.TimeUnit;
 public class TmpFileTools {
     public static final String DEFAULT_URL_SIGN_SALT = "abc123def456";
 
+    @Data
+    @NoArgsConstructor
+    public static class UploadTmpFileMetadata {
+        protected String fileUrl;
+        protected String fileName;
+        protected String createTime;
+
+        public Map<String, Object> toMap() {
+            Map<String, Object> ret = new LinkedHashMap<>();
+            ret.put("fileUrl", fileUrl);
+            ret.put("fileName", fileName);
+            ret.put("createTime", createTime);
+            return ret;
+        }
+    }
+
+    @Data
+    @NoArgsConstructor
+    public static class FileAttachMessage {
+        protected UploadTmpFileMetadata file;
+        protected String content;
+    }
+
     private static final Set<String> exposeTools;
     private final ScheduledExecutorService pool = Executors.newSingleThreadScheduledExecutor();
 
@@ -189,7 +212,7 @@ public class TmpFileTools {
         return FileToolUtils.regexSearchTextFile(file, pattern);
     }
 
-    public Map<String, Object> saveFile(InputStream is, String fileName) throws IOException {
+    public UploadTmpFileMetadata saveFile(InputStream is, String fileName) throws IOException {
         String datePath = DIR_FORMATTER.format(LocalDateTime.now());
         File dateDir = getFile(datePath);
 
@@ -216,13 +239,13 @@ public class TmpFileTools {
 
         StreamUtil.writeBytes(is, dataFile);
 
-        Map<String, Object> metadata = new LinkedHashMap<>();
+        UploadTmpFileMetadata metadata = new UploadTmpFileMetadata();
         String url = PROTOCOL + "://" + dateDir.getName() + "/" + uidDir.getName() + "/" + dataFile.getName();
 
         url = signedUrl(url);
-        metadata.put("fileUrl", url);
-        metadata.put("fileName", fullName);
-        metadata.put("createTime", CREATE_FORMATTER.format(LocalDateTime.now()));
+        metadata.setFileUrl(url);
+        metadata.setFileName(fullName);
+        metadata.setCreateTime(CREATE_FORMATTER.format(LocalDateTime.now()));
 
         String json = jsonSerializer.serialize(metadata);
         StreamUtil.writeString(json, metaFile);

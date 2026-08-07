@@ -7,11 +7,11 @@ import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.mutator.BaseMutator;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
+import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -30,5 +30,5 @@ public class OpenAiMessageVo implements BaseMutator<OpenAiMessageVo> {
     protected RequestOpenAiToolMessage request_tool;
     protected OpenAiSystemMessage echo_skill;
     protected OpenAiSystemMessage echo_truth;
-    protected List<Map<String, Object>> attachFiles;
+    protected List<TmpFileTools.UploadTmpFileMetadata> attachFiles;
 }
