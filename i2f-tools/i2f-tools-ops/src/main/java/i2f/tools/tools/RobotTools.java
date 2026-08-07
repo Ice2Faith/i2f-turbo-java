@@ -17,6 +17,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 /**
@@ -32,6 +34,8 @@ import java.util.Map;
         "robot"
 })
 public class RobotTools {
+    private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
+
     @Autowired(required = false)
     protected TmpFileTools tmpFileTools;
 
@@ -62,20 +66,27 @@ public class RobotTools {
         BufferedImage image = robot.createScreenCapture(screenRectangle);
 
         File tempFile = FileUtil.getTempFile(".jpg");
-        ImageIO.write(image, "jpg", tempFile);
+        try {
+            ImageIO.write(image, "jpg", tempFile);
 
-        TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(tempFile), tempFile.getName());
+            String virtualFileName = "screen-" + TIME_FORMATTER.format(LocalDateTime.now()) + ".jpg";
+            TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(tempFile), virtualFileName);
 
-        Map<String, Object> map = metadata.toMap();
-        StringBuilder builder = new StringBuilder();
-        builder.append("screen picture has upload, will send with after user message.\n");
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            Map<String, Object> map = metadata.toMap();
+            StringBuilder builder = new StringBuilder();
+            builder.append("screen picture has upload, will send with after user message.\n");
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+            }
+
+            TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
+            ret.setContent(builder.toString());
+            ret.setFile(metadata);
+            return ret;
+        } finally {
+            if (tempFile.exists()) {
+                tempFile.delete();
+            }
         }
-
-        TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
-        ret.setContent(builder.toString());
-        ret.setFile(metadata);
-        return ret;
     }
 }
