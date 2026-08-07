@@ -88,13 +88,15 @@ public class BiYingSearch {
         }
         try {
 
-            while (true) {
+            int nopCount=0;
+            while (nopCount<1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
                     break;
                 }
                 if (entry == null) {
+                    nopCount++;
                     try {
                         Thread.sleep(1);
                     } catch (InterruptedException e) {
@@ -102,8 +104,9 @@ public class BiYingSearch {
                     }
                     continue;
                 }
-                try {
+                nopCount=0;
 
+                try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
                     } else {
@@ -114,6 +117,7 @@ public class BiYingSearch {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
                         if (SeleniumUtil.isCannotRecoveryException(e)) {
                             break;
                         }
@@ -134,12 +138,19 @@ public class BiYingSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                        try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#b_results .b_algo"), 1));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                            try {
+                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("#b_results .b_algo"), 1));
+                                break;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if (i==2) {
+                                    // 无法加载搜索主页，可能有人机验证，继续加载也无济于事，直接失败返回
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
                     }
                     // 百度搜索页面
@@ -167,11 +178,19 @@ public class BiYingSearch {
                                 String href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
+                                    String itemText = item.getText();
+                                    if (itemText == null || itemText.isEmpty()) {
+                                        continue;
+                                    }
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
                                     result.setTitle(title);
-                                    result.setDescription(item.getText());
-                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    result.setDescription(itemText);
+                                    maxFetchCount.decrementAndGet();
+                                    context.getResults().add(result);
+                                    if (maxFetchCount.get() <= 0) {
+                                        return context;
+                                    }
                                 }
                             }
 
@@ -183,7 +202,7 @@ public class BiYingSearch {
                     // 百度搜索首页
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         // 最大翻页
-                        int maxPage = 5;
+                        int maxPage = 10;
                         List<WebElement> pageElems = driver.findElements(By.cssSelector("#b_results .b_pag .sb_pagF li a"));
                         for (int i = 0; i < pageElems.size(); i++) {
                             if (i == 0 || i == pageElems.size() - 1) {
@@ -191,6 +210,9 @@ public class BiYingSearch {
                             }
                             WebElement page = pageElems.get(i);
                             String href = page.getAttribute("href");
+                            if (href == null || href.isEmpty()) {
+                                continue;
+                            }
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
@@ -218,33 +240,8 @@ public class BiYingSearch {
 
                     }
 
-                    // 跳转的具体条目
-                    if (SearchType.ARTICLE == entry.getValue()) {
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        String text = body.getText();
-                        if (text == null || text.trim().isEmpty()) {
-                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                        }
-                        body = driver.findElement(By.tagName("body"));
-                        text = body.getText();
-//                        System.out.println("www-article:\n" + text);
-
-                        if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
-                            SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
-                            if (body != null) {
-                                result.setText(body.getText());
-                            }
-                            context.getResults().add(result);
-                        }
-                        maxFetchCount.decrementAndGet();
-                    }
-
-
                     if (maxFetchCount.get() <= 0) {
-                        break;
+                        return context;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

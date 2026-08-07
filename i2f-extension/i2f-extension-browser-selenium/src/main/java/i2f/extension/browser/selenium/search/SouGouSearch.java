@@ -6,6 +6,7 @@ import i2f.browser.std.search.enums.SearchType;
 import i2f.extension.browser.selenium.BrowserSelenium;
 import i2f.extension.browser.selenium.search.utils.SeleniumUtil;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -34,6 +35,7 @@ public class SouGouSearch {
     public static SearchContext search(String question, String driverPath) {
         return search(question, 5, false, driverPath);
     }
+
     public static SearchContext search(String question, int maxArticleCount, String driverPath) {
         return search(question, maxArticleCount, false, driverPath);
     }
@@ -87,13 +89,15 @@ public class SouGouSearch {
         }
         try {
 
-            while (true) {
+            int nopCount=0;
+            while (nopCount<1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
                     break;
                 }
                 if (entry == null) {
+                    nopCount++;
                     try {
                         Thread.sleep(1);
                     } catch (InterruptedException e) {
@@ -102,26 +106,25 @@ public class SouGouSearch {
                     continue;
                 }
 
+                nopCount=0;
+
                 try {
-
-
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
                     } else {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
                     }
-
                     try {
                         if (!Objects.equals(driver.getCurrentUrl(), entry.getKey().getUrl())) {
                             driver.navigate().to(entry.getKey().getUrl());
                         }
                     } catch (Exception e) {
+                        e.printStackTrace();
                         if (SeleniumUtil.isCannotRecoveryException(e)) {
                             break;
                         }
                         continue;
                     }
-
 
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(RANDOM.nextInt(5) + 1));
                     if (true) {
@@ -135,16 +138,57 @@ public class SouGouSearch {
                             }
                         }
                     }
+
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                        try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".results .vrwrap[exposed=\"1\"] .vr-title a"), 1));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                            try {
+                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".results .vrwrap[exposed=\"1\"] .vr-title a"), 0));
+                                break;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if(i==2){
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
+
                         entry.getKey().setUrl(driver.getCurrentUrl());
                     }
+
+                    // 百度搜索首页
+                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                        // 最大翻页
+                        int maxPage = 10;
+
+                        JavascriptExecutor js = (JavascriptExecutor) driver;
+                        long lastHeight = (long) js.executeScript("return document.body.scrollHeight");
+
+                        for (int i = 0; i < maxPage; i++) {
+                            // 3. 执行 JS 滚动到页面最底部
+                            js.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+
+                            // 4. 等待新内容加载 (根据网络情况和页面渲染速度调整时间)
+                            Thread.sleep(2000);
+
+                            // 5. 获取滚动后的新页面高度
+                            long newHeight = (long) js.executeScript("return document.body.scrollHeight");
+
+                            // 6. 判断是否加载了新内容
+                            if (newHeight == lastHeight) {
+                                // 如果高度没有变化，说明已经到底部或没有更多数据，退出循环
+                                break;
+                            }
+
+                            // 更新高度，继续下一次滚动
+                            lastHeight = newHeight;
+
+                        }
+
+
+                    }
+
                     // 百度搜索页面
                     if (Arrays.asList(SearchType.SEARCH_FIRST,
                             SearchType.SEARCH_PAGE).contains(entry.getValue())) {
@@ -174,11 +218,19 @@ public class SouGouSearch {
                                 String href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
+                                    String itemText = item.getText();
+                                    if (itemText == null || itemText.isEmpty()) {
+                                        continue;
+                                    }
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
                                     result.setTitle(title);
-                                    result.setDescription(item.getText());
-                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    result.setDescription(itemText);
+                                    maxFetchCount.decrementAndGet();
+                                    context.getResults().add(result);
+                                    if (maxFetchCount.get() <= 0) {
+                                        return context;
+                                    }
                                 }
                             }
 
@@ -187,31 +239,7 @@ public class SouGouSearch {
 
                     }
 
-                    // 百度搜索首页
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        // 最大翻页
-                        int maxPage = 5;
-                        List<WebElement> pageElems = driver.findElements(By.cssSelector("#pagebar_container a"));
-                        for (int i = 0; i < pageElems.size(); i++) {
-                            if (i == pageElems.size() - 1) {
-                                continue;
-                            }
-                            WebElement page = pageElems.get(i);
-                            String href = page.getAttribute("href");
-
-                            if (context != null) {
-                                SearchResult result = new SearchResult();
-                                result.setUrl(href);
-                                urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));
-                            }
-
-                            maxPage--;
-                            if (maxPage <= 0) {
-                                break;
-                            }
-                        }
-
-
+                    if(SearchType.SEARCH_FIRST == entry.getValue()){
                         if (context != null) {
                             SeleniumUtil.removeNoContentElements(driver);
                             SearchResult result = entry.getKey();
@@ -222,36 +250,10 @@ public class SouGouSearch {
                                 result.setText(body.getText());
                             }
                         }
-
                     }
-
-                    // 跳转的具体条目
-                    if (SearchType.ARTICLE == entry.getValue()) {
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        String text = body.getText();
-                        if (text == null || text.trim().isEmpty()) {
-                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                        }
-                        body = driver.findElement(By.tagName("body"));
-                        text = body.getText();
-//                        System.out.println("www-article:\n" + text);
-
-                        if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
-                            SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
-                            if (body != null) {
-                                result.setText(body.getText());
-                            }
-                            context.getResults().add(result);
-                        }
-                        maxFetchCount.decrementAndGet();
-                    }
-
 
                     if (maxFetchCount.get() <= 0) {
-                        break;
+                        return context;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

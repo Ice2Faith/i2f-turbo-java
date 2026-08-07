@@ -88,13 +88,15 @@ public class BaiduSearch {
         }
         try {
 
-            while (true) {
+            int nopCount=0;
+            while (nopCount<1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
                     break;
                 }
                 if (entry == null) {
+                    nopCount++;
                     try {
                         Thread.sleep(1);
                     } catch (InterruptedException e) {
@@ -102,10 +104,9 @@ public class BaiduSearch {
                     }
                     continue;
                 }
+                nopCount=0;
 
                 try {
-
-
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
                         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
                     } else {
@@ -135,13 +136,19 @@ public class BaiduSearch {
                             }
                         }
                     }
+
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                        try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("div[tpl=\"www_index\"]"), 1));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                            try {
+                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector("div[tpl=\"www_index\"]"), 1));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if(i==2){
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
                     }
                     // 百度搜索页面
@@ -156,8 +163,15 @@ public class BaiduSearch {
                             if (context != null) {
                                 SearchResult result = new SearchResult();
                                 result.setUrl(href);
-                                result.setDescription(item.getText());
-                                urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                String itemText = item.getText();
+                                String[] itemArr = itemText.split("\n", 2);
+                                result.setTitle(itemArr.length == 2 ? itemArr[0] : null);
+                                result.setDescription(itemArr.length == 2 ? itemArr[1] : itemText);
+                                maxFetchCount.decrementAndGet();
+                                context.getResults().add(result);
+                                if (maxFetchCount.get() <= 0) {
+                                    return context;
+                                }
                             }
                         }
 
@@ -168,7 +182,7 @@ public class BaiduSearch {
 //                            System.out.println("www-response:\n" + text);
                             String href = item.getAttribute("mu");
 //                        System.out.println("www-href:\n" + href);
-                            List<WebElement> aElems = item.findElements(By.cssSelector("a.sc-link"));
+                            List<WebElement> aElems = item.findElements(By.cssSelector("a.cos-link"));
                             if (aElems == null || aElems.isEmpty()) {
                                 continue;
                             }
@@ -179,8 +193,15 @@ public class BaiduSearch {
                                 if (context != null) {
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
-                                    result.setDescription(item.getText());
-                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    String itemText = item.getText();
+                                    String[] itemArr = itemText.split("\n", 2);
+                                    result.setTitle(itemArr.length == 2 ? itemArr[0] : null);
+                                    result.setDescription(itemArr.length == 2 ? itemArr[1] : itemText);
+                                    maxFetchCount.decrementAndGet();
+                                    context.getResults().add(result);
+                                    if (maxFetchCount.get() <= 0) {
+                                        return context;
+                                    }
                                 }
                             }
 
@@ -192,7 +213,7 @@ public class BaiduSearch {
                     // 百度搜索首页
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
                         // 最大翻页
-                        int maxPage = 5;
+                        int maxPage = 10;
                         List<WebElement> pageElems = driver.findElements(By.cssSelector("div[tpl=\"app/page\"] a"));
                         for (int i = 0; i < pageElems.size(); i++) {
                             if (i == pageElems.size() - 1) {
@@ -200,6 +221,9 @@ public class BaiduSearch {
                             }
                             WebElement page = pageElems.get(i);
                             String href = page.getAttribute("href");
+                            if (href == null || href.isEmpty()) {
+                                continue;
+                            }
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
@@ -225,14 +249,20 @@ public class BaiduSearch {
                         aiElems.addAll(ai2Elems);
                         for (WebElement item : aiElems) {
                             String text = item.getText();
+                            if (text == null || text.isEmpty()) {
+                                continue;
+                            }
 //                            System.out.println("ai-response:\n" + text);
                             if (context != null) {
                                 SearchResult result = new SearchResult();
-                                result.setUrl(entry.getKey().getUrl());
-                                result.setTitle(context.getQuestion());
-                                result.setDescription("AI answer");
-                                result.setText(text);
+                                result.setUrl(null);
+                                result.setTitle("Search Engine Summary");
+                                result.setDescription(text);
+                                maxFetchCount.decrementAndGet();
                                 context.getResults().add(result);
+                                if (maxFetchCount.get() <= 0) {
+                                    return context;
+                                }
                             }
                         }
 
@@ -249,34 +279,8 @@ public class BaiduSearch {
 
                     }
 
-                    // 跳转的具体条目
-                    if (SearchType.ARTICLE == entry.getValue()) {
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        String text = body.getText();
-                        if (text == null || text.trim().isEmpty()) {
-                            // 无文本，在等几秒
-                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                        }
-                        body = driver.findElement(By.tagName("body"));
-                        text = body.getText();
-//                        System.out.println("www-article:\n" + text);
-
-                        if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
-                            SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
-                            if (body != null) {
-                                result.setText(body.getText());
-                            }
-                            context.getResults().add(result);
-                        }
-                        maxFetchCount.decrementAndGet();
-                    }
-
-
                     if (maxFetchCount.get() <= 0) {
-                        break;
+                        return context;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -88,13 +88,15 @@ public class TouTiaoSearch {
         }
         try {
 
-            while (true) {
+            int nopCount=0;
+            while (nopCount<1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
                     break;
                 }
                 if (entry == null) {
+                    nopCount++;
                     try {
                         Thread.sleep(1);
                     } catch (InterruptedException e) {
@@ -102,6 +104,7 @@ public class TouTiaoSearch {
                     }
                     continue;
                 }
+                nopCount=0;
 
                 try {
 
@@ -134,13 +137,23 @@ public class TouTiaoSearch {
                             }
                         }
                     }
+                    List<WebElement> inputElems = driver.findElements(By.cssSelector(".top-wrapper input"));
+                    WebElement inputElem = inputElems.get(0);
+                    inputElem.click();
+                    inputElem.sendKeys("\n");
+
                     if (SearchType.SEARCH_FIRST == entry.getValue()) {
-                        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
-                        try {
-                            wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            break;
+                        for (int i = 0; i < 3; i++) {
+                            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
+                            try {
+                                wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(By.cssSelector(".s-result-list .result-content .cs-card-content"), 1));
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                if(i==2){
+                                    return context;
+                                }
+                                continue;
+                            }
                         }
                     }
                     // 百度搜索页面
@@ -168,11 +181,19 @@ public class TouTiaoSearch {
                                 String href = aElem.getAttribute("href");
                                 System.out.println("www-href:\n" + href);
                                 if (context != null) {
+                                    String itemText = item.getText();
+                                    if (itemText == null || itemText.isEmpty()) {
+                                        continue;
+                                    }
                                     SearchResult result = new SearchResult();
                                     result.setUrl(href);
                                     result.setTitle(title);
-                                    result.setDescription(item.getText());
-                                    urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.ARTICLE));
+                                    result.setDescription(itemText);
+                                    maxFetchCount.decrementAndGet();
+                                    context.getResults().add(result);
+                                    if (maxFetchCount.get() <= 0) {
+                                        return context;
+                                    }
                                 }
                             }
 
@@ -219,33 +240,8 @@ public class TouTiaoSearch {
 
                     }
 
-                    // 跳转的具体条目
-                    if (SearchType.ARTICLE == entry.getValue()) {
-                        WebElement body = driver.findElement(By.tagName("body"));
-                        String text = body.getText();
-                        if (text == null || text.trim().isEmpty()) {
-                            driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
-                        }
-                        body = driver.findElement(By.tagName("body"));
-                        text = body.getText();
-//                        System.out.println("www-article:\n" + text);
-
-                        if (context != null) {
-                            SeleniumUtil.removeNoContentElements(driver);
-                            SearchResult result = entry.getKey();
-                            result.setTitle(driver.getTitle());
-                            result.setHtml(driver.getPageSource());
-                            if (body != null) {
-                                result.setText(body.getText());
-                            }
-                            context.getResults().add(result);
-                        }
-                        maxFetchCount.decrementAndGet();
-                    }
-
-
                     if (maxFetchCount.get() <= 0) {
-                        break;
+                        return context;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
