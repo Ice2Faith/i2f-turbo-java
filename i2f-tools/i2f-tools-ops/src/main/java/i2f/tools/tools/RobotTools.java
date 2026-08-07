@@ -50,7 +50,10 @@ public class RobotTools {
         if (!OsUtil.isWindows()) {
             throw new IllegalStateException("current OS is not windows, cannot capture screen!");
         }
-        
+        if (tmpFileTools == null) {
+            throw new IllegalStateException("current application not enable tmp file");
+        }
+
         System.setProperty("java.awt.headless", "false");
 
         boolean ok = DialogBoxes.confirm("即将进行屏幕抓取，请准备好要提供的屏幕显示，确认后将立即进行截图");
