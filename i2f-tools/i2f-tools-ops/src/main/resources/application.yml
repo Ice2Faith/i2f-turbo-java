@@ -18,6 +18,8 @@ ai:
       enable: false
     mcp-gateway:
       enable: true
+    robot:
+      enable: false
   rags:
     enable: false
     embedding:
