@@ -2290,7 +2290,8 @@
                                 session.streamingStarted = true;
                             }
                             json.hidden = false;
-                            messages.push(json);
+                            insertBeforeLast(messages, json);
+                            // messages.push(json);
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_truth') {
