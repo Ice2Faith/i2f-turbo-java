@@ -133,7 +133,8 @@ public class SouGouSearch {
                         }
                     }
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector(".results .vrwrap[exposed=\"1\"] .vr-title a", new Page.WaitForSelectorOptions()
@@ -155,16 +156,16 @@ public class SouGouSearch {
                         // 最大翻页
                         int maxPage = 10;
 
-                        long lastHeight = (long) driver.getPage().evaluate("return document.body.scrollHeight");
+                        int lastHeight = (int) driver.getPage().evaluate("document.body.scrollHeight");
                         for (int i = 0; i < maxPage; i++) {
                             // 3. 执行 JS 滚动到页面最底部
-                            driver.getPage().evaluate("window.scrollTo(0, document.body.scrollHeight);");
+                            driver.getPage().evaluate("window.scrollTo(0, document.body.scrollHeight)");
 
                             // 4. 等待新内容加载 (根据网络情况和页面渲染速度调整时间)
                             Thread.sleep(2000);
 
                             // 5. 获取滚动后的新页面高度
-                            long newHeight = (long) driver.getPage().evaluate("return document.body.scrollHeight");
+                            int newHeight = (int) driver.getPage().evaluate("document.body.scrollHeight");
 
                             // 6. 判断是否加载了新内容
                             if (newHeight == lastHeight) {

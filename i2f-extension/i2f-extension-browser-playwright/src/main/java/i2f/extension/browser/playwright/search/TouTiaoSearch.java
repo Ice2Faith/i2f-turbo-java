@@ -137,7 +137,8 @@ public class TouTiaoSearch {
                     enterElem.click();
                     enterElem.press("Enter");
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector(".s-result-list .result-content .cs-card-content", new Page.WaitForSelectorOptions()

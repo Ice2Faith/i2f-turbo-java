@@ -132,7 +132,9 @@ public class BiYingSearch {
                         }
                     }
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                    ||SearchType.SEARCH_PAGE == entry.getValue()
+                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector("#b_results .b_algo", new Page.WaitForSelectorOptions()
@@ -212,6 +214,9 @@ public class BiYingSearch {
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
+                                if(!href.contains("://")){
+                                    href = (String) page.evaluate("() => new URL('"+href+"', window.location.href).href");
+                                }
                                 result.setUrl(href);
                                 urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));
                             }

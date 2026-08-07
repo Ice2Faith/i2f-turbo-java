@@ -133,7 +133,8 @@ public class BaiduKaifaSearch {
                         }
                     }
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                    ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector("#content-left .ant-list-items .ant-list-item", new Page.WaitForSelectorOptions()

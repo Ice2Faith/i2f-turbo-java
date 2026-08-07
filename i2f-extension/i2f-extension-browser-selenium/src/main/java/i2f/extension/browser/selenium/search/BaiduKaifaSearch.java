@@ -138,7 +138,8 @@ public class BaiduKaifaSearch {
                         }
                     }
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                             try {

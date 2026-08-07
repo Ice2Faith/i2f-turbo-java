@@ -132,7 +132,8 @@ public class BaiduSearch {
                         }
                     }
 
-                    if (SearchType.SEARCH_FIRST == entry.getValue()) {
+                    if (SearchType.SEARCH_FIRST == entry.getValue()
+                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector("div[tpl=\"www_index\"]", new Page.WaitForSelectorOptions()
@@ -224,6 +225,9 @@ public class BaiduSearch {
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
+                                if(!href.contains("://")){
+                                    href = (String) page.evaluate("() => new URL('"+href+"', window.location.href).href");
+                                }
                                 result.setUrl(href);
                                 urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));
                             }
