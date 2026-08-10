@@ -630,19 +630,19 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
     @Override
     public String renderString(Object context, String text) {
         return RegexUtil.regexFindAndReplace(text, "[\\\\]*\\$(\\!)?\\{[^}]+\\}", (str) -> {
-            boolean null2empty=false;
-            if(str.startsWith("$!{")){
-                null2empty=true;
+            boolean null2empty = false;
+            if (str.startsWith("$!{")) {
+                null2empty = true;
                 str = str.substring("$!{".length(), str.length() - "}".length());
-            }else{
-                null2empty=false;
+            } else {
+                null2empty = false;
                 str = str.substring("${".length(), str.length() - "}".length());
             }
             str = str.trim();
             Object value = getValue(context, str);
-            if(value==null){
-                if(null2empty){
-                    value="";
+            if (value == null) {
+                if (null2empty) {
+                    value = "";
                 }
             }
             return String.valueOf(value);
