@@ -144,7 +144,7 @@ express:
     | trySegment
     | throwSegment
     | parenSegment
-    | ('!' | 'not') express
+    | prefixOperator express
     | equalValue
     | newInstance
     | invokeFunction
@@ -158,12 +158,16 @@ express:
     | express ('*' | '/' | '%') express
     | express ('+' | '-') express
     | express ('in' | 'notin' | '>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
-    | express ('&&' | 'and' | '||' | 'or') express
-    | negtiveSegment
+    | express ('&&' | 'and') express
+    | express ('||' | 'or') express
     | express '?' express ':' express
     | express pipelineFunctionSegment+
     | scriptBlock
     ;
+
+prefixOperator:
+    '-' | '!' | 'not'
+;
 
 pipelineFunctionSegment:
     '|>' '::'? functionCall
@@ -177,10 +181,6 @@ parameterList:
     NAMING ( TERM_COMMA NAMING )*
     ;
 
-
-negtiveSegment:
-    '-' express
-    ;
 
 debuggerSegment:
     'debugger' (namingBlock)? (TERM_PAREN_L conditionBlock TERM_PAREN_R)?

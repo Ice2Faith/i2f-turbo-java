@@ -5,7 +5,6 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes.*;
 import static i2f.turbo.idea.plugin.funic.lang.parser.FunicParserUtil.*;
-
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -92,17 +91,23 @@ public class FunicParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OP_BIT_LMOV | OP_BIT_RSMOV | OP_BIT_RMOV | OP_BIT_XOR  | OP_BIT_AND  | OP_BIT_OR
+  // OP_BIT_LMOV| KW_SHL | OP_BIT_RSMOV| KW_USHR | OP_BIT_RMOV| KW_SHR | OP_BIT_XOR| KW_XOR  | OP_BIT_AND| KW_BAND  | OP_BIT_OR| KW_BOR
   public static boolean bitOperatorPart(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "bitOperatorPart")) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, BIT_OPERATOR_PART, "<bit operator part>");
     r = consumeToken(b, OP_BIT_LMOV);
+      if (!r) r = consumeToken(b, KW_SHL);
     if (!r) r = consumeToken(b, OP_BIT_RSMOV);
+      if (!r) r = consumeToken(b, KW_USHR);
     if (!r) r = consumeToken(b, OP_BIT_RMOV);
+      if (!r) r = consumeToken(b, KW_SHR);
     if (!r) r = consumeToken(b, OP_BIT_XOR);
+      if (!r) r = consumeToken(b, KW_XOR);
     if (!r) r = consumeToken(b, OP_BIT_AND);
+      if (!r) r = consumeToken(b, KW_BAND);
     if (!r) r = consumeToken(b, OP_BIT_OR);
+      if (!r) r = consumeToken(b, KW_BOR);
     exit_section_(b, l, m, r, false, null);
     return r;
   }

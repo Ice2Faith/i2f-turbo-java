@@ -161,6 +161,13 @@ KW_IN: 'in';
 KW_INSTANCEOF: 'instanceof';
 KW_IS: 'is';
 
+KW_SHL: 'shl';
+KW_SHR: 'shr';
+KW_USHR: 'ushr';
+KW_XOR: 'xor';
+KW_BAND: 'band';
+KW_BOR: 'bor';
+
 KW_AND: 'and';
 KW_OR: 'or';
 
@@ -262,7 +269,7 @@ compareOperatorPart:
 ;
 
 bitOperatorPart:
-('<<' | '>>>' | '>>' | '^'  | '&'  | '|'  )
+('<<' | KW_SHL | '>>>' | KW_USHR | '>>' | KW_SHR | '^' | KW_XOR  | '&' | KW_BAND  | '|' | KW_BOR  )
 ;
 
 mathAddSubOperatorPart:

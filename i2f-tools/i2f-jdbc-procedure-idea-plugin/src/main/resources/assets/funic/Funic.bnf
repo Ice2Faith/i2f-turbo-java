@@ -110,6 +110,13 @@
     KW_INSTANCEOF= "instanceof"
     KW_IS= "is"
 
+    KW_SHL= "shl";
+    KW_SHR= "shr";
+    KW_USHR= "ushr";
+    KW_XOR= "xor";
+    KW_BAND= "band";
+    KW_BOR= "bor";
+
     KW_AND= "and"
     KW_OR= "or"
 
@@ -310,7 +317,7 @@ compareOperatorPart::=
 ;
 
 bitOperatorPart::=
-    (OP_BIT_LMOV | OP_BIT_RSMOV | OP_BIT_RMOV | OP_BIT_XOR  | OP_BIT_AND  | OP_BIT_OR  )
+    (OP_BIT_LMOV| KW_SHL | OP_BIT_RSMOV| KW_USHR | OP_BIT_RMOV| KW_SHR | OP_BIT_XOR| KW_XOR  | OP_BIT_AND| KW_BAND  | OP_BIT_OR| KW_BOR  )
 ;
 
 mathAddSubOperatorPart::=

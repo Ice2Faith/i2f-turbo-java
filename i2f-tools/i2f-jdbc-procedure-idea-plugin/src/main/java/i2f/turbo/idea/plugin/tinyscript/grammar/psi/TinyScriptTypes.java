@@ -55,7 +55,6 @@ public interface TinyScriptTypes {
   IElementType MATH_ADD_SUB_OPERATOR_PART = new TinyScriptElementType("MATH_ADD_SUB_OPERATOR_PART");
   IElementType MATH_MUL_DIV_OPERATOR_PART = new TinyScriptElementType("MATH_MUL_DIV_OPERATOR_PART");
   IElementType NAMING_BLOCK = new TinyScriptElementType("NAMING_BLOCK");
-  IElementType NEGTIVE_SEGMENT = new TinyScriptElementType("NEGTIVE_SEGMENT");
   IElementType NEW_INSTANCE = new TinyScriptElementType("NEW_INSTANCE");
   IElementType OPERATOR_SEGMENT = new TinyScriptElementType("OPERATOR_SEGMENT");
   IElementType OTC_NUMBER = new TinyScriptElementType("OTC_NUMBER");
@@ -271,8 +270,6 @@ public interface TinyScriptTypes {
         return new TinyScriptMathMulDivOperatorPartImpl(node);
       } else if (type == NAMING_BLOCK) {
         return new TinyScriptNamingBlockImpl(node);
-      } else if (type == NEGTIVE_SEGMENT) {
-        return new TinyScriptNegtiveSegmentImpl(node);
       } else if (type == NEW_INSTANCE) {
         return new TinyScriptNewInstanceImpl(node);
       } else if (type == OPERATOR_SEGMENT) {

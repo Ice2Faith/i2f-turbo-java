@@ -83,6 +83,12 @@ WS=[ \t\r\n]+
   "in"                                      { return KW_IN; }
   "instanceof"                              { return KW_INSTANCEOF; }
   "is"                                      { return KW_IS; }
+  "shl"                                     { return KW_SHL; }
+  "shr"                                     { return KW_SHR; }
+  "ushr"                                    { return KW_USHR; }
+  "xor"                                     { return KW_XOR; }
+  "band"                                    { return KW_BAND; }
+  "bor"                                     { return KW_BOR; }
   "and"                                     { return KW_AND; }
   "or"                                      { return KW_OR; }
   "go"                                      { return KW_GO; }

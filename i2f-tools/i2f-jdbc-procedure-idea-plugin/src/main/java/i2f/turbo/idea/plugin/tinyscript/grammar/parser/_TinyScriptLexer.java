@@ -18,24 +18,20 @@ public class _TinyScriptLexer implements FlexLexer {
    */
   public static final int YYEOF = -1;
 
-  /**
-   * initial size of the lookahead buffer
-   */
+  /** initial size of the lookahead buffer */
   private static final int ZZ_BUFFERSIZE = 16384;
 
-  /**
-   * lexical states
-   */
+  /** lexical states */
   public static final int YYINITIAL = 0;
 
   /**
    * ZZ_LEXSTATE[l] is the state in the DFA for the lexical state l
    * ZZ_LEXSTATE[l+1] is the state in the DFA for the lexical state l
-   * at the beginning of a line
+   *                  at the beginning of a line
    * l is of the form l = 2*k, k a non negative integer
    */
   private static final int ZZ_LEXSTATE[] = {
-          0, 0
+     0, 0
   };
 
   /**
@@ -540,9 +536,7 @@ public class _TinyScriptLexer implements FlexLexer {
   @SuppressWarnings("unused")
   private int yyline;
 
-  /**
-   * Number of characters from the last newline up to the start of the matched text.
-   */
+  /** Number of characters from the last newline up to the start of the matched text. */
   @SuppressWarnings("unused")
   protected int yycolumn;
 
@@ -560,14 +554,14 @@ public class _TinyScriptLexer implements FlexLexer {
 
   /* user code: */
   public _TinyScriptLexer() {
-    this((java.io.Reader) null);
+    this((java.io.Reader)null);
   }
 
 
   /**
    * Creates a new scanner
    *
-   * @param in the java.io.Reader to read input from.
+   * @param   in  the java.io.Reader to read input from.
    */
   public _TinyScriptLexer(java.io.Reader in) {
     this.zzReader = in;
@@ -603,7 +597,7 @@ public class _TinyScriptLexer implements FlexLexer {
   public void reset(CharSequence buffer, int start, int end, int initialState) {
     zzBuffer = buffer;
     zzCurrentPos = zzMarkedPos = zzStartRead = start;
-    zzAtEOF = false;
+    zzAtEOF  = false;
     zzAtBOL = true;
     zzEndRead = end;
     yybegin(initialState);
@@ -612,8 +606,9 @@ public class _TinyScriptLexer implements FlexLexer {
   /**
    * Refills the input buffer.
    *
-   * @return {@code false}, iff there was new input.
-   * @throws java.io.IOException if any I/O-Error occurs
+   * @return      {@code false}, iff there was new input.
+   *
+   * @exception java.io.IOException  if any I/O-Error occurs
    */
   private boolean zzRefill() throws java.io.IOException {
     return true;
@@ -649,15 +644,16 @@ public class _TinyScriptLexer implements FlexLexer {
   /**
    * Returns the character at position {@code pos} from the
    * matched text.
-   * <p>
+   *
    * It is equivalent to yytext().charAt(pos), but faster
    *
    * @param pos the position of the character to fetch.
    *            A value from 0 to yylength()-1.
+   *
    * @return the character at position pos
    */
   public final char yycharat(int pos) {
-    return zzBuffer.charAt(zzStartRead + pos);
+    return zzBuffer.charAt(zzStartRead+pos);
   }
 
 
@@ -665,23 +661,23 @@ public class _TinyScriptLexer implements FlexLexer {
    * Returns the length of the matched text region.
    */
   public final int yylength() {
-    return zzMarkedPos - zzStartRead;
+    return zzMarkedPos -zzStartRead;
   }
 
 
   /**
    * Reports an error that occurred while scanning.
-   * <p>
+   *
    * In a wellformed scanner (no or only correct usage of
    * yypushback(int) and a match-all fallback rule) this method
    * will only be called with things that "Can't Possibly Happen".
    * If this method is called, something is seriously wrong
    * (e.g. a JFlex bug producing a faulty scanner etc.).
-   * <p>
+   *
    * Usual syntax/scanner level error handling should be done
    * in error fallback rules.
    *
-   * @param errorCode the code of the errormessage to display
+   * @param   errorCode  the code of the errormessage to display
    */
   private void zzScanError(int errorCode) {
     String message;
@@ -704,7 +700,7 @@ public class _TinyScriptLexer implements FlexLexer {
    *                This number must not be greater than yylength()!
    */
   public void yypushback(int number) {
-    if (number > yylength())
+    if (number > yylength() )
       zzScanError(ZZ_PUSHBACK_2BIG);
 
     zzMarkedPos -= number;
@@ -718,7 +714,8 @@ public class _TinyScriptLexer implements FlexLexer {
    * @return the next token
    * @exception java.io.IOException  if any I/O-Error occurs
    */
-  public IElementType advance() throws java.io.IOException {
+  public IElementType advance() throws java.io.IOException
+  {
     int zzInput;
     int zzAction;
 
@@ -743,13 +740,12 @@ public class _TinyScriptLexer implements FlexLexer {
 
       // set up zzAction for empty match case:
       int zzAttributes = zzAttrL[zzState];
-      if ((zzAttributes & 1) == 1) {
+      if ((zzAttributes & 1) == 1 ) {
         zzAction = zzState;
       }
 
 
-      zzForAction:
-      {
+      zzForAction: {
         while (true) {
 
           if (zzCurrentPosL < zzEndReadL) {
@@ -776,12 +772,12 @@ public class _TinyScriptLexer implements FlexLexer {
               zzCurrentPosL += Character.charCount(zzInput);
             }
           }
-          int zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput)];
+          int zzNext = zzTransL[zzRowMapL[zzState] + zzCMap(zzInput) ];
           if (zzNext == -1) break zzForAction;
           zzState = zzNext;
 
           zzAttributes = zzAttrL[zzState];
-          if ((zzAttributes & 1) == 1) {
+          if ((zzAttributes & 1) == 1 ) {
             zzAction = zzState;
             zzMarkedPosL = zzCurrentPosL;
             if ((zzAttributes & 8) == 8) break zzForAction;
