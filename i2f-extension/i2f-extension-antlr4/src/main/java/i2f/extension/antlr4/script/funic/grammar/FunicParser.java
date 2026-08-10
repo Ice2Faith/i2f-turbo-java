@@ -1,4 +1,4 @@
-// Generated from /src/main/java/i2f/extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
@@ -42,8 +42,9 @@ public class FunicParser extends Parser {
             KW_CONTINUE = 84, KW_BREAK = 85, KW_FOR = 86, KW_DO = 87, KW_WHILE = 88, KW_IF = 89,
             KW_ELIF = 90, KW_ELSE = 91, KW_AS = 92, KW_NEW = 93, KW_NOT = 94, KW_TEQ = 95, KW_TNEQ = 96,
             KW_GTE = 97, KW_LTE = 98, KW_GT = 99, KW_LT = 100, KW_NEQ = 101, KW_NE = 102, KW_EQ = 103,
-            KW_IN = 104, KW_INSTANCEOF = 105, KW_IS = 106, KW_AND = 107, KW_OR = 108, KW_GO = 109,
-            KW_SYNCHRONIZED = 110, KW_IMPORT = 111, KW_DEBUGGER = 112, IDENTIFIER = 113, WS = 114;
+            KW_IN = 104, KW_INSTANCEOF = 105, KW_IS = 106, KW_SHL = 107, KW_SHR = 108, KW_USHR = 109,
+            KW_XOR = 110, KW_BAND = 111, KW_BOR = 112, KW_AND = 113, KW_OR = 114, KW_GO = 115,
+            KW_SYNCHRONIZED = 116, KW_IMPORT = 117, KW_DEBUGGER = 118, IDENTIFIER = 119, WS = 120;
     public static final int
             RULE_root = 0, RULE_script = 1, RULE_express = 2, RULE_debuggerExpress = 3,
             RULE_extractExpress = 4, RULE_extractPairs = 5, RULE_extractPair = 6,
@@ -112,8 +113,9 @@ public class FunicParser extends Parser {
                 "'try'", "'catch'", "'finally'", "'throw'", "'return'", "'continue'",
                 "'break'", "'for'", "'do'", "'while'", "'if'", "'elif'", "'else'", "'as'",
                 "'new'", "'not'", "'teq'", "'tneq'", "'gte'", "'lte'", "'gt'", "'lt'",
-                "'neq'", "'ne'", "'eq'", "'in'", "'instanceof'", "'is'", "'and'", "'or'",
-                "'go'", "'synchronized'", "'import'", "'debugger'"
+                "'neq'", "'ne'", "'eq'", "'in'", "'instanceof'", "'is'", "'shl'", "'shr'",
+                "'ushr'", "'xor'", "'band'", "'bor'", "'and'", "'or'", "'go'", "'synchronized'",
+                "'import'", "'debugger'"
         };
     }
 
@@ -136,8 +138,9 @@ public class FunicParser extends Parser {
                 "KW_BREAK", "KW_FOR", "KW_DO", "KW_WHILE", "KW_IF", "KW_ELIF", "KW_ELSE",
                 "KW_AS", "KW_NEW", "KW_NOT", "KW_TEQ", "KW_TNEQ", "KW_GTE", "KW_LTE",
                 "KW_GT", "KW_LT", "KW_NEQ", "KW_NE", "KW_EQ", "KW_IN", "KW_INSTANCEOF",
-                "KW_IS", "KW_AND", "KW_OR", "KW_GO", "KW_SYNCHRONIZED", "KW_IMPORT",
-                "KW_DEBUGGER", "IDENTIFIER", "WS"
+                "KW_IS", "KW_SHL", "KW_SHR", "KW_USHR", "KW_XOR", "KW_BAND", "KW_BOR",
+                "KW_AND", "KW_OR", "KW_GO", "KW_SYNCHRONIZED", "KW_IMPORT", "KW_DEBUGGER",
+                "IDENTIFIER", "WS"
         };
     }
 
@@ -1106,7 +1109,7 @@ public class FunicParser extends Parser {
                 setState(282);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(281);
                         extractPairs();
@@ -1610,6 +1613,30 @@ public class FunicParser extends Parser {
 
     @SuppressWarnings("CheckReturnValue")
     public static class BitOperatorPartContext extends ParserRuleContext {
+        public TerminalNode KW_SHL() {
+            return getToken(FunicParser.KW_SHL, 0);
+        }
+
+        public TerminalNode KW_USHR() {
+            return getToken(FunicParser.KW_USHR, 0);
+        }
+
+        public TerminalNode KW_SHR() {
+            return getToken(FunicParser.KW_SHR, 0);
+        }
+
+        public TerminalNode KW_XOR() {
+            return getToken(FunicParser.KW_XOR, 0);
+        }
+
+        public TerminalNode KW_BAND() {
+            return getToken(FunicParser.KW_BAND, 0);
+        }
+
+        public TerminalNode KW_BOR() {
+            return getToken(FunicParser.KW_BOR, 0);
+        }
+
         public BitOperatorPartContext(ParserRuleContext parent, int invokingState) {
             super(parent, invokingState);
         }
@@ -1646,7 +1673,7 @@ public class FunicParser extends Parser {
             {
                 setState(328);
                 _la = _input.LA(1);
-                if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & 66060288L) != 0))) {
+                if (!((((_la) & ~0x3f) == 0 && ((1L << _la) & 66060288L) != 0) || ((((_la - 107)) & ~0x3f) == 0 && ((1L << (_la - 107)) & 63L) != 0))) {
                     _errHandler.recoverInline(this);
                 } else {
                     if (_input.LA(1) == Token.EOF) matchedEOF = true;
@@ -3244,7 +3271,7 @@ public class FunicParser extends Parser {
                 setState(464);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(463);
                         express(0);
@@ -3256,7 +3283,7 @@ public class FunicParser extends Parser {
                 setState(468);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(467);
                         express(0);
@@ -3268,7 +3295,7 @@ public class FunicParser extends Parser {
                 setState(472);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(471);
                         express(0);
@@ -3735,7 +3762,7 @@ public class FunicParser extends Parser {
                 setState(520);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(519);
                         script();
@@ -3879,7 +3906,7 @@ public class FunicParser extends Parser {
                 setState(538);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -4611683819404132352L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 562949953421315L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -4611683819404132352L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 36028797018963971L) != 0)) {
                     {
                         setState(530);
                         unpackMapExpress();
@@ -5080,7 +5107,7 @@ public class FunicParser extends Parser {
                 setState(642);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972741171069550540L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(634);
                         functionArgument();
@@ -5239,7 +5266,7 @@ public class FunicParser extends Parser {
                 setState(661);
                 _errHandler.sync(this);
                 _la = _input.LA(1);
-                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972738972046294988L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 1090717212274687L) != 0)) {
+                if ((((_la) & ~0x3f) == 0 && ((1L << _la) & -972738972046294988L) != 0) || ((((_la - 64)) & ~0x3f) == 0 && ((1L << (_la - 64)) & 69805795901763583L) != 0)) {
                     {
                         setState(653);
                         unpackListExpress();
@@ -6559,7 +6586,7 @@ public class FunicParser extends Parser {
     }
 
     public static final String _serializedATN =
-            "\u0004\u0001r\u02e6\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
+            "\u0004\u0001x\u02e6\u0002\u0000\u0007\u0000\u0002\u0001\u0007\u0001\u0002" +
                     "\u0002\u0007\u0002\u0002\u0003\u0007\u0003\u0002\u0004\u0007\u0004\u0002" +
                     "\u0005\u0007\u0005\u0002\u0006\u0007\u0006\u0002\u0007\u0007\u0007\u0002" +
                     "\b\u0007\b\u0002\t\u0007\t\u0002\n\u0007\n\u0002\u000b\u0007\u000b\u0002" +
@@ -6659,7 +6686,7 @@ public class FunicParser extends Parser {
                     "\b\n\f\u000e\u0010\u0012\u0014\u0016\u0018\u001a\u001c\u001e \"$&(*,." +
                     "02468:<>@BDFHJLNPRTVXZ\\^`bdfhjlnprtvxz|~\u0080\u0082\u0084\u0086\u0088" +
                     "\u008a\u008c\u008e\u0090\u0092\u0094\u0096\u0098\u009a\u0000\u0010\u0002" +
-                    "\u0000\t\tkk\u0002\u0000\n\nll\u0001\u0000\u0014\u0019\u0001\u0000\u001a" +
+                    "\u0000\t\tqq\u0002\u0000\n\nrr\u0002\u0000\u0014\u0019kp\u0001\u0000\u001a" +
                     "\u001b\u0001\u0000\u001c\u001f\u0001\u0000 !\u0003\u0000\u001b\u001b\"" +
                     "#^^\u0001\u0000MN\u0001\u0000+,\u0002\u0000\u001f\u001f\"\"\u0001\u0000" +
                     "/6\u0001\u0000@A\u0001\u0000>?\u0001\u0000<=\u0002\u0000CEII\u0001\u0000" +
@@ -6774,7 +6801,7 @@ public class FunicParser extends Parser {
                     "\u0000\u0000\u0000\u0108\u0106\u0001\u0000\u0000\u0000\u0109\u010c\u0001" +
                     "\u0000\u0000\u0000\u010a\u0108\u0001\u0000\u0000\u0000\u010a\u010b\u0001" +
                     "\u0000\u0000\u0000\u010b\u0005\u0001\u0000\u0000\u0000\u010c\u010a\u0001" +
-                    "\u0000\u0000\u0000\u010d\u010f\u0005p\u0000\u0000\u010e\u0110\u0003z=" +
+                    "\u0000\u0000\u0000\u010d\u010f\u0005v\u0000\u0000\u010e\u0110\u0003z=" +
                     "\u0000\u010f\u010e\u0001\u0000\u0000\u0000\u010f\u0110\u0001\u0000\u0000" +
                     "\u0000\u0110\u0115\u0001\u0000\u0000\u0000\u0111\u0112\u0005\u0002\u0000" +
                     "\u0000\u0112\u0113\u0003\u0004\u0002\u0000\u0113\u0114\u0005\u0003\u0000" +
@@ -6828,22 +6855,22 @@ public class FunicParser extends Parser {
                     "\u015e\u0001\u0000\u0000\u0000\u015c\u015e\u0003p8\u0000\u015d\u0153\u0001" +
                     "\u0000\u0000\u0000\u015d\u0154\u0001\u0000\u0000\u0000\u015d\u0156\u0001" +
                     "\u0000\u0000\u0000\u015d\u015c\u0001\u0000\u0000\u0000\u015e\u001f\u0001" +
-                    "\u0000\u0000\u0000\u015f\u0160\u0005n\u0000\u0000\u0160\u0161\u0005\u0002" +
+                    "\u0000\u0000\u0000\u015f\u0160\u0005t\u0000\u0000\u0160\u0161\u0005\u0002" +
                     "\u0000\u0000\u0161\u0162\u0003\u0004\u0002\u0000\u0162\u0163\u0005\u0003" +
                     "\u0000\u0000\u0163\u0164\u0003L&\u0000\u0164!\u0001\u0000\u0000\u0000" +
                     "\u0165\u0166\u0003r9\u0000\u0166\u0167\u0005&\u0000\u0000\u0167\u0168" +
-                    "\u0003L&\u0000\u0168#\u0001\u0000\u0000\u0000\u0169\u016a\u0005o\u0000" +
+                    "\u0003L&\u0000\u0168#\u0001\u0000\u0000\u0000\u0169\u016a\u0005u\u0000" +
                     "\u0000\u016a\u016c\u0003z=\u0000\u016b\u016d\u0005\'\u0000\u0000\u016c" +
                     "\u016b\u0001\u0000\u0000\u0000\u016c\u016d\u0001\u0000\u0000\u0000\u016d" +
-                    "%\u0001\u0000\u0000\u0000\u016e\u016f\u0005m\u0000\u0000\u016f\u0175\u0003" +
-                    "\"\u0011\u0000\u0170\u0171\u0005m\u0000\u0000\u0171\u0175\u0003L&\u0000" +
-                    "\u0172\u0173\u0005m\u0000\u0000\u0173\u0175\u0003\u0004\u0002\u0000\u0174" +
+                    "%\u0001\u0000\u0000\u0000\u016e\u016f\u0005s\u0000\u0000\u016f\u0175\u0003" +
+                    "\"\u0011\u0000\u0170\u0171\u0005s\u0000\u0000\u0171\u0175\u0003L&\u0000" +
+                    "\u0172\u0173\u0005s\u0000\u0000\u0173\u0175\u0003\u0004\u0002\u0000\u0174" +
                     "\u016e\u0001\u0000\u0000\u0000\u0174\u0170\u0001\u0000\u0000\u0000\u0174" +
                     "\u0172\u0001\u0000\u0000\u0000\u0175\'\u0001\u0000\u0000\u0000\u0176\u0177" +
                     "\u0005(\u0000\u0000\u0177\u0179\u0003\u0004\u0002\u0000\u0178\u0176\u0001" +
                     "\u0000\u0000\u0000\u0179\u017a\u0001\u0000\u0000\u0000\u017a\u0178\u0001" +
                     "\u0000\u0000\u0000\u017a\u017b\u0001\u0000\u0000\u0000\u017b)\u0001\u0000" +
-                    "\u0000\u0000\u017c\u017d\u0007\u0007\u0000\u0000\u017d\u017e\u0005q\u0000" +
+                    "\u0000\u0000\u017c\u017d\u0007\u0007\u0000\u0000\u017d\u017e\u0005w\u0000" +
                     "\u0000\u017e\u0180\u0003.\u0017\u0000\u017f\u0181\u0003,\u0016\u0000\u0180" +
                     "\u017f\u0001\u0000\u0000\u0000\u0180\u0181\u0001\u0000\u0000\u0000\u0181" +
                     "\u0182\u0001\u0000\u0000\u0000\u0182\u0183\u0003L&\u0000\u0183+\u0001" +
@@ -6856,9 +6883,9 @@ public class FunicParser extends Parser {
                     "\u0001\u0000\u0000\u0000\u0190\u0188\u0001\u0000\u0000\u0000\u0190\u0191" +
                     "\u0001\u0000\u0000\u0000\u0191\u0192\u0001\u0000\u0000\u0000\u0192\u0193" +
                     "\u0005\u0003\u0000\u0000\u0193/\u0001\u0000\u0000\u0000\u0194\u0195\u0003" +
-                    "z=\u0000\u0195\u0196\u0005q\u0000\u0000\u0196\u019c\u0001\u0000\u0000" +
-                    "\u0000\u0197\u0198\u0005q\u0000\u0000\u0198\u0199\u0005\b\u0000\u0000" +
-                    "\u0199\u019c\u0003z=\u0000\u019a\u019c\u0005q\u0000\u0000\u019b\u0194" +
+                    "z=\u0000\u0195\u0196\u0005w\u0000\u0000\u0196\u019c\u0001\u0000\u0000" +
+                    "\u0000\u0197\u0198\u0005w\u0000\u0000\u0198\u0199\u0005\b\u0000\u0000" +
+                    "\u0199\u019c\u0003z=\u0000\u019a\u019c\u0005w\u0000\u0000\u019b\u0194" +
                     "\u0001\u0000\u0000\u0000\u019b\u0197\u0001\u0000\u0000\u0000\u019b\u019a" +
                     "\u0001\u0000\u0000\u0000\u019c1\u0001\u0000\u0000\u0000\u019d\u019e\u0005" +
                     "O\u0000\u0000\u019e\u01a2\u0003L&\u0000\u019f\u01a1\u00034\u001a\u0000" +
@@ -6874,7 +6901,7 @@ public class FunicParser extends Parser {
                     "\u0001\u0000\u0000\u0000\u01b1\u01b4\u0001\u0000\u0000\u0000\u01b2\u01b0" +
                     "\u0001\u0000\u0000\u0000\u01b3\u01ab\u0001\u0000\u0000\u0000\u01b3\u01b4" +
                     "\u0001\u0000\u0000\u0000\u01b4\u01b5\u0001\u0000\u0000\u0000\u01b5\u01b6" +
-                    "\u0005q\u0000\u0000\u01b6\u01b7\u0005\u0003\u0000\u0000\u01b7\u01b8\u0003" +
+                    "\u0005w\u0000\u0000\u01b6\u01b7\u0005\u0003\u0000\u0000\u01b7\u01b8\u0003" +
                     "L&\u0000\u01b85\u0001\u0000\u0000\u0000\u01b9\u01ba\u0005R\u0000\u0000" +
                     "\u01ba\u01bb\u0003\u0004\u0002\u0000\u01bb7\u0001\u0000\u0000\u0000\u01bc" +
                     "\u01be\u0005S\u0000\u0000\u01bd\u01bf\u0003\u0004\u0002\u0000\u01be\u01bd" +
@@ -6882,7 +6909,7 @@ public class FunicParser extends Parser {
                     "\u0000\u0000\u0000\u01c0\u01c1\u0005T\u0000\u0000\u01c1;\u0001\u0000\u0000" +
                     "\u0000\u01c2\u01c3\u0005U\u0000\u0000\u01c3=\u0001\u0000\u0000\u0000\u01c4" +
                     "\u01c5\u0005V\u0000\u0000\u01c5\u01c6\u0005\u0002\u0000\u0000\u01c6\u01c7" +
-                    "\u0005q\u0000\u0000\u01c7\u01c8\u0003\u0004\u0002\u0000\u01c8\u01c9\u0005" +
+                    "\u0005w\u0000\u0000\u01c7\u01c8\u0003\u0004\u0002\u0000\u01c8\u01c9\u0005" +
                     ")\u0000\u0000\u01c9\u01ca\u0003\u0004\u0002\u0000\u01ca\u01cb\u0005\u0003" +
                     "\u0000\u0000\u01cb\u01cc\u0003L&\u0000\u01cc?\u0001\u0000\u0000\u0000" +
                     "\u01cd\u01ce\u0005V\u0000\u0000\u01ce\u01d0\u0005\u0002\u0000\u0000\u01cf" +
@@ -6895,7 +6922,7 @@ public class FunicParser extends Parser {
                     "\u01d9\u0001\u0000\u0000\u0000\u01d9\u01da\u0001\u0000\u0000\u0000\u01da" +
                     "\u01db\u0005\u0003\u0000\u0000\u01db\u01dc\u0003L&\u0000\u01dcA\u0001" +
                     "\u0000\u0000\u0000\u01dd\u01de\u0005V\u0000\u0000\u01de\u01df\u0005\u0002" +
-                    "\u0000\u0000\u01df\u01e0\u0005q\u0000\u0000\u01e0\u01e1\u0005\b\u0000" +
+                    "\u0000\u0000\u01df\u01e0\u0005w\u0000\u0000\u01e0\u01e1\u0005\b\u0000" +
                     "\u0000\u01e1\u01e2\u0003\u0004\u0002\u0000\u01e2\u01e3\u0005\u0003\u0000" +
                     "\u0000\u01e3\u01e4\u0003L&\u0000\u01e4C\u0001\u0000\u0000\u0000\u01e5" +
                     "\u01e6\u0005W\u0000\u0000\u01e6\u01e7\u0003L&\u0000\u01e7\u01e8\u0005" +
@@ -6932,7 +6959,7 @@ public class FunicParser extends Parser {
                     "\u0000\u0000\u0000\u0221\u0222\u0005)\u0000\u0000\u0222\u0225\u0003\u0004" +
                     "\u0002\u0000\u0223\u0225\u0003T*\u0000\u0224\u0221\u0001\u0000\u0000\u0000" +
                     "\u0224\u0223\u0001\u0000\u0000\u0000\u0225S\u0001\u0000\u0000\u0000\u0226" +
-                    "\u022a\u0005q\u0000\u0000\u0227\u022a\u0003\u008cF\u0000\u0228\u022a\u0003" +
+                    "\u022a\u0005w\u0000\u0000\u0227\u022a\u0003\u008cF\u0000\u0228\u022a\u0003" +
                     "\u008eG\u0000\u0229\u0226\u0001\u0000\u0000\u0000\u0229\u0227\u0001\u0000" +
                     "\u0000\u0000\u0229\u0228\u0001\u0000\u0000\u0000\u022a\u022b\u0001\u0000" +
                     "\u0000\u0000\u022b\u022c\u0005\b\u0000\u0000\u022c\u022f\u0003\u0004\u0002" +
@@ -6940,7 +6967,7 @@ public class FunicParser extends Parser {
                     "\u022e\u022d\u0001\u0000\u0000\u0000\u022fU\u0001\u0000\u0000\u0000\u0230" +
                     "\u0231\u0005*\u0000\u0000\u0231\u0232\u0003\u0004\u0002\u0000\u0232\u0233" +
                     "\u0005\b\u0000\u0000\u0233\u0234\u0003\u0004\u0002\u0000\u0234W\u0001" +
-                    "\u0000\u0000\u0000\u0235\u0236\u0007\b\u0000\u0000\u0236\u0237\u0005q" +
+                    "\u0000\u0000\u0000\u0235\u0236\u0007\b\u0000\u0000\u0236\u0237\u0005w" +
                     "\u0000\u0000\u0237Y\u0001\u0000\u0000\u0000\u0238\u0239\u0005\u0002\u0000" +
                     "\u0000\u0239\u023a\u0003\u0004\u0002\u0000\u023a\u023b\u0005\u0003\u0000" +
                     "\u0000\u023b[\u0001\u0000\u0000\u0000\u023c\u023d\u0005]\u0000\u0000\u023d" +
@@ -6964,13 +6991,13 @@ public class FunicParser extends Parser {
                     "\u0000\u0262\u0263\u0007\u0005\u0000\u0000\u0263i\u0001\u0000\u0000\u0000" +
                     "\u0264\u0265\u0007\n\u0000\u0000\u0265\u0266\u0003\u0004\u0002\u0000\u0266" +
                     "k\u0001\u0000\u0000\u0000\u0267\u0268\u0003\u0080@\u0000\u0268\u0269\u0005" +
-                    "q\u0000\u0000\u0269m\u0001\u0000\u0000\u0000\u026a\u026b\u0003\u0080@" +
+                    "w\u0000\u0000\u0269m\u0001\u0000\u0000\u0000\u026a\u026b\u0003\u0080@" +
                     "\u0000\u026b\u026c\u0003p8\u0000\u026c\u026d\u0003r9\u0000\u026do\u0001" +
                     "\u0000\u0000\u0000\u026e\u026f\u00057\u0000\u0000\u026f\u0270\u0003\u0004" +
                     "\u0002\u0000\u0270\u0271\u00058\u0000\u0000\u0271\u0278\u0001\u0000\u0000" +
                     "\u0000\u0272\u0273\u0005\u000f\u0000\u0000\u0273\u0274\u0003\u0004\u0002" +
                     "\u0000\u0274\u0275\u0005\r\u0000\u0000\u0275\u0278\u0001\u0000\u0000\u0000" +
-                    "\u0276\u0278\u0005q\u0000\u0000\u0277\u026e\u0001\u0000\u0000\u0000\u0277" +
+                    "\u0276\u0278\u0005w\u0000\u0000\u0277\u026e\u0001\u0000\u0000\u0000\u0277" +
                     "\u0272\u0001\u0000\u0000\u0000\u0277\u0276\u0001\u0000\u0000\u0000\u0278" +
                     "q\u0001\u0000\u0000\u0000\u0279\u0282\u0005\u0002\u0000\u0000\u027a\u027f" +
                     "\u0003t:\u0000\u027b\u027c\u0005\u0007\u0000\u0000\u027c\u027e\u0003t" +
@@ -6979,7 +7006,7 @@ public class FunicParser extends Parser {
                     "\u0000\u0280\u0283\u0001\u0000\u0000\u0000\u0281\u027f\u0001\u0000\u0000" +
                     "\u0000\u0282\u027a\u0001\u0000\u0000\u0000\u0282\u0283\u0001\u0000\u0000" +
                     "\u0000\u0283\u0284\u0001\u0000\u0000\u0000\u0284\u0285\u0005\u0003\u0000" +
-                    "\u0000\u0285s\u0001\u0000\u0000\u0000\u0286\u0287\u0005q\u0000\u0000\u0287" +
+                    "\u0000\u0285s\u0001\u0000\u0000\u0000\u0286\u0287\u0005w\u0000\u0000\u0287" +
                     "\u0288\u0005\b\u0000\u0000\u0288\u028b\u0003\u0004\u0002\u0000\u0289\u028b" +
                     "\u0003\u0004\u0002\u0000\u028a\u0286\u0001\u0000\u0000\u0000\u028a\u0289" +
                     "\u0001\u0000\u0000\u0000\u028bu\u0001\u0000\u0000\u0000\u028c\u0295\u0005" +
@@ -6994,8 +7021,8 @@ public class FunicParser extends Parser {
                     "\u029b\u0005.\u0000\u0000\u029bw\u0001\u0000\u0000\u0000\u029c\u029e\u0005" +
                     ")\u0000\u0000\u029d\u029c\u0001\u0000\u0000\u0000\u029d\u029e\u0001\u0000" +
                     "\u0000\u0000\u029e\u029f\u0001\u0000\u0000\u0000\u029f\u02a0\u0003\u0004" +
-                    "\u0002\u0000\u02a0y\u0001\u0000\u0000\u0000\u02a1\u02a6\u0005q\u0000\u0000" +
-                    "\u02a2\u02a3\u0005+\u0000\u0000\u02a3\u02a5\u0005q\u0000\u0000\u02a4\u02a2" +
+                    "\u0002\u0000\u02a0y\u0001\u0000\u0000\u0000\u02a1\u02a6\u0005w\u0000\u0000" +
+                    "\u02a2\u02a3\u0005+\u0000\u0000\u02a3\u02a5\u0005w\u0000\u0000\u02a4\u02a2" +
                     "\u0001\u0000\u0000\u0000\u02a5\u02a8\u0001\u0000\u0000\u0000\u02a6\u02a4" +
                     "\u0001\u0000\u0000\u0000\u02a6\u02a7\u0001\u0000\u0000\u0000\u02a7{\u0001" +
                     "\u0000\u0000\u0000\u02a8\u02a6\u0001\u0000\u0000\u0000\u02a9\u02aa\u0003" +
@@ -7014,7 +7041,7 @@ public class FunicParser extends Parser {
                     ">\u0000\u02c2\u02be\u0001\u0000\u0000\u0000\u02c2\u02bf\u0001\u0000\u0000" +
                     "\u0000\u02c2\u02c0\u0001\u0000\u0000\u0000\u02c2\u02c1\u0001\u0000\u0000" +
                     "\u0000\u02c3\u0083\u0001\u0000\u0000\u0000\u02c4\u02c5\u0005B\u0000\u0000" +
-                    "\u02c5\u0085\u0001\u0000\u0000\u0000\u02c6\u02c7\u0005q\u0000\u0000\u02c7" +
+                    "\u02c5\u0085\u0001\u0000\u0000\u0000\u02c6\u02c7\u0005w\u0000\u0000\u02c7" +
                     "\u0087\u0001\u0000\u0000\u0000\u02c8\u02ce\u0003\u0090H\u0000\u02c9\u02ce" +
                     "\u0003\u008aE\u0000\u02ca\u02ce\u0003\u0092I\u0000\u02cb\u02ce\u0003\u0098" +
                     "L\u0000\u02cc\u02ce\u0003\u009aM\u0000\u02cd\u02c8\u0001\u0000\u0000\u0000" +

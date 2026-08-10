@@ -466,6 +466,8 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv << rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("shl", doubleOperatorFunctionMap.get("<<"));
+
         doubleOperatorFunctionMap.put(">>>", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
             rightValue = unwrapSupplierValue(rightValue);
@@ -480,6 +482,8 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv >>> rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("ushr", doubleOperatorFunctionMap.get(">>>"));
+
 
         doubleOperatorFunctionMap.put(">>", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
@@ -495,6 +499,7 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv >> rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("shr", doubleOperatorFunctionMap.get(">>"));
 
         doubleOperatorFunctionMap.put("^", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
@@ -510,6 +515,8 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv ^ rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("xor", doubleOperatorFunctionMap.get("^"));
+
 
         doubleOperatorFunctionMap.put("&", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
@@ -525,6 +532,8 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv & rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("band", doubleOperatorFunctionMap.get("&"));
+
 
         doubleOperatorFunctionMap.put("|", (leftValue, rightValue, visitor) -> {
             leftValue = unwrapSupplierValue(leftValue);
@@ -540,6 +549,8 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv | rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
+        doubleOperatorFunctionMap.put("bor", doubleOperatorFunctionMap.get("bor"));
+
     }
 
     protected Object unwrapSupplierValue(Object value) {

@@ -1,4 +1,4 @@
-// Generated from /src/main/java/i2f/extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
+// Generated from /extension/antlr4/script/funic/rule/Funic.g4 by ANTLR 4.13.2
 
 package i2f.extension.antlr4.script.funic.grammar;
 
