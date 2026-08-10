@@ -56,7 +56,7 @@ public class RobotTools {
             throw new IllegalStateException("current application not enable tmp file");
         }
 
-        System.setProperty("java.awt.headless", "false");
+        DialogBoxes.enableHeadless(false);
 
         boolean ok = DialogBoxes.confirm("即将进行屏幕抓取，请准备好要提供的屏幕显示，确认后将在倒计时结束后进行截图");
         if (!ok) {
