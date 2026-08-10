@@ -295,19 +295,17 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.ScriptBlockContext) {
                 TinyScriptParser.ScriptBlockContext nextCtx = (TinyScriptParser.ScriptBlockContext) item;
                 return visitScriptBlock(nextCtx);
-            } else if (item instanceof TerminalNode) {
-                if (count == 2) {
-                    TerminalNode termNode = (TerminalNode) ctx.getChild(0);
-                    String term = (String) visitTerminal(termNode);
-                    String prefixOperator = term;
-                    ParseTree expressNode = ctx.getChild(1);
-                    if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
-                        throw new IllegalArgumentException("invalid double-operator right node, expect express, but found type: " + expressNode.getClass());
-                    }
-                    TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
-                    Object value = visitExpress(expressCtx);
-                    return resolver.resolvePrefixOperator(context, prefixOperator, value);
+            } else if (item instanceof TinyScriptParser.PrefixOperatorContext) {
+                TinyScriptParser.PrefixOperatorContext termNode = (TinyScriptParser.PrefixOperatorContext) item;
+                String term = (String) visitPrefixOperator(termNode);
+                String prefixOperator = term;
+                ParseTree expressNode = ctx.getChild(1);
+                if (!(expressNode instanceof TinyScriptParser.ExpressContext)) {
+                    throw new IllegalArgumentException("invalid prefix-operator right node, expect express, but found type: " + expressNode.getClass());
                 }
+                TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) expressNode;
+                Object value = visitExpress(expressCtx);
+                return resolver.resolvePrefixOperator(context, prefixOperator, value);
             } else if (item instanceof TinyScriptParser.ExpressContext) {
                 boolean isPipelineCall = true;
                 List<TinyScriptParser.PipelineFunctionSegmentContext> pipelineList = new ArrayList<>();
@@ -469,9 +467,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (item instanceof TinyScriptParser.ThrowSegmentContext) {
                 TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) item;
                 return visitThrowSegment(nextCtx);
-            } else if (item instanceof TinyScriptParser.NegtiveSegmentContext) {
-                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) item;
-                return visitNegtiveSegment(nextCtx);
             } else if (item instanceof TinyScriptParser.StaticEnumValueContext) {
                 TinyScriptParser.StaticEnumValueContext nextCtx = (TinyScriptParser.StaticEnumValueContext) item;
                 return visitStaticEnumValue(nextCtx);
@@ -492,29 +487,19 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
     }
 
     @Override
-    public Object visitNegtiveSegment(TinyScriptParser.NegtiveSegmentContext ctx) {
+    public Object visitPrefixOperator(TinyScriptParser.PrefixOperatorContext ctx) {
         try {
             debugNode(ctx);
             int count = ctx.getChildCount();
-            if (count != 2) {
-                throw new IllegalArgumentException("missing negtive segment block!");
+            if (count < 1) {
+                throw new IllegalArgumentException("missing prefix operator block!");
             }
-            ParseTree termNode = ctx.getChild(0);
-            ParseTree objectNode = ctx.getChild(1);
-            if (!(termNode instanceof TerminalNode)) {
-                throw new IllegalArgumentException("invalid negtive segment block, expect terminal node, but found " + ctx.getClass() + "!");
+            ParseTree item = ctx.getChild(0);
+            if (!(item instanceof TerminalNode)) {
+                throw new IllegalArgumentException("invalid prefix operator block, expect terminal, but found " + ctx.getClass() + "!");
             }
-            if (!(objectNode instanceof TinyScriptParser.ExpressContext)) {
-                throw new IllegalArgumentException("invalid negtive segment block, expect express node, but found " + ctx.getClass() + "!");
-            }
-            TerminalNode termCtx = (TerminalNode) termNode;
-            String term = (String) visitTerminal(termCtx);
-            if (!"-".equals(term)) {
-                throw new IllegalArgumentException("invalid negtive operator, expect '-' but found '" + term + "'!");
-            }
-            TinyScriptParser.ExpressContext expressCtx = (TinyScriptParser.ExpressContext) objectNode;
-            Object obj = visitExpress(expressCtx);
-            return resolver.resolvePrefixOperator(context, term, obj);
+            TerminalNode nextCtx = (TerminalNode) item;
+            return visitTerminal(nextCtx);
         } catch (Throwable e) {
             if (e instanceof TinyScriptException) {
                 throw (TinyScriptException) e;
@@ -3032,9 +3017,6 @@ public class TinyScriptVisitorImpl implements TinyScriptVisitor<Object> {
             } else if (tree instanceof TinyScriptParser.ThrowSegmentContext) {
                 TinyScriptParser.ThrowSegmentContext nextCtx = (TinyScriptParser.ThrowSegmentContext) tree;
                 return visitThrowSegment(nextCtx);
-            } else if (tree instanceof TinyScriptParser.NegtiveSegmentContext) {
-                TinyScriptParser.NegtiveSegmentContext nextCtx = (TinyScriptParser.NegtiveSegmentContext) tree;
-                return visitNegtiveSegment(nextCtx);
             } else if (tree instanceof TinyScriptParser.ExtractExpressContext) {
                 TinyScriptParser.ExtractExpressContext nextCtx = (TinyScriptParser.ExtractExpressContext) tree;
                 return visitExtractExpress(nextCtx);
