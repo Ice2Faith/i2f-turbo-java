@@ -158,7 +158,8 @@ express:
     | express ('*' | '/' | '%') express
     | express ('+' | '-') express
     | express ('in' | 'notin' | '>=' | 'gte' | '<=' | 'lte' | '!=' | 'ne' | '<>' | 'neq' | '==' | 'eq' | '>' | 'gt' | '<' | 'lt') express
-    | express ('&&' | 'and' | '||' | 'or') express
+    | express ('&&' | 'and') express
+    | express ('||' | 'or') express
     | express '?' express ':' express
     | express pipelineFunctionSegment+
     | scriptBlock
