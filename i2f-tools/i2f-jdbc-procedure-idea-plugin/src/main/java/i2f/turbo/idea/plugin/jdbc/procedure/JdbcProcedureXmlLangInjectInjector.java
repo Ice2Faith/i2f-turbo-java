@@ -1056,6 +1056,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         XmlTag tag = attr.getParent();
         String tagName = tag.getName();
+        if (TagConsts.PROCEDURE.equals(tagName)
+                || TagConsts.SCRIPT_SEGMENT.equals(tagName)) {
+            // 声明参数，不进行注入
+            return;
+        }
         String attrName = attr.getName();
         if (attrName == null) {
             attrName = "";
