@@ -6,6 +6,14 @@ xproc4j:
   xml-locations: classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml
   watching-directories: classpath*:procedure/;classpath*:com/
 
+i2f:
+  springboot:
+    ops:
+      open-ai:
+        enable: false
+      dashscope:
+        enable: false
+
 ai:
   tools:
     file:
