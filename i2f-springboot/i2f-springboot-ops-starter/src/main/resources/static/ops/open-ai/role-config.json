@@ -40,6 +40,17 @@
     ]
   },
   {
+    "label": "工程管理",
+    "icon": "el-icon-mouse",
+    "children": [
+      {
+        "label": "循环工程",
+        "icon": "el-icon-mouse",
+        "url": "./roles/engine/role-loop-engineering.md"
+      }
+    ]
+  },
+  {
     "label": "绘图/可视化",
     "icon": "el-icon-pie-chart",
     "children": [

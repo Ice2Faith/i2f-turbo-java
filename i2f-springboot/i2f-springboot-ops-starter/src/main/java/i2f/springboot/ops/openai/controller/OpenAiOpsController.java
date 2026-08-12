@@ -438,9 +438,12 @@ public class OpenAiOpsController implements IOpsProvider {
             Map<String, String> sessionRecordsMap = SessionRecordTools.replaceAllInContextHolder(req.getSessionRecordsMap());
             req.setSessionRecordsMap(sessionRecordsMap);
 
+            ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
+
 
             CompletableFuture.runAsync(() -> {
                 ToolCallContextHolder.put("req", req);
+                ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
                 try {
                     OpenAiCompletionVo vo = req.getCompletion();
                     OpenAiCompletionDto completion = new OpenAiCompletionDto();
@@ -675,6 +678,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                         }
                                         Runnable toolTask = () -> {
                                             ToolCallContextHolder.put("req", req);
+                                            ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
                                             try {
                                                 String id = call.getId();
                                                 OpenAiToolCallFunction function = call.getFunction();
@@ -775,6 +779,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                                     latch.await();
                                     ToolCallContextHolder.put("req", req);
+                                    ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
                                 }
                             }
                         }
