@@ -549,7 +549,7 @@ public class DefaultFunicResolver implements FunicResolver {
             long ret = lv | rv;
             return castAsNumberType(ret, leftValue, rightValue);
         });
-        doubleOperatorFunctionMap.put("bor", doubleOperatorFunctionMap.get("bor"));
+        doubleOperatorFunctionMap.put("bor", doubleOperatorFunctionMap.get("|"));
 
     }
 
