@@ -1979,6 +1979,10 @@
                                 let session = _this.currentSession;
                                 if (session.abortController) {
                                     session.abortController.abort();
+                                    session.abortController = null;
+                                } else if (window._abort_controller) {
+                                    window._abort_controller.abort();
+                                    window._abort_controller = null;
                                 }
                             }
                         },
@@ -2472,7 +2476,7 @@
                     this.$responsing = true;
                     // 原生 fetch + ReadableStream 解析 SSE
                     const abortController=new AbortController();
-
+                    window._abort_controller = abortController;
                     session.abortController = abortController
                     const response = await fetch('./stream',
                         {
