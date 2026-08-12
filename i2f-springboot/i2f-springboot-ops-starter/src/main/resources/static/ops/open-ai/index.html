@@ -735,6 +735,21 @@
                                     width="480"
                                     trigger="hover">
                                 <p>
+                                    循环工程，是否注入循环工程的工作流程提示词。<br/>
+                                    如果开启，将会自动注入循环工程的提示词，配合现有的工具，实现回话级别的循环工程实践。<br/>
+                                    提供进度恢复、需求整理、计划制定、待办事项、事项实施、自我改进的自我循环。<br/>
+                                    因此，循环工程时提示词与工具调用结合的产物，因为状态的读写需要使用工具实现。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableLoopEngineering">
+                                    循环工程
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
                                     回显请求，将实际发送给LLM大模型的请求报文回显回来。<br/>
                                     如果开启，后端将会将请求报文回显给前端，前端在[消息列表]页面右键菜单，可以查看请求报文。<br/>
                                     可以用于学习报文、或者观察实际发送报文是否符合预期。<br/>
@@ -1454,7 +1469,8 @@
                         enableTruth: false,
                         autoApprovalToolTags: ['auto'],
                         enableMemories: false,
-                        memoryBucket: ''
+                        memoryBucket: '',
+                        enableLoopEngineering: false
                     }
                 }
             },
@@ -1658,6 +1674,7 @@
                         completion_tokens: -1,
                         total_tokens: -1
                     },
+                    sessionRecordsMap: {},
                     sending: false,
                     streamingStarted: false,
                     abortController: null,
@@ -2347,6 +2364,10 @@
                             _this.metas.echoRequestPayload = json || {};
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'echo_session_records_map') {
+                            session.sessionRecordsMap = json || {};
+                            return;
+                        }
 
                         if (json.usage) {
                             // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
@@ -2444,6 +2465,8 @@
                     req.enableTruth = this.form.enableTruth;
                     req.truthContent = truthContent;
                     req.enableVisionImage=this.form.enableVisionImage;
+                    req.enableLoopEngineering = this.form.enableLoopEngineering;
+                    req.sessionRecordsMap = session.sessionRecordsMap;
                     req = this.transferSend(req);
 
                     this.$responsing = true;

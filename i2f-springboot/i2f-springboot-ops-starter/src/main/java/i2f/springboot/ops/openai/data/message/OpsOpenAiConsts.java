@@ -22,4 +22,6 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
     String ECHO_REQUEST_PAYLOAD = "echo_request_payload";
 
     String ECHO_TRUTH = "echo_truth";
+
+    String ECHO_SESSION_RECORDS_MAP = "echo_session_records_map";
 }

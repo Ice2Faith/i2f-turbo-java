@@ -4,7 +4,9 @@ import i2f.ai.std.tool.definition.ToolDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -40,4 +42,7 @@ public class OpenAiOperateDto {
     protected String memoryBucket;
 
     protected String ttsContent;
+
+    protected boolean enableLoopEngineering = false;
+    protected Map<String, String> sessionRecordsMap = new HashMap<>();
 }

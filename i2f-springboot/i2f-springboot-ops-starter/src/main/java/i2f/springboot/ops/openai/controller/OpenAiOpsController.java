@@ -30,6 +30,7 @@ import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
+import i2f.springboot.ops.openai.tool.impl.SessionRecordTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import i2f.springboot.ops.openai.tool.impl.TruthStoreTools;
 import i2f.web.servlet.ServletFileUtil;
@@ -434,6 +435,10 @@ public class OpenAiOpsController implements IOpsProvider {
             reqRef.set(req);
             ToolCallContextHolder.put("req", req);
 
+            Map<String, String> sessionRecordsMap = SessionRecordTools.replaceAllInContextHolder(req.getSessionRecordsMap());
+            req.setSessionRecordsMap(sessionRecordsMap);
+
+
             CompletableFuture.runAsync(() -> {
                 ToolCallContextHolder.put("req", req);
                 try {
@@ -526,6 +531,27 @@ public class OpenAiOpsController implements IOpsProvider {
                             emitter.send(respJson);
                         }
 
+                    }
+
+                    if (req.isEnableLoopEngineering() && needInjectSystemPrompt) {
+                        String content = SessionRecordTools.convertSystemPrompt();
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                        completion.getMessages().add(0, system);
+
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
+                        dto.setEcho_skill(system);
+
+                        String defSkillMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
@@ -851,6 +877,14 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
+                            if (req.isEnableLoopEngineering()) {
+                                Set<String> checkNames = SessionRecordTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
                             if (unqToolNames.contains(name)) {
                                 return true;
                             }
@@ -888,6 +922,19 @@ public class OpenAiOpsController implements IOpsProvider {
                             OpenAiSystemMessage sys = new OpenAiSystemMessage(mergedSystem);
                             completion.getMessages().add(0, sys);
                         }
+                    }
+
+                    if (sessionRecordsMap != null) {
+                        String emitSessionRecordsMsg = objectMapper.writeValueAsString(sessionRecordsMap);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(emitSessionRecordsMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(emitSessionRecordsMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SESSION_RECORDS_MAP);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (req.isEnableEchoRequestPayload()) {

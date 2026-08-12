@@ -3,6 +3,8 @@ package i2f.ai.std.tool;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author Ice2Faith
@@ -40,6 +42,20 @@ public class ToolCallContextHolder {
         }
     }
 
+    public static <T> T getOr(String key, Supplier<T> supplier) {
+        LOCK.writeLock().lock();
+        try {
+            T ret = get(key);
+            if (ret == null) {
+                ret = supplier.get();
+                put(key, ret);
+            }
+            return ret;
+        } finally {
+            LOCK.writeLock().unlock();
+        }
+    }
+
     public static void remove(String key) {
         LOCK.writeLock().lock();
         try {
@@ -61,6 +77,15 @@ public class ToolCallContextHolder {
                 return;
             }
             LOCAL.set(null);
+        } finally {
+            LOCK.writeLock().unlock();
+        }
+    }
+
+    public static <R> R compute(Function<ThreadLocal<Map<String, Object>>, R> consumer) {
+        LOCK.writeLock().lock();
+        try {
+            return consumer.apply(LOCAL);
         } finally {
             LOCK.writeLock().unlock();
         }
