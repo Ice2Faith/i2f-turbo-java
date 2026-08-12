@@ -307,15 +307,18 @@
                     <div class="message-role-label ">
                         {{ roleLabel(msg.type) }}
                     </div>
-                    <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
-                         class="thinking-content"
-                         :class="{
+                    <template v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes('assistant_thinking')) :true">
+                        <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
+                             class="thinking-content"
+                             :class="{
                                     'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
                                     }"
-                         :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
-                         v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
+                             :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
+                             v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
 
-                    </div>
+                        </div>
+                    </template>
+
                     <div class="message-content"
                          :class="{
                                     'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
@@ -738,6 +741,21 @@
                                 </p>
                                 <el-checkbox slot="reference" v-model="form.enableEchoRequestPayload">
                                     回显请求
+                                </el-checkbox>
+                            </el-popover>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="480"
+                                    trigger="hover">
+                                <p>
+                                    留1用户，是否始终保留第一条用户消息。<br/>
+                                    如果开启，在发生消息截断的时候，始终会保留第一条用户消息。<br/>
+                                    适用于首条消息重要，贯穿始终，例如重要的附件或者重要的目标内容。<br/>
+                                    这样做的好处是，随时提醒大模型要达成的目标，而不至于因为消息截断，而忘了目标。<br/>
+                                </p>
+                                <el-checkbox slot="reference" v-model="form.enableKeepFirstUserMessage">
+                                    留1用户
                                 </el-checkbox>
                             </el-popover>
                             <el-popover
@@ -1377,6 +1395,7 @@
                             {label: '工具', value: 'tool', std: true},
                             {label: '工具结果', value: 'echo_tool', std: false},
                             {label: '工具请求', value: 'request_tool', std: false},
+                            {label: '助手思考', value: 'assistant_thinking', std: false},
                             {label: '技能注入', value: 'echo_skill', std: false},
                             {label: '事实注入', value: 'echo_truth', std: false}
                         ],
@@ -1428,6 +1447,7 @@
                         lruToolMaxSize: 20,
                         lruToolNames: [],
                         enableEchoRequestPayload: false,
+                        enableKeepFirstUserMessage: false,
                         enableMergedSystemMsg: false,
                         attachFiles: [],
                         enableVisionImage: false,
@@ -2117,20 +2137,37 @@
                         stack.push(item)
                     }
 
+                    // 始终要保留的消息
+                    let keepMsgList=[]
+
+                    // 如果有第一条系统消息，添加到接口消息
                     // 查找第一条系统消息，这个一般是AI的人设
-                    let roleMsg = null;
                     for (let i = 0; i < messages.length; i++) {
                         let item = messages[i];
                         if (item.type == 'system') {
-                            roleMsg = item;
+                            keepMsgList.push(item);
                             break;
                         }
                     }
 
-                    // 如果有第一条系统消息，添加到接口消息
-                    if (roleMsg && roleMsg.type == 'system') {
-                        apiMessages.push(roleMsg);
-                        stack.splice(stack.length - 1, 1);
+                    // 如果开启了始终保留第一条用户消息
+                    // 则保留这条用户消息
+                    if(this.form.enableKeepFirstUserMessage){
+                        for (let i = 0; i < messages.length; i++) {
+                            let item = messages[i];
+                            if (item.type == 'user') {
+                                keepMsgList.push(item);
+                                break;
+                            }
+                        }
+                    }
+
+
+                    // 如果有始终保留消息，则替换最旧的消息
+                    if (keepMsgList.length>0) {
+                        apiMessages.push(...keepMsgList)
+                        // 移除掉开头的几条消息，腾出位置
+                        stack.splice(stack.length - keepMsgList.length, keepMsgList.length);
                     }
 
                     for (let i = stack.length - 1; i >= 0; i--) {
@@ -2527,6 +2564,7 @@
                         let oldList = [...messages]
                         messages.splice(0, messages.length);
 
+                        // 第一条用户消息以及之前的消息保留，一般就是system消息+第一条user消息
                         let firstUserIndex = 0;
                         for (let i = 0; i < oldList.length; i++) {
                             let item = oldList[i];
@@ -2536,12 +2574,24 @@
                                 break;
                             }
                         }
+                        // 如果第一条用户消息之后，紧跟着一条系统消息，这条也保留
                         if (firstUserIndex + 1 < oldList.length) {
                             let item = oldList[firstUserIndex + 1];
                             if (item.type == 'system') {
                                 messages.push(item);
                             }
                         }
+
+                        // 最后一条事实注入消息保留
+                        for (let i = oldList.length -1; i >=0 ; i--) {
+                            let item = oldList[i];
+                            if (item.type == 'echo_truth') {
+                                messages.push(item);
+                                break;
+                            }
+
+                        }
+
                         messages.push(assistantMsg);
                     }
                 } catch (e) {
