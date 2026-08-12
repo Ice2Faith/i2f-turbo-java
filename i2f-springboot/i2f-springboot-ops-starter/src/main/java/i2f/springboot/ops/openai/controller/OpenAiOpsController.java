@@ -481,9 +481,51 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (req.isEnableTruth()) {
+                        // 事实内容注入
                         String truthContent = req.getTruthContent();
-                        OpenAiSystemMessage system = new OpenAiSystemMessage("# 关键事实\n\n" + truthContent);
-                        completion.getMessages().add(0, system);
+                        if (truthContent != null && !truthContent.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage("# 关键事实\n\n" + truthContent);
+                            completion.getMessages().add(0, system);
+
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
+                            dto.setEcho_truth(system);
+
+                            String defTruthMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defTruthMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defTruthMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
+                        }
+                    }
+                    if (req.isEnableTruth() && needInjectSystemPrompt) {
+                        // 事实系统使用方式
+                        String content = TruthStoreTools.convertSystemPrompt();
+                        if (content != null && !content.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
+
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_SKILL);
+                            dto.setEcho_skill(system);
+
+                            String defSkillMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
+                        }
+
                     }
 
                     if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
@@ -534,71 +576,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         if (toolManager != null) {
                             List<ToolDefinition> tools = toolManager.getTools();
                             if (tools != null) {
-                                if (!req.isEnableMemories()) {
-                                    tools = tools.stream()
-                                            .filter(e -> {
-                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                if (rawTool != null) {
-                                                    if (MemoryTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            })
-                                            .collect(Collectors.toList());
-                                }
-                                if (!req.isEnableTruth()) {
-                                    tools = tools.stream()
-                                            .filter(e -> {
-                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                if (rawTool != null) {
-                                                    if (TruthStoreTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            })
-                                            .collect(Collectors.toList());
-                                }
-                                if (!req.isEnableSkills()) {
-                                    tools = tools.stream()
-                                            .filter(e -> {
-                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                if (rawTool != null) {
-                                                    if (SkillsTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            })
-                                            .collect(Collectors.toList());
-                                }
-                                if (!req.isEnableRags()) {
-                                    tools = tools.stream()
-                                            .filter(e -> {
-                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                if (rawTool != null) {
-                                                    if (RagTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            })
-                                            .collect(Collectors.toList());
-                                }
-                                if (!req.isEnableLruTools()) {
-                                    tools = tools.stream()
-                                            .filter(e -> {
-                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                if (rawTool != null) {
-                                                    if (McpProviderTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                        return false;
-                                                    }
-                                                }
-                                                return true;
-                                            })
-                                            .collect(Collectors.toList());
-                                }
+                                tools = filterRequestTools(req, tools);
                                 if (completion.getTools() == null) {
                                     completion.setTools(new ArrayList<>());
                                 }
@@ -646,71 +624,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     Map<String, ToolDefinition> definitionMap = new HashMap<>();
                                     if (toolManager != null) {
                                         List<ToolDefinition> tools = toolManager.getTools();
-                                        if (!req.isEnableMemories()) {
-                                            tools = tools.stream()
-                                                    .filter(e -> {
-                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                        if (rawTool != null) {
-                                                            if (MemoryTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                                return false;
-                                                            }
-                                                        }
-                                                        return true;
-                                                    })
-                                                    .collect(Collectors.toList());
-                                        }
-                                        if (!req.isEnableTruth()) {
-                                            tools = tools.stream()
-                                                    .filter(e -> {
-                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                        if (rawTool != null) {
-                                                            if (TruthStoreTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                                return false;
-                                                            }
-                                                        }
-                                                        return true;
-                                                    })
-                                                    .collect(Collectors.toList());
-                                        }
-                                        if (!req.isEnableSkills()) {
-                                            tools = tools.stream()
-                                                    .filter(e -> {
-                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                        if (rawTool != null) {
-                                                            if (SkillsTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                                return false;
-                                                            }
-                                                        }
-                                                        return true;
-                                                    })
-                                                    .collect(Collectors.toList());
-                                        }
-                                        if (!req.isEnableRags()) {
-                                            tools = tools.stream()
-                                                    .filter(e -> {
-                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                        if (rawTool != null) {
-                                                            if (RagTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                                return false;
-                                                            }
-                                                        }
-                                                        return true;
-                                                    })
-                                                    .collect(Collectors.toList());
-                                        }
-                                        if (!req.isEnableLruTools()) {
-                                            tools = tools.stream()
-                                                    .filter(e -> {
-                                                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
-                                                        if (rawTool != null) {
-                                                            if (McpProviderTools.class.isAssignableFrom(rawTool.getBindClass())) {
-                                                                return false;
-                                                            }
-                                                        }
-                                                        return true;
-                                                    })
-                                                    .collect(Collectors.toList());
-                                        }
+                                        tools = filterRequestTools(req, tools);
                                         for (ToolDefinition tool : tools) {
                                             definitionMap.put(tool.getName(), tool);
                                         }
@@ -950,26 +864,6 @@ public class OpenAiOpsController implements IOpsProvider {
                     url = extraStandardBaseUrl(url);
                     url = url + "/chat/completions";
 
-                    if (req.isEnableTruth()) {
-                        String truthContent = req.getTruthContent();
-                        OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
-
-                        OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
-                        dto.setEcho_truth(system);
-
-                        String defTruthMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defTruthMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defTruthMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
-                    }
-
                     // 合并重排system消息，用于在一些严格的模型要求下，要求system消息只有一条，且只能在第一条的情况
                     if (req.isEnableMergedSystemMsg()) {
 
@@ -1099,5 +993,74 @@ public class OpenAiOpsController implements IOpsProvider {
             emitter.complete();
         }
         return emitter;
+    }
+
+    public static List<ToolDefinition> filterRequestTools(OpenAiOperateDto req, List<ToolDefinition> tools) {
+        if (!req.isEnableMemories()) {
+            tools = tools.stream()
+                    .filter(e -> {
+                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                        if (rawTool != null) {
+                            if (MemoryTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (!req.isEnableTruth()) {
+            tools = tools.stream()
+                    .filter(e -> {
+                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                        if (rawTool != null) {
+                            if (TruthStoreTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (!req.isEnableSkills()) {
+            tools = tools.stream()
+                    .filter(e -> {
+                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                        if (rawTool != null) {
+                            if (SkillsTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (!req.isEnableRags()) {
+            tools = tools.stream()
+                    .filter(e -> {
+                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                        if (rawTool != null) {
+                            if (RagTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+        if (!req.isEnableLruTools()) {
+            tools = tools.stream()
+                    .filter(e -> {
+                        ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(e);
+                        if (rawTool != null) {
+                            if (McpProviderTools.class.isAssignableFrom(rawTool.getBindClass())) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    })
+                    .collect(Collectors.toList());
+        }
+        return tools;
     }
 }
