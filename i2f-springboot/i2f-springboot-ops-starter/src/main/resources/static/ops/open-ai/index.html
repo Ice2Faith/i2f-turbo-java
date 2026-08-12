@@ -2448,7 +2448,9 @@
 
                     this.$responsing = true;
                     // 原生 fetch + ReadableStream 解析 SSE
-                    session.abortController = new AbortController();
+                    const abortController=new AbortController();
+
+                    session.abortController = abortController
                     const response = await fetch('./stream',
                         {
                             method: 'POST',
@@ -2456,7 +2458,7 @@
                                 'Content-Type': 'application/json',
                             },
                             body: JSON.stringify(req),
-                            signal: session.abortController.signal
+                            signal: abortController.signal
                         }
                     );
                     if (!response.ok) {
