@@ -34,6 +34,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,6 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2025/11/1 21:44
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.datasource.enable:true}")
 @ConditionalOnClass(DataSource.class)
 @Slf4j
 @Data

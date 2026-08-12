@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -27,6 +28,7 @@ import java.util.List;
  * @date 2026/4/28 19:09
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.dashscope.enable:false}")
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data

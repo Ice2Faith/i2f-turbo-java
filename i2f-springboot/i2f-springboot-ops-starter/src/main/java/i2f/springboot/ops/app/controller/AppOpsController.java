@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.logging.LogLevel;
 import org.springframework.boot.logging.LoggerConfiguration;
 import org.springframework.boot.logging.LoggingSystem;
@@ -39,6 +40,7 @@ import java.util.*;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.app.enable:true}")
 @Slf4j
 @Data
 @NoArgsConstructor

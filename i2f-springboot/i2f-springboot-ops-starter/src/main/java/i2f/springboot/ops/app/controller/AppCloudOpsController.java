@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
 import org.springframework.context.ApplicationContext;
@@ -27,6 +28,7 @@ import java.util.List;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.app.enable:true}")
 @ConditionalOnClass(DiscoveryClient.class)
 @Slf4j
 @Data

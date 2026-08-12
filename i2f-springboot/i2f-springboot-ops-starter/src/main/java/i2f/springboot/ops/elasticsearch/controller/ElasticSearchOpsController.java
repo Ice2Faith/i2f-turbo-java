@@ -17,6 +17,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,7 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/11/27 11:15
  */
+@ConditionalOnExpression("${i2f.springboot.ops.elasticsearch.enable:true}")
 @ConditionalOnClass(RestHighLevelClient.class)
 @Slf4j
 @Data

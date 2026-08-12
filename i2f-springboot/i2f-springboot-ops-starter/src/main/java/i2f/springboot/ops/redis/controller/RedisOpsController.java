@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.connection.RedisConnection;
@@ -37,6 +38,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2025/11/1 23:18
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.redis.enable:true}")
 @ConditionalOnClass(RedisTemplate.class)
 @Slf4j
 @Data

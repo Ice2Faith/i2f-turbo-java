@@ -12,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,6 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025/12/5 9:30
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.xproc4j.enable:true}")
 @Data
 @NoArgsConstructor
 @Slf4j

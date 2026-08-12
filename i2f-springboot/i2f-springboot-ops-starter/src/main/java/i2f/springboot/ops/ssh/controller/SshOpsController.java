@@ -19,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,6 +39,7 @@ import java.util.*;
  * @date 2025/11/13 20:57
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.ssh.enable:true}")
 @ConditionalOnClass(ChannelSftp.class)
 @Slf4j
 @Data

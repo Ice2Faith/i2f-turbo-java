@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,6 +49,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025/11/8 16:37
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.xxl-job.enable:true}")
 @ConditionalOnClass(XxlJobExecutor.class)
 @Slf4j
 @Data

@@ -14,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +37,7 @@ import java.util.*;
  * @date 2025/11/4 21:53
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.host.enable:true}")
 @Slf4j
 @Data
 @NoArgsConstructor

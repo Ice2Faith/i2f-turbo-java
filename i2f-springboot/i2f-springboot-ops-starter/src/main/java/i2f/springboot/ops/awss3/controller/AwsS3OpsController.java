@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -42,6 +43,7 @@ import java.util.*;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.aws-s3.enable:true}")
 @ConditionalOnClass(S3Client.class)
 @Slf4j
 @Data
