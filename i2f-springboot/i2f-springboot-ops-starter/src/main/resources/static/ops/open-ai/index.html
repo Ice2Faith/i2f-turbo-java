@@ -3017,7 +3017,7 @@
                     this.dialog.fileViewer.type='audio'
                     this.dialog.fileViewer.show=true;
                 }else if(['.mp4','.mkv','.rmvb','.flv','.avi','.wav'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
                     this.dialog.fileViewer.url = '../viewer/video-player.html?url=' + encodeURIComponent(fullUrl);
                     this.dialog.fileViewer.type='video'
                     this.dialog.fileViewer.show=true;
