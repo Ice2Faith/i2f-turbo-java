@@ -49,9 +49,9 @@ public class SessionRecordTools {
 
     public static String convertSystemPrompt() {
         /*language=markdown*/
-        return "# 循环工程\n" +
+        return "# 工程化用户需求解决方案指南\n" +
                 "\n" +
-                "- 指导完成用户需求的工程化实施步骤\n" +
+                "- 使用工程化思想，指导完成用户需求的工程化实施步骤及解决方案指南\n" +
                 "- 【重要】要求严格按照工作流程执行\n" +
                 "- 通过持久化存储为达成目标过程中的过程记录\n" +
                 "- 记录的类型\n" +
