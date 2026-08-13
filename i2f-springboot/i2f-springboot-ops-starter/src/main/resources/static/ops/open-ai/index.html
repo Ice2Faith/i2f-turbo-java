@@ -1108,12 +1108,9 @@
             </template>
             <template v-else-if="dialog.fileViewer.type=='video'">
                 <div style="background: black">
-                    <video :src="dialog.fileViewer.url"
-                           controls
-                           autoplay
-                           style="width: 100%;height: 75vh;">
-                        您的浏览器不支持 video 标签。
-                    </video>
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
                 </div>
             </template>
             <template v-else-if="dialog.fileViewer.type=='pdf'">
@@ -3020,6 +3017,8 @@
                     this.dialog.fileViewer.type='audio'
                     this.dialog.fileViewer.show=true;
                 }else if(['.mp4','.mkv','.rmvb','.flv','.avi','.wav'].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/video-player.html?url=' + encodeURIComponent(fullUrl);
                     this.dialog.fileViewer.type='video'
                     this.dialog.fileViewer.show=true;
                 }else if(['.pdf'].includes(suffix)){
