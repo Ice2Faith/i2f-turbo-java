@@ -4,27 +4,27 @@
     <meta charset="UTF-8">
     <!-- 移动端适配核心：控制视口宽度和缩放比例 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>pptx-viewer</title>
+    <title>ofd-viewer</title>
     <script src="../lib/vue/vue-2.js"></script>
 
-    <script src="../lib/pptx-preview@1.0.7/dist/pptx-preview.umd.min.js"></script>
+    <script src="../lib/liteofd/index.js"></script>
 </head>
 <body>
 <div id="app">
-    <div id="pptx-container"
+    <div id="ofd-container"
          v-loading="loading"
          :style="'width: '+width+';height: '+height+'; overflow-y: auto; '"></div>
 </div>
 </body>
 <script>
     window.app = new Vue({
-        name: "PptxViewer",
+        name: "OfdViewer",
         data() {
             return {
                 url: '',
                 width: '100%',
                 height: '100vh',
-                // //////////////////
+                // /////////////////
                 loading: false,
             }
         },
@@ -33,7 +33,7 @@
                 immediate: true,
                 handler: function (val, old) {
                     if (val) {
-                        this.renderPptx();
+                        this.renderOfd();
                     }
                 }
             },
@@ -62,10 +62,10 @@
                 }
                 this.$message.error(msg)
             },
-            async renderPptx() {
-                this.previewPptxFromUrl(this.url, 'pptx-container')
+            async renderOfd() {
+                this.previewOfdFromUrl(this.url, 'ofd-container')
             },
-            async previewPptxFromUrl(url, containerId) {
+            async previewOfdFromUrl(url, containerId) {
                 const container = document.getElementById(containerId);
                 if (!container) {
                     return;
@@ -73,21 +73,30 @@
 
                 this.loading = true;
                 try {
-                    // 3. 初始化预览器
-                    const pptxPreviewer = pptxPreview.init(container, {
-                        width: this.cssLengthToPx(this.width),
-                        height: this.cssLengthToPx(this.height)
-                    });
+                    // 1. 使用 fetch 获取远程 URL 的文件流
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`文件请求失败: HTTP ${response.status}`);
+                    }
 
+                    // 2. 将响应转换为 Blob 或 ArrayBuffer
+                    // 方式一：转换为 Blob
+                    const arrayBuffer = await response.arrayBuffer();
 
-                    // 4. 获取 PPTX 的 URL 并读取为 ArrayBuffer 格式，传给预览器
-                    await fetch(url)
-                        .then(response => response.arrayBuffer())
-                        .then(arrayBuffer => {
-                            pptxPreviewer.preview(arrayBuffer);
-                        })
+                    const liteOfd = new liteofd.LiteOfd();
+                    await liteOfd.parse(arrayBuffer);
+
+                    // 3. 将所有页面渲染到 container 中进行显示
+                    // 页面渲染宽度与容器宽度（max-width:900px）保持一致
+                    let width = this.cssLengthToPx(this.width);
+                    liteOfd.minWidth = Math.min(960, width);
+                    liteOfd.maxWidth = Math.max(1280, width);
+                    // render() 返回包含所有页面的滚动容器，直接挂载即可
+                    const ofdDiv = liteOfd.render();
+                    container.appendChild(ofdDiv);
+
                 } catch (error) {
-                    console.error('PPT 文档预览失败:', error);
+                    console.error('Ofd 文档预览失败:', error);
                     container.innerHTML = '<p style="color: red;">文档加载失败，请稍后重试。</p>';
                 } finally {
                     this.loading = false;
@@ -135,8 +144,44 @@
         box-sizing: content-box;
     }
 
-    #pptx-container {
+    /* liteofd 渲染根容器（源自 liteofd 官方 main.css 的 .pages-container 样式） */
+    #ofd-container .pages-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
 
+    /* 每页纸张样式 */
+    #ofd-container .page-container {
+        margin: 15px auto;
+        background: #fff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 文本选择层：隐藏原始文本，仅用于选中/复制（源自 liteofd 官方 main.css 的 .textLayer 样式） */
+    #ofd-container .textLayer {
+        position: absolute;
+        text-align: initial;
+        inset: 0;
+        overflow: hidden;
+        opacity: 1;
+        line-height: 1;
+        text-size-adjust: none;
+        forced-color-adjust: none;
+        transform-origin: 0 0;
+    }
+
+    #ofd-container .textLayer :is(span, br, div) {
+        color: transparent;
+        white-space: pre;
+        cursor: text;
+        transform-origin: 0 0;
+    }
+
+    #ofd-container .textLayer::selection {
+        background: rgba(0 0 255 / 0.25);
+        color: transparent;
     }
 
     @media (min-width: 320px) and (max-width: 719px) {
