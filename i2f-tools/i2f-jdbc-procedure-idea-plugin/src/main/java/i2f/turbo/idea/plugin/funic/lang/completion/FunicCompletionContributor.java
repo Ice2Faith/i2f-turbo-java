@@ -11,8 +11,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.funic.lang.psi.FunicTokenType;
+import i2f.turbo.idea.plugin.utils.CompletionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,6 +45,18 @@ public class FunicCompletionContributor extends CompletionContributor {
                     result.addElement(item);
                 }
                 return;
+            }
+
+
+            Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
+            if (functions != null && !functions.isEmpty()) {
+                for (Map.Entry<String, Class<?>> attr : functions.entrySet()) {
+                    LookupElement item = LookupElementBuilder.create(attr.getKey())
+                            .withTypeText(attr.getValue().getSimpleName() + " Functions")
+                            .withIcon(FunicConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
             }
         }
     }

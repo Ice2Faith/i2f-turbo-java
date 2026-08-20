@@ -11,8 +11,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.tree.IElementType;
 import i2f.turbo.idea.plugin.ognl.OgnlConsts;
 import i2f.turbo.idea.plugin.ognl.lang.psi.OgnlTokenType;
+import i2f.turbo.idea.plugin.utils.CompletionUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -42,7 +44,17 @@ public class OgnlCompletionContributor extends CompletionContributor {
                             .withItemTextItalic(true);
                     result.addElement(item);
                 }
-                return;
+            }
+
+            Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
+            if (functions != null && !functions.isEmpty()) {
+                for (Map.Entry<String, Class<?>> attr : functions.entrySet()) {
+                    LookupElement item = LookupElementBuilder.create(attr.getKey())
+                            .withTypeText(attr.getValue().getSimpleName() + " Functions")
+                            .withIcon(OgnlConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
             }
         }
     }
