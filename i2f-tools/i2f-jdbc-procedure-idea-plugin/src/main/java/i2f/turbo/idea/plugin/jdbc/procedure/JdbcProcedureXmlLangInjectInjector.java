@@ -661,7 +661,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public Language getPossibleEvalLanguage() {
-        Language lang = Language.findLanguageByID("Spring EL");
+        Language lang = Language.findLanguageByID("Ognl");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("Spring EL");
         if (lang != null) {
             return lang;
         }
