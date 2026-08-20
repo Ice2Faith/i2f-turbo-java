@@ -1,0 +1,25 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 定义渐变 -->
+    <defs>
+        <linearGradient id="leftLineGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF1200"/>
+            <stop offset="100%" stop-color="#FFB000"/>
+        </linearGradient>
+
+        <linearGradient id="rightGradient" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFB000"/>
+            <stop offset="100%" stop-color="#FF1200"/>
+        </linearGradient>
+    </defs>
+
+
+    <text x="4" y="14" font-size="3.8" fill="url(#leftLineGradient)" font-family="sans-serif">Ognl</text>
+
+    <text x="4.6" y="6.6" font-size="5" fill="url(#rightGradient)" font-family="sans-serif">o</text>
+
+    <text x="1" y="11" font-size="12" fill="url(#leftLineGradient)" font-family="sans-serif">G</text>
+    <text x="11" y="8.8" font-size="6" fill="url(#rightGradient)" font-family="sans-serif">n</text>
+
+    <text x="9.6" y="10" font-size="8.8" fill="url(#leftLineGradient)" font-family="sans-serif">L</text>
+
+</svg>
