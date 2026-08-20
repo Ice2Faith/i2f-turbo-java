@@ -230,6 +230,9 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.ognl.lang.completion.OgnlCompletionContributor"/>
 
+        <lang.formatter
+                language="Ognl"
+                implementationClass="i2f.turbo.idea.plugin.ognl.lang.formatter.OgnlFormattingModelBuilder"/>
         <!-- *************************** Ognl  end *************************** -->
 
         <!-- *************************** funic  begin *************************** -->
