@@ -3,6 +3,18 @@ setlocal enabledelayedexpansion
 chcp 65001 > nul
 title run jar
 
+if exist "%JAVA_HOME%\bin\java.exe" (
+    echo Java env has found.
+) else (
+    :: from jdk get jre
+	:: bin\jlink --module-path jmods --add-modules java.base,java.sql,java.desktop,java.xml,jdk.compiler,java.instrument,java.logging,java.prefs,java.naming,java.management,java.security.jgss,java.scripting,jdk.dynalink,jdk.unsupported,java.sql.rowset --bind-services --output jre --strip-debug --no-man-pages --no-header-files --compress=2
+	set JAVA_HOME=jre
+	echo Java env use embed jre.
+)
+
+set CLASSPATH=.;%JAVA_HOME%\lib;%JAVA_HOME%\lib\dt.jar;%JAVA_HOME%\lib\tools.jar
+set PATH=%JAVA_HOME%\bin;%PATH%
+
 set MAX_JAR=
 
 set JVM_OPTS=-Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -Dlogback.app.env=test
