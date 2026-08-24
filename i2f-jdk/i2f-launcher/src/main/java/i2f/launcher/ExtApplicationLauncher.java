@@ -59,10 +59,33 @@ public class ExtApplicationLauncher {
 
         Thread.currentThread().setContextClassLoader(loader);
 
+        // 找到真实的main
         Class<?> clazz = Class.forName(mainClass, false, Thread.currentThread().getContextClassLoader());
         Method method = clazz.getDeclaredMethod("main", String[].class);
         method.setAccessible(true);
+
+        // 处理自定义插件
+        List<ExtLauncherSpi> list = getExtLauncherSpis(loader);
+        for (ExtLauncherSpi spi : list) {
+            try {
+                spi.premain(clazz,args);
+            } catch (Throwable e) {
+                System.err.println("ext launcher spi premain error: "+e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+        // 启动真实的main
         method.invoke(null, (Object) args);
+    }
+
+    private static List<ExtLauncherSpi> getExtLauncherSpis(ClassLoader loader) {
+        List<ExtLauncherSpi> list=new ArrayList<>();
+        ServiceLoader<ExtLauncherSpi> loaders = ServiceLoader.load(ExtLauncherSpi.class, loader);
+        for (ExtLauncherSpi spi : loaders) {
+            list.add(spi);
+        }
+        return list;
     }
 
 
