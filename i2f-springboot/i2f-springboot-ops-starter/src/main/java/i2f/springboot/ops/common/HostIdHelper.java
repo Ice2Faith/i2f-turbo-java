@@ -56,15 +56,15 @@ public class HostIdHelper {
                 return ret;
             }
         }
-        List<Map.Entry<InetAddress, NetworkInterface>> list = NetworkUtil.getUsefulAddresses();
+        List<NetworkUtil.IpEntry> list = NetworkUtil.getUsefulAddresses();
         int port = getAppPort();
         int count = 0;
         String hostId = port + "@";
-        for (Map.Entry<InetAddress, NetworkInterface> entry : list) {
+        for (NetworkUtil.IpEntry entry : list) {
             if (count > 0) {
                 hostId += "|";
             }
-            hostId += "[" + entry.getKey().getHostAddress() + "#" + entry.getValue().getName() + "]";
+            hostId += "[" + entry.getInetAddress().getHostAddress() + "#" + entry.getNetworkInterface().getName() + "]";
             count++;
             if (count == 3) {
                 break;
