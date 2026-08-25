@@ -1974,12 +1974,22 @@
                             icon: 'el-icon-circle-close',
                             onClick: () => {
                                 let session = _this.currentSession;
-                                if (session.abortController) {
-                                    session.abortController.abort();
-                                    session.abortController = null;
-                                } else if (window['_abort_'+session.sessionId]) {
-                                    window['_abort_'+session.sessionId].abort();
-                                    window['_abort_'+session.sessionId] = null;
+                                try {
+                                    if (session.abortController) {
+                                        session.abortController.abort();
+                                        session.abortController = null;
+                                    }
+                                }catch (e) {
+
+                                }
+                                try {
+                                    if (window['_abort_' + session.sessionId]) {
+                                        window['_abort_' + session.sessionId].abort();
+                                        window['_abort_' + session.sessionId] = null;
+                                        delete window['_abort_' + session.sessionId];
+                                    }
+                                }catch (e){
+
                                 }
                             }
                         },
