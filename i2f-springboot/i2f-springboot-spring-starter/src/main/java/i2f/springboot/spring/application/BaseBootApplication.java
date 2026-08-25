@@ -2,6 +2,7 @@ package i2f.springboot.spring.application;
 
 import i2f.extension.slf4j.Slf4jPrintStream;
 import i2f.jvm.JvmUtil;
+import i2f.net.NetworkUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringBootVersion;
@@ -22,6 +23,7 @@ import java.net.NetworkInterface;
 import java.security.Provider;
 import java.sql.Driver;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -133,29 +135,29 @@ public class BaseBootApplication {
                 }
 
 
-                builder.append("\tlocal  : \thttp://localhost:").append(port).append(contextPath).append("/\n")
-                        .append("\tnet    : \thttp://").append(ip).append(":").append(port).append(contextPath).append("/\n");
+                builder.append("\tlocal  : \thttp://localhost:").append(port).append(contextPath).append("/\n");
+                builder.append("\tnet    : \thttp://").append(ip).append(":").append(port).append(contextPath).append("/\n");
 
-                Enumeration<NetworkInterface> allInterfaces = NetworkInterface.getNetworkInterfaces();
-                while (allInterfaces.hasMoreElements()) {
-                    NetworkInterface item = allInterfaces.nextElement();
-                    if (!item.isUp() || item.isVirtual() || item.isLoopback()) {
-                        continue;
+                String preferredIp = NetworkUtil.getPreferredIp();
+                if(preferredIp!=null){
+                    builder.append("\tprefer : \thttp://").append(preferredIp).append(":").append(port).append(contextPath).append("/\n");
+                }
+
+                List<NetworkUtil.IpEntry> addresses = NetworkUtil.getUsefulAddresses();
+                String interfaceName=null;
+                for (NetworkUtil.IpEntry entry : addresses) {
+                    NetworkInterface networkInterface = entry.getNetworkInterface();
+                    String name = networkInterface.getName();
+                    if(!name.equals(interfaceName)){
+                        builder.append("\t\t").append(" ").append(networkInterface.getName()).append(": ").append(networkInterface.getDisplayName()).append("\n");
+                        interfaceName=name;
                     }
-                    builder.append("\t\t").append(" ").append(item.getName()).append(": ").append(item.getDisplayName()).append("\n");
-                    Enumeration<InetAddress> addrs = item.getInetAddresses();
-                    while (addrs.hasMoreElements()) {
-                        InetAddress addr = addrs.nextElement();
-                        if (addr.isLoopbackAddress()) {
-                            continue;
-                        }
-                        String pip = addr.getHostAddress();
-                        if (addr instanceof Inet4Address) {
-                            builder.append("\t\t\tipv4\thttp://").append(pip).append(":").append(port).append(contextPath).append("/\n");
-                        } else if (addr instanceof Inet6Address) {
-                            builder.append("\t\t\tipv6\thttp://").append(pip).append(":").append(port).append(contextPath).append("/\n");
-                        }
-
+                    InetAddress addr = entry.getInetAddress();
+                    String pip = addr.getHostAddress();
+                    if (addr instanceof Inet4Address) {
+                        builder.append("\t\t\tipv4\thttp://").append(pip).append(":").append(port).append(contextPath).append("/\n");
+                    } else if (addr instanceof Inet6Address) {
+                        builder.append("\t\t\tipv6\thttp://").append(pip).append(":").append(port).append(contextPath).append("/\n");
                     }
                 }
             } catch (Exception e) {

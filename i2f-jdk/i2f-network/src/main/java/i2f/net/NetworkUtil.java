@@ -1,9 +1,13 @@
 package i2f.net;
 
-import java.net.Inet4Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.util.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.net.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -11,16 +15,126 @@ import java.util.*;
  * @desc
  */
 public class NetworkUtil {
-    public static Map.Entry<InetAddress, NetworkInterface> getFirstUsefulAddress() {
-        List<Map.Entry<InetAddress, NetworkInterface>> list = getUsefulAddresses();
+    // 常见虚拟网卡关键字（强虚拟）
+    private static final String[] VIRTUAL_NAMES = {
+            "docker", "cni", "cali", "flannel", "weave", "podman", "kube-ipvs", "cilium",
+            "virbr", "vnet", "vboxnet", "vmnet", "vmx", "vmware", "vethernet", "xenbr", "vif",
+            "dummy",
+            "macvlan", "ipvlan"
+    };
+
+    // 弱虚拟网卡（可能误报或 VPN 类）
+    private static final String[] VIRTUAL_WEAK_NAMES = {
+            "br-", "vwnet",
+            "tun", "tap", "utun", "wg",
+            "zt", "tailscale", "ts", "openvpn", "ovpn", "ipsec",
+            "bond", "team",
+            "vxlan", "geneve", "gre", "gretap", "ipip", "sit", "erspan"
+    };
+
+    /**
+     * 判断是否为强虚拟网卡
+     */
+    public static boolean isVirtualInterface(String name) {
+        String lower = name.toLowerCase();
+        for (String kw : VIRTUAL_NAMES) {
+            if (lower.contains(kw)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否为弱虚拟网卡
+     */
+    public static boolean isVirtualWeakInterface(String name) {
+        String lower = name.toLowerCase();
+        for (String kw : VIRTUAL_WEAK_NAMES) {
+            if (lower.contains(kw)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * IP 条目，包含网卡名、IP 地址及虚拟标识
+     */
+    @Data
+    @NoArgsConstructor
+    public static class IpEntry {
+        protected NetworkInterface networkInterface;
+        protected InetAddress inetAddress;
+
+        protected String interfaceName;
+        protected String ip;
+        protected boolean ipv6;
+        protected boolean virtual;
+        protected boolean weakVirtual;
+
+        public IpEntry(NetworkInterface networkInterface, InetAddress inetAddress) {
+            this.networkInterface = networkInterface;
+            this.inetAddress = inetAddress;
+            this.resolveProperties();
+        }
+
+        public void resolveProperties() {
+            if (networkInterface != null) {
+                interfaceName = networkInterface.getDisplayName();
+            }
+            if (inetAddress != null) {
+                ip = inetAddress.getHostAddress();
+                ipv6 = inetAddress instanceof Inet6Address;
+            }
+            if (interfaceName != null) {
+                virtual = isVirtualInterface(interfaceName);
+                weakVirtual = isVirtualWeakInterface(interfaceName);
+            }
+        }
+    }
+
+    /**
+     * 获取系统当前正在使用的出口 IP（最可靠）
+     */
+    public static String getPreferredIp() {
+        // 尝试通过 UDP 连接 8.8.8.8:80 获取本地地址
+        try (DatagramSocket socket = new DatagramSocket()) {
+            socket.connect(InetAddress.getByName("8.8.8.8"), 80);
+            socket.setSoTimeout(2000);
+            InetAddress local = socket.getLocalAddress();
+            if (local instanceof Inet4Address) {
+                return local.getHostAddress();
+            }
+        } catch (Exception e) {
+            // 忽略异常，继续降级方案
+        }
+
+        // 降级方案：取 getAllIpList 排序后的第一个 IP
+        List<IpEntry> entries = getUsefulAddresses();
+        if (!entries.isEmpty()) {
+            return entries.get(0).getIp();
+        }
+        return null;
+    }
+
+    /**
+     * 获取第一个有用的网卡地址
+     */
+    public static IpEntry getFirstUsefulAddress() {
+        List<IpEntry> list = getUsefulAddresses();
         if (list.isEmpty()) {
             return null;
         }
         return list.get(0);
     }
 
-    public static List<Map.Entry<InetAddress, NetworkInterface>> getUsefulAddresses() {
-        List<Map.Entry<InetAddress, NetworkInterface>> ret = new ArrayList<>();
+    /**
+     * 获取所有 up 状态、非 loopback 的 IPv4 地址（包含虚拟网卡），
+     * 返回按 [非虚拟 → 弱虚拟 → 强虚拟] 排序的列表，同组内按网卡名排序。
+     */
+    public static List<IpEntry> getUsefulAddresses() {
+        List<IpEntry> ret = new ArrayList<>();
         try {
             Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
             while (networkInterfaces.hasMoreElements()) {
@@ -42,7 +156,7 @@ public class NetworkUtil {
                             if (inetAddress.isLoopbackAddress()) {
                                 continue;
                             }
-                            ret.add(new AbstractMap.SimpleEntry<>(inetAddress, networkInterface));
+                            ret.add(new IpEntry(networkInterface, inetAddress));
                         } catch (Exception e) {
 
                         }
@@ -54,60 +168,14 @@ public class NetworkUtil {
         } catch (Exception e) {
 
         }
-        ret.sort((v1, v2) -> {
-            NetworkInterface n1 = v1.getValue();
-            NetworkInterface n2 = v2.getValue();
-            boolean n1Virtual = isVirtualOrSoftwareInterface(n1);
-            boolean n2Virtual = isVirtualOrSoftwareInterface(n2);
-            if (n1Virtual == n2Virtual) {
-                InetAddress k1 = v1.getKey();
-                InetAddress k2 = v2.getKey();
-                if (k1 instanceof Inet4Address && k2 instanceof Inet4Address) {
-                    return 0;
-                } else if (k1 instanceof Inet4Address) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            } else if (n1Virtual) {
-                return 1;
-            } else {
-                return -1;
-            }
-        });
+
+        // 排序规则：非虚拟网卡在前，非弱虚拟网卡在前，网卡名称正序，ipv4在前
+        ret.sort(Comparator
+                .comparing(IpEntry::isVirtual)
+                .thenComparing(IpEntry::isWeakVirtual)
+                .thenComparing(IpEntry::getInterfaceName)
+                .thenComparing(IpEntry::isIpv6)
+        );
         return ret;
-    }
-
-    public static boolean isVirtualOrSoftwareInterface(NetworkInterface ni) {
-        try {
-            if (ni.isVirtual()) {
-                return true;
-            }
-
-            String name = ni.getName().toLowerCase();
-            if (name.contains("virtual") ||
-                    name.contains("docker") ||
-                    name.contains("loop") ||
-                    name.contains("dummy") ||
-                    name.contains("vmware") ||
-                    name.contains("vmnet") ||
-                    name.contains("veth")) {
-                return true;
-            }
-
-            String displayName = ni.getDisplayName().toLowerCase();
-            if (displayName.contains("virtual") ||
-                    displayName.contains("docker") ||
-                    displayName.contains("loop") ||
-                    displayName.contains("dummy") ||
-                    displayName.contains("vmware") ||
-                    displayName.contains("vmnet") ||
-                    displayName.contains("veth")) {
-                return true;
-            }
-        } catch (Exception e) {
-
-        }
-        return false;
     }
 }
