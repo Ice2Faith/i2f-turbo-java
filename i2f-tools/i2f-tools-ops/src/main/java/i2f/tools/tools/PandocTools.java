@@ -51,7 +51,7 @@ public class PandocTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "convert markdown to docx, use pandoc command impl, support multiply source type"
+            description = "convert(save) markdown to docx, use pandoc command impl, support multiply source type"
     )
     public TmpFileTools.FileAttachMessage pandoc_markdown_to_docx(
             @ToolParam(value = "type", description = "the content type, value in [\"local_file\", \"upload_file\", \"text\"]")
