@@ -51,15 +51,15 @@ public class PandocTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "convert(save) markdown to docx, use pandoc command impl, support multiply source type"
+            description = "convert(save) markdown to docx, use pandoc command impl. support multiply content type. Note: must setting `type` argument."
     )
     public TmpFileTools.FileAttachMessage pandoc_markdown_to_docx(
-            @ToolParam(value = "type", description = "the content type, value in [\"local_file\", \"upload_file\", \"text\"]")
+            @ToolParam(value = "type", description = "the content type, not null, value in [\"local_file\", \"upload_file\", \"text\"]")
             FileSourceType type,
-            @ToolParam(value = "content", description = "the content, real type according to type argument to decide.\n" +
-                    " type=\"local_file\", this is local file path, such \"/docs/sample.md\". \n" +
-                    " type=\"upload_file\", this is upload file url, such  \"upload://xxx/sample.md\". \n" +
-                    " type=\"text\", this is full text content. \n"
+            @ToolParam(value = "content", description = "the content, real type according to `type` argument to decide.\n" +
+                    " `type`=\"local_file\", this is local file path, such \"/docs/sample.md\". \n" +
+                    " `type`=\"upload_file\", this is upload file url, such  \"upload://xxx/sample.md\". \n" +
+                    " `type`=\"text\", this is full markdown text content, such \"# title\". \n"
             )
             String content
     ) throws Exception {
