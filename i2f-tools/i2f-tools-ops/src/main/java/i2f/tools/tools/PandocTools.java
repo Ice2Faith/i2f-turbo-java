@@ -51,7 +51,10 @@ public class PandocTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "convert(save) markdown to docx, use pandoc command impl. support multiply content type. Note: must setting `type` argument."
+            description = "Convert markdown content to a docx document. \n" +
+                    "Supports input methods: direct text (type=\"text\"), local file path (type=\"local_file\"), and upload file link (type=\"upload_file\"). \n" +
+                    "The most commonly used is type=\"text\" — just pass the markdown content directly, no need to save a file first.\n" +
+                    "Note: must setting `type` argument."
     )
     public TmpFileTools.FileAttachMessage pandoc_markdown_to_docx(
             @ToolParam(value = "type", description = "the content type, not null, value in [\"local_file\", \"upload_file\", \"text\"]")
