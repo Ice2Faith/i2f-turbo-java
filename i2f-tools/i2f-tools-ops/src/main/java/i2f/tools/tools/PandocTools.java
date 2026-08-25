@@ -4,7 +4,9 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.io.stream.StreamUtil;
 import i2f.os.OsUtil;
+import i2f.resources.ResourceUtil;
 import i2f.springboot.ops.openai.tool.impl.LocalFileTools;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import lombok.Data;
@@ -16,6 +18,7 @@ import org.springframework.stereotype.Component;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.UUID;
@@ -71,6 +74,7 @@ public class PandocTools {
         }
         File sourceFile = null;
         File tmpFile = null;
+        File referenceFile=null;
         try {
             if (FileSourceType.local_file == type) {
                 if (localFileTools == null) {
@@ -89,9 +93,14 @@ public class PandocTools {
 
             sourceFile = new File(sourceFile.getAbsolutePath());
             File workdir = sourceFile.getParentFile();
-            tmpFile = new File(workdir, "tmp_" + (UUID.randomUUID().toString()) + ".docx");
+            referenceFile=new File(workdir,"ref_" + (UUID.randomUUID().toString().replace("-","")) + ".docx");
+            tmpFile = new File(workdir, "tmp_" + (UUID.randomUUID().toString().replace("-","")) + ".docx");
 
-            // pandoc -s --toc -M toc-title="" -t docx input.md -o output.docx
+            InputStream is = ResourceUtil.getClasspathResourceAsStream("assets/pandoc/custom-reference.docx");
+            StreamUtil.writeBytes(is,referenceFile);
+
+
+            // pandoc -s --toc -M toc-title="" -t docx input.md -o output.docx --reference-doc=custom-reference.docx
 
             String output = OsUtil.execCmd(true, 60, new String[]{
                     "pandoc",
@@ -103,7 +112,8 @@ public class PandocTools {
                     "docx",
                     sourceFile.getName(),
                     "-o",
-                    tmpFile.getName()
+                    tmpFile.getName(),
+                    "--reference-doc="+referenceFile.getName()
             }, null, workdir, null);
             if (!tmpFile.exists()) {
                 System.out.println(output);
@@ -117,6 +127,7 @@ public class PandocTools {
             }
             TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(tmpFile), name + ".docx");
             tmpFile.delete();
+            referenceFile.delete();
 
             Map<String, Object> map = metadata.toMap();
             StringBuilder builder = new StringBuilder();
@@ -131,6 +142,9 @@ public class PandocTools {
 
             return ret;
         } finally {
+            if(referenceFile!=null && referenceFile.exists()){
+                referenceFile.delete();
+            }
             if (tmpFile != null && tmpFile.exists()) {
                 tmpFile.delete();
             }
