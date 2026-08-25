@@ -1977,9 +1977,9 @@
                                 if (session.abortController) {
                                     session.abortController.abort();
                                     session.abortController = null;
-                                } else if (window._abort_controller) {
-                                    window._abort_controller.abort();
-                                    window._abort_controller = null;
+                                } else if (window['_abort_'+session.sessionId]) {
+                                    window['_abort_'+session.sessionId].abort();
+                                    window['_abort_'+session.sessionId] = null;
                                 }
                             }
                         },
@@ -2099,31 +2099,62 @@
                 this.form.inputText = '';
 
                 if (item.type == 'user') {
-                    this.directSendMessage();
+                    this.directSendMessage({
+                        sessionId: sid
+                    });
                 } else {
                     this.form.messageType = 'user';
 
                     this.$confirm('非用户消息，是否需要发送请求到模型？', '提示', {type: 'warning'})
                         .then(() => {
-                            this.directSendMessage()
+                            this.directSendMessage({
+                                sessionId: sid
+                            })
                         }).catch(() => {
                         this.$message.info('请求未发送，你可以继续编辑')
                     });
                 }
 
             },
+            findSession(sessionId){
+                if(!sessionId){
+                    return this.currentSession;
+                }
+                let ret=this.metas.sessionList.filter(e => e.sessionId == sessionId)[0]
+                if(ret){
+                    return ret;
+                }
+                return this.currentSession;
+            },
+            findSessionMessages(sessionId){
+                // 确保有活跃会话
+                if (!sessionId) {
+                    return this.getActiveMessages();
+                }
+                if (!this.metas.historyMessageMap[sessionId]) {
+                    this.$set(this.metas.historyMessageMap, sessionId, []);
+                }
+                let messages = this.metas.historyMessageMap[sessionId];
+                return messages;
+            },
             // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
-            async directSendMessage(action) {
-
-                let sid = this.metas.activeSessionId;
-                let messages = this.getActiveMessages();
+            async directSendMessage(options={}) {
+                if(!options){
+                    options={}
+                }
+                if (!options.sessionId) {
+                    this.getActiveMessages();
+                    options.sessionId=this.metas.activeSessionId;
+                }
+                let messages = this.findSessionMessages();
                 if (messages.length == 0) {
                     this.$message.error('没有任何历史消息，操作失败')
                     return
                 }
 
                 // 用第一条用户消息作为会话标题
-                let session = this.currentSession;
+                let session = this.findSession(options.sessionId);
+                options.sessionId=session.sessionId;
                 if (session && (!session.title || session.title === '新对话')) {
                     let lastMsg = messages[messages.length - 1];
                     let text = lastMsg[lastMsg.type].content;
@@ -2473,7 +2504,7 @@
                     this.$responsing = true;
                     // 原生 fetch + ReadableStream 解析 SSE
                     const abortController=new AbortController();
-                    window._abort_controller = abortController;
+                    window['_abort_'+options.sessionId] = abortController;
                     session.abortController = abortController
                     const response = await fetch('./stream',
                         {
@@ -2580,13 +2611,15 @@
                             // 弹窗确认工具是否需要允许执行
                             this.dialog.toolApproval.show = true;
                         } else {
-                            this.directSendMessage()
+                            this.directSendMessage({
+                                sessionId: options.sessionId
+                            })
                         }
 
 
                     }
 
-                    if (action == 'summary-history') {
+                    if (options.action == 'summary-history') {
                         let oldList = [...messages]
                         messages.splice(0, messages.length);
 
