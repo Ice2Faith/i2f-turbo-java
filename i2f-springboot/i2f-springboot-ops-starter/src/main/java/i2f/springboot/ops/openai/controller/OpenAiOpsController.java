@@ -791,9 +791,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                 .set(u -> u::setUser, new OpenAiUserMessage("here is tool returns files"))
                                 .set(u -> u::setAttachFiles, toolFileMessages.stream().map(e -> e.getFile()).collect(Collectors.toList()))
                                 .done();
-                        OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
-                        completion.getMessages().add(user);
 
+                        // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
                         String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
                         OpsSecureReturn<?> resp = null;
                         if (req.isEncryptOutput()) {
@@ -804,6 +803,10 @@ public class OpenAiOpsController implements IOpsProvider {
                         resp.withAttr("type", OpsOpenAiConsts.USER);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
+
+                        OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
+                        completion.getMessages().add(user);
+
                     }
 
                     if (req.isEnableLruTools() && mcpProviderTools != null) {

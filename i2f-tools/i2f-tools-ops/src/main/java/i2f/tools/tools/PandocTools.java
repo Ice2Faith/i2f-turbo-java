@@ -20,6 +20,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.UUID;
 
@@ -36,6 +38,7 @@ import java.util.UUID;
         AiTags.FILE_VALUE
 })
 public class PandocTools {
+    public static final DateTimeFormatter FORMATTER=DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     @Autowired(required = false)
     protected TmpFileTools tmpFileTools;
@@ -72,6 +75,7 @@ public class PandocTools {
         if (tmpFileTools == null) {
             throw new IllegalStateException("current application not enable tmp file");
         }
+        String name="data.md";
         File sourceFile = null;
         File tmpFile = null;
         File referenceFile=null;
@@ -81,12 +85,15 @@ public class PandocTools {
                     throw new IllegalStateException("current application not enable local file");
                 }
                 sourceFile = localFileTools.getFile(content);
+                name=sourceFile.getName();
             } else if (FileSourceType.upload_file == type) {
                 sourceFile = tmpFileTools.getFileByUrl(content);
+                name=tmpFileTools.getRealFileNameByUrl(content);
             } else if (FileSourceType.text == type) {
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), "tmp.md");
                 String fileUrl = metadata.getFileUrl();
                 sourceFile = tmpFileTools.getFileByUrl(fileUrl);
+                name=metadata.getFileName();
             } else {
                 throw new IllegalArgumentException("missing or un-correct `type` argument, only support value in [\"local_file\", \"upload_file\", \"text\"]");
             }
@@ -120,12 +127,15 @@ public class PandocTools {
                 throw new IllegalArgumentException("convert failure!");
             }
 
-            String name = sourceFile.getName();
+            if(name==null || name.isEmpty()){
+                name="data.md";
+            }
             int idx = name.lastIndexOf(".");
             if (idx >= 0) {
                 name = name.substring(0, idx);
             }
-            TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(tmpFile), name + ".docx");
+            String outputName = name + "-" + FORMATTER.format(LocalDateTime.now()) + ".docx";
+            TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new FileInputStream(tmpFile), outputName);
             tmpFile.delete();
             referenceFile.delete();
 
