@@ -23,6 +23,11 @@ public class FileToolUtils {
 
     public static List<Map<String, Object>> searchFiles(File startFile, String pattern, int maxDeep, File rootFile) {
         List<Map<String, Object>> ret = new ArrayList<>();
+        if (pattern != null) {
+            if (!pattern.startsWith("/")) {
+                pattern = "/" + pattern;
+            }
+        }
         search_files_next(ret, startFile, pattern, maxDeep, rootFile);
         return ret;
     }
@@ -118,9 +123,8 @@ public class FileToolUtils {
         if (!startFile.exists()) {
             return;
         }
-        if (startFile.isFile()) {
-            acceptFile(startFile, ret, pattern, rootFile);
-        } else if (startFile.isDirectory()) {
+        acceptFile(startFile, ret, pattern, rootFile);
+        if (startFile.isDirectory()) {
             try {
                 File[] files = startFile.listFiles();
                 if (files != null) {
@@ -143,6 +147,7 @@ public class FileToolUtils {
         String absolutePath = FileToolUtils.getSubPath(file, rootFile);
         if (pattern == null || pattern.isEmpty()) {
             Map<String, Object> item = new HashMap<>();
+            item.put("isDirectory", startFile.isDirectory());
             item.put("file", absolutePath);
             item.put("byteSize", file.length());
             item.put("humanSize", HumanUtil.humanFileSize(file.length()));
@@ -152,6 +157,7 @@ public class FileToolUtils {
 
         if (matcher.matches(absolutePath, pattern)) {
             Map<String, Object> item = new HashMap<>();
+            item.put("isDirectory", startFile.isDirectory());
             item.put("file", absolutePath);
             item.put("byteSize", file.length());
             item.put("humanSize", HumanUtil.humanFileSize(file.length()));
@@ -177,7 +183,10 @@ public class FileToolUtils {
         String absolutePath = file.getAbsolutePath();
         absolutePath = absolutePath.replace("\\", "/");
         if (!absolutePath.startsWith(absRootPath)) {
-            return null;
+            absolutePath = absolutePath + "/";
+            if (!absolutePath.startsWith(absRootPath)) {
+                return null;
+            }
         }
         absolutePath = absolutePath.substring(absRootPath.length());
         if (!absolutePath.startsWith("/")) {
