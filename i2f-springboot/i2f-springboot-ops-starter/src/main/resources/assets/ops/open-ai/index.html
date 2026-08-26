@@ -3116,8 +3116,8 @@
                     this.dialog.fileViewer.type='audio'
                     this.dialog.fileViewer.show=true;
                 }else if(['.mp4','.mkv','.rmvb','.flv','.avi','.wav'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/video-player.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/video-player.html?url=' + encodeURIComponent(fullUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4')+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true){
                         window.open(this.dialog.fileViewer.url,'_blank')
                     }else{
@@ -3125,8 +3125,8 @@
                         this.dialog.fileViewer.show=true;
                     }
                 }else if(['.pdf'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/pdf-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/pdf-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3140,8 +3140,8 @@
                     '.sql',
                     '.html','.htm','.htmlx','.css','.sass','.less','.js','.ts'
                 ].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/text-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/text-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     }else {
@@ -3162,8 +3162,8 @@
                         this.dialog.fileViewer.type = 'text'
                     }
                 }else if(['.csv'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/csv-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/csv-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3174,8 +3174,8 @@
                     ".doc", ".dot", ".dotx", ".dotm", ".rtf",
                     ".wps", ".wpt", ".odt", ".ott", ".fodt", ".epub"
                 ].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/docx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/docx-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3186,8 +3186,8 @@
                     ".xls", ".xlsm", ".xlt", ".xltm", ".tsv",
                     ".ods", ".ots", ".et", ".ett"
                 ].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/xlsx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/xlsx-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3197,8 +3197,8 @@
                 }else if(['.pptx',
                     ".ppt", ".pps", ".dps", ".odp", ".otp", ".ppsx"
                 ].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/pptx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/pptx-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3206,8 +3206,8 @@
                         this.dialog.fileViewer.show = true;
                     }
                 }else if(['.ofd'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/ofd-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/ofd-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
@@ -3215,8 +3215,8 @@
                         this.dialog.fileViewer.show = true;
                     }
                 }else if(['.fbx', '.glb', '.gltf'].includes(suffix)){
-                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
-                    this.dialog.fileViewer.url = '../viewer/d3-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl);
+                    this.dialog.fileViewer.url = '../viewer/d3-viewer.html?url=' + encodeURIComponent(fullUrl)+"&title="+encodeURIComponent(this.dialog.fileViewer.title);
                     if(true) {
                         window.open(this.dialog.fileViewer.url, '_blank')
                     } else {
