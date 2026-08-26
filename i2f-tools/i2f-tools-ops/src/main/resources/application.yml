@@ -18,6 +18,7 @@ ai:
   tools:
     file:
       root-path: ./ai-root
+      full-access: false
     selenium-web-search:
       enable: false
     playwright-web-search:
