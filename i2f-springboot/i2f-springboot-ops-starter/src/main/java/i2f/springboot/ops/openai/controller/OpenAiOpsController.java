@@ -17,6 +17,7 @@ import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.image.common.ImageCompressor;
 import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
+import i2f.resp.ApiResp;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
@@ -298,6 +299,28 @@ public class OpenAiOpsController implements IOpsProvider {
             }
             if (realName == null || realName.isEmpty()) {
                 realName = "download.data";
+            }
+
+            String suffix = "";
+            int idx = realName.lastIndexOf(".");
+            if (idx >= 0) {
+                suffix = realName.substring(idx).toLowerCase();
+            }
+
+            if (Arrays.asList(
+                    ".doc", ".dot", ".dotx", ".dotm", ".rtf",
+                    ".wps", ".wpt", ".odt", ".ott", ".fodt", ".epub"
+            ).contains(suffix) || Arrays.asList(
+                    ".xls", ".xlsm", ".xlt", ".xltm", ".tsv",
+                    ".ods", ".ots", ".et", ".ett"
+            ).contains(suffix) || Arrays.asList(
+                    ".ppt", ".pps", ".dps", ".odp", ".otp", ".ppsx"
+            ).contains(suffix)) {
+                ApiResp<File> outputResp = OfficeFormatUtil.convertOfficeFile(file, false);
+                if (outputResp.isSuccess()) {
+                    file = outputResp.getData();
+                    realName=file.getName();
+                }
             }
 
             ServletFileUtil.responseAsFileAttachment(new FileInputStream(file), true, realName, null, false, response);

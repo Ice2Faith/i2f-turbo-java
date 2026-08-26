@@ -1113,11 +1113,67 @@
                     ></iframe>
                 </div>
             </template>
-            <template v-else-if="dialog.fileViewer.type=='pdf'">
+            <template v-else-if="dialog.fileViewer.type=='pdf-native'">
                 <embed :src="dialog.fileViewer.url"
                        type="application/pdf"
                        style="width: 100%;height: 75vh;"
                 />
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='pdf'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='text'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='csv'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='docx'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='xlsx'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='pptx'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='ofd'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
+            </template>
+            <template v-else-if="dialog.fileViewer.type=='d3'">
+                <div style="background: black">
+                    <iframe :src="dialog.fileViewer.url"
+                            style="width: 100%;height: 75vh;"
+                    ></iframe>
+                </div>
             </template>
             <template v-else>
                 该文件不支持预览！
@@ -3062,11 +3118,21 @@
                 }else if(['.mp4','.mkv','.rmvb','.flv','.avi','.wav'].includes(suffix)){
                     let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
                     this.dialog.fileViewer.url = '../viewer/video-player.html?url=' + encodeURIComponent(fullUrl);
-                    this.dialog.fileViewer.type='video'
-                    this.dialog.fileViewer.show=true;
+                    if(true){
+                        window.open(this.dialog.fileViewer.url,'_blank')
+                    }else{
+                        this.dialog.fileViewer.type='video'
+                        this.dialog.fileViewer.show=true;
+                    }
                 }else if(['.pdf'].includes(suffix)){
-                    this.dialog.fileViewer.type='pdf'
-                    this.dialog.fileViewer.show=true;
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/pdf-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'pdf'
+                        this.dialog.fileViewer.show = true;
+                    }
                 }else if(['.txt','.text',
                     '.java','.py','.c','.h','.cpp','.hpp','.php','.go','.cs','.groovy','.scala',
                     '.json','.xml',
@@ -3074,21 +3140,89 @@
                     '.sql',
                     '.html','.htm','.htmlx','.css','.sass','.less','.js','.ts'
                 ].includes(suffix)){
-                    this.callDownloadTmpFile(item.fileUrl, false).then(res => {
-                        const blob = new Blob([res.data], {type: res.contentType})
-                        return this.blobToStringWithFileReader(blob)
-                    }).then(text=>{
-                        this.dialog.messageEditor.type = 'view';
-                        this.dialog.messageEditor.text = text;
-                        this.dialog.messageEditor.lang = 'text';
-                        this.dialog.messageEditor.show = true;
-                        setTimeout(() => {
-                            this.initMessageEditor();
-                        }, 200)
-                    }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                    })
-                    this.dialog.fileViewer.type='text'
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/text-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    }else {
+                        this.callDownloadTmpFile(item.fileUrl, false).then(res => {
+                            const blob = new Blob([res.data], {type: res.contentType})
+                            return this.blobToStringWithFileReader(blob)
+                        }).then(text => {
+                            this.dialog.messageEditor.type = 'view';
+                            this.dialog.messageEditor.text = text;
+                            this.dialog.messageEditor.lang = 'text';
+                            this.dialog.messageEditor.show = true;
+                            setTimeout(() => {
+                                this.initMessageEditor();
+                            }, 200)
+                        }).catch(err => {
+                            this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                        })
+                        this.dialog.fileViewer.type = 'text'
+                    }
+                }else if(['.csv'].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/csv-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'csv'
+                        this.dialog.fileViewer.show = true;
+                    }
+                }else if(['.docx',
+                    ".doc", ".dot", ".dotx", ".dotm", ".rtf",
+                    ".wps", ".wpt", ".odt", ".ott", ".fodt", ".epub"
+                ].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/docx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'docx'
+                        this.dialog.fileViewer.show = true;
+                    }
+                }else if(['.xlsx',
+                    ".xls", ".xlsm", ".xlt", ".xltm", ".tsv",
+                    ".ods", ".ots", ".et", ".ett"
+                ].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/xlsx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'xlsx'
+                        this.dialog.fileViewer.show = true;
+                    }
+                }else if(['.pptx',
+                    ".ppt", ".pps", ".dps", ".odp", ".otp", ".ppsx"
+                ].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/pptx-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'pptx'
+                        this.dialog.fileViewer.show = true;
+                    }
+                }else if(['.ofd'].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/ofd-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'ofd'
+                        this.dialog.fileViewer.show = true;
+                    }
+                }else if(['.fbx', '.glb', '.gltf'].includes(suffix)){
+                    let fullUrl = '../open-ai/tmp-file/inline?fileUrl=' + encodeURIComponent(fileUrl) + '&type=' + ('.flv' == suffix ? 'FLV' : 'MP4');
+                    this.dialog.fileViewer.url = '../viewer/d3-viewer.html?url=' + encodeURIComponent(fullUrl);
+                    if(true) {
+                        window.open(this.dialog.fileViewer.url, '_blank')
+                    } else {
+                        this.dialog.fileViewer.type = 'd3'
+                        this.dialog.fileViewer.show = true;
+                    }
                 }else{
                     this.$message.warning('不支持语言的类型')
                     window.open(this.dialog.fileViewer.url,'_blank')
