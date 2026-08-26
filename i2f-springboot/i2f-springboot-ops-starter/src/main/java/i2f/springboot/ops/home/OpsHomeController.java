@@ -1,6 +1,5 @@
 package i2f.springboot.ops.home;
 
-import com.jcraft.jsch.ChannelSftp;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -8,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
@@ -34,7 +32,7 @@ public class OpsHomeController {
     @Autowired
     private ApplicationContext applicationContext;
 
-    @RequestMapping("/")
+    @RequestMapping({"/", "/home", "/index"})
     public void index(HttpServletRequest request, HttpServletResponse response) throws Exception {
         request.getRequestDispatcher("./index.html").forward(request, response);
     }
