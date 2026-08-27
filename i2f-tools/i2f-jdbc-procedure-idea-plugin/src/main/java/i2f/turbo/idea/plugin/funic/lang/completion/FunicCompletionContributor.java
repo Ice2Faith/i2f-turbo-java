@@ -44,7 +44,6 @@ public class FunicCompletionContributor extends CompletionContributor {
                             .withItemTextItalic(true);
                     result.addElement(item);
                 }
-                return;
             }
 
 

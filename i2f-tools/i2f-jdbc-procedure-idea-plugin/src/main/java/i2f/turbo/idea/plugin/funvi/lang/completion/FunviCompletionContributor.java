@@ -44,7 +44,6 @@ public class FunviCompletionContributor extends CompletionContributor {
                             .withItemTextItalic(true);
                     result.addElement(item);
                 }
-                return;
             }
 
             Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
