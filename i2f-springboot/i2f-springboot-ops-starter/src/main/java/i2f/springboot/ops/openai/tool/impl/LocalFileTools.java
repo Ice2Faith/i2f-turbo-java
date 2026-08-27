@@ -55,9 +55,27 @@ public class LocalFileTools {
                                                   int maxDeep) {
 
         File rootFile = getRootFile();
-        File startFile = getFile(startPath);
 
-        return FileToolUtils.searchFiles(startFile, pattern, maxDeep, rootFile);
+        File searchRootFile=rootFile;
+        File startFile = getFile(startPath);
+        if(searchRootFile==null){
+            searchRootFile=startFile;
+        }
+        searchRootFile=FileToolUtils.normalizeFile(searchRootFile);
+
+        List<Map<String, Object>> list = FileToolUtils.searchFiles(startFile, pattern, maxDeep, searchRootFile);
+        if(fullAccess) {
+            for (Map<String, Object> map : list) {
+                try {
+                    map.put("rootPath", searchRootFile.getAbsolutePath());
+                    String file = (String)map.get("file");
+                    map.put("fullPath",FileToolUtils.normalizeFile(new File(searchRootFile,file)));
+                } catch (Throwable e) {
+                    // ignore
+                }
+            }
+        }
+        return list;
     }
 
     @Tool(

@@ -96,6 +96,7 @@ public class AppEvalOpsController {
                         beanMap.put(name, bean);
                     }
                     context.put("beanMap", beanMap);
+                    context.put("request",request);
                     Object eval = GroovyScript.eval(script, context);
                     refRet.set(eval);
                 } catch (Throwable e) {

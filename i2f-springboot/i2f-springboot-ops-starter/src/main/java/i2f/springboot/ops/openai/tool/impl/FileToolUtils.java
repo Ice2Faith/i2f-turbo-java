@@ -145,17 +145,8 @@ public class FileToolUtils {
         }
         File file = new File(startFile.getAbsolutePath());
         String absolutePath = getSubPath(file, rootFile);
-        if (pattern == null || pattern.isEmpty()) {
-            Map<String, Object> item = new HashMap<>();
-            item.put("isDirectory", startFile.isDirectory());
-            item.put("file", absolutePath);
-            item.put("byteSize", file.length());
-            item.put("humanSize", HumanUtil.humanFileSize(file.length()));
-            ret.add(item);
-            return;
-        }
-
-        if (matcher.matches(absolutePath, pattern)) {
+        if (pattern == null || pattern.isEmpty()
+                || matcher.matches(absolutePath, pattern)) {
             Map<String, Object> item = new HashMap<>();
             item.put("isDirectory", startFile.isDirectory());
             item.put("file", absolutePath);
