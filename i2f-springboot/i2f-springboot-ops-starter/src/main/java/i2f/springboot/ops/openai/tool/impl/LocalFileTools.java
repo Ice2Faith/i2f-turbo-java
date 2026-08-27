@@ -38,6 +38,9 @@ public class LocalFileTools {
     @Value("${ai.tools.file.backup-file:true}")
     protected boolean backupFile = true;
 
+    @Value("${ai.tools.file.full-access:false}")
+    protected boolean fullAccess = false;
+
     @Tool(
             tags = {
                     AiTags.READONLY_VALUE
@@ -291,6 +294,9 @@ public class LocalFileTools {
 
 
     public File getRootFile() {
+        if (fullAccess) {
+            return null;
+        }
         File rootFile = new File(this.rootPath);
         rootFile = FileToolUtils.normalizeFile(rootFile);
         return rootFile;

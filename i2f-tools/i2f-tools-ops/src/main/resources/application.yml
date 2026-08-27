@@ -6,18 +6,12 @@ xproc4j:
   xml-locations: classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml
   watching-directories: classpath*:procedure/;classpath*:com/
 
-i2f:
-  springboot:
-    ops:
-      open-ai:
-        enable: false
-      dashscope:
-        enable: false
 
 ai:
   tools:
     file:
       root-path: ./ai-root
+      full-access: false
     selenium-web-search:
       enable: false
     playwright-web-search:
@@ -50,3 +44,14 @@ ai:
       apiKey: sk-xxxx
       model: qwen-audio-3.0-tts-flash
       voice: longanhuan_v3.6
+
+# ops 操作面板
+i2f:
+  springboot:
+    ops:
+      open-ai:
+        enable: false
+      dashscope:
+        enable: false
+      secure:
+#         cert:

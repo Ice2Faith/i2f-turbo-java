@@ -144,7 +144,7 @@ public class FileToolUtils {
             return;
         }
         File file = new File(startFile.getAbsolutePath());
-        String absolutePath = FileToolUtils.getSubPath(file, rootFile);
+        String absolutePath = getSubPath(file, rootFile);
         if (pattern == null || pattern.isEmpty()) {
             Map<String, Object> item = new HashMap<>();
             item.put("isDirectory", startFile.isDirectory());
@@ -172,6 +172,9 @@ public class FileToolUtils {
 
     public static String getSubPath(File file, File rootFile) {
         file = normalizeFile(file);
+        if (rootFile == null) {
+            return file.getAbsolutePath();
+        }
         rootFile = normalizeFile(rootFile);
 
         String absRootPath = rootFile.getAbsolutePath();
@@ -196,6 +199,12 @@ public class FileToolUtils {
     }
 
     public static File getSubFile(String startPath, File rootFile) {
+        File startFile = new File((startPath == null || startPath.isEmpty()) ? "." : startPath);
+        startFile = normalizeFile(startFile);
+        if (rootFile == null) {
+            return startFile;
+        }
+
         rootFile = normalizeFile(rootFile);
 
         String absRootPath = rootFile.getAbsolutePath();
@@ -204,7 +213,7 @@ public class FileToolUtils {
             absRootPath = absRootPath + "/";
         }
 
-        File startFile = rootFile;
+        startFile = rootFile;
         if (startPath != null && !startPath.isEmpty()) {
             startFile = new File(rootFile, startPath);
             startFile = normalizeFile(startFile);
