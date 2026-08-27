@@ -330,10 +330,14 @@ public class LocalFileTools {
         File rootFile = getRootFile();
         if(startPath==null || startPath.isEmpty()
                 || ".".equals(startPath)
-                || "./".equals(startPath)
-                || ".\\".equals(startPath)){
+                // 相对路径处理
+                || startPath.startsWith("./")
+                || startPath.startsWith(".\\")
+                || startPath.startsWith("../")
+                || startPath.startsWith("..\\")){
             rootFile=getRootFile(false);
         }
+
         return FileToolUtils.getSubFile(startPath, rootFile);
     }
 
