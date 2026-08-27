@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.match.impl.AntMatcher;
 import i2f.match.regex.RegexUtil;
@@ -157,7 +158,9 @@ public class FileToolUtils {
     }
 
     public static File normalizeFile(File file) {
-        file = new File(file.getAbsolutePath());
+        String fullPath = FileUtil.pathGen(file.getAbsolutePath());
+        fullPath=fullPath==null?".":fullPath;
+        file = new File(fullPath);
         return file;
     }
 

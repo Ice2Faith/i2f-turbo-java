@@ -328,14 +328,16 @@ public class LocalFileTools {
 
     public File getFile(String startPath) {
         File rootFile = getRootFile();
-        if(startPath==null || startPath.isEmpty()
-                || ".".equals(startPath)
-                // 相对路径处理
-                || startPath.startsWith("./")
-                || startPath.startsWith(".\\")
-                || startPath.startsWith("../")
-                || startPath.startsWith("..\\")){
+
+        if(startPath==null || startPath.isEmpty()){
             rootFile=getRootFile(false);
+        }else{
+            File testRootFile=getRootFile(false);
+            File testDirectFile=FileToolUtils.normalizeFile(new File(startPath));
+            File testRelativeFile=FileToolUtils.normalizeFile(new File(testRootFile,startPath));
+            if(testDirectFile.getAbsolutePath().equals(testRelativeFile.getAbsolutePath())){
+                rootFile=getRootFile(false);
+            }
         }
 
         return FileToolUtils.getSubFile(startPath, rootFile);
