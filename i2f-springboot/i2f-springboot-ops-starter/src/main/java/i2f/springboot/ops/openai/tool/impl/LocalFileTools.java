@@ -310,18 +310,30 @@ public class LocalFileTools {
         }
     }
 
-
     public File getRootFile() {
+        return getRootFile(this.fullAccess);
+    }
+
+    public File getRootFile(boolean fullAccess) {
+        File rootFile = new File(this.rootPath);
+        if(!rootFile.exists()){
+            rootFile.mkdirs();
+        }
         if (fullAccess) {
             return null;
         }
-        File rootFile = new File(this.rootPath);
         rootFile = FileToolUtils.normalizeFile(rootFile);
         return rootFile;
     }
 
     public File getFile(String startPath) {
         File rootFile = getRootFile();
+        if(startPath==null || startPath.isEmpty()
+                || ".".equals(startPath)
+                || "./".equals(startPath)
+                || ".\\".equals(startPath)){
+            rootFile=getRootFile(false);
+        }
         return FileToolUtils.getSubFile(startPath, rootFile);
     }
 
