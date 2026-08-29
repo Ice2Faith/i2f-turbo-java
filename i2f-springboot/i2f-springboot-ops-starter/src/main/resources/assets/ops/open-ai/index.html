@@ -384,6 +384,11 @@
                                             <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
                                                class="el-icon-copy-document"></i>
                                         </el-tooltip>
+                                        <el-tooltip effect="dark" content="编辑数据" placement="top-start">
+                                            <i @click="editDataSelectMessage(idx)"
+                                               style="color: #4ba4ec;font-size: 14px;"
+                                               class="el-icon-brush"></i>
+                                        </el-tooltip>
                                         <el-tooltip effect="dark" content="语音播报" placement="top-start">
                                             <i class="el-icon-microphone"
                                                v-if="metas.supportTts || form.useQwenTts"
@@ -482,6 +487,14 @@
                             会话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
                             带来的问题是，Token费用的消耗变高，上下文也可能太长而被LLM大模型丢失。<br/>
                             因此，会话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
+                        <hr/>
+                        自动总结，需要在开启【截断会话】的前提下，在检测到消息即将达到设置的时候。<br/>
+                        自动进行一次会话总结调用。<br/>
+                        <hr/>
+                        <el-checkbox v-model="metas.enableAutoSummary"
+                                     :disabled="!metas.enableTruncOverflowHistory">
+                            自动总结
+                        </el-checkbox>
                         </p>
                         <el-button slot="reference"
                                    v-if="currentMessages && currentMessages.length>0"
@@ -1422,6 +1435,7 @@
                         uploadList: [],
                         maxHistoryCount: 20,
                         enableTruncOverflowHistory: true,
+                        enableAutoSummary: false,
                         showConfig: false,
                         supportTts: false,
                         ttsPlaying: false,
@@ -1580,6 +1594,25 @@
 
                     let item = list[index];
                     item[item.type].content = content;
+                } else if (this.dialog.messageEditor.type == 'edit-data-message') {
+                    let sid = this.metas.activeSessionId;
+                    if (!sid) {
+                        return
+                    }
+                    let list = this.metas.historyMessageMap[sid]
+                    if (!list) {
+                        return
+                    }
+
+                    let index = this.dialog.messageEditor.messageIndex;
+                    let content = this.dialog.messageEditor.text;
+
+                    try {
+                        let obj = JSON.parse(content);
+                        list[index] = Object.assign(list[index], obj);
+                    } catch (e) {
+                        this.$message.error('设置消息数据失败，可能是JSON解析错误！')
+                    }
                 } else if (this.dialog.messageEditor.type == 'import-message-history') {
                     let content = this.dialog.messageEditor.text;
                     try {
@@ -2301,6 +2334,14 @@
                         let item = stack[i];
                         apiMessages.push(item)
                     }
+
+                    if (this.metas.enableAutoSummary) {
+                        if (apiMessages.length >= (this.metas.maxHistoryCount - 1)) {
+                            this.$message.warning('自动会话总结触发...')
+                            this.directSummarySessionHistory();
+                            return;
+                        }
+                    }
                 } else {
                     messages.forEach(e => {
                         apiMessages.push(e)
@@ -2370,7 +2411,7 @@
                         let resp = JSON.parse(raw);
                         if (resp.code == 200) {
                             //console.log(json.data)
-                            if (!resp.data || resp.data === '[DONE]') {
+                            if (resp.data === '[DONE]') {
                                 Object.keys(toolCallsMap).forEach(k => {
                                     let item = toolCallsMap[k];
                                     let toolCallContent = 'call_id=' + item.id + '\n' +
@@ -2814,6 +2855,27 @@
                 let content = item[item.type].content;
                 copy2clipboard(content);
             },
+            editDataSelectMessage(index) {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return
+                }
+                let list = this.metas.historyMessageMap[sid]
+                if (!list) {
+                    return
+                }
+                let item = list[index];
+                let content = JSON.stringify(item, null, '    ');
+
+                this.dialog.messageEditor.type = 'edit-data-message';
+                this.dialog.messageEditor.messageIndex = index;
+                this.dialog.messageEditor.text = content;
+                this.dialog.messageEditor.lang = 'javascript';
+                this.dialog.messageEditor.show = true;
+                setTimeout(() => {
+                    this.initMessageEditor();
+                }, 200)
+            },
             editSelectMessage(index) {
                 let sid = this.metas.activeSessionId;
                 if (!sid) {
@@ -2838,19 +2900,22 @@
             summarySessionHistory() {
                 this.$confirm('确认进行会话总结，总结后历史消息将会被移除？', '提示', {type: 'warning'})
                     .then(() => {
-                        let item = {
-                            type: 'user',
-                            hidden: false,
-                            user: {
-                                role: 'user',
-                                content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. response with before user question language.'
-                            }
-                        }
-                        let messages = this.getActiveMessages();
-                        messages.push(item);
-                        this.directSendMessage('summary-history')
+                        this.directSummarySessionHistory()
                     }).catch(() => {
                 });
+            },
+            directSummarySessionHistory() {
+                let item = {
+                    type: 'user',
+                    hidden: false,
+                    user: {
+                        role: 'user',
+                        content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. response with before user question language.'
+                    }
+                }
+                let messages = this.getActiveMessages();
+                messages.push(item);
+                this.directSendMessage('summary-history')
             },
             onTts(msg) {
                 let content = msg[msg.type].content;
