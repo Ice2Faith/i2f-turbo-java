@@ -1027,9 +1027,13 @@ public class OpenAiOpsController implements IOpsProvider {
                                     response -> {
                                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
                                             String line = null;
+                                            boolean hasDone = false;
                                             while ((line = reader.readLine()) != null) {
                                                 if (line.startsWith("data:")) {
                                                     String data = line.substring(5).trim();
+                                                    if ("[DONE]".equals(data)) {
+                                                        hasDone = true;
+                                                    }
                                                     OpsSecureReturn<?> resp = null;
                                                     if (req.isEncryptOutput()) {
                                                         resp = transfer.success(data);
@@ -1043,8 +1047,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     break;
                                                 }
                                             }
-                                            String respJson = objectMapper.writeValueAsString(OpsSecureReturn.success("[DONE]"));
-                                            emitter.send(respJson);
+                                            if (!hasDone) {
+                                                String respJson = objectMapper.writeValueAsString(OpsSecureReturn.success("[DONE]"));
+                                                emitter.send(respJson);
+                                            }
                                         } catch (Exception e) {
                                             try {
                                                 OpsSecureReturn<?> resp = null;
