@@ -206,7 +206,7 @@ public class SessionRecordTools {
     public boolean session_record_update(
             @ToolParam(value = "recordType", description = "the record type, for example \"plan\" or \"checklist\".")
             String recordType,
-            @ToolParam(value = "content", description = "the text content, any you want stored.")
+            @ToolParam(value = "content", description = "the text content, any you want stored, cloud be null means remove.")
             String content
     ) {
         Map<String, String> sessionRecordsMap = ToolCallContextHolder.getOr(TOOL_CONTEXT_KEY, ConcurrentHashMap::new);
