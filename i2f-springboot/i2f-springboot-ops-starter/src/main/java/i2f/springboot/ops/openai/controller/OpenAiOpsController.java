@@ -319,7 +319,7 @@ public class OpenAiOpsController implements IOpsProvider {
                 ApiResp<File> outputResp = OfficeFormatUtil.convertOfficeFile(file, false);
                 if (outputResp.isSuccess()) {
                     file = outputResp.getData();
-                    realName=file.getName();
+                    realName = file.getName();
                 }
             }
 
@@ -516,7 +516,10 @@ public class OpenAiOpsController implements IOpsProvider {
                         // 事实内容注入
                         String truthContent = req.getTruthContent();
                         if (truthContent != null && !truthContent.isEmpty()) {
-                            OpenAiSystemMessage system = new OpenAiSystemMessage("# 关键事实\n\n" + truthContent);
+                            if (!truthContent.startsWith("# 关键事实\n\n")) {
+                                truthContent = "# 关键事实\n\n" + truthContent;
+                            }
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
                             completion.getMessages().add(0, system);
 
                             // 注入完成后，清空，后面回显
