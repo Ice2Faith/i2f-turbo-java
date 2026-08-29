@@ -201,7 +201,7 @@ public class SessionRecordTools {
             tags = {
                     AiTags.AUTO_VALUE
             },
-            description = "update session content by record type. Note: old record type content will be replaced, work on chat session level."
+            description = "update/remove session content by record type. Note: old record type content will be replaced, if content is null will remove it, work on chat session level."
     )
     public boolean session_record_update(
             @ToolParam(value = "recordType", description = "the record type, for example \"plan\" or \"checklist\".")

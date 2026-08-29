@@ -884,6 +884,14 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
+                            if (true) {
+                                Set<String> checkNames = SessionRecordTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
                             if (hasAttachFiles.get()) {
                                 Set<String> checkNames = TmpFileTools.toolNames();
                                 for (String checkName : checkNames) {
