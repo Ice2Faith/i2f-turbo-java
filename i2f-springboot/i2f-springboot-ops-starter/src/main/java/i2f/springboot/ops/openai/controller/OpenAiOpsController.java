@@ -522,10 +522,6 @@ public class OpenAiOpsController implements IOpsProvider {
                             OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
                             completion.getMessages().add(0, system);
 
-                            // 注入完成后，清空，后面回显
-                            // 后面会有工具调用设置新的truth
-                            // 如果没有新的值，那就表示没有更新
-                            req.setTruthContent(null);
 
                             OpenAiMessageVo dto = new OpenAiMessageVo();
                             dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
@@ -819,28 +815,26 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
-                    // 回显给前端，事实
+                    // 回显给前端，工具调用可能变更了内容，事实
                     if (req.isEnableTruth()) {
                         // 事实内容注入
                         String truthContent = req.getTruthContent();
-                        if (truthContent != null && !truthContent.isEmpty()) {
-                            OpenAiSystemMessage system = new OpenAiSystemMessage("# 关键事实\n\n" + truthContent);
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
 
-                            OpenAiMessageVo dto = new OpenAiMessageVo();
-                            dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
-                            dto.setEcho_truth(system);
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
+                        dto.setEcho_truth(system);
 
-                            String defTruthMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defTruthMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defTruthMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                        String defTruthMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defTruthMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defTruthMsg);
                         }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (!toolFileMessages.isEmpty()) {
