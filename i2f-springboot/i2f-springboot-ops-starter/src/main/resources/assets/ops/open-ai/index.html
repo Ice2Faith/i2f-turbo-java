@@ -2339,7 +2339,8 @@
                         apiMessages.push(item)
                     }
 
-                    if (this.metas.enableAutoSummary) {
+                    if (this.metas.enableAutoSummary
+                        && options.action != 'summary-history') {
                         if (apiMessages.length >= (this.metas.maxHistoryCount - 1)) {
                             this.$message.warning('自动会话总结触发...')
                             this.directSummarySessionHistory(true);
