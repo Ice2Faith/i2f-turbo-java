@@ -2172,7 +2172,11 @@
                 }
 
                 let sid = this.metas.activeSessionId;
+                let session = this.findSession(sid)
                 let messages = this.getActiveMessages();
+
+                // 按钮触发的发送，需要重置action
+                session.lastOptions = null;
 
                 // 追加用户消息，构建 API 请求消息列表
                 let item = {
@@ -2338,7 +2342,7 @@
                     if (this.metas.enableAutoSummary) {
                         if (apiMessages.length >= (this.metas.maxHistoryCount - 1)) {
                             this.$message.warning('自动会话总结触发...')
-                            this.directSummarySessionHistory();
+                            this.directSummarySessionHistory(true);
                             return;
                         }
                     }
@@ -2673,6 +2677,11 @@
                         this.onTts(assistantMsg)
                     }
 
+                    // 需要保存最后一次请求的action,因为中间可能会有工具调用
+                    // 如果有工具调用的情况下，action通常不会被处理
+                    // 需要等待工具调用结束之后，才能进行action
+                    session.lastOptions = options;
+
                     if (Object.keys(toolCallsMap).length > 0) {
                         let toolApprovalList = []
 
@@ -2738,10 +2747,27 @@
                             })
                         }
 
-
+                        // 发生了工具调用，其实就已经结束了
+                        // 后面的逻辑应该发生在没有工具调用的情况
+                        return;
                     }
 
-                    if (options.action == 'summary-history') {
+                    // 非工具调用的情况，会走到这里
+                    // 因此需要检查因为中间穿插工具调用
+                    // 而导致的action动作延迟
+                    let lastOptions = session.lastOptions || {};
+                    session.lastOptions = null;
+
+                    // summary-history 可能是用户触发的，也可能是勾选了自动总结触发的
+                    // 那么，请求序列就可能是这样的
+                    // 首先，发送summary消息
+                    // 然后，模型可能调用工具存储一些记忆之类的工具
+                    // 最后，模型才发送总结的内容给用户
+                    // 因此，中间穿插了可能的工具调用
+                    // 就需要借助session存储lastAction
+                    // 知道最后一次的action，形成闭环
+                    if (options.action == 'summary-history'
+                        || lastOptions.action == 'summary-history') {
                         let oldList = [...messages]
                         messages.splice(0, messages.length);
 
@@ -2774,6 +2800,13 @@
                         }
 
                         messages.push(assistantMsg);
+
+                        // 发生总结，可能是由于自动总结触发的
+                        // 这时候，就需要触发继续循环
+                        // 否则就停在了总结这里，需要手动继续
+                        if (options.needContinue || lastOptions.needContinue) {
+                            this.continueAfterSummaryHistory()
+                        }
                     }
                 } catch (e) {
                     let errMsg = '请求失败';
@@ -2838,6 +2871,9 @@
                     .then(() => {
                         list.splice(index + 1, list.length - index)
                         this.$set(this.metas.historyMessageMap, sid, list)
+                        let session = this.findSession(sid);
+                        // 按钮触发的发送，需要重置action
+                        session.lastOptions = null;
                         this.directSendMessage()
                     }).catch(() => {
                 });
@@ -2904,18 +2940,34 @@
                     }).catch(() => {
                 });
             },
-            directSummarySessionHistory() {
+            directSummarySessionHistory(needContinue = false) {
                 let item = {
                     type: 'user',
                     hidden: false,
                     user: {
                         role: 'user',
-                        content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. response with before user question language.'
+                        content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. Unfinished tasks, to-dos, task progress, and key user information or issues. This is to ensure that the remaining tasks can be seamlessly continued after summarization, since all previous context will be lost and only the summary will remain. Response with before user question language.'
                     }
                 }
                 let messages = this.getActiveMessages();
                 messages.push(item);
-                this.directSendMessage('summary-history')
+                this.directSendMessage({
+                    action: 'summary-history',
+                    needContinue: needContinue
+                })
+            },
+            continueAfterSummaryHistory() {
+                let item = {
+                    type: 'user',
+                    hidden: false,
+                    user: {
+                        role: 'user',
+                        content: 'continue'
+                    }
+                }
+                let messages = this.getActiveMessages();
+                messages.push(item);
+                this.directSendMessage()
             },
             onTts(msg) {
                 let content = msg[msg.type].content;
