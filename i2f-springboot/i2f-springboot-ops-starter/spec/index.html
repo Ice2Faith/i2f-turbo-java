@@ -161,19 +161,19 @@
             <!-- 统计 -->
             <div class="stats-strip reveal">
                 <div class="stat" style="--c:#e8590c;">
-                    <div class="num" data-count="35">0</div>
+                    <div class="num" data-count="43">0</div>
                     <div class="lab">Java 源文件</div>
                 </div>
                 <div class="stat" style="--c:#0b7285;">
-                    <div class="num" data-count="16">0</div>
+                    <div class="num" data-count="17">0</div>
                     <div class="lab">内置工具类</div>
                 </div>
                 <div class="stat" style="--c:#2b8a3e;">
-                    <div class="num" data-count="7">0</div>
+                    <div class="num" data-count="8">0</div>
                     <div class="lab">回显消息类型</div>
                 </div>
                 <div class="stat" style="--c:#1971c2;">
-                    <div class="num" data-count="5">0</div>
+                    <div class="num" data-count="6">0</div>
                     <div class="lab">REST 端点</div>
                 </div>
                 <div class="stat" style="--c:#e67700;">
@@ -229,7 +229,7 @@
                     <div class="card" style="--c:#0b7285;"><span class="idx">B</span>
                         <h3>工具调用</h3>
                         <div class="tagline">Function Calling</div>
-                        <p>16 个内置工具类经
+                        <p>17 个内置工具类经
                             <code>@Tool</code> 注解自动生成 JSON Schema 注入对话；工具契约并行执行，HITL 人工审批把关危险操作。
                         </p>
                     </div>
@@ -379,7 +379,7 @@
                         <rect x="20" y="326" width="8" height="52" fill="#e8590c"/>
                         <text class="svg-lbl" x="44" y="348" style="fill:#e8590c;">基础层</text>
                         <text class="svg-lbl-sm" x="44" y="366">Harness Eng. · Fat Client · SSE Streaming</text>
-                        <text class="svg-lbl-sm" x="330" y="348">4195 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展
+                        <text class="svg-lbl-sm" x="330" y="348">3332 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展
                         </text>
                         <text class="svg-lbl-sm" x="330" y="366">SSE 逐 Token 流式输出 · SM2/SM4 国密加密传输</text>
                     </svg>
@@ -557,10 +557,11 @@
 
             <div class="two-col">
                 <div class="reveal">
-                    <div class="panel-title">子系统包结构（35 个 Java 文件）</div>
+                    <div class="panel-title">子系统包结构（43 个 Java 文件）</div>
                     <div class="pkg-tree"><span class="dir">i2f.springboot.ops.openai</span>
                         ├── <span class="pkg">controller</span>/
-                        │   └── OpenAiOpsController <span class="cm"># 5 个 REST 端点 · SSE 编排核心</span>
+                        │ ├── OpenAiOpsController <span class="cm"># 5 个 REST 端点 · SSE 编排核心</span>
+                        │ └── QwenTtsOpsController <span class="cm"># 千问语音合成代理</span>
                         ├── <span class="pkg">data</span>/
                         │   ├── OpenAiOperateDto <span class="cm"># 操作请求：功能开关集合</span>
                         │   ├── OpenAiCompletionVo / Dto <span class="cm"># 补全请求 VO/DTO</span>
@@ -568,14 +569,17 @@
                         │   ├── OpenAiMeta <span class="cm"># baseUrl · apiKey</span>
                         │   ├── OpenAiToolApprovalDto <span class="cm"># 工具审批决定</span>
                         │   └── <span class="pkg">message</span>/ OpsOpenAiConsts <span
-                                class="cm"># 7 种回显类型常量</span>
+                                class="cm"># 8 种回显类型常量</span>
                         ├── <span class="pkg">tool</span>/
                         │   ├── SpringContextToolAutoConfiguration
-                        │   ├── <span class="pkg">impl</span>/ 16 个工具类 <span class="cm"># @Tool 注解驱动</span>
+                        │ ├── <span class="pkg">impl</span>/ 17 个工具类 <span class="cm"># @Tool 注解驱动</span>
+                        │ │ └── SessionRecordTools <span class="cm"># 循环工程会话记录读写</span>
                         │   └── <span class="pkg">impl.sql</span>/ SQL 校验器 <span class="cm"># AST + 正则双校验</span>
                         ├── <span class="pkg">skill</span>/ SkillAutoConfiguration <span class="cm"># 30s 热扫描</span>
-                        └── <span class="pkg">rag</span>/ RagAutoConfiguration <span
-                                class="cm"># 向量化 + SQLite 存储</span></div>
+                        ├── <span class="pkg">rag</span>/ RagAutoConfiguration <span
+                                class="cm"># 向量化 + SQLite 存储</span>
+                        └── <span class="pkg">tts</span>/ QwenAudioTtsWebSocket <span
+                                class="cm"># 千问语音合成 WebSocket 客户端</span></div>
                 </div>
                 <div class="reveal">
                     <div class="panel-title">关键依赖（pom.xml 摘录）</div>
@@ -671,10 +675,11 @@
                     <text class="svg-lbl-sm" x="130" y="86">1. POST /stream（OpsSecureDto · SM4 加密报文）</text>
                     <rect x="382" y="104" width="16" height="66" fill="#fff4ec" stroke="#e8590c"/>
                     <text class="svg-lbl-sm" x="408" y="120">2. 解密 · 组装 CompletionDto</text>
-                    <text class="svg-lbl-sm" x="408" y="138">3. 注入：事实 / 技能 / LRU 系统提示词</text>
+                    <text class="svg-lbl-sm" x="408" y="138">3. 注入：事实 / 循环工程 / 技能 / LRU 系统提示词</text>
                     <text class="svg-lbl-sm" x="408" y="156">4. 附件 &lt;upload_files&gt; 追加到用户消息</text>
                     <line class="svg-line" x1="384" y1="190" x2="116" y2="190" marker-end="url(#sq-ah)"/>
-                    <text class="svg-lbl-sm" x="130" y="184">5. SSE：definition_tool / echo_skill / echo_truth 事件
+                    <text class="svg-lbl-sm" x="130" y="184">5. SSE：definition_tool / echo_skill / echo_truth /
+                        echo_session_records_map 事件
                     </text>
                     <line class="svg-line" x1="390" y1="228" x2="619" y2="228" marker-end="url(#sq-ah)"/>
                     <text class="svg-lbl-sm" x="404" y="222">6. 末消息含 tool_calls → 并行提交（审批检查）</text>
@@ -740,7 +745,9 @@
                         <h4>工具契约执行 <code>HITL 审批</code></h4>
                         <p>末消息为带
                             <code>tool_calls</code> 的 assistant 消息时，逐个契约核对前端审批决定（<code>toolApprovalList</code>）：拒绝则注入拒绝原因作为错误结果；允许则提交
-                            <code>toolPool</code> 并行执行，<code>CountDownLatch</code> 汇聚后回填消息列表。</p>
+                            <code>toolPool</code> 并行执行，<code>CountDownLatch</code> 汇聚后回填消息列表。前端在每轮发起前做<b>未
+                                resolved 授权恢复检查</b>——存在待审批契约但审批弹窗已关闭（<code>resolved=false</code>）时自动重新唤起弹窗，避免待授权工具调用被静默丢弃。
+                        </p>
                     </div>
                 </div>
                 <div class="step">
@@ -750,6 +757,17 @@
                         <p>通过 <code>HttpRequest.doPost(url).json()</code> 携带 Bearer 令牌请求 LLM，逐行读取
                             <code>data:</code> 前缀的 chunk，封装为 <code>OpsSecureReturn</code>（按
                             <code>encryptOutput</code> 决定是否加密）后 <code>emitter.send()</code> 中继。</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>循环工程会话记录 <code>sessionRecordsMap</code></h4>
+                        <p>开启
+                            <code>enableLoopEngineering</code> 后，请求携带的 <code>sessionRecordsMap</code> 经
+                            <code>ToolCallContextHolder</code> 注入 <code>SessionRecordTools</code> 读写上下文；流结束前以
+                            <code>echo_session_records_map</code> 事件回显最新记录，前端持久化到
+                            localStorage，实现跨轮循环工程状态接力。</p>
                     </div>
                 </div>
             </div>
@@ -796,6 +814,12 @@
                         <td>附件下载（支持下载解析后的纯文本）</td>
                         <td>文件附件流</td>
                     </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/tts/qwen/generate</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>千问语音合成（分段 WebSocket 拉流转 MP3）</td>
+                        <td>文件访问凭据</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -840,6 +864,14 @@
                                     class="cm">/* 记忆系统 */</span>
                             <span class="ty">"enableMergedSystemMsg"</span>: <span class="kw">false</span>, <span
                                     class="cm">/* 系统重排 */</span>
+                            <span class="ty">"stream_options"</span>: { <span class="ty">"include_usage"</span>: <span
+                                    class="kw">true</span> }, <span class="cm">/* Token 用量统计 */</span>
+                            <span class="ty">"enableVisionImage"</span>: <span class="kw">false</span>, <span
+                                    class="cm">/* 图片视觉输入 */</span>
+                            <span class="ty">"enableLoopEngineering"</span>: <span class="kw">true</span>, <span
+                                    class="cm">/* 循环工程 */</span>
+                            <span class="ty">"sessionRecordsMap"</span>: { }, <span
+                                    class="cm">/* 循环工程四类会话记录 */</span>
   <span class="ty">"toolApprovalList"</span>: [ <span class="cm">/* HITL 审批决定，见第 06 章 */</span> ]
                             }</pre>
                     </div>
@@ -964,7 +996,9 @@
                         <tbody>
                         <tr>
                             <td><b>会话生命周期</b></td>
-                            <td>NEW → ACTIVE → SUMMARIZING（总结）/ TRIMMED（截断）/ EXPORTED（导出）/ DELETED → 回到 ACTIVE</td>
+                            <td>NEW → ACTIVE → SUMMARIZING（手动 / 自动总结）/ TRIMMED（截断）/ EXPORTED（导出）/ DELETED → 回到
+                                ACTIVE
+                            </td>
                         </tr>
                         <tr>
                             <td><b>工具加载</b></td>
@@ -1132,7 +1166,7 @@
             </div>
             <p class="lead reveal">
                 消息是框架的第一公民。标准层定义 4 种角色消息，Ops 层通过 <code>OpenAiMessageVo</code> 多态载体与
-                <code>OpsOpenAiConsts</code> 扩展出 7 种<b>回显消息</b>——让前端不仅能看到对话，还能看到"系统为模型做了什么"。
+                <code>OpsOpenAiConsts</code> 扩展出 8 种<b>回显消息</b>——让前端不仅能看到对话，还能看到"系统为模型做了什么"。
             </p>
 
             <div class="two-col">
@@ -1221,6 +1255,11 @@
                                 <td>完整补全报文</td>
                                 <td>回显实际发给 LLM 的请求报文（学习/调试）</td>
                             </tr>
+                            <tr>
+                                <td><code>echo_session_records_map</code></td>
+                                <td>循环工程会话记录 Map</td>
+                                <td>流结束前回显 request / plan / checklist / agent 四类记录，前端持久化接力</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1256,7 +1295,21 @@
 
     <span class="kw">protected</span> List&lt;String&gt; lruToolNames; <span class="cm">// LRU 存活工具</span>
     <span class="kw">protected</span> Integer lruToolMaxSize; <span class="cm">// LRU 容量</span>
+    <span class="kw">protected</span> List&lt;ToolDefinition&gt; loadedTools; <span
+                            class="cm">// 前端已加载工具定义（回传续用）</span>
     <span class="kw">protected</span> String truthContent; <span class="cm">// 关键事实内容</span>
+
+    <span class="kw">protected</span> String md5; <span class="cm">// 附件 MD5 校验</span>
+    <span class="kw">protected</span> String fileUrl; <span class="cm">// 附件访问凭据</span>
+    <span class="kw">protected boolean</span> parsedText; <span class="cm">// 下载解析后的纯文本</span>
+    <span class="kw">protected boolean</span> enableVisionImage; <span
+                            class="cm">// 图片视觉输入开关</span>
+    <span class="kw">protected</span> String ttsContent; <span class="cm">// 语音合成文本（千问 TTS）</span>
+
+    <span class="kw">protected boolean</span> enableLoopEngineering; <span
+                            class="cm">// 循环工程开关</span>
+    <span class="kw">protected</span> Map&lt;String, String&gt; sessionRecordsMap; <span
+                            class="cm">// 循环工程会话记录（四类）</span>
                     }</pre>
             </div>
         </section>
@@ -1588,7 +1641,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">内置工具清单 — ops 层 16 类 + 条件装配 2 类</div>
+                <div class="panel-title">内置工具清单 — ops 层 17 类 + 条件装配 4 类</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
                         <thead>
@@ -1714,11 +1767,18 @@
                             <td>用户级记忆检索 / 保存 / 删除</td>
                             <td><span class="tag t-t">RAG</span></td>
                         </tr>
+                        <tr>
+                            <td><code>SessionRecordTools</code> ※</td>
+                            <td><code>session_record_read / session_record_update</code></td>
+                            <td>循环工程会话记录读写（request / plan / checklist / agent）</td>
+                            <td><span class="tag t-g">AUTO</span></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
                 <p class="body" style="font-size:12.5px;">※ 条件装配：随 <code>ai.skills.enable</code> /
-                    <code>ai.rags.enable</code> / <code>ai.rags.memory.enable</code> 开关注入，详见第 13 章。</p>
+                    <code>ai.rags.enable</code> / <code>ai.rags.memory.enable</code> /
+                    <code>ai.tools.session-record.enable</code> 开关注入，详见第 13 章。</p>
             </div>
 
             <div class="reveal">
@@ -1810,6 +1870,16 @@
                         </p>
                     </div>
                 </div>
+            </div>
+
+            <div class="callout reveal" style="--c:#e8590c;">
+                <div class="co-title">HITL 鲁棒性 — 未 resolved 授权恢复检查</div>
+                <p>审批弹窗是异步中断点：用户可能在弹窗打开时切走会话或直接关闭弹窗，导致
+                    <code>toolApprovalList</code> 存在待审批契约却无法回传决定。前端在每轮发送前检查
+                    <code>toolApprovalList.length &gt; 0 &amp;&amp; !toolApproval.resolved</code>——存在未完成审批则强制重新唤起弹窗（支持<b>批量全拒
+                        / 批量允许 / 批量填充拒绝原因</b>）；审批决定经
+                    <code>continueExecuteWithToolApproval()</code> 提交后置 <code>resolved=true</code>
+                    并继续推理，保证待授权工具调用不会被静默丢弃。</p>
             </div>
 
             <div class="callout reveal" style="--c:#c92a2a;">
@@ -2968,9 +3038,11 @@
                 <div class="card reveal" style="--c:#e67700;">
                     <div class="idx">E</div>
                     <h3>会话截断与总结</h3>
-                    <div class="tagline">前端消息治理</div>
-                    <p>长会话由前端按策略截断或摘要压缩后再提交，控制 token 预算；与后端 <code>AiAgent</code> 的
-                        <code>compressOrDropHistoryMessage</code> 形成前后两道消息治理。</p>
+                    <div class="tagline">enableAutoSummary · 自动触发</div>
+                    <p>长会话由前端按策略截断；开启<b>自动会话总结</b>后，当
+                        <code>apiMessages.length ≥ maxHistoryCount - 1</code> 时自动发起总结（保留首条 system 人设与首条
+                        user 锚定主题），
+                        与后端 <code>compressOrDropHistoryMessage</code> 形成前后两道消息治理。</p>
                 </div>
                 <div class="card reveal" style="--c:#c92a2a;">
                     <div class="idx">F</div>
@@ -3001,19 +3073,59 @@
                     <p>开启后，图片附件将被<b>压缩编码为 base64</b> 直接发送给视觉模型进行推理识别（而非默认 OCR 文本提取），
                     适合图表结构、非文本类图片的理解场景；压缩策略按像素尺寸与文件大小双重控制，按图片像素消耗 Token。</p>
                 </div>
+                <div class="card reveal" style="--c:#364fc7;">
+                    <div class="idx">J</div>
+                    <h3>循环工程 Loop Engineering</h3>
+                    <div class="tagline">session_record_read / session_record_update</div>
+                    <p>开启 <code>enableLoopEngineering</code> 后，后端注入五步工程化工作流提示词；模型借
+                        <code>SessionRecordTools</code> 读写 <code>sessionRecordsMap</code>（request / plan / checklist /
+                        agent 四类记录），
+                        经 <code>echo_session_records_map</code> 回显并由前端持久化——长周期任务的进度检查与断点续作。</p>
+                </div>
+            </div>
+
+            <div class="two-col">
+                <div class="reveal">
+                    <div class="panel-title">自动会话总结 — 触发与消息保留策略</div>
+                    <div class="callout" style="--c:#e67700;margin-top:0;">
+                        <div class="co-title">触发条件（前端 directSendMessage）</div>
+                        <p>开关 <code>enableAutoSummary</code> 需与 <code>enableTruncOverflowHistory</code> 协同开启；当
+                            <code>apiMessages.length ≥ maxHistoryCount - 1</code> 时自动拦截发送动作，改发
+                            <code>summary-history</code> 总结请求（提示词特意要求保留未完成任务、待办事项与关键用户信息，确保后续可无缝续接）。
+                            总结完成后按<b>保留策略</b>重建消息列表：首条 system 人设 + 首条 user + 紧随其后的 system +
+                            最后一条 echo_truth + 总结结果（assistant）；随后
+                            <code>needContinue</code> 标志触发 <code>continueAfterSummaryHistory()</code> 自动发送
+                            "continue" 并继续对话循环——<b>总结不打断流程，用户全程无感知</b>。</p>
+                    </div>
+                </div>
+                <div class="reveal">
+                    <div class="panel-title">循环工程 — 五步工作流与状态接力</div>
+                    <div class="callout" style="--c:#364fc7;margin-top:0;">
+                        <div class="co-title">sessionRecordsMap 跨轮接力</div>
+                        <p>开启 <code>enableLoopEngineering</code> 后，系统提示词追加五步工作流：<b>进度检查恢复 → 需求整理
+                            → 方案制定 → 待办拆分 → 事项实施</b>；
+                            <code>SessionRecordTools</code> 按 <code>request / plan / checklist / agent</code> 四类键读写
+                            <code>sessionRecordsMap</code>，
+                            流结束前经 <code>echo_session_records_map</code> 回显，前端写入 localStorage
+                            并在下一轮原样回传——工具调用上下文在「中断—恢复」之间零丢失。</p>
+                    </div>
+                </div>
             </div>
 
             <div class="two-col">
                 <div class="reveal">
                     <div class="panel-title">提示词注入优先级 — 从先到后</div>
                     <div class="pkg-tree"><span class="cm"># 后端组装报文时的注入顺序</span>
-                        <span class="num">1.</span> 事实注入 (Truth) <span class="cm">→ messages[0] 系统消息</span>
-                        <span class="num">2.</span> MCP 动态工具提示词 <span class="cm">→ messages[0] 系统消息</span>
-                        <span class="num">3.</span> 技能系统提示词 <span class="cm">→ messages[0] 系统消息</span>
-                        <span class="num">4.</span> 角色 System Prompt <span class="cm">→ 用户手动添加的角色人设</span>
-                        <span class="num">5.</span> 用户消息 + 附件 <span
+                        <span class="num">1.</span> 事实内容 (Truth) <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">2.</span> 事实使用方式 <span class="cm">→ TruthStoreTools 工具使用指引</span>
+                        <span class="num">3.</span> 循环工程 <span
+                                class="cm">→ SessionRecordTools 五步工作流提示词</span>
+                        <span class="num">4.</span> MCP 动态工具提示词 <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">5.</span> 技能系统提示词 <span class="cm">→ messages[0] 系统消息</span>
+                        <span class="num">6.</span> 角色 System Prompt <span class="cm">→ 用户手动添加的角色人设</span>
+                        <span class="num">7.</span> 用户消息 + 附件 <span
                                 class="cm">→ 消息列表末尾（&lt;upload_files&gt;）；若开启图片视觉，图片经压缩后以 base64 内嵌</span>
-                        <span class="num">6.</span> 系统重排 (可选) <span
+                        <span class="num">8.</span> 系统重排 (可选) <span
                                 class="cm">→ 合并全部 system 为一条置于首位</span></div>
                 </div>
                 <div class="reveal">
@@ -3029,7 +3141,8 @@
             <div class="callout reveal" style="--c:#0b7285;">
                 <div class="co-title">正交开关 — 能力即插即用</div>
                 <p>上述特性分别由 <code>enableTruth</code> /
-                    <code>enableVisionImage</code> / <code>enableEchoRequestPayload</code> 等<b>请求级布尔开关</b>控制（见 <code>OpenAiOperateDto</code>），前端功能面板一一对应。每个开关独立生效、互不牵连——这是「消息循环为体、能力插件为用」设计哲学的直接体现。
+                    <code>enableVisionImage</code> / <code>enableEchoRequestPayload</code> /
+                    <code>enableLoopEngineering</code> 等<b>请求级布尔开关</b>控制（见 <code>OpenAiOperateDto</code>），前端功能面板一一对应。每个开关独立生效、互不牵连——这是「消息循环为体、能力插件为用」设计哲学的直接体现。
                 </p>
             </div>
         </section>
@@ -3108,6 +3221,16 @@
                             <td><code>ai.rags.memory.enable</code></td>
                             <td><code>MemoryTools</code></td>
                             <td>记忆三件套工具（search / save / delete）</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.session-record.enable</code></td>
+                            <td><code>SessionRecordTools</code></td>
+                            <td>循环工程会话记录读写工具</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tts.qwen.enable</code></td>
+                            <td><code>QwenTtsOpsController</code></td>
+                            <td>千问语音合成代理端点</td>
                         </tr>
                         </tbody>
                     </table>
@@ -3332,7 +3455,15 @@
                         <div class="step">
                             <div class="no"></div>
                             <div class="bd"><h4>工具审批对话框</h4>
-                                <p>tool_calls 触发审批弹窗：批准 / 拒绝 / 编辑参数后放行（HITL）。</p></div>
+                                <p>tool_calls 触发审批弹窗：批准 / 拒绝 / 编辑参数后放行（HITL）；支持<b>批量全拒 / 批量允许
+                                    / 批量填充拒绝原因</b>。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>未 resolved 授权恢复</h4>
+                                <p>每轮发送前检查 <code>toolApprovalList.length &gt; 0 &amp;&amp;
+                                    !toolApproval.resolved</code>，存在未完成审批则自动重新唤起弹窗，待授权调用不丢失。</p>
+                            </div>
                         </div>
                         <div class="step">
                             <div class="no"></div>
@@ -3343,7 +3474,13 @@
                         <div class="step">
                             <div class="no"></div>
                             <div class="bd"><h4>功能开关面板</h4>
-                                <p>工具 / 技能 / 知识库 / 记忆 / LRU / 事实 / 图片视觉 / 报文回显，八个开关即时生效。</p></div>
+                                <p>工具 / 技能 / 知识库 / 记忆 / LRU / 事实 / 图片视觉 / 报文回显 /
+                                    循环工程等开关即时生效。</p></div>
+                        </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>中断输出</h4>
+                                <p><code>AbortController</code> 中断在途 SSE 请求，长输出可随时叫停。</p></div>
                         </div>
                     </div>
                 </div>
@@ -3409,7 +3546,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">13 大可配置开关 — 细粒度控制 Agent 行为边界</div>
+                <div class="panel-title">16 大可配置开关 — 细粒度控制 Agent 行为边界</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
                         <thead>
@@ -3423,7 +3560,7 @@
                         <tr>
                             <td><b>定制显示</b></td>
                             <td><code>hiddenMessageTypes</code></td>
-                            <td>按使用习惯控制各类消息（尤其 7 种回显消息）的显示 / 隐藏</td>
+                            <td>按使用习惯控制各类消息（尤其 8 种回显消息）的显示 / 隐藏</td>
                         </tr>
                         <tr>
                             <td><b>动态工具</b></td>
@@ -3447,8 +3584,8 @@
                         </tr>
                         <tr>
                             <td><b>语音播报</b></td>
-                            <td>TextToSpeech API</td>
-                            <td>自动 TTS 播报助手消息，浏览器原生语音合成</td>
+                            <td>TextToSpeech API · <code>useQwenTts</code></td>
+                            <td>自动 TTS 播报助手消息：浏览器原生语音合成，或走千问 TTS 合成（约 1.4 元/万字）</td>
                         </tr>
                         <tr>
                             <td><b>图片视觉</b></td>
@@ -3485,6 +3622,24 @@
                             <td><code>enableMemories</code> · <code>memoryBucket</code></td>
                             <td>用户级跨会话记忆：模型主动存储 / 检索 / 删除记忆，Bucket 桶隔离（依赖工具开启）</td>
                         </tr>
+                        <tr>
+                            <td><b>循环工程</b></td>
+                            <td><code>enableLoopEngineering</code></td>
+                            <td>注入五步工作流提示词，SessionRecordTools 读写 request / plan / checklist / agent
+                                会话记录，跨轮断点续作
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>保留首条用户</b></td>
+                            <td><code>enableKeepFirstUserMessage</code></td>
+                            <td>截断上下文时保留首条用户消息，锚定对话主题</td>
+                        </tr>
+                        <tr>
+                            <td><b>自动总结</b></td>
+                            <td><code>enableAutoSummary</code></td>
+                            <td>消息数逼近 <code>maxHistoryCount</code> 时自动发起会话总结（需与截断开关协同），保留人设与主题后重建上下文
+                            </td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
@@ -3493,7 +3648,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">会话管理 — 4195 行单文件 SPA 的状态底座</div>
+                <div class="panel-title">会话管理 — 3332 行单文件 SPA 的状态底座</div>
                 <div class="step-list" style="margin-top:0;">
                     <div class="step">
                         <div class="no"></div>
@@ -3511,6 +3666,14 @@
                             <p>
                                 <code>maxHistoryCount</code> 限制发送轮数（默认 20），超出丢弃早期历史；亦可让 LLM 将历史总结为简要内容压缩 Token；截断时始终保留首条角色消息，前端本地保留完整历史。
                             </p></div>
+                    </div>
+                    <div class="step">
+                        <div class="no"></div>
+                        <div class="bd"><h4>自动会话总结</h4>
+                            <p>开启 <code>enableAutoSummary</code> 后，消息数达到 <code>maxHistoryCount - 1</code> 自动触发
+                                <code>summary-history</code> 总结请求（提示词特意要求保留未完成任务与待办事项）；总结后保留首条
+                                system 人设 / 首条 user / 最后 echo_truth + 总结结果重建上下文，<code>needContinue</code>
+                                标志驱动自动发送 "continue" 继续循环——全程无需用户手动干预。</p></div>
                     </div>
                     <div class="step">
                         <div class="no"></div>
@@ -3743,7 +3906,9 @@
                     <div class="callout" style="--c:#c92a2a;margin-top:14px;">
                         <div class="co-title">部署红线</div>
                         <p>命令行工具默认禁用（<code>ai.tools.command.enable=false</code>）需手动开启；SQL 执行前经安全校验；文件路径规范化防穿越；加密输出拖慢模型输出速度、非必要不开启；工具调用需模型支持 Function-Calling（Qwen / DeepSeek / GPT 等）；技能依赖工具系统，需同时开启
-                            <code>ai.tools.enable</code>。</p>
+                            <code>ai.tools.enable</code>；循环工程会话记录（<code>sessionRecordsMap</code>）由前端持久化到
+                            localStorage 跨轮接力，服务端不落盘、无隐私残留；千问 TTS 按调用量计费（约 1.4 元/万字），依赖临时文件上传能力（<code>ai.tools.tmp-file.enable</code>）。
+                        </p>
                     </div>
                 </div>
             </div>
