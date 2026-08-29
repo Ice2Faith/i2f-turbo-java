@@ -1477,6 +1477,7 @@
                             show: false,
                             rejectAll: false,
                             rejectAllReason: '',
+                            resolved: false
                         },
                         messageEditor: {
                             show: false,
@@ -2218,6 +2219,17 @@
                     return
                 }
 
+                // 未进行授权就中断的情况，继续进入授权环节
+                if (this.form.toolApprovalList.length > 0
+                    && !this.dialog.toolApproval.resolved) {
+                    // 重置默认拒绝
+                    this.dialog.toolApproval.rejectAll = false;
+                    this.dialog.toolApproval.resolved = false;
+                    // 弹窗确认工具是否需要允许执行
+                    this.dialog.toolApproval.show = true;
+                    return;
+                }
+
                 // 用第一条用户消息作为会话标题
                 let session = this.findSession(options.sessionId);
                 options.sessionId=session.sessionId;
@@ -2674,6 +2686,9 @@
                         this.form.toolApprovalList = toolApprovalList;
 
                         if (toolApprovalList.length > 0) {
+                            // 重置默认拒绝
+                            this.dialog.toolApproval.rejectAll = false;
+                            this.dialog.toolApproval.resolved = false;
                             // 弹窗确认工具是否需要允许执行
                             this.dialog.toolApproval.show = true;
                         } else {
@@ -2753,6 +2768,7 @@
                 })
             },
             async continueExecuteWithToolApproval() {
+                this.dialog.toolApproval.resolved = true;
                 this.dialog.toolApproval.show = false;
                 this.directSendMessage()
             },
