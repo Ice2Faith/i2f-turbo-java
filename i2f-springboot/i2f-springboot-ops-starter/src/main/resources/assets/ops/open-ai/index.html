@@ -2282,6 +2282,13 @@
                     session.title = text.length > 20 ? text.substring(0, 20) + '...' : text;
                 }
 
+                // 需要保存最后一次请求的action,因为中间可能会有工具调用
+                // 如果有工具调用的情况下，action通常不会被处理
+                // 需要等待工具调用结束之后，才能进行action
+                if (options.action) {
+                    session.lastOptions = options;
+                }
+
                 // 快照当前历史消息作为请求内容（不包括将要添加的助手占位）
                 let apiMessages = [];
                 // 开启截断的情况下，发送给LLM的消息进行截断，本地消息依旧保留
@@ -2339,19 +2346,24 @@
                         apiMessages.push(item)
                     }
 
-                    if (this.metas.enableAutoSummary
-                        && options.action != 'summary-history') {
-                        let checkCount = this.metas.maxHistoryCount - 1;
-                        if (checkCount >= 1 && apiMessages.length >= checkCount) {
-                            this.$message.warning('自动会话总结触发...')
-                            this.directSummarySessionHistory(true);
-                            return;
-                        }
-                    }
                 } else {
                     messages.forEach(e => {
                         apiMessages.push(e)
                     })
+                }
+
+                if (this.metas.enableTruncOverflowHistory
+                    && this.metas.enableAutoSummary
+                    && options.action != 'summary-history') {
+                    let lastOptions = session.lastOptions || {};
+                    let checkCount = this.metas.maxHistoryCount - 1;
+                    if (checkCount >= 1
+                        && this.currentHistoryCount >= checkCount
+                        && lastOptions.action != 'summary-history') {
+                        this.$message.warning('自动会话总结触发...')
+                        this.directSummarySessionHistory(true);
+                        return;
+                    }
                 }
 
                 this.$nextTick(() => this.scrollToBottom());
@@ -2679,11 +2691,6 @@
                         this.onTts(assistantMsg)
                     }
 
-                    // 需要保存最后一次请求的action,因为中间可能会有工具调用
-                    // 如果有工具调用的情况下，action通常不会被处理
-                    // 需要等待工具调用结束之后，才能进行action
-                    session.lastOptions = options;
-
                     if (Object.keys(toolCallsMap).length > 0) {
                         let toolApprovalList = []
 
@@ -2754,11 +2761,14 @@
                         return;
                     }
 
+
                     // 非工具调用的情况，会走到这里
                     // 因此需要检查因为中间穿插工具调用
                     // 而导致的action动作延迟
                     let lastOptions = session.lastOptions || {};
-                    session.lastOptions = null;
+                    if (lastOptions.action) {
+                        session.lastOptions = null;
+                    }
 
                     // summary-history 可能是用户触发的，也可能是勾选了自动总结触发的
                     // 那么，请求序列就可能是这样的
@@ -2808,8 +2818,10 @@
                         // 否则就停在了总结这里，需要手动继续
                         if (options.needContinue || lastOptions.needContinue) {
                             this.continueAfterSummaryHistory()
+                            return;
                         }
                     }
+
                 } catch (e) {
                     let errMsg = '请求失败';
                     if (e.response && e.response.data) {
@@ -2948,7 +2960,11 @@
                     hidden: false,
                     user: {
                         role: 'user',
-                        content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. Unfinished tasks, to-dos, task progress, and key user information or issues. This is to ensure that the remaining tasks can be seamlessly continued after summarization, since all previous context will be lost and only the summary will remain. Response with before user question language.'
+                        content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. ' +
+                            'Unfinished tasks, to-dos, task progress, session record types, interaction/tool/etc. preferences, and key user information or issues. ' +
+                            'This is to ensure that the remaining tasks can be seamlessly continued after summarization, since all previous context will be lost and only the summary will remain. ' +
+                            (needContinue ? 'Must stop generating immediately after finishing the summary. ' : '') +
+                            'Response with before user question language.'
                     }
                 }
                 let messages = this.getActiveMessages();

@@ -147,6 +147,25 @@ public class SessionRecordTools {
         return sessionRecordsMap;
     }
 
+    public static final String SESSION_RECORD_TYPES = "session_record_types";
+
+    @Tool(
+            value = SESSION_RECORD_TYPES,
+            tags = {
+                    AiTags.AUTO_VALUE
+            },
+            description = "list of record types from session. Note: work on chat session level."
+    )
+    public List<String> session_record_types() {
+        List<String> ret = new ArrayList<>();
+        Map<String, String> sessionRecordsMap = ToolCallContextHolder.get(TOOL_CONTEXT_KEY);
+        if (sessionRecordsMap == null) {
+            return ret;
+        }
+        ret.addAll(sessionRecordsMap.keySet());
+        return ret;
+    }
+
     public static final String SESSION_RECORD_READ = "session_record_read";
 
     @Tool(
