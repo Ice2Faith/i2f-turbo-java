@@ -17,6 +17,17 @@ function getPresetBaseUrlList() {
                 tips: '登录之后，添加一个 API Key，复制 API Key，形如：sk-********'
             },
             models: [
+                {label: "千问-Qwen3.8-Max", value: "qwen3.8-max"},
+                {label: "千问-Qwen3.8-Flash", value: "qwen3.8-flash"},
+                {label: "千问-Qwen3.8-2.4t-a95b", value: "qwen3.8-2.4t-a95b"},
+                {label: "阿里云-Deepseek-v4-pro-0813", value: "deepseek-v4-pro-0813"},
+                {label: "阿里云-Deepseek-v4-flash-0731", value: "deepseek-v4-flash-0731"},
+                {label: "阿里云-glm-5.2", value: "glm-5.2"},
+                {label: "阿里云-kimi-k3", value: "kimi-k3"},
+                {label: "阿里云-kimi-k2.7-code", value: "kimi-k2.7-code"},
+                {label: "阿里云-stepfun/step-3.7-flash", value: "stepfun/step-3.7-flash"},
+                {label: "阿里云-xiaomi/mimo-v2.5-pro", value: "xiaomi/mimo-v2.5-pro"},
+
                 {label: "千问-Qwen3.7-Max", value: "qwen3.7-max"},
                 {label: "千问-Qwen3.7-Plus", value: "qwen3.7-plus"},
                 {label: "千问-Qwen3.6-Plus", value: "qwen3.6-plus"},
