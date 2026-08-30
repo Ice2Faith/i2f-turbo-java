@@ -24,6 +24,8 @@ ai:
       enable: false
     form:
       enable: false
+    groovy:
+      enable: false
   rags:
     enable: false
     embedding:
