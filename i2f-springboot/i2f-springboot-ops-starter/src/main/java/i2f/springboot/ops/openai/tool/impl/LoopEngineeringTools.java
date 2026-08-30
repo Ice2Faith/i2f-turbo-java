@@ -9,7 +9,7 @@ public class LoopEngineeringTools {
 
     public static String convertSystemPrompt() {
         /*language=markdown*/
-        return "# 工程化用户需求解决方案指南\n" +
+        String ret = "# 工程化用户需求解决方案指南\n" +
                 "\n" +
                 "- 使用工程化思想，指导完成用户需求的工程化实施步骤及解决方案指南\n" +
                 "- 【重要】要求严格按照工作流程执行\n" +
@@ -27,7 +27,7 @@ public class LoopEngineeringTools {
                 "\n" +
                 "## 记录的读写\n" +
                 "\n" +
-                "- 【重要】通过使用工具 `" + SessionRecordTools.SESSION_RECORD_READ + "` 和 `" + SessionRecordTools.SESSION_RECORD_UPDATE + "` 实现基于回话级别的读写\n" +
+                "- 【重要】通过使用工具 `{{session_record_read}}` 和 `{{session_record_update}}` 实现基于回话级别的读写\n" +
                 "- 传入的记录类型，就是规范的记录类型\n" +
                 "\n" +
                 "## 工作流程\n" +
@@ -91,6 +91,9 @@ public class LoopEngineeringTools {
                 "- 任务开始之前，先检查 agent 记录\n" +
                 "- 查看其中可能记录的注意事项/错误处理/错误解决方案\n" +
                 "- 避免范同样的错误";
+        ret = ret.replace("{{session_record_read}}", SessionRecordTools.SESSION_RECORD_READ);
+        ret = ret.replace("{{session_record_update}}", SessionRecordTools.SESSION_RECORD_UPDATE);
+        return ret;
     }
 
 }
