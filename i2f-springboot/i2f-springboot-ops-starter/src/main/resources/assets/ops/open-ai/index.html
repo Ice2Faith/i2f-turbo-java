@@ -1479,7 +1479,11 @@
                             {label: '工具请求', value: 'request_tool', std: false},
                             {label: '助手思考', value: 'assistant_thinking', std: false},
                             {label: '技能注入', value: 'echo_skill', std: false},
-                            {label: '事实注入', value: 'echo_truth', std: false}
+                            {label: '动态工具', value: 'echo_dynamic_tool', std: false},
+                            {label: '循环工程', value: 'echo_loop_engineering', std: false},
+                            {label: '事实注入', value: 'echo_truth_prompt', std: false},
+                            {label: '事实内容', value: 'echo_truth_content', std: false},
+                            {label: '事实同步', value: 'echo_truth_sync', std: false}
                         ],
                         enableCustomDisplay: false,
                         hiddenMessageTypes: [],
@@ -2410,7 +2414,8 @@
                 // 获取最后一次事实
                 for (let i = messages.length - 1; i >= 0; i--) {
                     let item = messages[i];
-                    if (item.type == 'echo_truth') {
+                    if (item.type == 'echo_truth_content'
+                        || item.type == 'echo_truth_sync') {
                         truthContent = item[item.type].content;
                         break;
                     }
@@ -2517,7 +2522,39 @@
                             // messages.push(json);
                             return;
                         }
-                        if (resp.attrs && resp.attrs.type == 'echo_truth') {
+                        if (resp.attrs && resp.attrs.type == 'echo_dynamic_tool') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_loop_engineering') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_truth_prompt') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_truth_content') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_truth_sync') {
                             if (!session.streamingStarted) {
                                 session.streamingStarted = true;
                             }
@@ -2804,7 +2841,8 @@
                         // 最后一条事实注入消息保留
                         for (let i = oldList.length -1; i >=0 ; i--) {
                             let item = oldList[i];
-                            if (item.type == 'echo_truth') {
+                            if (item.type == 'echo_truth_content'
+                                || item.type == 'echo_truth_sync') {
                                 messages.push(item);
                                 break;
                             }

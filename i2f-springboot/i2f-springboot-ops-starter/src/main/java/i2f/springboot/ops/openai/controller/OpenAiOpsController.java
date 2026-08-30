@@ -30,10 +30,7 @@ import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
-import i2f.springboot.ops.openai.tool.impl.McpProviderTools;
-import i2f.springboot.ops.openai.tool.impl.SessionRecordTools;
-import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
-import i2f.springboot.ops.openai.tool.impl.TruthStoreTools;
+import i2f.springboot.ops.openai.tool.impl.*;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -524,8 +521,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
 
                             OpenAiMessageVo dto = new OpenAiMessageVo();
-                            dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
-                            dto.setEcho_truth(system);
+                            dto.setType(OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
+                            dto.setEcho_truth_content(system);
 
                             String defTruthMsg = objectMapper.writeValueAsString(dto);
                             OpsSecureReturn<?> resp = null;
@@ -534,7 +531,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             } else {
                                 resp = OpsSecureReturn.success(defTruthMsg);
                             }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
                             String respJson = objectMapper.writeValueAsString(resp);
                             emitter.send(respJson);
                         }
@@ -549,8 +546,8 @@ public class OpenAiOpsController implements IOpsProvider {
                             completion.getMessages().add(0, system);
 
                             OpenAiMessageVo dto = new OpenAiMessageVo();
-                            dto.setType(OpsOpenAiConsts.ECHO_SKILL);
-                            dto.setEcho_skill(system);
+                            dto.setType(OpsOpenAiConsts.ECHO_TRUTH_PROMPT);
+                            dto.setEcho_truth_prompt(system);
 
                             String defSkillMsg = objectMapper.writeValueAsString(dto);
                             OpsSecureReturn<?> resp = null;
@@ -559,7 +556,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             } else {
                                 resp = OpsSecureReturn.success(defSkillMsg);
                             }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_PROMPT);
                             String respJson = objectMapper.writeValueAsString(resp);
                             emitter.send(respJson);
                         }
@@ -567,13 +564,13 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (req.isEnableLoopEngineering() && needInjectSystemPrompt) {
-                        String content = SessionRecordTools.convertSystemPrompt();
+                        String content = LoopEngineeringTools.convertSystemPrompt();
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                         completion.getMessages().add(0, system);
 
                         OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
-                        dto.setEcho_skill(system);
+                        dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
+                        dto.setEcho_loop_engineering(system);
 
                         String defSkillMsg = objectMapper.writeValueAsString(dto);
                         OpsSecureReturn<?> resp = null;
@@ -582,7 +579,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         } else {
                             resp = OpsSecureReturn.success(defSkillMsg);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                     }
@@ -593,8 +590,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         completion.getMessages().add(0, system);
 
                         OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_SKILL);
-                        dto.setEcho_skill(system);
+                        dto.setType(OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
+                        dto.setEcho_dynamic_tool(system);
 
                         String defSkillMsg = objectMapper.writeValueAsString(dto);
                         OpsSecureReturn<?> resp = null;
@@ -603,7 +600,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         } else {
                             resp = OpsSecureReturn.success(defSkillMsg);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                     }
@@ -822,8 +819,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         OpenAiSystemMessage system = new OpenAiSystemMessage(truthContent);
 
                         OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_TRUTH);
-                        dto.setEcho_truth(system);
+                        dto.setType(OpsOpenAiConsts.ECHO_TRUTH_SYNC);
+                        dto.setEcho_truth_content(system);
 
                         String defTruthMsg = objectMapper.writeValueAsString(dto);
                         OpsSecureReturn<?> resp = null;
@@ -832,7 +829,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         } else {
                             resp = OpsSecureReturn.success(defTruthMsg);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH);
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_SYNC);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                     }
