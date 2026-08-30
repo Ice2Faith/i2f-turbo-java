@@ -87,11 +87,16 @@ public class FileToolUtils {
                 }
                 lineNumber++;
             }
+            int moreLines = 0;
+            while (moreLines <= 100 && (line = reader.readLine()) != null) {
+                moreLines++;
+            }
             Map<String, Object> ret = new HashMap<>();
             ret.put("realizeStartLine", Math.min(startLine, lineNumber));
             ret.put("realizeEndLine", Math.min(endLine, lineNumber));
             ret.put("textContent", builder.toString());
-            ret.put("hasMoreLine", (reader.readLine() != null));
+            ret.put("hasMoreLine", moreLines > 0);
+            ret.put("moreLines", moreLines <= 99 ? String.valueOf(moreLines) : "99+");
             return ret;
         }
     }
