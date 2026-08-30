@@ -161,15 +161,15 @@
             <!-- 统计 -->
             <div class="stats-strip reveal">
                 <div class="stat" style="--c:#e8590c;">
-                    <div class="num" data-count="43">0</div>
+                    <div class="num" data-count="45">0</div>
                     <div class="lab">Java 源文件</div>
                 </div>
                 <div class="stat" style="--c:#0b7285;">
-                    <div class="num" data-count="17">0</div>
+                    <div class="num" data-count="18">0</div>
                     <div class="lab">内置工具类</div>
                 </div>
                 <div class="stat" style="--c:#2b8a3e;">
-                    <div class="num" data-count="8">0</div>
+                    <div class="num" data-count="12">0</div>
                     <div class="lab">回显消息类型</div>
                 </div>
                 <div class="stat" style="--c:#1971c2;">
@@ -229,7 +229,7 @@
                     <div class="card" style="--c:#0b7285;"><span class="idx">B</span>
                         <h3>工具调用</h3>
                         <div class="tagline">Function Calling</div>
-                        <p>17 个内置工具类经
+                        <p>18 个内置工具类经
                             <code>@Tool</code> 注解自动生成 JSON Schema 注入对话；工具契约并行执行，HITL 人工审批把关危险操作。
                         </p>
                     </div>
@@ -379,7 +379,7 @@
                         <rect x="20" y="326" width="8" height="52" fill="#e8590c"/>
                         <text class="svg-lbl" x="44" y="348" style="fill:#e8590c;">基础层</text>
                         <text class="svg-lbl-sm" x="44" y="366">Harness Eng. · Fat Client · SSE Streaming</text>
-                        <text class="svg-lbl-sm" x="330" y="348">3332 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展
+                        <text class="svg-lbl-sm" x="330" y="348">3440 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展
                         </text>
                         <text class="svg-lbl-sm" x="330" y="366">SSE 逐 Token 流式输出 · SM2/SM4 国密加密传输</text>
                     </svg>
@@ -515,7 +515,7 @@
                     <!-- L4 ops -->
                     <rect class="svg-node svg-node-acc" x="60" y="20" width="680" height="72" rx="3"/>
                     <text class="svg-lbl" x="80" y="48">i2f-springboot-ops-starter · openai 子系统</text>
-                    <text class="svg-lbl-sm" x="80" y="70">controller / data / tool.impl(16) / skill / rag — 应用编排 ·
+                    <text class="svg-lbl-sm" x="80" y="70">controller / data / tool.impl(17) / skill / rag — 应用编排 ·
                         安全网关 · SSE 中继 · HITL 审批
                     </text>
                     <!-- L3 spring + extension -->
@@ -557,7 +557,7 @@
 
             <div class="two-col">
                 <div class="reveal">
-                    <div class="panel-title">子系统包结构（43 个 Java 文件）</div>
+                    <div class="panel-title">子系统包结构（45 个 Java 文件）</div>
                     <div class="pkg-tree"><span class="dir">i2f.springboot.ops.openai</span>
                         ├── <span class="pkg">controller</span>/
                         │ ├── OpenAiOpsController <span class="cm"># 5 个 REST 端点 · SSE 编排核心</span>
@@ -569,10 +569,12 @@
                         │   ├── OpenAiMeta <span class="cm"># baseUrl · apiKey</span>
                         │   ├── OpenAiToolApprovalDto <span class="cm"># 工具审批决定</span>
                         │   └── <span class="pkg">message</span>/ OpsOpenAiConsts <span
-                                class="cm"># 8 种回显类型常量</span>
+                                class="cm"># 12 种回显类型常量</span>
                         ├── <span class="pkg">tool</span>/
                         │   ├── SpringContextToolAutoConfiguration
                         │ ├── <span class="pkg">impl</span>/ 17 个工具类 <span class="cm"># @Tool 注解驱动</span>
+                        │ │ ├── GroovyTools <span class="cm"># groovy_run_script（条件装配）</span>
+                        │ │ ├── LoopEngineeringTools <span class="cm"># 循环工程五步工作流提示词</span>
                         │ │ └── SessionRecordTools <span class="cm"># 循环工程会话记录读写</span>
                         │   └── <span class="pkg">impl.sql</span>/ SQL 校验器 <span class="cm"># AST + 正则双校验</span>
                         ├── <span class="pkg">skill</span>/ SkillAutoConfiguration <span class="cm"># 30s 热扫描</span>
@@ -678,8 +680,8 @@
                     <text class="svg-lbl-sm" x="408" y="138">3. 注入：事实 / 循环工程 / 技能 / LRU 系统提示词</text>
                     <text class="svg-lbl-sm" x="408" y="156">4. 附件 &lt;upload_files&gt; 追加到用户消息</text>
                     <line class="svg-line" x1="384" y1="190" x2="116" y2="190" marker-end="url(#sq-ah)"/>
-                    <text class="svg-lbl-sm" x="130" y="184">5. SSE：definition_tool / echo_skill / echo_truth /
-                        echo_session_records_map 事件
+                    <text class="svg-lbl-sm" x="130" y="184">5. SSE：definition_tool / echo_skill / echo_dynamic_tool /
+                        echo_loop_engineering / echo_truth_prompt / echo_truth_content / echo_session_records_map 事件
                     </text>
                     <line class="svg-line" x1="390" y1="228" x2="619" y2="228" marker-end="url(#sq-ah)"/>
                     <text class="svg-lbl-sm" x="404" y="222">6. 末消息含 tool_calls → 并行提交（审批检查）</text>
@@ -1166,7 +1168,8 @@
             </div>
             <p class="lead reveal">
                 消息是框架的第一公民。标准层定义 4 种角色消息，Ops 层通过 <code>OpenAiMessageVo</code> 多态载体与
-                <code>OpsOpenAiConsts</code> 扩展出 8 种<b>回显消息</b>——让前端不仅能看到对话，还能看到"系统为模型做了什么"。
+                <code>OpsOpenAiConsts</code> 扩展出 12 种<b>回显消息</b>——每个类型独占一个字段，让前端不仅能看到对话，
+                还能看到"系统为模型做了什么"（提示词注入 / 工具调用 / 事实变迁）。
             </p>
 
             <div class="two-col">
@@ -1238,17 +1241,38 @@
                             <tr>
                                 <td><code>echo_skill</code></td>
                                 <td>技能系统提示词</td>
-                                <td>回显注入的技能声明 / LRU 工具提示词</td>
+                                <td>回显注入的技能声明提示词（SKILL.md 聚合）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_dynamic_tool</code></td>
+                                <td>MCP 动态工具提示词</td>
+                                <td>回显注入的 MCP 三步发现指引（列举供应商 → 列举工具 → 装载工具）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_loop_engineering</code></td>
+                                <td>循环工程提示词</td>
+                                <td>回显注入的五步工程化工作流提示词（进度恢复 → 需求 → 方案 → 待办 → 实施）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_truth_prompt</code></td>
+                                <td>事实使用方式提示词</td>
+                                <td>回显注入的 TruthStoreTools 事实读写指引（如何用 <code>store_truth</code>）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_truth_content</code></td>
+                                <td>事实内容系统消息</td>
+                                <td>回显注入的「# 关键事实」内容（置于 messages[0]）</td>
+                            </tr>
+                            <tr>
+                                <td><code>echo_truth_sync</code></td>
+                                <td>事实同步系统消息</td>
+                                <td>工具执行后回显最新事实——<code>store_truth</code> 可能改写事实，前端据此刷新下一轮
+                                    <code>truthContent</code></td>
                             </tr>
                             <tr>
                                 <td><code>echo_lru_tools</code></td>
                                 <td>工具名列表</td>
                                 <td>同步 LRU 淘汰后的存活工具集</td>
-                            </tr>
-                            <tr>
-                                <td><code>echo_truth</code></td>
-                                <td>事实系统消息</td>
-                                <td>回显注入的关键事实内容</td>
                             </tr>
                             <tr>
                                 <td><code>echo_request_payload</code></td>
@@ -1264,6 +1288,58 @@
                         </table>
                     </div>
                 </div>
+            </div>
+
+            <div class="code-block reveal">
+                <div class="code-head">
+                    <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                               style="background:#ffbd2e;"></span><span
+                        class="dot" style="background:#27c93f;"></span>
+                    <span class="fname">OpenAiMessageVo.java — 多态消息载体（type + 每类型独立字段）</span>
+                    <button class="copy-btn">COPY</button>
+                </div>
+                <pre><span class="kw">public class</span> <span class="ty">OpenAiMessageVo</span> {
+    <span class="kw">protected</span> String type; <span class="cm">// 消息类型（决定读取哪个字段）</span>
+
+    <span class="cm">// ---- 标准四角色 ----</span>
+    <span class="kw">protected</span> OpenAiSystemMessage system;
+    <span class="kw">protected</span> OpenAiUserMessage user;
+    <span class="kw">protected</span> OpenAiAssistantMessage assistant;
+    <span class="kw">protected</span> OpenAiToolMessage tool;
+
+    <span class="cm">// ---- 工具回显 ----</span>
+    <span class="kw">protected</span> EchoOpenAiToolMessage echo_tool; <span class="cm">// 工具执行结果</span>
+    <span class="kw">protected</span> RequestOpenAiToolMessage request_tool; <span
+                            class="cm">// 工具调用请求</span>
+
+    <span class="cm">// ---- 系统提示词注入回显（OpenAiSystemMessage 载荷）----</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_skill; <span class="cm">// 技能声明</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_dynamic_tool; <span
+                            class="cm">// MCP 动态工具指引</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_loop_engineering; <span
+                            class="cm">// 循环工程工作流</span>
+
+    <span class="cm">// ---- 事实注入三态回显（Truth 三元组）----</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_truth_prompt; <span
+                            class="cm">// 事实使用方式</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_truth_content; <span
+                            class="cm">// 事实内容</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_truth_sync; <span
+                            class="cm">// 事实同步（工具执行后）</span>
+
+    <span class="kw">protected</span> List&lt;TmpFileTools.UploadTmpFileMetadata&gt; attachFiles; <span
+                            class="cm">// 附件</span>
+                    }</pre>
+            </div>
+
+            <div class="callout reveal" style="--c:#862e9c;">
+                <div class="co-title">Truth 三元组 — echo_truth 的一分为三</div>
+                <p>原单一 <code>echo_truth</code> 细化为三个独立事件，对应事实生命周期的三个时刻：请求开始注入「#
+                    关键事实」内容时发 <code>echo_truth_content</code>；注入事实使用方式指引时发
+                    <code>echo_truth_prompt</code>；工具执行完毕（模型可能刚调用 <code>store_truth</code>
+                    改写了事实）再以 <code>echo_truth_sync</code> 回显最新事实。前端倒序查找
+                    <code>echo_truth_content</code> / <code>echo_truth_sync</code> 取最新值作为下一轮
+                    <code>truthContent</code>——事实的「注入 → 使用 → 同步」全程可见、可追溯。</p>
             </div>
 
             <div class="code-block reveal">
@@ -1641,7 +1717,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">内置工具清单 — ops 层 17 类 + 条件装配 4 类</div>
+                <div class="panel-title">内置工具清单 — ops 层 18 类 + 条件装配 5 类</div>
                 <div class="spec-table-wrap">
                     <table class="spec">
                         <thead>
@@ -1744,7 +1820,7 @@
                             <td><span class="tag t-b">PUBLIC_NET</span></td>
                         </tr>
                         <tr>
-                            <td><code>FileFileUtils</code></td>
+                            <td><code>FileToolUtils</code></td>
                             <td>文件工具</td>
                             <td>文件处理辅助能力</td>
                             <td>—</td>
@@ -1773,12 +1849,20 @@
                             <td>循环工程会话记录读写（request / plan / checklist / agent）</td>
                             <td><span class="tag t-g">AUTO</span></td>
                         </tr>
+                        <tr>
+                            <td><code>GroovyTools</code> ※</td>
+                            <td><code>groovy_run_script</code></td>
+                            <td>Groovy 脚本动态执行（GroovyShell）</td>
+                            <td><span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span><span
+                                    class="tag t-t">SCRIPT</span></td>
+                        </tr>
                         </tbody>
                     </table>
                 </div>
                 <p class="body" style="font-size:12.5px;">※ 条件装配：随 <code>ai.skills.enable</code> /
                     <code>ai.rags.enable</code> / <code>ai.rags.memory.enable</code> /
-                    <code>ai.tools.session-record.enable</code> 开关注入，详见第 13 章。</p>
+                    <code>ai.tools.session-record.enable</code> / <code>ai.tools.groovy.enable</code> 开关注入，详见第 13
+                    章。</p>
             </div>
 
             <div class="reveal">
@@ -3011,7 +3095,8 @@
                     <div class="tagline">store_truth → # 关键事实</div>
                     <p>LLM 调用 <code>store_truth</code> 把关键结论写入
                         <code>truthContent</code>；后续每轮对话自动拼装为「# 关键事实」系统消息并经
-                        <code>echo_truth</code> 回显——跨轮次的<b>长期记忆</b>由此而来。</p>
+                        <code>echo_truth_content</code> / <code>echo_truth_sync</code> 回显（三态回显见第 06 章）——跨轮次的<b>长期记忆</b>由此而来。
+                    </p>
                 </div>
                 <div class="card reveal" style="--c:#0b7285;">
                     <div class="idx">B</div>
@@ -3077,7 +3162,8 @@
                     <div class="idx">J</div>
                     <h3>循环工程 Loop Engineering</h3>
                     <div class="tagline">session_record_read / session_record_update</div>
-                    <p>开启 <code>enableLoopEngineering</code> 后，后端注入五步工程化工作流提示词；模型借
+                    <p>开启 <code>enableLoopEngineering</code> 后，后端注入五步工程化工作流提示词（经
+                        <code>echo_loop_engineering</code> 回显）；模型借
                         <code>SessionRecordTools</code> 读写 <code>sessionRecordsMap</code>（request / plan / checklist /
                         agent 四类记录），
                         经 <code>echo_session_records_map</code> 回显并由前端持久化——长周期任务的进度检查与断点续作。</p>
@@ -3093,7 +3179,7 @@
                             <code>apiMessages.length ≥ maxHistoryCount - 1</code> 时自动拦截发送动作，改发
                             <code>summary-history</code> 总结请求（提示词特意要求保留未完成任务、待办事项与关键用户信息，确保后续可无缝续接）。
                             总结完成后按<b>保留策略</b>重建消息列表：首条 system 人设 + 首条 user + 紧随其后的 system +
-                            最后一条 echo_truth + 总结结果（assistant）；随后
+                            最后一条 echo_truth_content / echo_truth_sync + 总结结果（assistant）；随后
                             <code>needContinue</code> 标志触发 <code>continueAfterSummaryHistory()</code> 自动发送
                             "continue" 并继续对话循环——<b>总结不打断流程，用户全程无感知</b>。</p>
                     </div>
@@ -3103,7 +3189,7 @@
                     <div class="callout" style="--c:#364fc7;margin-top:0;">
                         <div class="co-title">sessionRecordsMap 跨轮接力</div>
                         <p>开启 <code>enableLoopEngineering</code> 后，系统提示词追加五步工作流：<b>进度检查恢复 → 需求整理
-                            → 方案制定 → 待办拆分 → 事项实施</b>；
+                            → 方案制定 → 待办拆分 → 事项实施</b>（注入时经 <code>echo_loop_engineering</code> 回显）；
                             <code>SessionRecordTools</code> 按 <code>request / plan / checklist / agent</code> 四类键读写
                             <code>sessionRecordsMap</code>，
                             流结束前经 <code>echo_session_records_map</code> 回显，前端写入 localStorage
@@ -3115,18 +3201,21 @@
             <div class="two-col">
                 <div class="reveal">
                     <div class="panel-title">提示词注入优先级 — 从先到后</div>
-                    <div class="pkg-tree"><span class="cm"># 后端组装报文时的注入顺序</span>
-                        <span class="num">1.</span> 事实内容 (Truth) <span class="cm">→ messages[0] 系统消息</span>
-                        <span class="num">2.</span> 事实使用方式 <span class="cm">→ TruthStoreTools 工具使用指引</span>
+                    <div class="pkg-tree"><span class="cm"># 后端组装报文时的注入顺序（每步均同步回显独立事件）</span>
+                        <span class="num">1.</span> 事实内容 (Truth) <span class="cm">→ messages[0] 系统消息 · echo_truth_content</span>
+                        <span class="num">2.</span> 事实使用方式 <span class="cm">→ TruthStoreTools 工具使用指引 · echo_truth_prompt</span>
                         <span class="num">3.</span> 循环工程 <span
-                                class="cm">→ SessionRecordTools 五步工作流提示词</span>
-                        <span class="num">4.</span> MCP 动态工具提示词 <span class="cm">→ messages[0] 系统消息</span>
-                        <span class="num">5.</span> 技能系统提示词 <span class="cm">→ messages[0] 系统消息</span>
+                                class="cm">→ SessionRecordTools 五步工作流提示词 · echo_loop_engineering</span>
+                        <span class="num">4.</span> MCP 动态工具提示词 <span class="cm">→ messages[0] 系统消息 · echo_dynamic_tool</span>
+                        <span class="num">5.</span> 技能系统提示词 <span
+                                class="cm">→ messages[0] 系统消息 · echo_skill</span>
                         <span class="num">6.</span> 角色 System Prompt <span class="cm">→ 用户手动添加的角色人设</span>
                         <span class="num">7.</span> 用户消息 + 附件 <span
                                 class="cm">→ 消息列表末尾（&lt;upload_files&gt;）；若开启图片视觉，图片经压缩后以 base64 内嵌</span>
                         <span class="num">8.</span> 系统重排 (可选) <span
-                                class="cm">→ 合并全部 system 为一条置于首位</span></div>
+                                class="cm">→ 合并全部 system 为一条置于首位</span>
+                        <span class="cm"># 工具执行后，事实可能被 store_truth 改写，再发 echo_truth_sync 同步最新事实</span>
+                    </div>
                 </div>
                 <div class="reveal">
                     <div class="panel-title">注入时机的工程考量</div>
@@ -3226,6 +3315,11 @@
                             <td><code>ai.tools.session-record.enable</code></td>
                             <td><code>SessionRecordTools</code></td>
                             <td>循环工程会话记录读写工具</td>
+                        </tr>
+                        <tr>
+                            <td><code>ai.tools.groovy.enable</code></td>
+                            <td><code>GroovyTools</code></td>
+                            <td>Groovy 脚本执行工具（<b>默认关闭</b>，需 Groovy 依赖）</td>
                         </tr>
                         <tr>
                             <td><code>ai.tts.qwen.enable</code></td>
@@ -3560,7 +3654,7 @@
                         <tr>
                             <td><b>定制显示</b></td>
                             <td><code>hiddenMessageTypes</code></td>
-                            <td>按使用习惯控制各类消息（尤其 8 种回显消息）的显示 / 隐藏</td>
+                            <td>按使用习惯控制各类消息（尤其 12 种回显消息）的显示 / 隐藏</td>
                         </tr>
                         <tr>
                             <td><b>动态工具</b></td>
@@ -3595,7 +3689,9 @@
                         <tr>
                             <td><b>事实注入</b></td>
                             <td><code>enableTruth</code> · <code>store_truth</code></td>
-                            <td>模型主动存储 / 更新关键事实，防遗忘防幻觉，echo_truth 回显</td>
+                            <td>模型主动存储 / 更新关键事实，防遗忘防幻觉，echo_truth_prompt / echo_truth_content /
+                                echo_truth_sync 三态回显
+                            </td>
                         </tr>
                         <tr>
                             <td><b>附加时间</b></td>
@@ -3648,7 +3744,7 @@
             </div>
 
             <div class="reveal">
-                <div class="panel-title">会话管理 — 3332 行单文件 SPA 的状态底座</div>
+                <div class="panel-title">会话管理 — 3440 行单文件 SPA 的状态底座</div>
                 <div class="step-list" style="margin-top:0;">
                     <div class="step">
                         <div class="no"></div>
@@ -3672,7 +3768,7 @@
                         <div class="bd"><h4>自动会话总结</h4>
                             <p>开启 <code>enableAutoSummary</code> 后，消息数达到 <code>maxHistoryCount - 1</code> 自动触发
                                 <code>summary-history</code> 总结请求（提示词特意要求保留未完成任务与待办事项）；总结后保留首条
-                                system 人设 / 首条 user / 最后 echo_truth + 总结结果重建上下文，<code>needContinue</code>
+                                system 人设 / 首条 user / 最后 echo_truth_content / echo_truth_sync + 总结结果重建上下文，<code>needContinue</code>
                                 标志驱动自动发送 "continue" 继续循环——全程无需用户手动干预。</p></div>
                     </div>
                     <div class="step">
@@ -3905,7 +4001,9 @@
                     </div>
                     <div class="callout" style="--c:#c92a2a;margin-top:14px;">
                         <div class="co-title">部署红线</div>
-                        <p>命令行工具默认禁用（<code>ai.tools.command.enable=false</code>）需手动开启；SQL 执行前经安全校验；文件路径规范化防穿越；加密输出拖慢模型输出速度、非必要不开启；工具调用需模型支持 Function-Calling（Qwen / DeepSeek / GPT 等）；技能依赖工具系统，需同时开启
+                        <p>命令行工具默认禁用（<code>ai.tools.command.enable=false</code>）需手动开启；Groovy 脚本工具默认禁用（<code>ai.tools.groovy.enable=false</code>）需手动开启；SQL
+                            执行前经安全校验；文件路径规范化防穿越；加密输出拖慢模型输出速度、非必要不开启；工具调用需模型支持
+                            Function-Calling（Qwen / DeepSeek / GPT 等）；技能依赖工具系统，需同时开启
                             <code>ai.tools.enable</code>；循环工程会话记录（<code>sessionRecordsMap</code>）由前端持久化到
                             localStorage 跨轮接力，服务端不落盘、无隐私残留；千问 TTS 按调用量计费（约 1.4 元/万字），依赖临时文件上传能力（<code>ai.tools.tmp-file.enable</code>）。
                         </p>
