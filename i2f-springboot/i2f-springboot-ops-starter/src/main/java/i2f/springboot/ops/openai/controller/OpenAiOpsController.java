@@ -943,7 +943,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                             if (req.isEnableLoopEngineering()) {
-                                Set<String> checkNames = SessionRecordTools.toolNames();
+                                Set<String> checkNames = LoopEngineeringTools.toolNames();
                                 for (String checkName : checkNames) {
                                     if (name.contains(checkName)) {
                                         return true;
