@@ -22,6 +22,8 @@ ai:
       enable: true
     robot:
       enable: false
+    pandoc:
+      enable: false
     form:
       enable: false
     groovy:
