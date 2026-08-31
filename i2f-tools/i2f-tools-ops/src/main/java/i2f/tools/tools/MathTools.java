@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.extension.antlr4.script.funic.lang.Funic;
 import i2f.extension.antlr4.script.funic.lang.resolver.FunicResolver;
 import i2f.extension.antlr4.script.funic.lang.resolver.impl.SandboxFunicResolver;
@@ -21,6 +23,7 @@ import java.util.List;
  * @date 2026/7/6 14:27
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="math",description = "提供基于轻量级脚本语言的强有力的数学运算能力"))
 @ConditionalOnExpression("${ai.tools.math.enable:true}")
 @Component
 @Tools(tags = {

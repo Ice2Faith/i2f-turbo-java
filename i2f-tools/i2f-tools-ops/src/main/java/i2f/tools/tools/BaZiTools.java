@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.tools.yi.BaZi;
 import i2f.tools.yi.GanZhiDate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
  * @date 2026/6/10 15:18
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="bazi",description = "提供专业的八字排盘信息、五行、十神、命宫、身宫、胎元等"))
 @ConditionalOnExpression("${ai.tools.ba-zi.enable:true}")
 @Component
 @Tools(tags = {

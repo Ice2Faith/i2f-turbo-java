@@ -3,6 +3,8 @@ package i2f.tools.tools;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.form.dialog.DialogBoxes;
 import i2f.io.file.FileUtil;
 import i2f.os.OsUtil;
@@ -28,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2026/8/7 18:42
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="robot",description = "提供基于robot的本机控制能力、截屏等"))
 @ConditionalOnExpression("${ai.tools.robot.enable:false}")
 @Data
 @NoArgsConstructor
