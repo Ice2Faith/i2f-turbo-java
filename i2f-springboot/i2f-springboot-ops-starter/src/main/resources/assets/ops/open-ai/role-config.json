@@ -47,6 +47,11 @@
         "label": "循环工程",
         "icon": "el-icon-mouse",
         "url": "./roles/engine/role-loop-engineering.md"
+      },
+      {
+        "label": "意图识别",
+        "icon": "el-icon-mouse",
+        "url": "./roles/engine/role-intent-recognize.md"
       }
     ]
   },
