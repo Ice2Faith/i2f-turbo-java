@@ -36,7 +36,7 @@
             <li><a href="#ch07" class="toc"><span class="no">07</span>工具体系</a></li>
             <li><a href="#ch08" class="toc"><span class="no">08</span>技能系统</a></li>
             <li><a href="#ch09" class="toc"><span class="no">09</span>RAG · 记忆系统</a></li>
-            <li><a href="#ch10" class="toc"><span class="no">10</span>MCP 动态工具</a></li>
+            <li><a href="#ch10" class="toc"><span class="no">10</span>MCP 动态工具 · 意图推荐</a></li>
             <li><a href="#ch11" class="toc"><span class="no">11</span>安全体系</a></li>
             <li><a href="#ch12" class="toc"><span class="no">12</span>高级特性</a></li>
             <li><a href="#ch13" class="toc"><span class="no">13</span>自动装配</a></li>
@@ -169,7 +169,7 @@
                     <div class="lab">内置工具类</div>
                 </div>
                 <div class="stat" style="--c:#2b8a3e;">
-                    <div class="num" data-count="12">0</div>
+                    <div class="num" data-count="13">0</div>
                     <div class="lab">回显消息类型</div>
                 </div>
                 <div class="stat" style="--c:#1971c2;">
@@ -859,6 +859,8 @@
                                     class="ty">"enableSkills"</span>: <span class="kw">true</span>,
                             <span class="ty">"enableRags"</span>: <span class="kw">true</span>, <span
                                     class="ty">"enableLruTools"</span>: <span class="kw">false</span>,
+                            <span class="ty">"enableToolRecommendByIntentRecognize"</span>: <span class="kw">false</span>, <span
+                                    class="cm">/* 意图识别辅助工具推荐 */</span>
                             <span class="ty">"enableTruth"</span>: <span class="kw">false</span>, <span
                                     class="ty">"encryptOutput"</span>: <span class="kw">false</span>,
                             <span class="ty">"enableMemories"</span>: <span class="kw">false</span>, <span
@@ -1275,6 +1277,11 @@
                                 <td>同步 LRU 淘汰后的存活工具集</td>
                             </tr>
                             <tr>
+                                <td><code>echo_tool_intent_recommend</code></td>
+                                <td>意图识别推理结果</td>
+                                <td>回显工具意图识别的完整推理过程（prompt / rawResult / finalResult），前端可见、可追溯</td>
+                            </tr>
+                            <tr>
                                 <td><code>echo_request_payload</code></td>
                                 <td>完整补全报文</td>
                                 <td>回显实际发给 LLM 的请求报文（学习/调试）</td>
@@ -1327,6 +1334,10 @@
     <span class="kw">protected</span> OpenAiSystemMessage echo_truth_sync; <span
                             class="cm">// 事实同步（工具执行后）</span>
 
+    <span class="cm">// ---- 工具意图推荐 ----</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_tool_intent_recommend; <span
+                            class="cm">// 意图识别推理过程</span>
+
     <span class="kw">protected</span> List&lt;TmpFileTools.UploadTmpFileMetadata&gt; attachFiles; <span
                             class="cm">// 附件</span>
                     }</pre>
@@ -1362,6 +1373,7 @@
     <span class="kw">protected boolean</span> enableSkills; <span class="cm">// 技能系统开关</span>
     <span class="kw">protected boolean</span> enableRags; <span class="cm">// 知识库开关</span>
     <span class="kw">protected boolean</span> enableLruTools; <span class="cm">// MCP 动态工具开关</span>
+    <span class="kw">protected boolean</span> enableToolRecommendByIntentRecognize; <span class="cm">// 意图识别辅助工具推荐（依赖 enableLruTools）</span>
     <span class="kw">protected boolean</span> enableEchoRequestPayload; <span class="cm">// 请求报文回显</span>
     <span class="kw">protected boolean</span> enableMergedSystemMsg; <span
                             class="cm">// 系统重排：合并系统消息至首条</span>
@@ -2383,7 +2395,7 @@
             <div class="ch-head reveal">
                 <div class="ch-no">10</div>
                 <h2><span class="en">MCP Dynamic Tools</span>MCP 动态工具
-                ：三步发现 + LRU 装载</h2>
+                ：三步发现 + LRU 装载 + 意图推荐</h2>
                 <div class="rule"></div>
             </div>
             <p class="lead reveal">
@@ -2471,6 +2483,108 @@
                     </div>
                 </div>
             </div>
+
+    <!-- 意图识别辅助工具推荐 -->
+    <div class="reveal" style="margin-top:42px;">
+        <div class="panel-title">意图识别辅助工具推荐 — 先猜意图，再给工具</div>
+        <p class="body" style="font-size:13.5px;">
+            动态工具虽能按需装载，但 LLM 仍需从零开始「翻目录」——对上百个工具提供商的场景，三步发现本身就需要消耗
+            额外的推理轮次。意图识别方案在 LRU 动态工具的基础上引入<b>前置过滤</b>：利用
+            <code>@ToolIntent</code> 注解为每个工具标注意图标签，再由 LLM 根据用户问题<b>先推断意图</b>，
+            将推断出的意图标签对应的工具<b>优先插入 LRU 队列头部</b>，让 LLM 在后续推理中<b>更大概率直接命中所需工具</b>。
+        </p>
+
+        <div class="diagram-panel" style="margin-top:14px;">
+            <svg viewBox="0 0 940 196" role="img" aria-label="意图识别辅助工具推荐流程">
+                <defs>
+                    <marker id="ah10-ir" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#e8590c"/>
+                    </marker>
+                    <marker id="ah10-ir-k" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+                        <path d="M0,0 L9,4.5 L0,9 Z" fill="#46607a"/>
+                    </marker>
+                </defs>
+                <rect class="svg-node" x="20" y="40" width="160" height="62" rx="3"/>
+                <text class="svg-lbl" x="100" y="66" text-anchor="middle">① 提取用户消息</text>
+                <text class="svg-lbl-sm" x="100" y="84" text-anchor="middle">末条 user 消息</text>
+
+                <rect class="svg-node svg-node-acc" x="210" y="40" width="170" height="62" rx="3"/>
+                <text class="svg-lbl" x="295" y="66" text-anchor="middle">② 解析工具意图</text>
+                <text class="svg-lbl-sm" x="295" y="84" text-anchor="middle">@ToolIntent 注解 → label</text>
+
+                <rect class="svg-node svg-node-dark" x="410" y="40" width="190" height="62" rx="3"/>
+                <text class="svg-lbl-w" x="505" y="66" text-anchor="middle">③ LLM 意图识别</text>
+                <text class="svg-lbl-sm" x="505" y="84" text-anchor="middle" style="fill:#8fb3d6;">intent_recognize()</text>
+
+                <rect class="svg-node svg-node-teal" x="630" y="40" width="160" height="62" rx="3"/>
+                <text class="svg-lbl" x="710" y="66" text-anchor="middle">④ 重排 LRU 队列</text>
+                <text class="svg-lbl-sm" x="710" y="84" text-anchor="middle">推荐工具优先插入</text>
+
+                <rect class="svg-node svg-node-green" x="820" y="40" width="100" height="62" rx="3"/>
+                <text class="svg-lbl" x="870" y="66" text-anchor="middle">⑤ 过滤注入</text>
+                <text class="svg-lbl-sm" x="870" y="84" text-anchor="middle">LRU 窗口工具</text>
+
+                <path class="svg-line-acc flow-anim" d="M180,71 L210,71" marker-end="url(#ah10-ir)"/>
+                <path class="svg-line-acc flow-anim" d="M380,71 L410,71" marker-end="url(#ah10-ir)"/>
+                <path class="svg-line-acc flow-anim" d="M600,71 L630,71" marker-end="url(#ah10-ir)"/>
+                <path class="svg-line-acc flow-anim" d="M790,71 L820,71" marker-end="url(#ah10-ir)"/>
+
+                <text class="svg-lbl-sm" x="20" y="138">仅在最后一条消息为 user 时触发 · 保留 25% 原 LRU 队列头部（最少 3 个）</text>
+                <text class="svg-lbl-sm" x="20" y="156">推荐工具优先插入队列 · 保留的原队列工具补充到尾部 · 最终由 LRU 窗口截断</text>
+                <text class="svg-lbl-sm" x="20" y="174">回显 <code>echo_tool_intent_recommend</code> 事件：包含完整 prompt / rawResult / finalResult，意图识别过程全程可见</text>
+            </svg>
+            <div class="dg-cap">意图识别五步 — 前置过滤 + LRU 队列重排，让 LLM 更大概率命中所需工具</div>
+        </div>
+
+        <div class="two-col">
+            <div class="reveal">
+                <div class="panel-title">@ToolIntent 注解 — 工具意图标注</div>
+                <div class="code-block" style="margin-top:0;">
+                    <div class="code-head">
+                        <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                   style="background:#ffbd2e;"></span><span
+                            class="dot" style="background:#27c93f;"></span>
+                        <span class="fname">ToolIntent.java — 三种标注方式</span>
+                        <button class="copy-btn">COPY</button>
+                    </div>
+                    <pre><span class="kw">public @interface</span> <span class="ty">ToolIntent</span> {
+    <span class="cm">// 方式一：枚举常量</span>
+    <span class="ty">ToolIntents</span>[] value() <span class="kw">default</span> {};
+    <span class="cm">// 方式二：自定义键值对</span>
+    <span class="ty">ToolIntentItem</span>[] items() <span class="kw">default</span> {};
+    <span class="cm">// 方式三：实现 IToolIntent 接口的类</span>
+    Class&lt;? <span class="kw">extends</span> <span class="ty">IToolIntent</span>&gt;[] from() <span
+                            class="kw">default</span> {};
+                    }
+
+<span class="cm">// 使用示例</span>
+<span class="kw">@ToolIntent</span>(items = <span class="kw">@ToolIntentItem</span>(
+    value = <span class="str">"sql_safe"</span>,
+    description = <span class="str">"SQL语句安全性校验"</span>
+))
+<span class="kw">public</span> String safe_sql_detect(...) { ... }</pre>
+                </div>
+            </div>
+            <div class="reveal">
+                <div class="panel-title">设计要点</div>
+                <div class="callout" style="--c:#e8590c;margin-top:0;">
+                    <div class="co-title">前置于 LLM 推理</div>
+                    <p>意图识别发生在 LLM 正式推理<b>之前</b>，利用 <code>AgentTools.intent_recognize()</code> 调用 LLM
+                    做一次轻量级的意图分类（非流式），将识别出的意图标签对应的工具<b>插入 LRU 队列头部</b>——
+                    后续 LLM 正常推理时，看到的就是已按意图排好序的工具列表。</p>
+                </div>
+                <div class="callout" style="--c:#0b7285;">
+                    <div class="co-title">未标注工具的降级策略</div>
+                    <p>未标注 <code>@ToolIntent</code> 的工具不会丢失：以工具名本身作为意图标签，确保所有工具都参与意图识别。</p>
+                </div>
+                <div class="callout" style="--c:#2b8a3e;">
+                    <div class="co-title">Token 成本可控</div>
+                    <p>意图识别是一次额外的非流式 LLM 调用，会增加少量 Token 消耗；但相比将上百个工具定义全量注入请求，
+                    意图识别 + LRU 的组合方案在工具数量多时<b>综合 Token 消耗更低</b>。</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- MCP 基础设施模块 -->
     <div class="reveal" style="margin-top:42px;">
