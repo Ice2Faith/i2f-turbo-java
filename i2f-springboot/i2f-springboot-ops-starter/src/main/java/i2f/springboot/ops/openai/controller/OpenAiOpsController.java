@@ -820,7 +820,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                         OpenAiMessageVo dto = new OpenAiMessageVo();
                         dto.setType(OpsOpenAiConsts.ECHO_TRUTH_SYNC);
-                        dto.setEcho_truth_content(system);
+                        dto.setEcho_truth_sync(system);
 
                         String defTruthMsg = objectMapper.writeValueAsString(dto);
                         OpsSecureReturn<?> resp = null;
