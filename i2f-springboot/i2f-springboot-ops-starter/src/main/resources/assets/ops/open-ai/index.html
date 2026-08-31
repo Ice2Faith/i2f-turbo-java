@@ -324,7 +324,7 @@
                                     'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
                                     'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
                                     }"
-                         v-html="renderMarkdown(msg[msg.type].content || '[未收到任何内容]')"></div>
+                         v-html="renderMessageMarkdown(msg,idx)"></div>
                     <div class="input-attach-files input-attach-files__message"
                          v-if="msg.attachFiles && msg.attachFiles.length>0">
                                 <span v-for="(item,index) in msg.attachFiles"
@@ -2191,6 +2191,15 @@
                     minWidth: 180
                 });
             },
+            extraMessageContent(msg, idx) {
+                if (msg.type == 'assistant' && idx === this.currentMessages.length - 1) {
+                    return msg[msg.type].content || msg.progress
+                }
+                return msg[msg.type].content
+            },
+            renderMessageMarkdown(msg, idx) {
+                return this.renderMarkdown(this.extraMessageContent(msg, idx) || '[未收到任何内容]')
+            },
             async sendMessage() {
                 let text = (this.form.inputText || '').trim();
                 if (!text) {
@@ -2602,6 +2611,10 @@
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_session_records_map') {
                             session.sessionRecordsMap = json || {};
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_progress') {
+                            assistantMsg.progress = json || '';
                             return;
                         }
 

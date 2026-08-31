@@ -451,6 +451,11 @@ public class OpenAiOpsController implements IOpsProvider {
         return user;
     }
 
+    @FunctionalInterface
+    public interface ExFunction<R, T> {
+        R apply(T t) throws Exception;
+    }
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
@@ -461,6 +466,21 @@ public class OpenAiOpsController implements IOpsProvider {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
             ToolCallContextHolder.put("req", req);
+
+            ExFunction<Object, String> echoProgress = (content) -> {
+                OpsSecureReturn<?> resp = null;
+                if (req.isEncryptOutput()) {
+                    resp = transfer.success(content);
+                } else {
+                    resp = OpsSecureReturn.success(content);
+                }
+                resp.withAttr("type", OpsOpenAiConsts.ECHO_PROGRESS);
+                String respJson = objectMapper.writeValueAsString(resp);
+                emitter.send(respJson);
+                return null;
+            };
+
+            echoProgress.apply("请求处理中...");
 
             Map<String, String> sessionRecordsMap = SessionRecordTools.replaceAllInContextHolder(req.getSessionRecordsMap());
             req.setSessionRecordsMap(sessionRecordsMap);
@@ -473,6 +493,8 @@ public class OpenAiOpsController implements IOpsProvider {
                 ToolCallContextHolder.put("req", req);
                 ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
                 try {
+                    echoProgress.apply("转换消息中...");
+
                     OpenAiCompletionVo vo = req.getCompletion();
                     OpenAiCompletionDto completion = new OpenAiCompletionDto();
                     List<OpenAiToolApprovalDto> toolApprovalList = req.getToolApprovalList();
@@ -506,6 +528,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
                     completion.setTools(vo.getTools());
+
+                    echoProgress.apply("系统提示词注入中...");
 
                     // 最后一条是 user/system 消息的时候，允许注入提示词，否则就是 assistant/tool 的时候往往是中间过程，不用注入提示词
                     boolean needInjectSystemPrompt = (injectMsg == null || Arrays.asList(OpenAiConsts.USER, OpenAiConsts.SYSTEM).contains(injectMsg.getType()));
@@ -640,6 +664,8 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (req.isEnableTools()) {
+                        echoProgress.apply("工具注入中...");
+
                         if (toolManager != null) {
                             List<ToolDefinition> tools = toolManager.getTools();
                             if (tools != null) {
@@ -691,6 +717,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                 List<OpenAiToolCall> calls = assistantMessage.getTool_calls();
 
                                 if (calls != null && !calls.isEmpty()) {
+                                    echoProgress.apply("工具调用中...");
+
                                     Map<String, ToolDefinition> definitionMap = new HashMap<>();
                                     if (toolManager != null) {
                                         List<ToolDefinition> tools = toolManager.getTools();
@@ -723,6 +751,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                             try {
                                                 String id = call.getId();
                                                 OpenAiToolCallFunction function = call.getFunction();
+
+                                                echoProgress.apply(function.getName() + " 工具调用中...");
 
                                                 ToolCallRequest toolCallRequest = new ToolCallRequest().toMutator()
                                                         .cast(ToolCallRequest.class)
@@ -821,6 +851,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                     latch.await();
                                     ToolCallContextHolder.put("req", req);
                                     ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
+
+                                    echoProgress.apply("工具调用完成...");
                                 }
                             }
                         }
@@ -913,6 +945,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                             if (userMsgContent != null && !userMsgContent.isEmpty()) {
+                                echoProgress.apply("工具意图识别推荐中...");
+
                                 Map<String,Set<String>> labelToolNameMap=new LinkedHashMap<>();
 
                                 List<AgentTools.IntentItem> intentItems = new ArrayList<>();
@@ -1112,6 +1146,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     // 合并重排system消息，用于在一些严格的模型要求下，要求system消息只有一条，且只能在第一条的情况
                     if (req.isEnableMergedSystemMsg()) {
+                        echoProgress.apply("重拍系统消息中...");
 
                         List<OpenAiMessage> messages = completion.getMessages();
                         completion.setMessages(new ArrayList<>());
@@ -1162,6 +1197,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
+                    echoProgress.apply("模型推理中...");
+
                     HttpRequest.doPost(url)
                             .set(u -> u::json)
                             .set2(u -> u::addHeader, HttpHeaderConstants.Authorization, HttpHeaderConstants.Bearer + " " + req.getMeta().getApiKey())
@@ -1195,6 +1232,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 String respJson = objectMapper.writeValueAsString(OpsSecureReturn.success("[DONE]"));
                                                 emitter.send(respJson);
                                             }
+                                            echoProgress.apply("模型推理完成...");
                                         } catch (Exception e) {
                                             try {
                                                 OpsSecureReturn<?> resp = null;
@@ -1212,7 +1250,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                         }
                                         return null;
                                     });
-
+                    
+                    echoProgress.apply("");
                     emitter.complete();
                 } catch (Exception e) {
                     try {
