@@ -181,7 +181,7 @@ public class AgentTools {
                 description = description.replace("\n", ". ");
             }
             system += String.format("- %s\n" +
-                            "    - %s",
+                            "    - %s\n",
                     intent.getLabel(), description
             );
         }
