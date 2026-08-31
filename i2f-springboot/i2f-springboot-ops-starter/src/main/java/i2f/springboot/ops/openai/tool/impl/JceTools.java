@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,7 @@ import java.security.MessageDigest;
  * @date 2026/6/2 14:13
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="jce",description = "提供基于jce的digest能力"))
 @ConditionalOnExpression("${ai.tools.jce.enable:true}")
 @Component
 @Tools(tags = {

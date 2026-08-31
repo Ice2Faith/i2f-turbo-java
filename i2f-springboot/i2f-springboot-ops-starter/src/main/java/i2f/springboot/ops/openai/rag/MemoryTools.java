@@ -9,6 +9,8 @@ import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.mutator.BaseMutator;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
@@ -22,6 +24,7 @@ import java.util.*;
  * @date 2026/3/25 15:09
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="memory",description = "基于向量检索的长期记忆功能"))
 @Data
 @NoArgsConstructor
 @Tools(tags = {

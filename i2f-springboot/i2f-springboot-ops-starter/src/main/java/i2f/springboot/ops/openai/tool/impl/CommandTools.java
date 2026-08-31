@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.os.OsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,6 +22,7 @@ import java.util.List;
  * @date 2026/6/22 16:38
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="command",description = "提供命令行执行、操作系统类型判断"))
 @ConditionalOnExpression("${ai.tools.command.enable:false}")
 @Component
 @Data

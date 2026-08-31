@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import java.util.Base64;
  * @date 2026/6/2 14:12
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="codec",description = "提供字符串的编解码，base64/url"))
 @ConditionalOnExpression("${ai.tools.codec.enable:true}")
 @Component
 @Tools(tags = {

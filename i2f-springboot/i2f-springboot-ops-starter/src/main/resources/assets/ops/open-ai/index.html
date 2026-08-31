@@ -556,6 +556,26 @@
                                                  :max="99999"></el-input-number>
                                 <el-divider direction="vertical"></el-divider>
                                 <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
+                                <el-divider direction="vertical"></el-divider>
+                                <el-popover
+                                        placement="top-start"
+                                        title="说明"
+                                        width="480"
+                                        trigger="hover">
+                                    <p>
+                                        意图推荐，这是一种基于意图识别的工具推荐技术。<br/>
+                                        需要先开启【动态工具】。<br/>
+                                        这种技术，先对工具进行按意图分类，然后讲这些分类提供给大模型推理。<br/>
+                                        模型推理之后，将可能使用的分类返回，程序根据返回的分类，查找对应的工具，提供给模型真正使用。<br/>
+                                        此功能开启后，会一定程度上增加少量Token消耗。<br/>
+                                        只在最后一条消息是【用户】消息时触发。<br/>
+                                    </p>
+                                    <el-checkbox slot="reference"
+                                                 :disabled="!form.enableLruTools"
+                                                 v-model="form.enableToolRecommendByIntentRecognize">
+                                        意图推荐
+                                    </el-checkbox>
+                                </el-popover>
                                 </p>
                                 <el-checkbox slot="reference"
                                              :disabled="!form.enableTools"
@@ -1483,7 +1503,8 @@
                             {label: '循环工程', value: 'echo_loop_engineering', std: false},
                             {label: '事实注入', value: 'echo_truth_prompt', std: false},
                             {label: '事实内容', value: 'echo_truth_content', std: false},
-                            {label: '事实同步', value: 'echo_truth_sync', std: false}
+                            {label: '事实同步', value: 'echo_truth_sync', std: false},
+                            {label: '工具意图推荐', value: 'echo_tool_intent_recommend', std: false}
                         ],
                         enableCustomDisplay: false,
                         hiddenMessageTypes: [],
@@ -1533,6 +1554,7 @@
                         enableLruTools: false,
                         lruToolMaxSize: 20,
                         lruToolNames: [],
+                        enableToolRecommendByIntentRecognize: false,
                         enableEchoRequestPayload: false,
                         enableKeepFirstUserMessage: false,
                         enableMergedSystemMsg: false,
@@ -2562,6 +2584,14 @@
                             insertBeforeLast(messages, json);
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'echo_tool_intent_recommend') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
                         if (resp.attrs && resp.attrs.type == 'echo_lru_tools') {
                             _this.form.lruToolNames = json || [];
                             return;
@@ -2666,6 +2696,7 @@
                     req.enableLruTools = this.form.enableLruTools;
                     req.lruToolNames = this.form.lruToolNames;
                     req.lruToolMaxSize = this.form.lruToolMaxSize;
+                    req.enableToolRecommendByIntentRecognize=this.form.enableToolRecommendByIntentRecognize;
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
                     req.enableMergedSystemMsg = this.form.enableMergedSystemMsg;
                     req.enableTruth = this.form.enableTruth;

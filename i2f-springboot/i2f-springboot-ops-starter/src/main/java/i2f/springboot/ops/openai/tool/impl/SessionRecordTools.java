@@ -5,6 +5,8 @@ import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2026/8/12 18:51
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="session_record",description = "提供基于session级别的持久化存储读写能力"))
 @ConditionalOnExpression("${ai.tools.session-record.enable:true}")
 @Component
 @Tools

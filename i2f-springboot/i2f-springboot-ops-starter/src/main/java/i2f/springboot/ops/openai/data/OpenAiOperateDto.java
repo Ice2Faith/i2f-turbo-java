@@ -28,6 +28,7 @@ public class OpenAiOperateDto {
     protected boolean enableMergedSystemMsg = false;
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
+    protected boolean enableToolRecommendByIntentRecognize;
     protected List<ToolDefinition> loadedTools;
 
     protected String md5;

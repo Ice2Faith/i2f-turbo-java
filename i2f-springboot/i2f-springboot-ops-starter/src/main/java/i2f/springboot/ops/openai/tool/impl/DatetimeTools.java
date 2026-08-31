@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/1 19:13
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="datetime",description = "提供日期时间的获取、判断、当前时间、天数、闰年等"))
 @ConditionalOnExpression("${ai.tools.datetime.enable:true}")
 @Component
 @Tools(tags = {

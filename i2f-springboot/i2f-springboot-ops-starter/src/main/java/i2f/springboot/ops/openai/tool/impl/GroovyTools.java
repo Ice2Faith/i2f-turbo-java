@@ -5,6 +5,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.extension.groovy.GroovyScript;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,6 +28,7 @@ import java.util.Map;
  * @date 2026/8/30 21:06
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="groovy",description = "提供基于groovy的脚本运行能力"))
 @ConditionalOnExpression("${ai.tools.groovy.enable:false}")
 @ConditionalOnClass({
         GroovyShell.class,

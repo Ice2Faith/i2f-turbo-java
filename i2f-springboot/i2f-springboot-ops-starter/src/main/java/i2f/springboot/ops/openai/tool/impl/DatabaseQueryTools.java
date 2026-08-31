@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
 import i2f.page.ApiOffsetSize;
@@ -33,6 +35,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="database_query",description = "提供数据库数据的查询能力，限制只读的查询，不能更新"))
 @ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DefaultDatasourceProvider.class)
 @ConditionalOnBean(DatasourceProvider.class)

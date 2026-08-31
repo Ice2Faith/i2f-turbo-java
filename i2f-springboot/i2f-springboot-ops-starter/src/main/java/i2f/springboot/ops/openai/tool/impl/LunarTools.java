@@ -7,6 +7,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -21,6 +23,7 @@ import java.util.Map;
  * @date 2026/6/8 20:08
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="lunar",description = "提供给定日期的农历、八字、纳音、五行等信息"))
 @ConditionalOnClass(Lunar.class)
 @ConditionalOnExpression("${ai.tools.lunar.enable:true}")
 @Component

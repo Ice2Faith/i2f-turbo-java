@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import lombok.Data;
@@ -22,6 +24,7 @@ import java.util.*;
  * @date 2026/6/2 11:34
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="file",description = "提供本地文件系统的操作能力"))
 @ConditionalOnExpression("${ai.tools.file.enable:true}")
 @Data
 @NoArgsConstructor

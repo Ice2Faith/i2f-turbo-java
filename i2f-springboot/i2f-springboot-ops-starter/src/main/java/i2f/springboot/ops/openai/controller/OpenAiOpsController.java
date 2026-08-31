@@ -13,6 +13,8 @@ import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.intent.IToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentHelper;
 import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.image.common.ImageCompressor;
 import i2f.net.http.consts.HttpHeaderConstants;
@@ -31,6 +33,7 @@ import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.*;
+import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import i2f.web.servlet.ServletFileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -56,6 +59,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
@@ -112,6 +116,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private TmpFileTools tmpFileTools;
+
+    @Autowired(required = false)
+    private AgentTools agentTools;
 
     @Autowired
     private OpenAiOpsProperties properties;
@@ -460,6 +467,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
             ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
 
+            Map<String,CopyOnWriteArrayList<ToolDefinition>> allToolsMap=new ConcurrentHashMap<>();
 
             CompletableFuture.runAsync(() -> {
                 ToolCallContextHolder.put("req", req);
@@ -584,7 +592,10 @@ public class OpenAiOpsController implements IOpsProvider {
                         emitter.send(respJson);
                     }
 
-                    if (req.isEnableLruTools() && mcpProviderTools != null && needInjectSystemPrompt) {
+                    if (req.isEnableTools()
+                            && req.isEnableLruTools()
+                            && mcpProviderTools != null
+                            && needInjectSystemPrompt) {
                         String content = McpProviderTools.SYSTEM_PROMPT;
                         OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                         completion.getMessages().add(0, system);
@@ -637,6 +648,9 @@ public class OpenAiOpsController implements IOpsProvider {
                                     completion.setTools(new ArrayList<>());
                                 }
                                 for (ToolDefinition tool : tools) {
+                                    allToolsMap.computeIfAbsent(tool.getName(),k->new CopyOnWriteArrayList<>())
+                                            .add(tool);
+
                                     OpenAiToolDefinitionDto dto = new OpenAiToolDefinitionDto();
                                     dto.setName(tool.getName());
                                     dto.setDescription(tool.getDescription());
@@ -858,7 +872,14 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     }
 
-                    if (req.isEnableLruTools() && mcpProviderTools != null) {
+                    if (req.isEnableTools()
+                            && req.isEnableLruTools()
+                            && mcpProviderTools != null) {
+                        Integer keepSize = req.getLruToolMaxSize();
+                        if (keepSize == null || keepSize < 1) {
+                            keepSize = 20;
+                        }
+
                         LinkedList<String> unqToolNames = new LinkedList<>();
 
                         List<String> lruToolNames = req.getLruToolNames();
@@ -879,11 +900,130 @@ public class OpenAiOpsController implements IOpsProvider {
                             }
                         }
 
-                        Integer keepSize = req.getLruToolMaxSize();
-                        if (keepSize == null || keepSize < 1) {
-                            keepSize = 20;
+                        List<OpenAiToolsDefinition> tools = completion.getTools();
+
+                        if(req.isEnableToolRecommendByIntentRecognize()) {
+                            // 这里可以通过意图识别，进行变更 unqToolNames 列表，实现工具只能推荐
+                            String userMsgContent = null;
+                            if (completion.getMessages() != null && !completion.getMessages().isEmpty()) {
+                                OpenAiMessage msg = completion.getMessages().get(completion.getMessages().size() - 1);
+                                if (msg instanceof OpenAiUserMessage
+                                        || msg instanceof OpenAiRichUserMessage) {
+                                    userMsgContent = msg.content();
+                                }
+                            }
+                            if (userMsgContent != null && !userMsgContent.isEmpty()) {
+                                Map<String,Set<String>> labelToolNameMap=new LinkedHashMap<>();
+
+                                List<AgentTools.IntentItem> intentItems = new ArrayList<>();
+                                for (OpenAiToolsDefinition e : tools) {
+                                    boolean resolved=false;
+                                    CopyOnWriteArrayList<ToolDefinition> definitions = allToolsMap.get(e.getFunction().getName());
+                                    if(definitions!=null && !definitions.isEmpty()){
+                                        for (ToolDefinition definition : definitions) {
+                                            ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(definition);
+                                            if(rawTool==null){
+                                                continue;
+                                            }
+                                            Method bindMethod = rawTool.getBindMethod();
+                                            if(bindMethod==null){
+                                                continue;
+                                            }
+                                            Map<String, IToolIntent> parse = ToolIntentHelper.parse(bindMethod);
+                                            for (Map.Entry<String, IToolIntent> entry : parse.entrySet()) {
+                                                AgentTools.IntentItem item = new AgentTools.IntentItem();
+
+                                                item.setLabel(entry.getKey());
+                                                item.setDescription(entry.getValue().description());
+                                                intentItems.add(item);
+                                                labelToolNameMap.computeIfAbsent(item.getLabel(),k->new LinkedHashSet<>())
+                                                        .add(e.getFunction().getName());
+                                                resolved=true;
+                                            }
+                                        }
+                                    }
+                                    if(!resolved){
+                                        AgentTools.IntentItem item = new AgentTools.IntentItem();
+
+                                        item.setLabel(e.getFunction().getName());
+                                        item.setDescription(e.getFunction().getName());
+                                        intentItems.add(item);
+                                        labelToolNameMap.computeIfAbsent(item.getLabel(),k->new LinkedHashSet<>())
+                                                .add(e.getFunction().getName());
+                                        resolved=true;
+                                    }
+                                }
+
+                                AgentTools agentTools = this.agentTools;
+                                if(agentTools==null){
+                                    agentTools=new AgentTools();
+                                }
+                                AgentTools.IntentResult intentResult = agentTools.intent_recognize(userMsgContent, intentItems);
+
+                                if(intentResult!=null){
+                                    // 工具意图推荐
+                                    String content=""+intentResult.getPrompt()+"\n\n"
+                                            +"# raw result \n\n"
+                                            +intentResult.getRawResult()+"\n\n"
+                                            +"# final result \n\n"
+                                            + intentResult.getResult();
+                                    OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+
+                                    OpenAiMessageVo dto = new OpenAiMessageVo();
+                                    dto.setType(OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
+                                    dto.setEcho_tool_intent_recommend(system);
+
+                                    String defTruthMsg = objectMapper.writeValueAsString(dto);
+                                    OpsSecureReturn<?> resp = null;
+                                    if (req.isEncryptOutput()) {
+                                        resp = transfer.success(defTruthMsg);
+                                    } else {
+                                        resp = OpsSecureReturn.success(defTruthMsg);
+                                    }
+                                    resp.withAttr("type", OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
+                                    String respJson = objectMapper.writeValueAsString(resp);
+                                    emitter.send(respJson);
+                                }
+
+                                Set<String> labels = intentResult.getResult();
+
+                                if (!labels.isEmpty()) {
+                                    // 保留个数
+                                    int headSize = (int) (keepSize * 0.25);
+                                    headSize = Math.max(headSize, 3);
+
+                                    List<String> removeList = new ArrayList<>();
+                                    while (unqToolNames.size() > headSize) {
+                                        removeList.add(unqToolNames.removeLast());
+                                    }
+
+                                    // 先添加推荐的
+                                    List<String> labelToolList=new ArrayList<>();
+                                    for (String label : labels) {
+                                        Set<String> names = labelToolNameMap.get(label);
+                                        if(names!=null){
+                                            labelToolList.addAll(names);
+                                        }
+                                    }
+                                    for (String name : labelToolList) {
+                                        if (!unqToolNames.contains(name)) {
+                                            unqToolNames.add(name);
+                                        }
+                                    }
+
+                                    // 在添加原来被移除的
+                                    for (String removeName : removeList) {
+                                        if (!unqToolNames.contains(removeName)) {
+                                            unqToolNames.add(removeName);
+                                        }
+                                    }
+
+                                }
+                            }
                         }
-                        while (unqToolNames.size() > 20) {
+
+                        // 根据LRU最大窗口大小，移除最旧的
+                        while (unqToolNames.size() > keepSize) {
                             unqToolNames.removeLast();
                         }
 
@@ -898,8 +1038,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
 
-                        List<OpenAiToolsDefinition> tools = completion.getTools();
-                        tools = tools.stream().filter(e -> {
+                        // 固定加载的工具
+                        tools.stream().filter(e -> {
                             FunctionJsonSchema function = e.getFunction();
                             String name = function.getName();
                             if (true) {
@@ -950,12 +1090,19 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
-                            if (unqToolNames.contains(name)) {
-                                return true;
-                            }
                             return false;
+                        }).forEach(e->{
+                            if(!unqToolNames.contains(e.getFunction().getName())){
+                                unqToolNames.add(e.getFunction().getName());
+                            }
+                        });
+
+                        // 真正的工具
+                        List<OpenAiToolsDefinition> filteredTools=tools.stream().filter(e->{
+                            return unqToolNames.contains(e.getFunction().getName());
                         }).collect(Collectors.toList());
-                        completion.setTools(tools);
+
+                        completion.setTools(filteredTools);
                     }
 
 

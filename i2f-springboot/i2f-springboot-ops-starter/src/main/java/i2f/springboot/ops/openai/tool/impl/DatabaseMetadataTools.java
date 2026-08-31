@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.database.metadata.data.TableMeta;
 import i2f.database.metadata.impl.DatabaseMetadataProviders;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
@@ -31,6 +33,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="database_metadata",description = "提供数据库元数据查询能力、获取数据源、数据库类型、表结构等"))
 @ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DefaultDatasourceProvider.class)
 @ConditionalOnBean(DatasourceProvider.class)

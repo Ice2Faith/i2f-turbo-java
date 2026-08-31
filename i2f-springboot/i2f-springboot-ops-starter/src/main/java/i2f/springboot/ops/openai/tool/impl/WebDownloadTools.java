@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.io.stream.StreamUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,6 +25,7 @@ import java.util.UUID;
  * @date 2026/6/22 16:55
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="web_download",description = "提供网络地址文件的下载能力"))
 @ConditionalOnExpression("${ai.tools.web-download.enable:true}")
 @Component
 @Data

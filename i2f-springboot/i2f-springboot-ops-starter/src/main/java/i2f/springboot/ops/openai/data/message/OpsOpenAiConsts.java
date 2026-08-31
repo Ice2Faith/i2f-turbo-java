@@ -32,4 +32,6 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
     String ECHO_TRUTH_SYNC = "echo_truth_sync";
 
     String ECHO_SESSION_RECORDS_MAP = "echo_session_records_map";
+
+    String ECHO_TOOL_INTENT_RECOMMEND="echo_tool_intent_recommend";
 }

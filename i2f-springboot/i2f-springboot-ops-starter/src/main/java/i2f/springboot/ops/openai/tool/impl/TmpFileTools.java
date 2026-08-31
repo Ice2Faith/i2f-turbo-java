@@ -6,6 +6,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.extension.document.pdf.PdfConvertUtil;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
@@ -37,6 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/7/15 15:51
  * @desc
  */
+@ToolIntent(items = @ToolIntentItem(value="tmp_file",description = "提供针对上传的临时文件的读写能力"))
 @ConditionalOnExpression("${ai.tools.tmp-file.enable:true}")
 @Data
 @NoArgsConstructor
