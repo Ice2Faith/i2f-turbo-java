@@ -51,6 +51,8 @@ import java.util.Map;
 public class DashScopeImageWanText2ImageTools {
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
+    public static final String DEFAULT_MODEL="qwen-image-2.0-pro";
+
     @Autowired(required = false)
     private DashScopeOpsImageWanText2ImageController imageWanText2ImageController;
 
@@ -61,7 +63,7 @@ public class DashScopeImageWanText2ImageTools {
     private TmpFileTools tmpFileTools;
 
     @Value("${ai.tools.dashscope-t2i.model:qwen-image-2.0-pro}")
-    protected String model = "qwen-image-2.0-pro";
+    protected String model = DEFAULT_MODEL;
 
     @Tool(
             tags = {
@@ -88,7 +90,7 @@ public class DashScopeImageWanText2ImageTools {
         }
         String modelName = this.model;
         if (modelName == null || modelName.isEmpty()) {
-            modelName = "qwen-image-2.0-pro";
+            modelName = DEFAULT_MODEL;
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
         OpenAiMeta meta = req.getMeta();
