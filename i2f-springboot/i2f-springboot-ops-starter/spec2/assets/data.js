@@ -1,13 +1,19 @@
 function getDemoMarkdown() {
+    /* 使用变量替换markdown的代码块开始结束标记，
+    这样就不用转义了，
+    也不会因为代码格式化而出现问题，
+    最后使用trim去除前后多余的空行，
+    内容就是一致的
+    */
+    let markdownBlockBorder = '```'
     return `
 # 标题
 
 - 列表
 
 ## mermaid 图表
-` +
-        '```mermaid' +
-        `
+
+${markdownBlockBorder}mermaid
     sequenceDiagram
     participant U as 用户浏览器
     participant A as 应用A
@@ -41,11 +47,8 @@ function getDemoMarkdown() {
     S-->>B: 20. 返回验证结果及用户信息
     B->>B: 21. 创建本地会话
     B-->>U: 22. 返回受保护资源
-` +
-        '```' +
-        `
+${markdownBlockBorder}
 
 - 列表
-
-`
+`.trim()
 }
