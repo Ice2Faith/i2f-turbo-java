@@ -3518,10 +3518,12 @@
                 }
             },
             startAutoRefreshAsyncTaskStatus(msg){
+                let lastError=null
                 let count=50;
                 let runNext=()=>{
                     this.delegateRefreshAsyncTaskStatusByMsg(msg)
                         .then(resp=>{
+                            lastError=null
                             let list=resp || []
                             for (let i = 0; i < list.length; i++) {
                                 let item=list[i];
@@ -3535,7 +3537,15 @@
                                     break
                                 }
                             }
-                        })
+                        }).catch(err=>{
+                            lastError=null
+                    }).finally(()=>{
+                        if(count<=0){
+                            if(lastError){
+                                this.messageError(lastError,300)
+                            }
+                        }
+                    })
                 }
                 runNext()
             },

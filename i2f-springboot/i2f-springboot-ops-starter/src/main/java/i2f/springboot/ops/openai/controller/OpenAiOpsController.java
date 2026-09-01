@@ -373,7 +373,7 @@ public class OpenAiOpsController implements IOpsProvider {
     public OpsSecureReturn<OpsSecureDto> queryAsyncTask(@RequestBody OpsSecureDto reqDto) throws Exception {
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
-            AsyncTaskMessage asyncTask = req.getAsyncTask();
+            AsyncTaskMessage asyncTask = req.getAsyncTasks();
             List<AsyncTaskItem> list = asyncTask.getList();
             for (int i = 0; i < list.size(); i++) {
                 AsyncTaskItem asyncTaskItem=list.get(i);
