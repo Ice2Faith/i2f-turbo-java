@@ -28,6 +28,8 @@ ai:
       enable: false
     groovy:
       enable: false
+    dashscope-t2i:
+      enable: false
   rags:
     enable: false
     embedding:
