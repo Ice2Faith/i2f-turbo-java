@@ -169,11 +169,11 @@
                     <div class="lab">内置工具类</div>
                 </div>
                 <div class="stat" style="--c:#2b8a3e;">
-                    <div class="num" data-count="13">0</div>
+                    <div class="num" data-count="14">0</div>
                     <div class="lab">回显消息类型</div>
                 </div>
                 <div class="stat" style="--c:#1971c2;">
-                    <div class="num" data-count="6">0</div>
+                    <div class="num" data-count="7">0</div>
                     <div class="lab">REST 端点</div>
                 </div>
                 <div class="stat" style="--c:#e67700;">
@@ -560,7 +560,7 @@
                     <div class="panel-title">子系统包结构（45 个 Java 文件）</div>
                     <div class="pkg-tree"><span class="dir">i2f.springboot.ops.openai</span>
                         ├── <span class="pkg">controller</span>/
-                        │ ├── OpenAiOpsController <span class="cm"># 5 个 REST 端点 · SSE 编排核心</span>
+                        │ ├── OpenAiOpsController <span class="cm"># 7 个 REST 端点 · SSE 编排核心</span>
                         │ └── QwenTtsOpsController <span class="cm"># 千问语音合成代理</span>
                         ├── <span class="pkg">data</span>/
                         │   ├── OpenAiOperateDto <span class="cm"># 操作请求：功能开关集合</span>
@@ -580,6 +580,8 @@
                         ├── <span class="pkg">skill</span>/ SkillAutoConfiguration <span class="cm"># 30s 热扫描</span>
                         ├── <span class="pkg">rag</span>/ RagAutoConfiguration <span
                                 class="cm"># 向量化 + SQLite 存储</span>
+                        ├── <span class="pkg">async</span>/ AsyncTaskDispatcher / AsyncTaskResolver <span
+                                class="cm"># 异步任务调度与状态轮询</span>
                         └── <span class="pkg">tts</span>/ QwenAudioTtsWebSocket <span
                                 class="cm"># 千问语音合成 WebSocket 客户端</span></div>
                 </div>
@@ -772,6 +774,18 @@
                             localStorage，实现跨轮循环工程状态接力。</p>
                     </div>
                 </div>
+                <div class="step">
+                    <div class="no"></div>
+                    <div class="bd">
+                        <h4>异步任务收集与回显 <code>AsyncTaskMessage</code></h4>
+                        <p>工具执行返回 <code>AsyncTaskMessage</code>（如文生图等长耗时操作）时，Controller 自动收集全部异步任务，
+                            以 <code>echo_async_tasks</code> 事件回显给前端；前端渲染任务状态标签（等待中 / 运行中 / 成功
+                            / 失败），
+                            用户可手动刷新查询状态，或待任务完成后自动展示结果文件。
+                            异步任务的查询路由由 <code>AsyncTaskDispatcher</code> 统一分发至匹配的 <code>AsyncTaskResolver</code>
+                            实现。</p>
+                    </div>
+                </div>
             </div>
 
             <div class="panel-title">REST 端点一览</div>
@@ -821,6 +835,12 @@
                         <td><span class="tag t-o">POST</span></td>
                         <td>千问语音合成（分段 WebSocket 拉流转 MP3）</td>
                         <td>文件访问凭据</td>
+                    </tr>
+                    <tr>
+                        <td><code>/ops/open-ai/async/task/query</code></td>
+                        <td><span class="tag t-o">POST</span></td>
+                        <td>异步任务状态轮询（文生图等长耗时操作）</td>
+                        <td>加密的任务状态列表</td>
                     </tr>
                     </tbody>
                 </table>
@@ -1291,6 +1311,11 @@
                                 <td>循环工程会话记录 Map</td>
                                 <td>流结束前回显 request / plan / checklist / agent 四类记录，前端持久化接力</td>
                             </tr>
+                            <tr>
+                                <td><code>echo_async_tasks</code></td>
+                                <td>异步任务列表</td>
+                                <td>回显工具产生的异步任务（如文生图），前端渲染状态标签并提供刷新查询</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1340,6 +1365,12 @@
 
     <span class="kw">protected</span> List&lt;TmpFileTools.UploadTmpFileMetadata&gt; attachFiles; <span
                             class="cm">// 附件</span>
+
+    <span class="cm">// ---- 异步任务 ----</span>
+    <span class="kw">protected</span> OpenAiSystemMessage echo_async_tasks; <span
+                            class="cm">// 异步任务回显</span>
+    <span class="kw">protected</span> List&lt;AsyncTaskItem&gt; asyncTasks; <span
+                            class="cm">// 异步任务列表</span>
                     }</pre>
             </div>
 
@@ -1398,6 +1429,9 @@
                             class="cm">// 循环工程开关</span>
     <span class="kw">protected</span> Map&lt;String, String&gt; sessionRecordsMap; <span
                             class="cm">// 循环工程会话记录（四类）</span>
+
+    <span class="kw">protected</span> List&lt;AsyncTaskItem&gt; asyncTasks; <span
+                            class="cm">// 异步任务状态列表（轮询回传）</span>
                     }</pre>
             </div>
         </section>
@@ -1945,7 +1979,55 @@
         </div>
     </div>
 
-    <div class="two-col">
+            <!-- AsyncTaskResolver — 异步任务模式 -->
+            <div class="reveal" style="margin-top:28px;">
+                <div class="panel-title">AsyncTaskResolver — 异步任务工具扩展模式</div>
+                <p class="body" style="font-size:13.5px;">
+                    对于文生图、视频生成等<b>长耗时操作</b>，工具无法在单次 HTTP 请求内完成。
+                    框架提供了 <code>AsyncTaskResolver</code> 接口，让工具将耗时操作建模为<b>异步任务</b>：
+                    工具方法立即返回 <code>AsyncTaskMessage</code>（含任务 ID 与初始状态），
+                    Controller 自动将其收集并通过 <code>echo_async_tasks</code> 事件推送前端；
+                    前端可随时经 <code>POST /ops/open-ai/async/task/query</code> 轮询任务状态，
+                    <code>AsyncTaskDispatcher</code> 从 Spring 容器中查找匹配的 <code>AsyncTaskResolver</code> 实现进行状态查询。
+                </p>
+                <div class="code-block" style="margin-top:0;">
+                    <div class="code-head">
+                        <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                   style="background:#ffbd2e;"></span><span
+                            class="dot" style="background:#27c93f;"></span>
+                        <span class="fname">AsyncTaskResolver.java — 异步任务解析器接口</span>
+                        <button class="copy-btn">COPY</button>
+                    </div>
+                    <pre><span class="kw">public interface</span> <span class="ty">AsyncTaskResolver</span> {
+    <span class="cm">// 判定是否支持处理该任务类型</span>
+    <span class="kw">boolean</span> <span class="fn">support</span>(AsyncTaskItem item, OpenAiMeta meta) <span
+                                class="kw">throws</span> Exception;
+
+    <span class="cm">// 查询任务状态并更新 item 的 status / result / error</span>
+    AsyncTaskItem <span class="fn">resolve</span>(AsyncTaskItem item, OpenAiMeta meta) <span class="kw">throws</span> Exception;
+}
+
+<span class="kw">public class</span> <span class="ty">AsyncTaskItem</span> {
+    <span class="kw">protected</span> String description; <span class="cm">// 任务描述</span>
+    <span class="kw">protected</span> String type; <span class="cm">// 任务类型（用于 Resolver 匹配）</span>
+    <span class="kw">protected</span> String taskId; <span class="cm">// 任务 ID</span>
+    <span class="kw">protected</span> String status; <span class="cm">// pending / running / success / failure</span>
+    <span class="kw">protected</span> String resultType; <span
+                                class="cm">// image / image_list / video / file_list</span>
+    <span class="kw">protected</span> Object result; <span class="cm">// 结果数据</span>
+    <span class="kw">protected</span> String error; <span class="cm">// 错误信息</span>
+}</pre>
+                </div>
+                <div class="callout" style="--c:#0b7285;margin-top:14px;">
+                    <div class="co-title">Dispatcher 自动路由 — 零配置扩展</div>
+                    <p><code>AsyncTaskDispatcher</code> 实现 <code>ApplicationContextAware</code>，启动时自动发现容器中所有
+                        <code>AsyncTaskResolver</code> Bean。每次轮询时按 <code>item.type</code> 匹配——
+                        新增一种异步任务类型只需实现 <code>AsyncTaskResolver</code> 接口并注册为 Spring Bean，无需修改任何调度代码。
+                    </p>
+                </div>
+            </div>
+
+            <div class="two-col">
                 <div class="reveal">
                     <div class="panel-title">标签自动审批 — 决策流程</div>
                     <div class="pkg-tree"><span class="cm"># 模型返回 tool_calls 后的前端审批决策</span>
@@ -3282,6 +3364,16 @@
                         agent 四类记录），
                         经 <code>echo_session_records_map</code> 回显并由前端持久化——长周期任务的进度检查与断点续作。</p>
                 </div>
+                <div class="card reveal" style="--c:#ae3ec9;">
+                    <div class="idx">K</div>
+                    <h3>异步任务 AsyncTask</h3>
+                    <div class="tagline">AsyncTaskResolver · Dispatcher</div>
+                    <p>文生图、视频生成等<b>长耗时操作</b>建模为异步任务：工具返回 <code>AsyncTaskMessage</code> 立即释放线程，
+                        前端经 <code>echo_async_tasks</code> 展示任务状态（pending / running / success / failure），
+                        可手动刷新轮询；后端 <code>AsyncTaskDispatcher</code> 自动路由到匹配的
+                        <code>AsyncTaskResolver</code>，
+                        新增任务类型仅需实现接口并注册 Bean。</p>
+                </div>
             </div>
 
             <div class="two-col">
@@ -3690,6 +3782,13 @@
                             <div class="bd"><h4>中断输出</h4>
                                 <p><code>AbortController</code> 中断在途 SSE 请求，长输出可随时叫停。</p></div>
                         </div>
+                        <div class="step">
+                            <div class="no"></div>
+                            <div class="bd"><h4>异步任务状态展示</h4>
+                                <p><code>asyncTasks</code> 列表渲染为带状态标签（等待中/运行中/成功/失败）的任务卡片，
+                                    支持手动刷新查询状态；任务完成后自动展示结果文件（图片/视频等），支持预览与下载。</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -3973,6 +4072,12 @@
                                 <td>编写 <code>@Tool</code> 注解的 Spring Bean</td>
                             </tr>
                             <tr>
+                                <td>新增异步任务工具</td>
+                                <td>实现 <code>AsyncTaskResolver</code> + <code>@Tool</code> 返回
+                                    <code>AsyncTaskMessage</code>，注册为 Spring Bean
+                                </td>
+                            </tr>
+                            <tr>
                                 <td>新增技能</td>
                                 <td>在 <code>skills/{name}/</code> 放置 <code>SKILL.md</code>，30 秒内生效</td>
                             </tr>
@@ -4062,6 +4167,84 @@
             </div>
         </div>
     </div>
+
+            <!-- AsyncTask 扩展专属 -->
+            <div class="reveal" style="margin-top:42px;">
+                <div class="panel-title">AsyncTask 专属扩展 — 三步接入异步任务工具</div>
+                <div class="two-col" style="margin-top:0;">
+                    <div>
+                        <div class="step-list" style="margin-top:0;">
+                            <div class="step">
+                                <div class="no"></div>
+                                <div class="bd"><h4>编写工具方法，返回 AsyncTaskMessage</h4>
+                                    <p>在 <code>@Tool</code> 注解方法中调用远程 API 创建异步任务，将返回的 taskId 封装为
+                                        <code>AsyncTaskItem</code>（设置 status=PENDING、type 为唯一标识），
+                                        然后包装为 <code>AsyncTaskMessage</code> 返回。
+                                        Controller 自动检测 <code>AsyncTaskMessage</code> 返回值并通过 <code>echo_async_tasks</code>
+                                        推送前端。</p></div>
+                            </div>
+                            <div class="step">
+                                <div class="no"></div>
+                                <div class="bd"><h4>实现 AsyncTaskResolver 接口</h4>
+                                    <p>实现 <code>support()</code> 方法按 <code>item.type</code> 匹配任务类型；
+                                        实现 <code>resolve()</code> 方法调用远程 API 查询任务状态，更新
+                                        <code>item.status</code>、
+                                        <code>item.result</code> 等字段。完成后将结果文件下载到临时文件目录，
+                                        返回 <code>TmpFileTools.UploadTmpFileMetadata</code> 列表作为结果。</p></div>
+                            </div>
+                            <div class="step">
+                                <div class="no"></div>
+                                <div class="bd"><h4>注册为 Spring Bean</h4>
+                                    <p>将实现类标注 <code>@Component</code>，<code>AsyncTaskDispatcher</code> 自动发现并纳入调度。
+                                        无需额外配置，前端轮询时自动路由到正确的 Resolver。</p></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="code-block" style="margin-top:0;">
+                            <div class="code-head">
+                                <span class="dot" style="background:#ff5f56;"></span><span class="dot"
+                                                                                           style="background:#ffbd2e;"></span><span
+                                    class="dot" style="background:#27c93f;"></span>
+                                <span class="fname">示例：文生图异步任务工具</span>
+                                <button class="copy-btn">COPY</button>
+                            </div>
+                            <pre><span class="ann">@Component</span>
+<span class="ann">@Tools</span>
+<span class="kw">public class</span> <span class="ty">ImageGenTools</span> <span class="kw">implements</span> <span
+                                        class="ty">AsyncTaskResolver</span> {
+    <span class="kw">public static final</span> String TASK_TYPE = <span class="str">"image_gen"</span>;
+
+    <span class="ann">@Tool</span>(description = <span class="str">"文生图，异步返回结果"</span>)
+    <span class="kw">public</span> AsyncTaskMessage <span class="fn">text_to_image</span>(String content) {
+        String taskId = remoteApi.createTask(content); <span class="cm">// 提交远程任务</span>
+        AsyncTaskItem item = <span class="kw">new</span> AsyncTaskItem();
+        item.setStatus(AsyncTaskItem.Status.PENDING);
+        item.setType(TASK_TYPE);
+        item.setTaskId(taskId);
+        <span class="kw">return new</span> AsyncTaskMessage(item);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public boolean</span> <span class="fn">support</span>(AsyncTaskItem item, OpenAiMeta meta) {
+        <span class="kw">return</span> TASK_TYPE.equals(item.getType());
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public</span> AsyncTaskItem <span class="fn">resolve</span>(AsyncTaskItem item, OpenAiMeta meta) {
+        Map&lt;String, Object&gt; resp = remoteApi.queryTask(item.getTaskId());
+        <span class="kw">if</span> (<span class="str">"SUCCEEDED"</span>.equals(resp.get(<span
+                                        class="str">"status"</span>))) {
+            item.setStatus(AsyncTaskItem.Status.SUCCESS);
+            item.setResult(downloadResultFiles(resp));
+        }
+        <span class="kw">return</span> item;
+    }
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="two-col">
                 <div class="reveal">
