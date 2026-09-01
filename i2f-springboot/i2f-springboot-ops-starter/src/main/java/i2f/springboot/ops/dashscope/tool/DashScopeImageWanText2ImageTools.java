@@ -75,6 +75,8 @@ public class DashScopeImageWanText2ImageTools {
     public TmpFileTools.FileAttachMessage text_to_image_wan(
             @ToolParam(value = "content", description = "the content, description what is the image")
             String content,
+            @ToolParam(value = "portrait_mode", description = "portrait mode image, default is false")
+            boolean portrait_mode ,
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
@@ -117,6 +119,9 @@ public class DashScopeImageWanText2ImageTools {
         dto.setPrompt(content);
         dto.setImageUrl(reference_image_url);
         dto.setSize("2688*1536");
+        if(portrait_mode){
+            dto.setSize("1536*2688");
+        }
         dto.setWatermark(false);
         dto.setModelName(modelName);
         DashScopeMeta dashScopeMeta = new DashScopeMeta();
