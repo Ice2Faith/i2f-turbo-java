@@ -18,7 +18,9 @@ import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
@@ -26,6 +28,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,21 +41,14 @@ import java.util.Map;
  * @desc
  */
 @ToolIntent(items = @ToolIntentItem(value = "dashscope_t2i", description = "提供基于阿里云的文生图能力"))
-@ConditionalOnExpression("${ai.tools.dashscope-t2i.enable:false}")
+@ConditionalOnExpression("${ai.tools.dashscope-t2i.enable:true}")
 @Component
 @Data
+@Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 @Tools
 public class DashScopeImageWanText2ImageTools {
-    private RestTemplate restTemplate = createRestTemplate();
-
-    public RestTemplate createRestTemplate() {
-        return new RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(30))
-                .setReadTimeout(Duration.ofMinutes(15))
-                .build();
-    }
 
     @Autowired(required = false)
     private DashScopeOpsImageWanText2ImageController imageWanText2ImageController;
@@ -62,6 +59,9 @@ public class DashScopeImageWanText2ImageTools {
     @Autowired(required = false)
     private TmpFileTools tmpFileTools;
 
+    @Value("${ai.tools.dashscope-t2i.model:qwen-image-2.0-pro}")
+    protected String model="qwen-image-2.0-pro";
+
     @Tool(
             tags = {
                     AiTags.HIGH_COST_VALUE,
@@ -69,7 +69,7 @@ public class DashScopeImageWanText2ImageTools {
                     AiTags.PUBLIC_NET_VALUE,
                     AiTags.WRITABLE_VALUE
             },
-            description = "text to image, output png image file."
+            description = "text to image, output png image file, Note: support chinese text content."
     )
     public TmpFileTools.FileAttachMessage text_to_image_wan(
             @ToolParam(value = "content", description = "the content, description what is the image")
@@ -82,6 +82,10 @@ public class DashScopeImageWanText2ImageTools {
         }
         if (tmpFileTools == null) {
             throw new IllegalStateException("system not enable tmp file.");
+        }
+        String modelName=this.model;
+        if(modelName==null || modelName.isEmpty()){
+            modelName="qwen-image-2.0-pro";
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
         OpenAiMeta meta = req.getMeta();
@@ -98,7 +102,7 @@ public class DashScopeImageWanText2ImageTools {
                 }
                 File file = tmpFileTools.getFileByUrl(reference_image_url);
                 DashScopeUploadOperateDto dto = new DashScopeUploadOperateDto();
-                dto.setModelName("qwen-image-2.0-pro");
+                dto.setModelName(modelName);
                 DashScopeMeta dashScopeMeta = new DashScopeMeta();
                 dashScopeMeta.setApiKey(meta.getApiKey());
                 dto.setMeta(dashScopeMeta);
@@ -113,7 +117,7 @@ public class DashScopeImageWanText2ImageTools {
         dto.setImageUrl(reference_image_url);
         dto.setSize("2688*1536");
         dto.setWatermark(false);
-        dto.setModelName("qwen-image-2.0-pro");
+        dto.setModelName(modelName);
         DashScopeMeta dashScopeMeta = new DashScopeMeta();
         dashScopeMeta.setApiKey(meta.getApiKey());
         dto.setMeta(dashScopeMeta);
@@ -148,16 +152,18 @@ public class DashScopeImageWanText2ImageTools {
         builder.append("result image(s) has upload, will send with after user message.\n");
 
         for (String url : downloadUrlList) {
-            String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";
-            TmpFileTools.UploadTmpFileMetadata metadata = restTemplate.execute(url, HttpMethod.GET, null, response -> {
-                return tmpFileTools.saveFile(response.getBody(), virtualFileName);
-            });
-            ret.getFiles().add(metadata);
+            try {
+                String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";
+                TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
+                ret.getFiles().add(metadata);
 
-            Map<String, Object> map = metadata.toMap();
-            builder.append("--------------\n");
-            for (Map.Entry<String, Object> entry : map.entrySet()) {
-                builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+                Map<String, Object> map = metadata.toMap();
+                builder.append("--------------\n");
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+                }
+            } catch (Exception e) {
+                log.warn("downloadUrl: "+url, e);
             }
         }
 
