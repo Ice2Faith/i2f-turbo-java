@@ -156,14 +156,15 @@ public class DashScopeVideoHappyHorseText2VideoTools implements AsyncTaskResolve
             dto.getParameters().put("resolution", "720P");
             dto.getParameters().put("duration", 10);
             dto.getParameters().put("watermark", false);
-            dto.getParameters().put("ratio", "16:9");
-            if (portrait_mode) {
-                dto.getParameters().put("ratio", "9:16");
-            }
+
         } else {
             dto.getParameters().put("resolution", "720P");
             dto.getParameters().put("duration", 10);
             dto.getParameters().put("watermark", false);
+            dto.getParameters().put("ratio", "16:9");
+            if (portrait_mode) {
+                dto.getParameters().put("ratio", "9:16");
+            }
         }
 
 

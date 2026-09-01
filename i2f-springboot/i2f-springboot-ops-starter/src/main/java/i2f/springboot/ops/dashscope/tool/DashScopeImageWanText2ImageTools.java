@@ -51,7 +51,7 @@ import java.util.Map;
 public class DashScopeImageWanText2ImageTools {
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
-    public static final String DEFAULT_MODEL="qwen-image-2.0-pro";
+    public static final String DEFAULT_MODEL = "qwen-image-2.0-pro";
 
     @Autowired(required = false)
     private DashScopeOpsImageWanText2ImageController imageWanText2ImageController;

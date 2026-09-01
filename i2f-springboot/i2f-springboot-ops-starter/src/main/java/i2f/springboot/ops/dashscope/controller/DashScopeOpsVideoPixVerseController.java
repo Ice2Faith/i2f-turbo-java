@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.dashscope.data.DashScopeVideoPixVerseOperateDto;
 import i2f.springboot.ops.dashscope.data.DashScopeVideoViduOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -52,7 +53,7 @@ public class DashScopeOpsVideoPixVerseController {
     @Autowired
     private DashScopeOpsController controller;
 
-    public String videoPixVerse(DashScopeVideoViduOperateDto req) throws Exception {
+    public String videoPixVerse(DashScopeVideoPixVerseOperateDto req) throws Exception {
 
         Map<String, Object> body = new HashMap<>();
         body.put("model", req.getModelName());
@@ -91,7 +92,7 @@ public class DashScopeOpsVideoPixVerseController {
     public OpsSecureReturn<OpsSecureDto> videoInsteadPeople(@RequestBody OpsSecureDto reqDto,
                                                             HttpServletRequest request) throws Exception {
         try {
-            DashScopeVideoViduOperateDto req = transfer.recv(reqDto, DashScopeVideoViduOperateDto.class);
+            DashScopeVideoPixVerseOperateDto req = transfer.recv(reqDto, DashScopeVideoPixVerseOperateDto.class);
 
             String taskId = videoPixVerse(req);
             return transfer.success(taskId);
