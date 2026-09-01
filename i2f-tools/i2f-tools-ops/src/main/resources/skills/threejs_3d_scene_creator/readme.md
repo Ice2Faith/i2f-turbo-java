@@ -14,16 +14,50 @@ author: Ice2Faith
 并且在页面中已经引入了如下的依赖，因此你可以使用这些依赖
 
 ```html
+<!-- gsap 动画库 -->
+<script src="../lib/gsap@3.12.5/dist/all.js"></script>
+<script src="../lib/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/CSSRulePlugin.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/CustomEase.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/Draggable.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/EaselPlugin.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/EasePack.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/Flip.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/Observer.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/PixiPlugin.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="../lib/gsap@3.12.5/dist/TextPlugin.min.js"></script>
+
+<script>
+    gsap.registerPlugin(
+            CSSRulePlugin,
+            CustomEase,
+            Draggable,
+            EaselPlugin,
+            EasePack,
+            Flip,
+            MotionPathPlugin,
+            Observer,
+            PixiPlugin,
+            ScrollToPlugin,
+            ScrollTrigger,
+            TextPlugin,
+    );
+</script>
+
 <!-- 引入 ES Module 类型的 Three.js 和 Cannon-es -->
 <script type="importmap">
     {
       "imports": {
-        "three": ".../three@0.160.0/build/three.module.js",
-        "three/addons/": ".../three@0.160.0/examples/jsm/",
-        "cannon-es": ".../cannon-es@0.20.0/dist/cannon-es.js"
+        "three": "../lib/three@0.160.0/build/three.module.js",
+        "three/addons/": "../lib/three@0.160.0/examples/jsm/",
+        "cannon-es": "../lib/cannon-es@0.20.0/dist/cannon-es.js"
       }
     }
 </script>
+
 ```
 
 - 你编写的代码将会运行在如下环境的函数中
@@ -173,6 +207,13 @@ renderThreeJs(dom){
         renderer.render(scene, camera);
     }
     animate();
+    
+    // 使用 gsap 做动画的示例
+    gsap.from(camera.position, {
+        y: 20, // 相机从 y=20 的位置开始
+        duration: 2, // 动画持续2秒
+        ease: "power2.out" // 缓动效果
+    });
 
     // 监听窗口大小变化，自适应屏幕
     window.addEventListener('resize', () => {
@@ -182,3 +223,4 @@ renderThreeJs(dom){
     });
 };
 ```
+
