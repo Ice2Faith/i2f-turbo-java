@@ -145,12 +145,13 @@ public class PandocTools {
 
             Map<String, Object> map = metadata.toMap();
             StringBuilder builder = new StringBuilder();
-            builder.append("convert result file has upload, will send with after user message.\n");
+            builder.append("convert result file has show to user.\n");
             for (Map.Entry<String, Object> entry : map.entrySet()) {
                 builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             }
 
             TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
+            ret.setSendToLlm(false);
             ret.setContent(builder.toString());
             ret.setFiles(new ArrayList<>());
             ret.getFiles().add(metadata);

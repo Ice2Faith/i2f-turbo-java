@@ -97,6 +97,7 @@ public class RobotTools {
             }
 
             TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
+            ret.setSendToLlm(true);
             ret.setContent(builder.toString());
             ret.setFiles(new ArrayList<>());
             ret.getFiles().add(metadata);

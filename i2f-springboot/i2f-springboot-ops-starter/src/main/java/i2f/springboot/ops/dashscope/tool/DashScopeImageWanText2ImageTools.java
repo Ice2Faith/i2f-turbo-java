@@ -151,11 +151,12 @@ public class DashScopeImageWanText2ImageTools {
         }
 
         TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
+        ret.setSendToLlm(false);
         ret.setContent(null);
         ret.setFiles(new ArrayList<>());
 
         StringBuilder builder = new StringBuilder();
-        builder.append("result image(s) has upload, will send with after user message.\n");
+        builder.append("result image(s) has show to user.\n");
 
         for (String url : downloadUrlList) {
             String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";

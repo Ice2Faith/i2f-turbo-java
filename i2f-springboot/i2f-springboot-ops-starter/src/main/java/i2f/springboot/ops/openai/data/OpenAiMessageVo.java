@@ -35,5 +35,6 @@ public class OpenAiMessageVo implements BaseMutator<OpenAiMessageVo> {
     protected OpenAiSystemMessage echo_truth_content;
     protected OpenAiSystemMessage echo_truth_sync;
     protected OpenAiSystemMessage echo_tool_intent_recommend;
+    protected OpenAiSystemMessage echo_attach_files;
     protected List<TmpFileTools.UploadTmpFileMetadata> attachFiles;
 }

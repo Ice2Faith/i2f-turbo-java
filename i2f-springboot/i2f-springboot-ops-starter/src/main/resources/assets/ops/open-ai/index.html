@@ -1504,7 +1504,8 @@
                             {label: '事实注入', value: 'echo_truth_prompt', std: false},
                             {label: '事实内容', value: 'echo_truth_content', std: false},
                             {label: '事实同步', value: 'echo_truth_sync', std: false},
-                            {label: '工具意图推荐', value: 'echo_tool_intent_recommend', std: false}
+                            {label: '工具意图推荐', value: 'echo_tool_intent_recommend', std: false},
+                            {label: '工具输出文件', value: 'echo_attach_files', std: false}
                         ],
                         enableCustomDisplay: false,
                         hiddenMessageTypes: [],
@@ -2571,6 +2572,14 @@
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_truth_prompt') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_attach_files') {
                             if (!session.streamingStarted) {
                                 session.streamingStarted = true;
                             }

@@ -884,34 +884,61 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (!toolFileMessages.isEmpty()) {
-                        List<TmpFileTools.UploadTmpFileMetadata> attachFiles = new ArrayList<>();
+                        List<TmpFileTools.UploadTmpFileMetadata> sendToUserAttachFiles = new ArrayList<>();
+                        List<TmpFileTools.UploadTmpFileMetadata> sendToLLmAttachFiles = new ArrayList<>();
                         for (TmpFileTools.FileAttachMessage item : toolFileMessages) {
                             List<TmpFileTools.UploadTmpFileMetadata> files = item.getFiles();
                             if (files != null) {
-                                attachFiles.addAll(files);
+                                if(item.isSendToLlm()) {
+                                    sendToLLmAttachFiles.addAll(files);
+                                }else{
+                                    sendToUserAttachFiles.addAll(files);
+                                }
                             }
                         }
 
-                        OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
-                                .set(u -> u::setType, OpenAiConsts.USER)
-                                .set(u -> u::setUser, new OpenAiUserMessage(TOOL_RETURNS_FILE_CONTENT))
-                                .set(u -> u::setAttachFiles, attachFiles)
-                                .done();
+                        if(!sendToUserAttachFiles.isEmpty()){
+                            OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
+                                    .set(u -> u::setType, OpsOpenAiConsts.ECHO_ATTACH_FILES)
+                                    .set(u -> u::setEcho_attach_files, new OpenAiSystemMessage("tool response files"))
+                                    .set(u -> u::setAttachFiles, sendToUserAttachFiles)
+                                    .done();
 
-                        // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
-                        String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
+                            // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
+                            String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_ATTACH_FILES);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.USER);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
 
-                        OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
-                        completion.getMessages().add(user);
+                        if(!sendToLLmAttachFiles.isEmpty()) {
+                            OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
+                                    .set(u -> u::setType, OpenAiConsts.USER)
+                                    .set(u -> u::setUser, new OpenAiUserMessage(TOOL_RETURNS_FILE_CONTENT))
+                                    .set(u -> u::setAttachFiles, sendToLLmAttachFiles)
+                                    .done();
+
+                            // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
+                            String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.USER);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
+
+                            OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
+                            completion.getMessages().add(user);
+                        }
 
                     }
 

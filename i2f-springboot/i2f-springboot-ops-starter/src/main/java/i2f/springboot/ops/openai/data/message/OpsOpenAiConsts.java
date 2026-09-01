@@ -35,5 +35,7 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
 
     String ECHO_TOOL_INTENT_RECOMMEND="echo_tool_intent_recommend";
 
+    String ECHO_ATTACH_FILES="echo_attach_files";
+
     String ECHO_PROGRESS = "echo_progress";
 }

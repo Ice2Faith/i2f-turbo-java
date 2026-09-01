@@ -71,6 +71,7 @@ public class TmpFileTools {
     public static class FileAttachMessage {
         protected List<UploadTmpFileMetadata> files;
         protected String content;
+        protected boolean sendToLlm;
     }
 
     private static final Set<String> exposeTools;
