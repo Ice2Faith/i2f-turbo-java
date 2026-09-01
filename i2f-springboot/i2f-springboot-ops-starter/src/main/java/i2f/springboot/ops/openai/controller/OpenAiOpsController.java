@@ -456,6 +456,8 @@ public class OpenAiOpsController implements IOpsProvider {
         R apply(T t) throws Exception;
     }
 
+    public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
@@ -488,7 +490,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
             ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
 
-            Map<String,CopyOnWriteArrayList<ToolDefinition>> allToolsMap=new ConcurrentHashMap<>();
+            Map<String, CopyOnWriteArrayList<ToolDefinition>> allToolsMap = new ConcurrentHashMap<>();
 
             CompletableFuture.runAsync(() -> {
                 ToolCallContextHolder.put("req", req);
@@ -675,7 +677,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     completion.setTools(new ArrayList<>());
                                 }
                                 for (ToolDefinition tool : tools) {
-                                    allToolsMap.computeIfAbsent(tool.getName(),k->new CopyOnWriteArrayList<>())
+                                    allToolsMap.computeIfAbsent(tool.getName(), k -> new CopyOnWriteArrayList<>())
                                             .add(tool);
 
                                     OpenAiToolDefinitionDto dto = new OpenAiToolDefinitionDto();
@@ -882,16 +884,17 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (!toolFileMessages.isEmpty()) {
-                        List<TmpFileTools.UploadTmpFileMetadata> attachFiles=new ArrayList<>();
+                        List<TmpFileTools.UploadTmpFileMetadata> attachFiles = new ArrayList<>();
                         for (TmpFileTools.FileAttachMessage item : toolFileMessages) {
                             List<TmpFileTools.UploadTmpFileMetadata> files = item.getFiles();
-                            if(files!=null){
+                            if (files != null) {
                                 attachFiles.addAll(files);
                             }
                         }
+
                         OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
                                 .set(u -> u::setType, OpenAiConsts.USER)
-                                .set(u -> u::setUser, new OpenAiUserMessage("here is tool returns files"))
+                                .set(u -> u::setUser, new OpenAiUserMessage(TOOL_RETURNS_FILE_CONTENT))
                                 .set(u -> u::setAttachFiles, attachFiles)
                                 .done();
 
@@ -942,7 +945,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                         List<OpenAiToolsDefinition> tools = completion.getTools();
 
-                        if(req.isEnableToolRecommendByIntentRecognize()) {
+                        if (req.isEnableToolRecommendByIntentRecognize()) {
                             // 这里可以通过意图识别，进行变更 unqToolNames 列表，实现工具只能推荐
                             String userMsgContent = null;
                             if (completion.getMessages() != null && !completion.getMessages().isEmpty()) {
@@ -952,23 +955,28 @@ public class OpenAiOpsController implements IOpsProvider {
                                     userMsgContent = msg.content();
                                 }
                             }
-                            if (userMsgContent != null && !userMsgContent.isEmpty()) {
+                            String cmpUserMsgContent = userMsgContent;
+                            if (cmpUserMsgContent != null) {
+                                cmpUserMsgContent = cmpUserMsgContent.trim();
+                            }
+                            if (cmpUserMsgContent != null && !cmpUserMsgContent.isEmpty()
+                                    && !TOOL_RETURNS_FILE_CONTENT.equals(cmpUserMsgContent)) {
                                 echoProgress.apply("工具意图识别推荐中...");
 
-                                Map<String,Set<String>> labelToolNameMap=new LinkedHashMap<>();
+                                Map<String, Set<String>> labelToolNameMap = new LinkedHashMap<>();
 
                                 List<AgentTools.IntentItem> intentItems = new ArrayList<>();
                                 for (OpenAiToolsDefinition e : tools) {
-                                    boolean resolved=false;
+                                    boolean resolved = false;
                                     CopyOnWriteArrayList<ToolDefinition> definitions = allToolsMap.get(e.getFunction().getName());
-                                    if(definitions!=null && !definitions.isEmpty()){
+                                    if (definitions != null && !definitions.isEmpty()) {
                                         for (ToolDefinition definition : definitions) {
                                             ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(definition);
-                                            if(rawTool==null){
+                                            if (rawTool == null) {
                                                 continue;
                                             }
                                             Method bindMethod = rawTool.getBindMethod();
-                                            if(bindMethod==null){
+                                            if (bindMethod == null) {
                                                 continue;
                                             }
                                             Map<String, IToolIntent> parse = ToolIntentHelper.parse(bindMethod);
@@ -978,36 +986,36 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 item.setLabel(entry.getKey());
                                                 item.setDescription(entry.getValue().description());
                                                 intentItems.add(item);
-                                                labelToolNameMap.computeIfAbsent(item.getLabel(),k->new LinkedHashSet<>())
+                                                labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
                                                         .add(e.getFunction().getName());
-                                                resolved=true;
+                                                resolved = true;
                                             }
                                         }
                                     }
-                                    if(!resolved){
+                                    if (!resolved) {
                                         AgentTools.IntentItem item = new AgentTools.IntentItem();
 
                                         item.setLabel(e.getFunction().getName());
                                         item.setDescription(e.getFunction().getName());
                                         intentItems.add(item);
-                                        labelToolNameMap.computeIfAbsent(item.getLabel(),k->new LinkedHashSet<>())
+                                        labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
                                                 .add(e.getFunction().getName());
-                                        resolved=true;
+                                        resolved = true;
                                     }
                                 }
 
                                 AgentTools agentTools = this.agentTools;
-                                if(agentTools==null){
-                                    agentTools=new AgentTools();
+                                if (agentTools == null) {
+                                    agentTools = new AgentTools();
                                 }
                                 AgentTools.IntentResult intentResult = agentTools.intent_recognize(userMsgContent, intentItems);
 
-                                if(intentResult!=null){
+                                if (intentResult != null) {
                                     // 工具意图推荐
-                                    String content=""+intentResult.getPrompt()+"\n\n"
-                                            +"# raw result \n\n"
-                                            +intentResult.getRawResult()+"\n\n"
-                                            +"# final result \n\n"
+                                    String content = "" + intentResult.getPrompt() + "\n\n"
+                                            + "# raw result \n\n"
+                                            + intentResult.getRawResult() + "\n\n"
+                                            + "# final result \n\n"
                                             + intentResult.getResult();
                                     OpenAiSystemMessage system = new OpenAiSystemMessage(content);
 
@@ -1040,10 +1048,10 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
 
                                     // 先添加推荐的
-                                    List<String> labelToolList=new ArrayList<>();
+                                    List<String> labelToolList = new ArrayList<>();
                                     for (String label : labels) {
                                         Set<String> names = labelToolNameMap.get(label);
-                                        if(names!=null){
+                                        if (names != null) {
                                             labelToolList.addAll(names);
                                         }
                                     }
@@ -1133,14 +1141,14 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                             return false;
-                        }).forEach(e->{
-                            if(!unqToolNames.contains(e.getFunction().getName())){
+                        }).forEach(e -> {
+                            if (!unqToolNames.contains(e.getFunction().getName())) {
                                 unqToolNames.add(e.getFunction().getName());
                             }
                         });
 
                         // 真正的工具
-                        List<OpenAiToolsDefinition> filteredTools=tools.stream().filter(e->{
+                        List<OpenAiToolsDefinition> filteredTools = tools.stream().filter(e -> {
                             return unqToolNames.contains(e.getFunction().getName());
                         }).collect(Collectors.toList());
 
@@ -1258,7 +1266,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                         }
                                         return null;
                                     });
-                    
+
                     echoProgress.apply("");
                     emitter.complete();
                 } catch (Exception e) {
