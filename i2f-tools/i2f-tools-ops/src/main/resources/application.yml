@@ -30,6 +30,8 @@ ai:
       enable: false
     dashscope-t2i:
       enable: false
+    kling-t2i:
+      enable: false
   rags:
     enable: false
     embedding:
