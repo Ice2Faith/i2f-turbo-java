@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -97,7 +98,8 @@ public class RobotTools {
 
             TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
             ret.setContent(builder.toString());
-            ret.setFile(metadata);
+            ret.setFiles(new ArrayList<>());
+            ret.getFiles().add(metadata);
             return ret;
         } finally {
             if (tempFile.exists()) {

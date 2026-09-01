@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
 
@@ -150,8 +151,9 @@ public class PandocTools {
             }
 
             TmpFileTools.FileAttachMessage ret = new TmpFileTools.FileAttachMessage();
-            ret.setFile(metadata);
             ret.setContent(builder.toString());
+            ret.setFiles(new ArrayList<>());
+            ret.getFiles().add(metadata);
 
             return ret;
         } finally {
