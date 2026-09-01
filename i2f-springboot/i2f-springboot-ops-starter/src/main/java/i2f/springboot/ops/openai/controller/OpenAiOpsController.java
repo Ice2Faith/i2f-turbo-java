@@ -904,7 +904,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     .set(u -> u::setAttachFiles, sendToUserAttachFiles)
                                     .done();
 
-                            // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
+                            // 这里echo回前端
                             String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
                             OpsSecureReturn<?> resp = null;
                             if (req.isEncryptOutput()) {
