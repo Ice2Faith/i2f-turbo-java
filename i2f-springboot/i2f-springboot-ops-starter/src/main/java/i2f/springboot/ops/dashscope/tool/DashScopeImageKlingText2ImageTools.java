@@ -158,6 +158,7 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
         String taskId = imageKlingText2ImageController.imageKling(dto);
 
         AsyncTaskItem taskItem = new AsyncTaskItem();
+        taskItem.setDescription("可灵文生图-图片生成");
         taskItem.setStatus(AsyncTaskItem.Status.PENDING);
         taskItem.setType(TASK_TYPE);
         taskItem.setTaskId(taskId);
