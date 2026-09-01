@@ -22,6 +22,22 @@
         }
     </style>
 
+    <!-- gsap 动画库 -->
+    <script src="../lib/gsap@3.12.5/dist/all.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/CSSRulePlugin.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/CustomEase.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/Draggable.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/EaselPlugin.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/EasePack.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/Flip.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/MotionPathPlugin.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/Observer.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/PixiPlugin.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/ScrollToPlugin.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <script src="../lib/gsap@3.12.5/dist/TextPlugin.min.js"></script>
+
     <!-- 1. 使用 importmap 定义模块的导入路径（类似于给库起别名） -->
     <script type="importmap">
         {
@@ -34,7 +50,22 @@
 </head>
 <body>
 <div id="info">正在加载 Three.js ...</div>
-
+<script>
+    gsap.registerPlugin(
+        CSSRulePlugin,
+        CustomEase,
+        Draggable,
+        EaselPlugin,
+        EasePack,
+        Flip,
+        MotionPathPlugin,
+        Observer,
+        PixiPlugin,
+        ScrollToPlugin,
+        ScrollTrigger,
+        TextPlugin,
+    );
+</script>
 <!-- 2. 核心：给 script 标签加上 type="module"，内部即可使用 import 语法 -->
 <script type="module">
     // 从 importmap 定义好的路径中导入核心库和插件
@@ -126,6 +157,12 @@
             model.position.sub(center.multiplyScalar(scale));
 
             scene.add(model);
+
+            gsap.from(camera.position, {
+                y: 20, // 相机从 y=20 的位置开始
+                duration: 2, // 动画持续2秒
+                ease: "power2.out" // 缓动效果
+            });
             document.getElementById('info').innerText = '模型加载成功！鼠标左键旋转，右键平移，滚轮缩放。';
         }, undefined, function (error) {
             console.error('模型加载出错:', error);
