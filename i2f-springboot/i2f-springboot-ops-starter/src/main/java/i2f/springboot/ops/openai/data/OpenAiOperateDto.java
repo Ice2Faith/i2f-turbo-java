@@ -1,6 +1,8 @@
 package i2f.springboot.ops.openai.data;
 
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.springboot.ops.openai.async.AsyncTaskItem;
+import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -46,4 +48,6 @@ public class OpenAiOperateDto {
 
     protected boolean enableLoopEngineering = false;
     protected Map<String, String> sessionRecordsMap = new HashMap<>();
+
+    protected AsyncTaskMessage asyncTask;
 }

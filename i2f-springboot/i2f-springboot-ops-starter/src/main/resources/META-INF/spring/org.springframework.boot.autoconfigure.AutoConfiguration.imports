@@ -49,6 +49,7 @@ i2f.springboot.ops.openai.tool.impl.a2a.AgentTools
 i2f.springboot.ops.openai.tool.SpringContextToolAutoConfiguration
 i2f.springboot.ops.openai.controller.OpenAiOpsController
 i2f.springboot.ops.openai.controller.QwenTtsOpsController
+i2f.springboot.ops.openai.async.AsyncTaskDispatcher
 i2f.springboot.ops.dashscope.controller.DashScopeOpsController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController
@@ -62,4 +63,5 @@ i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoPixVerseController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoKlingController
 i2f.springboot.ops.dashscope.controller.DashScopeOpsD3TripoController
 i2f.springboot.ops.dashscope.tool.DashScopeImageWanText2ImageTools
+i2f.springboot.ops.dashscope.tool.DashScopeImageKlingText2ImageTools
 

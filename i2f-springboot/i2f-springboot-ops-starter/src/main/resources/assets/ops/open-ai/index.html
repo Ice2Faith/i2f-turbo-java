@@ -347,6 +347,39 @@
                                     </span>
                                 </span>
                     </div>
+                    <div class="input-attach-files input-attach-files__message"
+                         v-if="msg.asyncTasks && msg.asyncTasks.length>0">
+                                <span v-for="(item,index) in msg.asyncTasks"
+                                      class="input-attach-file-item"
+                                      :key="index">
+                                    <span class="input-attach-file-item__label">
+                                        <el-popover
+                                                placement="top-start"
+                                                title="说明"
+                                                width="200"
+                                                trigger="hover">
+                                            <p v-if="item.error">报错：{{item.error}}</p>
+                                            <span slot="reference">
+                                                 <el-tag size="small" v-if="item.status=='pending'" type="info">等待中</el-tag>
+                                                <el-tag size="small" v-if="item.status=='running'">运行中</el-tag>
+                                                <el-tag size="small" v-if="item.status=='success'" type="success">成功</el-tag>
+                                                <el-tag size="small" v-if="item.status=='failure'" type="danger">失败</el-tag>
+                                            </span>
+                                        </el-popover>
+                                        {{item.description || item.type}}
+                                    </span>
+                                    <span class="input-attach-file-item__actions">
+                                        <el-tooltip effect="dark" v-if="item.status=='pending' || item.status=='running'"
+                                                    content="刷新状态"
+                                                    placement="top-start">
+                                            <i class="el-icon-refresh" @click="refreshAsyncTaskStatus(item,asyncTasks,msg)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
+                                            <i class="el-icon-circle-close" style="color: orangered;" @click="msg.asyncTasks.splice(index,1)"></i>
+                                        </el-tooltip>
+                                    </span>
+                                </span>
+                    </div>
                     <div class="bubble-actions">
                         <el-popover
                                 v-if="msg.usage && msg.usage.total_tokens>=0"
@@ -2419,6 +2452,7 @@
                     },
                     progress: '',
                     attachFiles: [],
+                    asyncTasks: [],
                     usage: {
                         prompt_tokens: -1,
                         completion_tokens: -1,
@@ -2587,6 +2621,16 @@
                             json.hidden = false;
                             insertBeforeLast(messages, json);
                             assistantMsg.attachFiles=json.attachFiles || [];
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_async_tasks') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            assistantMsg.asyncTasks=json.asyncTasks || [];
+                            _this.startAutoRefreshAsyncTaskStatus(assistantMsg)
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_truth_content') {
@@ -3472,6 +3516,53 @@
                     this.$message.warning('不支持语言的类型')
                     window.open(this.dialog.fileViewer.url,'_blank')
                 }
+            },
+            startAutoRefreshAsyncTaskStatus(msg){
+                let count=50;
+                let runNext=()=>{
+                    this.delegateRefreshAsyncTaskStatusByMsg(msg)
+                        .then(resp=>{
+                            let list=resp || []
+                            for (let i = 0; i < list.length; i++) {
+                                let item=list[i];
+                                if(item.status=='pending' || item.status=='running'){
+                                    if(count>0){
+                                        count--;
+                                        setTimeout(()=>{
+                                            runNext()
+                                        },3000)
+                                    }
+                                    break
+                                }
+                            }
+                        })
+                }
+                runNext()
+            },
+            delegateRefreshAsyncTaskStatusByMsg(msg){
+                let req = this.assignOpenAiMeta({
+                    asyncTasks: msg.asyncTasks
+                }, true);
+                return this.$axios({
+                    url: `./async/task/query`,
+                    method: 'post',
+                    data: this.transferSend(req)
+                }).then(res => {
+                    if (res.data.code == 200) {
+                        //console.log(res.data)
+                        let resp = this.transferRecv(res.data.data);
+                        msg.asyncTasks=resp;
+                        // console.log(resp)
+                        return Promise.resolve(resp)
+                    } else {
+                        return Promise.reject(res.data.msg)
+                    }
+                }).catch(err => {
+                    return Promise.reject(err.errorMessage || err.message || '操作失败')
+                })
+            },
+            refreshAsyncTaskStatus(item,asyncTasks,msg){
+                this.startAutoRefreshAsyncTaskStatus(msg)
             }
         }
     });

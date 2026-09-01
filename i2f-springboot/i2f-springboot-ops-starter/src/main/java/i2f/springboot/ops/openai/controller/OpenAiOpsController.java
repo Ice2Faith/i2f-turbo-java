@@ -26,6 +26,9 @@ import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
+import i2f.springboot.ops.openai.async.AsyncTaskDispatcher;
+import i2f.springboot.ops.openai.async.AsyncTaskItem;
+import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
@@ -122,6 +125,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired
     private OpenAiOpsProperties properties;
+
+    @Autowired
+    private AsyncTaskDispatcher asyncTaskDispatcher;
 
     protected SecureRandom random = new SecureRandom();
 
@@ -362,6 +368,25 @@ public class OpenAiOpsController implements IOpsProvider {
         }
     }
 
+    @PostMapping("/async/task/query")
+    @ResponseBody
+    public OpsSecureReturn<OpsSecureDto> queryAsyncTask(@RequestBody OpsSecureDto reqDto) throws Exception {
+        try {
+            OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
+            AsyncTaskMessage asyncTask = req.getAsyncTask();
+            List<AsyncTaskItem> list = asyncTask.getList();
+            for (int i = 0; i < list.size(); i++) {
+                AsyncTaskItem asyncTaskItem=list.get(i);
+                AsyncTaskItem ret = asyncTaskDispatcher.query(asyncTaskItem, req.getMeta());
+                list.set(i,ret);
+            }
+            return transfer.success(asyncTask);
+        } catch (Throwable e) {
+            log.warn(e.getMessage(), e);
+            return transfer.error(e);
+        }
+    }
+
     public OpenAiMessage convertOpenAiUserMessage(OpenAiMessageVo item,
                                                   OpenAiOperateDto req,
                                                   AtomicBoolean hasAttachFiles) throws Exception {
@@ -464,6 +489,7 @@ public class OpenAiOpsController implements IOpsProvider {
         AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
         AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
         CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<AsyncTaskMessage>  asyncTaskMessages=new CopyOnWriteArrayList<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
@@ -792,6 +818,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                                     toolFileMessages.add(fileMsg);
                                                     callRet = fileMsg.getContent();
                                                 }
+                                                if (callRet instanceof AsyncTaskMessage) {
+                                                    AsyncTaskMessage taskMsg = (AsyncTaskMessage) callRet;
+                                                    asyncTaskMessages.add(taskMsg);
+                                                    callRet = taskMsg.getContent();
+                                                }
                                                 if (callRet instanceof CharSequence) {
                                                     callRet = String.valueOf(callRet);
                                                 } else {
@@ -940,6 +971,33 @@ public class OpenAiOpsController implements IOpsProvider {
                             completion.getMessages().add(user);
                         }
 
+                    }
+
+                    if(!asyncTaskMessages.isEmpty()){
+                        List<AsyncTaskItem> asyncTasks=new ArrayList<>();
+                        for (AsyncTaskMessage msg : asyncTaskMessages) {
+                            List<AsyncTaskItem> list = msg.getList();
+                            if(list!=null){
+                                asyncTasks.addAll(list);
+                            }
+                        }
+                        OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
+                                .set(u -> u::setType, OpsOpenAiConsts.ECHO_ASYNC_TASKS)
+                                .set(u -> u::setEcho_async_tasks, new OpenAiSystemMessage("tool response async tasks"))
+                                .set(u -> u::setAsyncTasks, asyncTasks)
+                                .done();
+
+                        // 这里echo回前端
+                        String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_ASYNC_TASKS);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
                     }
 
                     if (req.isEnableTools()

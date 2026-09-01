@@ -37,5 +37,7 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
 
     String ECHO_ATTACH_FILES="echo_attach_files";
 
+    String ECHO_ASYNC_TASKS="echo_async_tasks";
+
     String ECHO_PROGRESS = "echo_progress";
 }
