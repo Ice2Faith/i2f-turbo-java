@@ -140,7 +140,14 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
             contentList.add(imageContent);
         }
 
-        dto.getInput().put("messages", contentList);
+        List<Map<String,Object>> messages=new ArrayList<>();
+
+        Map<String,Object> userMessage=new HashMap<>();
+        userMessage.put("role","user");
+        userMessage.put("content",contentList);
+        messages.add(userMessage);
+
+        dto.getInput().put("messages", messages);
 
         dto.setParameters(new HashMap<>());
         dto.getParameters().put("n", 3);
