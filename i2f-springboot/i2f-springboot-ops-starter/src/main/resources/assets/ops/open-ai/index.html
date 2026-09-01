@@ -380,6 +380,29 @@
                                     </span>
                                 </span>
                     </div>
+                    <div class="input-attach-files input-attach-files__message"
+                         v-if="msg.asyncTasksAttachFiles && msg.asyncTasksAttachFiles.length>0">
+                                <span v-for="(item,index) in msg.asyncTasksAttachFiles"
+                                      class="input-attach-file-item"
+                                      :key="index">
+                                    <span class="input-attach-file-item__label">{{item.fileName}}</span>
+                                    <span class="input-attach-file-item__actions">
+                                        <el-tooltip effect="dark" content="查看原始文件" placement="top-start">
+                                            <i class="el-icon-view" @click="viewUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载原始文件" placement="top-start">
+                                            <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载解析后文件" placement="top-start">
+                                            <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
+                                            <i class="el-icon-circle-close" style="color: orangered;" @click="msg.asyncTasksAttachFiles.splice(index,1)"></i>
+                                        </el-tooltip>
+                                    </span>
+                                </span>
+                    </div>
+
                     <div class="bubble-actions">
                         <el-popover
                                 v-if="msg.usage && msg.usage.total_tokens>=0"
@@ -2453,6 +2476,7 @@
                     progress: '',
                     attachFiles: [],
                     asyncTasks: [],
+                    asyncTasksAttachFiles: [],
                     usage: {
                         prompt_tokens: -1,
                         completion_tokens: -1,
@@ -2630,6 +2654,7 @@
                             json.hidden = false;
                             insertBeforeLast(messages, json);
                             assistantMsg.asyncTasks=json.asyncTasks || [];
+                            assistantMsg.asyncTasksAttachFiles=[];
                             _this.startAutoRefreshAsyncTaskStatus(assistantMsg)
                             return;
                         }
@@ -3525,16 +3550,36 @@
                         .then(resp=>{
                             lastError=null
                             let list=resp || []
+                            let asyncTasksAttachFiles=[]
+                            let needRefresh=false
                             for (let i = 0; i < list.length; i++) {
                                 let item=list[i];
                                 if(item.status=='pending' || item.status=='running'){
-                                    if(count>0){
-                                        count--;
-                                        setTimeout(()=>{
-                                            runNext()
-                                        },3000)
+                                    needRefresh=true
+                                }
+                                if(item.status=='success'){
+                                    if(item.resultType=='image_list'
+                                    ||item.resultType=='file_list'){
+                                        let files=item.result || []
+                                        asyncTasksAttachFiles.push(...files)
+                                    }else if(item.resultType=='image'
+                                    ||item.resultType=='video'
+                                    ||item.resultType=='audio'
+                                        ||item.resultType=='file'){
+                                        let file=item.result
+                                        if(file){
+                                            asyncTasksAttachFiles.push(file)
+                                        }
                                     }
-                                    break
+                                }
+                            }
+                            msg.asyncTasksAttachFiles=asyncTasksAttachFiles;
+                            if(needRefresh){
+                                if(count>0){
+                                    count--;
+                                    setTimeout(()=>{
+                                        runNext()
+                                    },3000)
                                 }
                             }
                         }).catch(err=>{

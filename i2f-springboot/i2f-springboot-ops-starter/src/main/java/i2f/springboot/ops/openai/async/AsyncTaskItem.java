@@ -17,6 +17,8 @@ public class AsyncTaskItem {
         String IMAGE = "image";
         String VIDEO = "video";
         String AUDIO = "audio";
+        String FILE = "file";
+        String FILE_LIST = "file_list";
         String IMAGE_LIST = "image_list";
     }
 
