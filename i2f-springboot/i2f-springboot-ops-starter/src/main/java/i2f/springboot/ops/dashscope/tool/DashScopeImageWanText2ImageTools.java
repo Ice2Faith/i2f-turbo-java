@@ -7,6 +7,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.springboot.ops.dashscope.controller.DashScopeOpsController;
 import i2f.springboot.ops.dashscope.controller.DashScopeOpsImageWanText2ImageController;
 import i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController;
 import i2f.springboot.ops.dashscope.data.DashScopeImageWanText2ImageOperateDto;
@@ -22,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
@@ -38,6 +40,7 @@ import java.util.Map;
  * @desc
  */
 @ToolIntent(items = @ToolIntentItem(value = "dashscope_t2i", description = "提供基于阿里云的文生图能力"))
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnExpression("${ai.tools.dashscope-t2i.enable:true}")
 @Component
 @Data

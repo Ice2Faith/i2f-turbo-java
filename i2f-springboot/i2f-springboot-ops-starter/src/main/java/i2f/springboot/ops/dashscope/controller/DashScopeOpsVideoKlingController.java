@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +31,7 @@ import java.util.Map;
  * @date 2026/4/28 19:09
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ops.dashscope.enable:false}")
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data

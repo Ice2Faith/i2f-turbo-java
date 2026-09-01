@@ -1,6 +1,8 @@
 package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sun.org.apache.xpath.internal.operations.Bool;
+import i2f.os.OsUtil;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
@@ -13,6 +15,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.client.RestTemplate;
@@ -28,7 +34,7 @@ import java.util.List;
  * @date 2026/4/28 19:09
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ops.dashscope.enable:false}")
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data
@@ -36,6 +42,17 @@ import java.util.List;
 @Controller
 @RequestMapping("/ops/dashscope")
 public class DashScopeOpsController implements IOpsProvider {
+
+    public static class DashScopeCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            return context.getEnvironment().getProperty("i2f.springboot.ops.dashscope.enable",
+                    Boolean.class,
+                    Boolean.FALSE);
+        }
+    }
+
     @Autowired
     protected OpsSecureTransfer transfer;
 
