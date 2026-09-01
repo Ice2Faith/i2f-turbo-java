@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -152,8 +153,8 @@ public class DashScopeImageWanText2ImageTools {
         builder.append("result image(s) has upload, will send with after user message.\n");
 
         for (String url : downloadUrlList) {
+            String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";
             try {
-                String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                 ret.getFiles().add(metadata);
 
@@ -164,6 +165,18 @@ public class DashScopeImageWanText2ImageTools {
                 }
             } catch (Exception e) {
                 log.warn("downloadUrl: "+url, e);
+
+                TmpFileTools.UploadTmpFileMetadata metadata = new TmpFileTools.UploadTmpFileMetadata();
+                metadata.setFileName(virtualFileName);
+                metadata.setFileUrl(url);
+                metadata.setCreateTime(TmpFileTools.CREATE_FORMATTER.format(LocalDateTime.now()));
+                ret.getFiles().add(metadata);
+
+                Map<String, Object> map = metadata.toMap();
+                builder.append("--------------\n");
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
+                }
             }
         }
 
