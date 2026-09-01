@@ -36,6 +36,7 @@ public class AsyncTaskItem {
     protected String status;
     protected String resultType;
     protected Object result;
+    protected Object rawResult;
     protected String error;
 
     public boolean isFinished() {

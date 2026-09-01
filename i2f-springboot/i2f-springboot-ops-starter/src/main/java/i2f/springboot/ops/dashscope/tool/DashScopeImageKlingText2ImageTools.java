@@ -208,6 +208,7 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
 
         dto.setTaskId(item.getTaskId());
         Map<String, Object> resp = taskController.getTaskStatus(dto);
+        item.setRawResult(resp);
 
         Map<String, Object> output = (Map<String, Object>) resp.get("output");
         String taskStatus = (String) output.get("task_status");
