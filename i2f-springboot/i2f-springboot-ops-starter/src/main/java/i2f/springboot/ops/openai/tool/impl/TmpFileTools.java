@@ -69,7 +69,7 @@ public class TmpFileTools {
     @Data
     @NoArgsConstructor
     public static class FileAttachMessage {
-        protected UploadTmpFileMetadata file;
+        protected List<UploadTmpFileMetadata> files;
         protected String content;
     }
 

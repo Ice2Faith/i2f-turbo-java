@@ -882,10 +882,17 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (!toolFileMessages.isEmpty()) {
+                        List<TmpFileTools.UploadTmpFileMetadata> attachFiles=new ArrayList<>();
+                        for (TmpFileTools.FileAttachMessage item : toolFileMessages) {
+                            List<TmpFileTools.UploadTmpFileMetadata> files = item.getFiles();
+                            if(files!=null){
+                                attachFiles.addAll(files);
+                            }
+                        }
                         OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
                                 .set(u -> u::setType, OpenAiConsts.USER)
                                 .set(u -> u::setUser, new OpenAiUserMessage("here is tool returns files"))
-                                .set(u -> u::setAttachFiles, toolFileMessages.stream().map(e -> e.getFile()).collect(Collectors.toList()))
+                                .set(u -> u::setAttachFiles, attachFiles)
                                 .done();
 
                         // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
