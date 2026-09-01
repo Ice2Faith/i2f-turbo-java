@@ -8,13 +8,13 @@ import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.springboot.ops.dashscope.controller.DashScopeOpsController;
-import i2f.springboot.ops.dashscope.controller.DashScopeOpsImageKlingText2ImageController;
 import i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController;
 import i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController;
-import i2f.springboot.ops.dashscope.data.DashScopeImageKlingText2ImageOperateDto;
+import i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoHappyHorseController;
 import i2f.springboot.ops.dashscope.data.DashScopeMeta;
 import i2f.springboot.ops.dashscope.data.DashScopeTaskOperateDto;
 import i2f.springboot.ops.dashscope.data.DashScopeUploadOperateDto;
+import i2f.springboot.ops.dashscope.data.DashScopeVideoHappyHorseOperateDto;
 import i2f.springboot.ops.openai.async.AsyncTaskItem;
 import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import i2f.springboot.ops.openai.async.AsyncTaskResolver;
@@ -45,24 +45,25 @@ import java.util.Map;
  * @date 2026/9/1 9:02
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value = "kling_t2i", description = "提供基于可灵的文生图能力"))
+@ToolIntent(items = @ToolIntentItem(value = "happyhorse_t2v", description = "提供基于阿里云的HappyHorse的文生视频能力"))
 @Conditional(DashScopeOpsController.DashScopeCondition.class)
-@ConditionalOnExpression("${ai.tools.kling-t2i.enable:true}")
+@ConditionalOnExpression("${ai.tools.happyhorse-t2v.enable:true}")
 @Component
 @Data
 @Slf4j
 @NoArgsConstructor
 @AllArgsConstructor
 @Tools
-public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
-    public static final String TASK_TYPE = "dashscope_kling_text2image";
+public class DashScopeVideoHappyHorseText2VideoTools implements AsyncTaskResolver {
+    public static final String TASK_TYPE = "dashscope_happyhorse_text2video";
 
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
-    public static final String DEFAULT_MODEL = "kling/kling-v3-omni-image-generation";
+    public static final String DEFAULT_MODEL = "happyhorse-1.0-t2v";
+    public static final String DEFAULT_MODEL_I2V = "happyhorse-1.0-i2v";
 
     @Autowired(required = false)
-    private DashScopeOpsImageKlingText2ImageController imageKlingText2ImageController;
+    private DashScopeOpsVideoHappyHorseController videoHappyHorseController;
 
     @Autowired(required = false)
     private DashScopeOpsTmpFileController tmpFileController;
@@ -73,8 +74,11 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
     @Autowired(required = false)
     private TmpFileTools tmpFileTools;
 
-    @Value("${ai.tools.kling-t2i.model:kling/kling-v3-omni-image-generation}")
+    @Value("${ai.tools.happyhorse-t2v.model:happyhorse-1.0-t2v}")
     protected String model = DEFAULT_MODEL;
+
+    @Value("${ai.tools.happyhorse-t2v.model-i2v:happyhorse-1.0-i2v}")
+    protected String modelImage2Video = DEFAULT_MODEL;
 
     @Tool(
             tags = {
@@ -83,18 +87,18 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
                     AiTags.PUBLIC_NET_VALUE,
                     AiTags.WRITABLE_VALUE
             },
-            description = "text to image, output png image file, Note: support chinese text content, don't describe the reference image, just give me reference url if has it."
+            description = "text to video, output mp4 video file, Note: support chinese text content, don't describe the reference image, just give me reference url if has it."
     )
-    public AsyncTaskMessage text_to_image_kling(
+    public AsyncTaskMessage text_to_video_happy_horse(
             @ToolParam(value = "content", description = "the content, description what is the image")
             String content,
-            @ToolParam(value = "portrait_mode", description = "portrait mode image, default is false")
+            @ToolParam(value = "portrait_mode", description = "portrait mode video, default is false")
             boolean portrait_mode,
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
-        if (imageKlingText2ImageController == null) {
-            throw new IllegalStateException("system not enable dashscope text2image endpoint.");
+        if (videoHappyHorseController == null) {
+            throw new IllegalStateException("system not enable dashscope text2video endpoint.");
         }
         if (tmpFileTools == null) {
             throw new IllegalStateException("system not enable tmp file.");
@@ -110,7 +114,11 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
             throw new IllegalArgumentException("this tool only support run in aliyun provided model.");
         }
 
-        if (reference_image_url != null) {
+        if (reference_image_url != null && !reference_image_url.isEmpty()) {
+            modelName = this.modelImage2Video;
+            if (modelName == null || modelName.isEmpty()) {
+                modelName = DEFAULT_MODEL_I2V;
+            }
             // 处理临时文件，转换为阿里云临时文件上传
             if (reference_image_url.startsWith(TmpFileTools.PROTOCOL + "://")) {
                 if (tmpFileController == null) {
@@ -126,56 +134,56 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
             }
         }
 
-        DashScopeImageKlingText2ImageOperateDto dto = new DashScopeImageKlingText2ImageOperateDto();
+
+        DashScopeVideoHappyHorseOperateDto dto = new DashScopeVideoHappyHorseOperateDto();
         dto.setModelName(modelName);
         dto.setInput(new HashMap<>());
-        List<Map<String, Object>> contentList = new ArrayList<>();
-        Map<String, Object> textContent = new HashMap<>();
-        textContent.put("text", content);
-        contentList.add(textContent);
 
-        if (reference_image_url != null) {
-            Map<String, Object> imageContent = new HashMap<>();
-            imageContent.put("image", reference_image_url);
-            contentList.add(imageContent);
+        dto.getInput().put("prompt", content);
+        if (reference_image_url != null && !reference_image_url.isEmpty()) {
+            List<Map<String, Object>> mediaList = new ArrayList<>();
+            dto.getInput().put("media", mediaList);
+
+            Map<String, Object> firstFrameMedia = new HashMap<>();
+            mediaList.add(firstFrameMedia);
+
+            firstFrameMedia.put("type", "first_frame");
+            firstFrameMedia.put("url", reference_image_url);
         }
 
-        List<Map<String,Object>> messages=new ArrayList<>();
-
-        Map<String,Object> userMessage=new HashMap<>();
-        userMessage.put("role","user");
-        userMessage.put("content",contentList);
-        messages.add(userMessage);
-
-        dto.getInput().put("messages", messages);
-
         dto.setParameters(new HashMap<>());
-        dto.getParameters().put("n", 3);
-        dto.getParameters().put("aspect_ratio", "16:9");
-        dto.getParameters().put("resolution", "1k");
-        dto.getParameters().put("watermark", false);
-        if (portrait_mode) {
-            dto.getParameters().put("aspect_ratio", "9:16");
+        if (reference_image_url != null && !reference_image_url.isEmpty()) {
+            dto.getParameters().put("resolution", "720P");
+            dto.getParameters().put("duration", 10);
+            dto.getParameters().put("watermark", false);
+            dto.getParameters().put("ratio", "16:9");
+            if (portrait_mode) {
+                dto.getParameters().put("ratio", "9:16");
+            }
+        } else {
+            dto.getParameters().put("resolution", "720P");
+            dto.getParameters().put("duration", 10);
+            dto.getParameters().put("watermark", false);
         }
 
 
         DashScopeMeta dashScopeMeta = new DashScopeMeta();
         dashScopeMeta.setApiKey(meta.getApiKey());
         dto.setMeta(dashScopeMeta);
-        String taskId = imageKlingText2ImageController.imageKling(dto);
+        String taskId = videoHappyHorseController.videoHappyHorse(dto);
 
         AsyncTaskItem taskItem = new AsyncTaskItem();
-        taskItem.setDescription("可灵文生图-图片生成");
+        taskItem.setDescription("HappyHorse-视频生成");
         taskItem.setStatus(AsyncTaskItem.Status.PENDING);
         taskItem.setType(TASK_TYPE);
         taskItem.setTaskId(taskId);
         taskItem.setTaskParameters(new HashMap<>());
         taskItem.getTaskParameters().put("model", modelName);
-        taskItem.setResultType(AsyncTaskItem.ResultTypes.IMAGE_LIST);
+        taskItem.setResultType(AsyncTaskItem.ResultTypes.VIDEO);
         taskItem.setResult(new ArrayList<>());
 
         AsyncTaskMessage ret = new AsyncTaskMessage();
-        ret.setContent("result images(s) has show to user.");
+        ret.setContent("result video has show to user.");
         ret.setList(new ArrayList<>());
         ret.getList().add(taskItem);
         return ret;
@@ -219,28 +227,15 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
         } else if ("SUCCEEDED".equals(taskStatus)) {
             List<String> downloadUrlList = new ArrayList<>();
 
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) output.get("choices");
-            if (choices == null) {
-                choices = new ArrayList<>();
+            Object taskUrl = output.get("video_url");
+            if (taskUrl != null) {
+                downloadUrlList.add(String.valueOf(taskUrl));
             }
 
-            for (Map<String, Object> choice : choices) {
-                Map<String, Object> choiceMessage = (Map<String, Object>) choice.get("message");
-                List<Map<String, Object>> choiceMessageContents = (List<Map<String, Object>>) choiceMessage.get("content");
-                if (choiceMessageContents == null) {
-                    continue;
-                }
-                for (Map<String, Object> choiceMessageContent : choiceMessageContents) {
-                    Object url = choiceMessageContent.get("image");
-                    if (url != null) {
-                        downloadUrlList.add(String.valueOf(url));
-                    }
-                }
-            }
 
             List<TmpFileTools.UploadTmpFileMetadata> files = new ArrayList<>();
             for (String url : downloadUrlList) {
-                String virtualFileName = "kling-image-" + (files.size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
+                String virtualFileName = "happyhorse-video-" + (files.size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
                 try {
                     TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                     files.add(metadata);
@@ -256,8 +251,8 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
             }
 
             item.setStatus(AsyncTaskItem.Status.SUCCESS);
-            item.setResultType(AsyncTaskItem.ResultTypes.IMAGE_LIST);
-            item.setResult(files);
+            item.setResultType(AsyncTaskItem.ResultTypes.VIDEO);
+            item.setResult(files.isEmpty() ? null : files.get(0));
         } else {
             item.setStatus(AsyncTaskItem.Status.FAILURE);
             item.setError(output.get("output") + ": " + output.get("message"));

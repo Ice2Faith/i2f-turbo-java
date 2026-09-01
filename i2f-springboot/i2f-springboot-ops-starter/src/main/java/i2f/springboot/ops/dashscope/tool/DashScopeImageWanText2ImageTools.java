@@ -161,7 +161,7 @@ public class DashScopeImageWanText2ImageTools {
         builder.append("result image(s) has show to user.\n");
 
         for (String url : downloadUrlList) {
-            String virtualFileName = "image-" + (ret.getFiles().size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
+            String virtualFileName = "wan-image-" + (ret.getFiles().size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
             try {
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                 ret.getFiles().add(metadata);
