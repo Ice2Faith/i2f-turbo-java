@@ -70,7 +70,7 @@ public class DashScopeImageWanText2ImageTools {
                     AiTags.PUBLIC_NET_VALUE,
                     AiTags.WRITABLE_VALUE
             },
-            description = "text to image, output png image file, Note: support chinese text content."
+            description = "text to image, output png image file, Note: support chinese text content, don't describe the reference image, just give me reference url if has it."
     )
     public TmpFileTools.FileAttachMessage text_to_image_wan(
             @ToolParam(value = "content", description = "the content, description what is the image")
