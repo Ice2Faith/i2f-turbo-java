@@ -2418,6 +2418,7 @@
                         reasoning_content: '',
                     },
                     progress: '',
+                    attachFiles: [],
                     usage: {
                         prompt_tokens: -1,
                         completion_tokens: -1,
@@ -2585,6 +2586,7 @@
                             }
                             json.hidden = false;
                             insertBeforeLast(messages, json);
+                            assistantMsg.attachFiles=json.attachFiles || [];
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_truth_content') {

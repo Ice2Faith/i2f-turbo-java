@@ -986,8 +986,17 @@ public class OpenAiOpsController implements IOpsProvider {
                             if (cmpUserMsgContent != null) {
                                 cmpUserMsgContent = cmpUserMsgContent.trim();
                             }
+                            boolean hasAssitantMsg=false;
+                            for (OpenAiMessage msg : completion.getMessages()) {
+                                if(msg instanceof OpenAiAssistantMessage){
+                                    hasAssitantMsg=true;
+                                }
+                            }
+                            boolean needIntentRecognize=hasAssitantMsg?(random.nextDouble()<0.3):true;
+
                             if (cmpUserMsgContent != null && !cmpUserMsgContent.isEmpty()
-                                    && !TOOL_RETURNS_FILE_CONTENT.equals(cmpUserMsgContent)) {
+                                    && !TOOL_RETURNS_FILE_CONTENT.equals(cmpUserMsgContent)
+                                    && needIntentRecognize) {
                                 echoProgress.apply("工具意图识别推荐中...");
 
                                 Map<String, Set<String>> labelToolNameMap = new LinkedHashMap<>();

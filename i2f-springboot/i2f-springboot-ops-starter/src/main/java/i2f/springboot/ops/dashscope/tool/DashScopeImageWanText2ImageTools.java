@@ -22,16 +22,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
-import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +46,7 @@ import java.util.Map;
 @AllArgsConstructor
 @Tools
 public class DashScopeImageWanText2ImageTools {
+    private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     @Autowired(required = false)
     private DashScopeOpsImageWanText2ImageController imageWanText2ImageController;
@@ -61,7 +58,7 @@ public class DashScopeImageWanText2ImageTools {
     private TmpFileTools tmpFileTools;
 
     @Value("${ai.tools.dashscope-t2i.model:qwen-image-2.0-pro}")
-    protected String model="qwen-image-2.0-pro";
+    protected String model = "qwen-image-2.0-pro";
 
     @Tool(
             tags = {
@@ -76,7 +73,7 @@ public class DashScopeImageWanText2ImageTools {
             @ToolParam(value = "content", description = "the content, description what is the image")
             String content,
             @ToolParam(value = "portrait_mode", description = "portrait mode image, default is false")
-            boolean portrait_mode ,
+            boolean portrait_mode,
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
@@ -86,9 +83,9 @@ public class DashScopeImageWanText2ImageTools {
         if (tmpFileTools == null) {
             throw new IllegalStateException("system not enable tmp file.");
         }
-        String modelName=this.model;
-        if(modelName==null || modelName.isEmpty()){
-            modelName="qwen-image-2.0-pro";
+        String modelName = this.model;
+        if (modelName == null || modelName.isEmpty()) {
+            modelName = "qwen-image-2.0-pro";
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
         OpenAiMeta meta = req.getMeta();
@@ -119,7 +116,7 @@ public class DashScopeImageWanText2ImageTools {
         dto.setPrompt(content);
         dto.setImageUrl(reference_image_url);
         dto.setSize("2688*1536");
-        if(portrait_mode){
+        if (portrait_mode) {
             dto.setSize("1536*2688");
         }
         dto.setWatermark(false);
@@ -159,7 +156,7 @@ public class DashScopeImageWanText2ImageTools {
         builder.append("result image(s) has show to user.\n");
 
         for (String url : downloadUrlList) {
-            String virtualFileName = "image-" + (ret.getFiles().size() + 1) + ".png";
+            String virtualFileName = "image-" + (ret.getFiles().size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
             try {
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                 ret.getFiles().add(metadata);
@@ -170,7 +167,7 @@ public class DashScopeImageWanText2ImageTools {
                     builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
                 }
             } catch (Exception e) {
-                log.warn("downloadUrl: "+url, e);
+                log.warn("downloadUrl: " + url, e);
 
                 TmpFileTools.UploadTmpFileMetadata metadata = new TmpFileTools.UploadTmpFileMetadata();
                 metadata.setFileName(virtualFileName);
