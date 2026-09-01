@@ -218,7 +218,7 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
         } else if ("SUCCEEDED".equals(taskStatus)) {
             List<String> downloadUrlList = new ArrayList<>();
 
-            List<Map<String, Object>> choices = (List<Map<String, Object>>) resp.get("choices");
+            List<Map<String, Object>> choices = (List<Map<String, Object>>) output.get("choices");
             if (choices == null) {
                 choices = new ArrayList<>();
             }
