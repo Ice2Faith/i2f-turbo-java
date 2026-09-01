@@ -468,11 +468,12 @@ public class OpenAiOpsController implements IOpsProvider {
             ToolCallContextHolder.put("req", req);
 
             ExFunction<Object, String> echoProgress = (content) -> {
+                String emitContent = objectMapper.writeValueAsString(content);
                 OpsSecureReturn<?> resp = null;
                 if (req.isEncryptOutput()) {
-                    resp = transfer.success(content);
+                    resp = transfer.success(emitContent);
                 } else {
-                    resp = OpsSecureReturn.success(content);
+                    resp = OpsSecureReturn.success(emitContent);
                 }
                 resp.withAttr("type", OpsOpenAiConsts.ECHO_PROGRESS);
                 String respJson = objectMapper.writeValueAsString(resp);
