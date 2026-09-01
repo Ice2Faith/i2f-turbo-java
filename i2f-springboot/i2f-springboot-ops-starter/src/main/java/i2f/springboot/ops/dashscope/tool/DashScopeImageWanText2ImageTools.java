@@ -163,12 +163,6 @@ public class DashScopeImageWanText2ImageTools {
             try {
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                 ret.getFiles().add(metadata);
-
-                Map<String, Object> map = metadata.toMap();
-                builder.append("--------------\n");
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
-                }
             } catch (Exception e) {
                 log.warn("downloadUrl: " + url, e);
 
@@ -177,12 +171,14 @@ public class DashScopeImageWanText2ImageTools {
                 metadata.setFileUrl(url);
                 metadata.setCreateTime(TmpFileTools.CREATE_FORMATTER.format(LocalDateTime.now()));
                 ret.getFiles().add(metadata);
+            }
+        }
 
-                Map<String, Object> map = metadata.toMap();
-                builder.append("--------------\n");
-                for (Map.Entry<String, Object> entry : map.entrySet()) {
-                    builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
-                }
+        for (TmpFileTools.UploadTmpFileMetadata metadata : ret.getFiles()) {
+            Map<String, Object> map = metadata.toMap();
+            builder.append("--------------\n");
+            for (Map.Entry<String, Object> entry : map.entrySet()) {
+                builder.append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             }
         }
 
