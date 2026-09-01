@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="i2f-springboot-ops-starter OpenAI 兼容 AI 对话框架 · 技术全景文档">
@@ -21,10 +20,8 @@
 
     <script src="./lib/markdown-it@14.1.1/dist/markdown-it.min.js"></script>
 
-    <!-- highlight.js 核心高亮库 -->
     <script src="./lib/highlight.js/11.11.1/highlight.min.js"></script>
     <link rel="stylesheet" href="./lib/highlight.js/11.11.1/styles/github.min.css"/>
-
 
     <link rel="stylesheet" href="./lib/katex@0.16.9/dist/katex.min.css">
     <script src="./lib/katex@0.16.9/dist/katex.min.js"></script>
@@ -49,40 +46,146 @@
 
 </head>
 <body>
-    <div id="app">
-        <div v-html="renderMarkdown(sampleMarkdown)">
+<div id="app">
+    <!-- ==================== 阅读进度条 ==================== -->
+    <div class="reading-progress" :style="{ width: progress + '%' }"></div>
 
+    <!-- ==================== 顶部导航条 ==================== -->
+    <header class="boot-strip" :class="{ 'nav-visible': navOpen }">
+        <div class="boot-inner">
+            <div class="boot-brand">
+                <span class="boot-logo">⚙</span>
+                <span class="boot-title">i2f-springboot-ops-starter</span>
+                <span class="boot-pipe">|</span>
+                <span class="boot-sub">OpenAI 子系统 · 技术全景</span>
+            </div>
+            <nav class="boot-nav">
+                <a v-for="n in spec.nav" :key="n.id"
+                   :class="{ active: activeNavId === n.id }"
+                   @click.prevent="scrollToChapter(n.id)"
+                   href="javascript:void(0)">
+                    <span class="bn-no">{{ n.no }}</span>
+                    <span class="bn-title">{{ n.title }}</span>
+                </a>
+            </nav>
+            <button class="nav-toggle" @click="toggleNav" :aria-label="navOpen ? '关闭导航' : '打开导航'">
+                <span></span><span></span><span></span>
+            </button>
         </div>
-    </div>
-</body>
+    </header>
+
+    <!-- ==================== 侧边导航面板 (移动端) ==================== -->
+    <div class="side-nav-overlay" :class="{ open: navOpen }" @click="navOpen = false"></div>
+    <aside class="side-nav-panel" :class="{ open: navOpen }">
+        <div class="side-nav-header">
+            <span class="side-nav-title">目录</span>
+            <button class="side-nav-close" @click="navOpen = false">&times;</button>
+        </div>
+        <nav class="side-nav-list">
+            <a v-for="n in spec.nav" :key="n.id"
+               :class="{ active: activeNavId === n.id }"
+               @click.prevent="scrollToChapter(n.id)"
+               href="javascript:void(0)">
+                <span class="sn-no">{{ n.no }}</span>
+                <span class="sn-title">{{ n.title }}</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- ==================== 主内容区域 ==================== -->
+    <main class="main-content">
+        <!-- Masthead -->
+        <section class="masthead" v-if="mastheadHtml" v-html="mastheadHtml"></section>
+        <section class="masthead masthead-loading" v-else>
+            <div class="loading-spinner"><i class="el-icon-loading"></i> 加载中...</div>
+        </section>
+
+        <!-- Meta 信息表 -->
+        <section class="meta-section reveal">
+            <div class="meta-table-wrap">
+                <table class="meta-table">
+                    <tbody>
+                    <tr v-for="(m, i) in spec.meta" :key="i" :class="{ acc: m.acc }">
+                        <td class="meta-k">{{ m.k }}</td>
+                        <td class="meta-v">{{ m.v }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 统计数字 -->
+        <section class="stat-section reveal">
+            <div class="stat-grid">
+                <div class="stat-item" v-for="(s, i) in spec.stats" :key="i" :style="{ '--sc': s.color }">
+                    <span class="stat-count" :data-target="s.count">0</span>
+                    <span class="stat-label">{{ s.label }}</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 章节内容 -->
+        <section v-for="ch in spec.chapters" :key="ch.id" :id="ch.id" class="chapter">
+            <div class="chapter-header reveal">
+                <span class="ch-no">{{ ch.no }}</span>
+                <div class="ch-title-group">
+                    <span class="ch-en">{{ ch.en }}</span>
+                    <h2 class="ch-title">{{ ch.title }}</h2>
+                </div>
+            </div>
+            <div class="chapter-body">
+                <!-- 加载中 -->
+                <div v-if="chapterLoading[ch.id]" class="chapter-loading">
+                    <i class="el-icon-loading"></i> 加载章节内容...
+                </div>
+                <!-- 加载失败 -->
+                <div v-else-if="chapterError[ch.id]" class="chapter-error">
+                    <i class="el-icon-warning"></i> 加载失败：{{ chapterError[ch.id] }}
+                </div>
+                <!-- 渲染内容 -->
+                <div v-else-if="chapterHtml[ch.id]" v-html="chapterHtml[ch.id]" class="chapter-html"></div>
+                <!-- 初始占位 -->
+                <div v-else class="chapter-placeholder"></div>
+            </div>
+        </section>
+
+        <!-- 页脚 -->
+        <footer class="footer reveal">
+            <div class="footer-inner">
+                <p class="footer-brand">i2f-springboot-ops-starter</p>
+                <p class="footer-license">
+                    <a href="https://github.com/Ice2Faith/i2f-turbo-java" target="_blank" rel="noopener">GitHub</a>
+                    &nbsp;·&nbsp; Licensed under GPL v3
+                    &nbsp;·&nbsp; i2f.turbo
+                </p>
+            </div>
+        </footer>
+    </main>
+
+    <!-- ==================== 返回顶部 ==================== -->
+    <transition name="el-fade-in">
+        <button v-show="showBackTop" class="back-top" @click="scrollToTop"
+                title="返回顶部">
+            <i class="el-icon-top"></i>
+        </button>
+    </transition>
+</div>
+
 <script>
     gsap.registerPlugin(
-        CSSRulePlugin,
-        CustomEase,
-        Draggable,
-        EaselPlugin,
-        EasePack,
-        Flip,
-        MotionPathPlugin,
-        Observer,
-        PixiPlugin,
-        ScrollToPlugin,
-        ScrollTrigger,
-        TextPlugin,
+        CSSRulePlugin, CustomEase, Draggable, EaselPlugin,
+        EasePack, Flip, MotionPathPlugin, Observer,
+        PixiPlugin, ScrollToPlugin, ScrollTrigger, TextPlugin
     );
 </script>
 <script type="module">
     import mermaid from './lib/mermaid@11/dist/mermaid.esm.min.mjs';
-
-    // 初始化配置：关闭自动加载，因为我们打算手动控制渲染时机
-    mermaid.initialize({
-        startOnLoad: false
-    });
-
+    mermaid.initialize({ startOnLoad: false });
     window.mermaid = mermaid;
 </script>
 <script src="./assets/markdown-setup.js"></script>
 <script src="./assets/markdown-mixins.js"></script>
 <script src="./assets/data.js"></script>
 <script src="./assets/app.js"></script>
+</body>
 </html>

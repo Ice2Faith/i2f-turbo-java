@@ -1,7 +1,7 @@
 function setupMarkdown() {
     // 初始化 markdown-it
     let md = (typeof markdownit === 'function') ? markdownit({
-        html: false,        // 禁止原始 HTML 防止 XSS
+        html: true,         // 允许 HTML（静态文档场景，非用户内容）
         linkify: true,      // 自动识别 URL
         typographer: true,  // 智能标点替换
         breaks: true,       // \n 转为 <br>

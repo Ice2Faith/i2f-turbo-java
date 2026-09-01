@@ -1,54 +1,59 @@
-function getDemoMarkdown() {
-    /* 使用变量替换markdown的代码块开始结束标记，
-    这样就不用转义了，
-    也不会因为代码格式化而出现问题，
-    最后使用trim去除前后多余的空行，
-    内容就是一致的
-    */
-    let markdownBlockBorder = '```'
-    return `
-# 标题
-
-- 列表
-
-## mermaid 图表
-
-${markdownBlockBorder}mermaid
-    sequenceDiagram
-    participant U as 用户浏览器
-    participant A as 应用A
-    participant B as 应用B
-    participant S as SSO认证中心
-
-    Note over U,S: === 首次访问应用A（未登录） ===
-
-    U->>A: 1. 访问应用A受保护资源
-    A-->>U: 2. 未登录，302重定向到SSO认证中心
-    U->>S: 3. 携带service=A的回调地址，请求登录页
-    S-->>U: 4. 返回登录页面
-    U->>S: 5. 提交用户名和密码
-    S->>S: 6. 验证凭证，创建全局会话
-    S-->>U: 7. 302重定向回应用A，携带Ticket(ST)
-    U->>A: 8. 携带Ticket请求应用A
-    A->>S: 9. 向SSO中心验证Ticket有效性
-    S-->>A: 10. 返回验证结果及用户信息
-    A->>A: 11. 创建本地会话
-    A-->>U: 12. 返回受保护资源
-
-    Note over U,S: === 访问应用B（已登录SSO） ===
-
-    U->>B: 13. 访问应用B受保护资源
-    B-->>U: 14. 未登录，302重定向到SSO认证中心
-    U->>S: 15. 携带service=B的回调地址，请求认证
-    S->>S: 16. 检测到已有全局会话，无需再次登录
-    S-->>U: 17. 302重定向回应用B，携带新Ticket(ST)
-    U->>B: 18. 携带Ticket请求应用B
-    B->>S: 19. 向SSO中心验证Ticket有效性
-    S-->>B: 20. 返回验证结果及用户信息
-    B->>B: 21. 创建本地会话
-    B-->>U: 22. 返回受保护资源
-${markdownBlockBorder}
-
-- 列表
-`.trim()
+/**
+ * i2f-springboot-ops-starter · OpenAI 子系统技术全景
+ * 数据层：导航、统计、章节元数据
+ * 实际内容从 content/*.md 文件 fetch 加载
+ */
+function getSpecData() {
+    return {
+        nav: [
+            { id: 'ch01', no: '01', title: '概述' },
+            { id: 'ch02', no: '02', title: '设计理念' },
+            { id: 'ch03', no: '03', title: '分层架构' },
+            { id: 'ch04', no: '04', title: '核心对话流程' },
+            { id: 'ch05', no: '05', title: 'Re-Act 循环' },
+            { id: 'ch06', no: '06', title: '消息模型' },
+            { id: 'ch07', no: '07', title: '工具体系' },
+            { id: 'ch08', no: '08', title: '技能系统' },
+            { id: 'ch09', no: '09', title: 'RAG · 记忆系统' },
+            { id: 'ch10', no: '10', title: 'MCP 动态工具 · 意图推荐' },
+            { id: 'ch11', no: '11', title: '安全体系' },
+            { id: 'ch12', no: '12', title: '高级特性' },
+            { id: 'ch13', no: '13', title: '自动装配' },
+            { id: 'ch14', no: '14', title: '前端工程' },
+            { id: 'ch15', no: '15', title: '扩展指南' }
+        ],
+        stats: [
+            { count: 45, label: 'Java 源文件', color: '#e8590c' },
+            { count: 18, label: '内置工具类', color: '#0b7285' },
+            { count: 14, label: '回显消息类型', color: '#2b8a3e' },
+            { count: 7, label: 'REST 端点', color: '#1971c2' },
+            { count: 20, label: '角色预设 (Role)', color: '#e67700' },
+            { count: 4, label: 'AiModel 实现', color: '#c92a2a' }
+        ],
+        chapters: [
+            { id: 'ch01', no: '01', en: 'Overview', title: '概述：运维控制台里的 AI 心脏', file: 'content/ch01-overview.md' },
+            { id: 'ch02', no: '02', en: 'Design Philosophy', title: '设计理念', file: 'content/ch02-design.md' },
+            { id: 'ch03', no: '03', en: 'Layered Architecture', title: '分层架构', file: 'content/ch03-architecture.md' },
+            { id: 'ch04', no: '04', en: 'Conversation Pipeline', title: '核心对话流程', file: 'content/ch04-pipeline.md' },
+            { id: 'ch05', no: '05', en: 'Re-Act Loop', title: 'Re-Act 循环：Agent 的心脏', file: 'content/ch05-react.md' },
+            { id: 'ch06', no: '06', en: 'Message Model', title: '消息模型与回显协议', file: 'content/ch06-messages.md' },
+            { id: 'ch07', no: '07', en: 'Function Calling', title: '工具体系：注解驱动的能力池', file: 'content/ch07-tools.md' },
+            { id: 'ch08', no: '08', en: 'Skill System', title: '技能系统：懒加载的领域知识包', file: 'content/ch08-skills.md' },
+            { id: 'ch09', no: '09', en: 'RAG Pipeline & Memory', title: 'RAG 知识库 · 记忆系统：向量检索与三级记忆', file: 'content/ch09-rag.md' },
+            { id: 'ch10', no: '10', en: 'MCP Dynamic Tools', title: 'MCP 动态工具：三步发现 + LRU 装载 + 意图推荐', file: 'content/ch10-mcp.md' },
+            { id: 'ch11', no: '11', en: 'SM Crypto Transfer', title: '安全体系：国密全链路传输', file: 'content/ch11-security.md' },
+            { id: 'ch12', no: '12', en: 'Advanced Features', title: '高级特性：让对话长出记忆与手脚', file: 'content/ch12-advanced.md' },
+            { id: 'ch13', no: '13', en: 'Auto Configuration', title: '自动装配：一个依赖即一个工作台', file: 'content/ch13-autoconfig.md' },
+            { id: 'ch14', no: '14', en: 'Fat Client', title: '前端工程：浏览器里的 Agent 状态机', file: 'content/ch14-frontend.md' },
+            { id: 'ch15', no: '15', en: 'Extension Guide', title: '扩展指南：三步接入一个新工具', file: 'content/ch15-extension.md' }
+        ],
+        meta: [
+            { k: 'Maven 坐标', v: 'i2f.turbo : i2f-springboot-ops-starter' },
+            { k: '版本 / 基线', v: '1.0-jdk8 · Java 8', acc: true },
+            { k: '运行框架', v: 'Spring Boot 2.7.18' },
+            { k: '子系统包名', v: 'i2f.springboot.ops.openai' },
+            { k: '访问入口', v: '/ops/open-ai/index.html' },
+            { k: '安全传输', v: 'SM2 · SM3 · SM4 国密', acc: true }
+        ]
+    };
 }
