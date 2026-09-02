@@ -1,6 +1,5 @@
 <template>
-    <div>
-        <div class="side-nav-overlay" :class="{ open: navOpen }" @click="closeNav"></div>
+    <div class="side-nav-wrap">
         <aside class="side-nav-panel" :class="{ open: navOpen }">
             <div class="side-nav-header">
                 <span class="side-nav-title">目录</span>

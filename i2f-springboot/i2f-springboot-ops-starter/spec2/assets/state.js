@@ -6,31 +6,16 @@
 (function () {
     var spec = getSpecData();
 
-    /* ==================== 预初始化章节状态（确保 Vue 响应式） ==================== */
-    var chapterHtml = {};
-    var chapterLoading = {};
-    var chapterError = {};
-    spec.chapters.forEach(function (ch) {
-        chapterHtml[ch.id] = '';
-        chapterLoading[ch.id] = false;
-        chapterError[ch.id] = null;
-    });
-
     /* ==================== 全局响应式状态 ==================== */
     window.$specState = Vue.observable({
         progress: 0,
         showBackTop: false,
         activeNavId: 'ch01',
-        navOpen: false,
-        chapterHtml: chapterHtml,
-        chapterLoading: chapterLoading,
-        chapterError: chapterError,
-        mastheadHtml: ''
+        navOpen: false
     });
 
     /* ==================== 全局只读数据 ==================== */
     window.$spec = spec;
-    window.$md = setupMarkdown();
 
     /* ==================== 全局工具函数 ==================== */
     window.$specUtils = {
@@ -50,14 +35,6 @@
          */
         scrollToTop: function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        },
-
-        /**
-         * 渲染 Markdown
-         */
-        renderMd: function (raw) {
-            if (!raw) return '';
-            return window.$md.render(raw);
         },
 
         /**

@@ -2,14 +2,17 @@
     <div>
         <ReadingProgress />
         <AppNav />
-        <SideNav />
-        <main class="main-content">
-            <Masthead />
-            <MetaTable />
-            <StatGrid />
-            <ChapterSection v-for="ch in spec.chapters" :key="ch.id" :chapter="ch" />
-            <AppFooter />
-        </main>
+        <div class="side-nav-overlay" :class="{ open: navOpen }" @click="closeNav"></div>
+        <div class="layout">
+            <SideNav />
+            <main class="main-content">
+                <Masthead />
+                <MetaTable />
+                <StatGrid />
+                <ChapterSection v-for="ch in spec.chapters" :key="ch.id" :chapter="ch" />
+                <AppFooter />
+            </main>
+        </div>
         <BackToTop />
     </div>
 </template>
@@ -49,73 +52,7 @@
                     self.state.progress = Math.round((scrollY / docHeight) * 100);
                 }
                 self.state.showBackTop = scrollY > 400;
-                self.initReveal();
-                self.loadVisibleChapters();
                 self.updateActiveNav();
-            },
-
-            /* ---------- 滚动揭示动画 ---------- */
-            initReveal: function () {
-                var reveals = document.querySelectorAll('.reveal');
-                for (var i = 0; i < reveals.length; i++) {
-                    var el = reveals[i];
-                    if (el._revealed) continue;
-                    el._revealed = true;
-                    var rect = el.getBoundingClientRect();
-                    if (rect.top < window.innerHeight - 60) {
-                        el.classList.add('active');
-                    }
-                }
-            },
-
-            /* ---------- 懒加载可见章节 ---------- */
-            loadVisibleChapters: function () {
-                var self = this;
-                self.spec.chapters.forEach(function (ch) {
-                    var el = document.getElementById(ch.id);
-                    if (!el) return;
-                    var rect = el.getBoundingClientRect();
-                    if (rect.top < window.innerHeight * 3 && rect.bottom > -window.innerHeight) {
-                        self.loadChapter(ch);
-                    }
-                });
-            },
-
-            /* ---------- 加载单个章节 ---------- */
-            loadChapter: function (ch) {
-                var self = this;
-                if (self.state.chapterHtml[ch.id] || self.state.chapterLoading[ch.id]) return;
-                self.state.chapterLoading[ch.id] = true;
-                fetch(ch.file)
-                    .then(function (r) {
-                        if (!r.ok) throw new Error('HTTP ' + r.status);
-                        return r.text();
-                    })
-                    .then(function (text) {
-                        self.state.chapterHtml[ch.id] = window.$md.render(text);
-                        self.$nextTick(function () {
-                            self.initReveal();
-                            self.renderMermaidBlocks();
-                        });
-                    })
-                    .catch(function (err) {
-                        self.state.chapterError[ch.id] = err.message;
-                    })
-                    .finally(function () {
-                        self.state.chapterLoading[ch.id] = false;
-                    });
-            },
-
-            /* ---------- 渲染 mermaid 代码块 ---------- */
-            renderMermaidBlocks: function () {
-                var blocks = document.querySelectorAll('.mermaid-code-block');
-                for (var i = 0; i < blocks.length; i++) {
-                    var dom = blocks[i];
-                    if (dom.innerHTML.trim() !== '') continue;
-                    if (dom.chartCode && window.mermaid) {
-                        renderMermaid(dom, dom.chartCode);
-                    }
-                }
             },
 
             /* ---------- 更新激活导航 ---------- */
@@ -136,28 +73,24 @@
                 self.state.activeNavId = bestId;
             },
 
-            /* ---------- 加载 masthead ---------- */
-            loadMasthead: function () {
-                var self = this;
-                fetch('content/masthead.md')
-                    .then(function (r) {
-                        if (!r.ok) throw new Error('HTTP ' + r.status);
-                        return r.text();
-                    })
-                    .then(function (text) {
-                        self.state.mastheadHtml = window.$md.render(text);
-                        self.$nextTick(function () {
-                            self.initReveal();
-                        });
-                    });
+            /* ---------- 关闭导航 ---------- */
+            closeNav: function () {
+                window.$specState.navOpen = false;
             }
         },
         mounted: function () {
             var self = this;
-            self.loadMasthead();
             self.$nextTick(function () {
-                self.loadVisibleChapters();
-                self.initReveal();
+                /* 初始化 GSAP 动画系统 */
+                if (window.$gsap) {
+                    window.$gsap.initAll();
+                }
+                /* 异步组件加载后刷新动画扫描 */
+                setTimeout(function () {
+                    if (window.$gsap) {
+                        window.$gsap.refresh();
+                    }
+                }, 2000);
             });
             window.addEventListener('scroll', function () {
                 if (self.scrollTimer) return;

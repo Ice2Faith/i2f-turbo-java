@@ -8,19 +8,30 @@
             </div>
         </div>
         <div class="chapter-body">
-            <div v-if="loading" class="chapter-loading">
-                <i class="el-icon-loading"></i> 加载章节内容...
-            </div>
-            <div v-else-if="error" class="chapter-error">
-                <i class="el-icon-warning"></i> 加载失败：{{ error }}
-            </div>
-            <div v-else-if="html" v-html="html" class="chapter-html"></div>
-            <div v-else class="chapter-placeholder"></div>
+            <component :is="chapterComponent" />
         </div>
     </section>
 </template>
 
 <script>
+    var chapterMap = {
+        'ch01': 'Ch01Overview',
+        'ch02': 'Ch02Design',
+        'ch03': 'Ch03Architecture',
+        'ch04': 'Ch04Pipeline',
+        'ch05': 'Ch05React',
+        'ch06': 'Ch06Messages',
+        'ch07': 'Ch07Tools',
+        'ch08': 'Ch08Skills',
+        'ch09': 'Ch09Rag',
+        'ch10': 'Ch10Mcp',
+        'ch11': 'Ch11Security',
+        'ch12': 'Ch12Advanced',
+        'ch13': 'Ch13Autoconfig',
+        'ch14': 'Ch14Frontend',
+        'ch15': 'Ch15Extension'
+    };
+
     export default {
         name: 'ChapterSection',
         props: {
@@ -29,15 +40,26 @@
                 required: true
             }
         },
+        components: {
+            Ch01Overview: './chapters/Ch01Overview.vue',
+            Ch02Design: './chapters/Ch02Design.vue',
+            Ch03Architecture: './chapters/Ch03Architecture.vue',
+            Ch04Pipeline: './chapters/Ch04Pipeline.vue',
+            Ch05React: './chapters/Ch05React.vue',
+            Ch06Messages: './chapters/Ch06Messages.vue',
+            Ch07Tools: './chapters/Ch07Tools.vue',
+            Ch08Skills: './chapters/Ch08Skills.vue',
+            Ch09Rag: './chapters/Ch09Rag.vue',
+            Ch10Mcp: './chapters/Ch10Mcp.vue',
+            Ch11Security: './chapters/Ch11Security.vue',
+            Ch12Advanced: './chapters/Ch12Advanced.vue',
+            Ch13Autoconfig: './chapters/Ch13Autoconfig.vue',
+            Ch14Frontend: './chapters/Ch14Frontend.vue',
+            Ch15Extension: './chapters/Ch15Extension.vue'
+        },
         computed: {
-            html: function () {
-                return window.$specState.chapterHtml[this.chapter.id];
-            },
-            loading: function () {
-                return window.$specState.chapterLoading[this.chapter.id];
-            },
-            error: function () {
-                return window.$specState.chapterError[this.chapter.id];
+            chapterComponent: function () {
+                return chapterMap[this.chapter.id] || 'div';
             }
         }
     };

@@ -1,7 +1,6 @@
 /**
  * i2f-springboot-ops-starter · OpenAI 子系统技术全景
  * 数据层：导航、统计、章节元数据
- * 实际内容从 content/*.md 文件 fetch 加载
  */
 function getSpecData() {
     return {
@@ -31,21 +30,21 @@ function getSpecData() {
             { count: 4, label: 'AiModel 实现', color: '#c92a2a' }
         ],
         chapters: [
-            { id: 'ch01', no: '01', en: 'Overview', title: '概述：运维控制台里的 AI 心脏', file: 'content/ch01-overview.md' },
-            { id: 'ch02', no: '02', en: 'Design Philosophy', title: '设计理念', file: 'content/ch02-design.md' },
-            { id: 'ch03', no: '03', en: 'Layered Architecture', title: '分层架构', file: 'content/ch03-architecture.md' },
-            { id: 'ch04', no: '04', en: 'Conversation Pipeline', title: '核心对话流程', file: 'content/ch04-pipeline.md' },
-            { id: 'ch05', no: '05', en: 'Re-Act Loop', title: 'Re-Act 循环：Agent 的心脏', file: 'content/ch05-react.md' },
-            { id: 'ch06', no: '06', en: 'Message Model', title: '消息模型与回显协议', file: 'content/ch06-messages.md' },
-            { id: 'ch07', no: '07', en: 'Function Calling', title: '工具体系：注解驱动的能力池', file: 'content/ch07-tools.md' },
-            { id: 'ch08', no: '08', en: 'Skill System', title: '技能系统：懒加载的领域知识包', file: 'content/ch08-skills.md' },
-            { id: 'ch09', no: '09', en: 'RAG Pipeline & Memory', title: 'RAG 知识库 · 记忆系统：向量检索与三级记忆', file: 'content/ch09-rag.md' },
-            { id: 'ch10', no: '10', en: 'MCP Dynamic Tools', title: 'MCP 动态工具：三步发现 + LRU 装载 + 意图推荐', file: 'content/ch10-mcp.md' },
-            { id: 'ch11', no: '11', en: 'SM Crypto Transfer', title: '安全体系：国密全链路传输', file: 'content/ch11-security.md' },
-            { id: 'ch12', no: '12', en: 'Advanced Features', title: '高级特性：让对话长出记忆与手脚', file: 'content/ch12-advanced.md' },
-            { id: 'ch13', no: '13', en: 'Auto Configuration', title: '自动装配：一个依赖即一个工作台', file: 'content/ch13-autoconfig.md' },
-            { id: 'ch14', no: '14', en: 'Fat Client', title: '前端工程：浏览器里的 Agent 状态机', file: 'content/ch14-frontend.md' },
-            { id: 'ch15', no: '15', en: 'Extension Guide', title: '扩展指南：三步接入一个新工具', file: 'content/ch15-extension.md' }
+            { id: 'ch01', no: '01', en: 'Overview', title: '概述：运维控制台里的 AI 心脏' },
+            { id: 'ch02', no: '02', en: 'Design Philosophy', title: '设计理念' },
+            { id: 'ch03', no: '03', en: 'Layered Architecture', title: '分层架构' },
+            { id: 'ch04', no: '04', en: 'Conversation Pipeline', title: '核心对话流程' },
+            { id: 'ch05', no: '05', en: 'Re-Act Loop', title: 'Re-Act 循环：Agent 的心脏' },
+            { id: 'ch06', no: '06', en: 'Message Model', title: '消息模型与回显协议' },
+            { id: 'ch07', no: '07', en: 'Function Calling', title: '工具体系：注解驱动的能力池' },
+            { id: 'ch08', no: '08', en: 'Skill System', title: '技能系统：懒加载的领域知识包' },
+            { id: 'ch09', no: '09', en: 'RAG Pipeline & Memory', title: 'RAG 知识库 · 记忆系统：向量检索与三级记忆' },
+            { id: 'ch10', no: '10', en: 'MCP Dynamic Tools', title: 'MCP 动态工具：三步发现 + LRU 装载 + 意图推荐' },
+            { id: 'ch11', no: '11', en: 'SM Crypto Transfer', title: '安全体系：国密全链路传输' },
+            { id: 'ch12', no: '12', en: 'Advanced Features', title: '高级特性：让对话长出记忆与手脚' },
+            { id: 'ch13', no: '13', en: 'Auto Configuration', title: '自动装配：一个依赖即一个工作台' },
+            { id: 'ch14', no: '14', en: 'Fat Client', title: '前端工程：浏览器里的 Agent 状态机' },
+            { id: 'ch15', no: '15', en: 'Extension Guide', title: '扩展指南：三步接入一个新工具' }
         ],
         meta: [
             { k: 'Maven 坐标', v: 'i2f.turbo : i2f-springboot-ops-starter' },

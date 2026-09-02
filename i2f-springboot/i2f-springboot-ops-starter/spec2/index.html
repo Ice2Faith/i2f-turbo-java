@@ -18,14 +18,8 @@
     <link href="./lib/element-ui/fonts/element-icons.ttf"/>
     <link href="./lib/element-ui/fonts/element-icons.woff"/>
 
-    <script src="./lib/markdown-it@14.1.1/dist/markdown-it.min.js"></script>
-
     <script src="./lib/highlight.js/11.11.1/highlight.min.js"></script>
     <link rel="stylesheet" href="./lib/highlight.js/11.11.1/styles/github.min.css"/>
-
-    <link rel="stylesheet" href="./lib/katex@0.16.9/dist/katex.min.css">
-    <script src="./lib/katex@0.16.9/dist/katex.min.js"></script>
-    <script src="./lib/markdown-it-texmath@1.0.0/texmath.min.js"></script>
 
     <script src="./lib/@panzoom/panzoom@4.4.3/dist/panzoom.min.js"></script>
 
@@ -70,10 +64,10 @@
 </script>
 
 <!-- 应用初始化链 -->
-<script src="./assets/markdown-setup.js"></script>
-<script src="./assets/markdown-mixins.js"></script>
+<script src="./assets/render-utils.js"></script>
 <script src="./assets/data.js"></script>
 <script src="./assets/state.js"></script>
+<script src="./assets/animations.js"></script>
 <script>
     /* 由 Vue2Loader 加载根组件 app.vue 并挂载到 #app */
     Vue2Loader.createVue('./components/app.vue', 'app').then(function (app) {
