@@ -1367,6 +1367,45 @@ Vue2Loader.createVue = function (url, domId = 'app') {
 }
 
 /**
+ * mixin loader helper methods to vue options
+ *
+ * @param vueOptions {object}
+ * @param baseHref {string}
+ * @return {void}
+ */
+Vue2Loader.mixinLoaderMethodsToVueOptions=function(vueOptions,baseHref){
+    vueOptions.methods={
+        ...vueOptions.methods,
+        /**
+         * 返回组件本身的地址
+         *
+         * @return {string}
+         */
+        loaderHref(){
+            return baseHref;
+        },
+        /**
+         * 返回相对于组件的真实地址
+         *
+         * @param url 相对与组件的地址
+         * @return {string}
+         */
+        loaderUrl(url){
+            return new URL(url,this.loaderHref()).href;
+        },
+        /**
+         * 返回相对于组件的真实地址对应的资源
+         *
+         * @param url 相对与组件的地址
+         * @return {Promise<Response>}
+         */
+        loaderResource(url){
+            return fetch(this.loaderUrl(url))
+        }
+    }
+}
+
+/**
  * 递归解析VueOptions中的属性
  * baseHref用于记录传入的VueOptions对应的基本URL路径，进行递归查找依赖时，才能确定真实的URL绝对路径进行加载依赖
  * 将器加载为真实的对象
@@ -1375,6 +1414,7 @@ Vue2Loader.createVue = function (url, domId = 'app') {
  * vueOptions.mixins 将会使用真实对象替换URL指向，实现局部混入
  * vueOptions.directives 将会直接进行Vue.directive指令注册
  * vueOptions.objects 将会将对象都挂载到Vue.prototype原型上
+ * vueOptions.methods 添加几个个固定的方法，用于解析相对于组件的资源地址，详情查看 `Vue2Loader.mixinLoaderMethodsToVueOptions` 实现
  * 使用案例:
  * ************************************************
  * vueOptions={
@@ -1391,21 +1431,31 @@ Vue2Loader.createVue = function (url, domId = 'app') {
  *     objects:{
  *         rsa: '../util/rsa.js'
  *     },
- *     ...
- *     以下是vue其他的配置,区别是上面这部分的写法
+ *     // ...
+ *     // 以下是vue其他的配置,区别是上面这部分的写法
  *     data(){
  *         return {
- *
+ *              sampleText: ''
  *         }
  *     },
  *     mounted(){
  *
  *     },
  *     created(){
- *
+ *          this.sampleFetch();
  *     },
  *     methods:{
- *
+ *          sampleFetch(){
+ *              // 使用注入的loaderUrl解析相对于组件的相对地址
+ *              // 这样才能拿到真实的地址
+ *              // 否则，直接使用fetch的话，这个应该是相对于html文件的地址
+ *              // 而不是相对于组件的地址
+ *              // loaderUrl 的作用就是解析为真实的地址
+ *              let url=this.loaderUrl('./sample.txt')
+ *              fetch(url).then(r=>r.text()).then(t=>{
+ *                  this.sampleText=t;
+ *              })
+ *          }
  *     }
  *
  * }
@@ -1420,6 +1470,8 @@ Vue2Loader.createVue = function (url, domId = 'app') {
  * @return {Promise<Object>} 处理替换完整的VueOptions,引用还是传入的vueOptions
  */
 Vue2Loader.resolveVueDependency = function (vueOptions, baseHref) {
+    Vue2Loader.mixinLoaderMethodsToVueOptions(vueOptions,baseHref)
+
     let arr = []
     if (vueOptions.components) {
         Object.keys(vueOptions.components).forEach(function (key) {
