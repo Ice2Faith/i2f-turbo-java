@@ -12,3 +12,15 @@ MCP 动态工具与国密全链路安全传输，兼容 OpenAI / DashScope / Oll
 <span class="sse">text/event-stream</span>
 <span class="caret"></span>
 </div>
+
+<div class="reveal">
+<div class="diagram-panel">
+        
+```svg
+assets/diagrams/masthead-loop.svg
+```
+
+
+<div class="dg-cap">核心消息循环 — 一次对话即一轮消息列表的维护与推理</div>
+</div>
+</div>

@@ -1,47 +1,123 @@
-<p class="lead">消息模型是整个框架的<b>血液</b>。前端通过 <code>OpenAiMessageVo</code> 多态载体传输消息，后端通过 <code>OpsOpenAiConsts</code> 定义 12 种回显类型，SSE 流中的每一帧都带有明确的类型标签。</p>
+<p class="lead">消息是框架的第一公民。标准层定义 4 种角色消息，Ops 层通过 <code>OpenAiMessageVo</code> 多态载体与 <code>OpsOpenAiConsts</code> 扩展出 14 种<b>回显消息</b>——每个类型独占一个字段，让前端不仅能看到对话，还能看到"系统为模型做了什么"（提示词注入 / 工具调用 / 事实变迁）。</p>
 
-<div class="panel">
-<div class="panel-title">OpenAiMessageVo — 多态消息载体</div>
+<div class="two-col">
+<div>
+<div class="panel-title">OpenAI 标准四角色</div>
 <div class="spec-table-wrap">
 <table class="spec">
-<thead><tr><th>字段</th><th>类型</th><th>说明</th></tr></thead>
+<thead><tr><th>角色</th><th>常量</th><th>语义</th></tr></thead>
 <tbody>
-<tr><td><code>role</code></td><td>String</td><td>system / user / assistant / tool</td></tr>
-<tr><td><code>content</code></td><td>String | Object</td><td>文本内容或多模态数组</td></tr>
-<tr><td><code>tool_calls</code></td><td>List&lt;ToolCallVo&gt;</td><td>助手请求的工具调用列表</td></tr>
-<tr><td><code>tool_call_id</code></td><td>String</td><td>工具消息关联的工具调用 ID</td></tr>
-<tr><td><code>name</code></td><td>String</td><td>工具名称/可选参与者名称</td></tr>
-<tr><td><code>reasoning_content</code></td><td>String</td><td>DeepSeek-R1 / o1 等模型的思考过程</td></tr>
-<tr><td><code>prefix</code></td><td>Boolean</td><td>推理模型 prefix 模式（assistant 角色）</td></tr>
+<tr><td><span class="tag t-b">user</span></td><td><code>OpenAiConsts.USER</code></td><td>用户提示词，一般由用户发送</td></tr>
+<tr><td><span class="tag t-g">system</span></td><td><code>OpenAiConsts.SYSTEM</code></td><td>系统提示词，限定角色 / 职责 / 推理约束</td></tr>
+<tr><td><span class="tag t-o">assistant</span></td><td><code>OpenAiConsts.ASSISTANT</code></td><td>模型答复；特例：携带 <code>tool_calls</code> 契约</td></tr>
+<tr><td><span class="tag t-t">tool</span></td><td><code>OpenAiConsts.TOOL</code></td><td>工具执行结果，凭 <code>tool_call_id</code> 关联契约</td></tr>
+</tbody>
+</table>
+</div>
+<p class="body" style="font-size:13px;">前端可按角色定制显示/隐藏；<code>assistant</code> 消息额外支持 <code>reasoning_content</code> 思考过程折叠渲染。</p>
+</div>
+<div>
+<div class="panel-title">Ops 扩展回显类型（OpsOpenAiConsts）</div>
+<div class="spec-table-wrap">
+<table class="spec">
+<thead><tr><th>类型常量</th><th>载荷</th><th>用途</th></tr></thead>
+<tbody>
+<tr><td><code>definition_tool</code></td><td>工具定义 DTO</td><td>告知前端本轮注入了哪些工具（名称/描述/参数/标签/绑定类方法）</td></tr>
+<tr><td><code>echo_tool</code></td><td>EchoOpenAiToolMessage</td><td>回显工具执行结果与调用参数</td></tr>
+<tr><td><code>request_tool</code></td><td>RequestOpenAiToolMessage</td><td>回显工具调用请求</td></tr>
+<tr><td><code>echo_skill</code></td><td>技能系统提示词</td><td>回显注入的技能声明提示词（SKILL.md 聚合）</td></tr>
+<tr><td><code>echo_dynamic_tool</code></td><td>MCP 动态工具提示词</td><td>回显注入的 MCP 三步发现指引（列举供应商 → 列举工具 → 装载工具）</td></tr>
+<tr><td><code>echo_loop_engineering</code></td><td>循环工程提示词</td><td>回显注入的五步工程化工作流提示词（进度恢复 → 需求 → 方案 → 待办 → 实施）</td></tr>
+<tr><td><code>echo_truth_prompt</code></td><td>事实使用方式提示词</td><td>回显注入的 TruthStoreTools 事实读写指引（如何用 <code>store_truth</code>）</td></tr>
+<tr><td><code>echo_truth_content</code></td><td>事实内容系统消息</td><td>回显注入的「# 关键事实」内容（置于 messages[0]）</td></tr>
+<tr><td><code>echo_truth_sync</code></td><td>事实同步系统消息</td><td>工具执行后回显最新事实——<code>store_truth</code> 可能改写事实，前端据此刷新下一轮 <code>truthContent</code></td></tr>
+<tr><td><code>echo_lru_tools</code></td><td>工具名列表</td><td>同步 LRU 淘汰后的存活工具集</td></tr>
+<tr><td><code>echo_tool_intent_recommend</code></td><td>意图识别推理结果</td><td>回显工具意图识别的完整推理过程（prompt / rawResult / finalResult），前端可见、可追溯</td></tr>
+<tr><td><code>echo_request_payload</code></td><td>完整补全报文</td><td>回显实际发给 LLM 的请求报文（学习/调试）</td></tr>
+<tr><td><code>echo_session_records_map</code></td><td>循环工程会话记录 Map</td><td>流结束前回显 request / plan / checklist / agent 四类记录，前端持久化接力</td></tr>
+<tr><td><code>echo_async_tasks</code></td><td>异步任务列表</td><td>回显工具产生的异步任务（如文生图），前端渲染状态标签并提供刷新查询</td></tr>
 </tbody>
 </table>
 </div>
 </div>
-
-<div class="panel">
-<div class="panel-title">OpsOpenAiConsts — 12 种 SSE 回显类型</div>
-<div class="spec-table-wrap">
-<table class="spec">
-<thead><tr><th>常量</th><th>值</th><th>含义</th></tr></thead>
-<tbody>
-<tr><td><code>REPLY_MESSAGE</code></td><td>reply_message</td><td>普通回复消息</td></tr>
-<tr><td><code>REPLY_MESSAGE_ID</code></td><td>reply_message_id</td><td>回复消息 ID</td></tr>
-<tr><td><code>REPLY_MESSAGE_DELTA</code></td><td>reply_message_delta</td><td>回复消息增量（流式文本）</td></tr>
-<tr><td><code>REPLY_MESSAGE_FINISH</code></td><td>reply_message_finish</td><td>回复消息完成</td></tr>
-<tr><td><code>REPLY_MESSAGE_REASONING</code></td><td>reply_message_reasoning</td><td>思考过程增量</td></tr>
-<tr><td><code>REPLY_MESSAGE_REASONING_FINISH</code></td><td>reply_message_reasoning_finish</td><td>思考过程完成</td></tr>
-<tr><td><code>REPLY_MESSAGE_TOOL_CALLS</code></td><td>reply_message_tool_calls</td><td>工具调用请求</td></tr>
-<tr><td><code>REPLY_MESSAGE_TOOL_CALL_FINISH</code></td><td>reply_message_tool_call_finish</td><td>工具调用完成</td></tr>
-<tr><td><code>REPLY_ERROR</code></td><td>reply_error</td><td>错误回显</td></tr>
-<tr><td><code>REPLY_SYSTEM</code></td><td>reply_system</td><td>系统消息</td></tr>
-<tr><td><code>REPLY_RECORD</code></td><td>reply_record</td><td>会话记录回显</td></tr>
-<tr><td><code>REPLY_ASYNC_TASK</code></td><td>reply_async_task</td><td>异步任务状态</td></tr>
-</tbody>
-</table>
-</div>
 </div>
 
-<div class="callout" style="--c:#1971c2;">
-<div class="co-title">前端如何消费 SSE 帧</div>
-<p>前端通过 <code>fetch</code> 的 <code>ReadableStream</code> 逐行读取 SSE 流，每行解析为 <code>data: { "type": "reply_message_delta", "content": "..." }</code>。根据 <code>type</code> 字段路由到不同的渲染逻辑：<code>reply_message_delta</code> 追加到打字机效果、<code>reply_message_reasoning</code> 追加到折叠的思考面板、<code>reply_message_tool_calls</code> 弹出 HITL 审批弹窗。</p>
+<div class="panel-title">OpenAiMessageVo.java — 多态消息载体（type + 每类型独立字段）</div>
+
+```java
+public class OpenAiMessageVo {
+    protected String type; // 消息类型（决定读取哪个字段）
+
+    // ---- 标准四角色 ----
+    protected OpenAiSystemMessage system;
+    protected OpenAiUserMessage user;
+    protected OpenAiAssistantMessage assistant;
+    protected OpenAiToolMessage tool;
+
+    // ---- 工具回显 ----
+    protected EchoOpenAiToolMessage echo_tool; // 工具执行结果
+    protected RequestOpenAiToolMessage request_tool; // 工具调用请求
+
+    // ---- 系统提示词注入回显（OpenAiSystemMessage 载荷）----
+    protected OpenAiSystemMessage echo_skill; // 技能声明
+    protected OpenAiSystemMessage echo_dynamic_tool; // MCP 动态工具指引
+    protected OpenAiSystemMessage echo_loop_engineering; // 循环工程工作流
+
+    // ---- 事实注入三态回显（Truth 三元组）----
+    protected OpenAiSystemMessage echo_truth_prompt; // 事实使用方式
+    protected OpenAiSystemMessage echo_truth_content; // 事实内容
+    protected OpenAiSystemMessage echo_truth_sync; // 事实同步（工具执行后）
+
+    // ---- 工具意图推荐 ----
+    protected OpenAiSystemMessage echo_tool_intent_recommend; // 意图识别推理过程
+
+    protected List<TmpFileTools.UploadTmpFileMetadata> attachFiles; // 附件
+
+    // ---- 异步任务 ----
+    protected OpenAiSystemMessage echo_async_tasks; // 异步任务回显
+    protected List<AsyncTaskItem> asyncTasks; // 异步任务列表
+}
+```
+
+<div class="callout" style="--c:#862e9c;">
+<div class="co-title">Truth 三元组 — echo_truth 的一分为三</div>
+<p>原单一 <code>echo_truth</code> 细化为三个独立事件，对应事实生命周期的三个时刻：请求开始注入「# 关键事实」内容时发 <code>echo_truth_content</code>；注入事实使用方式指引时发 <code>echo_truth_prompt</code>；工具执行完毕（模型可能刚调用 <code>store_truth</code> 改写了事实）再以 <code>echo_truth_sync</code> 回显最新事实。前端倒序查找 <code>echo_truth_content</code> / <code>echo_truth_sync</code> 取最新值作为下一轮 <code>truthContent</code>——事实的「注入 → 使用 → 同步」全程可见、可追溯。</p>
 </div>
+
+<div class="panel-title">OpenAiOperateDto.java — 一次请求即一份"功能开关清单"</div>
+
+```java
+public class OpenAiOperateDto {
+    protected OpenAiMeta meta; // baseUrl · apiKey
+    protected OpenAiCompletionVo completion; // model · messages · stream
+    protected List<OpenAiToolApprovalDto> toolApprovalList; // HITL 审批决定
+
+    protected boolean encryptOutput; // 输出是否 SM4 加密
+    protected boolean enableTools; // Function Calling 开关
+    protected boolean enableSkills; // 技能系统开关
+    protected boolean enableRags; // 知识库开关
+    protected boolean enableLruTools; // MCP 动态工具开关
+    protected boolean enableToolRecommendByIntentRecognize; // 意图识别辅助工具推荐（依赖 enableLruTools）
+    protected boolean enableEchoRequestPayload; // 请求报文回显
+    protected boolean enableMergedSystemMsg; // 系统重排：合并系统消息至首条
+    protected boolean enableTruth; // 事实注入开关
+    protected boolean enableMemories; // 记忆系统开关
+    protected String memoryBucket; // 记忆桶（用户级隔离）
+
+    protected List<String> lruToolNames; // LRU 存活工具
+    protected Integer lruToolMaxSize; // LRU 容量
+    protected List<ToolDefinition> loadedTools; // 前端已加载工具定义（回传续用）
+    protected String truthContent; // 关键事实内容
+
+    protected String md5; // 附件 MD5 校验
+    protected String fileUrl; // 附件访问凭据
+    protected boolean parsedText; // 下载解析后的纯文本
+    protected boolean enableVisionImage; // 图片视觉输入开关
+    protected String ttsContent; // 语音合成文本（千问 TTS）
+
+    protected boolean enableLoopEngineering; // 循环工程开关
+    protected Map<String, String> sessionRecordsMap; // 循环工程会话记录（四类）
+
+    protected List<AsyncTaskItem> asyncTasks; // 异步任务状态列表（轮询回传）
+}
+```

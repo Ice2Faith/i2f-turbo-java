@@ -35,6 +35,29 @@ function setupMarkdown() {
                     renderMermaid(dom, graph)
                 };
                 setTimeout(applyFunc, 300);
+            } else if (lang == 'svg') {
+
+                let chartId = 'svg_' + new Date().getTime() + '_' + Math.random().toString(16).substring(2);
+                innerHtml = `<div id="${chartId}" class="rich-code-block svg-code-block"></div>`;
+                actionsHtml = ``;
+                let count = 10;
+                let applyFunc = () => {
+                    let dom = document.querySelector('#' + chartId);
+                    if (!dom && count > 0) {
+                        count--;
+                        setTimeout(applyFunc, 300);
+                        return;
+                    }
+
+                    if (!dom) {
+                        return;
+                    }
+                    dom.chartCode = str;
+
+                    renderSvg(dom, str);
+
+                };
+                setTimeout(applyFunc, 300);
             } else if (lang && hljs.getLanguage(lang)) {
                 // 检查语言是否受支持
                 try {
@@ -129,7 +152,8 @@ function onSaveMarkdownCodeBlock(event, lang) {
 
         const link = document.createElement('a');
         link.href = url;
-        link.download = (lang || 'text') + '_' + new Date().getTime() + '.txt';
+        let ext = (lang == 'svg') ? 'svg' : 'txt';
+        link.download = (lang || 'text') + '_' + new Date().getTime() + '.' + ext;
         link.click();
 
         // 清理内存
@@ -208,6 +232,30 @@ function renderMermaid(dom, graph) {
         }
         if (bubbleDom) {
             bubbleDom.rendering = false;
+        }
+    }, 0)
+}
+
+function renderSvg(dom, html) {
+    setTimeout(() => {
+        try {
+            if (html.trim().startsWith('<')) {
+                // 围栏内为完整 SVG 代码，直接注入
+                dom.innerHTML = html;
+            } else {
+                // 围栏内为 .svg 文件相对路径，fetch 后内联注入
+                fetch(html.trim()).then((r) => {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                }).then((text) => {
+                    dom.innerHTML = text;
+                    dom.chartCode = text;
+                }).catch((err) => {
+                    dom.innerHTML = `<p style="color:red;">SVG 加载失败：${err.message}</p>`;
+                });
+            }
+        } catch (e) {
+            dom.innerHTML = `<p style="color:red;">SVG 渲染失败</p>`;
         }
     }, 0)
 }

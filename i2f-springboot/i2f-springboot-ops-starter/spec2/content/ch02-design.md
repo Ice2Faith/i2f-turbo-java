@@ -15,13 +15,34 @@
 <div class="panel-title">AI 工程范式全景 — 15 种范式 · 6 层架构</div>
 <p class="body" style="font-size:13.5px;">本模块以一个 OpenAI 兼容的胖客户端对话系统为载体，完整实践了当前 AI Agent 工程的主流范式。这些范式并非孤立存在，而是<b>层层嵌套、相互协作</b>，共同构成功能完备的 Agent 系统：</p>
 <div class="diagram-panel" style="margin-top:14px;">
-<svg viewBox="0 0 940 386" role="img" aria-label="AI 工程范式六层架构图">
-<rect class="svg-node" x="20" y="16" width="900" height="52" rx="3" style="stroke:#e67700;"/><rect x="20" y="16" width="8" height="52" fill="#e67700"/><text class="svg-lbl" x="44" y="38" style="fill:#e67700;">引导层</text><text class="svg-lbl-sm" x="44" y="56">Prompt Engineering · Multi-Agent</text><text class="svg-lbl-sm" x="330" y="38">20 角色预设切换人格 · 技能/MCP/事实动态注入</text><text class="svg-lbl-sm" x="330" y="56">30% 概率重注入防遗忘 · 时间感知 · 附件 XML 标签追加</text>
-<rect class="svg-node" x="20" y="78" width="900" height="52" rx="3" style="stroke:#1971c2;"/><rect x="20" y="78" width="8" height="52" fill="#1971c2"/><text class="svg-lbl" x="44" y="100" style="fill:#1971c2;">执行层</text><text class="svg-lbl-sm" x="44" y="118">ReAct · Loop Engineering</text><text class="svg-lbl-sm" x="330" y="100">推理-行动循环 · 前端递归驱动 directSendMessage</text><text class="svg-lbl-sm" x="330" y="118">CountDownLatch 并发执行 · AbortController 中断 · 错误兜底不中断循环</text>
-<rect class="svg-node" x="20" y="140" width="900" height="52" rx="3" style="stroke:#c92a2a;"/><rect x="20" y="140" width="8" height="52" fill="#c92a2a"/><text class="svg-lbl" x="44" y="162" style="fill:#c92a2a;">控制层</text><text class="svg-lbl-sm" x="44" y="180">HITL · Tool Tags &amp; Auto-Approval</text><text class="svg-lbl-sm" x="330" y="162">工具审批弹窗 · 逐个/全部允许/拒绝 + 拒绝原因反馈</text><text class="svg-lbl-sm" x="330" y="180">多维语义标签 · autoApprovalToolTags 标签自动审批</text>
-<rect class="svg-node" x="20" y="202" width="900" height="52" rx="3" style="stroke:#2b8a3e;"/><rect x="20" y="202" width="8" height="52" fill="#2b8a3e"/><text class="svg-lbl" x="44" y="224" style="fill:#2b8a3e;">能力层</text><text class="svg-lbl-sm" x="44" y="242">MCP · RAG · Skills · A2A</text><text class="svg-lbl-sm" x="330" y="224">MCP 动态发现 + LRU 淘汰 · SQLite 向量检索 · SKILL.md 文档技能</text><text class="svg-lbl-sm" x="330" y="242">A2A Agent 嵌套调用（LLM 作为工具 · 独立上下文）</text>
-<rect class="svg-node" x="20" y="264" width="900" height="52" rx="3" style="stroke:#862e9c;"/><rect x="20" y="264" width="8" height="52" fill="#862e9c"/><text class="svg-lbl" x="44" y="286" style="fill:#862e9c;">记忆层</text><text class="svg-lbl-sm" x="44" y="304">Truth · Memory · Context Window</text><text class="svg-lbl-sm" x="330" y="286">Truth 会话级事实（整体替换）· Memory 用户级向量记忆（Bucket 桶隔离）</text><text class="svg-lbl-sm" x="330" y="304">maxHistoryCount 截断 · 角色消息始终保留 · LRU 控制工具声明占用</text>
-<rect class="svg-node" x="20" y="326" width="900" height="52" rx="3" style="stroke:#e8590c;"/><rect x="20" y="326" width="8" height="52" fill="#e8590c"/><text class="svg-lbl" x="44" y="348" style="fill:#e8590c;">基础层</text><text class="svg-lbl-sm" x="44" y="366">Harness Eng. · Fat Client · SSE Streaming</text><text class="svg-lbl-sm" x="330" y="348">3440 行单文件 SPA 状态驱动 · 后端单轮无状态可水平扩展</text><text class="svg-lbl-sm" x="330" y="366">SSE 逐 Token 流式输出 · SM2/SM4 国密加密传输</text>
-</svg>
+
+```svg
+assets/diagrams/ch02-pattern-layers.svg
+```
+
+
 <div class="dg-cap">范式六层架构 — 执行/控制/能力/记忆/基础/引导层层嵌套协作</div>
+</div>
+
+<div class="spec-table-wrap">
+<table class="spec">
+<thead><tr><th>#</th><th>范式</th><th>英文</th><th>本模块的核心定位</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><b>ReAct</b></td><td>Reasoning + Acting</td><td>推理-行动循环，Agent 的核心执行模式（第 05 章）</td></tr>
+<tr><td>2</td><td><b>循环工程</b></td><td>Loop Engineering</td><td>工具调用循环的编排与驱动：何时开始/终止/中断/并发</td></tr>
+<tr><td>3</td><td><b>脚手架工程</b></td><td>Harness Engineering</td><td>LLM 外围基础设施：消息管理/状态维护/I/O/安全传输</td></tr>
+<tr><td>4</td><td><b>人机协同</b></td><td>Human In The Loop</td><td>工具执行审批，危险操作人类把关（第 07 章）</td></tr>
+<tr><td>5</td><td><b>MCP</b></td><td>Model Context Protocol</td><td>动态工具发现与加载的桥接网关（第 10 章）</td></tr>
+<tr><td>6</td><td><b>RAG</b></td><td>Retrieval-Augmented Generation</td><td>向量检索增强生成（第 09 章）</td></tr>
+<tr><td>7</td><td><b>A2A</b></td><td>Agent-to-Agent</td><td>Agent 间调用，LLM 作为工具（第 12 章）</td></tr>
+<tr><td>8</td><td><b>多智能体</b></td><td>Multi-Agent</td><td>多角色/多能力体分工协作（角色系统 + 工具分工）</td></tr>
+<tr><td>9</td><td><b>技能系统</b></td><td>Skill-based Agent</td><td>基于文档的可插拔技能（第 08 章）</td></tr>
+<tr><td>10</td><td><b>事实注入</b></td><td>Truth Injection / Memory</td><td>三级记忆架构：Truth 会话级 + Memory 用户级 + RAG 系统级（第 09 / 12 章）</td></tr>
+<tr><td>11</td><td><b>提示词工程</b></td><td>Prompt Engineering</td><td>角色系统与动态提示词注入策略</td></tr>
+<tr><td>12</td><td><b>上下文工程</b></td><td>Context Window Management</td><td>上下文窗口管理与压缩（截断/总结/LRU）</td></tr>
+<tr><td>13</td><td><b>胖客户端</b></td><td>Fat Client Architecture</td><td>状态驱动的胖客户端架构（第 14 章）</td></tr>
+<tr><td>14</td><td><b>流式输出</b></td><td>SSE Streaming</td><td>Server-Sent Events 逐 Token 实时输出（第 04 章）</td></tr>
+<tr><td>15</td><td><b>标签化权限</b></td><td>Tool Tags &amp; Auto-Approval</td><td>标签化权限与自动审批策略（第 07 章）</td></tr>
+</tbody>
+</table>
 </div>

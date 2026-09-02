@@ -1,31 +1,121 @@
-<p class="lead">一次完整的 OpenAI 对话，在前端-后端-LLM 三者之间经历 7 个阶段，形成一个端到端的 SSE 流水线。前端维护会话状态，后端仅做安全与转发。</p>
+<p class="lead"><code>POST /ops/open-ai/stream</code> 是整个子系统最核心的端点（<code>OpenAiOpsController#stream</code>，约 600 行编排逻辑）。它返回一个 5 分钟超时的 <code>SseEmitter</code>，真正的编排跑在 work-stealing 线程池中。</p>
 
 <div class="diagram-panel">
-<svg viewBox="0 0 800 480" role="img" aria-label="核心对话流程 SSESequence 图">
-<defs><marker id="ch4-ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#46607a"/></marker></defs>
-<rect class="svg-node" x="30" y="10" width="80" height="36" rx="3" style="fill:var(--dark);stroke:var(--dark);"/><text class="svg-lbl-w" x="70" y="33" text-anchor="middle">Browser</text>
-<rect class="svg-node svg-node-teal" x="210" y="10" width="100" height="36" rx="3"/><text class="svg-lbl" x="260" y="33" text-anchor="middle">Controller</text>
-<rect class="svg-node" x="410" y="10" width="100" height="36" rx="3"/><text class="svg-lbl" x="460" y="33" text-anchor="middle">AiAgent</text>
-<rect class="svg-node svg-node-acc" x="610" y="10" width="160" height="36" rx="3"/><text class="svg-lbl" x="690" y="33" text-anchor="middle">LLM (OpenAI兼容)</text>
-<path class="svg-line" d="M70,62 L70,440" stroke-dasharray="4 6"/><path class="svg-line" d="M260,62 L260,440" stroke-dasharray="4 6"/><path class="svg-line" d="M460,62 L460,440" stroke-dasharray="4 6"/><path class="svg-line" d="M690,62 L690,440" stroke-dasharray="4 6"/>
-<text class="svg-lbl-sm" x="74" y="78">① SM2/SM4 加密</text><path class="svg-line" d="M70,86 L260,86" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="140" y="102">POST /ops/open-ai/stream</text>
-<text class="svg-lbl-sm" x="264" y="126">② 解密·构建 Agent</text><path class="svg-line" d="M260,134 L460,134" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="340" y="150">AiAgent.invoke(messages)</text>
-<text class="svg-lbl-sm" x="464" y="174">③ 注入 Prompt 上下文</text><path class="svg-line" d="M460,182 L690,182" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="560" y="198">POST /v1/chat/completions (stream)</text>
-<text class="svg-lbl-sm" x="680" y="222" text-anchor="end">④ SSE 逐 Token 返回</text><path class="svg-line" d="M690,230 L460,230" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="560" y="246">delta.content / delta.tool_calls</text>
-<text class="svg-lbl-sm" x="464" y="270">⑤ 中继 SSE 到前端</text><path class="svg-line" d="M460,278 L260,278" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="340" y="294">SseEmitter.send(chunk)</text>
-<text class="svg-lbl-sm" x="264" y="318">⑥ 可选输出加密</text><path class="svg-line" d="M260,326 L70,326" marker-end="url(#ch4-ah)"/><text class="svg-lbl-sm" x="140" y="342">SM4 加密（可选）</text>
-<text class="svg-lbl-sm" x="74" y="366">⑦ 前端消费·重新渲染</text><path class="svg-line" d="M70,374 L70,374"/><text class="svg-lbl-sm" x="74" y="390">打字机效果·工具审批弹窗·ReAct 循环</text>
-<rect class="svg-node" x="30" y="410" width="130" height="36" rx="3"/><text class="svg-lbl" x="95" y="433" text-anchor="middle">SseEmitter 5min</text>
-</svg>
-<div class="dg-cap">端到端 SSE 流水线 — 后端仅做安全网关 + 中继，不保存会话状态</div>
+
+```svg
+assets/diagrams/ch04-sequence.svg
+```
+
+
+<div class="dg-cap">SSE 对话时序 — 后端是"安全网关 + 工具执行器 + 流中继"三位一体</div>
 </div>
 
+<div class="panel-title">编排关键决策点</div>
 <div class="step-list">
-<div class="step"><div class="no"></div><div class="bd"><h4>① 加密发送</h4><p>前端生成随机 SM4 密钥，加密 JSON 请求体；SM2 公钥封装 SM4 密钥；SM3 摘要 + SM2 签名；时间戳防重放。POST 到 <code>POST /ops/open-ai/stream</code>。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>② 解密与验证</h4><p><code>OpenAiOpsController</code> 的 <code>doStreamCompletion</code> 方法：SM2 解密 SM4 密钥 → SM4 解密请求体 → 验证签名与时间戳（默认 5 分钟窗口）。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>③ 上下文注入</h4><p>构建 <code>AiAgent</code> 实例，注入系统提示词（角色 + 技能 + 事实 + 时间 + MCP 工具声明），合并用户消息与附件 XML。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>④ 工具检查 + 缓存</h4><p>检查最后一条助手消息是否包含 <code>tool_calls</code>；若所有工具结果已收集完毕，则缓存到 <code>toolMessageCache</code> 供后续复用。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>⑤ 模型调用</h4><p>调用 <code>AiAgent.invoke()</code> → <code>AiModel.chatStream()</code> → <code>HttpOpenAiAiModel</code> 发起 POST 到 LLM 的 <code>/v1/chat/completions</code>，启用 <code>stream: true</code>。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>⑥ SSE 中继</h4><p>后端逐 chunk 接收 LLM 的 SSE 流（<code>delta.content</code>、<code>delta.tool_calls</code>、<code>delta.reasoning_content</code>），包装为 <code>OpsOpenAiConsts</code> 定义的 12 种回显类型，通过 <code>SseEmitter.send()</code> 逐条中继给前端。</p></div></div>
-<div class="step"><div class="no"></div><div class="bd"><h4>⑦ 前端渲染与循环</h4><p>前端 <code>EventSource</code> 或 <code>fetch</code> 消费 SSE 流：打字机效果逐字渲染 <code>content</code>，独立折叠渲染 <code>reasoning</code>，检测 <code>tool_calls</code> 后弹出审批弹窗，获批后自动触发下一轮 ReAct 循环。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>解密与线程切换 <code>transfer.recv()</code></h4><p>请求体 <code>OpsSecureDto</code> 经国密链路解密还原为 <code>OpenAiOperateDto</code>；随后 <code>CompletableFuture.runAsync</code> 切入 work-stealing 池（<code>min(max(CPU×4+2, 16), 512)</code> 线程），HTTP 线程立即返回 SseEmitter。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>提示词注入时机判定 <code>needInjectSystemPrompt</code></h4><p>仅当末消息是 user/system 时注入系统提示词；若末消息是 assistant/tool（多为中间过程）则默认不注入，但保留 <b>30% 概率随机注入</b>，保证长周期对话中提示词引导不丢失。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>工具集动态裁剪</h4><p>依据 <code>enableMemories / enableTruth / enableSkills / enableRags / enableLruTools</code> 五开关，按绑定类（<code>MemoryTools / TruthStoreTools / SkillsTools / RagTools / McpProviderTools</code>）过滤工具列表——功能开关即工具可见性。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>工具契约执行 <code>HITL 审批</code></h4><p>末消息为带 <code>tool_calls</code> 的 assistant 消息时，逐个契约核对前端审批决定（<code>toolApprovalList</code>）：拒绝则注入拒绝原因作为错误结果；允许则提交 <code>toolPool</code> 并行执行，<code>CountDownLatch</code> 汇聚后回填消息列表。前端在每轮发起前做<b>未 resolved 授权恢复检查</b>——存在待审批契约但审批弹窗已关闭（<code>resolved=false</code>）时自动重新唤起弹窗，避免待授权工具调用被静默丢弃。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>流式中继 <code>SpringWebHttpProcessor</code></h4><p>通过 <code>HttpRequest.doPost(url).json()</code> 携带 Bearer 令牌请求 LLM，逐行读取 <code>data:</code> 前缀的 chunk，封装为 <code>OpsSecureReturn</code>（按 <code>encryptOutput</code> 决定是否加密）后 <code>emitter.send()</code> 中继。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>循环工程会话记录 <code>sessionRecordsMap</code></h4><p>开启 <code>enableLoopEngineering</code> 后，请求携带的 <code>sessionRecordsMap</code> 经 <code>ToolCallContextHolder</code> 注入 <code>SessionRecordTools</code> 读写上下文；流结束前以 <code>echo_session_records_map</code> 事件回显最新记录，前端持久化到 localStorage，实现跨轮循环工程状态接力。</p></div></div>
+<div class="step"><div class="no"></div><div class="bd"><h4>异步任务收集与回显 <code>AsyncTaskMessage</code></h4><p>工具执行返回 <code>AsyncTaskMessage</code>（如文生图等长耗时操作）时，Controller 自动收集全部异步任务，以 <code>echo_async_tasks</code> 事件回显给前端；前端渲染任务状态标签（等待中 / 运行中 / 成功 / 失败），用户可手动刷新查询状态，或待任务完成后自动展示结果文件。异步任务的查询路由由 <code>AsyncTaskDispatcher</code> 统一分发至匹配的 <code>AsyncTaskResolver</code> 实现。</p></div></div>
+</div>
+
+<div class="panel-title">REST 端点一览</div>
+<div class="spec-table-wrap">
+<table class="spec">
+<thead><tr><th>端点</th><th>方法</th><th>职责</th><th>返回</th></tr></thead>
+<tbody>
+<tr><td><code>/ops/open-ai/stream</code></td><td><span class="tag t-o">POST</span></td><td>SSE 流式对话（编排核心）</td><td><code>SseEmitter</code> · text/event-stream</td></tr>
+<tr><td><code>/ops/open-ai/models</code></td><td><span class="tag t-o">POST</span></td><td>代理查询 LLM 提供方的模型列表</td><td>加密的模型数组</td></tr>
+<tr><td><code>/ops/open-ai/tool/tags</code></td><td><span class="tag t-o">POST</span></td><td>聚合全部工具标签（自动审批配置用）</td><td>加密的标签集合</td></tr>
+<tr><td><code>/ops/open-ai/tmp-file/upload</code></td><td><span class="tag t-o">POST</span></td><td>附件上传（MD5 流式校验防篡改）</td><td>文件访问凭据</td></tr>
+<tr><td><code>/ops/open-ai/tmp-file/download</code></td><td><span class="tag t-o">POST</span></td><td>附件下载（支持下载解析后的纯文本）</td><td>文件附件流</td></tr>
+<tr><td><code>/ops/open-ai/tts/qwen/generate</code></td><td><span class="tag t-o">POST</span></td><td>千问语音合成（分段 WebSocket 拉流转 MP3）</td><td>文件访问凭据</td></tr>
+<tr><td><code>/ops/open-ai/async/task/query</code></td><td><span class="tag t-o">POST</span></td><td>异步任务状态轮询（文生图等长耗时操作）</td><td>加密的任务状态列表</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="two-col">
+<div>
+<div class="panel-title">/stream 请求体 — 一次请求即一份完整契约</div>
+
+```json
+{
+  "meta": {
+    "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+    "apiKey": "sk-***"
+  },
+  "completion": {
+    "model": "qwen-max",
+    "stream": true,
+    "messages": [
+      { "role": "system", "content": "..." },
+      { "role": "user", "content": "..." }
+    ],
+    "temperature": 0.7,
+    "maxTokens": 2048
+  },
+  "enableTools": true,
+  "enableSkills": true,
+  "enableRags": true,
+  "enableLruTools": false,
+  "enableToolRecommendByIntentRecognize": false, /* 意图识别辅助工具推荐 */
+  "enableTruth": false,
+  "encryptOutput": false,
+  "enableMemories": false,
+  "memoryBucket": "user-001",                  /* 记忆系统 */
+  "enableMergedSystemMsg": false,              /* 系统重排 */
+  "stream_options": { "include_usage": true }, /* Token 用量统计 */
+  "enableVisionImage": false,                  /* 图片视觉输入 */
+  "enableLoopEngineering": true,               /* 循环工程 */
+  "sessionRecordsMap": { },                    /* 循环工程四类会话记录 */
+  "toolApprovalList": [                        /* HITL 审批决定，见第 06 章 */ ]
+}
+```
+</div>
+<div>
+<div class="panel-title">SSE 事件格式 — 逐 chunk 中继</div>
+
+```text
+event: delta
+data: {"choices":[{"delta":{"content":"你好"},"index":0}]}
+
+# 推理过程（思考内容）独立字段推送
+event: delta
+data: {"choices":[{"delta":{"reasoning_content":"..."}}]}
+
+# 工具调用契约（流式拼接 arguments）
+event: delta
+data: {"choices":[{"delta":{"tool_calls":[{
+  "id":"call_xxx",
+  "function":{"name":"rag_search","arguments":"{}"}}]}}]}
+
+event: done
+data: [DONE]
+```
+</div>
+</div>
+
+<div class="panel-title">对话状态机 — 一轮对话的完整生命周期</div>
+<div class="diagram-panel">
+
+```svg
+assets/diagrams/ch04-state-machine.svg
+```
+
+
+<div class="dg-cap">对话核心状态机 — 工具循环（HITL_AWAIT → TOOL_EXEC → FEEDBACK）可多轮嵌套</div>
+</div>
+<div class="spec-table-wrap">
+<table class="spec">
+<thead><tr><th>子系统</th><th>状态轨迹</th></tr></thead>
+<tbody>
+<tr><td><b>会话生命周期</b></td><td>NEW → ACTIVE → SUMMARIZING（手动 / 自动总结）/ TRIMMED（截断）/ EXPORTED（导出）/ DELETED → 回到 ACTIVE</td></tr>
+<tr><td><b>工具加载</b></td><td>DISABLED → ENABLED → FULL_LOAD（全量）/ LRU_MODE（动态）→ READY</td></tr>
+<tr><td><b>RAG 知识库</b></td><td>DISABLED → ENABLED → DOC_SCAN（扫描）→ EMBED（向量化）→ READY → QUERYING（检索中）</td></tr>
+<tr><td><b>技能系统</b></td><td>DISABLED → ENABLED → FILE_SCAN（30s 循环）→ LOADED → DECLARED（声明注入）→ EXECUTING</td></tr>
+</tbody>
+</table>
 </div>

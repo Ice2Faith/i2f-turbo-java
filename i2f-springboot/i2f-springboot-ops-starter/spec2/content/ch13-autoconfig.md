@@ -1,39 +1,71 @@
-<p class="lead">Spring Boot 自动装配是"一个依赖即一个工作台"理念的基石。引入 <code>i2f-springboot-ops-starter</code> 后，Spring Boot 自动配置机制将整个 OpenAI 子系统注入应用。</p>
+<p class="lead">整个 AI 子系统遵循 SpringBoot Starter 哲学：<b>引入依赖即自动装配</b>，全部能力默认开启，用 <code>@ConditionalOnExpression</code> 挂接配置开关，用 <code>@ConditionalOnMissingBean</code> 让渡自定义实现。</p>
 
-<div class="panel">
-<div class="panel-title">自动装配组件矩阵</div>
+<div class="panel-title">配置开关一览（默认全部为 true）</div>
 <div class="spec-table-wrap">
 <table class="spec">
-<thead><tr><th>配置类</th><th>职责</th><th>条件</th></tr></thead>
+<thead><tr><th>开关</th><th>装配类 / Bean</th><th>控制范围</th></tr></thead>
 <tbody>
-<tr><td><code>OpenAiOpsWebAutoConfiguration</code></td><td>注册 <code>OpenAiOpsController</code> 和 <code>QwenTtsOpsController</code></td><td><code>@ConditionalOnWebApplication</code></td></tr>
-<tr><td><code>SpringContextToolAutoConfiguration</code></td><td>扫描 <code>@Tool</code> 注解，注册所有工具 Bean</td><td>始终装配</td></tr>
-<tr><td><code>SkillAutoConfiguration</code></td><td>启动 30 秒热扫描调度器</td><td><code>i2f.ops.openai.skill.enabled=true</code></td></tr>
-<tr><td><code>RagAutoConfiguration</code></td><td>初始化 Embedding 服务 + SQLite 向量存储</td><td><code>i2f.ops.openai.rag.enabled=true</code></td></tr>
-<tr><td><code>GroovyTools</code> (条件 Bean)</td><td>注册 Groovy 脚本执行工具</td><td><code>@ConditionalOnClass(GroovyShell.class)</code></td></tr>
-<tr><td><code>SQL 校验器</code> (条件 Bean)</td><td>注册 SQL AST 安全校验器</td><td><code>@ConditionalOnClass(JSqlParser.class)</code></td></tr>
+<tr><td><code>ai.tools.enable</code></td><td><code>SpringContextToolAutoConfiguration</code></td><td>工具体系总开关</td></tr>
+<tr><td><code>ai.tools.mcp.app.enable</code></td><td><code>ContextAppMcpToolProvider</code></td><td>应用内 MCP 工具供应商</td></tr>
+<tr><td><code>ai.tools.mcp.manager.enable</code></td><td><code>ContextMcpToolGatewayManager</code></td><td>MCP 网关 ToolManager</td></tr>
+<tr><td><code>ai.tools.app.manager.enable</code></td><td><code>ContextAppToolManager</code></td><td>应用内 @Tool 扫描 ToolManager</td></tr>
+<tr><td><code>ai.tools.mcp-gateway.enable</code></td><td><code>McpProviderTools</code></td><td>MCP 动态工具元工具</td></tr>
+<tr><td><code>ai.skills.enable</code></td><td><code>SkillAutoConfiguration</code></td><td>技能系统 + 30 秒热扫描</td></tr>
+<tr><td><code>ai.skills.tool.enable</code></td><td><code>SkillsTools</code></td><td>技能三件套工具</td></tr>
+<tr><td><code>ai.rags.enable</code></td><td><code>RagAutoConfiguration</code></td><td>RAG 知识库全链路</td></tr>
+<tr><td><code>ai.rags.memory.bucket.enable</code></td><td><code>BucketRagEmbeddingStore</code></td><td>记忆桶向量存储（SQLite 桶分区）</td></tr>
+<tr><td><code>ai.rags.memory.enable</code></td><td><code>MemoryTools</code></td><td>记忆三件套工具（search / save / delete）</td></tr>
+<tr><td><code>ai.tools.session-record.enable</code></td><td><code>SessionRecordTools</code></td><td>循环工程会话记录读写工具</td></tr>
+<tr><td><code>ai.tools.groovy.enable</code></td><td><code>GroovyTools</code></td><td>Groovy 脚本执行工具（<b>默认关闭</b>，需 Groovy 依赖）</td></tr>
+<tr><td><code>ai.tts.qwen.enable</code></td><td><code>QwenTtsOpsController</code></td><td>千问语音合成代理端点</td></tr>
 </tbody>
 </table>
 </div>
-</div>
 
-<div class="panel">
-<div class="panel-title">关键配置属性</div>
-<div class="spec-table-wrap">
+<div class="two-col">
+<div>
+<div class="panel-title">装配策略</div>
+<div class="step-list" style="margin-top:0;">
+<div class="step">
+<div class="no"></div>
+<div class="bd"><h4>条件表达式门控</h4>
+<p><code>@ConditionalOnExpression("${ai.xxx.enable:true}")</code> —— 默认开启，配置即关。</p></div>
+</div>
+<div class="step">
+<div class="no"></div>
+<div class="bd"><h4>缺失才装配</h4>
+<p><code>@ConditionalOnMissingBean</code> —— 用户自实现同类型 Bean 时自动让渡，扩展不冲突。</p></div>
+</div>
+<div class="step">
+<div class="no"></div>
+<div class="bd"><h4>双管理器互斥</h4>
+<p>MCP 网关与应用扫描两个 <code>ToolManager</code> 互斥装配，避免工具重复注册。</p></div>
+</div>
+<div class="step">
+<div class="no"></div>
+<div class="bd"><h4>启动即预热</h4>
+<p>技能首轮全量扫描、RAG 后台线程加载文档，均异步完成，不阻塞应用启动。</p></div>
+</div>
+</div>
+</div>
+<div>
+<div class="panel-title">RAG 可调参数（RagEmbeddingModelProperties）</div>
+<div class="spec-table-wrap" style="margin-top:0;">
 <table class="spec">
-<thead><tr><th>属性</th><th>默认值</th><th>说明</th></tr></thead>
+<thead><tr><th>属性</th><th>含义</th></tr></thead>
 <tbody>
-<tr><td><code>i2f.ops.openai.base-url</code></td><td>—</td><td>LLM 服务 Base URL</td></tr>
-<tr><td><code>i2f.ops.openai.api-key</code></td><td>—</td><td>LLM 服务 API Key</td></tr>
-<tr><td><code>i2f.ops.openai.model</code></td><td>—</td><td>默认模型名</td></tr>
-<tr><td><code>i2f.ops.openai.skill.enabled</code></td><td>true</td><td>是否启用技能系统</td></tr>
-<tr><td><code>i2f.ops.openai.skill.base-path</code></td><td>skills/</td><td>技能目录路径</td></tr>
-<tr><td><code>i2f.ops.openai.rag.enabled</code></td><td>true</td><td>是否启用 RAG</td></tr>
-<tr><td><code>i2f.ops.openai.rag.embedding-model</code></td><td>—</td><td>Embedding 模型名</td></tr>
-<tr><td><code>i2f.ops.openai.crypto.enabled</code></td><td>true</td><td>是否启用国密加密</td></tr>
-<tr><td><code>i2f.ops.openai.crypto.timestamp-window</code></td><td>300</td><td>时间戳防重放窗口（秒）</td></tr>
+<tr><td><code>baseUrl / apiKey / model</code></td><td>Embedding 服务接入点</td></tr>
+<tr><td><code>dimension</code></td><td>向量维度（SQLite 存储建表依据）</td></tr>
+<tr><td><code>docsPath</code></td><td>文档投放目录</td></tr>
+<tr><td><code>maxSegmentSizeInChars</code></td><td>切分器最大分段长度</td></tr>
+<tr><td><code>maxOverlapRate</code></td><td>分段重叠率</td></tr>
+<tr><td><code>docsEmbedBatchSize</code></td><td>入库批量大小</td></tr>
+<tr><td><code>enableMarkitdownDocReader</code></td><td>Office 文档读取器开关</td></tr>
+<tr><td><code>enableEasyocrDocReader</code></td><td>图片 / PDF-OCR 读取器开关</td></tr>
+<tr><td><code>enablePandocDocReader</code></td><td>Pandoc 转换读取器开关</td></tr>
 </tbody>
 </table>
+</div>
 </div>
 </div>
 

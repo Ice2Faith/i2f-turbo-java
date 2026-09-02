@@ -365,6 +365,8 @@ p code, li code, .card code, .callout code, h4 code, h3 code { font-family: var(
 .markdown-code-block .markdown-header-actions > *:hover { color: deepskyblue; }
 .markdown-code-block .markdown-code-body { margin-top: 0px; border-radius: 0px 0px 8px 8px; }
 .mermaid-code-block { width: 100%; min-width: 480px; min-height: 320px; background: white; }
+.svg-code-block { width: 100%; overflow-x: auto; background: var(--panel); }
+.svg-code-block svg { display: block; margin: 6px auto; max-width: 100%; height: auto; }
 
 /* ==================== 响应式 ==================== */
 @media (max-width: 1100px) {

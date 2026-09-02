@@ -1,22 +1,52 @@
-<p class="lead">Re-Act（Reasoning + Acting）是本框架的<b>核心执行引擎</b>，由 <code>AiAgent</code> 类实现。并非由后端循环驱动，而是<b>前端递归驱动</b>——每次 SSE 流结束后，前端检测到 <code>tool_calls</code> 就自动发起下一轮请求，形成"推理→行动→观察→再推理"的闭环。</p>
+<p class="lead">标准层 <code>i2f.ai.std.agent.AiAgent</code>（471 行）实现了完整的 <b>Reasoning + Acting</b> 循环。Ops 子系统虽由前端驱动循环节奏，但后端 <code>i2f-ai-std</code> 提供的这套 Agent 引擎是同一套设计哲学的程序化表达，二者共享工具解析（<code>ToolRawHelper</code>）与消息模型。</p>
 
 <div class="diagram-panel">
-<svg viewBox="0 0 780 420" role="img" aria-label="ReAct 循环流程图">
-<defs><marker id="r5-ah" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#e8590c"/></marker></defs>
-<rect class="svg-node svg-node-acc" x="280" y="16" width="220" height="52" rx="4"/><text class="svg-lbl" x="390" y="38" text-anchor="middle">前端发送消息列表</text><text class="svg-lbl-sm" x="390" y="56" text-anchor="middle">role: system/user/assistant/tool</text>
-<path class="svg-line-acc" d="M390,68 L390,100" marker-end="url(#r5-ah)"/>
-<rect class="svg-node svg-node-teal" x="270" y="104" width="240" height="52" rx="4"/><text class="svg-lbl" x="390" y="126" text-anchor="middle">AiAgent.invoke()</text><text class="svg-lbl-sm" x="390" y="144" text-anchor="middle">注入提示词 → 工具声明 → AiModel.chatStream()</text>
-<path class="svg-line-acc" d="M390,156 L390,188" marker-end="url(#r5-ah)"/>
-<rect class="svg-node" x="290" y="192" width="200" height="52" rx="4"/><text class="svg-lbl" x="390" y="214" text-anchor="middle">LLM 推理</text><text class="svg-lbl-sm" x="390" y="232" text-anchor="middle">文本回复 / tool_calls 决策</text>
-<path class="svg-line" d="M390,244 L390,300" marker-end="url(#r5-ah)"/>
-<rect class="svg-node" x="260" y="276" width="260" height="22" rx="11" style="fill:var(--orange-soft);stroke:var(--orange);"/><text class="svg-lbl-sm" x="390" y="291" text-anchor="middle" style="fill:var(--orange);">有 tool_calls？</text>
-<path class="svg-line" d="M520,287 L700,287 L700,220 L502,220" marker-end="url(#r5-ah)"/><text class="svg-lbl-sm" x="720" y="260" style="fill:var(--red);">否 → 结束</text>
-<path class="svg-line" d="M260,287 L60,287 L60,220 L278,220" marker-end="url(#r5-ah)"/><text class="svg-lbl-sm" x="40" y="260" style="fill:var(--green);">是 → 继续</text>
-<rect class="svg-node svg-node-green" x="270" y="316" width="240" height="52" rx="4"/><text class="svg-lbl" x="390" y="338" text-anchor="middle">工具契约并行执行</text><text class="svg-lbl-sm" x="390" y="356" text-anchor="middle">CountDownLatch 并发 · HITL 审批</text>
-<path class="svg-line-acc" d="M390,368 L390,400" marker-end="url(#r5-ah)"/>
-<text class="svg-lbl-sm" x="390" y="416" text-anchor="middle">结果注入消息列表，前端递归触发下一轮</text>
-</svg>
-<div class="dg-cap">Re-Act 循环 — 由前端递归驱动，非后端循环</div>
+
+```svg
+assets/diagrams/ch05-react-loop.svg
+```
+
+
+<div class="dg-cap">AiAgent Re-Act 循环 — 直至模型返回 STOP 或触发护栏</div>
+</div>
+
+<div class="two-col">
+<div>
+<div class="panel-title">消息列表演化记号法</div>
+<div class="pkg-tree"><span class="cm"># 一轮完整的工具调用对话</span>
+[1u] <span class="cm"># 用户发送消息</span>
+↓ 注入工具声明
+[1u] → LLM 推理
+↓ 返回调用契约
+[1u, 2ac] <span class="cm"># 2ac = 助手消息 + tool_calls</span>
+↓ 执行工具 · 反馈结果
+[1u, 2ac, 3t] <span class="cm"># 3t = 工具消息</span>
+↓ LLM 继续推理（客户端自动触发）
+[1u, 2ac, 3t, 4a] <span class="cm"># 4a = 最终归纳答复</span></div>
+<p class="body" style="font-size:13px;margin-top:10px;">两轮 LLM 调用：第一轮仅携带 <code>[1u]</code> 由用户触发；第二轮携带三条消息由客户端自动触发——这正是"客户端即 Agent 运行时"的含义。</p>
+</div>
+<div>
+<div class="panel-title">AiAgentContext 护栏配置</div>
+<div class="spec-table-wrap">
+<table class="spec">
+<thead><tr><th>配置项</th><th>默认</th><th>说明</th></tr></thead>
+<tbody>
+<tr><td><code>maxAllToolCallCount</code></td><td>100</td><td>全局工具调用上限</td></tr>
+<tr><td><code>maxSingleToolCallCount</code></td><td>10</td><td>单工具调用上限</td></tr>
+<tr><td><code>maxSingleToolSameArgumentFailureCount</code></td><td>2</td><td>同参数失败上限（防死磕）</td></tr>
+<tr><td><code>maxKeepMessageCount</code></td><td>20</td><td>最大保留消息数</td></tr>
+<tr><td><code>compressHistoryCount</code></td><td>16</td><td>触发 LLM 摘要压缩阈值</td></tr>
+<tr><td><code>keepFirstUserMessage</code></td><td>true</td><td>截断时保留首条用户消息</td></tr>
+<tr><td><code>enableParallelToolCall</code></td><td>true</td><td>并行执行工具契约</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div class="callout" style="--c:#2b8a3e;">
+<div class="co-title">历史压缩策略（compressOrDropHistoryMessage）</div>
+<p>消息数达到阈值时，将超量历史消息取出并追加一条 <code>"总结上述对话内容"</code> 的用户消息，单独请求 LLM 生成摘要回填——用一次廉价调用换取上下文瘦身；随后按 <code>maxKeepMessageCount</code> 硬截断，并可选保留首条用户消息以锚定对话主题。前端页面则以"截断会话历史线"分割线可视化这一过程。</p>
 </div>
 
 <div class="panel">
