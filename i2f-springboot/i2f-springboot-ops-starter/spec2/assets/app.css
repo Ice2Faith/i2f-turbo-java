@@ -640,6 +640,8 @@ a:hover {
 .chapter {
     padding: 58px 0 10px 0;
     border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    max-width: 100vw;
 }
 
 .chapter-header {
@@ -1387,6 +1389,8 @@ p code, li code, .card code, .callout code, h4 code, h3 code {
     border: none;
     border-radius: 0;
     padding: 8px;
+    overflow-x: auto;
+    max-width: 100vw;
 }
 
 .mermaid-code-block {
