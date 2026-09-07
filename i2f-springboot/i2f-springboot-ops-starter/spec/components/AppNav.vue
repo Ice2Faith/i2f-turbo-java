@@ -6,7 +6,9 @@
             </button>
             <div class="boot-brand">
                 <span class="boot-logo">⚙</span>
-                <span class="boot-title">i2f-springboot-ops-starter</span>
+                <span class="boot-title">
+                     i2f-springboot-ops-starter
+                </span>
                 <span class="boot-pipe">|</span>
                 <span class="boot-sub">OpenAI 子系统 · 技术全景</span>
             </div>
