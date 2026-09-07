@@ -32,6 +32,14 @@ ai:
       enable: false
     kling-t2i:
       enable: false
+    happyhorse-t2v:
+      enable: false
+    kling-t2v:
+      enable: false
+    pixverse-t2v:
+      enable: false
+    vidu-t2v:
+      enable: false
   rags:
     enable: false
     embedding:
