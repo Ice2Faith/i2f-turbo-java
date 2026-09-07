@@ -236,7 +236,7 @@ public class DashScopeVideoHappyHorseText2VideoTools implements AsyncTaskResolve
 
             List<TmpFileTools.UploadTmpFileMetadata> files = new ArrayList<>();
             for (String url : downloadUrlList) {
-                String virtualFileName = "happyhorse-video-" + (files.size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".png";
+                String virtualFileName = "happyhorse-video-" + (files.size() + 1) + "-" + (TIME_FORMATTER.format(LocalDateTime.now())) + ".mp4";
                 try {
                     TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new URL(url).openStream(), virtualFileName);
                     files.add(metadata);
