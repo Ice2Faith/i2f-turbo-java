@@ -51,15 +51,16 @@ import java.util.Set;
 )
 public class SpiComponentScanMojo extends AbstractMojo {
 
-    private static final String SERVICES_PATH = "META-INF/services/";
-    private static final String CLASS_FILE_SUFFIX = ".class";
-    private static final String VALUE_ATTRIBUTE = "value";
+    public static final String SERVICES_PATH = "META-INF/services/";
+    public static final String CLASS_FILE_SUFFIX = ".class";
+    public static final String VALUE_ATTRIBUTE = "value";
+    public static final String DEFAULT_ANNOTATION_CLASS="i2f.spi.annotations.Spi";
 
     /**
      * Fully qualified name of the SPI annotation to scan for.
      * Can be overridden via the {@code spi.annotation} system property.
      */
-    @Parameter(property = "spi.annotation", defaultValue = "i2f.spi.annotations.Spi")
+    @Parameter(property = "spi.annotation", defaultValue = DEFAULT_ANNOTATION_CLASS)
     private String spiAnnotation;
 
     /**
