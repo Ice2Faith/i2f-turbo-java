@@ -45,12 +45,6 @@
             <version>9.6</version>
         </dependency>
 
-        <!-- spi -->
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spi-annotations</artifactId>
-            <version>${i2f.version}</version>
-        </dependency>
     </dependencies>
 
     <build>
