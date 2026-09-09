@@ -41,7 +41,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @NoArgsConstructor
 @Slf4j
 @Controller
-@RequestMapping("/ops/xproc4j")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/xproc4j")
 public class XProc4jOpsController implements IOpsProvider {
     public static final String ATTR_LOG = "log";
 

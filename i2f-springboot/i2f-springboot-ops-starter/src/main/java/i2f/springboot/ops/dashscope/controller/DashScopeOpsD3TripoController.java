@@ -3,6 +3,7 @@ package i2f.springboot.ops.dashscope.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.io.stream.StreamUtil;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -39,7 +40,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/d3/tripo")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/d3/tripo")
 public class DashScopeOpsD3TripoController {
     @Autowired
     protected OpsSecureTransfer transfer;

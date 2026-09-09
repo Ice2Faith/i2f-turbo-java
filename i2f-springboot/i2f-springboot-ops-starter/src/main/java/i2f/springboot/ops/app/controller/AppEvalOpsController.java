@@ -36,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/app")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/app")
 public class AppEvalOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;

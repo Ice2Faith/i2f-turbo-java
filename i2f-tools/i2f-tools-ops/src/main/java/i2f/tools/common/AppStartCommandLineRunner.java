@@ -1,6 +1,7 @@
 package i2f.tools.common;
 
 import i2f.os.OsUtil;
+import i2f.springboot.ops.common.OpsConsts;
 import lombok.Data;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,11 +21,12 @@ public class AppStartCommandLineRunner implements ApplicationRunner, Environment
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        if(OsUtil.isWindows()){
+        if (OsUtil.isWindows()) {
+            String baseUrl = environment.getProperty(OpsConsts.BASE_URL_PROPERTY, OpsConsts.DEFAULT_BASE_URL);
             String prop = environment.getProperty("server.port", "8080");
             OsUtil.runCmd(new String[]{
                     "explorer",
-                    "http://localhost:"+prop+"/ops/"
+                    "http://localhost:" + prop + baseUrl + "/"
             });
         }
     }

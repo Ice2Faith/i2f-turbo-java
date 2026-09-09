@@ -85,7 +85,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/open-ai")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/open-ai")
 public class OpenAiOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

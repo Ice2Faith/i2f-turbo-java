@@ -2,7 +2,9 @@ package i2f.springboot.ops.common;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.CacheControl;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -17,18 +19,20 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @Data
 @NoArgsConstructor
-public class OpsStaticResourceConfiguration implements WebMvcConfigurer {
+public class OpsStaticResourceConfiguration implements WebMvcConfigurer, EnvironmentAware {
+    protected Environment environment;
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        String baseUrl = environment.getProperty(OpsConsts.BASE_URL_PROPERTY, OpsConsts.DEFAULT_BASE_URL);
         // 依赖库7天缓存
-        registry.addResourceHandler("/ops/lib/**")
+        registry.addResourceHandler(baseUrl+"/lib/**")
                 .addResourceLocations("classpath:/assets/ops/lib/")
                 .setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS)
                         .cachePublic()
                         .mustRevalidate());
 
         // 其他文件1天缓存
-        registry.addResourceHandler("/ops/**")
+        registry.addResourceHandler(baseUrl+"/**")
                 .addResourceLocations("classpath:/assets/ops/")
                 .setCacheControl(CacheControl.maxAge(1, TimeUnit.DAYS)
                         .cachePublic()

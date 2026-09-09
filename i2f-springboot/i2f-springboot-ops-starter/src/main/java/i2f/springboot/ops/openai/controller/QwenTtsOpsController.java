@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.controller;
 
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -37,7 +38,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/open-ai")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/open-ai")
 public class QwenTtsOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;

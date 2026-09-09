@@ -45,7 +45,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/app")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/app")
 public class AppOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

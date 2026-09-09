@@ -34,7 +34,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/app")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/app")
 public class AppCloudOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;

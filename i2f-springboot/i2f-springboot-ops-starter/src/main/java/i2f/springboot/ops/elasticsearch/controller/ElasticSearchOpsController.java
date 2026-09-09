@@ -2,6 +2,7 @@ package i2f.springboot.ops.elasticsearch.controller;
 
 import i2f.extension.elasticsearch.EsManager;
 import i2f.page.Page;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -40,7 +41,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/elasticsearch")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/elasticsearch")
 public class ElasticSearchOpsController implements IOpsProvider {
 
     @Autowired

@@ -3,6 +3,7 @@ package i2f.springboot.ops.dashscope.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 import i2f.os.OsUtil;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
@@ -40,7 +41,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope")
 public class DashScopeOpsController implements IOpsProvider {
 
     public static class DashScopeCondition implements Condition {

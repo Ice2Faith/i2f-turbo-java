@@ -3,10 +3,7 @@ package i2f.springboot.ops.ssh.controller;
 import com.jcraft.jsch.ChannelSftp;
 import i2f.extension.sftp.basic.SftpUtil;
 import i2f.os.OsUtil;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -45,7 +42,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/ssh")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/ssh")
 public class SshOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

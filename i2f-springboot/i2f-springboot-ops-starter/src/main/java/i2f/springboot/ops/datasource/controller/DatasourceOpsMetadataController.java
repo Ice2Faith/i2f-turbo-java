@@ -9,6 +9,7 @@ import i2f.database.metadata.reverse.ddl.impl.MysqlDdlDatabaseReverseEngineer;
 import i2f.database.metadata.reverse.ddl.impl.OracleDdlDatabaseReverseEngineer;
 import i2f.database.metadata.reverse.ddl.impl.PostgreDdlDatabaseReverseEngineer;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -39,7 +40,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/datasource/metadata")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/datasource/metadata")
 public class DatasourceOpsMetadataController {
 
     @Autowired

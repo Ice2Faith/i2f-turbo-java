@@ -2,6 +2,7 @@ package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -38,7 +39,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/video/pixverse")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/video/pixverse")
 public class DashScopeOpsVideoPixVerseController {
     @Autowired
     protected OpsSecureTransfer transfer;

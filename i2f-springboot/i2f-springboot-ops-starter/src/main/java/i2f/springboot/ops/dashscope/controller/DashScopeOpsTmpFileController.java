@@ -2,10 +2,7 @@ package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.dashscope.data.DashScopeBaseOperateDto;
 import i2f.springboot.ops.dashscope.data.DashScopeUploadOperateDto;
 import lombok.Data;
@@ -48,7 +45,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/tmp-file")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/tmp-file")
 public class DashScopeOpsTmpFileController {
     @Autowired
     protected OpsSecureTransfer transfer;

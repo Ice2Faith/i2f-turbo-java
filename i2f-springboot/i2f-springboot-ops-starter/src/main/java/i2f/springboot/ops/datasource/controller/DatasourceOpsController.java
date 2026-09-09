@@ -15,10 +15,7 @@ import i2f.rowset.std.IRowHeader;
 import i2f.rowset.std.IRowSet;
 import i2f.rowset.std.impl.SimpleIteratorRowSet;
 import i2f.rowset.std.impl.SimpleRowHeader;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.data.DatasourceImportOperateDto;
 import i2f.springboot.ops.datasource.data.DatasourceListRespDto;
 import i2f.springboot.ops.datasource.data.DatasourceOperateDto;
@@ -63,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/datasource")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/datasource")
 public class DatasourceOpsController implements IOpsProvider {
 
     @Autowired

@@ -5,10 +5,7 @@ import i2f.extension.filesystem.minio.MinioFileSystem;
 import i2f.io.filesystem.IFile;
 import i2f.io.stream.StreamUtil;
 import i2f.match.impl.SimpleMatcher;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -49,7 +46,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/minio")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/minio")
 public class MinioOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

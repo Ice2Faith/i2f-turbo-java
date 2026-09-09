@@ -1,5 +1,6 @@
 package i2f.springboot.ops.home;
 
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -27,7 +28,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"")
 public class OpsHomeController {
     @Autowired
     private ApplicationContext applicationContext;
