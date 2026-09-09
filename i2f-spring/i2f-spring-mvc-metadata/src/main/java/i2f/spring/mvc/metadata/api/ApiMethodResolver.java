@@ -1,10 +1,12 @@
 package i2f.spring.mvc.metadata.api;
 
 import i2f.reflect.ReflectResolver;
+import i2f.spring.mvc.metadata.SpringMetadataUtil;
 import i2f.typeof.TypeOf;
 import io.swagger.annotations.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,7 @@ import java.security.SecureRandom;
 import java.time.temporal.Temporal;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -74,6 +77,17 @@ public class ApiMethodResolver {
     protected ApiMethod api;
     protected boolean withClassAnnotation = true;
 
+    public static ApiMethod resolveParameters(ApiMethod method, Environment environment){
+        List<String> urls = method.getUrls();
+        if(urls!=null){
+            urls=urls.stream()
+                    .map(url-> SpringMetadataUtil.resolveParameters(url,environment))
+                    .collect(Collectors.toList());
+        }
+        method.setUrls(urls);
+        return method;
+    }
+
     public static ApiMethod parseMethod(Method method) {
         return new ApiMethodResolver(method).parse();
     }
@@ -123,6 +137,10 @@ public class ApiMethodResolver {
         parseArguments();
 
         return api;
+    }
+
+    public ApiMethod parse(Environment environment){
+        return resolveParameters(parse(), environment);
     }
 
     protected void parseBasicMethod() {
