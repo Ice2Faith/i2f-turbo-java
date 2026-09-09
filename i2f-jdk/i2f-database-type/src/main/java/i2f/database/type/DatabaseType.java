@@ -305,7 +305,7 @@ public enum DatabaseType {
             if (!isValid(type)) {
                 type = dialectOfJdbcUrl(conn.getMetaData().getURL(), false);
             }
-            TYPE_MAP.put(conn, type);
+            DIALECT_MAP.put(conn, type);
             return type;
         }
     }
