@@ -143,6 +143,7 @@
         <module>i2f-sm-crypto</module>
         <module>i2f-sm-crypto-swl</module>
         <module>i2f-spi</module>
+        <module>i2f-spi-annotations</module>
         <module>i2f-std-const</module>
         <module>i2f-streaming</module>
         <module>i2f-swl</module>

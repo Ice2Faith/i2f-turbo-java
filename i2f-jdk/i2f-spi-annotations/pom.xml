@@ -9,14 +9,7 @@
         <version>1.0-jdk8</version>
     </parent>
 
-    <artifactId>i2f-spi</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-spi-annotations</artifactId>
-        </dependency>
-    </dependencies>
+    <artifactId>i2f-spi-annotations</artifactId>
 
     <build>
         <plugins>

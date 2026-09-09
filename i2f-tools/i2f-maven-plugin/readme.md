@@ -64,7 +64,7 @@ mvn compile
 <dependency>
     <groupId>i2f.turbo</groupId>
     <artifactId>i2f-spi-annotations</artifactId>
-    <version>1.0</version>
+    <version>1.0-jdk8</version>
 </dependency>
 ```
 
