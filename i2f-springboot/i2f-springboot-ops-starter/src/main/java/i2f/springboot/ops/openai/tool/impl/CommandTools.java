@@ -22,14 +22,17 @@ import java.util.List;
  * @date 2026/6/22 16:38
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="command",description = "提供命令行执行、操作系统类型判断"))
-@ConditionalOnExpression("${ai.tools.command.enable:false}")
+@ToolIntent(items = @ToolIntentItem(value=CommandTools.TOOL_INTENT_VALUE,description = CommandTools.TOOL_INTENT_DESCRIPTION))
+@ConditionalOnExpression(CommandTools.CONDITION_EXPRESS)
 @Component
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Tools
 public class CommandTools {
+    public static final String CONDITION_EXPRESS="${ai.tools.command.enable:false}";
+    public static final String TOOL_INTENT_VALUE="command";
+    public static final String TOOL_INTENT_DESCRIPTION="提供命令行执行、操作系统类型判断";
 
     @Autowired(required = false)
     private LocalFileTools localFileTools;
@@ -61,9 +64,9 @@ public class CommandTools {
                     AiTags.EXECUTABLE_VALUE,
                     AiTags.HUMAN_VALUE,
                     AiTags.COMMAND_VALUE
-            }, description = "run an command line, implements by java process."
+            }, description = "run an normal command line, implements by java process, some command maybe need in `cmd /c` or `sh -c` when not found command."
     )
-    public String run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/k\",\"start\",\"calc\"]")
+    public String run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/c\",\"start\",\"calc\"]")
                                    List<String> commandArray,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
