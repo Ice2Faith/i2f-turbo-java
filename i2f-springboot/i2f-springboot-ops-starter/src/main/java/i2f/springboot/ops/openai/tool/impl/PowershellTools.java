@@ -78,7 +78,7 @@ public class PowershellTools {
                     AiTags.COMMAND_VALUE
             }, description = "run an powershell script, command will run as a temp ps1 script."
     )
-    public String run_powershell_script(@ToolParam(value = "script", description = "the powershell script, for example \"Get-Process | Select-Object -First 5\"")
+    public String run_powershell_script(@ToolParam(value = "script", description = "the powershell full script content, for example \"Get-Process | Select-Object -First 5\"")
                                    String script,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
