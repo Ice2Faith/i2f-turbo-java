@@ -4,7 +4,7 @@
 
 ## i2f-jdk
 
-> 仅依赖 JDK8 的基础能力模块集合，提供反射、类型系统、集合、IO、加密、SPI 服务加载、JVM Agent、AI 标准抽象、网络通信、AI 协议实现、通用算法、注解元数据、数组工具、字节序编解码、认证契约、参数化 SQL 构建、分页方言适配、SQL 字面量文本化、数据库类型方言识别、类型安全查询语言、可序列化函数式接口体系、方法引用解析（内核 + 任意方法通用层 + 转换器门面）、浏览器抓取标准契约、流式对象修改器、一次性口令（HOTP/TOTP）认证、元组标准契约与强类型实现家族、类型系统判定与泛型超类型令牌、底层内存窥探（Unsafe/对象地址/大小）、字符串匹配标准契约（布尔/优先级打分）、字符串匹配实现（通配/Ant/正则+择优排序）与全仓正则工具箱、内存缓存/自调节容器/弱引用复用/RAII 作用域工具族、外置 classpath 应用启动器（child-first 加载插件 jar）、日志标准门面（ILogger 大门面 + 可插拔 LoggerProvider SPI + StdioLogger 彩色兜底）、日志门面默认完整实现（LogHolder 全局+线程双路由 + 广播/文件/JDBC 写出 + System.out 收编 + log.properties 装配）等零三方依赖的通用工具。
+> 仅依赖 JDK8 的基础能力模块集合，提供反射、类型系统、集合、IO、加密、SPI 服务加载、JVM Agent、AI 标准抽象、网络通信、AI 协议实现、通用算法、注解元数据、数组工具、字节序编解码、认证契约、参数化 SQL 构建、分页方言适配、SQL 字面量文本化、数据库类型方言识别、类型安全查询语言、可序列化函数式接口体系、方法引用解析（内核 + 任意方法通用层 + 转换器门面）、浏览器抓取标准契约、流式对象修改器、一次性口令（HOTP/TOTP）认证、元组标准契约与强类型实现家族、类型系统判定与泛型超类型令牌、底层内存窥探（Unsafe/对象地址/大小）、字符串匹配标准契约（布尔/优先级打分）、字符串匹配实现（通配/Ant/正则+择优排序）与全仓正则工具箱、内存缓存/自调节容器/弱引用复用/RAII 作用域工具族、外置 classpath 应用启动器（child-first 加载插件 jar）、日志标准门面（ILogger 大门面 + 可插拔 LoggerProvider SPI + StdioLogger 彩色兜底）、日志门面默认完整实现（LogHolder 全局+线程双路由 + 广播/文件/JDBC 写出 + System.out 收编 + log.properties 装配）生命周期契约（ILifeCycle 三动词 create/destroy/close + Closeable 桥接 + LifeCycleException）、按 key 限流控制（Limiter 单动词 require 令牌桶 TokenBucketLimiter + IKeyedLimiter 三动词失败锁定/令牌桶）、锁抽象契约（ILock/INotify/IReadWriteLock/ILockProvider 接口及 JDK 原生实现）、操作系统工具（OsUtil 跨平台命令执行/平台探测 + WindowsOsUtil PowerShell 执行 + PerfUtil/LinuxUtil/WindowsUtil 的 CPU/内存/磁盘采集）、二进制流封包协议（EE EE 引导 + EF 转义 + 多 head/多 body + tail 校验的 StreamPacket/StreamPacketResolver，HTTP 风格 PacketProtocol 映射，512KB 内存/临时文件自适应流适配，纯 JDK 零依赖）、分页数据模型（ApiOffsetSize 偏移-大小-排他结束下标三字段 + ApiPage 零基页索引与一基页号转换 + Page 泛型结果承载的 JDBC/MyBatis/ES/脚本统一分页契约，运行期零依赖仅 lombok 编译期）、对象池与分段并发原语（ObjectPool 队列缓存对象池 + hash 分段对象提供者/分段锁/String.intern 分段同步，纯 JDK）、properties 配置装载（PropertiesUtil 单门面：点分键树化 + 下划线/中划线驼峰归一 + Visitor 前缀定位 + RichConverter 强类型转换的 properties→Bean 装载管线，依赖 i2f-reflect/i2f-text）、代理标准契约（IProxyHandler 五阶段钩子 initContext/before 短路/after 改写/except 替换/onFinally 回调 + IProxyInvocationHandler 函数式三参 invoke + IProxyProvider 桥接 + DefaultMethodSmartInvocationHandler 的 default 方法 MethodHandles 兼容，JDK/CGLIB/AspectJ 统一代理契约，依赖 i2f-invokable）、JDK 动态代理实现（JdkProxyUtil 六重载门面提供函数式/五阶段/原生三契约 × 实例/接口双形态 + normal/interfaces 双 InvocationHandler 适配器 + JdkProxyProvider/JdkDynamicProxyProvider 双提供者 + BasicDynamicProxyHandler 五阶段解包骨架，依赖 i2f-proxy-std）、注解驱动的代理处理器（@Lock 方法级互斥 / @Retry 倍率退避重试 / @Validate 参数返回值深度校验三大 IProxyInvocationHandler 处理器 + ILockProvider 可插拔锁 + 15 校验注解族标签化递归校验，依赖 i2f-proxy-std/i2f-annotations-ext/i2f-lock/i2f-convert/i2f-comparator/i2f-reflect，⚠ 实测必须 normal 实例形态否则递归）、三态引用包装（Reference 单类 183 行：VALUE/NOP/FINISH 三态区分「有值/值为 null/跳过/终止」四义，ReadWriteLock 读写安全，nop/finish/empty/of 四静态工厂 + get/set/isXxx/toXxx，被 i2f-iterator 作元素三态协议、i2f-container RingQueue 作队列槽位直接依赖，经 i2f-text/i2f-match 两条主干传递至 jdbc/ai/脚本族 9 模块消费，零 Maven 依赖）、反射全家桶（ReflectResolver 单类 3414 行七大能力族——类加载/字段方法发现/注解解析（元注解递归 + @Repeatable 展开）/调用匹配（类型距离 + varargs 打包）/值读写（getter 优先）/Bean 复制（copy/assign/merge 三语义 + 弱名）/虚拟字段合成，叠加 RichConverter 泛型递归强转、ObjectRouteResolver 点分路由扁平↔树、ReflectSignature 签名互转与 vistor 表达式引擎（js 风格路径 + $root/$param 内建 + @ 静态调用），约 30 个 LruMap 缓存 + ENABLE_CACHE 开关；被 44 模块 79 源文件消费，是 lambda/properties/bql/spring-mvc-metadata 的共同反射底座，⚠ loadClassWithJdk 直载丢失/迭代器转换死循环等 16 项已实证瑕疵详见文档）、资源定位与类路径扫描（ResourceUtil 六态位置协议 classpath:/classpath*:/file:/URL/相对/绝对 → URL/Stream/Bytes/String + matchResources 通配 + getResourcesFiles 位置展开；ResourcesLoader 全类路径扫描引擎：目录递归 + jar 流 + 嵌套 jar URL 流式解包 + manifest Class-Path 补全 + jumpJre + 约 150 三方前缀默认排除表 + 包名前缀收缩 + ReflectResolver.loadClass 产 Class + RES_CACHE 缓存，支撑 netty 注解控制器扫包与 quartz 任务扫描；ResourceProvider assets 约定 SPI；被 io-file/idcard/ai-std/翻译族/Excel/逆向生成等 11 模块直接消费、经 i2f-ai-std 传递至 jdbc-procedure/xproc4j-starter 等 6 模块，零三方依赖，⚠ provider get(id) 变长参数传 null 数组 NPE 等瑕疵详见文档）、统一 API 响应契约（ApiResp 泛型响应体 code/msg/data 三字段 + 惰性 kvs 扩展键值 + 链式 add/code/msg/data + success/error/resp 静态工厂 + isSuccess 单判据 + ApiCode 七码常量接口 SUCCESS=200/ERROR=0/NO_LOGIN=401/NO_AUTH=403/UNKNOWN=402/NOT_FOUND=404/SYS_EXCEPTION=500，被 spring-starter 以 @ConditionalOnMissingBean 默认装配为全局响应包装/异常转换/404 转换器、security/shiro/sentinel/activity/spring-authentication 处理器与 ai-rest-openai MCP 网关直接使用，共 9 模块 23 源文件消费，仅 lombok 编译期依赖）、AWT 桌面自动化（RobotUtil 单类约 165 行：多屏设备枚举 + 主屏截屏/存图/取色 + 单键与组合键点击（Ctrl+C/V/X、Ctrl+Shift+Esc 等）+ 左中右键点击 + 左键插值拖拽，纯 JDK 零依赖、全仓尚无消费方）、表格行集流式读写（`IRowSet` = `Iterator` + `Closeable` 流式行集契约与 CSV 引号状态机读写 + BigDecimal/日期自动类型推断 + 长数字防科学计数，JSON 数组/JSONL 抽象写出注入 JSON 库，ops-starter 数据源控制台用于 CSV 导出/导入）、JSR-223 脚本引擎门面（ScriptProvider 聚合 ScriptEngine+Invocable+Compilable 三接口 + compile/invoke 运行时特性探测守卫 + getJavaScriptInstance 静态工厂；唯一消费方 xproc4j：`<lang-eval-javascript>` 求值节点与 Java 动态编译 import 注入；lombok 冗余声明、Java15+ 需自行补 nashorn-core）、极简前缀索引树双形态（PrefixSearchTree 泛型键序列 + StringSearchTree String 特化，ConcurrentSkipListMap 有序子节点 + add/find/prefix 前缀召回/collect 有序导出/printTree 树形打印，零消费方，⚠ remove 只清子树不删 data 与 null 键 NPE）、序列化标准契约（ISerializer 双动词统一「对象↔字节/文本」双通道九接口 + serialize=encode 桥接 codec 体系 + 类型化反序列化三级重载/deserializeAsMap/Base64 便捷 + 双向适配器 + 四级异常族；被 AI 栈（MCP 参数 deserializeAsMap）/HTTP 网络栈/SWL 加密传输族/哈希契约族等 26 模块 77 源文件消费，官方实现 JdkBytes/Json2/Xml2 下沉 i2f-serialize-impl，⚠ 适配器 null 语义缺失与类型参数静默忽略等实证瑕疵详见文档）、序列化官方实现（零第三方依赖自研 JSON 引擎 Json2/Json2Serializer 17 处实例化为全仓默认引擎 + JsonGenerator/JsonParser 双侧实现 + XML 只写生成 Xml2/Xml2Serializer + 独立树解析 XmlParser + 自描述文本 FormatText + JDK 原生/字符集字节互转；⚠ 探针实证 unescape 顺序缺陷吞转义、裸键 `{a:1}` 静默丢数、大整数 NFE、`<?xml?>` 声明解析崩溃等 12 项失败详见文档）等零三方依赖的通用工具。
 
 ### i2f-spi-annotations
 
@@ -215,6 +215,48 @@
 > 内存缓存 / 自调节容器 / 弱引用复用 / RAII 作用域**工具族**（单包 `i2f.lru`，13 类）：LRU 家族 `LruMap`（`LinkedHashMap`+`removeEldestEntry` 容量淘汰、全方法套 `ReentrantLock`，`accessOrder=true` 才按访问序）/`WindowLruMap`（`Duration` 时间片槽位键）/`LruList`（`touch` 提头自调节）/`ConcurrentLinkedSet`（双 map 手写双向链集）/`ConcurrentLruCache`（读优并发生成式 LRU）；过期记忆化 `ExpireConcurrentMap`/`CachedSupplier`；弱引用复用 `WeakEntry`（`ReferenceQueue` 清理线程）+ `WeakStackRetrieveCacheProvider`（L1/L2 `ThreadLocal` 按 `==` 复用幂等转换）；RAII `ScopeValue`/`UncheckedScopeValue`（锁/`ThreadLocal`/close 自动配对）。`LruMap` 是全仓反射/编译缓存事实标准（lambda/bql/compiler/jdbc-proxy/log 等大量消费）；实际仅用 `i2f-clock-impl` 的 `SystemClock`（`i2f-cache-std`、`lombok` 声明未用）。
 
 - 详细文档：[i2f-lru-map](./i2f-jdk/i2f-lru-map/readme.md)
+
+### i2f-lru-cache
+
+> 将 LRU 淘汰策略接入缓存接口的**适配桥接模块**（1 源文件 24 行）：`LruMapCache<K,V>` 继承 `i2f-cache.MapCache`，通过构造器注入 `i2f-lru-map.LruMap` 替换底层 `ConcurrentHashMap`，使缓存操作自带 LRU 容量淘汰语义（超出容量自动淘汰最久未访问条目）。三个构造器分别对应默认 1024 容量、指定容量、外部注入 LruMap 实例。产物仍是 `IContainerCache`，可与 `ExpireCacheWrapper` 装饰器组合实现「LRU + TTL」双淘汰策略。依赖 `i2f-lru-map` + `i2f-cache`，`lombok` 声明未用。
+
+- 详细文档：[i2f-lru-cache](./i2f-jdk/i2f-lru-cache/readme.md)
+
+### i2f-math
+
+> **数学计算工具箱**（14 源文件约 3100 行，零三方运行期依赖），覆盖 5 个零耦合子领域：`MathUtil` 静态门面（~70+ 方法：三角/插值/钳制/排列组合/距离/随机数/精度截断）；`FormulaCalculator` 双栈字符串公式计算器（60+ 运算符：基础算术/根对数累加累乘/位运算/三角函数族/阶乘/进制换算/单位转换/斐波那契）；`Matrix`/`MatrixInt` 矩阵运算（加/乘/转置/单位阵）；`Segment<T,D>` 四元组区间抽象（Integer/Long/Double/Date 四实现 + 重叠判定）；`Fibonacci`/`Factorial` 缓存数列（BigInteger 数组），`HexNumberConverter` 2-36 进制互转。下游 `i2f-color`/`i2f-graphics-*`/`i2f-image-impl` 消费 `MathUtil`；`i2f-ai-std`/`i2f-extension-xproc4j` 消费 `FormulaCalculator`。**瑕疵**：`combination` int 溢出/漏乘、`Fibonacci` 负值行为不一致、`regular` while 循环大值性能差、`MatrixDiffrentException` 拼写错误等。
+
+- 详细文档：[i2f-math](./i2f-jdk/i2f-math/readme.md)
+
+### i2f-mixins
+
+> **混入式函数编程工具箱**（22 源文件约 3900 行，10 个运行期 i2f 内部依赖），以 JDK 接口默认方法实现 Java 的"多重继承"式函数编程：`MixinProxyFactory` 基于 `DefaultMethodSmartInvocationHandler` + JDK 动态代理生成接口实例（`ConcurrentHashMap` 缓存，免匿名对象）；`AllMixins` 聚合 18 个 `*Mixins` 接口。九大领域——`StringMixins`（1258 行，~70+ 方法：7 种命名风格转换/命名填充修剪/join 通用五类型/Oracle `to_char` 数字格式/Base64/URL编码/SQL 转义）；`MathMixins`（625 行，~50+ 方法：`BigDecimal` 泛型算术/三角函数族/`round`/`trunc` 精度控制/进制 2-36 互转/`fibonacci`/`factorial`/聚集运算）；`ObjectMixins`（457 行：六级级联比较/`Visitor` 表达式访问/`decode`/`coalesce` 条件选择/多类型 `is_empty`/`length`）；`DateMixins`（363 行：`ChronoUnit` 别名映射 22 种/日期算术/`timestamp` 互转/`trunc`）；`RegexMixins`（322 行：Oracle POSIX 正则转换/`occurrence` 替换/`split_literal`）；`ArrayMixins`（159 行：负索引读写/元素类型转换）；`FileMixins`（103 行：文本文件读写）；`CollectionMixins`/`MapMixins`/`SystemMixins`/`ThreadMixins`/`ThreadLocalMixins`/`CommandLineMixins`/`RandomMixins`/`JvmMixins`/`OsMixins`/`MatchMixins`/`UuidMixins` 各 22–85 行。**瑕疵**：`StringMixins.substr_count` 变量名笔误（自身比自身）、`MathMixins.min_of` 与 `max_of` 返回类型不对称、`CommandLineMixins.exec` 异常仅 `printStackTrace`。
+
+- 详细文档：[i2f-mixins](./i2f-jdk/i2f-mixins/readme.md)
+
+### i2f-native-core
+
+> **原生（JNI）指针工具箱**（5 源文件约 180 行 + 309 行 C/C++ 教程），为 JNI 开发提供底层基础设施：`Ptr` 指针值类型安全包装（`isZero`/`isNegOne` 哨兵判定 + `equals`/`hashCode`）；`MallocPtr`/`NewPtr`/`NewArrayPtr` 三指针类型标记（区分 `malloc`/`new`/`new[]` 分配来源，便于上层封装对应释放方式）；`NativeUtil` 原生库加载工具（`loadClasspathLib` 从 classpath 释放 `.dll`/`.so` 到 `./lib/` 目录后 `System.load`，一行解决 JAR 内打包原生库场景）；附带 `cpp_native_dev.md` 系统教程（JNI 函数命名/字符串数组操作/Visual Studio DLL 工程配置）。下游 `i2f-native-windows`/`i2f-native-windows-easyx` 消费。**瑕疵**：`Ptr` 无自动释放/AutoCloseable、`loadClasspathLib` 并发无锁、释放路径硬编码不可配置等。
+
+- 详细文档：[i2f-native-core](./i2f-jdk/i2f-native-core/readme.md)
+
+### i2f-native-windows
+
+> **Windows（JNI）原生 API 门面**（153 Java 源文件 + 2 C++ 项目，总计约 15000+ 行），两层架构（`NativesWindows` 920 行 ~250+ native 原生方法声明 + `WinApi` 3494 行类型安全 Java 门面 + 50 个 Handle 子类 + 94 个常量接口），13 大子域覆盖：窗口管理（findWindow/enumWindows/createWindowEx/messageBox/messageLoop/bindMessageCallbacker）；GDI 绘图（120+ 方法：bitBlt/stretchBlt/createCompatibleBitmap/createDIBSection/rectangle/ellipse/polygon/polyBezier/path/region/DC 全栈）；输入模拟（keyboardEvent/mouseEvent/setCursorPos/getAsyncKeyState）；进程/线程（openProcess/createThread/suspendResume/snapshot/toolhelp/privilege）；文件系统（createFile/readFile/writeFile/encryptFile/symbolicLink）；注册表（8 方法 CRUD）；服务控制（12 方法全生命周期）；COM（coInitialize/coCreateInstance/coInstanceQueryInterface）；Shell（shortcut/recycleBin/fileOp/specialFolder）；控制台（allocConsole/freopenStdio）；Win32 App 框架（registerClassEx/createWindowEx/defWindowProc/postQuitMessage）；Win8 DPI 扩展（getDpiForMonitor/getScaleFactorForMonitor）。依赖 `i2f-native-core`（Ptr/NativeUtil）+ `i2f-graphics-2d`（Point/Size/Rectangle）+ `i2f-convert`。**瑕疵**：`freeMallocPtr` 等需手动 finally 释放、JNI 异常无包装、`registerClassEx` 10 参无 Builder、`WinSendMessageMsg` 300+ 消息常量平铺、测试类在 src/main/java 下随 jar 发布等。
+
+- 详细文档：[i2f-native-windows](./i2f-jdk/i2f-native-windows/readme.md)
+
+### i2f-native-windows-easyx
+
+> **EasyX 图形库（JNI）Java 门面**（9 Java 源文件 + 1 C++ 项目 1571 行，总计约 2900 行），两层架构（`NativesEasyX` 378 行 ~110 native 方法 + `EasyXApi` 953 行类型安全 Java API 门面），在 `i2f-native-windows` 的 Win32 GDI 基础之上封装 EasyX 轻量级图形库，一行 `initGraph` 即创建图形窗口。覆盖 11 大功能域：窗口生命周期（initGraph/closeGraph/clearDevice/beginBatchDraw/endBatchDraw）；绘图原语（circle/rectangle/ellipse/pie/polygon/roundRect/bar/bar3d/arc + 4 变体 outline/fill/clear/solid 共 40+ 方法）；文字输出（outText/outTextXy/drawText/setTextStyle 4 重载/setTextStyleLogFont 14 参）；图像操作（loadImage/createImage/freeImage/saveImage/putImage/resize/rotateImage + 像素缓冲区读写）；绘图状态（color/fillColor/lineColor/textColor/bkColor/bkMode/fillStyle 4 重载/lineStyle 4 重载/writeMode/polyFillMode/rop2/origin/aspectRatio）；批量绘制（beginBatchDraw/endBatchDraw/flushBatchDraw）；鼠标输入（mouseHit/getMouseMsg/flushMouseMsgBuffer）；输入框（inputBox 6 重载）；颜色转换（hslToRgb/hsvToRgb/bgr/getRValue/getGValue/getBValue/rgbToGray/rgbToHsl/rgbToHsv）；光标/坐标（getX/getY/getPoint/moveTo/moveRel/lineTo/lineRel + getWidth/getHeight/getMaxX/getMaxY）；工作图像（setWorkingImage/getWorkingImage）。依赖 `i2f-native-windows`（Hwnd/Hdc/WinApi/GDI 常量）+ `i2f-native-core`（Ptr）+ `i2f-graphics-2d`（Point/Size/Rectangle）+ `i2f-convert`。**瑕疵**：`freeImage` 需手动 finally 释放、JNI 字符串解析无编译期保护、`setTextStyleLogFont` 14 参无 Builder、颜色 int 无类型安全、测试类在 src/main/java 下随 jar 发布等。
+
+- 详细文档：[i2f-native-windows-easyx](./i2f-jdk/i2f-native-windows-easyx/readme.md)
+
+### i2f-number-idcard
+
+> **中国大陆身份证号码解析/校验工具**（3 源文件约 164 行 + 3516 行行政区划字典随 jar 内置），以 GB 11643-1999 标准实现 18 位公民身份号码的一站式解析与校验：`IdCardNumberUtil.parse` 一次切分「区划码/出生日期/顺序码/性别位/校验位」五段并回填 16 字段结果模型 `IdNumberData`（区划中文名、性别中文、闰年判定、日期对象等派生字段俱全），失败时以 `illegalReason` 说明原因而不抛异常；`isLegalIdNumber` 聚合「格式 + 日期 + 校验码」三层判定；校验码按标准「加权因子表 `{7,9,10,5,8,4,2,1,6,3,7,9,10,5,8,4,2}` + 模 11 余数映射表」计算（已手工验算与 GB 11643 一致）；`RegionMap` 类加载时经 `i2f-resources` 加载内置字典，`decode` 提供 6 位区划码 → 中文全称查询。依赖 `i2f-datetime`（`Dates.isLeapYear`/`isLegalDate`）+ `i2f-resources` + `lombok`（`@Data` 真实使用）；全仓暂无源码级消费者（仅 `i2f-jdk-all` 聚合与根 POM 版本托管）。**瑕疵**：字典 630000-659004（青海 53 行/宁夏 31 行/新疆 117 行，共 201 行）名称全部误加「甘肃省」前缀、字典版本陈旧（含崇文/宣武/密云县等已撤销区划且缺港澳台）、`RegionMap` 未指定 UTF-8 字符集（GBK 环境乱码）、格式正则 `[0-9|x]` 混入字面量 `|`、`dateFmt` 共享 `SimpleDateFormat` 线程不安全等。
+
+- 详细文档：[i2f-number-idcard](./i2f-jdk/i2f-number-idcard/readme.md)
 
 ### i2f-cache-std
 
@@ -605,6 +647,132 @@
 > **JVM 运行环境探测工具 / 零依赖最小工具模块**（单包 `i2f.jvm`、单类 `JvmUtil` 100 行、7 静态方法、零依赖零资源零测试）：基于 `java.lang.management.RuntimeMXBean` 提供进程标识（`getPid()` 拆 `pid@host` 取 PID、`getStartUser()` **实返回主机名**）、启动参数直通（`getInputArguments`/`getRuntimeMXBean`）与三大启动参数特征检测（`isDebug()` 识别 jdwp、`isAgent()` 识别 `-javaagent:`、`isNoVerify()` 识别历史参数），5 字段以 `AtomicReference.updateAndGet` 无锁惰性缓存；消费 **9 模块**（6 显式 POM + 3 隐式传递）：调试桥门控 **14 处** `isDebug()`（antlr4 脚本引擎 / jdbc-procedure / idea-plugin 的断点桥前置判断）、`i2f-agent` 自附加 `VirtualMachine.attach(getPid())`、spring-starter 启动横幅（PID/User/debug/agent/verify）、env-impl/jvm-mixins/form/agent-javassist；⚠ `getStartUser()` 命名与实现不符（返回**主机名**而非启动用户，启动横幅 `User:` 栏展示错误）、`getPid()` 解析失败降级字符串 `"-1"` 且被永久缓存（attach 场景将失败、"−1" 可被 `Long.parseLong` 静默吞下）。
 
 - 详细文档：[i2f-jvm](./i2f-jdk/i2f-jvm/readme.md)
+
+### i2f-lifecycle
+
+> **统一生命周期契约模块**（全模块仅 2 文件约 50 行：1 接口 + 1 非受检异常，零 i2f 内部依赖、运行期零三方）：ILifeCycle extends Closeable 以 create()/destroy()/close() 三动词刻画「显式创建 → 使用 → 显式销毁」对象的最小生命周期——create/destroy 均为 default 空实现（可选钩子、按需覆写），close() 把 Closeable.close() 桥接为 destroy()，使生命周期对象天然兼容 try-with-resources；配套 LifeCycleException（extends RuntimeException、4 构造器）作为创建/销毁阶段失败的约定信号（create/destroy 签名不带 throws，实现方以非受检异常包装 IO/SQL 失败）。被三族消费：i2f-data-processor（IDataReader/IDataWriter 继承 + 实现类以 LifeCycleException 包装 IO 并支持 deleteOnDestroy 删文件）、i2f-check-filter（IHashGroupProvider 继承，HashGroupRepeatFilter 哈希分组去重管线手工 create/destroy 各级流）、i2f-translate 体系（ITranslator 继承，SQLite 连接随 create/destroy 开关、测试类以 try-with-resources 验证 close→destroy 桥接，另有实现只吃默认空钩子）；⚠ 钩子默认空实现且无状态/无幂等约定、失败信号部分消费方改用 IllegalStateException、pom 声明的 lombok 实际未用。
+
+- 详细文档：[i2f-lifecycle](./i2f-jdk/i2f-lifecycle/readme.md)
+
+### i2f-limit
+
+> **按 key 限流器模块**（5 文件约 350 行、零测试、两条互不相关的契约线）：新线（2024/8）单动词 Limiter.require(name) + TokenBucketLimiter——ConcurrentHashMap 按名分桶（null 走全局桶 nullCnt，新桶初始 1 令牌），单守护线程 limit-thread 每周期给每桶 +incrementCount（封顶 limitCount，默认 300）并清理闲置超 maxKeepaliveMillSeconds（默认 30 分钟）的键，require() 单调用完成「惰性 init → 取桶刷新访问时间 → 原子扣减 → 旧值 > 0 放行」，另有 getQps/setQps 便捷换算；旧线（2022/5）三动词 IKeyedLimiter（hasLimit/limit/unlimited，args 预留未用）+ 两实现：MaxCountWaitTimeExpireKeyedLimiter（最大失败次数 + 等待期的「滑动锁定」，计数存 ObjectExpireCacheWrapper(MapCache) 十进制字符串、limit() 每次重置 TTL、封顶 max(maxCount,maxRecordsCount)，unlimited 即解除，setCache 可换分布式）与 TokenBulletKeyedLimiter（构造即启动定时补充：每 productTime 每键 +1 封顶 maxTokenCount，未登记键默认放行、新键 limit() 建 0 令牌，可外部注入线程池）。依赖 i2f-clock-impl（SystemClock 缓存时钟）与 i2f-cache（本地过期缓存），lombok 真实使用；⚠ 全仓无源码级消费者（仅 i2f-jdk/i2f-jdk-all/根 POM 注册）；setQps 公式错误（仅「秒 + 周期 1」严格成立，分钟截断为 1、毫秒放大 1000 倍）且 getQps 亚秒周期除零；TokenBulletKeyedLimiter 的 synchronized(this) 锁错 Runnable 对象、默认池非守护且无停止手段、counters 无清理、hasLimit 竞态可 NPE；MaxCount... 的 waitTimeUint 未设置时 limit() NPE 等（详见文档）。
+
+- 详细文档：[i2f-limit](./i2f-jdk/i2f-limit/readme.md)
+
+### i2f-lock
+
+> **锁抽象契约模块**（8 文件约 230 行，框架无关、运行期零三方依赖）：以 ILock（lock/unlock throws Throwable） 定义基本锁最小接口；INotify（signal/signalAll/await） 定义条件等待/通知契约；INotifyLock extends ILock, INotify 组合标识；IReadWriteLock（readLock/writeLock 均返回 ILock） 提供读写锁抽象；ILockProvider（name/getLock(key)） 定义按 key 获取锁实例的提供者契约。三条实现线：JdkLock 包装 ReentrantLock + Condition 实现 INotifyLock（3 构造器支持无参/共享 Lock/完全自定义）；JdkReadWriteLock 包装 ReentrantReadWriteLock 适配 IReadWriteLock（读/写锁经 JdkLock 统一为 ILock）；JdkCacheLockProvider 以 ConcurrentHashMap.computeIfAbsent 按 key 懒建 JdkLock 缓存（NAME = "jvm" 标识进程内锁提供者，支持外部注入 Map）。设计要点：接口抛出 Throwable 为分布式锁预留；读写锁均返回 ILock 降低使用复杂度；INotifyLock 通过接口组合表达能力聚合。⚠ JdkCacheLockProvider 缓存不自动清理，key 有限场景安全。
+
+- 详细文档：[i2f-lock](./i2f-jdk/i2f-lock/readme.md)
+
+### i2f-os
+
+> **操作系统工具模块**（25 源文件约 2350 行）：`OsUtil` 静态门面提供 Windows/Linux 判定、`is64bit` 三级判定、命令字符集探测（`sun.jnu.encoding`→`file.encoding`→默认）与命令执行四形态（start/run/exec/execForResult × 单串/数组重载，stdout+stderr 合并读取后返回 `CommandResult`：exitCode/executeTimeout/stdout）；`WindowsOsUtil` 封装 PowerShell（`-Command` 直执行 + UTF-8 BOM 临时 ps1 以 `-File` 执行后清理）；`PerfUtil` 按平台分发 CPU/内存/磁盘使用率采集——Linux 侧 `LinuxUtil` 解析 top/free/df/iostat（含各设备 IO 明细），Windows 侧 `WindowsUtil` 解析 WMIC 并映射 14 类 DTO（CPU/OS/进程/内存条/缓存/逻辑盘/物理盘/网卡×2/打印机×2/显示器/启动项/声卡）。被 `i2f-mixins`（os_* 混入）、`i2f-ai-std`（技能脚本执行 + 命令型 RAG 读取）、`i2f-jdbc-procedure`（LangShell 节点）、模板渲染系与 `i2f-springboot-ops-starter`（主机管理/AI 命令工具）广泛消费；仅依赖 `i2f-convert`。⚠ 性能采集族暂全仓无源码级消费方；`startCmd` 重载行为分叉且均非异步、超时因读流阻塞形同虚设、Linux 内存/CPU 指标语义反转、WMIC 弃用风险等（详见文档）。
+
+- 详细文档：[i2f-os](./i2f-jdk/i2f-os/readme.md)
+
+### i2f-packet
+
+> **二进制流封包协议模块**（12 源文件约 2000 行，纯 JDK 零依赖）：自定义流式帧协议——`EE EE` 双字节引导 + 四控制字节（EE/EF/EA/EB）与 `EF` 前缀转义，帧结构为「head 数 + 多 head（EA 分隔）+ body 数 + 多 body（EA 分隔）+ 可选 8 字节 tail 校验 + EB」；`StreamPacket` 承载多头多体，`StreamPacketResolver` 提供对称 read/write（前导定位、转义解码、校验重建），`PacketRule` 三预设（simpleRule 无校验/hashRule 校验/defaultRule 校验+上下文 XOR 混淆）且控制字节、缓冲阈值、校验累积器、编解码器全可插拔，`PacketProtocol` 映射为 HTTP 风格（action/content-type/name 内置头 + x-body-{i}-{name} 体级附加头，约 62 个 body 容量推导），`LocalOutputStreamInputAdapter` 按 512KB 阈值自适应内存/临时文件（TempFileInputStream 读完即删）。⚠ 全仓无源码级消费方（仅聚合打包与索引提及）；实测存在读端转义状态缺陷——数据/校验尾字节编码后为 0xEF 时其后分隔符/结束符被吞并（静默数据错位或 IOException），另有协议级 read 对无包 NPE、write 关闭调用方流、长度字节无防护等（详见文档）。
+
+- 详细文档：[i2f-packet](./i2f-jdk/i2f-packet/readme.md)
+
+### i2f-page
+
+> **分页数据模型模块**（3 源文件约 216 行，运行期零依赖仅 lombok 编译期）：三层轻量值对象构成全仓统一分页契约——`ApiOffsetSize`（offset 起始下标 + size 页大小 + end 排他结束下标）、`ApiPage`（0 基页索引 index + `ofPageNumSize` 1 基页号转换 + `beginPage` 默认第 1 页/每页 20 兜底）、`Page<T>`（total 总数 + list 数据列表结果承载）；被 `i2f-bindsql-page`（9 个方言包装器，Oracle/DB2/Firebird/CirroData 依赖 end）、`i2f-jdbc-impl`（JdbcResolver.page 族）、`i2f-jdbc-bql`、`i2f-jdbc-procedure`、`i2f-jdbc-proxy`（BaseMapper.page）、`i2f-extension-mybatis`（MybatisPagination）、`i2f-extension-elasticsearch`、`i2f-extension-xproc4j` 等约 35+ 源文件消费。⚠ 实测高危缺陷：`ApiPage.prepare()` 在 index 非空且 size 为 null 时拆箱 NPE（`of(pageNum, null)` 构造即抛）；另有 size=0 反推除零 ArithmeticException、仅 size 时 prepare 单次不补 end 致 Oracle 静默全量返回、`@Data` 继承链 equals 不含父类字段等（详见文档）。
+
+- 详细文档：[i2f-page](./i2f-jdk/i2f-page/readme.md)
+
+### i2f-pool
+
+> **对象池与分段并发原语模块**（6 源文件约 281 行，纯 JDK 零运行期依赖）：`IPool` 双动词契约（require/release）+ `ObjectPool`（LinkedBlockingQueue 缓存 + AtomicInteger 计数 + ReadWriteLock 检查-创建、Supplier 懒创建、maxCount 默认 300）的队列缓存对象池；`SegmentObjectProvider`（hashCode % segmentSize 懒创建槽位共享对象）、`SegmentLock`/`SegmentReentrantLock`（按 key hash 加解锁）、`SegmentSynchronizedObjectProvider`（槽位编号经 String.intern 化为有限全局监视器 + 三态 synchronize 辅助）的分段并发族；被 i2f-swl 的 SwlExchanger 用于加密器/摘要器实例复用。⚠ 实测高危缺陷：`ObjectPool.require()` 新建对象同时入队并返回同一引用，导致同一对象被多个调用者并存持有、配对 require/release 后重复发放（详见文档）。
+
+- 详细文档：[i2f-pool](./i2f-jdk/i2f-pool/readme.md)
+
+### i2f-properties
+
+> **Properties 配置装载模块**（4 源文件约 260 行 + 1 演示 properties，依赖 i2f-reflect/i2f-text）：`PropertiesUtil` 单门面提供「properties → 强类型 Bean」装载管线——`load(File/URL/InputStream)` + `toMap` 排序收集 + `ObjectRouteResolver` 点分键逐层树化（`items[0].name` 合成 List）+ `StringUtils::toCamel` 键风格归一（下划线/中划线/驼峰三种写法等价）+ `Visitor` 前缀定位（支持点路径）+ `RichConverter` 递归转换（嵌套 Bean/List/枚举/File/Class），6 个 `loadAsBean` 重载（Class/TypeToken/Type × 有无 prefix）；自带 `test` 演示包（log.properties 结构 + 混合键风格示例）。⚠ 全仓无源码级消费方（仅聚合打包与索引提及；i2f-log 为自研 loader 未依赖本模块）；实测两处高危缺陷：字符串配置转布尔全部得到 true（`=false` 读回 true，根因 i2f-convert ObjectConvertor 宽泛转换拦截使 tryParseBoolean 成死代码）、顶层键首段含 `_`/`-`/大写开头时 NPE（根因 i2f-reflect groupMap 的 put/get 键不一致），另有流关闭两态不一致、prefix 未命中静默 null、toMap 丢弃非 String 键值等（详见文档）。
+
+- 详细文档：[i2f-properties](./i2f-jdk/i2f-properties/readme.md)
+
+### i2f-proxy-std
+
+> **代理标准契约层**（6 源文件约 320 行，仅依赖 i2f-invokable）：双契约——`IProxyHandler` 五阶段钩子（initContext/before 短路/after 改写/except 替换/onFinally 回调）与 `IProxyInvocationHandler` 函数式三参 invoke（@FunctionalInterface + `of(IProxyHandler)` 适配工厂）；`IProxyProvider` 提供者契约（proxy(obj, handler) 双形态桥接）；`ProxyHandlerAdapter` 五阶段编排器；`DefaultMethodSmartInvocationHandler` 三路分派骨架（Object/default/普通，default 经 MethodHandles findSpecial 特殊调用）；`MethodHandlesUtil` JDK8 私有构造器反射与 JDK9+ privateLookupIn 的跨版本 Lookup 兼容层。被 i2f-proxy/i2f-proxy-handlers/i2f-mixins/i2f-spring-core 与 cglib/aspectj/mybatis/ai-std 等扩展消费。⚠ 实测三处高危缺陷：五阶段适配器任何目标异常 → 变成无信息的 NPE（except 传错变量 + throw null，真实异常彻底丢失）、智能 handler 抽象方法直接崩（IllegalArgumentException）、Object 方法语义颠倒（`proxy.equals(proxy)`=false）（详见文档）。
+
+- 详细文档：[i2f-proxy-std](./i2f-jdk/i2f-proxy-std/readme.md)
+
+### i2f-proxy
+
+> **JDK 动态代理实现模块**（6 源文件约 170 行，依赖 i2f-proxy-std）：`JdkProxyUtil` 六重载门面（IProxyInvocationHandler 函数式 / IProxyHandler 五阶段 / 原生 InvocationHandler 三契约 × 实例/接口双形态）+ normal 适配器（target=原实例可转发）与 interfaces 适配器（target=代理自身）双 InvocationHandler 适配器 + `JdkProxyProvider`/`JdkDynamicProxyProvider` 双 IProxyProvider（INSTANCE 单例）+ `BasicDynamicProxyHandler` 五阶段 before 解包骨架；被 ai-std/http-proxy/jdbc-proxy/aspectj/xproc4j-starter 五处消费（AiServices/RestClientProvider/ProxySqlExecuteGenerator/AspectjUtil 等声明式接口基础设施）。⚠ 实测要点：interfaces 形态 + 五阶段未短路无限递归（before 被调 1030 次后 NPE 终止）、泛型 T 陷阱赋给实现类即 CCE、default 与 Object 方法全部回调 handler（详见文档）。
+
+- 详细文档：[i2f-proxy](./i2f-jdk/i2f-proxy/readme.md)
+
+### i2f-proxy-handlers
+
+> **注解驱动的代理处理器模块**（4 源文件约 706 行，依赖 i2f-proxy-std/i2f-annotations-ext/i2f-lock/i2f-convert/i2f-comparator/i2f-reflect）：把 `@Lock`/`@Retry`/`@Validate` 横切语义落地为三个可直接挂动态代理的 `IProxyInvocationHandler`——`LockProxyHandler`（锁键=类名+方法名+value，JVM ReentrantLock 默认、ILockProvider 可换分布式）、`RetryProxyHandler`（倍率退避 + maxDelay 封顶 + breakOn）、`ValidateProxyHandler`（15 校验注解族 + @Tag 标签过滤 + 对象/集合/Map/数组递归 + 路径化消息 `arg0[0].name`）+ `ValidateException`；全仓暂无源码级消费方（参考实现库，按需手动挂载）。⚠ 实测高危缺陷：三个处理器 interfaces 形态转发即无限递归（getLock 被调 1032 次、根因 SOE，必须 normal 实例形态）、breakOn 因 ITE 包装完全失效、转发业务异常被包成 UndeclaredThrowableException<-ITE<-业务异常、@NotSize 双边界判定反转（区间内放行/低于下界误拒）、@Min 失败消息误报 Max（详见文档）。
+
+- 详细文档：[i2f-proxy-handlers](./i2f-jdk/i2f-proxy-handlers/readme.md)
+
+### i2f-reference
+
+> **值的三态引用包装**（单包单类 `Reference<E>` 183 行、零 Maven 依赖连 lombok 都无）：以 VALUE/NOP/FINISH 三态显式区分「有值（可为 null）/无值跳过/流终止」四种 `null` 无法表达的语义，`ReadWriteLock` 读写锁保护 `get/set/isXxx/toXxx`，`nop/finish/empty/of` 四静态工厂；被 `i2f-iterator`（元素读取三态协议）与 `i2f-container`（RingQueue 队列槽位）直接依赖，经 `i2f-text`、`i2f-match` 两条主干传递至 jdbc/ai/脚本族共 9 模块 19 文件消费（缓存可空值、扩展点短路、SSE 流终止信号）。
+
+- 详细文档：[i2f-reference](./i2f-jdk/i2f-reference/readme.md)
+
+### i2f-reflect
+
+> **全仓反射能力中央底座**（33 个源文件约 6200 行）：`ReflectResolver` 单类 3414 行七大能力族——类加载（双路径 + 前缀补全）、字段/方法发现（序列化视角过滤）、注解解析（元注解递归 + @Repeatable 展开）、调用匹配（类型距离 + varargs 打包）、值读写（getter/setter 优先）、Bean 复制（copy/assign/merge 三语义 + 弱名归一）、虚拟字段；叠加 `RichConverter` 泛型递归强转、`ObjectRouteResolver` 点分路由扁平↔树、`ReflectSignature` 签名互转与 `vistor` 表达式引擎（`user.roles[0].name` 路径 + `@静态调用`），约 30 个 LruMap 缓存 + `ENABLE_CACHE` 开关；被 44 模块 79 源文件消费，是 i2f-lambda/i2f-properties/i2f-bql/i2f-spring-mvc-metadata/i2f-jdbc-procedure 等的共同反射地基（⚠ `loadClassWithJdk` 直载丢失、`RichConverter` 迭代器转换死循环 OOM 等 16 项已实证缺陷——详见文档）。
+
+- 详细文档：[i2f-reflect](./i2f-jdk/i2f-reflect/readme.md)
+
+### i2f-resources
+
+> **资源定位与类路径扫描工具箱**（5 源文件约 1460 行、零三方依赖）：`ResourceUtil` 把 `classpath:`/`classpath*:`/`file:`/URL/相对/绝对六态位置统一解析为 URL/Stream/Bytes/String，另提供 `matchResources` 目录/jar 条目通配与 `getResourcesFiles` 位置集合展开；`ResourcesLoader` 是全类路径扫描引擎——目录递归 + jar 流遍历 + 嵌套 jar URL 流式解包 + manifest `Class-Path` 补全 + `jumpJre` 跳过 JRE + jar/资源双 BiPredicate 过滤（默认排除约 150 个三方前缀）+ 包名最短前缀收缩 + `ReflectResolver.loadClass` 产 Class，`getResources()` 带 `RES_CACHE` 缓存，支撑 netty 注解控制器扫包与 quartz 任务扫描；`ResourceProvider`/`DefaultResourceProvider` 以 `assets.properties`+`assets/bundle/` 约定提供键值/媒体/类型化取值（SPI 尚无消费方）。被 io-file/idcard/ai-std/翻译/Excel/逆向生成等 11 模块直接消费、经 i2f-ai-std 传递至 jdbc-procedure/xproc4j-starter 等 6 模块（共 25 源文件；⚠ 主要瑕疵：provider `get(id)` 变长参数传 null 数组 NPE、嵌套 jar 假递归 URL 失真、classpath 分号硬编码、`isLegalClassFile` 数字规则误杀——详见文档）。
+
+- 详细文档：[i2f-resources](./i2f-jdk/i2f-resources/readme.md)
+
+### i2f-resp
+
+> **统一 API 响应契约模块**（2 源文件约 95 行、运行期零依赖仅 lombok 编译期）：`ApiResp<T>` 泛型响应体——`code`/`msg`/`data` 三字段 + 惰性 `kvs` 扩展键值，链式 `code()/msg()/data()/add()` 与 `success/error/resp` 静态工厂并存，`isSuccess()` 以 `code == 200` 为唯一判据；`ApiCode` 常量接口收纳 7 个状态码（SUCCESS=200、ERROR=0、NO_LOGIN=401、NO_AUTH=403、UNKNOWN=402、NOT_FOUND=404、SYS_EXCEPTION=500）。作为全仓「正常返回链路」的统一响应模型（与 i2f-exception 的「异常抛出链路」互补）：被 `i2f-springboot-spring-starter` 以 `@ConditionalOnMissingBean` 默认装配为全局响应包装/异常转换/404 转换三转换器（可整体替换），security/shiro/sentinel/activity/spring-authentication 安全与业务处理器、ai-rest-openai MCP 网关接口签名直接使用；共 9 模块 23 源文件消费（直接 7 模块 19 文件 + 经 ai-rest-openai 传递 2 模块 4 文件）。⚠ 主要瑕疵：`ApiCode` 常量接口反模式（非 enum 无法穷举）+ 两套码值体系混编且消费方裸数字回潮（UNKNOWN=402 与 HTTP 402 语义冲突）、`error(msg)` 默认码 0 与 HTTP 状态脱钩、`isSuccess()` 被 Bean 序列化额外产出 success 字段、工厂参数顺序（data/msg）不一致、kvs 惰性初始化返回 null——详见文档。
+
+- 详细文档：[i2f-resp](./i2f-jdk/i2f-resp/readme.md)
+
+### i2f-robot
+
+> **AWT 桌面自动化工具**（单类 `RobotUtil` 20 方法名/24 公开静态方法约 165 行、纯 JDK 零依赖、全仓零消费方）：把 `java.awt.Robot` 封装为静态门面——设备层 `defaultGraphicsDevice`/`getGraphicsDevices`（多屏枚举），实例层 `defaultRobot` 懒加载单例（失败包装 UnsupportedOperationException），操作层三族：截屏族（`screenCapture` 主屏截图 / `screenSave(File)` 按扩展名 jpg/jpeg/png/bmp 选编码器存图 / `getPixelColor` 取色 / `getBounds` 主屏边界）、键盘族（`keyClick` 单键、`keyPressCombine` 正序按下逆序弹起、Ctrl+C/V/X、Ctrl+Shift+Esc、Ctrl+Alt+Del、Win 键）、鼠标族（左中右键点击、`mouseDrag` 左键直线插值拖拽 10ms/步），键鼠操作内置 60ms 按下-弹起间隔。定位为面向使用者的独立工具库：经 `i2f-jdk-all` 聚合打包、无 Main-Class 非可执行 jar。⚠ 主要瑕疵：多屏支持残缺（操作全部固定默认屏）、`keyPressCtrlAltDelete()` 受 Windows SAS 安全注意序列保护本质无效、拖拽步长/延迟魔法数不可调、`screenSave` 非白名单后缀静默按 png 编码但保留原扩展名、headless 下设备层 HeadlessException 与 Robot 层 UnsupportedOperationException 失败方式不一致——详见文档。
+
+- 详细文档：[i2f-robot](./i2f-jdk/i2f-robot/readme.md)
+
+### i2f-rowset
+
+> **表格行集流式读写契约**（12 源文件约 830 行、零项目内部依赖仅 lombok 编译期）：`IRowSet` = `Iterator` + `Closeable` 流式行集契约（`IRowHeader`/`IRowSetReader`/`IRowSetWriter` + `SimpleRowHeader`/`SimpleIteratorRowSet`/`SimpleCollectionMapRowSet`），CSV 侧 `CsvReader` 字符级状态机（引号包围/双引号转义/跨行续读/EOF 校验）+ `CsvMapRowSetReader` 自动类型推断（BigDecimal/true/四种日期）+ `CsvMapRowSetWriter` 类型分派格式化（长数字加引号防科学计数、日期三格式），JSON 侧两个抽象 writer（数组套数组/JSONL）把 `toJson` 注入留给使用方不绑定 JSON 库；唯一直接消费方 ops-starter 数据源控制台（/export CSV 导出、/import 流式批量导入；两个 Jackson 适配器备而未用），经其传递至 i2f-tools-ops。⚠ 主要瑕疵：`"false"` 解析返回字符串的布尔不对称 Bug、读写两端 `nullAsEmpty` 同名反义、数据行长于表头越界、静态 ThreadLocal 格式化器跨实例串扰、`"123"`/`"null"` 文本往返类型漂移等——详见文档。
+
+- 详细文档：[i2f-rowset](./i2f-jdk/i2f-rowset/readme.md)
+
+### i2f-script
+
+> **JSR-223 脚本引擎统一门面**（4 源文件约 280 行、零项目内部依赖）：`ScriptProvider` 实现 `ScriptEngine`/`Invocable`/`Compilable` 三接口，把任意 JSR-223 引擎包装为单一门面——静态 `manager` + `getEngine`/`getJavaScriptEngine`/`getInstance`/`getJavaScriptInstance` 双工厂，`compile`/`invokeMethod`/`invokeFunction` 前置 `instanceof` 特性探测（不支持抛 `ScriptFeatureNotSupportException`，而 `getInterface` 却抛 `IllegalArgumentException` 不一致），其余 14 方法纯透传；唯一源码级消费方 `i2f-extension-xproc4j`（`LangEvalJavascriptNode` 求值 `<lang-eval-javascript>` 标签并包装异常、`LangEvalJavaNode` 把 `i2f.script.*` 注入动态编译代码），经 `i2f-jdbc-procedure`（编译级声明但模块内零引用）传递供给；Java15+ 需自行补 nashorn-core（provided+optional，胖包不含）。⚠ 主要瑕疵：引擎 null 静默构造 NPE 延迟爆发、三接口无条件实现致 `instanceof Compilable` 判定失真、getInterface 异常类型不一致、demo 类随主 jar 发布、lombok 冗余声明——详见文档。
+
+- 详细文档：[i2f-script](./i2f-jdk/i2f-script/readme.md)
+
+### i2f-search
+
+> **极简前缀索引树（Trie / 字典树）双形态**（2 源文件约 265 行、零项目内部依赖）：`PrefixSearchTree<T, D>` 泛型键序列版 + `StringSearchTree<D>` String 特化版，均以 `ConcurrentSkipListMap` 作有序子节点容器——`add` 挂载（同键覆盖）/ `find` 精确查找 / `prefix` 前缀批量召回（含端点自身，天然按键序）/ `collect` 有序全量导出 / `printTree` ASCII 树形打印 / `remove` 删除 / `clear` 清空，空迭代器约定为根节点操作。全仓零源码消费方（仅 POM 声明 4 处，经 `i2f-jdk-all` 聚合发布）。⚠ 主要瑕疵：`remove` 只清子树不删自身 `data`（叶子路径删除为完全空操作、中间节点留空壳）、null 键 NPE 与非 `Comparable` 键 `ClassCastException` 延迟爆发、两棵树约 90% 重复代码——详见文档。
+
+- 详细文档：[i2f-search](./i2f-jdk/i2f-search/readme.md)
+
+### i2f-serialize-impl
+
+> **序列化契约的官方实现层**（13 源文件约 1422 行、7 个内部依赖 + lombok 实质使用）：配套 i2f-serialize-std 五接口的官方实现——字节族 `SerializeUtil` 静态门面 + `JdkBytesObjectSerializer`（JDK 原生、INSTANCE 单例、null 透传）+ `CharsetBytesStringSerializer`（UTF8/GBK/ISO88591 三常量）；JSON 族**零第三方依赖自研引擎**：`Json2` 静态门面 + `Json2Serializer`（**17 处实例化为全仓默认 JSON 引擎**）+ `JsonGenerator`（229 行类型分派链 + 双单例 null 策略）/ `JsonParser`（407 行正则分词 + 递归下降，JSON5 风格超集单引号/注释/圆括号）；文本族 `FormatTextSerializer`（「类名:内容」自描述，java.lang. 压缩为 $）；XML 族只写 `Xml2` + `Xml2Serializer`（反序列化全抛 UOE）与独立解析器 `XmlParser`（含 main 演示 + XmlCtx/XmlNode 树节点），`Xml2.toXmlString` 11 处静态转义调用（代码生成器族）；六类能力（SerializeUtil/JdkBytes/Charset/FormatText/XmlParser/XmlCtx）全仓零消费。⚠ 探针实证 40 项（28 通过 12 失败 10 观察）：unescape 顺序缺陷吞转义（字面 `\t` 变 TAB、`\n` 错转换行）、`\b`/`\f`/`\u` 还原不对称、裸键 `{a:1}` 静默丢数、大整数与 `|123` 抛 NFE、`deserializeAsMap` 顶层数组 CCE、带 `<?xml?>` 声明解析崩溃、charset null 泄漏 `CodecException` 等——详见文档。
+
+- 详细文档：[i2f-serialize-impl](./i2f-jdk/i2f-serialize-impl/readme.md)
+
+### i2f-serialize-std
+
+> **序列化标准契约层**（15 类型约 384 行 = 9 接口 + 4 异常 + 2 适配器，仅依赖 i2f-codec-std，lombok 声明未用）：以 `ISerializer<E,D>` 双动词统一「对象 ↔ 编码结果」并 default 桥接 codec-std 的 `ICodec`（serialize=encode、deserialize=decode），`ITypeSerializer` 叠加类型化反序列化三级重载（`deserialize(enc)`/`(enc, Class)`/`(enc, Object type)`）与 `deserializeAsMap`；沿数据通道固化四子接口——`IBytesObjectSerializer`/`IBytesStringSerializer`（byte[] 通道 + `serializeAsBase64/deserializeByBase64`）与 `IStringObjectSerializer`/`IStringTypeSerializer`（String 通道），叠加领域契约 `IJsonSerializer`（+`map2Bean/bean2Map`）与 `IXmlSerializer`（标记组合）及 `asStringSerializer()/asBytesSerializer()` + 双向镜像适配器（默认 UTF-8）互桥；`SerializeException`（extends `CodecException`）与 Json/Xml/FormatText 三子异常成族；被 26 模块 77 源文件消费（`IJsonSerializer` 53 处 import 为全仓最大契约面）——AI 栈（`AiAgent` 注入 + MCP 工具参数 `deserializeAsMap` 9 处）、HTTP 网络栈（`HttpProcessorProvider` processor 参数 + `HttpResponse.getContentAsObject`）、SWL 安全传输族、i2f-hash 13 个 HashProvider 字节契约与 jackson/fastjson/fastjson2/gson 适配实现；官方实现下沉 i2f-serialize-impl（Json2 被 17 处实例化为默认 JSON 引擎；Xml2 只写）。⚠ 探针实证：双向适配器 null 输入抛 `SerializeException(msg=null,cause=NPE)`（15 断言 3 失败）、`deserialize(enc,clazz)` 默认静默忽略类型参数返回未转换结果、`bean2Map` 默认拒绝/`map2Bean` 默认无转换、`XmlSerializeException` 全仓零抛出的死类等 10 条瑕疵——详见文档。
+
+- 详细文档：[i2f-serialize-std](./i2f-jdk/i2f-serialize-std/readme.md)
 
 ## i2f-spring
 
