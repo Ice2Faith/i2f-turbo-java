@@ -18,6 +18,8 @@ ai:
       enable: false
     command:
       enable: false
+    powershell:
+      enable: false
     mcp-gateway:
       enable: true
     robot:
@@ -27,6 +29,8 @@ ai:
     form:
       enable: false
     groovy:
+      enable: false
+    python:
       enable: false
     dashscope-t2i:
       enable: false

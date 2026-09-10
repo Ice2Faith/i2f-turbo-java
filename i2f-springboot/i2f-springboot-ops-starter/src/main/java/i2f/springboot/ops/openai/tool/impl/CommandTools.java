@@ -23,14 +23,13 @@ import java.util.List;
  * @desc
  */
 @ToolIntent(items = @ToolIntentItem(value=CommandTools.TOOL_INTENT_VALUE,description = CommandTools.TOOL_INTENT_DESCRIPTION))
-@ConditionalOnExpression(CommandTools.CONDITION_EXPRESS)
+@ConditionalOnExpression("${ai.tools.command.enable:false}")
 @Component
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Tools
 public class CommandTools {
-    public static final String CONDITION_EXPRESS="${ai.tools.command.enable:false}";
     public static final String TOOL_INTENT_VALUE="command";
     public static final String TOOL_INTENT_DESCRIPTION="提供命令行执行、操作系统类型判断";
 

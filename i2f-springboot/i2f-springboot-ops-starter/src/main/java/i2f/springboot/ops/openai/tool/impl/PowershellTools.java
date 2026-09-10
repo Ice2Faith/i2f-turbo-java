@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @desc
  */
 @ToolIntent(items = @ToolIntentItem(value=CommandTools.TOOL_INTENT_VALUE,description = CommandTools.TOOL_INTENT_DESCRIPTION))
-@ConditionalOnExpression(CommandTools.CONDITION_EXPRESS)
+@ConditionalOnExpression("${ai.tools.powershell.enable:false}")
 @Conditional(PowershellTools.WindowsFormCondition.class)
 @Data
 @NoArgsConstructor
