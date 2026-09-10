@@ -7,6 +7,7 @@ import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.os.OsUtil;
+import i2f.os.data.CommandResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Ice2Faith
@@ -65,7 +67,7 @@ public class CommandTools {
                     AiTags.COMMAND_VALUE
             }, description = "run an normal command line, implements by java process, some command maybe need in `cmd /c` or `sh -c` when not found command."
     )
-    public String run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/c\",\"start\",\"calc\"]")
+    public CommandResult run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/c\",\"start\",\"calc\"]")
                                    List<String> commandArray,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
@@ -77,7 +79,7 @@ public class CommandTools {
             throw new IllegalStateException("missing local-file secure control.");
         }
         dir = localFileTools.getFile(workdir);
-        String ret = OsUtil.runCmd(commandArray.toArray(new String[0]), null, dir, null);
+        CommandResult ret = OsUtil.execCmdForResult(true, TimeUnit.MINUTES.toMillis(3), commandArray.toArray(new String[0]), null, dir, null);
         return ret;
     }
 }

@@ -6,7 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.os.OsUtil;
-import i2f.os.WindowsUtil;
+import i2f.os.data.CommandResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,7 +105,7 @@ public class PythonTools {
                     AiTags.SCRIPT_VALUE
             }, description = "run an python script, command will run as a temp py script."
     )
-    public String run_python_script(@ToolParam(value = "script", description = "the python full script content, for example \"print(1)\"")
+    public CommandResult run_python_script(@ToolParam(value = "script", description = "the python full script content, for example \"print(1)\"")
                                    String script,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
@@ -117,12 +117,12 @@ public class PythonTools {
             throw new IllegalStateException("missing local-file secure control.");
         }
         dir = localFileTools.getFile(workdir);
-        String ret = execPythonScript(true, TimeUnit.MINUTES.toMillis(3),
+        CommandResult ret = execPythonScript(true, TimeUnit.MINUTES.toMillis(3),
                 script, null, dir, null);
         return ret;
     }
 
-    public static String execPythonScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
+    public static CommandResult execPythonScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
         String fileName= "py-"+ UUID.randomUUID().toString().replace("-", "").toLowerCase()+".py";
         File scriptFile=new File(fileName);
         String python=getPythonCommand();
@@ -144,7 +144,7 @@ public class PythonTools {
             List<String> cmdList = new ArrayList<>();
             cmdList.add(python);
             cmdList.add(fileName);
-            return OsUtil.execCmd(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
+            return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
         }finally {
             if(scriptFile.exists()){
                 scriptFile.delete();

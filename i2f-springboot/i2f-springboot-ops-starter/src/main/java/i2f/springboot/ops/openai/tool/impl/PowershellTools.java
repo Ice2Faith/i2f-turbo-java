@@ -6,7 +6,8 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.os.OsUtil;
-import i2f.os.WindowsUtil;
+import i2f.os.WindowsOsUtil;
+import i2f.os.data.CommandResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,6 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -54,7 +54,7 @@ public class PowershellTools {
                     AiTags.COMMAND_VALUE
             }, description = "run an powershell command line."
     )
-    public String run_powershell_command(@ToolParam(value = "command", description = "the powershell command, for example \"Get-Process | Select-Object -First 5\"")
+    public CommandResult run_powershell_command(@ToolParam(value = "command", description = "the powershell command, for example \"Get-Process | Select-Object -First 5\"")
                                    String command,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
@@ -66,7 +66,7 @@ public class PowershellTools {
             throw new IllegalStateException("missing local-file secure control.");
         }
         dir = localFileTools.getFile(workdir);
-        String ret = WindowsUtil.execPowershell(true, TimeUnit.MINUTES.toMillis(3),
+        CommandResult ret = WindowsOsUtil.execPowershell(true, TimeUnit.MINUTES.toMillis(3),
                 command, null, dir, null);
         return ret;
     }
@@ -78,7 +78,7 @@ public class PowershellTools {
                     AiTags.COMMAND_VALUE
             }, description = "run an powershell script, command will run as a temp ps1 script."
     )
-    public String run_powershell_script(@ToolParam(value = "script", description = "the powershell full script content, for example \"Get-Process | Select-Object -First 5\"")
+    public CommandResult run_powershell_script(@ToolParam(value = "script", description = "the powershell full script content, for example \"Get-Process | Select-Object -First 5\"")
                                    String script,
                                    @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
                                    String workdir) {
@@ -90,7 +90,7 @@ public class PowershellTools {
             throw new IllegalStateException("missing local-file secure control.");
         }
         dir = localFileTools.getFile(workdir);
-        String ret = WindowsUtil.execPowershellScript(true, TimeUnit.MINUTES.toMillis(3),
+        CommandResult ret = WindowsOsUtil.execPowershellScript(true, TimeUnit.MINUTES.toMillis(3),
                 script, null, dir, null);
         return ret;
     }

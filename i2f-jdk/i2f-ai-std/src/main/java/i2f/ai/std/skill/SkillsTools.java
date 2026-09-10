@@ -6,6 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.io.stream.StreamUtil;
 import i2f.os.OsUtil;
+import i2f.os.data.CommandResult;
 
 import java.io.File;
 import java.net.URL;
@@ -88,9 +89,9 @@ public class SkillsTools {
                     AiTags.COMMAND_VALUE
             }, description = "执行技能(skill)中的命令行脚本"
     )
-    public String run_skill_script(@ToolParam(description = "技能名称，例如：search_website") String skillName,
-                                   @ToolParam(description = "脚本路径，例如：script/test.py") String scriptPath,
-                                   @ToolParam(description = "脚本的命令行参数，例如：-o -l test.txt") List<String> commandArguments) throws Exception {
+    public CommandResult run_skill_script(@ToolParam(description = "技能名称，例如：search_website") String skillName,
+                                          @ToolParam(description = "脚本路径，例如：script/test.py") String scriptPath,
+                                          @ToolParam(description = "脚本的命令行参数，例如：-o -l test.txt") List<String> commandArguments) throws Exception {
         if (skillName == null || !skillName.matches("^[a-zA-Z0-9\\-_\\.]+$")) {
             throw new IllegalArgumentException("bad skillName accept");
         }
@@ -134,7 +135,7 @@ public class SkillsTools {
         commandArr.add(scriptFile.getName());
         commandArr.addAll(commandArguments);
 
-        return OsUtil.execCmd(true, TimeUnit.MINUTES.toSeconds(3),
+        return OsUtil.execCmdForResult(true, TimeUnit.MINUTES.toSeconds(3),
                 commandArr.toArray(new String[0]),
                 null,
                 new File(scriptFile.getAbsolutePath()).getParentFile(),

@@ -1,5 +1,7 @@
 package i2f.os;
 
+import i2f.os.data.CommandResult;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -13,8 +15,8 @@ import java.util.UUID;
  * @date 2026/9/10 19:38
  * @desc
  */
-public class WindowsUtil {
-    public static String execPowershell(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
+public class WindowsOsUtil {
+    public static CommandResult execPowershell(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
         if(!OsUtil.isWindows()){
             throw new IllegalStateException("current os is not windows, not support powershell");
         }
@@ -26,10 +28,10 @@ public class WindowsUtil {
                 "-Command"
         ));
         cmdList.add(command);
-        return OsUtil.execCmd(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
+        return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
     }
 
-    public static String execPowershellScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
+    public static CommandResult execPowershellScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
         if(!OsUtil.isWindows()){
             throw new IllegalStateException("current os is not windows, not support powershell");
         }
@@ -62,7 +64,7 @@ public class WindowsUtil {
                     "-File"
             ));
             cmdList.add(fileName);
-            return OsUtil.execCmd(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
+            return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
         }finally {
             if(scriptFile.exists()){
                 scriptFile.delete();
