@@ -13,6 +13,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -33,6 +37,7 @@ import java.util.concurrent.CountDownLatch;
  */
 @ToolIntent(items = @ToolIntentItem(value="robot",description = "提供基于robot的本机控制能力、截屏等"))
 @ConditionalOnExpression("${ai.tools.robot.enable:false}")
+@Conditional(FormTools.WindowsFormCondition.class)
 @Data
 @NoArgsConstructor
 @Component
@@ -40,6 +45,16 @@ import java.util.concurrent.CountDownLatch;
         "robot"
 })
 public class RobotTools {
+    public static class WindowsFormCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            if (!OsUtil.isWindows()) {
+                return false;
+            }
+            return true;
+        }
+    }
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     @Autowired(required = false)
