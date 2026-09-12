@@ -511,6 +511,11 @@
                 ></el-input>
                 <div class="input-actions">
                     <div>
+                        <span v-if="metas.ttsPlaying">
+                        <i class="el-icon-turn-off-microphone microphone-spark"
+                           style="font-size: 18px; color: dodgerblue;"
+                           @click="stopTts"></i>
+                        </span>
                         <span>
                             <el-button size="small" plain type="success" @click="metas.showMoreActions=true">
                                 更多<i class="el-icon-more"></i>
