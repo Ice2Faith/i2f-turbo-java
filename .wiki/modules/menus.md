@@ -6,6 +6,12 @@
 
 > 仅依赖 JDK8 的基础能力模块集合，提供反射、类型系统、集合、IO、加密、SPI 服务加载、JVM Agent、AI 标准抽象、网络通信、AI 协议实现、通用算法、注解元数据、数组工具、字节序编解码、认证契约、参数化 SQL 构建、分页方言适配、SQL 字面量文本化、数据库类型方言识别、类型安全查询语言、可序列化函数式接口体系、方法引用解析（内核 + 任意方法通用层 + 转换器门面）、浏览器抓取标准契约、流式对象修改器、一次性口令（HOTP/TOTP）认证、元组标准契约与强类型实现家族、类型系统判定与泛型超类型令牌、底层内存窥探（Unsafe/对象地址/大小）、字符串匹配标准契约（布尔/优先级打分）、字符串匹配实现（通配/Ant/正则+择优排序）与全仓正则工具箱、内存缓存/自调节容器/弱引用复用/RAII 作用域工具族、外置 classpath 应用启动器（child-first 加载插件 jar）、日志标准门面（ILogger 大门面 + 可插拔 LoggerProvider SPI + StdioLogger 彩色兜底）、日志门面默认完整实现（LogHolder 全局+线程双路由 + 广播/文件/JDBC 写出 + System.out 收编 + log.properties 装配）生命周期契约（ILifeCycle 三动词 create/destroy/close + Closeable 桥接 + LifeCycleException）、按 key 限流控制（Limiter 单动词 require 令牌桶 TokenBucketLimiter + IKeyedLimiter 三动词失败锁定/令牌桶）、锁抽象契约（ILock/INotify/IReadWriteLock/ILockProvider 接口及 JDK 原生实现）、操作系统工具（OsUtil 跨平台命令执行/平台探测 + WindowsOsUtil PowerShell 执行 + PerfUtil/LinuxUtil/WindowsUtil 的 CPU/内存/磁盘采集）、二进制流封包协议（EE EE 引导 + EF 转义 + 多 head/多 body + tail 校验的 StreamPacket/StreamPacketResolver，HTTP 风格 PacketProtocol 映射，512KB 内存/临时文件自适应流适配，纯 JDK 零依赖）、分页数据模型（ApiOffsetSize 偏移-大小-排他结束下标三字段 + ApiPage 零基页索引与一基页号转换 + Page 泛型结果承载的 JDBC/MyBatis/ES/脚本统一分页契约，运行期零依赖仅 lombok 编译期）、对象池与分段并发原语（ObjectPool 队列缓存对象池 + hash 分段对象提供者/分段锁/String.intern 分段同步，纯 JDK）、properties 配置装载（PropertiesUtil 单门面：点分键树化 + 下划线/中划线驼峰归一 + Visitor 前缀定位 + RichConverter 强类型转换的 properties→Bean 装载管线，依赖 i2f-reflect/i2f-text）、代理标准契约（IProxyHandler 五阶段钩子 initContext/before 短路/after 改写/except 替换/onFinally 回调 + IProxyInvocationHandler 函数式三参 invoke + IProxyProvider 桥接 + DefaultMethodSmartInvocationHandler 的 default 方法 MethodHandles 兼容，JDK/CGLIB/AspectJ 统一代理契约，依赖 i2f-invokable）、JDK 动态代理实现（JdkProxyUtil 六重载门面提供函数式/五阶段/原生三契约 × 实例/接口双形态 + normal/interfaces 双 InvocationHandler 适配器 + JdkProxyProvider/JdkDynamicProxyProvider 双提供者 + BasicDynamicProxyHandler 五阶段解包骨架，依赖 i2f-proxy-std）、注解驱动的代理处理器（@Lock 方法级互斥 / @Retry 倍率退避重试 / @Validate 参数返回值深度校验三大 IProxyInvocationHandler 处理器 + ILockProvider 可插拔锁 + 15 校验注解族标签化递归校验，依赖 i2f-proxy-std/i2f-annotations-ext/i2f-lock/i2f-convert/i2f-comparator/i2f-reflect，⚠ 实测必须 normal 实例形态否则递归）、三态引用包装（Reference 单类 183 行：VALUE/NOP/FINISH 三态区分「有值/值为 null/跳过/终止」四义，ReadWriteLock 读写安全，nop/finish/empty/of 四静态工厂 + get/set/isXxx/toXxx，被 i2f-iterator 作元素三态协议、i2f-container RingQueue 作队列槽位直接依赖，经 i2f-text/i2f-match 两条主干传递至 jdbc/ai/脚本族 9 模块消费，零 Maven 依赖）、反射全家桶（ReflectResolver 单类 3414 行七大能力族——类加载/字段方法发现/注解解析（元注解递归 + @Repeatable 展开）/调用匹配（类型距离 + varargs 打包）/值读写（getter 优先）/Bean 复制（copy/assign/merge 三语义 + 弱名）/虚拟字段合成，叠加 RichConverter 泛型递归强转、ObjectRouteResolver 点分路由扁平↔树、ReflectSignature 签名互转与 vistor 表达式引擎（js 风格路径 + $root/$param 内建 + @ 静态调用），约 30 个 LruMap 缓存 + ENABLE_CACHE 开关；被 44 模块 79 源文件消费，是 lambda/properties/bql/spring-mvc-metadata 的共同反射底座，⚠ loadClassWithJdk 直载丢失/迭代器转换死循环等 16 项已实证瑕疵详见文档）、资源定位与类路径扫描（ResourceUtil 六态位置协议 classpath:/classpath*:/file:/URL/相对/绝对 → URL/Stream/Bytes/String + matchResources 通配 + getResourcesFiles 位置展开；ResourcesLoader 全类路径扫描引擎：目录递归 + jar 流 + 嵌套 jar URL 流式解包 + manifest Class-Path 补全 + jumpJre + 约 150 三方前缀默认排除表 + 包名前缀收缩 + ReflectResolver.loadClass 产 Class + RES_CACHE 缓存，支撑 netty 注解控制器扫包与 quartz 任务扫描；ResourceProvider assets 约定 SPI；被 io-file/idcard/ai-std/翻译族/Excel/逆向生成等 11 模块直接消费、经 i2f-ai-std 传递至 jdbc-procedure/xproc4j-starter 等 6 模块，零三方依赖，⚠ provider get(id) 变长参数传 null 数组 NPE 等瑕疵详见文档）、统一 API 响应契约（ApiResp 泛型响应体 code/msg/data 三字段 + 惰性 kvs 扩展键值 + 链式 add/code/msg/data + success/error/resp 静态工厂 + isSuccess 单判据 + ApiCode 七码常量接口 SUCCESS=200/ERROR=0/NO_LOGIN=401/NO_AUTH=403/UNKNOWN=402/NOT_FOUND=404/SYS_EXCEPTION=500，被 spring-starter 以 @ConditionalOnMissingBean 默认装配为全局响应包装/异常转换/404 转换器、security/shiro/sentinel/activity/spring-authentication 处理器与 ai-rest-openai MCP 网关直接使用，共 9 模块 23 源文件消费，仅 lombok 编译期依赖）、AWT 桌面自动化（RobotUtil 单类约 165 行：多屏设备枚举 + 主屏截屏/存图/取色 + 单键与组合键点击（Ctrl+C/V/X、Ctrl+Shift+Esc 等）+ 左中右键点击 + 左键插值拖拽，纯 JDK 零依赖、全仓尚无消费方）、表格行集流式读写（`IRowSet` = `Iterator` + `Closeable` 流式行集契约与 CSV 引号状态机读写 + BigDecimal/日期自动类型推断 + 长数字防科学计数，JSON 数组/JSONL 抽象写出注入 JSON 库，ops-starter 数据源控制台用于 CSV 导出/导入）、JSR-223 脚本引擎门面（ScriptProvider 聚合 ScriptEngine+Invocable+Compilable 三接口 + compile/invoke 运行时特性探测守卫 + getJavaScriptInstance 静态工厂；唯一消费方 xproc4j：`<lang-eval-javascript>` 求值节点与 Java 动态编译 import 注入；lombok 冗余声明、Java15+ 需自行补 nashorn-core）、极简前缀索引树双形态（PrefixSearchTree 泛型键序列 + StringSearchTree String 特化，ConcurrentSkipListMap 有序子节点 + add/find/prefix 前缀召回/collect 有序导出/printTree 树形打印，零消费方，⚠ remove 只清子树不删 data 与 null 键 NPE）、序列化标准契约（ISerializer 双动词统一「对象↔字节/文本」双通道九接口 + serialize=encode 桥接 codec 体系 + 类型化反序列化三级重载/deserializeAsMap/Base64 便捷 + 双向适配器 + 四级异常族；被 AI 栈（MCP 参数 deserializeAsMap）/HTTP 网络栈/SWL 加密传输族/哈希契约族等 26 模块 77 源文件消费，官方实现 JdkBytes/Json2/Xml2 下沉 i2f-serialize-impl，⚠ 适配器 null 语义缺失与类型参数静默忽略等实证瑕疵详见文档）、序列化官方实现（零第三方依赖自研 JSON 引擎 Json2/Json2Serializer 17 处实例化为全仓默认引擎 + JsonGenerator/JsonParser 双侧实现 + XML 只写生成 Xml2/Xml2Serializer + 独立树解析 XmlParser + 自描述文本 FormatText + JDK 原生/字符集字节互转；⚠ 探针实证 unescape 顺序缺陷吞转义、裸键 `{a:1}` 静默丢数、大整数 NFE、`<?xml?>` 声明解析崩溃等 12 项失败详见文档）等零三方依赖的通用工具。
 
+### i2f-jdk-all
+
+> **i2f-jdk 全子模块的 Maven 聚合分发包 / 将 i2f-jdk 域下所有功能模块打包为单体 fat-jar 的一站式构建入口**（仅 1 个 pom.xml 共 633 行、无 Java 源码、零测试零资源，聚合约 91 个内部 `i2f-jdk` 子模块依赖，使用 `maven-assembly-plugin:3.1.0` 以 `jar-with-dependencies` 目标打包，产出含 Manifest 元信息的独立 JAR）。
+
+- 详细文档：[i2f-jdk-all](./i2f-jdk/i2f-jdk-all/readme.md)
+
 ### i2f-spi-annotations
 
 > SPI 注解定义模块，提供 `@Spi` 标记注解，声明服务实现类及其提供的接口，配合构建期插件生成 `META-INF/services/` 描述文件。
@@ -894,6 +900,28 @@
 
 - 详细文档：[i2f-translate-zh2pinyin](./i2f-jdk/i2f-translate-zh2pinyin/readme.md)
 
+## i2f-jdk-ext
+
+> 基于 javax.servlet 规范的 Web 层扩展模块集合,提供安全过滤器矩阵、Web 防火墙、失败锁定守卫与 Servlet 上下文 / 文件 / 包装器基础设施。
+
+### i2f-jdk-ext-web
+
+> **Servlet 层 Web 增强套件 / 安全过滤 + 防火墙 + 守卫 + 上下文与包装器的一站式横切能力层**(24 源文件约 3680 行、5 包 `i2f.web.filter` `.firewall`(context/exception/util/wrapper)`.guarder` `.servlet` `.wrapper`、零测试零资源、8 依赖 = 6 内部(i2f-network/io-stream/io-file/serialize-impl/cache/firewall)+ lombok + `javax.servlet-api`(provided+optional)):①`filter` 过滤器矩阵——抽象骨架 `OncePerHttpServletFilter`(attribute 防二次执行)、`SecurityFilter`(1428 行,方法/Content-Type/不可见字符/SQL 注入/远程调用/路径穿越/文件访问/命令注入/多编码变体检测 + IP/Origin/Referer 白名单 + body 缓存检查,违规 403;spring-starter `i2f.security.filter.*` 近 80 项配置)、`TraceFilter`(trace-id 头/参数→ThreadLocal + 钩子)、`MoveAverageProcessTimeStatFilter`(1024 段锁滑窗耗时);②`firewall`——`FirewallFilter`(@WebFilter,FirewallException→400)+ `FirewallContext`(6 静态开关 + 后缀/文件名双黑名单)+ `FirewallUtils`(字符×7 编码×4 字符集交叉断言)+ 请求/响应包装器(构造即预检查)+ 5 类异常;③`guarder`——`ResourcesFailureGuarder` 资源/IP 双维失败计数(默认 5/30 次)+ `IExpireCache` 过期锁定(30 分钟),`LoginGuarder` 登录特化;④`servlet`——`ServletContextHolder`(ThreadLocal 上下文)、`ServletContextUtil`(转发/Token/多级 IP/BaseUrl)、`ServletFileUtil`(Range 断点续传 206、附件下载)、`ServletResponseUtil`(JSON/XML/CORS);⑤`wrapper`——`HttpServletRequestProxyWrapper`(body 全缓存可重复读 + 头/参数可覆写)、`HttpServletResponseProxyWrapper`(响应体缓冲)、字节数组 Servlet 流。消费 7 模块:jdk-ext-swl(SwlWebFilter)、spring-web、springboot spring/security/shiro/ops-starter、spring-authentication。⚠ 瑕疵:`MoveAverageProcessTimeStatFilter` 滑窗淘汰 `addAndGet(lastTime)` 应为减(avgTime 失真);`SecurityFilter` **REMOTE_INVOKE_PATTERNS 误用 SQL_INJECT_REGEXES 编译**、`matchRemoteInvoke` 用 `matches` 全匹配难命中、`isExceedRootPath` 的 `..` 分支 pop 后又 push、`matchIllegalFileAccessFileName` `substring(0,idx)` **取到目录而非文件名**、`isMissingHeadersParameters` 豁免列表为空即跳过必填检查;`FirewallContext` add/remove 集合**语义颠倒**;`HttpServletRequestProxyWrapper` 第二构造器 `this.body = body` **自赋值**;`ByteArrayServletInputStream.isFinished()` 恒 false——详见文档。
+
+- 详细文档：[i2f-jdk-ext-web](./i2f-jdk-ext/i2f-jdk-ext-web/readme.md)
+
+### i2f-jdk-ext-swl
+
+> **SWL（Secure Wire Layer）安全传输协议的 Servlet 过滤器接入层 / 「请求解密 + 响应加密」对业务透明的容器适配底座**（4 源文件 562 行、单包 `i2f.web.swl.filter`、零测试零资源、5 依赖 = 3 内部（i2f-swl 协议引擎 / i2f-form-url-encoded 表单编解码 / i2f-jdk-ext-web 过滤器与包装器基础设施）+ lombok + javax.servlet-api（均 provided+optional））：`SwlWebFilter`（488 行，extends `OncePerHttpServletFilter`）核心流水线——**请求侧** swlh（混淆 SwlHeader）/ swlci（certId）/ swlu（Base64 原始 URL）/ swlp（加密参数）四头取值 + URL 防篡改滑窗校验（剥离 contextPath + 最多 2 段容差剥离 + 尾部匹配）+ `transfer.receive` 解密 + `HttpServletRequestProxyWrapper` 重建可重复读请求（参数 / Content-Type / 长度覆写）；**响应侧** 全量缓冲 + content-disposition 下载白名单（跳过加密防 OOM）+ `transfer.response` 加密 + `$.` 前缀密文 + swlh / swlci / swlct 回写 + `Access-Control-Expose-Headers` 合并去重；`SwlWebCtrl` in/out 双开关（每请求从 defaultCtrl 克隆、携带 swlh 强制 in、multipart 强制关 in）+ `parseCtrl` / `onException` 双钩子 + 6 个 request attribute 属性契约（解密异常暂存后由消费方 AOP 重抛交由 ExceptionHandler）。消费 2 模块：springboot-swl-starter（`SwlSpringWebFilter extends` 实现 @SwlCtrl 注解 + urlPatterns / 白名单 + 返回 String 标记）、springcloud-gateway-swl-starter（WebFlux 668 行同构复制版，保留正确写法）。⚠ 瑕疵：`SwlWebFilter.java:369` `"$." + responseBody` **byte[] 拼接笔误**（对照 SwlGatewayFilter.java:479 应为 `"$." + responseText`——响应体变 `$.[B@hash` 垃圾文本、加密计算白费，所有 out 加密响应损坏）；`getCharacterEncoding()` 为 null 时 `new String(bytes, null)` NPE（L169 / L235，被吞为「解密失败」）；`catch (Throwable)` 连 Error 也吞掉放行；响应加密段无异常兜底（直接 500）；`SWL_REQUIRE_ENCRYPT_RESPONSE` 契约断裂（消费方 SwlSpringAop:93 设置、核心从不读取）；urlPatterns / whiteListIn / whiteListOut 三字段核心空转（仅子类消费）——详见文档。
+
+- 详细文档：[i2f-jdk-ext-swl](./i2f-jdk-ext/i2f-jdk-ext-swl/readme.md)
+
+### i2f-jdk-ext-all
+
+> **i2f-jdk-ext 子模块的 Maven 聚合分发包 / 将 i2f-jdk-ext-swl + i2f-jdk-ext-web 打包为单体 fat-jar 的构建入口**（仅 1 个 pom.xml 共 41 行、无 Java 源码、零测试零资源，依赖 2 个内部模块，使用 `maven-assembly-plugin:3.1.0` 以 `jar-with-dependencies` 目标打包，产出含 Manifest 元信息的独立 JAR）。
+
+- 详细文档：[i2f-jdk-ext-all](./i2f-jdk-ext/i2f-jdk-ext-all/readme.md)
+
 ## i2f-spring
 
 > Spring 生态集成模块集合，封装 Spring 核心、MVC、安全、Redis、Web 等能力的增强与元数据解析。
@@ -906,7 +934,145 @@
 
 ## i2f-extension
 
-> 可选扩展能力集合，按需集成第三方库与增强组件（AI、文档、数据库反向工程、文件系统、序列化、Java Agent 字节码增强观测等）。
+> 可选扩展能力集合，按需集成第三方库与增强组件（7z 压缩、AI、文档、数据库反向工程、文件系统、序列化、ANTLR4 语言引擎（脚本/模板/计算器）、Java Agent 字节码增强观测等）。
+
+### i2f-extension-7zip
+
+> 基于 SevenZipJBinding 的 7z 归档压缩器实现，`SevenZCompressor` 落地 `i2f-compress-std` 的 `ICompressor` 契约：复用 `AbsCompressor` 的文件遍历/流绑定骨架，把目录树打包为 `.7z`（可选密码、头加密）或将其解包回目录；sevenzipjbinding 以 `provided` 引入，运行期由使用方提供。
+
+- 详细文档：[i2f-extension-7zip](./i2f-extension/i2f-extension-7zip/readme.md)
+
+### i2f-extension-ai-dashscope
+
+> 阿里云百炼（DashScope）官方 Java SDK 的 `i2f-ai-std` 契约实现：以 `ChatAi`/`RoleChatAi`（+Provider）、`AiModel`（`DashScopeModel` + `DashScopeJsonSerializer`）、`RagEmbeddingModel`/`RagRerankModel` 三组契约对接通义千问对话（qwen-plus）、文本向量化（text-embedding-v4）与重排序（gte-rerank-v2）；`DashScopeAi` 内置 function-calling 自循环（工具执行、同参限流、错误回填），`DashScopeToolHelper` 把 `@Tool` 注解桥接为 DashScope `ToolFunction`；dashscope-sdk-java 以 `provided` + `optional` 引入，运行期由使用方提供。
+
+- 详细文档：[i2f-extension-ai-dashscope](./i2f-extension/i2f-extension-ai-dashscope/readme.md)
+
+### i2f-extension-ai-langchain4j8
+
+> 面向 Java 8 的 langchain4j 0.31.0 版 `i2f-ai-std` 契约实现：以 `ChatAi`/`RoleChatAi`（+Provider）、`AiModel`（`Langchain4j8Model` + `Langchain4j8OpenAiModel` + `Langchain4j8JsonSerializer`）与 RAG 三件套（`RagEmbeddingModel`/`RagEmbeddingStore`/`RagTextSplitter`）复用 langchain4j 原生模型、消息与工具类型对接任意 OpenAI 兼容端点（默认百炼兼容模式 qwen-plus）；`Langchain4j8Ai` 内置 function-calling 自循环（工具执行、同参限流、错误回填），注解解析器在上游 `@Tool` 体系之外追加识别 langchain4j `@Tool`/`@P`（名称覆盖存在缺陷）；langchain4j 与 langchain4j-open-ai 以 `provided` + `optional` 引入，运行期由使用方提供。
+
+- 详细文档：[i2f-extension-ai-langchain4j8](./i2f-extension/i2f-extension-ai-langchain4j8/readme.md)
+
+### i2f-extension-ai-openai
+
+> 官方 OpenAI Java SDK（`com.openai:openai-java` 4.28.0，Kotlin 编译）的 `i2f-ai-std` 契约实现：以 `ChatAi`/`RoleChatAi`（+Provider）、`AiModel`（`OpenAiModel` 内嵌 Builder）、`RagEmbeddingModel`（`OpenAiRagEmbeddingModel`）三组契约对接 OpenAI 官方与任意 OpenAI 兼容端点（默认百炼 compatible-mode + `qwen-plus`）；`OpenAiAi` 内置 function-calling 自循环（工具执行、同参限流、错误回填），`OpenAiToolHelper` 把 `@Tool` 注解桥接为 `ChatCompletionTool`（参数 schema 经 `JsonValue.from` 直通，strict 未透传）；openai-java 与 kotlin-stdlib 均以 `provided` + `optional` 引入，运行期由使用方提供。
+
+- 详细文档：[i2f-extension-ai-openai](./i2f-extension/i2f-extension-ai-openai/readme.md)
+
+### i2f-extension-ai-rag-sqlite
+
+> **sqlite-vec 原生扩展**版的 `i2f-ai-std` RAG 存储层实现（3 源文件 425 行、单包 `i2f.extension.ai.rag.sqlite`、随包携带 `vec0.dll`/`vec0.so` 双平台原生扩展、零测试）：以单库 `RagEmbeddingStore`（`SqliteRagEmbeddingStore`）与分桶记忆 `BucketRagEmbeddingStore`（`SqliteBucketRagMemoryStore`）双契约落地本地嵌入式向量库——vec0 虚拟表（`vector float[1024] distance_metric=cosine`）承载 JSON 文本向量写入与 float32 BLOB 读出（`SqliteVecUtils.jdbcBytes2FloatArray` LITTLE_ENDIAN 解码），KNN 检索（`vector MATCH ? [+ and bucket in (...)] ORDER BY distance LIMIT ?`）距离转 `(2-distance)/2` 相似度；`SqliteVecUtils` 负责原生扩展自举（classpath → `runtime/persist/sqlite-vec/` 释放 + `enableLoadExtension` + `load_extension`）；`sqlite-jdbc` 以 `provided`+`optional` 引入、运行期由使用方提供；唯一消费方 ops-starter（`ai.rags` 双 store bean + `RagDataSourceCollector` 包装 DataSource + `MemoryTools` 记忆工具）。⚠ 三处确定性运行时缺陷（vec0 虚拟表建索引必失败 `virtual tables may not be indexed`、bucket 版 insert 6 列 5 占位 `5 values for 6 columns`、DLL 重复释放被文件锁拒绝）+ Linux 资源名不匹配（`libvec0.so` vs `vec0.so`）——详见文档。
+
+- 详细文档：[i2f-extension-ai-rag-sqlite](./i2f-extension/i2f-extension-ai-rag-sqlite/readme.md)
+
+### i2f-extension-antlr4
+
+> **ANTLR4 语言族（calculator + tinyscript + funic）的 Maven 聚合分发模块 / 将三个 ANTLR4 子模块及其 24 个 i2f-jdk 传递依赖打包为单体 fat-jar 的一站式构建入口**（仅 1 个 pom.xml 共 51 行、无 Java 源码、零测试零资源，三个子模块均 compile 依赖；使用 `maven-assembly-plugin:3.1.0` 以 `jar-with-dependencies` 目标打包，产出 1.07 MB / 733 条目 / 516 类文件的独立 JAR；`i2f-extension-xproc4j` 与 `i2f-springboot-xproc4j-starter` 的统一依赖入口，ANTLR 运行时按 `provided` 约定由使用方自备）。⚠ calculator 子模块主源码缺失致聚合产物无其类文件（jar 中 `FormulaCalculator` 实为 i2f-math 传递依赖所带）、fat-jar 不含 antlr4-runtime（独立 `-cp` 使用需自备）——详见文档。
+
+- 详细文档：[i2f-extension-antlr4](./i2f-extension/i2f-extension-antlr4/readme.md)
+
+### i2f-extension-antlr4-calculator
+
+> **基于 ANTLR4 的计算器表达式解析与求值模块**（仅 1 测试源文件 37 行、主源码与 ANTLR 文法文件缺失、`antlr4-runtime:4.13.2` provided + optional、9 个内部 i2f 依赖）：设计为 `Calculator.eval(String)` → `BigDecimal` 的一步式求值门面——底层通过 ANTLR4 `.g4` 文法生成 `CalculatorParser`/`CalculatorLexer`，`Calculator` 实现类以 Visitor/Listener 模式树遍历求值，支持算术运算符 + 多参数函数调用（如 `avg(4+3,5,6)`）+ BigDecimal 高精度计算。消费方 `i2f-extension-antlr4` 聚合 + `i2f-extension-all` 聚合 + 根 POM。⚠ 主源码完全缺失（src/main/java 为空目录）、POM 未配置 antlr4 代码生成插件、文法文件丢失致 API 合约不可查阅，当前为不可构建的占位模块。
+
+- 详细文档：[i2f-extension-antlr4-calculator](./i2f-extension/i2f-extension-antlr4-calculator/readme.md)
+
+### i2f-extension-antlr4-funic
+
+> **基于 ANTLR4 的「脚本引擎 + 模板引擎」双语言模块（Funic + Funvi）**（82 个 Java 源文件约 2.3 万行：funic 生成代码 6 类约 1.2 万行 + 手写 51 文件约 8000 行，funvi 生成代码 6 类约 1800 行 + 手写 19 文件约 1800 行；文法 `Funic.g4` 586 行 + `Funvi.g4` 86 行、语言手册 `Funic.md` 1382 行 + `Funvi.md` 365 行随包；`antlr4-runtime:4.13.2` provided + optional、9 个内部 i2f 依赖）：Funic 为 TinyScript 的完全重构增强替代品——静态门面 `Funic.script()` 12 重载 + LRU(4096) 语法树缓存 + `FunicResolver` 30 方法扩展点（`DefaultFunicResolver` 1383 行：运算符表/三级全局方法搜索/模板渲染/函数调用链）+ `FunicValue` 值对象体系（18 类）+ 安全双方案（`SandboxFunicResolver` 白名单沙箱 + `SafeFunicResolverProxy` 876 行动态代理黑名单）；语言覆盖渲染字符串 `${}`/`$!{}`、多行字符串、`#{}` 解包、管道 `|>`、lambda、`go`/`<-` 异步、`synchronized`、`func` 函数、`import`、try-catch-finally；Funvi 为轻量模板引擎（`Funvi.render()` 10 重载 + 11 种块处理器 + `BindSqlFunviResolver` `#{}`→`?` 参数化 SQL），`R"..."` 渲染字符串可联动委托 Funvi。消费方 `i2f-extension-xproc4j`（`lang-eval-funic` 节点 + `ProcedureFunicResolver` 等 8 文件）+ springboot starter（`enable-funic` 开关）+ IDEA 插件（.fic/.fvi 双语言一等支持：PSI/高亮/格式化/折叠/补全/断点调试）。**22 项运行时验证：5 通过、17 缺陷实锤**——⚠ `try-catch` 完全失效（`resolved` 死变量致 catch 副作用生效但原异常照抛、catch 体结果丢弃）、错误监听器消息双打印 + 词法异常裸抛 + `e=null` NPE 吞真实语法错误、下划线数字字面量求值必抛 NFE、Funvi `concat` 遇 null 追加值丢弃全部前文、Funvi 默认 `debug=true` 全节点 stdout 日志——详见文档。
+
+- 详细文档：[i2f-extension-antlr4-funic](./i2f-extension/i2f-extension-antlr4-funic/readme.md)
+
+### i2f-extension-antlr4-tinyscript
+
+> **基于 ANTLR4 的嵌入式迷你脚本语言引擎（TinyScript）**（30 主源文件约 1.33 万行：ANTLR4 生成 6 类约 8600 行入库 + 手写求值器 `TinyScriptVisitorImpl` 3129 行；`antlr4-runtime:4.13.2` provided + optional、9 个内部 i2f 依赖）：静态门面 `TinyScript.script()`（File/String/语法树 9 重载）+ LRU(4096) 语法树缓存 + `TinyScriptResolver` 16 方法扩展点（`DefaultTinyScriptResolver` 运算符表/BigDecimal 精度 20/模板渲染）+ 内建方法注册表（String/Math/System/Runtime/TinyScriptFunctions）；语言覆盖模板字符串、`$!{}` null 安全取值、`#{}` 解包、`|>` 管道、JSON 字面量、`func` 自定义函数与 `debugger` 调试断点。消费方 `i2f-extension-xproc4j`（`lang-eval-tinyscript` 节点 + `ProcedureTinyScriptResolver` 等 10 文件）+ IDEA 插件（.tis PSI 独立实现）；Funic 为其增强替代方案。**23 项运行时验证：13 通过、10 缺陷实锤**——⚠ 任何 `catch` 子句收集阶段必 NPE（`classNameCtxList` 未初始化）致 try-catch 完全不可用、try 异常被 `un-support try segment found` IAE 替换致原异常丢失、默认 `debug=true` 全节点 stdout 日志、下划线数字字面量求值失败、null 参与算术/复合赋值 NPE、函数声明不跨 `script()` 调用保留——详见文档。
+
+- 详细文档：[i2f-extension-antlr4-tinyscript](./i2f-extension/i2f-extension-antlr4-tinyscript/readme.md)
+
+### i2f-extension-aspectj
+
+> **AspectJ 连接点与 i2f-proxy 统一代理模型之间的桥接层**（3 源文件 93 行、单包族 `i2f.extension.aspectj`/`.impl`，零资源零 JUnit 测试、src/test 为 2 个 main 演示类）：把 `@Around` 切面中的 `ProceedingJoinPoint` 经 `JdkProxyUtil` 包装为 JDK 动态代理——`proceed*` 调用被重定向为「`AspectjInvoker`（`invoke` ≡ `pjp.proceed(args)`，继承 `JdkMethod` 可读方法签名）+ `IProxyInvocationHandler`」的编程式执行点：handler 可读方法、就地改写 `pjp.getArgs()` 数组（参数改写生效）、短路返回、拦截异常，由 `invokable.invoke(...)` 决定何时放行；非 `proceed` 方法原样转发。`AspectjProxyProvider` 将同一能力注册为 `IProxyProvider` 家族一员；`aspectjweaver 1.9.6` 以 `provided` 引入（版本硬编码）+ `aspectj-maven-plugin`（javac 后二进制织入，规避 Lombok 冲突）工程化编译期织入。**11 项运行时验证**（javac 直编 + JDK 动态代理 mock PJP）：核心链路 7 项通过；3 处行为瑕疵实锤——`proceed(Object[])` 新参数被静默丢弃、构造器连接点强转 `MethodSignature` 抛 CCE、`IProxyHandler` 重载异常路径因上游 `ProxyHandlerAdapter` 缺陷退化为无信息 NPE——详见文档。
+
+- 详细文档：[i2f-extension-aspectj](./i2f-extension/i2f-extension-aspectj/readme.md)
+
+### i2f-extension-asr-vosk
+
+> **基于 Vosk 的本地离线语音识别门面**（1 源文件 75 行：`AsrVoskProvider` 全静态 API，单包 `i2f.extension.asr.vosk`，零资源、无 JUnit——`src/test` 仅 1 个 main 演示类）：把「模型获取 → 释放到 `./runtime/persist/vosk/vosk-model-small-cn-0.22`（`StdConst.RUNTIME_PERSIST_DIR` 拼接）→ 初始化 → WAV 解码 → 分帧识别」收敛为 4 个静态方法——`init()`/`init(String)` 惰性/显式初始化静态单例 `Model`，`recognize(File)`/`recognize(InputStream)` 用 `javax.sound` 解码、`try-with-resources` 构造 `Recognizer(model, 16000)`、4096 字节缓冲循环 `acceptWaveForm`、`getFinalResult()` **原样返回 JSON**（text 由调用方解析）；`vosk 0.3.32`（JNA 封装 libvosk 原生库）与 `jna 5.7.0` 均以 `provided` 引入且版本仅本模块硬编码，运行期须知「jar + 原生库」三件套。**30 项运行时验证全部通过**（同签名桩替换 `org.vosk` + javac 直编；另以真实 vosk-0.3.32 + jna-5.7.0 编译验证 API 兼容）：核心链路符合预期；**4 处缺陷实锤**——`init(String)` 自定义路径被完全忽略（恒加载默认常量）、每次成功 init 泄漏一个关机钩子且退出时对同一模型重复 `close()`、初始化失败后字段遗留**已关闭模型**（后续识别静默使用之）、识别失败路径不关输入流（文件句柄泄漏，Windows 无法删除）——详见文档。
+
+- 详细文档：[i2f-extension-asr-vosk](./i2f-extension/i2f-extension-asr-vosk/readme.md)
+
+### i2f-extension-browser-playwright
+
+> **基于 Microsoft Playwright 的浏览器自动化搜索抓取扩展**（9 源文件 1677 行、包族 `i2f.extension.browser.playwright`/`.context`/`.search`/`.search.utils`，零资源、无 JUnit）：`i2f-browser-std` 契约之上实现四层能力——`BrowserPlaywright.getWebDriver(withUi, launchOptions)` 驱动工厂（默认 4 项反自动化 Chromium 参数 + `chromiumSandbox=false` + 60s/30s 超时）、`PlaywrightDriver` 四层持有者（page→context→browser→playwright 级联 close，`Closeable` 支持 try-with-resources）、`PlaywrightUtil`（`blockNetworkResources` 双层判定拦截图片/音视频/字体省带宽 + `removeNoContentElements` 三段 JS 清洗 + `TargetClosedError` 判定）、`WebPageScraper.scraper(url, webUi)` 通用正文抓取，以及五大搜索引擎同构实现 `BaiduSearch`/`BaiduKaifaSearch`/`BiYingSearch`/`SouGouSearch`/`TouTiaoSearch`（三重重载 `search(question[, maxArticleCount[, webUi]])`，`LinkedBlockingDeque<Map.Entry<SearchResult, SearchType>>` 阶段队列：SEARCH_FIRST 聚合 + 翻页入队 + AI 摘要、SEARCH_PAGE 仅聚合、SouGou 滚动加载独有；`maxArticleCount` 为含 AI 摘要的总配额）；`playwright 1.58.0` 以 `provided + optional` 引入且版本仅本模块硬编码（运行期需备 playwright jar + driver-bundle + Chromium 三件套），消费方 `i2f-tools-ops` 封装为 4 个 AI Tool（Windows + 开关双条件装配）。**72 项桩替换运行时验证全部通过**（同签名桩替换 `com.microsoft.playwright` + javac 直编，另以真实 playwright-1.58.0.jar 双阶段编译验证 API 兼容）：核心链路（驱动装配/关闭链/网络拦截/清洗/抓取/五引擎检索/配额截断/滚动加载）全通过；**实锤缺陷**——五搜索类整页 title/html/text 写入队列局部对象后从不入 results（整页数据丢失）、`WebPageScraper` 等待 body 失败被吞后未判空直接解引用（NPE）、队列排空忙等固定多耗约 1s、`getWebDriver` 原地改写调用者 launchOptions——详见文档。
+
+- 详细文档：[i2f-extension-browser-playwright](./i2f-extension/i2f-extension-browser-playwright/readme.md)
+
+### i2f-extension-browser-selenium
+
+> **基于 Selenium WebDriver 的浏览器自动化搜索抓取扩展**（9 源文件 2016 行、双驱动内置 `chromedriver.exe` + `msedgedriver.exe`、`selenium-java:4.32.0` provided + optional）：`BrowserSelenium` 驱动工厂（Edge/Chrome 双引擎 + 内置 driver 释放 + 版本不匹配自动 CDN 下载）+ `SeleniumUtil` CDP 网络拦截/DOM 清洗/异常判定 + `WebPageScraper` 通用正文页抓取 + 五大搜索引擎同构搜索类（Baidu/BaiduKaifa/BiYing/SouGou/TouTiao，`LinkedBlockingDeque` 阶段队列爬行，配额截断）。消费方 `i2f-tools-ops` AI Tool 封装 + `i2f-extension-all` 聚合。⚠ 瑕疵：整页数据丢失、队列排空忙等、自动下载平台硬编码 win64、空列表解引用等。
+
+- 详细文档：[i2f-extension-browser-selenium](./i2f-extension/i2f-extension-browser-selenium/readme.md)
+
+### i2f-extension-canal
+
+> **基于 Alibaba Canal 的 MySQL Binlog 订阅消费模板**（2 源文件 345 行、`canal.client:1.1.7` + `canal.protocol:1.1.7` provided + optional）：`CanalClient` 以模板方法模式封装 Canal 连接→订阅→轮询→Protobuf 解析→SQL 类型映射→事件分发的完整骨架——子类只需重写 `onInsertEventMap`/`onDeleteEventMap`/`onUpdateEventMap` 三个钩子；`CanalMeta` 连接元数据 POJO；内置 15+ JDBC 类型 Java 映射引擎（二进制、字符串、整数、浮点、高精度、时间、布尔）。消费方 `i2f-extension-all` 聚合 + 根 POM dependencyManagement。⚠ 瑕疵：无 ACK 确认、无自动重连、空 catch 静默吞异常、非 daemon 线程、FLOAT 精度降级等。
+
+- 详细文档：[i2f-extension-canal](./i2f-extension/i2f-extension-canal/readme.md)
+
+### i2f-extension-cglib
+
+> **基于 CGLIB 字节码增强的 i2f-proxy-std 代理实现**（3 源文件 105 行、`cglib:3.3.0` provided + optional）：`CglibUtil` 六重载静态门面 + `CglibProxyProvider` 实现 `IProxyProvider` 契约 + `CglibProxyInvocationHandlerAdapter` 将 `IProxyInvocationHandler` 桥接为 CGLIB `MethodInterceptor`；Adapter Pattern + Facade Pattern 双层结构，与 `i2f-proxy`（JDK 动态代理）、`i2f-extension-aspectj`（AspectJ 桥接）共享同一代理契约。消费方 `i2f-extension-all` 聚合 + `i2f-jdk/test-features` 测试依赖；`i2f-spring-core` 含同构复制版（使用 Spring 内建 `org.springframework.cglib.proxy.Enhancer`）。⚠ 瑕疵：lombok 冗余、共享 DEFAULT_ENHANCER 非线程安全、零测试覆盖。
+
+- 详细文档：[i2f-extension-cglib](./i2f-extension/i2f-extension-cglib/readme.md)
+
+### i2f-extension-compress
+
+> **基于 Apache Commons Compress 的归档压缩适配层**（5 源文件 393 行、`commons-compress:1.21` + `xz:1.8` provided + optional）：`ZipApacheCompressor`/`JarApacheCompressor`/`TarApacheCompressor`/`CpioApacheCompressor`/`SevenZApacheCompressor` 五种 Apache Commons Compress Archive API 的 `ICompressor` 桥接实现——同一接口操作 ZIP/JAR/TAR/CPIO/7Z 五种格式；Tar 支持未知大小条目自动暂存临时文件；7Z 非 Stream 体系通过匿名 InputStream 包装适配；继承 `AbsCompressor` 骨架获得 `compressBindFile`/`compressFile`/`release(二参)` 免费实现。消费方 `i2f-extension-all` 聚合 + 根 POM dependencyManagement。⚠ 瑕疵：无 try-finally 资源保护、Tar 临时文件风险、SevenZ 解压流语义不清、路径分隔符硬编码等。
+
+- 详细文档：[i2f-extension-compress](./i2f-extension/i2f-extension-compress/readme.md)
+
+### i2f-extension-cron
+
+> **基于 cron-utils 的嵌入式单机 CRON 任务调度器**（2 源文件 237 行、`cron-utils:9.2.1` provided + optional）：`CronUtil` 静态门面（UNIX/Spring/Quartz 三种 cron 方言的解析与未来 N 次执行时间计算）+ `CronExecutor` 三池分离调度器（cronPool 300ms 扫描预生成 10 个时间点 → triggerPool 300ms 扫描触发 → executePool CachedThreadPool 执行；`ConcurrentSkipListMap` 时间有序队列 + 双锁粒度分离）。支持 cron 周期任务、指定时间一次性任务、延迟一次性任务三态提交。消费方 `i2f-extension-all` 聚合 + 根 POM dependencyManagement。⚠ 瑕疵：无 shutdown/remove 方法、无空值保护、时间回跳风险、300ms 固定精度。
+
+- 详细文档：[i2f-extension-cron](./i2f-extension/i2f-extension-cron/readme.md)
+
+### i2f-extension-document
+
+> **基于 Aspose 与 PDFBox 生态的办公文档格式转换与处理套件**（7 源文件 574 行、5 个三方库 system/provided）：`DocumentUtil` Aspose.Words 转换门面（内置 License + 字体路径搜索 + 20+ 格式互转 + html2word/word2pdf/word2png）+ `SheetUtil` Aspose.Cells 转换门面（内置 License + PDF allColumnsInOnePagePerSheet + excel2pdf/excel2csv/excel2tiff）+ `DocumentExportUtil` Velocity 模板渲染 + Base64 图片嵌入流水线 + `WindowsDocumentUtil` documents4j Office COM 转换（仅 Windows）+ `PdfConvertUtil` PDFBox 文本提取与逐页 PNG 渲染（150 DPI）。消费方 `i2f-springboot-ops-starter`（2 处 PdfConvertUtil 用于 RAG/AI Tool）+ `i2f-extension-all` 聚合。⚠ 瑕疵：硬编码 Aspose 盗版许可、system-scope 依赖不可 CI 构建、空 catch 吞异常、字体路径硬编码混乱等。
+
+- 详细文档：[i2f-extension-document](./i2f-extension/i2f-extension-document/readme.md)
+
+### i2f-extension-easyexcel
+
+> **基于 Alibaba EasyExcel 的 Excel 导入/导出工具套件**（约 53 源文件共约 4200 行、`easyexcel:4.0.3` + `spring-context`/`spring-expression`/`spring-jdbc`/`mybatis:3.5.19`/`jackson` provided + optional）：`ExcelExportUtil` 21+ 重载静态写门面 + `ExcelImportUtil` Map/Bean 双模式读门面 + `ExcelExportTask` 循环分页引擎（pageSize=5000/sheetSize=65530 双阈值自动分 sheet）+ `IDataProvider` 策略族（List/Function/Service/MyBatis Cursor/JPA Stream 7 种实现）+ `@ExcelCellStyle` 注解驱动样式系统（SpEL 条件渲染 + 超链接/批注/下拉框）+ `Convertors` 注册中心（23+ 预置转换器 + SPI 扩展）+ `EasyExcelComplexUtil` 递归展平算法（`$` 路径分隔多块同 sheet 渲染）。消费方仅 POM 聚合。⚠ 瑕疵：空 catch 多处吞异常、静态 deletePool 永不关闭、createTemplateFileByColumns 双临时文件异步删除竞争、分页顺序校验严格、SpEL 异常不处理、下标越界等 12 项。
+
+- 详细文档：[i2f-extension-easyexcel](./i2f-extension/i2f-extension-easyexcel/readme.md)
+
+### i2f-extension-elasticsearch
+
+> **基于 Elasticsearch RestHighLevelClient 7.6.2 的索引/文档/查询操作封装套件**（8 源文件 1233 行、`elasticsearch:7.6.2` + `rest-high-level-client` + `spring-data-elasticsearch:4.0.6` + `spring-boot-starter-data-elasticsearch:2.3.7` provided + optional）：`EsManager` 三层门面（客户端工厂 + 索引管理 + 文档 CRUD + 批量 Bulk + 搜索查询）+ `EsBeanManager` POJO 注解映射层（`@EsIndex`/`@EsId`/`@EsField` 三注解 + ConcurrentHashMap 缓存 + 双向 Bean↔Map 转换）+ `EsQuery` Fluent SQL-like 查询构建器（BoolQuery 状态机 eq/gt/like/match/range + 分页/排序/列选择）+ `SpringEsQuery` Spring Data 桥接。消费方 `i2f-springboot-ops-starter`（3 处 Java 引用）+ `i2f-extension-all` 聚合。⚠ 瑕疵：空 catch 吞异常、批量空列表 `get(0)` NPE、缓存无限增长、`SpringEsQuery.inflate` 空 BoolQuery 等 10 项。
+
+- 详细文档：[i2f-extension-elasticsearch](./i2f-extension/i2f-extension-elasticsearch/readme.md)
+
+### i2f-extension-email
+
+> **基于 JavaMail (javax.mail 1.6.2) 的邮件发送工具门面**（3 源文件 396 行、`javax.mail:1.6.2` + `javax.activation:1.1.1` provided、零内部 i2f 依赖）：`EmailUtil` 10 静态方法门面（`directSend` 一键发信 + `getSession`/`makeMimeMessage`/`fillMimeMessage`/`send` 分步装配）+ `EmailConfigData` 流式 Builder（预设 20+ 邮箱服务商 SMTP 常量 + SSL/认证/多收件人配置）+ `EmailSendData` 流式 Builder（纯文本/HTML 双模式 + 多附件 + 自定义字符集）。消费方仅 POM 聚合。⚠ 瑕疵：`mail.stmp.host` 拼写错误、`System.getProperties()` 全局污染、SSL 信任所有证书、from/to 空值无保护等 10 项。
+
+- 详细文档：[i2f-extension-email](./i2f-extension/i2f-extension-email/readme.md)
+
+### i2f-extension-fastexcel
+
+> **基于 cn.idev.excel (fastexcel:1.2.0) 的 Excel 导入/导出工具套件**（56 源文件约 3350 行、`fastexcel:1.2.0` + `spring-context`/`spring-expression`/`spring-jdbc`/`jackson`/`mybatis:3.5.19` provided + optional）：与 i2f-extension-easyexcel 同构架构，底层引擎切换为 fastexcel——`ExcelExportUtil` 21+ 重载静态写门面 + `ExcelImportUtil` Map/Bean 双模式读门面 + `ExcelExportTask` 循环分页引擎（pageSize=5000/sheetSize=65530 双阈值自动分 sheet）+ `IDataProvider` 策略族（List/Function/Service/MyBatis Cursor/JPA Stream 7 种实现）+ `@ExcelCellStyle` 注解驱动样式系统（SpEL 条件渲染 + 超链接/批注/下拉框）+ `Convertors` 注册中心（23+ 预置转换器 + SPI 扩展）+ `EasyExcelComplexUtil` 递归展平算法（`$` 路径分隔多块同 sheet 渲染）。消费方仅 POM 聚合。⚠ 瑕疵：空 catch 多处吞异常、静态 deletePool 永不关闭、createTemplateFileByColumns 临时文件异步删除竞争等 10 项。
+
+- 详细文档：[i2f-extension-fastexcel](./i2f-extension/i2f-extension-fastexcel/readme.md)
+
+### i2f-extension-fastjson
+
+> **基于 fastjson1 兼容包（`com.alibaba:fastjson:2.0.26`，POM 自述 `fastjson1-compatible`、实由 fastjson2 引擎驱动）的 `IJsonSerializer` 契约适配器**（1 源文件 63 行、单类 `FastJsonSerializer`、零测试零资源）：把 `JSON.toJSONString`/`parse`/`parseObject` 装配为 i2f-serialize-std 的 JSON 契约实现——`Class`/`Type`/`TypeReference` 三路类型化反序列化分派 + `bean2Map`/`deserializeAsMap` 覆写 + `INSTANCE` 无状态单例；fastjson 以 provided 声明、运行期使用方自备；与兄弟模块 i2f-extension-fastjson2（原生 fastjson2 API）为同一契约的可替换双实现。消费方仅 POM 聚合与分发产物。⚠ 瑕疵：异常未包装契约 `JsonSerializeException`、`bean2Map` 对非对象 JSON 抛 JSONException、双次编解码开销、lombok 冗余声明等 9 项。
+
+- 详细文档：[i2f-extension-fastjson](./i2f-extension/i2f-extension-fastjson/readme.md)
 
 ### i2f-extension-reverse-engineer-generator
 
