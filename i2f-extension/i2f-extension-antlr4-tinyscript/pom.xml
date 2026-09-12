@@ -9,7 +9,8 @@
         <version>1.0-jdk8</version>
     </parent>
 
-    <artifactId>i2f-extension-antlr4</artifactId>
+    <artifactId>i2f-extension-antlr4-tinyscript</artifactId>
+
 
     <dependencies>
         <dependency>
@@ -19,17 +20,55 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-antlr4-calculator</artifactId>
+            <artifactId>i2f-reflect</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-antlr4-funic</artifactId>
+            <artifactId>i2f-convert</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-extension-antlr4-tinyscript</artifactId>
+            <artifactId>i2f-typeof</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-match</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-invokable</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mutator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mixins</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-jvm</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-bindsql</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr4-runtime</artifactId>
+            <version>4.13.2</version>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
@@ -47,5 +86,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

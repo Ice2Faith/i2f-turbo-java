@@ -46,6 +46,18 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-antlr4-calculator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-antlr4-funic</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-antlr4-tinyscript</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-aspectj</artifactId>
         </dependency>
         <dependency>
