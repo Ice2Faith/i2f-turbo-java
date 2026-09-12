@@ -25,7 +25,7 @@ html, body {
     border-bottom: 1px solid #e4e7ed;
     flex-shrink: 0;
     position: relative;
-    z-index: 100;
+    z-index: 300;
 }
 
 .top-config-title {
@@ -48,10 +48,20 @@ html, body {
     max-width: 600px;
 }
 
-.config-hint {
-    font-size: 11px;
-    color: #c0c4cc;
+/* 顶部栏标题：点击收起/展开左侧会话列表 */
+.top-title-toggle {
+    flex-shrink: 0;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+.top-title-toggle:hover {
+    color: #409eff;
+}
+
+.config-expand-btn {
     margin-left: auto;
+    flex-shrink: 0;
 }
 
 /* ===== 主体布局 ===== */
@@ -59,6 +69,7 @@ html, body {
     flex: 1;
     display: flex;
     overflow: hidden;
+    z-index: 200;
 }
 
 /* ===== 左侧侧边栏 ===== */
@@ -549,6 +560,11 @@ html, body {
     background: darkorange;
 }
 
+.el-select-dropdown{
+    max-width: 100vw;
+    overflow: auto;
+}
+
 .el-table__cell .table-cell-hidden {
     display: none;
 }
@@ -604,12 +620,47 @@ html, body {
     height: calc(100vh - 200px);
 }
 
-.config-card-block .el-card__body {
-    padding: 0px 20px;
+/* ===== AI 配置抽屉 ===== */
+.config-drawer .el-drawer__header {
+    padding: 14px 20px;
+    margin-bottom: 0;
+    border-bottom: 1px solid #e4e7ed;
+    color: #303133;
+    font-weight: 600;
 }
 
-.config-card-block .el-divider--horizontal {
+.config-drawer .el-drawer__body {
+    padding: 12px 20px 20px;
+    overflow-y: auto;
+}
+
+.config-drawer .el-divider--horizontal {
     margin: 14px 0;
+}
+
+.config-form .el-form-item {
+    margin-bottom: 14px;
+}
+
+.config-form .el-form-item__content {
+    width: 100%;
+}
+
+.config-form .el-input,
+.config-form .el-select,
+.config-form .el-input-number {
+    width: 100%;
+}
+
+.config-form .config-form-inline-item .el-form-item__content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.config-form .config-form-inline-item .el-form-item__content .el-select {
+    flex: 1;
+    width: auto;
 }
 
 .upload-image .el-upload-list--picture-card .el-upload-list__item {
@@ -770,6 +821,44 @@ html, body {
 }
 .audio-tts-play-foo-bar:hover{
     max-width: 30%;
+}
+
+.sidebar-mask{
+    display: none;
+}
+
+/**
+ * 移动端：会话列表悬浮展开，覆盖在聊天区上方，不挤压主区域
+ */
+@media (max-width: 768px) {
+    .config-drawer{
+        width: 80% !important;
+    }
+
+    .main-container {
+        position: relative;
+    }
+
+    .sidebar-mask{
+        background: #0004;
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+    .sidebar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        z-index: 300;
+        width: 280px;
+        max-width: 85vw;
+        box-shadow: 4px 0 16px rgba(0, 0, 0, 0.18);
+    }
 }
 
 
