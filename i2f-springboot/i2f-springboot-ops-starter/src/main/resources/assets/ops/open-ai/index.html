@@ -112,7 +112,8 @@
     <span class="i2f-back-top-bottom"
           style="box-shadow: 2px 2px 5px #444;"
           top-selector=".scroll-top-mark"
-          bottom-selector=".scroll-bottom-mark"></span>
+          bottom-selector=".scroll-bottom-mark">
+    </span>
 
     <span class="audio-tts-play-foo-bar"
           v-loading="metas.metas.audioTtsLoading"
@@ -120,7 +121,8 @@
         <audio v-key="metas.audioTtsUrl"
                :src="metas.audioTtsUrl"
                controls
-               autoplay></audio>
+               autoplay>
+        </audio>
     </span>
 
     <!-- 顶部配置栏：展示当前配置摘要，点击右侧"展开配置"打开配置抽屉 -->
@@ -288,63 +290,66 @@
         <!-- 中间聊天区 -->
         <div class="chat-container">
             <!-- 消息列表 -->
-    <div class="message-list center-message-list" id="mainMessageList" ref="messageList"
-         @contextmenu="onContextMenuMessageListPanel">
-        <span class="scroll-top-mark" style="width:0;height:0;opacity: 0;"></span>
+            <div class="message-list center-message-list"
+                 id="mainMessageList"
+                 ref="messageList"
+                 @contextmenu="onContextMenuMessageListPanel">
+                <span class="scroll-top-mark" style="width:0;height:0;opacity: 0;"></span>
 
-        <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
+                <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
                     <i class="el-icon-chat-dot-round"></i>
                     <p>发送消息，开始对话</p>
                 </div>
 
-        <div v-for="(msg, idx) in currentMessages"
-             :key="idx">
-            <el-divider v-if="!msg.hidden && (idx>1 && currentMessages[idx-1].hidden)">
-                截断会话历史线
-            </el-divider>
+                <div v-for="(msg, idx) in currentMessages"
+                     :key="idx">
+                    <el-divider v-if="!msg.hidden && (idx>1 && currentMessages[idx-1].hidden)">
+                        截断会话历史线
+                    </el-divider>
 
-            <div
-                    v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes(msg.type)) :true"
-                    class="message-row"
-                    :class="{
-                    'message-row-right' : msg.type==='user',
-                    'message-row-left': msg.type!=='user',
-                    'message-row-history-hidden': msg.hidden
-                    }"
-            >
-                <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
-                    <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
-                    <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
-                    <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
-                    <i v-else-if="msg.type.indexOf('tool')>=0 || msg.type.indexOf('echo')>=0"
-                       class="el-icon-news"></i>
-                    <i v-else class="el-icon-cpu"></i>
-                </div>
-                <div class="message-bubble hover-show-parent" style="position: relative;"
-                     :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
-                    <div class="message-role-label ">
-                        {{ roleLabel(msg.type) }}
-                    </div>
-                    <template v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes('assistant_thinking')) :true">
-                        <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
-                             class="thinking-content"
-                             :class="{
-                                    'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
-                                    }"
-                             :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
-                             v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
-
+                    <div
+                            v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes(msg.type)) :true"
+                            class="message-row"
+                            :class="{
+                            'message-row-right' : msg.type==='user',
+                            'message-row-left': msg.type!=='user',
+                            'message-row-history-hidden': msg.hidden
+                            }"
+                    >
+                        <div class="message-avatar" :class="msg.type==='user' ? 'avatar-user' : 'avatar-ai'">
+                            <i v-if="msg.type==='user'" class="el-icon-user-solid"></i>
+                            <i v-else-if="msg.type==='system'" class="el-icon-odometer"></i>
+                            <i v-else-if="msg.type==='tool'" class="el-icon-setting"></i>
+                            <i v-else-if="msg.type.indexOf('tool')>=0 || msg.type.indexOf('echo')>=0"
+                               class="el-icon-news"></i>
+                            <i v-else class="el-icon-cpu"></i>
                         </div>
-                    </template>
+                        <div class="message-bubble hover-show-parent" style="position: relative;"
+                             :class="msg.type==='user' ? 'bubble-user' : 'bubble-ai'">
+                            <div class="message-role-label ">
+                                {{ roleLabel(msg.type) }}
+                            </div>
+                            <template v-if="metas.enableCustomDisplay? (!metas.hiddenMessageTypes.includes('assistant_thinking')) :true">
+                                <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
+                                     class="thinking-content"
+                                     :class="{
+                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
+                                            }"
+                                     :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
+                                     v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
 
-                    <div class="message-content"
-                         :class="{
-                                    'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
-                                    'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
-                                    }"
-                         v-html="renderMessageMarkdown(msg,idx)"></div>
-                    <div class="input-attach-files input-attach-files__message"
-                         v-if="msg.attachFiles && msg.attachFiles.length>0">
+                                </div>
+                            </template>
+
+                            <div class="message-content"
+                                 :class="{
+                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
+                                            'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
+                                            }"
+                                 v-html="renderMessageMarkdown(msg,idx)">
+                            </div>
+                            <div class="input-attach-files input-attach-files__message"
+                                 v-if="msg.attachFiles && msg.attachFiles.length>0">
                                 <span v-for="(item,index) in msg.attachFiles"
                                       class="input-attach-file-item"
                                       :key="index">
@@ -364,9 +369,9 @@
                                         </el-tooltip>
                                     </span>
                                 </span>
-                    </div>
-                    <div class="input-attach-files input-attach-files__message"
-                         v-if="msg.asyncTasks && msg.asyncTasks.length>0">
+                            </div>
+                            <div class="input-attach-files input-attach-files__message"
+                                 v-if="msg.asyncTasks && msg.asyncTasks.length>0">
                                 <span v-for="(item,index) in msg.asyncTasks"
                                       class="input-attach-file-item"
                                       :key="index">
@@ -397,9 +402,9 @@
                                         </el-tooltip>
                                     </span>
                                 </span>
-                    </div>
-                    <div class="input-attach-files input-attach-files__message"
-                         v-if="msg.asyncTasksAttachFiles && msg.asyncTasksAttachFiles.length>0">
+                            </div>
+                            <div class="input-attach-files input-attach-files__message"
+                                 v-if="msg.asyncTasksAttachFiles && msg.asyncTasksAttachFiles.length>0">
                                 <span v-for="(item,index) in msg.asyncTasksAttachFiles"
                                       class="input-attach-file-item"
                                       :key="index">
@@ -419,77 +424,78 @@
                                         </el-tooltip>
                                     </span>
                                 </span>
-                    </div>
+                            </div>
 
-                    <div class="bubble-actions">
-                        <el-popover
-                                v-if="msg.usage && msg.usage.total_tokens>=0"
-                                placement="top-start"
-                                title="说明"
-                                width="200"
-                                trigger="hover">
-                            <p>
-                                tokens:<br/>
-                                prompt: {{msg.usage.prompt_tokens}}<br/>
-                                completion: {{msg.usage.completion_tokens}}<br/>
-                                total: {{msg.usage.total_tokens}}<br/>
-                            </p>
-                            <span slot="reference" v-if="msg.usage && msg.usage.total_tokens>=0">
-                                            tokens:
-                                            {{msg.usage.prompt_tokens}} /
-                                            {{msg.usage.completion_tokens}} /
-                                            {{msg.usage.total_tokens}}
-                                        </span>
-                        </el-popover>
-                        <span class="hover-show-child">
-                                        <el-tooltip effect="dark" content="移除消息" placement="top-start">
-                                            <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
-                                                class="el-icon-circle-close "></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="编辑消息" placement="top-start">
-                                            <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
-                                               class="el-icon-edit"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="重做消息" placement="top-start">
-                                            <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
-                                               class="el-icon-refresh"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="复制内容" placement="top-start">
-                                            <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
-                                               class="el-icon-copy-document"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="编辑数据" placement="top-start">
-                                            <i @click="editDataSelectMessage(idx)"
-                                               style="color: #4ba4ec;font-size: 14px;"
-                                               class="el-icon-brush"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="语音播报" placement="top-start">
-                                            <i class="el-icon-microphone"
-                                               v-if="metas.supportTts || form.useQwenTts"
-                                               style="color: orangered;font-size: 14px;"
-                                               @click="onTts(msg)"></i>
-                                        </el-tooltip>
+                            <div class="bubble-actions">
+                                <el-popover
+                                        v-if="msg.usage && msg.usage.total_tokens>=0"
+                                        placement="top-start"
+                                        title="说明"
+                                        width="200"
+                                        trigger="hover">
+                                    <p>
+                                        tokens:<br/>
+                                        prompt: {{msg.usage.prompt_tokens}}<br/>
+                                        completion: {{msg.usage.completion_tokens}}<br/>
+                                        total: {{msg.usage.total_tokens}}<br/>
+                                    </p>
+                                    <span slot="reference"
+                                          v-if="msg.usage && msg.usage.total_tokens>=0">
+                                        tokens:
+                                        {{msg.usage.prompt_tokens}} /
+                                        {{msg.usage.completion_tokens}} /
+                                        {{msg.usage.total_tokens}}
                                     </span>
+                                </el-popover>
+                                <span class="hover-show-child">
+                                    <el-tooltip effect="dark" content="移除消息" placement="top-start">
+                                        <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                                            class="el-icon-circle-close "></i>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="编辑消息" placement="top-start">
+                                        <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
+                                           class="el-icon-edit"></i>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="重做消息" placement="top-start">
+                                        <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                                           class="el-icon-refresh"></i>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="复制内容" placement="top-start">
+                                        <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                                           class="el-icon-copy-document"></i>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="编辑数据" placement="top-start">
+                                        <i @click="editDataSelectMessage(idx)"
+                                           style="color: #4ba4ec;font-size: 14px;"
+                                           class="el-icon-brush"></i>
+                                    </el-tooltip>
+                                    <el-tooltip effect="dark" content="语音播报" placement="top-start">
+                                        <i class="el-icon-microphone"
+                                           v-if="metas.supportTts || form.useQwenTts"
+                                           style="color: orangered;font-size: 14px;"
+                                           @click="onTts(msg)"></i>
+                                    </el-tooltip>
+                                </span>
 
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
-        <div v-if="currentSession?.sending && !currentSession?.streamingStarted"
-             class="message-row message-row-left">
-            <div class="message-avatar avatar-ai">
-                <i class="el-icon-cpu"></i>
-            </div>
-            <div class="message-bubble bubble-ai">
-                <div class="message-role-label">助手</div>
-                <div class="message-content typing">
-                    <span></span><span></span><span></span>
+                <!-- 发送中 loading 气泡：等待首个 token 期间才显示 -->
+                <div v-if="currentSession?.sending && !currentSession?.streamingStarted"
+                     class="message-row message-row-left">
+                    <div class="message-avatar avatar-ai">
+                        <i class="el-icon-cpu"></i>
+                    </div>
+                    <div class="message-bubble bubble-ai">
+                        <div class="message-role-label">助手</div>
+                        <div class="message-content typing">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-                </div>
-        <span class="scroll-bottom-mark" style="width:0;height:0;opacity: 0;"></span>
+                <span class="scroll-bottom-mark" style="width:0;height:0;opacity: 0;"></span>
             </div>
 
             <!-- 底部输入区 -->
@@ -504,405 +510,177 @@
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
-                    <span v-if="metas.ttsPlaying">
-                        <i class="el-icon-turn-off-microphone microphone-spark"
-                           style="font-size: 18px; color: dodgerblue;"
-                           @click="stopTts"></i>
-                    </span>
-                    <span>
-                        最大会话次数：
-                        <el-input-number v-model="metas.maxHistoryCount" size="mini" :min="-1"
-                                         :max="999"></el-input-number>
-                    </span>
-                    <span>
+                    <div>
+                        <span>
+                            <el-button size="small" plain type="success" @click="metas.showMoreActions=true">
+                                更多<i class="el-icon-more"></i>
+                            </el-button>
+                        </span>
+                        <span>
+                            <el-button size="small" plain type="warning" @click="clearCurrentSession"
+                                       :disabled="currentSession?.sending">
+                              清空  <i class="el-icon-delete"></i>
+                            </el-button>
+                        </span>
                         <el-popover
                                 placement="top-start"
-                                title="说明"
-                                width="320"
+                                title="文件列表"
+                                width="420"
                                 trigger="hover">
                             <p>
-                                截断会话，也就是如果当前的会话次数超过了设置的最大次数限制。<br/>
-                                将会丢弃早期的会话历史记录，保持会话次数小等于设定值。<br/>
-                                不过本页面，将会保留被丢弃的历史消息，会显示截断分割线<br/>
-                                如果需要同步清除本页面的被丢弃的消息，点击此按钮：
-                                <el-button type="warning"
-                                           size="mini"
-                                           icon="el-icon-circle-close"
-                                           circle
-                                           @click="truncOverflowHistory"></el-button>
+                                附件，使用临时文件存储，【非视觉模型】，基于工具调用，因此需要启用工具或者启用【图片视觉】功能。<br/>
+                                后台使用相关工具进行上传文件的文本化，提供给模型自行查阅的能力。<br/>
+                                因此，为不支持视觉的模型，提供了一定的多模态输入能力。<br/>
+                                但是，因为是文本化的关系，输入质量就受到文本化的限制。<br/>
+                                此方式，模型将会根据需要主动使用工具读取上传的文件内容。<br/>
+                            <hr/>
+                            特别说明，如果启用了【图片视觉】功能，也就是使用了【支持视觉的模型】。<br/>
+                            那么，这些图片将会以压缩大小之后以base64直接发送给模型直接进行视觉推理。<br/>
+                            而不再进行文本化处理，目前各大模型厂商，针对图片的计费规则，基本上都是按照图片像素大小进行的。<br/>
+                            本系统将会对图片最长边超过一定大小的图片，进行等比例缩放到较小的尺寸，默认是缩放到最大边为960大小。<br/>
+                            这个大小，可以通过后台应用配置进行调整。<br/>
+                            因此，你需要根据自己的需求，决定如何处理图片，是文本化嵌入，还是直接进行图片视觉推理。
+                            <hr/>
+                            <div class="input-attach-files" v-if="form.attachFiles && form.attachFiles.length>0">
+                                <span v-for="(item,index) in form.attachFiles"
+                                      class="input-attach-file-item"
+                                      :key="index">
+                                    <span class="input-attach-file-item__label">{{item.fileName}}</span>
+                                    <span class="input-attach-file-item__actions">
+                                        <el-tooltip effect="dark" content="查看原始文件" placement="top-start">
+                                            <i class="el-icon-view" @click="viewUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载原始文件" placement="top-start">
+                                            <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="下载解析后文件" placement="top-start">
+                                            <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
+                                        </el-tooltip>
+                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
+                                            <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
+                                        </el-tooltip>
+                                    </span>
+                                </span>
+                            </div>
                             </p>
-                            <span slot="reference">
-                                <el-checkbox v-model="metas.enableTruncOverflowHistory">截断会话</el-checkbox>
-                            </span>
+                            <el-upload
+                                    slot="reference"
+                                    ref="upload"
+                                    style="display: inline-block;"
+                                    action="#"
+                                    :file-list="metas.uploadList"
+                                    :auto-upload="false"
+                                    :on-change="onUploadFileChange"
+                                    :show-file-list="false"
+                            >
+                                <el-badge slot="trigger"
+                                          :value="form.attachFiles?.length || 0"
+                                          :hidden="(form.attachFiles?.length || 0)==0"
+                                          type="primary">
+                                    <el-button
+                                            :disabled="!form.enableTools && !form.enableVisionImage"
+                                            type="success"
+                                            size="small"
+                                            :loading="metas.uploadLoading">
+                                        附件 <i class="el-icon-upload"></i>
+                                    </el-button>
+                                </el-badge>
+                            </el-upload>
                         </el-popover>
+                        <span @contextmenu.prevent="onContextMenuMoreSendOptions"
+                              style="display:inline-block;min-width: 88px;">
+                            <el-button type="primary" size="small" @click="sendMessage"
+                                       :loading="currentSession?.sending"
+                                       :disabled="!form.inputText || !form.inputText.trim()">
+                                发送 <i class="el-icon-s-promotion"></i>
+                            </el-button>
+                            <el-popover
+                                    placement="top-start"
+                                    title="说明"
+                                    width="320"
+                                    trigger="hover">
+                            <p>
+                                右键菜单，解锁更多功能。<br/>
+                            </p>
+                            <i slot="reference" style="color: #aaa;" class="el-icon-question"></i>
+                            </el-popover>
+                        </span>
+                    </div>
+                </div>
+                <div class="input-status-bar">
+                    <el-popover
+                            v-if="currentSessionTotalUsages"
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            session total tokens:<br/>
+                            prompt: {{currentSessionTotalUsages.prompt_tokens}}<br/>
+                            completion: {{currentSessionTotalUsages.completion_tokens}}<br/>
+                            total: {{currentSessionTotalUsages.total_tokens}}<br/>
+                        </p>
+                        <span slot="reference" v-if="currentSessionTotalUsages">
+                            total: [
+                                    {{currentSessionTotalUsages.prompt_tokens}} /
+                                    {{currentSessionTotalUsages.completion_tokens}} /
+                                    {{currentSessionTotalUsages.total_tokens}}
+                            ]
+                        </span>
+                    </el-popover>
+                    <el-popover
+                            v-if="currentSessionVisibleUsages"
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            session visible tokens:<br/>
+                            prompt: {{currentSessionVisibleUsages.prompt_tokens}}<br/>
+                            completion: {{currentSessionVisibleUsages.completion_tokens}}<br/>
+                            total: {{currentSessionVisibleUsages.total_tokens}}<br/>
+                        </p>
+                        <span slot="reference" v-if="currentSessionVisibleUsages">
+                            visible: [
+                                {{currentSessionVisibleUsages.prompt_tokens}} /
+                                {{currentSessionVisibleUsages.completion_tokens}} /
+                                {{currentSessionVisibleUsages.total_tokens}}
+                            ]
+                        </span>
+                    </el-popover>
+                    <span>
+                        会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
                     </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <el-drawer title="更多选项"
+               :visible.sync="metas.showMoreActions"
+               direction="rtl"
+               size="60%"
+               append-to-body
+               custom-class="more-actions-drawer">
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col>
+                    发送类型：
+                    <el-select v-model="form.messageType"
+                               placeholder="发送消息类型"
+                               style="width:160px;">
+                        <el-option
+                                v-for="item in stdRoleList"
+                                :key="item.value"
+                                :label="item.label"
+                                :value="item.value">
+                        </el-option>
+                    </el-select>
                     <el-popover
                             placement="top-start"
                             title="说明"
-                            width="320"
-                            trigger="hover">
-                        <p>
-                            重做，也就是将历史消息直接发送给AI，而不用输入新的用户信息的手段。<br/>
-                            当AI的答复不满意时，可以选择删除AI的回答，直接进行重做。
-                        </p>
-                        <el-button slot="reference"
-                                   v-if="currentMessages && currentMessages.length>0"
-                                   type="success"
-                                   size="small"
-                                   @click="directSendMessage">重做
-                        </el-button>
-                    </el-popover>
-                    <el-popover
-                            placement="top-start"
-                            title="说明"
-                            width="360"
-                            trigger="hover">
-                        <p>
-                            会话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
-                            带来的问题是，Token费用的消耗变高，上下文也可能太长而被LLM大模型丢失。<br/>
-                            因此，会话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
-                        <hr/>
-                        自动总结，需要在开启【截断会话】的前提下，在检测到消息即将达到设置的时候。<br/>
-                        自动进行一次会话总结调用。<br/>
-                        <hr/>
-                        <el-checkbox v-model="metas.enableAutoSummary"
-                                     :disabled="!metas.enableTruncOverflowHistory">
-                            自动总结
-                        </el-checkbox>
-                        </p>
-                        <el-button slot="reference"
-                                   v-if="currentMessages && currentMessages.length>0"
-                                   type="success"
-                                   size="small"
-                                   @click="summarySessionHistory">会话总结
-                        </el-button>
-                    </el-popover>
-                    <el-popover placement="top-start"
-                                title="更多选项"
-                                width="720"
-                                trigger="hover">
-                        <div>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    定制显示，你可以控制显示消息的类型。<br/>
-                                    如果开启，你可以根据自己的使用习惯，定制选择哪些消息不进行显示。<br/>
-                                <hr/>
-                                <el-checkbox-group v-model="metas.hiddenMessageTypes">
-                                    <el-checkbox v-for="item in metas.roleList"
-                                                 :key="item.value"
-                                                 :label="item.value">
-                                        {{item.label}}
-                                    </el-checkbox>
-                                </el-checkbox-group>
-
-                                </p>
-                                <el-checkbox slot="reference"
-                                             v-model="metas.enableCustomDisplay">
-                                    定制显示
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
-                                    如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具，并使用LRU策略淘汰最久未使用的工具。<br/>
-                                    此功能需要后端开启 mcp 桥接网关支持。<br/>
-                                <hr/>
-                                <el-tag v-for="(tn,ti) in form.lruToolNames"
-                                        size="mini"
-                                        style="margin-left: 3px;"
-                                        closable
-                                        @close="form.lruToolNames.splice(ti,1)">
-                                    {{tn}}
-                                </el-tag>
-                                <hr/>
-                                最大工具个数：
-                                <el-input-number v-model="form.lruToolMaxSize"
-                                                 size="mini"
-                                                 :min="1"
-                                                 :max="99999"></el-input-number>
-                                <el-divider direction="vertical"></el-divider>
-                                <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
-                                <el-divider direction="vertical"></el-divider>
-                                <el-popover
-                                        placement="top-start"
-                                        title="说明"
-                                        width="480"
-                                        trigger="hover">
-                                    <p>
-                                        意图推荐，这是一种基于意图识别的工具推荐技术。<br/>
-                                        需要先开启【动态工具】。<br/>
-                                        这种技术，先对工具进行按意图分类，然后讲这些分类提供给大模型推理。<br/>
-                                        模型推理之后，将可能使用的分类返回，程序根据返回的分类，查找对应的工具，提供给模型真正使用。<br/>
-                                        此功能开启后，会一定程度上增加少量Token消耗。<br/>
-                                        只在最后一条消息是【用户】消息时触发。<br/>
-                                    </p>
-                                    <el-checkbox slot="reference"
-                                                 :disabled="!form.enableLruTools"
-                                                 v-model="form.enableToolRecommendByIntentRecognize">
-                                        意图推荐
-                                    </el-checkbox>
-                                </el-popover>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools"
-                                             v-model="form.enableLruTools">
-                                    动态工具
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
-                                    如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
-                                    如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
-                                <hr/>
-                                准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
-                                特别的<br/>
-                                如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
-                                <el-button size="mini"
-                                           icon="el-icon-refresh"
-                                           @click="loadToolTags"></el-button>
-                                <hr/>
-                                <el-checkbox-group v-model="form.autoApprovalToolTags">
-                                    <el-checkbox v-for="item in metas.toolTags"
-                                                 :key="item"
-                                                 :label="item">
-                                        {{item}}
-                                    </el-checkbox>
-                                </el-checkbox-group>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableTools">工具调用</el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    知识库，是否允许连接使用知识库。<br/>
-                                    如果开启，模型将根据需要连接使用知识库工具，检索知识库内容。<br/>
-                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools"
-                                             v-model="form.enableRags">
-                                    知识库
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    记忆系统，是否开启记忆系统。<br/>
-                                    如果开启，模型将根据需要自主查询/保存记忆。<br/>
-                                    此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
-                                    记忆根据桶进行隔离，因此你需要填写独属于你的记忆桶。<br/>
-                                <hr/>
-                                记忆桶：<br/>
-                                <el-input v-model="form.memoryBucket"
-                                          size="small"
-                                          placeholder="记忆桶">
-
-                                </el-input>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             :disabled="!form.enableTools || !form.enableRags"
-                                             v-model="form.enableMemories">
-                                    记忆系统
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
-                                    如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
-                                    如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
-                                    注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
-                                    注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
-                                    技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
-                                    文件的内容格式要求如下，案例为：<br/>
-                                    <br/>
-                                    --- <br/>
-                                    name: weather_analysis_skill <br/>
-                                    description: 获取指定城市天气并分析是否适合户外运动 <br/>
-                                    tags: [ weather, sports, analysis ] <br/>
-                                    version: 1.0.0 <br/>
-                                    author: your_name <br/>
-                                    --- <br/>
-                                    <br/>
-                                    # 第一步：... <br/>
-                                    <br/>
-                                </p>
-                                <el-checkbox slot="reference" :disabled="!form.enableTools" v-model="form.enableSkills">
-                                    技能调用
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    图片视觉，开启的前提是，所使用的模型支持视觉，也就是模型自身支持识别图片。<br/>
-                                    如果允许，那将会将图片进行压缩编码为base64之后直接发送给模型推理，而不进行默认的文本化提取处理。<br/>
-                                    如果不允许，则进行默认的文本化提取处理。<br/>
-                                    注意，视觉识别，是完整图片内容交给模型进行直接识别。<br/>
-                                    注意，文本化提取则是通过OCR光学字符识别提取文本内容。<br/>
-                                    因此，针对目的是提取文字进行总结类型的，优先考虑默认的文本化，因为不消耗模型推理Token。<br/>
-                                    针对图片结构，非文本类型的图片理解，才开启图片视觉，这样模型才能够正确理解图片，会消耗Token。<br/>
-                                    目前，各大模型厂商针对图片视觉的Token计费规则，是针对图片的像素来定价的，也就是像素越高，Token消耗越高。<br/>
-                                    因此，本系统默认对图片进行像素大小缩放以及文件大小压缩控制，默认缩放到最大边低于960为准，大小控制在256kb以内。<br/>
-                                    当然，也可以通过后台参数，改变这些大小。
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableVisionImage">
-                                    图片视觉
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    语音播报，自动播报助手消息。<br/>
-                                    如果开启，将会自动播报助手的答复消息。<br/>
-                                    默认使用浏览器的TTS引擎进行本地合成，本地合成引擎：{{metas.supportTts?'支持':'不支持'}}<br/>
-                                    当然，你也可以选择使用阿里提供的语音合成大模型进行合成，后端需要同步开启配置，最新合成费用查阅【百炼】平台<br/>
-                                    <hr/>
-                                    <el-checkbox v-model="form.useQwenTts">
-                                        使用千问语音合成（1.4元/万字）
-                                    </el-checkbox>
-                                </p>
-                                <el-checkbox slot="reference"
-                                             v-model="form.enableAutoTts">
-                                    语音播报
-                                    <i v-if="!metas.supportTts" class="el-icon-warning-outline"></i>
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    事实注入，系统为模型提供主动的事实存储与更新。<br/>
-                                    如果开启，系统将会自动与模型配合维护事实，保证时刻提醒模型客观事实，不要遗忘或者幻觉。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableTruth">
-                                    事实注入
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    附加时间，自动为用户消息添加发送时间。<br/>
-                                    如果开启，模型将会得到每次发送的时间，对于聊天助手类的应用，可以让模型感知到时间的变化。<br/>
-                                    因此，模型的回答将会变得有时间概念，比如会主动答复用户为什么这么久没理人之类的。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableUserSendTime">
-                                    附加时间
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    系统重排，实际发送给LLM大模型的消息是否需要对系统消息进行重排。<br/>
-                                    如果开启，后端将会把所有的系统消息合并为一条系统消息并放在消息列表第一位发送给大模型。<br/>
-                                    主要用于在某些模型强制要求的情况下使用：系统消息只能有一条且只能放在消息列表第一条。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableMergedSystemMsg">
-                                    系统重排
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    循环工程，是否注入循环工程的工作流程提示词。<br/>
-                                    如果开启，将会自动注入循环工程的提示词，配合现有的工具，实现回话级别的循环工程实践。<br/>
-                                    提供进度恢复、需求整理、计划制定、待办事项、事项实施、自我改进的自我循环。<br/>
-                                    因此，循环工程时提示词与工具调用结合的产物，因为状态的读写需要使用工具实现。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableLoopEngineering">
-                                    循环工程
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    回显请求，将实际发送给LLM大模型的请求报文回显回来。<br/>
-                                    如果开启，后端将会将请求报文回显给前端，前端在[消息列表]页面右键菜单，可以查看请求报文。<br/>
-                                    可以用于学习报文、或者观察实际发送报文是否符合预期。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableEchoRequestPayload">
-                                    回显请求
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    留1用户，是否始终保留第一条用户消息。<br/>
-                                    如果开启，在发生消息截断的时候，始终会保留第一条用户消息。<br/>
-                                    适用于首条消息重要，贯穿始终，例如重要的附件或者重要的目标内容。<br/>
-                                    这样做的好处是，随时提醒大模型要达成的目标，而不至于因为消息截断，而忘了目标。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.enableKeepFirstUserMessage">
-                                    留1用户
-                                </el-checkbox>
-                            </el-popover>
-                            <el-popover
-                                    placement="top-start"
-                                    title="说明"
-                                    width="480"
-                                    trigger="hover">
-                                <p>
-                                    输出加密，是否将模型的输出结果进行加密传输。<br/>
-                                    如果启用，那将会对模型的响应结果进行加密后返回，但是因为模型输出内容较多较频繁，也会拖慢模型输出速度。<br/>
-                                    如果不器用，则不会进行加密，不会拖慢模型输出速度，大多数情况下，不启用即可。<br/>
-                                </p>
-                                <el-checkbox slot="reference" v-model="form.encryptOutput">输出加密</el-checkbox>
-                            </el-popover>
-                        </div>
-                        <el-tag slot="reference" size="small">
-                            更多选项
-                        </el-tag>
-                    </el-popover>
-
-                    <el-popover
-                            placement="top-start"
-                            title="说明"
-                            width="960"
-                            trigger="hover">
+                            style="max-width: 85%"
+                            trigger="click">
                         <p style="font-size: 12px;">
                             消息类型，也就是在与大模型交互是使用的消息类型。<br/>
                             用户消息(user)，也叫用户提示词，一般情况下，用户发送的都是用户消息。<br/>
@@ -936,154 +714,619 @@
                             换个例子说明：<br/>
                             因此，大模型就像是一个大脑，Agent等就像是身体血肉与四肢，负责准备所见所得，处理大脑指令并反馈，维护行为连贯性，决定如何执行下一步。<br/>
                         </p>
-                        <el-select slot="reference"
-                                   v-model="form.messageType"
-                                   placeholder="发送消息类型"
-                                   style="width:160px;">
-                            <el-option
-                                    v-for="item in stdRoleList"
-                                    :key="item.value"
-                                    :label="item.label"
-                                    :value="item.value">
-                            </el-option>
-                        </el-select>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
                     </el-popover>
-                    <el-button size="small" plain type="warning" @click="clearCurrentSession"
-                               :disabled="currentSession?.sending">
-                        <i class="el-icon-delete"></i> 清空会话
-                    </el-button>
-
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col>
+                    最大会话次数：
+                    <el-input-number v-model="metas.maxHistoryCount" size="mini" :min="-1"
+                                     :max="999"></el-input-number>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top: 12px;">
+                <el-col :span="12">
+                    <el-checkbox v-model="metas.enableTruncOverflowHistory">
+                        截断会话
+                    </el-checkbox>
                     <el-popover
                             placement="top-start"
-                            title="文件列表"
-                            width="420"
+                            title="说明"
+                            width="320"
+                            trigger="click">
+                        <p>
+                            截断会话，也就是如果当前的会话次数超过了设置的最大次数限制。<br/>
+                            将会丢弃早期的会话历史记录，保持会话次数小等于设定值。<br/>
+                            不过本页面，将会保留被丢弃的历史消息，会显示截断分割线<br/>
+                            如果需要同步清除本页面的被丢弃的消息，点击此按钮
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-button type="warning"
+                               size="mini"
+                               icon="el-icon-circle-close"
+                               @click="truncOverflowHistory">
+                        清空历史
+                    </el-button>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="320"
+                            trigger="click">
+                        <p>
+                            如果需要同步清除本页面的被丢弃的消息，点击此按钮
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-button
+                            :disabled="!(currentMessages && currentMessages.length>0)"
+                            type="success"
+                            size="small"
+                            @click="summarySessionHistory">会话总结
+                    </el-button>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            trigger="click">
+                        <p>
+                            会话总结，当对话轮次越来越多之后，占用的Token也会变多，上下文也会变长。<br/>
+                            带来的问题是，Token费用的消耗变高，上下文也可能太长而被LLM大模型丢失。<br/>
+                            因此，会话总结的目的就是让LLM总结历史对话为简短的内容，尽可能保持历史概要，不让LLM遗忘的折中方案。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="metas.enableAutoSummary"
+                                 :disabled="!metas.enableTruncOverflowHistory">
+                        自动总结
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            trigger="click">
+                        <p>
+                            自动总结，需要在开启【截断会话】的前提下，在检测到消息即将达到设置的时候。<br/>
+                            自动进行一次会话总结调用。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-button :disabled="!(currentMessages && currentMessages.length>0)"
+                               type="success"
+                               size="small"
+                               @click="directSendMessage">重做
+                    </el-button>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="320"
+                            trigger="click">
+                        <p>
+                            重做，也就是将历史消息直接发送给AI，而不用输入新的用户信息的手段。<br/>
+                            当AI的答复不满意时，可以选择删除AI的回答，直接进行重做。
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox v-model="metas.enableCustomDisplay">
+                        定制显示
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            定制显示，你可以控制显示消息的类型。<br/>
+                            如果开启，你可以根据自己的使用习惯，定制选择哪些消息不进行显示。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top: 12px;">
+                <el-col>
+                    <el-checkbox-group v-model="metas.hiddenMessageTypes">
+                        <el-checkbox v-for="item in metas.roleList"
+                                     :disabled="!metas.enableCustomDisplay"
+                                     :key="item.value"
+                                     :label="item.value">
+                            {{item.label}}
+                        </el-checkbox>
+                    </el-checkbox-group>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableTools">工具调用</el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            工具调用，是否允许模型使用工具，也就是Tools/Function-Calling功能。<br/>
+                            如果允许，那将会自动注入工具声明信息，也会进行工具的调用。<br/>
+                            如果不允许，则不会有工具调用，也不会注入工具声明信息。<br/>
+                        <hr/>
+                        准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
+                        特别的<br/>
+                        如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
+
+                        <hr/>
+
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-button size="mini"
+                               icon="el-icon-refresh"
+                               @click="loadToolTags">
+                        自动审批
+                    </el-button>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            准允自动执行的标签：勾选后，如果工具的tag都满足，则会自动执行，不需要手动点击审批确认。<br/>
+                            特别的<br/>
+                            如果工具的tag包含auto,则不需要都满足，勾选了auto即可。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top: 12px">
+                <el-col>
+                    <el-checkbox-group v-model="form.autoApprovalToolTags">
+                        <el-checkbox v-for="item in metas.toolTags"
+                                     :key="item"
+                                     :label="item">
+                            {{item}}
+                        </el-checkbox>
+                    </el-checkbox-group>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox :disabled="!form.enableTools"
+                                 v-model="form.enableLruTools">
+                        动态工具
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            动态工具，允许不默认加载全部工具给模型，而是动态披露。<br/>
+                            如果开启，系统不再全量提供工具，而是模型根据需要自动加载工具，并使用LRU策略淘汰最久未使用的工具。<br/>
+                            此功能需要后端开启 mcp 桥接网关支持。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="24" style="margin-bottom: 12px;">
+                    最大工具个数：
+                    <el-input-number v-model="form.lruToolMaxSize"
+                                     size="mini"
+                                     :min="1"
+                                     :max="99999"></el-input-number>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox :disabled="!form.enableLruTools"
+                                 v-model="form.enableToolRecommendByIntentRecognize">
+                        意图推荐
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            意图推荐，这是一种基于意图识别的工具推荐技术。<br/>
+                            需要先开启【动态工具】。<br/>
+                            这种技术，先对工具进行按意图分类，然后讲这些分类提供给大模型推理。<br/>
+                            模型推理之后，将可能使用的分类返回，程序根据返回的分类，查找对应的工具，提供给模型真正使用。<br/>
+                            此功能开启后，会一定程度上增加少量Token消耗。<br/>
+                            只在最后一条消息是【用户】消息时触发。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-button type="primary" size="mini" @click="form.lruToolNames=[]">清空工具</el-button>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top: 12px;">
+                <el-col>
+                    <el-tag v-for="(tn,ti) in form.lruToolNames"
+                            size="mini"
+                            style="margin-left: 3px;"
+                            closable
+                            @close="form.lruToolNames.splice(ti,1)">
+                        {{tn}}
+                    </el-tag>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox :disabled="!form.enableTools"
+                                 v-model="form.enableSkills">
+                        技能调用
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            技能调用，是否允许模型使用技能，也就是Skills功能。<br/>
+                            如果允许，那将会自动注入技能声明信息和技能关联的工具声明信息，也会进行技能工具的调用。<br/>
+                            如果不允许，则不会有技能调用，也不会注入相关声明信息。<br/>
+                            注意，技能是基于工具运行的，因此必须启用工具才能使用技能。<br/>
+                            注意，技能和工具一样，每次都会注入到对话中，因此也会占用Token。<br/>
+                            技能存放在 ./skills/{技能名称}/SKILL.md 文件中。<br/>
+                            文件的内容格式要求如下，案例为：<br/>
+                            <br/>
+                            --- <br/>
+                            name: weather_analysis_skill <br/>
+                            description: 获取指定城市天气并分析是否适合户外运动 <br/>
+                            tags: [ weather, sports, analysis ] <br/>
+                            version: 1.0.0 <br/>
+                            author: your_name <br/>
+                            --- <br/>
+                            <br/>
+                            # 第一步：... <br/>
+                            <br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox :disabled="!form.enableTools"
+                                 v-model="form.enableRags">
+                        知识库
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            知识库，是否允许连接使用知识库。<br/>
+                            如果开启，模型将根据需要连接使用知识库工具，检索知识库内容。<br/>
+                            此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox :disabled="!form.enableTools || !form.enableRags"
+                                 v-model="form.enableMemories">
+                        记忆系统
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            记忆系统，是否开启记忆系统。<br/>
+                            如果开启，模型将根据需要自主查询/保存记忆。<br/>
+                            此功能需要后端配置开启 rags 知识库并配置 embedding 嵌入模型。<br/>
+                            记忆根据桶进行隔离，因此你需要填写独属于你的记忆桶。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+            <el-row :gutter="20" style="margin-top: 12px;">
+                <el-col>
+                    记忆桶：<br/>
+                    <el-input v-model="form.memoryBucket"
+                              size="small"
+                              placeholder="记忆桶">
+
+                    </el-input>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableTruth">
+                        事实注入
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            事实注入，系统为模型提供主动的事实存储与更新。<br/>
+                            如果开启，系统将会自动与模型配合维护事实，保证时刻提醒模型客观事实，不要遗忘或者幻觉。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableUserSendTime">
+                        附加时间
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            附加时间，自动为用户消息添加发送时间。<br/>
+                            如果开启，模型将会得到每次发送的时间，对于聊天助手类的应用，可以让模型感知到时间的变化。<br/>
+                            因此，模型的回答将会变得有时间概念，比如会主动答复用户为什么这么久没理人之类的。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableMergedSystemMsg">
+                        系统重排
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            系统重排，实际发送给LLM大模型的消息是否需要对系统消息进行重排。<br/>
+                            如果开启，后端将会把所有的系统消息合并为一条系统消息并放在消息列表第一位发送给大模型。<br/>
+                            主要用于在某些模型强制要求的情况下使用：系统消息只能有一条且只能放在消息列表第一条。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableLoopEngineering">
+                        循环工程
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            循环工程，是否注入循环工程的工作流程提示词。<br/>
+                            如果开启，将会自动注入循环工程的提示词，配合现有的工具，实现回话级别的循环工程实践。<br/>
+                            提供进度恢复、需求整理、计划制定、待办事项、事项实施、自我改进的自我循环。<br/>
+                            因此，循环工程时提示词与工具调用结合的产物，因为状态的读写需要使用工具实现。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableEchoRequestPayload">
+                        回显请求
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            回显请求，将实际发送给LLM大模型的请求报文回显回来。<br/>
+                            如果开启，后端将会将请求报文回显给前端，前端在[消息列表]页面右键菜单，可以查看请求报文。<br/>
+                            可以用于学习报文、或者观察实际发送报文是否符合预期。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableKeepFirstUserMessage">
+                        留1用户
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            留1用户，是否始终保留第一条用户消息。<br/>
+                            如果开启，在发生消息截断的时候，始终会保留第一条用户消息。<br/>
+                            适用于首条消息重要，贯穿始终，例如重要的附件或者重要的目标内容。<br/>
+                            这样做的好处是，随时提醒大模型要达成的目标，而不至于因为消息截断，而忘了目标。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.encryptOutput">
+                        输出加密
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            输出加密，是否将模型的输出结果进行加密传输。<br/>
+                            如果启用，那将会对模型的响应结果进行加密后返回，但是因为模型输出内容较多较频繁，也会拖慢模型输出速度。<br/>
+                            如果不器用，则不会进行加密，不会拖慢模型输出速度，大多数情况下，不启用即可。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableVisionImage">
+                        图片视觉
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
                             trigger="hover">
                         <p>
-                            附件，使用临时文件存储，【非视觉模型】，基于工具调用，因此需要启用工具或者启用【图片视觉】功能。<br/>
-                            后台使用相关工具进行上传文件的文本化，提供给模型自行查阅的能力。<br/>
-                            因此，为不支持视觉的模型，提供了一定的多模态输入能力。<br/>
-                            但是，因为是文本化的关系，输入质量就受到文本化的限制。<br/>
-                            此方式，模型将会根据需要主动使用工具读取上传的文件内容。<br/>
-                            <hr/>
-                            特别说明，如果启用了【图片视觉】功能，也就是使用了【支持视觉的模型】。<br/>
-                            那么，这些图片将会以压缩大小之后以base64直接发送给模型直接进行视觉推理。<br/>
-                            而不再进行文本化处理，目前各大模型厂商，针对图片的计费规则，基本上都是按照图片像素大小进行的。<br/>
-                            本系统将会对图片最长边超过一定大小的图片，进行等比例缩放到较小的尺寸，默认是缩放到最大边为960大小。<br/>
-                            这个大小，可以通过后台应用配置进行调整。<br/>
-                            因此，你需要根据自己的需求，决定如何处理图片，是文本化嵌入，还是直接进行图片视觉推理。
-                        <hr/>
-                        <div class="input-attach-files" v-if="form.attachFiles && form.attachFiles.length>0">
-                                <span v-for="(item,index) in form.attachFiles"
-                                      class="input-attach-file-item"
-                                      :key="index">
-                                    <span class="input-attach-file-item__label">{{item.fileName}}</span>
-                                    <span class="input-attach-file-item__actions">
-                                        <el-tooltip effect="dark" content="查看原始文件" placement="top-start">
-                                            <i class="el-icon-view" @click="viewUploadDocument(item)"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="下载原始文件" placement="top-start">
-                                            <i class="el-icon-download" @click="downloadUploadDocument(item)"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="下载解析后文件" placement="top-start">
-                                            <i class="el-icon-sold-out" @click="downloadUploadParsedDocument(item)"></i>
-                                        </el-tooltip>
-                                        <el-tooltip effect="dark" content="删除此项" placement="top-start">
-                                            <i class="el-icon-circle-close" @click="form.attachFiles.splice(index,1)"></i>
-                                        </el-tooltip>
-                                    </span>
-                                </span>
-                        </div>
+                            图片视觉，开启的前提是，所使用的模型支持视觉，也就是模型自身支持识别图片。<br/>
+                            如果允许，那将会将图片进行压缩编码为base64之后直接发送给模型推理，而不进行默认的文本化提取处理。<br/>
+                            如果不允许，则进行默认的文本化提取处理。<br/>
+                            注意，视觉识别，是完整图片内容交给模型进行直接识别。<br/>
+                            注意，文本化提取则是通过OCR光学字符识别提取文本内容。<br/>
+                            因此，针对目的是提取文字进行总结类型的，优先考虑默认的文本化，因为不消耗模型推理Token。<br/>
+                            针对图片结构，非文本类型的图片理解，才开启图片视觉，这样模型才能够正确理解图片，会消耗Token。<br/>
+                            目前，各大模型厂商针对图片视觉的Token计费规则，是针对图片的像素来定价的，也就是像素越高，Token消耗越高。<br/>
+                            因此，本系统默认对图片进行像素大小缩放以及文件大小压缩控制，默认缩放到最大边低于960为准，大小控制在256kb以内。<br/>
+                            当然，也可以通过后台参数，改变这些大小。
                         </p>
-                        <el-upload
-                                slot="reference"
-                                ref="upload"
-                                style="display: inline-block;"
-                                action="#"
-                                :file-list="metas.uploadList"
-                                :auto-upload="false"
-                                :on-change="onUploadFileChange"
-                                :show-file-list="false"
-                        >
-                            <el-badge slot="trigger"
-                                      :value="form.attachFiles?.length || 0"
-                                      :hidden="(form.attachFiles?.length || 0)==0"
-                                      type="primary">
-                                <el-button
-                                        :disabled="!form.enableTools && !form.enableVisionImage"
-                                        type="success"
-                                        size="small"
-                                        :loading="metas.uploadLoading">
-                                    附件 <i class="el-icon-upload"></i>
-                                </el-button>
-                            </el-badge>
-                        </el-upload>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
                     </el-popover>
-                    <span @contextmenu.prevent="onContextMenuMoreSendOptions">
-                        <el-button type="primary" size="small" @click="sendMessage"
-                                   :loading="currentSession?.sending"
-                                   :disabled="!form.inputText || !form.inputText.trim()">
-                            发送 <i class="el-icon-s-promotion"></i>
-                        </el-button>
-                        <el-popover
-                                placement="top-start"
-                                title="说明"
-                                width="320"
-                                trigger="hover">
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.enableAutoTts">
+                        语音播报
+                        <i v-if="!metas.supportTts" class="el-icon-warning-outline"></i>
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
                         <p>
-                            右键菜单，解锁更多功能。<br/>
+                            语音播报，自动播报助手消息。<br/>
+                            如果开启，将会自动播报助手的答复消息。<br/>
+                            默认使用浏览器的TTS引擎进行本地合成，本地合成引擎：{{metas.supportTts?'支持':'不支持'}}<br/>
+                            当然，你也可以选择使用【千问语音】<br/>
                         </p>
-                        <i slot="reference" style="color: #aaa;" class="el-icon-question"></i>
-                        </el-popover>
-                    </span>
-                </div>
-    <div class="input-status-bar">
-        <el-popover
-                v-if="currentSessionTotalUsages"
-                placement="top-start"
-                title="说明"
-                width="200"
-                trigger="hover">
-            <p>
-                session total tokens:<br/>
-                prompt: {{currentSessionTotalUsages.prompt_tokens}}<br/>
-                completion: {{currentSessionTotalUsages.completion_tokens}}<br/>
-                total: {{currentSessionTotalUsages.total_tokens}}<br/>
-            </p>
-            <span slot="reference" v-if="currentSessionTotalUsages">
-                                        total: [
-                                                {{currentSessionTotalUsages.prompt_tokens}} /
-                                                {{currentSessionTotalUsages.completion_tokens}} /
-                                                {{currentSessionTotalUsages.total_tokens}}
-                                        ]
-                                    </span>
-        </el-popover>
-        <el-popover
-                v-if="currentSessionVisibleUsages"
-                placement="top-start"
-                title="说明"
-                width="200"
-                trigger="hover">
-            <p>
-                session visible tokens:<br/>
-                prompt: {{currentSessionVisibleUsages.prompt_tokens}}<br/>
-                completion: {{currentSessionVisibleUsages.completion_tokens}}<br/>
-                total: {{currentSessionVisibleUsages.total_tokens}}<br/>
-            </p>
-            <span slot="reference" v-if="currentSessionVisibleUsages">
-                                        visible: [
-                                            {{currentSessionVisibleUsages.prompt_tokens}} /
-                                            {{currentSessionVisibleUsages.completion_tokens}} /
-                                            {{currentSessionVisibleUsages.total_tokens}}
-                                        ]
-                                    </span>
-        </el-popover>
-        <span>
-                                    会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
-                                </span>
-    </div>
-            </div>
-        </div>
-    </div>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.useQwenTts">
+                        千问语音
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            使用千问语音合成（1.4元/万字）<br/>
+                            使用阿里提供的语音合成大模型进行合成，后端需要同步开启配置，最新合成费用查阅【百炼】平台<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+
+        <el-card shadow="never">
+
+        </el-card>
+    </el-drawer>
 
     <el-dialog
             :title="dialog.toolApproval.title"
@@ -1537,8 +1780,9 @@
                         maxHistoryCount: 20,
                         enableTruncOverflowHistory: true,
                         enableAutoSummary: false,
-                        showConfig: false,
+                        showConfig: false, // AI配置
                         showSidebar: true, // 左侧会话列表是否展开
+                        showMoreActions: false, // 更多选项
                         supportTts: false,
                         ttsPlaying: false,
                         echoRequestPayload: {},
