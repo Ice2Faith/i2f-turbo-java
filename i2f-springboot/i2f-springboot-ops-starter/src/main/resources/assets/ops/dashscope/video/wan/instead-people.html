@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端适配核心：控制视口宽度和缩放比例 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - 视频换人</title>
@@ -137,72 +140,61 @@
 
                 <el-divider></el-divider>
             <el-form inline label-position="left" label-width="80px">
-                <el-row type="flex">
-                    <el-col :span="10">
-                        <el-row type="flex">
-                            <el-form-item>
-                                <span slot="label">
-                                    模型
-                                     <el-popover
-                                             placement="top-start"
-                                             title="模型类型"
-                                             width="360"
-                                             trigger="hover">
-                                         切换不同模型之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
-                                         如果不重新上传，模型将会找不到上传的图片和视频。
-                                        <i slot="reference" class="el-icon-question"></i>
-                                      </el-popover>
-                                </span>
-                                <el-select  clearable filterable v-model="form.modelName"  placeholder="模型" style="width: 260px;">
-                                    <el-option
-                                            v-for="item in metas.modelList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item label="模式">
-                                <el-select  clearable filterable v-model="form.mode"  placeholder="模式" >
-                                    <el-option
-                                            v-for="item in metas.parameterModeList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item>
-                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-row type="flex" justify="center">
-                            <el-form-item>
-                                <el-button v-loading="metas.resultTaskLoading" size="medium"
-                                           type="primary"
-                                           @click="onExecute">
-                                    执行
-                                </el-button>
-                                <el-popover
-                                        placement="top-start"
-                                        title="执行"
-                                        width="360"
-                                        trigger="hover">
-                                    点击执行之后，将会提交异步任务给平台。<br/>
-                                    后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
-                                    只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
-                                    <i slot="reference" class="el-icon-question"></i>
-                                </el-popover>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-row type="flex" justify="end">
+                <el-row >
+                    <el-form-item>
+                        <span slot="label">
+                            模型
+                             <el-popover
+                                     placement="top-start"
+                                     title="模型类型"
+                                     width="360"
+                                     trigger="hover">
+                                 切换不同模型之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
+                                 如果不重新上传，模型将会找不到上传的图片和视频。
+                                <i slot="reference" class="el-icon-question"></i>
+                              </el-popover>
+                        </span>
+                        <el-select  clearable filterable v-model="form.modelName"  placeholder="模型" style="width: 260px;">
+                            <el-option
+                                    v-for="item in metas.modelList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="模式">
+                        <el-select  clearable filterable v-model="form.mode"  placeholder="模式" >
+                            <el-option
+                                    v-for="item in metas.parameterModeList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                    </el-form-item>
 
-                        </el-row>
-                    </el-col>
+                    <el-form-item>
+                        <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                   type="primary"
+                                   @click="onExecute">
+                            执行
+                        </el-button>
+                        <el-popover
+                                placement="top-start"
+                                title="执行"
+                                width="360"
+                                trigger="hover">
+                            点击执行之后，将会提交异步任务给平台。<br/>
+                            后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
+                            只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
+                            <i slot="reference" class="el-icon-question"></i>
+                        </el-popover>
+                    </el-form-item>
+
                 </el-row>
 
 

@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端适配核心：控制视口宽度和缩放比例 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - PixVerse</title>
@@ -136,98 +139,87 @@
 
             <el-divider></el-divider>
             <el-form inline label-position="top" label-width="80px">
-                <el-row type="flex">
-                    <el-col :span="10">
-                        <el-row type="flex">
-                            <el-form-item>
-                                <span slot="label">
-                                    模式
-                                     <el-popover
-                                             placement="top-start"
-                                             title="模型类型"
-                                             width="360"
-                                             trigger="hover">
-                                         切换不同模式之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
-                                         如果不重新上传，模型将会找不到上传的图片和视频。
-                                        <i slot="reference" class="el-icon-question"></i>
-                                      </el-popover>
-                                </span>
-                                <el-select clearable filterable v-model="form.workMode" placeholder="模式"
-                                           style="width: 180px;">
-                                    <el-option
-                                            v-for="item in metas.workModeList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="分辨率">
-                                <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
-                                    <el-option
-                                            v-for="item in metas.resolutionList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="['t2v','r2v'].includes(pixVerseWorkMode)" label="宽高比">
-                                <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
-                                    <el-option
-                                            v-for="item in metas.ratioList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="pixVerseSupportAudio && ['t2v','i2v','r2v'].includes(pixVerseWorkMode)"
-                                          label="声音控制">
-                                <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
-                                    <el-option
-                                            v-for="item in metas.audioSettingList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="时长(s)">
-                                <el-input-number v-model="form.duration" :min="1" :max="pixVerseMaxDuration"
-                                                 size="small"/>
-                            </el-form-item>
-                            <el-form-item label="选项">
-                                <el-checkbox v-model="form.watermark">带水印</el-checkbox>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-row type="flex" justify="center">
-                            <el-form-item label="操作">
-                                <el-button v-loading="metas.resultTaskLoading" size="medium"
-                                           type="primary"
-                                           @click="onExecute">
-                                    执行
-                                </el-button>
-                                <el-popover
-                                        placement="top-start"
-                                        title="执行"
-                                        width="360"
-                                        trigger="hover">
-                                    点击执行之后，将会提交异步任务给平台。<br/>
-                                    后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
-                                    只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
-                                    <i slot="reference" class="el-icon-question"></i>
-                                </el-popover>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="10">
-                        <el-row type="flex" justify="end">
+                <el-row >
+                    <el-form-item>
+                        <span slot="label">
+                            模式
+                             <el-popover
+                                     placement="top-start"
+                                     title="模型类型"
+                                     width="360"
+                                     trigger="hover">
+                                 切换不同模式之后，需要重新上传图片和视频，因为使用的是临时文件，和模型是绑定的。<br/>
+                                 如果不重新上传，模型将会找不到上传的图片和视频。
+                                <i slot="reference" class="el-icon-question"></i>
+                              </el-popover>
+                        </span>
+                        <el-select clearable filterable v-model="form.workMode" placeholder="模式"
+                                   style="width: 180px;">
+                            <el-option
+                                    v-for="item in metas.workModeList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="分辨率">
+                        <el-select clearable filterable v-model="form.resolution" placeholder="分辨率">
+                            <el-option
+                                    v-for="item in metas.resolutionList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="['t2v','r2v'].includes(pixVerseWorkMode)" label="宽高比">
+                        <el-select clearable filterable v-model="form.ratio" placeholder="宽高比">
+                            <el-option
+                                    v-for="item in metas.ratioList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="pixVerseSupportAudio && ['t2v','i2v','r2v'].includes(pixVerseWorkMode)"
+                                  label="声音控制">
+                        <el-select clearable filterable v-model="form.audioSetting" placeholder="声音控制">
+                            <el-option
+                                    v-for="item in metas.audioSettingList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item v-if="['t2v','i2v','r2v'].includes(pixVerseWorkMode)" label="时长(s)">
+                        <el-input-number v-model="form.duration" :min="1" :max="pixVerseMaxDuration"
+                                         size="small"/>
+                    </el-form-item>
+                    <el-form-item label="选项">
+                        <el-checkbox v-model="form.watermark">带水印</el-checkbox>
+                    </el-form-item>
 
-                        </el-row>
-                    </el-col>
+                    <el-form-item label="操作">
+                        <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                   type="primary"
+                                   @click="onExecute">
+                            执行
+                        </el-button>
+                        <el-popover
+                                placement="top-start"
+                                title="执行"
+                                width="360"
+                                trigger="hover">
+                            点击执行之后，将会提交异步任务给平台。<br/>
+                            后续可以通过下面的[查询]按钮获取运行结果，预览和下载结果视频。<br/>
+                            只要提交任务给平台，就会进行计费了，如果只是单纯查询运行结果，不会计费。
+                            <i slot="reference" class="el-icon-question"></i>
+                        </el-popover>
+                    </el-form-item>
+
                 </el-row>
 
 

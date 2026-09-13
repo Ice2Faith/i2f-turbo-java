@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端适配核心：控制视口宽度和缩放比例 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - 数字人视频</title>
@@ -175,76 +178,66 @@
             <el-divider></el-divider>
 
             <el-form inline label-position="left" label-width="80px">
-                <el-row type="flex">
-                    <el-col :span="10">
-                        <el-row type="flex" align="middle">
-                            <el-form-item>
-                                <span slot="label">
-                                    模型
-                                </span>
-                                <el-select clearable filterable v-model="form.modelName" placeholder="模型"
-                                           style="width: 240px;">
-                                    <el-option
-                                            v-for="item in metas.modelList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                            <el-form-item>
-                                <span slot="label">
-                                    分辨率
-                                    <el-popover
-                                            placement="top-start"
-                                            title="分辨率说明"
-                                            width="360"
-                                            trigger="hover">
-                                        480P：约 640×480（约 31 万像素），0.5元/秒<br/>
-                                        720P：约 1280×720（约 92 万像素），0.9元/秒<br/>
-                                        模型会尽量保持输出视频与输入图片宽高比一致。
-                                        <i slot="reference" class="el-icon-question"></i>
-                                    </el-popover>
-                                </span>
-                                <el-select clearable v-model="form.resolution" placeholder="分辨率"
-                                           style="width: 240px;">
-                                    <el-option
-                                            v-for="item in metas.resolutionList"
-                                            :key="item.value"
-                                            :label="item.label"
-                                            :value="item.value">
-                                    </el-option>
-                                </el-select>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="4">
-                        <el-row type="flex" justify="center">
-                            <el-form-item>
-                                <el-button v-loading="metas.resultTaskLoading" size="medium"
-                                           type="primary"
-                                           @click="onExecute">
-                                    执行
-                                </el-button>
-                                <el-popover
-                                        placement="top-start"
-                                        title="生成视频"
-                                        width="360"
-                                        trigger="hover">
-                                    执行前请先进行图片检查，检查合格之后再执行，否则会浪费费用。<br/>
-                                    点击后将异步提交任务给平台。<br/>
-                                    可通过下方[查询]按钮轮询结果，约需 5~10 分钟。<br/>
-                                    任务提交即计费，仅查询不计费。<br/>
-                                    建议先完成第二步图像检测，确保图片合规后再生成。
-                                    <i slot="reference" class="el-icon-question"></i>
-                                </el-popover>
-                            </el-form-item>
-                        </el-row>
-                    </el-col>
-                    <el-col :span="6">
-                        <el-row type="flex" justify="end">
-                        </el-row>
-                    </el-col>
+                <el-row >
+                    <el-form-item>
+                        <span slot="label">
+                            模型
+                        </span>
+                        <el-select clearable filterable v-model="form.modelName" placeholder="模型"
+                                   style="width: 240px;">
+                            <el-option
+                                    v-for="item in metas.modelList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item>
+                        <span slot="label">
+                            分辨率
+                            <el-popover
+                                    placement="top-start"
+                                    title="分辨率说明"
+                                    width="360"
+                                    trigger="hover">
+                                480P：约 640×480（约 31 万像素），0.5元/秒<br/>
+                                720P：约 1280×720（约 92 万像素），0.9元/秒<br/>
+                                模型会尽量保持输出视频与输入图片宽高比一致。
+                                <i slot="reference" class="el-icon-question"></i>
+                            </el-popover>
+                        </span>
+                        <el-select clearable v-model="form.resolution" placeholder="分辨率"
+                                   style="width: 240px;">
+                            <el-option
+                                    v-for="item in metas.resolutionList"
+                                    :key="item.value"
+                                    :label="item.label"
+                                    :value="item.value">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button v-loading="metas.resultTaskLoading" size="medium"
+                                   type="primary"
+                                   @click="onExecute">
+                            执行
+                        </el-button>
+                        <el-popover
+                                placement="top-start"
+                                title="生成视频"
+                                width="360"
+                                trigger="hover">
+                            执行前请先进行图片检查，检查合格之后再执行，否则会浪费费用。<br/>
+                            点击后将异步提交任务给平台。<br/>
+                            可通过下方[查询]按钮轮询结果，约需 5~10 分钟。<br/>
+                            任务提交即计费，仅查询不计费。<br/>
+                            建议先完成第二步图像检测，确保图片合规后再生成。
+                            <i slot="reference" class="el-icon-question"></i>
+                        </el-popover>
+                    </el-form-item>
+
                 </el-row>
 
                 <el-row v-if="metas.resultTaskId">

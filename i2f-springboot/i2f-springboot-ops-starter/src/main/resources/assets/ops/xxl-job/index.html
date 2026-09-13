@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <!-- 移动端适配核心：控制视口宽度和缩放比例 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <!-- 1小时缓存过期 -->
     <meta http-equiv="Cache-Control" content="max-age=3600, public">
     <title>Ops - Xxl Job</title>
@@ -83,7 +86,7 @@
     </el-row>
 
     <el-divider>Xxl Job 操作</el-divider>
-    <el-card shadow="never">
+    <el-card shadow="never" class="input-area">
         <el-row type="flex">
             <el-col :span="16">
                 <el-card shadow="never">
@@ -1206,6 +1209,13 @@
 
     .scroller {
         height: 260px
+    }
+
+
+    @media (max-width: 768px) {
+        .input-area{
+            zoom: 0.7;
+        }
     }
 </style>
 </html>
