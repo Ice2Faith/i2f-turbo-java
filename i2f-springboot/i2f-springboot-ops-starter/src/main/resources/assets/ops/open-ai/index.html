@@ -1342,8 +1342,8 @@
         <el-card shadow="never" style="max-height: 70vh;overflow: auto;" class="tool-approval-card">
             <el-form inline>
                 <el-backtop target=".tool-approval-card"></el-backtop>
-                <el-row style="background: rgb(238, 238, 238); height: 50px; padding: 5px;">
-                    <el-col :span="8">
+                <el-row style="background: rgb(238, 238, 238); padding: 5px;">
+                    <el-col :span="metas.windowSize.isMobileWidth?24:8">
                         <el-form-item>
                             <el-switch
                                     v-model="dialog.toolApproval.rejectAll"
@@ -1356,7 +1356,7 @@
                                        @click="toggleAllToolApprovalChecked"></el-button>
                         </el-form-item>
                     </el-col>
-                    <el-col :span="16">
+                    <el-col :span="metas.windowSize.isMobileWidth?24:16">
                         <el-form-item class="form-item-full-width">
                             <el-input v-model="dialog.toolApproval.rejectAllReason" clearable
                                       placeholder="拒绝执行原因，提供给AI的拒绝信息，可不填">
@@ -1371,7 +1371,7 @@
                 <el-row v-for="(item,index) in form.toolApprovalList">
                     <el-divider v-if="index>0"></el-divider>
                     <el-row>
-                        <el-col :span="8">
+                        <el-col :span="metas.windowSize.isMobileWidth?24:8">
                             <el-form-item>
                                 <el-switch
                                         v-model="item.reject"
@@ -1382,7 +1382,7 @@
                                 </el-switch>
                             </el-form-item>
                         </el-col>
-                        <el-col :span="16">
+                        <el-col :span="metas.windowSize.isMobileWidth?24:16">
                             <el-form-item v-if="item.reject" class="form-item-full-width">
                                 <el-input v-model="item.rejectReason" clearable
                                           placeholder="拒绝执行原因，提供给AI的拒绝信息，可不填"></el-input>
@@ -1390,7 +1390,7 @@
                         </el-col>
                     </el-row>
                     <el-row>
-                        <el-descriptions>
+                        <el-descriptions :column="metas.windowSize.isMobileWidth?1:2">
                             <el-descriptions-item label="名称">{{item.functionName}}</el-descriptions-item>
                             <el-descriptions-item label="调用ID">{{item.tool_call_id}}</el-descriptions-item>
                             <el-descriptions-item label="描述">{{item.definition?.description}}</el-descriptions-item>
@@ -1419,7 +1419,7 @@
         <el-row type="flex" justify="end" v-if="dialog.messageEditor.type!='view'">
             <el-button size="mini" type="primary" @click="onSubmitEditMessage">保存</el-button>
         </el-row>
-        <el-card shadow="never">
+        <el-card shadow="never" class="message-editor-dialog">
             <el-form inline label-position="left" label-width="100px">
                 <el-form-item label="语言类型">
                     <el-select clearable filterable v-model="dialog.messageEditor.lang" placeholder="语言类型"
@@ -1775,6 +1775,11 @@
                     completions: [],
                     storage: {},
                     metas: {
+                        windowSize:{
+                          width: window.innerWidth,
+                          height: window.innerHeight,
+                          isMobileWidth: window.innerWidth < 678
+                        },
                         cert: '',
                         checkAllSession: false,
                         activeSessionId: null, // 当前活跃的会话ID
@@ -1782,7 +1787,7 @@
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
                         uploadLoading: false,
                         uploadList: [],
-                        maxHistoryCount: 20,
+                        maxHistoryCount: 30,
                         enableTruncOverflowHistory: true,
                         enableAutoSummary: false,
                         showConfig: false, // AI配置
@@ -1838,8 +1843,19 @@
                             {label: '工具意图推荐', value: 'echo_tool_intent_recommend', std: false},
                             {label: '工具输出文件', value: 'echo_attach_files', std: false}
                         ],
-                        enableCustomDisplay: false,
-                        hiddenMessageTypes: [],
+                        enableCustomDisplay: true,
+                        hiddenMessageTypes: [
+                            'tool',
+                            'echo_tool',
+                            'echo_skill',
+                            'echo_dynamic_tool',
+                            'echo_loop_engineering',
+                            'echo_truth_prompt',
+                            'echo_truth_content',
+                            'echo_truth_sync',
+                            'echo_tool_intent_recommend',
+                            'echo_attach_files'
+                        ],
                     },
                     drawer: {},
                     dialog: {
@@ -1872,28 +1888,28 @@
                             apiKey: '',  // open-ai 兼容的秘钥
                         },
                         presetBaseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1',   // 当前选中的预设地址（仅用于 select 绑定）
-                        modelName: 'qwen-plus',
+                        modelName: 'qwen3.7-plus',
                         inputText: '',
                         messageType: 'user',
                         encryptOutput: false,
-                        enableTools: false,
-                        enableSkills: false,
+                        enableTools: true,
+                        enableSkills: true,
                         enableRags: false,
                         enableUserSendTime: false,
                         enableAutoTts: false,
                         useQwenTts: false,
                         toolApprovalList: [],
-                        enableLruTools: false,
+                        enableLruTools: true,
                         lruToolMaxSize: 20,
                         lruToolNames: [],
-                        enableToolRecommendByIntentRecognize: false,
+                        enableToolRecommendByIntentRecognize: true,
                         enableEchoRequestPayload: false,
                         enableKeepFirstUserMessage: false,
                         enableMergedSystemMsg: false,
                         attachFiles: [],
-                        enableVisionImage: false,
-                        enableTruth: false,
-                        autoApprovalToolTags: ['auto'],
+                        enableVisionImage: true,
+                        enableTruth: true,
+                        autoApprovalToolTags: ['auto','readonly','datetime','math','mcp','os','random','skill','rag'],
                         enableMemories: false,
                         memoryBucket: '',
                         enableLoopEngineering: false
@@ -2138,13 +2154,16 @@
                 }
             },
             onWindowResize() {
-                let isMobileWidth = window.innerWidth <= 768;
-                if (isMobileWidth === this._lastIsMobileWidth) {
+                this.metas.windowSize.width= window.innerWidth;
+                this.metas.windowSize.height= window.innerHeight;
+
+                this.metas.windowSize.isMobileWidth = this.metas.windowSize.width < 768;
+                if (this.metas.windowSize.isMobileWidth === this._lastIsMobileWidth) {
                     return;
                 }
-                this._lastIsMobileWidth = isMobileWidth;
+                this._lastIsMobileWidth = this.metas.windowSize.isMobileWidth;
                 // 宽度跨越断点：移动端默认折叠，PC 端默认展开
-                this.metas.showSidebar = !isMobileWidth;
+                this.metas.showSidebar = !this.metas.windowSize.isMobileWidth;
             },
             deleteSession(sessionId) {
                 this.$confirm('确认删除该会话及所有历史消息？', '提示', {type: 'warning'})

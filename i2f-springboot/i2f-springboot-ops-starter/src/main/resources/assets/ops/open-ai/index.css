@@ -832,6 +832,14 @@ html, body {
  * 移动端：会话列表悬浮展开，覆盖在聊天区上方，不挤压主区域
  */
 @media (max-width: 768px) {
+    .el-message-box{
+        max-width: 80vw !important;
+    }
+
+    .message-editor-dialog{
+        zoom: 0.7;
+    }
+
     .config-drawer{
         width: 80% !important;
     }
