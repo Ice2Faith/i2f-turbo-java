@@ -38,6 +38,8 @@ ai:
       enable: false
     kling-t2i:
       enable: false
+    vidu-t2i:
+      enable: false
     happyhorse-t2v:
       enable: false
     kling-t2v:
@@ -74,8 +76,8 @@ i2f:
   springboot:
     ops:
       open-ai:
-        enable: false
+        enable: true
       dashscope:
-        enable: false
+        enable: true
       secure:
 #         cert:
