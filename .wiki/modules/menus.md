@@ -1098,6 +1098,24 @@
 
 - 详细文档：[i2f-extension-filesystem-minio](./i2f-extension/i2f-extension-filesystem-minio/readme.md)
 
+### i2f-extension-filesystem-oss-aliyun
+
+> **基于阿里云 OSS Java SDK（`com.aliyun.oss:aliyun-sdk-oss:3.17.4` provided）的 `IFileSystem` 契约适配器**（1 pom 79 行 + 2 源文件 484 行：`AliyunOssFileSystem` 436 行 + `AliyunOssFile` 48 行，另有配套依赖模块 `i2f-extension-oss-aliyun` 2 文件 237 行、`i2f-io-filesystem` 内部依赖、零测试零资源）：把阿里云 OSS 对象存储装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——路径按「首段=桶、余段=对象键」两级拆分（根列举桶 `listBuckets`、桶级 `doesBucketExist`/`createBucket`/`deleteBucket`、对象级 `doesObjectExist`/`getObject`/`putObject`/`deleteObject` 直通），目录为 `.ignore` 空对象占位 + 键前缀模拟，覆写 18 个方法（含 `pathSeparator` 转发），`copyTo` 走服务端 `copyObject`、`moveTo` 同桶走服务端 `renameObject`（`POST ?x-oss-rename`，全仓独有）、跨桶先拷贝后删除。**与 MinIO 模块最大差异：写通道全可用**——`store()` 未知长度流被 SDK 自动转 chunked 传输成功（T17 帧 `TE=chunked | CL=null`），`writeBytes`/`writeText` 随身可用（T19），`getOutputStream` 临时文件中转备选（T20 `CL=8`）。112 项运行时实证（112 通过 / 0 失败 / 13 记录，自研 714 行 OSS 协议桩 + 虚拟主机风格寻址，两次运行一致）。⚠ 头号缺陷：**签名版本配置失效**——`AliyunOssUtil.getClient` 创建的 `ClientBuilderConfiguration`（setSignatureVersion V4）从未传给 `OSSClientBuilder`，`meta` 默认 V4 被静默降级为 V1（T02 生效配置=V1、T48a wire 首词 `OSS`；手动补传对照 T02b/T48b=V4）；另 `listFiles` 分页缺陷（`nextMarker` 未用，真实 OSS 死循环，T47）、`decodeObjectName` 无条件 URLDecoder 污染原文键（`+`→空格 T45、`%41`→A T46）、`getStrictFile` 绝对路径恒拒绝（T42a）、`delete(目录)` 静默 no-op、`.ignore` 占位致桶删不掉等 18 项。
+
+- 详细文档：[i2f-extension-filesystem-oss-aliyun](./i2f-extension/i2f-extension-filesystem-oss-aliyun/readme.md)
+
+### i2f-extension-filesystem-oss-aws-s3
+
+> **基于 AWS SDK v2（`software.amazon.awssdk:s3` 2.17.100，provided + optional，模块内 BOM 版本管理）的 `IFileSystem` 契约适配器**（1 pom 79 行 + 2 源文件 580 行：`AwsS3OssFileSystem` 532 行 + `AwsS3OssFile` 48 行，另有配套依赖模块 `i2f-extension-oss-aws-s3` 2 文件 287 行、`i2f-io-filesystem` 内部依赖、零测试零资源）：把 AWS S3 对象存储装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——路径按「首段=桶、余段=对象键」两级拆分（根列举桶 `listBuckets`、桶级 `getBucketPolicyStatus` 探测 + `createBucket`/`deleteBucket`、对象级 `getObject`/`putObject`/`copyObject`/`deleteObject`/`listObjects` 直通），目录为 `.ignore` 空对象占位 + 键前缀模拟，覆写 18 个方法（含 `pathSeparator` 转发），`copyTo` 走服务端 `copyObject`、`moveTo` 恒为拷贝+删除两步（无跨桶分支）。**与 MinIO/Aliyun 模块最大差异：签名全程 `AWS4-HMAC-SHA256` 零降级**（T48：78 请求全覆盖——与 Aliyun「配置 V4 实际降级 V1」恰好相反）。127 项运行时实证（127 通过 / 0 失败 / 26 记录，自研 798 行 Mock S3 协议桩 + 虚拟主机风格寻址 + aws-chunked 信封解码，两次运行一致）。⚠ 头号缺陷：**`store()` 100% 失败**——`RequestBody.fromInputStream(is, -1L)`（L429）在构造 `RequestBody` 瞬间即被 SDK `Validate.isNotNegative` 拒绝（`IllegalArgumentException` 包装为 `IOException`，**请求从未发出**，T17），`AwsS3OssFile.writeBytes`（覆写为 store）→ `writeBytes`/`writeText` 连带报废，唯一可用写通道为 `getOutputStream`（临时文件 + `RequestBody.fromFile`，T20 帧 signed aws-chunked 信封 `CL=181`）。其他重点缺陷：`getBucketPolicyStatus` 桶探测缺陷簇（无 policy 桶 404 `NoSuchBucketPolicy` 未被 SDK 建模 → `isExists` 泄漏 `S3Exception` T13a、`isDirectory`=false T12a、`mkdir` 409 T09a、`AwsS3OssUtil.bucketCreate` 完全不可用 T51c）、`length()` 恒 0（available T14b/c）、`listFiles` 分页缺陷（无 delimiter 时 `NextMarker` 不返回、真实 S3 死循环 T47）、`urlOf` 预签名恒失败（`Duration.of(999, YEARS)` 抛 `UnsupportedTemporalTypeException` T53）、`decodeObjectName` 无条件 URLDecoder 污染 `+`/`%xx` 键（T44/T45）等 19 项。真实消费方：`i2f-springboot-ops-starter` 的 `AwsS3OpsController`（387 行 8 端点，upload 走 `getOutputStream` 规避 store 缺陷、delete 自建递归）。
+
+- 详细文档：[i2f-extension-filesystem-oss-aws-s3](./i2f-extension/i2f-extension-filesystem-oss-aws-s3/readme.md)
+
+### i2f-extension-filesystem-sftp
+
+> **基于 JSch（`com.jcraft:jsch:0.1.55` provided）的 `IFileSystem` 契约适配器**（1 pom 48 行 + 6 源文件 649 行：`SftpFileSystem` 258 行 + `ProxySftpFileSystem` 281 行（跳板双隧道）+ `SftpFile` 31 行 + `ProxySftpFile` 31 行（死代码）+ `SftpMeta` 23 行 + `ProxySftpMeta` 25 行，`i2f-io-filesystem` 内部依赖、零测试零资源）：把 SFTP 装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——覆写 14 个方法（11 个操作原语 + `getFile`/`getAbsolutePath`/`close`），`copyTo`/`moveTo`/`store`/`load`/`readText`/`writeText` 等 40+ 组合能力全部继承自 `AbsFileSystem`/`AbsFile`；`ProxySftpFileSystem` 经 SSH 本地端口转发实现「跳板机 → 目标机」两跳接入。**核心缺陷**：`getChannel()` 守卫 `!channel.isClosed()` 恒真（JSch 新建 channel `close=false`，`isClosed()` 仅在 `disconnect()` 后为 true）→ 每次操作都断旧会话并全量重连（实测每次操作恰好 1 个新 SSH 会话，Proxy 每次 2 个）；叠加 delete 三重失效链（外层 channel 被 `isFile()` 内部重建作废 + `isFile` 对目录误判 `true` + 异常全吞）→ **`delete` 对文件/目录全部静默失效**；`listFiles(path)` 实际列出**父目录**内容（含 `.`/`..`）；同 FS `copyTo`/`moveTo` 因「先取输入流、再取输出流触发重连断源流」必然抛 `IOException: Pipe closed`。64 项运行时实证（38 通过 / 5 对立断言失败实锤缺陷 / 21 记录；真实 OpenSSH 9.0p1 mock sshd + `sshd.log` 会话计数 + JSch `get()` 惰性流探针）。
+
+- 详细文档：[i2f-extension-filesystem-sftp](./i2f-extension/i2f-extension-filesystem-sftp/readme.md)
+
 ### i2f-extension-reverse-engineer-generator
 
 > 数据库反向工程与代码生成模块，基于 Velocity 模板从表结构或 Spring MVC 元数据生成分层代码、DDL、设计文档与 ER 图。
