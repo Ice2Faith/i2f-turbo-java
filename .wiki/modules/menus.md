@@ -934,7 +934,7 @@
 
 ## i2f-extension
 
-> 可选扩展能力集合，按需集成第三方库与增强组件（7z 压缩、AI、文档、数据库反向工程、文件系统、序列化、ANTLR4 语言引擎（脚本/模板/计算器）、Java Agent 字节码增强观测等）。
+> 可选扩展能力集合，按需集成第三方库与增强组件（7z 压缩、AI、文档、数据库反向工程、文件系统、序列化（fastjson1 兼容 + fastjson2 原生）、ANTLR4 语言引擎（脚本/模板/计算器）、Java Agent 字节码增强观测等）。
 
 ### i2f-extension-7zip
 
@@ -1073,6 +1073,30 @@
 > **基于 fastjson1 兼容包（`com.alibaba:fastjson:2.0.26`，POM 自述 `fastjson1-compatible`、实由 fastjson2 引擎驱动）的 `IJsonSerializer` 契约适配器**（1 源文件 63 行、单类 `FastJsonSerializer`、零测试零资源）：把 `JSON.toJSONString`/`parse`/`parseObject` 装配为 i2f-serialize-std 的 JSON 契约实现——`Class`/`Type`/`TypeReference` 三路类型化反序列化分派 + `bean2Map`/`deserializeAsMap` 覆写 + `INSTANCE` 无状态单例；fastjson 以 provided 声明、运行期使用方自备；与兄弟模块 i2f-extension-fastjson2（原生 fastjson2 API）为同一契约的可替换双实现。消费方仅 POM 聚合与分发产物。⚠ 瑕疵：异常未包装契约 `JsonSerializeException`、`bean2Map` 对非对象 JSON 抛 JSONException、双次编解码开销、lombok 冗余声明等 9 项。
 
 - 详细文档：[i2f-extension-fastjson](./i2f-extension/i2f-extension-fastjson/readme.md)
+
+### i2f-extension-fastjson2
+
+> **基于原生 fastjson2（`com.alibaba.fastjson2:fastjson2:2.0.34`，自包含零运行时传递依赖）的 `IJsonSerializer` 契约适配器**（1 源文件 63 行、单类 `FastJson2Serializer`、零测试零资源）：把 `JSON.toJSONString`/`parse`/`parseObject` 装配为 i2f-serialize-std 的 JSON 契约实现——`Class`/`Type`/`TypeReference` 三路类型化反序列化分派 + `bean2Map`/`deserializeAsMap` 覆写 + `INSTANCE` 无状态单例；fastjson2 以 provided 声明、运行期使用方自备；与兄弟模块 i2f-extension-fastjson（fastjson1 兼容包）为同一契约的可替换双实现，本模块面向新项目优先推荐。21 项运行时实证全部通过（JDK8 javac 直编）。消费方仅 POM 聚合与分发产物。⚠ 瑕疵：异常未包装契约 `JsonSerializeException`（实测抛 fastjson2 原生 `JSONException`）、`bean2Map` 对非对象 JSON 抛 JSONException、null 边界静默返回、双次编解码开销、lombok 冗余声明等 10 项。
+
+- 详细文档：[i2f-extension-fastjson2](./i2f-extension/i2f-extension-fastjson2/readme.md)
+
+### i2f-extension-filesystem-ftp
+
+> **基于 Apache Commons Net `FTPClient`（`commons-net:commons-net:3.6` provided）的 `IFileSystem` 契约适配器**（3 源文件 315 行、`i2f-io-filesystem` 内部依赖、零测试零资源）：把 FTP 协议装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——仅实现 11 个操作原语（`isDirectory`/`isFile`/`isExists`/`listFiles` 均为「切分目录 + 被动 LIST + 名称匹配」；`retrieveFileStream`/`storeFileStream`/`appendFileStream` 三路流；`makeDirectory`），另覆写 `getFile`/`getAbsolutePath`（契约覆写共 13 个），`mkdirs`/`copyTo`/`moveTo`/`store`/`load`/`readText`/`writeText` 等 40+ 组合能力全部继承自 `AbsFileSystem`/`AbsFile`（上游契约文档以其为扩展参照模板）；默认 `enableNewClient=true` 每操作新建连接（实测约 40 个逻辑操作 46 连接/46 登录，天然规避 FTP 流传输应答残留），复用模式因流传输后不调用 `completePendingCommand()` 导致 226 应答永久残留、控制连接逐次错位（29 项运行时实证全部通过，T25/T26 实锤：`IOException: Stream closed` → `ConnectException: Connection refused`，不自愈）。消费方仅 POM 聚合与分发产物。⚠ 瑕疵：从不调用 completePendingCommand、流传输恒 ACTIVE（PORT=9）而列目录被动（PASV=35）、根路径 `/` 三态恒 false、delete 非空目录静默失败、缺失文件读抛 IOException 而写缺失目录抛 NPE、close 后静默重连、commons-net 3.6 版本硬编码等 16 项。
+
+- 详细文档：[i2f-extension-filesystem-ftp](./i2f-extension/i2f-extension-filesystem-ftp/readme.md)
+
+### i2f-extension-filesystem-hdfs
+
+> **基于 Apache Hadoop `FileSystem` 客户端（`hadoop-client:3.2.1` provided）的 `IFileSystem` 契约适配器**（3 源文件 225 行：`HdfsFileSystem` 176 行 + `HdfsFile` 35 行 + `HdfsMeta` 14 行、`i2f-io-filesystem` 内部依赖、零测试零资源）：把 HDFS 分布式文件系统装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——覆写 15 个方法（14 个契约方法 + `close`：三态元信息与 `listFiles` 直通 `getFileStatus`/`listStatus`，三路流直通 `open`/`create(path,true)`/`append`，`mkdir`/`mkdirs` 均委托 Hadoop 递归 `mkdirs`），`copyTo`/`moveTo`/`store`/`load`/`readText`/`writeText` 等 40+ 组合能力全部继承自 `AbsFileSystem`/`AbsFile`。设计核心是「薄封装」：构造即建连（`FileSystem.get` 二选一路径：`uri`+`user` 齐备则指定用户身份），**Hadoop 全局静态缓存按 scheme+authority+user 跨实例共享**（实测两实例同一底层实例、后建实例 `meta.config` 被静默忽略、关闭其一影响共享者）；元数据六方法空 `catch (Throwable)` 吞异常（`listFiles` 缺失返回空列表）、`mkdir`/`length` 包装 `IllegalStateException`、三路流直抛原始异常（`UnsupportedOperationException` 实测透传）——三种异常策略并存；`isAppendable` 恒 `true`、`close()` 仅直通不重连；`hadoop-client` provided 声明、运行期使用方自备。38 项运行时实证全部通过（`file:///` LocalFileSystem 模式 + winutils 桩 + NativeIO 类路径 shim，两次运行 11.7s/13.3s 结果一致）。消费方仅 POM 聚合与分发产物。⚠ 瑕疵：六方法空 catch 连 `Error` 都吞成诊断盲区（实测无 `hadoop.dll` 时 `listStatus` 的 `UnsatisfiedLinkError` 被吞为空列表）、delete 忽略返回值致非空目录静默失败、isAppendable 恒 true、close 不重连、全局缓存四连锁、构造期异常包装不完整（`IllegalArgumentException` vs `IllegalStateException`）、listFiles 路径形态变化（`/C:/...`）与文件路径返回自身、length 目录语义漂移、`getExtension` 继承反转缺陷等 14 项。
+
+- 详细文档：[i2f-extension-filesystem-hdfs](./i2f-extension/i2f-extension-filesystem-hdfs/readme.md)
+
+### i2f-extension-filesystem-minio
+
+> **基于 MinIO Java SDK（`io.minio:minio:7.1.0` provided）的 `IFileSystem` 契约适配器**（1 pom 52 行 + 2 源文件 444 行：`MinioFileSystem` 400 行 + `MinioFile` 44 行，另有配套依赖模块 `i2f-extension-minio` 2 文件 191 行、`i2f-io-filesystem` 内部依赖、零测试零资源）：把 MinIO/S3 对象存储装配为 `i2f-io-filesystem` 的 `IFileSystem`/`IFile` 契约实现——路径按「首段=桶、余段=对象键」两级拆分（根列举桶 `listBuckets`、桶级 `bucketExists`/`makeBucket`/`removeBucket`、对象级 `statObject`/`getObject`/`putObject`/`removeObject` 直通），目录为 `.ignore` 空对象占位 + 键前缀模拟，覆写 16 个方法（含 `pathSeparator` 转发），`copyTo`/`moveTo`/`load`/`readText` 等 40+ 组合能力继承自 `AbsFileSystem`/`AbsFile`。设计核心是「无显式目录的桶/键模型 + 全方法吞异常降级」：五方法空 `catch (Throwable)` 静默（false/空列表/-1/0）、`delete` 目录静默 no-op（消费方自建递归补偿）、非空桶抛 `IllegalStateException`、追加流抛原生 `UnsupportedOperationException` 且 `isAppendable` 恒 false。54 项运行时实证（49 通过 + 5 记录，自研 578 行 S3 协议桩，三次运行：run1 崩溃暴露缺陷 → run2/run3 全绿，含 T48b 含 `+` 名编解码往返）。真实消费方：`i2f-springboot-oss-minio-starter` 自动装配（`@Bean MinioFileSystem`）+ `i2f-springboot-ops-starter` `MinioOpsController` 7 端点（upload 走 `getOutputStream` 规避缺陷、delete 自建递归）。⚠ 头号缺陷：`store()` 以 `.stream(is,-1,-1)` 上传——minio-java 7.1.0 `validateSizes` 在 build 期抛 `IllegalArgumentException: valid part size must be provided when object size is unknown`（包装 IOException），`MinioFile.writeBytes`（覆写为 store）→ `writeText` 连带报废。另：`decodeObjectName` 双重解码风险（非法 `%` 序列异常被吞致条目静默消失）、`length` 语义碎片化、`getExtension` 继承反转缺陷、io.minio 版本硬编码 5 处等 16 项。
+
+- 详细文档：[i2f-extension-filesystem-minio](./i2f-extension/i2f-extension-filesystem-minio/readme.md)
 
 ### i2f-extension-reverse-engineer-generator
 
