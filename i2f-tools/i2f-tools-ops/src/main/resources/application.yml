@@ -32,6 +32,8 @@ ai:
       enable: false
     python:
       enable: false
+    nodejs:
+      enable: false
     dashscope-t2i:
       enable: false
     kling-t2i:

@@ -44,6 +44,9 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.openai.tool.impl.SessionRecordTools,\
     i2f.springboot.ops.openai.tool.impl.CommandTools,\
     i2f.springboot.ops.openai.tool.impl.GroovyTools,\
+    i2f.springboot.ops.openai.tool.impl.PythonTools,\
+    i2f.springboot.ops.openai.tool.impl.NodejsTools,\
+    i2f.springboot.ops.openai.tool.impl.PowershellTools,\
     i2f.springboot.ops.openai.tool.impl.WebDownloadTools,\
     i2f.springboot.ops.openai.tool.impl.LunarTools,\
     i2f.springboot.ops.openai.tool.impl.a2a.AgentTools,\
