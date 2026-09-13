@@ -3,6 +3,7 @@ package i2f.springboot.ops.openai.tool.impl;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
+import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.os.OsUtil;
@@ -32,6 +33,9 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 @Component
+@Tools(tags = {
+        "powershell"
+})
 public class PowershellTools {
     public static class WindowsFormCondition implements Condition {
 
