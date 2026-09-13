@@ -62,6 +62,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoWanDigitalPeopleController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsImageKlingText2ImageController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsImageWanText2ImageController,\
+    i2f.springboot.ops.dashscope.controller.DashScopeOpsImageViduText2ImageController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoHappyHorseController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoViduController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsVideoPixVerseController,\
@@ -69,6 +70,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsD3TripoController,\
     i2f.springboot.ops.dashscope.tool.DashScopeImageWanText2ImageTools,\
     i2f.springboot.ops.dashscope.tool.DashScopeImageKlingText2ImageTools,\
+    i2f.springboot.ops.dashscope.tool.DashScopeImageViduText2ImageTools,\
     i2f.springboot.ops.dashscope.tool.DashScopeVideoHappyHorseText2VideoTools,\
     i2f.springboot.ops.dashscope.tool.DashScopeVideoKlingText2VideoTools,\
     i2f.springboot.ops.dashscope.tool.DashScopeVideoPixVerseText2VideoTools,\
