@@ -1536,6 +1536,82 @@
         </div>
 
     </el-dialog>
+
+    <el-dialog
+            :title="dialog.checkboxDialog.title"
+            :visible.sync="dialog.checkboxDialog.show"
+            :v-if="dialog.checkboxDialog.show"
+            :show-close="false"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            top="5vh"
+            width="90%">
+        <el-card shadow="never">
+            <div slot="header" class="clearfix">
+                <span>{{dialog.checkboxDialog.question || '请选择'}}</span>
+                <span style="float: right; padding: 3px 0" type="text">
+                    <el-button size="mini"
+                               @click="onCheckboxDialogToggle">
+                        反选
+                    </el-button>
+                </span>
+            </div>
+            <el-form label-position="left" label-width="100px">
+                <el-checkbox-group v-model="dialog.checkboxDialog.checked">
+                    <el-form-item v-for="(item,index) in dialog.checkboxDialog.options">
+                        <el-checkbox slot="label"
+                                     :label="item.index">
+                            {{item.index==-1?'自定义':(item.index+'')}}
+                        </el-checkbox>
+                        <el-input clearable
+                                  v-model="item.content"
+                                  :disabled="item.index!=-1 || (item.index==-1 && !dialog.checkboxDialog.checked.includes(-1))">
+                        </el-input>
+                    </el-form-item>
+                </el-checkbox-group>
+            </el-form>
+        </el-card>
+
+        <el-row type="flex" justify="end" style="margin-top: 12px;">
+            <el-button size="small" @click="onCheckboxDialogCancel">取消</el-button>
+            <el-button type="primary" size="small" @click="onCheckboxDialogConfirm">确认</el-button>
+        </el-row>
+    </el-dialog>
+
+    <el-dialog
+            :title="dialog.radioDialog.title"
+            :visible.sync="dialog.radioDialog.show"
+            :v-if="dialog.radioDialog.show"
+            :show-close="false"
+            :close-on-click-modal="false"
+            :close-on-press-escape="false"
+            top="5vh"
+            width="90%">
+        <el-card shadow="never">
+            <div slot="header" class="clearfix">
+                <span>{{dialog.radioDialog.question || '请选择'}}</span>
+            </div>
+            <el-form label-position="left" label-width="100px">
+                <el-radio-group v-model="dialog.radioDialog.checked">
+                    <el-form-item v-for="(item,index) in dialog.radioDialog.options">
+                        <el-radio slot="label"
+                                     :label="item.index">
+                            {{item.index==-1?'自定义':(item.index+'')}}
+                        </el-radio>
+                        <el-input clearable
+                                  v-model="item.content"
+                                  :disabled="item.index!=-1 || (item.index==-1 && dialog.radioDialog.checked==null)">
+                        </el-input>
+                    </el-form-item>
+                </el-radio-group>
+            </el-form>
+        </el-card>
+
+        <el-row type="flex" justify="end" style="margin-top: 12px;">
+            <el-button size="small" @click="onRadioDialogCancel">取消</el-button>
+            <el-button type="primary" size="small" @click="onRadioDialogConfirm">确认</el-button>
+        </el-row>
+    </el-dialog>
 </div>
 </body>
 <script type="module">
@@ -1881,6 +1957,44 @@
                             title: '文件预览器',
                             url: ''
                         },
+                        checkboxDialog:{
+                            show: false,
+                            title: '多选框',
+                            tool_call_id: '',
+                            checked: [],
+                            question: '你喜欢什么颜色',
+                            options: [
+                                /*{
+                                    index: 1,
+                                    content: '黑色'
+                                },{
+                                    index: 2,
+                                    content: '白色'
+                                },{
+                                    index: -1,
+                                    content: ''
+                                }*/
+                            ]
+                        },
+                        radioDialog:{
+                            show: false,
+                            title: '单选框',
+                            tool_call_id: '',
+                            checked: null,
+                            question: '你喜欢什么颜色',
+                            options: [
+                                /*{
+                                index: 1,
+                                content: '黑色'
+                                },{
+                                    index: 2,
+                                    content: '白色'
+                                },{
+                                    index: -1,
+                                    content: ''
+                                }*/
+                            ]
+                        }
                     },
                     form: {
                         meta: {
@@ -1912,7 +2026,13 @@
                         autoApprovalToolTags: ['auto','readonly','datetime','math','mcp','os','random','skill','rag'],
                         enableMemories: false,
                         memoryBucket: '',
-                        enableLoopEngineering: false
+                        enableLoopEngineering: false,
+                        webjsToolResults:[
+                            /*{
+                                tool_call_id: '',
+                                content: ''
+                            }*/
+                        ]
                     }
                 }
             },
@@ -2751,6 +2871,61 @@
                     })
                 }
 
+                // 处理浏览器端的工具调用
+                if(apiMessages) {
+                    let lastApiMsg = null
+                    for (let i = apiMessages.length - 1; i >= 0; i--) {
+                        let item=apiMessages[i]
+                        if(this.stdRoleList.filter(e=>e.value==item.type).length>0){
+                            lastApiMsg=item;
+                            break
+                        }
+                    }
+                    if(lastApiMsg && lastApiMsg.type=='assistant'){
+                        let calls=lastApiMsg[lastApiMsg.type].tool_calls;
+                        if(calls && calls.length>0){
+                            let needProcessCalls=[]
+                            calls.forEach(call=>{
+                                let id=call.id;
+                                let func=call.function;
+                                let funcName=func.name;
+                                let funcArguments=func.arguments;
+                                let lastName=funcName;
+                                let idx=funcName.lastIndexOf('.');
+                                if(idx>=0){
+                                    lastName=funcName.substring(idx+1);
+                                }
+                                if(['webjs_form_radio',
+                                    'webjs_form_checkbox'
+                                    ].includes(lastName)){
+                                    if(this.form.webjsToolResults.filter(e=>e.tool_call_id==id).length==0){
+                                        needProcessCalls.push({
+                                            lastName: lastName,
+                                            call: call
+                                        })
+                                    }
+                                }
+                            })
+                            if(needProcessCalls.length>0){
+                                let item=needProcessCalls[0]
+                                let call=item.call;
+                                if(item.lastName=='webjs_form_radio'){
+                                    this.dialog.radioDialog.tool_call_id=call.id
+                                    let argsMap=JSON.parse(call.function.arguments)
+                                    this.showRadioDialog(argsMap.question,argsMap.options)
+                                    return
+                                }else if(item.lastName=='webjs_form_checkbox'){
+                                    this.dialog.checkboxDialog.tool_call_id=call.id
+                                    let argsMap=JSON.parse(call.function.arguments)
+                                    this.showCheckboxDialog(argsMap.question,argsMap.options)
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+
+
                 if (this.metas.enableTruncOverflowHistory
                     && this.metas.enableAutoSummary
                     && options.action != 'summary-history') {
@@ -3105,6 +3280,7 @@
                     req.enableVisionImage=this.form.enableVisionImage;
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
                     req.sessionRecordsMap = session.sessionRecordsMap;
+                    req.webjsToolResults=this.form.webjsToolResults;
                     req = this.transferSend(req);
 
                     this.$responsing = true;
@@ -3155,6 +3331,8 @@
                     if (!assistantMsg.assistant.content) {
                         assistantMsg.assistant.content = '';
                     }
+
+                    this.form.webjsToolResults=[]
 
                     if (this.form.enableAutoTts) {
                         this.onTts(assistantMsg)
@@ -3925,6 +4103,93 @@
             },
             refreshAsyncTaskStatus(item,asyncTasks,msg){
                 this.startAutoRefreshAsyncTaskStatus(msg)
+            },
+            showCheckboxDialog(question,options){
+                this.dialog.checkboxDialog.checked=[]
+                this.dialog.checkboxDialog.question=question || '请选择'
+                let list=[]
+                if(options){
+                    for(let i=0;i<options.length;i++){
+                        list.push({
+                            index: i+1,
+                            content: options[i] || ''
+                        })
+                    }
+                }
+                list.push({
+                    index: -1,
+                    content: ''
+                })
+                this.dialog.checkboxDialog.options=list
+                this.dialog.checkboxDialog.show=true
+            },
+            onCheckboxDialogToggle(){
+                this.dialog.checkboxDialog.checked=this.dialog.checkboxDialog.options
+                    .map(e=>e.index)
+                    .filter(e=>!this.dialog.checkboxDialog.checked.includes(e))
+            },
+            onCheckboxDialogCancel(){
+                this.dialog.checkboxDialog.checked=[]
+                let toolContent={
+                    tool_call_id: this.dialog.checkboxDialog.tool_call_id,
+                    content: JSON.stringify([])
+                }
+                this.form.webjsToolResults.push(toolContent)
+                this.dialog.checkboxDialog.show=false
+                this.directSendMessage()
+            },
+            onCheckboxDialogConfirm(){
+                let items=this.dialog.checkboxDialog.options
+                    .filter(e=>this.dialog.checkboxDialog.checked.includes(e.index))
+                    .map(e=>e.content)
+                let toolContent={
+                    tool_call_id: this.dialog.checkboxDialog.tool_call_id,
+                    content: JSON.stringify(items)
+                }
+                this.form.webjsToolResults.push(toolContent)
+                this.dialog.checkboxDialog.show=false
+                this.directSendMessage()
+            },
+            showRadioDialog(question,options){
+                this.dialog.radioDialog.checked=null
+                this.dialog.radioDialog.question=question || '请选择'
+                let list=[]
+                if(options){
+                    for(let i=0;i<options.length;i++){
+                        list.push({
+                            index: i+1,
+                            content: options[i] || ''
+                        })
+                    }
+                }
+                list.push({
+                    index: -1,
+                    content: ''
+                })
+                this.dialog.radioDialog.options=list
+                this.dialog.radioDialog.show=true
+            },
+            onRadioDialogCancel(){
+                this.dialog.radioDialog.checked=null
+                let toolContent={
+                    tool_call_id: this.dialog.radioDialog.tool_call_id,
+                    content: null
+                }
+                this.form.webjsToolResults.push(toolContent)
+                this.dialog.radioDialog.show=false
+                this.directSendMessage()
+            },
+            onRadioDialogConfirm(){
+                let items=this.dialog.radioDialog.options
+                    .filter(e=>this.dialog.radioDialog.checked==e.index)
+                    .map(e=>e.content)
+                let toolContent={
+                    tool_call_id: this.dialog.radioDialog.tool_call_id,
+                    content: JSON.stringify(items.length>0?items[0]:null)
+                }
+                this.form.webjsToolResults.push(toolContent)
+                this.dialog.radioDialog.show=false
+                this.directSendMessage()
             }
         }
     });

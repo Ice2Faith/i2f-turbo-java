@@ -50,4 +50,6 @@ public class OpenAiOperateDto {
     protected Map<String, String> sessionRecordsMap = new HashMap<>();
 
     protected List<AsyncTaskItem> asyncTasks;
+
+    protected List<OpenAiWebjsToolResult> webjsToolResults;
 }

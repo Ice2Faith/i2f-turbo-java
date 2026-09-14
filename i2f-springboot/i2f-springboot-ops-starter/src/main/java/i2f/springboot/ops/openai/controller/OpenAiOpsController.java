@@ -804,10 +804,24 @@ public class OpenAiOpsController implements IOpsProvider {
                                                             throw new IllegalStateException("user reject tool execute" + rejectReason);
                                                         }
                                                     }
-                                                    if (!toolManager.support(toolCallRequest)) {
-                                                        throw new IllegalArgumentException("cannot found tool definition: " + toolCallRequest.getName());
+
+                                                    boolean isWebjsResolved=false;
+                                                    List<OpenAiWebjsToolResult> webjsToolResults = req.getWebjsToolResults();
+                                                    if(webjsToolResults!=null && !webjsToolResults.isEmpty()) {
+                                                        for (OpenAiWebjsToolResult result : webjsToolResults) {
+                                                            if(Objects.equals(id,result.getTool_call_id())){
+                                                                callRet=result.getContent();
+                                                                isWebjsResolved=true;
+                                                            }
+                                                        }
                                                     }
-                                                    callRet = toolManager.callTool(toolCallRequest);
+
+                                                    if(!isWebjsResolved) {
+                                                        if (!toolManager.support(toolCallRequest)) {
+                                                            throw new IllegalArgumentException("cannot found tool definition: " + toolCallRequest.getName());
+                                                        }
+                                                        callRet = toolManager.callTool(toolCallRequest);
+                                                    }
                                                 } catch (Throwable e) {
                                                     callRet = "call tool error! " + e.getClass() + ": " + e.getMessage();
                                                     log.warn(e.getMessage(), e);
