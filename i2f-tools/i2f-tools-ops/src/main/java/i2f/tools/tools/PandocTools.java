@@ -15,26 +15,30 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
  * @date 2026/8/25 16:41
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="pandoc",description = "提供基于pandoc的文档格式转换能力"))
+@ToolIntent(items = @ToolIntentItem(value = "pandoc", description = "提供基于pandoc的文档格式转换能力"))
 @ConditionalOnExpression("${ai.tools.pandoc.enable:false}")
+@Conditional(PandocTools.PandocInstalledCondition.class)
 @Data
 @NoArgsConstructor
 @Component
@@ -42,7 +46,64 @@ import java.util.UUID;
         AiTags.FILE_VALUE
 })
 public class PandocTools {
-    public static final DateTimeFormatter FORMATTER=DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
+
+    public static class PandocInstalledCondition implements Condition {
+
+        @Override
+        public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
+            return getPandocCommand() != null;
+        }
+    }
+
+    private static AtomicReference<AtomicReference<String>> cachePandocCommand = new AtomicReference<>();
+    private static ReentrantLock lockPandocCommand = new ReentrantLock();
+
+    public static String getPandocCommand() {
+        AtomicReference<String> optional = cachePandocCommand.get();
+        // 这里借助atomic来存储null无值的情况
+        if (optional != null) {
+            return optional.get();
+        }
+        lockPandocCommand.lock();
+        try {
+            // 临界区再次检查，有值直接返回
+            AtomicReference<String> cached = cachePandocCommand.get();
+            if (cached != null) {
+                return cached.get();
+            }
+
+            String ret = null;
+            String[] names = {"pandoc"};
+            for (String name : names) {
+                if (isPandocAvailable(name)) {
+                    ret = name;
+                    break;
+                }
+            }
+            cachePandocCommand.set(new AtomicReference<>(ret));
+            return ret;
+        } finally {
+            lockPandocCommand.unlock();
+        }
+    }
+
+    public static boolean isPandocAvailable(String command) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command, "--version");
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+            try (BufferedReader reader = new BufferedReader(
+                    new InputStreamReader(process.getInputStream()))) {
+                String line = reader.readLine();
+                int exitCode = process.waitFor();
+                return exitCode == 0 && line != null && line.toLowerCase().contains("pandoc");
+            }
+        } catch (Throwable e) {
+            return false;
+        }
+    }
+
+    public static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     @Autowired(required = false)
     protected TmpFileTools tmpFileTools;
@@ -79,36 +140,36 @@ public class PandocTools {
         if (tmpFileTools == null) {
             throw new IllegalStateException("current application not enable tmp file");
         }
-        String name="data.md";
+        String name = "data.md";
         File sourceFile = null;
         File tmpFile = null;
-        File referenceFile=null;
+        File referenceFile = null;
         try {
             if (FileSourceType.local_file == type) {
                 if (localFileTools == null) {
                     throw new IllegalStateException("current application not enable local file");
                 }
                 sourceFile = localFileTools.getFile(content);
-                name=sourceFile.getName();
+                name = sourceFile.getName();
             } else if (FileSourceType.upload_file == type) {
                 sourceFile = tmpFileTools.getFileByUrl(content);
-                name=tmpFileTools.getRealFileNameByUrl(content);
+                name = tmpFileTools.getRealFileNameByUrl(content);
             } else if (FileSourceType.text == type) {
                 TmpFileTools.UploadTmpFileMetadata metadata = tmpFileTools.saveFile(new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8)), "tmp.md");
                 String fileUrl = metadata.getFileUrl();
                 sourceFile = tmpFileTools.getFileByUrl(fileUrl);
-                name=metadata.getFileName();
+                name = metadata.getFileName();
             } else {
                 throw new IllegalArgumentException("missing or un-correct `type` argument, only support value in [\"local_file\", \"upload_file\", \"text\"]");
             }
 
             sourceFile = new File(sourceFile.getAbsolutePath());
             File workdir = sourceFile.getParentFile();
-            referenceFile=new File(workdir,"ref_" + (UUID.randomUUID().toString().replace("-","")) + ".docx");
-            tmpFile = new File(workdir, "tmp_" + (UUID.randomUUID().toString().replace("-","")) + ".docx");
+            referenceFile = new File(workdir, "ref_" + (UUID.randomUUID().toString().replace("-", "")) + ".docx");
+            tmpFile = new File(workdir, "tmp_" + (UUID.randomUUID().toString().replace("-", "")) + ".docx");
 
             InputStream is = ResourceUtil.getClasspathResourceAsStream("assets/pandoc/custom-reference.docx");
-            StreamUtil.writeBytes(is,referenceFile);
+            StreamUtil.writeBytes(is, referenceFile);
 
 
             // pandoc -s --toc -M toc-title="" -t docx input.md -o output.docx --reference-doc=custom-reference.docx
@@ -124,15 +185,15 @@ public class PandocTools {
                     sourceFile.getName(),
                     "-o",
                     tmpFile.getName(),
-                    "--reference-doc="+referenceFile.getName()
+                    "--reference-doc=" + referenceFile.getName()
             }, null, workdir, null);
             if (!tmpFile.exists()) {
                 System.out.println(output);
                 throw new IllegalArgumentException("convert failure!");
             }
 
-            if(name==null || name.isEmpty()){
-                name="data.md";
+            if (name == null || name.isEmpty()) {
+                name = "data.md";
             }
             int idx = name.lastIndexOf(".");
             if (idx >= 0) {
@@ -158,7 +219,7 @@ public class PandocTools {
 
             return ret;
         } finally {
-            if(referenceFile!=null && referenceFile.exists()){
+            if (referenceFile != null && referenceFile.exists()) {
                 referenceFile.delete();
             }
             if (tmpFile != null && tmpFile.exists()) {
