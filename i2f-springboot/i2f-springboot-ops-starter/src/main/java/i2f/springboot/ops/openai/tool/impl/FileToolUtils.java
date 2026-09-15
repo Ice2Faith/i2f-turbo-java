@@ -29,6 +29,10 @@ public class FileToolUtils {
                 pattern = "/" + pattern;
             }
         }
+		if (startFile.isDirectory()) {
+			// 如果直接是目录，层级+1，多展开一级，否则只会有目录本身
+			maxDeep+=1;
+		}
         search_files_next(ret, startFile, pattern, maxDeep, rootFile);
         return ret;
     }
