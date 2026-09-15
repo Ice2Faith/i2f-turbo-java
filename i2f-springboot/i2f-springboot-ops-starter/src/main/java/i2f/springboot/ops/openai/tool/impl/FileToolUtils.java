@@ -237,7 +237,11 @@ public class FileToolUtils {
 
         startFile = rootFile;
         if (startPath != null && !startPath.isEmpty()) {
-            startFile = new File(rootFile, startPath);
+            if (new File(startPath).isAbsolute()) {
+                startFile=new File(startPath);
+            }else {
+                startFile = new File(rootFile, startPath);
+            }
             startFile = normalizeFile(startFile);
         }
         String absStartPath = startFile.getAbsolutePath();

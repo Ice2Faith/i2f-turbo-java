@@ -380,6 +380,7 @@ public class TmpFileTools {
 
     public File getFile(String startPath) {
         File rootFile = getRootFile();
+        startPath = new File(getRootFile(), startPath).getAbsolutePath();
         return FileToolUtils.getSubFile(startPath, rootFile);
     }
 

@@ -339,7 +339,7 @@ public class LocalFileTools {
     public File getFile(String startPath) {
         File rootFile = getRootFile();
         if (startPath == null || startPath.isEmpty()) {
-            startPath = getRootFile().getAbsolutePath();
+            startPath = ".";
         }
 
         if (startPath.startsWith(ABS_PATH_PREFIX)) {
