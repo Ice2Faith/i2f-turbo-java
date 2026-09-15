@@ -165,9 +165,13 @@ public class FileToolUtils {
     public static File normalizeFile(File file) {
         String fullPath = FileUtil.pathGen(file.getAbsolutePath());
         fullPath=fullPath==null?".":fullPath;
-        if(fullPath.endsWith("/")
+        
+		if(fullPath.endsWith("/")
         ||fullPath.endsWith("\\")){
-            fullPath=fullPath.substring(0,fullPath.length()-1);
+            String subPath=fullPath.substring(0,fullPath.length()-1);
+			if(!subPath.isEmpty() && !subPath.endsWith(":")){
+				fullPath=subPath;
+			}
         }
         file = new File(fullPath);
         return file;

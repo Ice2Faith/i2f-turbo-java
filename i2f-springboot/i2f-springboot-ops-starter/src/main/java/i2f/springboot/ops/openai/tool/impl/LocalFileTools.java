@@ -50,13 +50,13 @@ public class LocalFileTools {
             },
             description = "search files by ant pattern"
     )
-    public List<Map<String, Object>> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
+    public Map<String, Object> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
                                                   String startPath,
                                                   @ToolParam(value = "pattern", description = "match pattern, ant match style, for example /**/*.java or /**/*user*")
                                                   String pattern,
                                                   @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, for example 3 or 10")
                                                   int maxDeep) {
-
+		Map<String, Object> ret=new HashMap<>();
         File rootFile = getRootFile();
 
         File searchRootFile=rootFile;
@@ -78,7 +78,11 @@ public class LocalFileTools {
                 }
             }
         }
-        return list;
+		
+		ret.put("realStartPath",searchRootFile.getAbsolutePath());
+		ret.put("results",list);
+		
+        return ret;
     }
 
     @Tool(
@@ -335,14 +339,16 @@ public class LocalFileTools {
         if(startPath==null || startPath.isEmpty()){
             rootFile=getRootFile(false);
         }else{
-            File testRootFile=getRootFile(false);
-            File testDirectFile=FileToolUtils.normalizeFile(new File(startPath));
-            File testRelativeFile=FileToolUtils.normalizeFile(new File(testRootFile,startPath));
-            if(testDirectFile.getAbsolutePath().equals(testRelativeFile.getAbsolutePath())){
-                rootFile=getRootFile(false);
-            }
+			File testStartFile=new File(startPath);
+			if(!testStartFile.isAbsolute()){
+                if(!fullAccess){
+                  rootFile=getRootFile(false);
+                }else{
+                  startPath=new File(getRootFile(false),startPath).getAbsolutePath();
+                }
+			}
         }
-
+  
         return FileToolUtils.getSubFile(startPath, rootFile);
     }
 
