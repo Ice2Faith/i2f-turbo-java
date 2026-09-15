@@ -5,6 +5,7 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.data.StringPairMap;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.extension.groovy.GroovyScript;
@@ -58,16 +59,23 @@ public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
                     "       - `org.springframework.core.env.Environment environment` \n"
     )
     public Map<String, Object> groovy_run_script(@ToolParam(value = "script", description = "the script, groovy script")
-                                                 String script) {
+                                                 String script,
+                                                 @ToolParam(value = "parameters", description = "the optional parameters list, cloud be null, it will be embed variable as `HashMap<String,String> parameters`")
+                                                 StringPairMap parameters) {
         Map<String, Object> ret = new HashMap<>();
 
         StringWriter writer = new StringWriter();
         PrintWriter logger = new PrintWriter(writer);
 
+        if(parameters==null){
+            parameters=new StringPairMap();
+        }
+
         Map<String, Object> params = new HashMap<>();
         params.put("logger", logger);
         params.put("applicationContext", applicationContext);
         params.put("environment", environment);
+        params.put("parameters",parameters.toMap());
 
         Object obj = GroovyScript.evalScript(script, params);
 

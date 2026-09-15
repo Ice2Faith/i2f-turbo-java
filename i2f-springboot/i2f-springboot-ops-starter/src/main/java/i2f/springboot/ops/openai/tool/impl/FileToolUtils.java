@@ -50,6 +50,14 @@ public class FileToolUtils {
             }
             if (file.isDirectory()) {
                 ret.put("type", "dir");
+                try {
+                    File[] files = file.listFiles();
+                    if (files != null) {
+                        ret.put("childrenCount", files.length);
+                    }
+                } catch (Throwable e) {
+                    // ignore
+                }
             }
             ret.put("canExecute", file.canExecute());
             ret.put("canRead", file.canRead());
@@ -65,6 +73,9 @@ public class FileToolUtils {
         ret.put("exists", exists);
         ret.put("totalLines", -1);
         if (exists) {
+            ret.put("lengthInBytes", file.length());
+            ret.put("lengthInHuman", HumanUtil.humanFileSize(file.length()));
+
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
                 int count = 0;
                 String line = null;
@@ -237,7 +248,7 @@ public class FileToolUtils {
 
         if (!absStartPath.endsWith(absRootPath)
                 && !absStartPath.startsWith(absRootPath)) {
-            throw new IllegalArgumentException("path not allow access! path=" + startPath);
+            throw new IllegalArgumentException("path not allow access at current policy! path=" + startPath);
         }
 
         return startFile;

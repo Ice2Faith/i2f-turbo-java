@@ -392,6 +392,7 @@ public class FileUtil {
             File[] files = srcFile.listFiles();
             for (File item : files) {
                 File newFile = new File(dstFile, item.getName());
+                useDir(newFile);
                 copy(newFile, item, filter);
             }
         }

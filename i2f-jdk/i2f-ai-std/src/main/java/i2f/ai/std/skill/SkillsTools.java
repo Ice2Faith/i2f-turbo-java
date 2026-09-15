@@ -87,7 +87,7 @@ public class SkillsTools {
                     AiTags.EXECUTABLE_VALUE,
                     AiTags.HUMAN_VALUE,
                     AiTags.COMMAND_VALUE
-            }, description = "执行技能(skill)中的命令行脚本"
+            }, description = "执行技能(skill)中的命令行脚本，支持 python(.py)/perl(.pl)/nodejs(.js)"
     )
     public CommandResult run_skill_script(@ToolParam(description = "技能名称，例如：search_website") String skillName,
                                           @ToolParam(description = "脚本路径，例如：script/test.py") String scriptPath,

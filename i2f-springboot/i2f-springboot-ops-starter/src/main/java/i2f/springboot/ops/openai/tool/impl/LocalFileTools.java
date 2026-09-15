@@ -24,7 +24,7 @@ import java.util.*;
  * @date 2026/6/2 11:34
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="file",description = "提供本地文件系统的操作能力"))
+@ToolIntent(items = @ToolIntentItem(value = "file", description = "提供本地文件系统的操作能力"))
 @ConditionalOnExpression("${ai.tools.file.enable:true}")
 @Data
 @NoArgsConstructor
@@ -34,6 +34,11 @@ import java.util.*;
 })
 public class LocalFileTools {
     public static final DateTimeFormatter BACKUP_TIMESTAMP_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS");
+
+    public static final String ABS_PATH_PREFIX = ":::abs:";
+    public static final String PATH_PROMPT = "All paths are workspace-relative. \"/foo\" => \"<workspace>/foo\".\n" +
+            "Use `" + ABS_PATH_PREFIX + "` prefix for real absolute paths, e.g. `" + ABS_PATH_PREFIX + "/real/abs/path`.\n" +
+            "External access may be denied unless allowed by policy.";
 
     @Value("${ai.tools.file.root-path:./ai-root}")
     protected String rootPath = "./ai-root";
@@ -48,40 +53,45 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "search files by ant pattern"
+            description = "get workspace real path and file stat info"
     )
-    public Map<String, Object> search_files(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, for example / or /user")
-                                                  String startPath,
-                                                  @ToolParam(value = "pattern", description = "match pattern, ant match style, for example /**/*.java or /**/*user*")
-                                                  String pattern,
-                                                  @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, for example 3 or 10")
-                                                  int maxDeep) {
-		Map<String, Object> ret=new HashMap<>();
+    public Map<String, Object> file_workspace() {
         File rootFile = getRootFile();
+        return FileToolUtils.getFileStat(rootFile, null);
+    }
 
-        File searchRootFile=rootFile;
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "search files by ant pattern.\n" + PATH_PROMPT
+    )
+    public Map<String, Object> file_search(@ToolParam(value = "startPath", description = "start search path, cloud be null means from root, e.g. / or /user")
+                                           String startPath,
+                                           @ToolParam(value = "pattern", description = "match pattern, ant match style, e.g. /**/*.java or /**/*user*")
+                                           String pattern,
+                                           @ToolParam(value = "maxDeep", description = "max search deep, -1 means unlimited, e.g. 3 or 10")
+                                           int maxDeep) {
+        Map<String, Object> ret = new HashMap<>();
+
         File startFile = getFile(startPath);
-        if(searchRootFile==null){
-            searchRootFile=startFile;
-        }
-        searchRootFile=FileToolUtils.normalizeFile(searchRootFile);
+        startFile = FileToolUtils.normalizeFile(startFile);
 
-        List<Map<String, Object>> list = FileToolUtils.searchFiles(startFile, pattern, maxDeep, searchRootFile);
-        if(fullAccess) {
+        List<Map<String, Object>> list = FileToolUtils.searchFiles(startFile, pattern, maxDeep, startFile);
+        if (fullAccess) {
             for (Map<String, Object> map : list) {
                 try {
-                    map.put("rootPath", searchRootFile.getAbsolutePath());
-                    String file = (String)map.get("file");
-                    map.put("fullPath",FileToolUtils.normalizeFile(new File(searchRootFile,file)));
+                    String file = (String) map.get("file");
+                    map.put("fullPath", FileToolUtils.normalizeFile(new File(startFile, file)));
                 } catch (Throwable e) {
                     // ignore
                 }
             }
         }
-		
-		ret.put("realStartPath",searchRootFile.getAbsolutePath());
-		ret.put("results",list);
-		
+
+        ret.put("realStartPath", startFile.getAbsolutePath());
+        ret.put("results", list);
+
         return ret;
     }
 
@@ -89,10 +99,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "make directory"
+            description = "make directory.\n" + PATH_PROMPT
     )
-    public boolean mkdirs(@ToolParam(value = "path", description = "create path, support multiply path(s), for example /user or /user/a/b ")
-                          String path) {
+    public boolean file_mkdirs(@ToolParam(value = "path", description = "create path, support multiply path(s), e.g. /user or /user/a/b ")
+                               String path) {
         File file = getFile(path);
         if (!file.exists()) {
             file.mkdirs();
@@ -104,10 +114,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "get file statistics, include exists,length,type(dir/file)"
+            description = "get file statistics, include exists,length,type(dir/file).\n" + PATH_PROMPT
     )
-    public Map<String, Object> get_file_stat(@ToolParam(value = "path", description = "the path, for example /user or /user/a.txt ")
-                                             String path) {
+    public Map<String, Object> file_stat(@ToolParam(value = "path", description = "the path, e.g. /user or /user/a.txt ")
+                                         String path) {
         File file = getFile(path);
         return FileToolUtils.getFileStat(file, getRootFile());
     }
@@ -116,10 +126,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "get text file total lines"
+            description = "get text file total lines.\n" + PATH_PROMPT
     )
-    public Map<String, Object> get_file_total_lines(@ToolParam(value = "path", description = "the path, for example /user or /user/a.txt ")
-                                                    String path) throws Exception {
+    public Map<String, Object> file_total_lines(@ToolParam(value = "path", description = "the path, e.g. /user or /user/a.txt ")
+                                                String path) throws Exception {
         File file = getFile(path);
         return FileToolUtils.getFileTotalLines(file, getRootFile());
     }
@@ -131,14 +141,14 @@ public class LocalFileTools {
             description = "Reads text file content by line range [startLine, endLine). Note: Inclusive startLine, exclusive endLine." +
                     "Return field `textContent` format is `<line_number> | <text_content>` of every line." +
                     "CRITICAL: The `<line_number> |` prefix is for visual positioning only. " +
-                    "When extracting text for editing, you MUST strictly preserve ALL original whitespace and indentation immediately following the `|` separator."
+                    "When extracting text for editing, you MUST strictly preserve ALL original whitespace and indentation immediately following the `|` separator.\n" + PATH_PROMPT
     )
-    public Map<String, Object> read_text_file_range(@ToolParam(value = "filePath", description = "file path, for example / or /user")
-                                                    String filePath,
-                                                    @ToolParam(value = "startLine", description = "start line number, value in [1,...], for example 1 or 100")
-                                                    int startLine,
-                                                    @ToolParam(value = "endLine", description = "end line number, value in [1,...], for example 1 or 100")
-                                                    int endLine
+    public Map<String, Object> file_read_range(@ToolParam(value = "filePath", description = "file path, e.g. / or /user")
+                                               String filePath,
+                                               @ToolParam(value = "startLine", description = "start line number, value in [1,...], e.g. 1 or 100")
+                                               int startLine,
+                                               @ToolParam(value = "endLine", description = "end line number, value in [1,...], e.g. 1 or 100")
+                                               int endLine
     ) throws IOException {
         File file = getFile(filePath);
         return FileToolUtils.readTextFileRange(file, startLine, endLine);
@@ -149,10 +159,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.READONLY_VALUE
             },
-            description = "search keyword by regex in file, response line range in [1,...]."
+            description = "search keyword by regex in file, response line range in [1,...].\n" + PATH_PROMPT
     )
-    public List<Map<String, Object>> regex_search_text_file(
-            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+    public List<Map<String, Object>> file_regex_search(
+            @ToolParam(value = "filePath", description = "file path, e.g. /test.txt or /user/User.java")
             String filePath,
             @ToolParam(value = "pattern", description = "the regex pattern, java standard.")
             String pattern) throws Exception {
@@ -164,13 +174,13 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "replace file lines in range [startLine,endLine) with new content. Note: Inclusive startLine, exclusive endLine."
+            description = "replace file lines in range [startLine,endLine) with new content. Note: Inclusive startLine, exclusive endLine.\n" + PATH_PROMPT
     )
-    public Map<String, Object> replace_file_lines(@ToolParam(value = "filePath", description = "file path, for example / or /user")
+    public Map<String, Object> file_replace_lines(@ToolParam(value = "filePath", description = "file path, e.g. / or /user")
                                                   String filePath,
-                                                  @ToolParam(value = "startLine", description = "start line number, value in [1,...], for example 1 or 100")
+                                                  @ToolParam(value = "startLine", description = "start line number, value in [1,...], e.g. 1 or 100")
                                                   int startLine,
-                                                  @ToolParam(value = "endLine", description = "end line number, value in [1,...], for example 1 or 100")
+                                                  @ToolParam(value = "endLine", description = "end line number, value in [1,...], e.g. 1 or 100")
                                                   int endLine,
                                                   @ToolParam(value = "content", description = "new content to replace, cloud be multi-line string, cloud be null means delete this line")
                                                   String content) throws IOException {
@@ -230,10 +240,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "write text content to file, if the path not exists will auto created."
+            description = "write text content to file, if the path not exists will auto created.\n" + PATH_PROMPT
     )
-    public boolean write_text_file(
-            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+    public boolean file_write(
+            @ToolParam(value = "filePath", description = "file path, e.g. /test.txt or /user/User.java")
             String filePath,
             @ToolParam(value = "content", description = "the text content")
             String content,
@@ -259,10 +269,10 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "replace keyword by regex in file, use String.replaceAll(...) implements, response line range in [1,...]."
+            description = "replace keyword by regex in file, use String.replaceAll(...) implements, response line range in [1,...].\n" + PATH_PROMPT
     )
-    public boolean regex_replace_text_file(
-            @ToolParam(value = "filePath", description = "file path, for example /test.txt or /user/User.java")
+    public boolean file_regex_replace(
+            @ToolParam(value = "filePath", description = "file path, e.g. /test.txt or /user/User.java")
             String filePath,
             @ToolParam(value = "pattern", description = "the regex pattern, java standard.")
             String pattern,
@@ -286,9 +296,9 @@ public class LocalFileTools {
             tags = {
                     AiTags.WRITABLE_VALUE
             },
-            description = "delete file or directory"
+            description = "delete file or directory(recursive delete all).\n" + PATH_PROMPT
     )
-    public boolean delete_file(@ToolParam(value = "path", description = "delete path, for example /user or /user/a/b ")
+    public boolean file_delete(@ToolParam(value = "path", description = "delete path, e.g. /user or /user/a/b ")
                                String path) throws IOException {
         File file = getFile(path);
         FileUtil.moveToTrash(file);
@@ -318,16 +328,9 @@ public class LocalFileTools {
     }
 
     public File getRootFile() {
-        return getRootFile(this.fullAccess);
-    }
-
-    public File getRootFile(boolean fullAccess) {
         File rootFile = new File(this.rootPath);
-        if(!rootFile.exists()){
+        if (!rootFile.exists()) {
             rootFile.mkdirs();
-        }
-        if (fullAccess) {
-            return null;
         }
         rootFile = FileToolUtils.normalizeFile(rootFile);
         return rootFile;
@@ -335,20 +338,21 @@ public class LocalFileTools {
 
     public File getFile(String startPath) {
         File rootFile = getRootFile();
-
-        if(startPath==null || startPath.isEmpty()){
-            rootFile=getRootFile(false);
-        }else{
-			File testStartFile=new File(startPath);
-			if(!testStartFile.isAbsolute()){
-                if(!fullAccess){
-                  rootFile=getRootFile(false);
-                }else{
-                  startPath=new File(getRootFile(false),startPath).getAbsolutePath();
-                }
-			}
+        if (startPath == null || startPath.isEmpty()) {
+            startPath = getRootFile().getAbsolutePath();
         }
-  
+
+        if (startPath.startsWith(ABS_PATH_PREFIX)) {
+            startPath = startPath.substring(ABS_PATH_PREFIX.length());
+            startPath = new File(startPath).getAbsolutePath();
+        } else {
+            startPath = new File(getRootFile(), startPath).getAbsolutePath();
+        }
+
+        if (fullAccess) {
+            rootFile = null;
+        }
+
         return FileToolUtils.getSubFile(startPath, rootFile);
     }
 
