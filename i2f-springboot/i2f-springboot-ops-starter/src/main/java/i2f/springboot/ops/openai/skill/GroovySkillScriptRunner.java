@@ -93,7 +93,7 @@ public class GroovySkillScriptRunner implements SkillScriptRunner {
                 "------------------------------------\n" +
                 "stdout:\n" +
                 stdout + "\n";
-        result.setStdout(stdout);
+        result.setStdout(payload);
 
 
         return result;
