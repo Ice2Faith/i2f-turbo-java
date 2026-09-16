@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -100,8 +101,13 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
     @Override
     public void speak(String content) throws Throwable {
         try {
-            if (lastProcess != null) {
+            if (lastProcess != null && lastProcess.isAlive()) {
                 lastProcess.destroyForcibly();
+                try {
+                    lastProcess.waitFor(3, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
                 lastProcess = null;
             }
         } catch (Throwable e) {
