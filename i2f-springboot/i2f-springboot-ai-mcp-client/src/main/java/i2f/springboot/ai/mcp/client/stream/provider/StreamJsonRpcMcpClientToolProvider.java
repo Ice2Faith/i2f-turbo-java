@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.client.official;
+package i2f.springboot.ai.mcp.client.stream.provider;
 
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
@@ -15,12 +15,12 @@ import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
-import i2f.springboot.ai.mcp.client.official.data.JsonRpcRequest;
-import i2f.springboot.ai.mcp.client.official.data.JsonRpcResponse;
-import i2f.springboot.ai.mcp.client.official.data.result.JsonRpcInitialResult;
-import i2f.springboot.ai.mcp.client.official.data.result.JsonRpcToolCallResult;
-import i2f.springboot.ai.mcp.client.official.data.result.JsonRpcToolListItem;
-import i2f.springboot.ai.mcp.client.official.data.result.JsonRpcToolListResult;
+import i2f.springboot.ai.mcp.client.stream.data.JsonRpcRequest;
+import i2f.springboot.ai.mcp.client.stream.data.JsonRpcResponse;
+import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcInitialResult;
+import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolCallResult;
+import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolListItem;
+import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolListResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -40,10 +40,13 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 @Data
 @NoArgsConstructor
-public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Closeable, BaseMutator<OfficialJsonRpcMcpClientToolProvider> {
+public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Closeable, BaseMutator<StreamJsonRpcMcpClientToolProvider> {
     public static final String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
+
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
+    protected HttpHeaders headers;
+
     protected AtomicLong idGenerator = new AtomicLong(1);
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
@@ -86,6 +89,9 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
             request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
+            if(headers!=null){
+                request.getHeaders().addAll(headers);
+            }
             request.setBody(wrapJsonRpcHttpBody("tools/list", null));
             RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
 
@@ -173,6 +179,9 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
         request.setUrl(getEndpointUrl());
         request.setMethod(HttpMethodConstants.POST);
         request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
+        if(headers!=null){
+            request.getHeaders().addAll(headers);
+        }
         request.setBody(wrapJsonRpcHttpBody("tools/call", params));
         RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
 
@@ -240,6 +249,10 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
             RestHttpRequest request = new RestHttpRequest();
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
+            request.setHeaders(HttpHeaders.create());
+            if(headers!=null){
+                request.getHeaders().addAll(headers);
+            }
             request.setBody(wrapJsonRpcHttpBody("initialize", params));
             RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
             // 【Map 结构示例】initialize 响应
@@ -281,6 +294,9 @@ public class OfficialJsonRpcMcpClientToolProvider implements McpToolProvider, Cl
         request.setMethod(HttpMethodConstants.DELETE);
         request.setBody(null);
         request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
+        if(headers!=null){
+            request.getHeaders().addAll(headers);
+        }
         RestHttpResponse<String> rest = restClient.rest(request, String.class);
 
         HttpHeaders headers = rest.getHeaders();

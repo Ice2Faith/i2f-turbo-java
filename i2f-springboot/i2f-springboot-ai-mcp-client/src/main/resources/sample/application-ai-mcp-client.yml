@@ -4,7 +4,7 @@ i2f:
     ai:
       mcp:
         client:
-          # simple mcp client protocol
+          # simple mcp client implements privacy protocol mcp
           simple:
             enable: true
             instances:
@@ -15,7 +15,18 @@ i2f:
                 app-id: xxx
                 app-key: xxx
                 hmac-name: HmacSHA256
-          # solon implements official protocol mcp
+          # stream mcp client implements official protocol mcp (streamable channel only)
+          stream:
+            enable: true
+            instances:
+              - enable: false
+                name: demo
+                description: a group utils tool
+                url: http://localhost:9999/mcp
+                bearer-token: xxx
+                #headers:
+                #  key: value
+          # solon mcp client implements official protocol mcp
           solon:
             enable: true
             instances:

@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.client.official.data.result;
+package i2f.springboot.ai.mcp.client.stream.data.result;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

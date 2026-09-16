@@ -41,6 +41,9 @@ public class HttpUrlConnectProcessor implements IHttpProcessor {
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<OutputStream> handler = new HttpFormUrlEncodedRequestBodyHandler();
+        if(request.getHeader()==null){
+            request.setHeader(HttpHeaders.create());
+        }
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
         if (contentType.contains(ContentTypeConstants.Json)) {
