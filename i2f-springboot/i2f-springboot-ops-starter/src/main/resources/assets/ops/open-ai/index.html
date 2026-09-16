@@ -89,6 +89,7 @@
     <script src="../lib/highlight.js/11.11.1/highlight.min.js"></script>
     <link rel="stylesheet" href="../lib/highlight.js/11.11.1/styles/github.min.css"/>
 
+    <script src="../common/js/Sse.js"></script>
     <script src="../common/js/TextToSpeech.js"></script>
 
     <link rel="stylesheet" href="../common/js/back-top-bottom/i2f-back-top-bottom.css"/>
@@ -3288,43 +3289,22 @@
                     const abortController=new AbortController();
                     window['_abort_'+options.sessionId] = abortController;
                     session.abortController = abortController
-                    const response = await fetch('./stream',
+
+                    sse('./stream',
                         {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
                             },
-                            body: JSON.stringify(req),
+                            body: req,
                             signal: abortController.signal
-                        }
-                    );
-                    if (!response.ok) {
-                        let errData = {};
-                        try {
-                            errData = await response.json();
-                        } catch (e) {
-                        }
-                        throw new Error((errData.error && errData.error.message) ? errData.error.message : ('HTTP ' + response.status));
-                    }
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder('utf-8');
-                    let buf = '';
-                    while (true) {
-                        const {done, value} = await reader.read();
-                        if (done) {
-                            break;
-                        }
-                        buf += decoder.decode(value, {stream: true});
-                        let lines = buf.split('\n');
-                        buf = lines.pop(); // 保留未完整的行
-                        for (let line of lines) {
-                            line = line.trim();
-                            if (!line || !line.startsWith('data:')) {
-                                continue;
+                        },
+                        (data)=>{
+                            if(!data.done){
+                                handleChunk(data.content)
                             }
-                            handleChunk(line.slice(5).trim());
                         }
-                    }
+                    )
 
                     this.$responsing = false;
 
