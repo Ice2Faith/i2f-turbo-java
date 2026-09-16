@@ -317,6 +317,12 @@
             <artifactId>Java-WebSocket</artifactId>
             <version>1.5.3</version>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-springboot-ai-mcp-client</artifactId>
+            <version>1.0-jdk8</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
