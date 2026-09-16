@@ -1,4 +1,4 @@
-package i2f.springboot.ops.openai.tts;
+package i2f.springboot.ops.openai.tts.qwen;
 
 import i2f.mutator.BaseMutator;
 import i2f.serialize.std.str.json.IJsonSerializer;

@@ -57,6 +57,8 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.openai.controller.OpenAiOpsController,\
     i2f.springboot.ops.openai.controller.QwenTtsOpsController,\
     i2f.springboot.ops.openai.async.AsyncTaskDispatcher,\
+    i2f.springboot.ops.openai.controller.ServerSpeakTtsOpsController,\
+    i2f.springboot.ops.openai.tts.cmd.TermuxTtsSpeaker,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsTaskController,\
     i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController,\

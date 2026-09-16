@@ -471,7 +471,7 @@
                                     </el-tooltip>
                                     <el-tooltip effect="dark" content="语音播报" placement="top-start">
                                         <i class="el-icon-microphone"
-                                           v-if="metas.supportTts || form.useQwenTts"
+                                           v-if="metas.supportTts || form.useQwenTts || form.useServerSpeakTts"
                                            style="color: orangered;font-size: 14px;"
                                            @click="onTts(msg)"></i>
                                     </el-tooltip>
@@ -1299,6 +1299,7 @@
                             如果开启，将会自动播报助手的答复消息。<br/>
                             默认使用浏览器的TTS引擎进行本地合成，本地合成引擎：{{metas.supportTts?'支持':'不支持'}}<br/>
                             当然，你也可以选择使用【千问语音】<br/>
+                            当然，如果你的后端都在你的身边，自己使用，你可以使用【后端播报】<br/>
                         </p>
                         <i slot="reference"
                            class="el-icon-question"
@@ -1318,6 +1319,26 @@
                         <p>
                             使用千问语音合成（1.4元/万字）<br/>
                             使用阿里提供的语音合成大模型进行合成，后端需要同步开启配置，最新合成费用查阅【百炼】平台<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    <el-checkbox v-model="form.useServerSpeakTts">
+                        后端播报
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            使用后端播报<br/>
+                            使用的是后端主机的离线语音播报引擎进行播报，因此，语音是在后端发出的<br/>
+                            适用于，你在自己的电脑上个人部署使用的情况<br/>
                         </p>
                         <i slot="reference"
                            class="el-icon-question"
@@ -2012,6 +2033,7 @@
                         enableUserSendTime: false,
                         enableAutoTts: false,
                         useQwenTts: false,
+                        useServerSpeakTts: false,
                         toolApprovalList: [],
                         enableLruTools: true,
                         lruToolMaxSize: 20,
@@ -3647,6 +3669,8 @@
                                 msg.qwenTts=resp;
                             })
                     }
+                }else if(this.form.useServerSpeakTts){
+                    this.speakTtsByServerSpeak(content)
                 }else{
                     this.speakTts(content)
                 }
@@ -3668,7 +3692,7 @@
                     try {
                         let req = this.assignOpenAiMeta({
                             ttsContent: content
-                        })
+                        },true)
                         this.$axios({
                             url: '/tts/qwen/generate',
                             method: 'post',
@@ -3699,6 +3723,41 @@
                     }
                 })
 
+            },
+            speakTtsByServerSpeak(content){
+                return new Promise((resolve, reject)=>{
+                    try {
+                        let req = this.assignOpenAiMeta({
+                            ttsContent: content
+                        },true)
+                        this.$axios({
+                            url: '/tts/server/speak',
+                            method: 'post',
+                            data: this.transferSend(req)
+                        }).then(res => {
+                            if (res.data.code == 200) {
+                                //console.log(res.data)
+                                let resp = this.transferRecv(res.data.data) || []
+                                //console.log(resp)
+
+                                if(!resp){
+                                    this.$message.warning('没有找到合适的后端离线语音合成引擎')
+                                }
+                                resolve(resp)
+                            } else {
+                                this.messageError(res.data.msg, 300)
+                                reject(res.data.msg)
+                            }
+                        }).catch(err => {
+                            this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                            reject(err.errorMessage || err.message || '操作失败')
+                        }).finally(()=>{
+                        })
+                    } catch (err) {
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
+                        reject(err.errorMessage || err.message || '操作失败')
+                    }
+                })
             },
             onUploadFileChange(file) {
                 this.metas.uploadList = []

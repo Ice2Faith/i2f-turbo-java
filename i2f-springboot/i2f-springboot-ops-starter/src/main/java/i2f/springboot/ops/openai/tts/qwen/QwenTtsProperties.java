@@ -1,4 +1,4 @@
-package i2f.springboot.ops.openai.tts;
+package i2f.springboot.ops.openai.tts.qwen;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
