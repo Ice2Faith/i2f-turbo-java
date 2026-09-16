@@ -26,7 +26,6 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TermuxTtsSpeaker implements CommandTtsSpeaker {
     public static final String COMMAND = "termux-tts-speak";
     public static final int PRIOR = 100;
-    protected static volatile Process lastProcess = null;
 
 
     private static AtomicReference<AtomicReference<String>> cacheCommand = new AtomicReference<>();
@@ -102,27 +101,23 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
 
     @Override
     public void speak(String content) throws Throwable {
-        for (int i = 0; i < 5; i++) {
-            try {
-                if (lastProcess != null && lastProcess.isAlive()) {
-                    lastProcess.destroy();
-                    try {
-                        if (!lastProcess.waitFor(3, TimeUnit.SECONDS)) {
-                            lastProcess.destroyForcibly();
-                        }
-                    } catch (Exception e) {
-                        lastProcess.destroyForcibly();
-                    }
-                }
-                Thread.sleep(300);
-            } catch (Throwable e) {
-                // ignore
-            }
+        // 消除上次命令残留
+        new ProcessBuilder("sh","-c",
+                "ps -ef | grep -v grep | grep termux-tts-speak | awk '{print $2}' | xargs kill -9"
+        ).start();
+        new ProcessBuilder("sh","-c",
+                "ps -ef | grep -v grep | grep termux-api | grep TextToSpeech | awk '{print $2}' | xargs kill -9"
+        ).start();
 
-        }
-        lastProcess = null;
+        // 强制终止正在运行的任务
+        new ProcessBuilder("sh","-c",
+                "ps -ef | grep -v grep | grep com.termux.api | awk '{print $2}' | xargs kill -9"
+        ).start();
 
-        lastProcess = new ProcessBuilder(COMMAND,
+
+        Thread.sleep(300);
+
+        new ProcessBuilder(COMMAND,
                 "-s", "MUSIC",
                 content
         ).start();
