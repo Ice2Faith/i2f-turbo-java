@@ -1,6 +1,5 @@
 package i2f.springboot.ops.xproc4j.data;
 
-import i2f.springboot.ops.common.OpsHostIdDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +12,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class XProc4jOperateDto extends OpsHostIdDto {
+public class XProc4jOperateDto {
     protected String procedureId;
     protected Map<String, Object> params;
 
