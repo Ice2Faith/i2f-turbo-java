@@ -76,6 +76,8 @@
     <link rel="stylesheet" href="../lib/jsoneditor/10.4.1/jsoneditor.min.css"/>
     <script src="../lib/jsoneditor/10.4.1/jsoneditor.min.js"></script>
 
+    <script src="../common/js/Sse.js"></script>
+
     <script src="../lib/ses@2.2.0/dist/ses.umd.js"></script>
     <script src="../common/js/SesSetup.js"></script>
 </head>
@@ -241,52 +243,6 @@
                                @click="doRefreshDatasources">
                     </el-button>
                 </el-form-item>
-                <el-form-item >
-                    <el-popover
-                            placement="top-start"
-                            width="200"
-                            trigger="hover">
-                            <span>
-                                主机锁定，在多实例部署的环境中，可以用来确定需要执行的操作的主机<br/>
-                                如果不是需要执行的主机接收到了请求，将会立即失败，不会执行操作<br/>
-                                这时候重新发起请求进行重试操作，多几次就能够在需要执行的主机上执行！
-                            </span>
-                        <el-checkbox slot="reference" v-model="form.useHostId">主机锁定</el-checkbox>
-                    </el-popover>
-                    <el-select  clearable filterable allow-create v-model="form.hostId" :disabled="!form.useHostId" placeholder="主机锁定">
-                        <el-option
-                                v-for="item in metas.hostIdList"
-                                :key="item"
-                                :label="item"
-                                :value="item">
-                        </el-option>
-                    </el-select>
-                    <el-popover
-                            placement="top-start"
-                            width="200"
-                            trigger="hover">
-                            <span>
-                                在多实例部署的环境中，就需要通过反复刷新的方式，尽量的获取所有的实例列表<br/>
-                                因此根据实际情况，请多次刷新来获取完整的实例列表
-                            </span>
-                        <el-button slot="reference" v-loading="metas.hostIdLoading" size="medium"
-                                   icon="el-icon-refresh" circle
-                                   @click="doRefreshHostId">
-                        </el-button>
-                    </el-popover>
-                    <el-popover
-                            placement="top-start"
-                            width="200"
-                            trigger="hover">
-                            <span>
-                                进行后端代理转发<br/>
-                                如果后端进行的负载均衡策略不能保证稳定的轮询的情况下<br/>
-                                比如主机粘连、Session粘连、非均匀负载的情况<br/>
-                                这样直接通过后端代理转发的方式，将可以明确的转发到需要执行的机器上
-                            </span>
-                        <el-checkbox slot="reference" v-model="form.proxyHostId">代理转发</el-checkbox>
-                    </el-popover>
-                </el-form-item>
                 <el-divider direction="vertical"></el-divider>
                 <el-form-item>
                     <el-checkbox v-model="form.enableDebug">开启Debug</el-checkbox>
@@ -342,6 +298,14 @@
                                 :value="item.value">
                         </el-option>
                     </el-select>
+                </el-form-item>
+                <el-form-item>
+                    <el-button v-if="dialog.textViewer.type=='log'"
+                               type="success"
+                               size="medium"
+                               @click="onRefreshLogText">
+                        刷新日志
+                    </el-button>
                 </el-form-item>
             </el-form>
             <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor,['json-editor'])">
@@ -414,8 +378,6 @@
                         datasources: [],
                         metasLoading: false,
                         metas: [],
-                        hostIdLoading: false,
-                        hostIdList:[],
                         langList:[
                             {label: 'Text',value:'text'},
                             {label: 'Yaml',value:'yaml'},
@@ -446,7 +408,8 @@
                             show: false,
                             title: '文本浏览',
                             text: '',
-                            lang: 'text'
+                            lang: 'text',
+                            type: ''
                         },
                         jsonEditor: {
                             show: false,
@@ -457,9 +420,6 @@
                         },
                     },
                     form: {
-                        useHostId: false,
-                        hostId: '',
-                        proxyHostId: false,
                         enableEvalScript: false,
                         datasource: '',
                         procedureId: '',
@@ -1380,6 +1340,7 @@
                 this.initTextViewerEditor()
             },
             onViewText(obj, title,lang) {
+                this.dialog.textViewer.type='';
                 if (title && title.length > 0) {
                     this.dialog.textViewer.title = title;
                 } else {
@@ -1476,61 +1437,11 @@
             onCertChange() {
                 this.doRefreshMetas();
                 this.doRefreshDatasources();
-                this.doRefreshHostId();
-            },
-            assignHostId(req){
-                if(this.form.useHostId){
-                    req.hostId=this.form.hostId;
-                    if(!req.hostId || req.hostId==''){
-                        throw new Error('请选择锁定的主机')
-                    }
-                    req.proxyHostId=this.form.proxyHostId;
-                }else{
-                    req.hostId=null;
-                }
-                return req;
-            },
-            doRefreshHostId(){
-                this.metas.hostIdLoading = true;
-                try {
-                    let req = {
-
-                    }
-                    this.$axios({
-                        url: '/hostId',
-                        method: 'post',
-                        data: this.transferSend(req)
-                    }).then(res => {
-                        if (res.data.code == 200) {
-                            //console.log(res.data)
-                            let resp = this.transferRecv(res.data.data) || ''
-                            //console.log(resp)
-                            let list=[...this.metas.hostIdList];
-                            if(resp && resp!='') {
-                                if (!list.includes(resp)) {
-                                    list.push(resp);
-                                }
-                            }
-                            this.metas.hostIdList=list;
-                        } else {
-                            this.messageError(res.data.msg,300)
-                        }
-                    }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败',300)
-                    }).finally(() => {
-                        this.metas.hostIdLoading = false;
-                    })
-                } catch (err) {
-                    this.messageError(err.errorMessage || err.message || '操作失败',300)
-                    this.metas.hostIdLoading = false;
-                }
             },
             doRefreshMetas() {
                 this.metas.metasLoading = true;
                 try {
-                    let req = this.assignHostId({
-
-                    })
+                    let req = {}
                     this.$axios({
                         url: '/metas',
                         method: 'post',
@@ -1557,9 +1468,7 @@
             doRefreshDatasources() {
                 this.metas.datasourcesLoading = true;
                 try {
-                    let req = this.assignHostId({
-
-                    })
+                    let req = {}
                     this.$axios({
                         url: '/datasources',
                         method: 'post',
@@ -1609,56 +1518,89 @@
             doExecute() {
                 this.metas.resultLoading = true;
                 try {
+                    this.metas.logList=[];
+                    this.dialog.textViewer.text='';
+                    if(this.form.enableLog){
+                        setTimeout(()=>{
+                            this.onViewLogList()
+                            setTimeout(()=>{
+                                this.onRefreshLogText()
+                            },300)
+                        },300)
+                    }
+
                     ses_eval('return ' + this.form.params)
                         .then(params=>{
-                            let req = this.assignHostId({
+                            let req = {
                                 procedureId: this.form.procedureId,
                                 params: params,
                                 async: this.form.async,
                                 waitForSeconds: this.form.waitForSeconds,
                                 enableDebug: this.form.enableDebug,
                                 enableLog: this.form.enableLog
-                            });
-                            let url='/call'
+                            };
+                            let url='./call'
                             if(this.form.enableEvalScript){
                                 req.procedureId=null;
                                 req.lang=this.form.lang;
                                 req.script=this.form.script
 
-                                url='/eval-script'
+                                url='./eval-script'
                             }
-                            this.$axios({
-                                url: url,
-                                method: 'post',
-                                data: this.transferSend(req)
-                            }).then(res => {
-                                this.metas.logList=(res.data.attrs)?(res.data.attrs.log || []):([]);
-                                if (res.data.code == 200) {
-                                    //console.log(res.data)
-                                    let resp = this.transferRecv(res.data.data)
-                                    // console.log(resp)
-                                    resp=resp+'';
-                                    try{
-                                        resp=JSON.stringify(JSON.parse(resp),null,'    ')
-                                    }catch (e){
 
+                            let _this=this
+                            sse(url,{
+                                method: 'POST',
+                                body: this.transferSend(req)
+                            },(data)=>{
+                                if(!data.done){
+                                    let raw=data.content;
+                                    try {
+                                        let res = JSON.parse(raw);
+                                        if (res.code == 200) {
+                                           try{
+                                               res.data = JSON.parse(res.data);
+                                           }catch (e) {
+                                               // ignore
+                                           }
+                                        }
+
+                                        let json = res.data;
+
+                                        if (res.attrs && res.attrs.type == 'log') {
+                                            _this.metas.logList.push(json)
+                                            return
+                                        }
+
+                                        //console.log(res.data)
+                                        let resp = _this.transferRecv(res.data)
+                                        // console.log(resp)
+                                        resp=resp+'';
+                                        try{
+                                            resp=JSON.stringify(JSON.parse(resp),null,'    ')
+                                        }catch (e){
+
+                                        }
+
+                                        if(res.code==200){
+                                            _this.metas.resultText = resp;
+                                            _this.metas.resultLang='javascript';
+                                        } else {
+                                            _this.metas.resultText = res.data.msg;
+                                            _this.metas.resultLang='text';
+                                            _this.messageError(res.data.msg,300)
+                                        }
+                                        setTimeout(()=>{
+                                            this.initResultEditor();
+                                        },200)
+                                    }catch (e) {
+                                        // ignore parse error
                                     }
-                                    this.metas.resultText = resp;
-                                    this.metas.resultLang='javascript';
-
-                                } else {
-                                    this.metas.resultText = res.data.msg;
-                                    this.metas.resultLang='text';
-                                    this.messageError(res.data.msg,300)
+                                }else{
+                                    this.metas.resultLoading = false;
                                 }
-                                setTimeout(()=>{
-                                    this.initResultEditor();
-                                },200)
-                            }).catch(err => {
-                                this.messageError(err.errorMessage || err.message || '操作失败',300)
-                            }).finally(() => {
-                                this.metas.resultLoading = false;
                             })
+
                         }).catch(err => {
                             this.messageError(err.errorMessage || err.message || '操作失败',300)
                             this.metas.resultLoading = false;
@@ -1705,6 +1647,7 @@
             onViewLogList(){
                 let text=this.metas.logList.join('\n')
                 this.onViewText(text,'执行日志','text')
+                this.dialog.textViewer.type='log';
             },
             showJsonEditor(text, callback) {
                 try {
@@ -1760,6 +1703,16 @@
                     callback(content)
                 }
                 this.dialog.jsonEditor.show = false;
+            },
+            onRefreshLogText(){
+                if(!this.metas.resultLoading){
+                    this.dialog.textViewer.type='';
+                }
+                let text=this.metas.logList.join('\n')
+                this.dialog.textViewer.text=text;
+                let editor=app.langEditors.textViewerEditor
+                editor.setValue(this.dialog.textViewer.text || '');
+                editor.scrollTo(0, editor.getDoc().height);
             }
         }
     })

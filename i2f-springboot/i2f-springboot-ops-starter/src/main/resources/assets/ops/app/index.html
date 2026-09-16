@@ -213,6 +213,14 @@
                     </el-option>
                 </el-select>
             </el-form-item>
+            <el-form-item>
+                <el-button type="success"
+                           size="medium"
+                           v-show="metas.stdoutText"
+                            @click="showStdout">
+                    标准输出
+                </el-button>
+            </el-form-item>
         </el-form>
         <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor,['json-editor'])">
             <textarea ref="refResultEditor"></textarea>
@@ -700,6 +708,7 @@
                         resultLoading: false,
                         resultLang: 'javascript',
                         resultText: '',
+                        stdoutText: '',
                         uploadLoading: false,
                         uploadList: [],
                         hostIdLoading: false,
@@ -1550,6 +1559,8 @@
                         if (res.data.code == 200) {
                             //console.log(res.data)
                             let resp = this.transferRecv(res.data.data)
+                            let stdout=res.data.attrs?.stdout || ''
+                            this.metas.stdoutText=stdout;
                             // console.log(resp)
                             this.metas.resultText = resp || '';
                             try {
@@ -1846,6 +1857,9 @@
                     callback(content)
                 }
                 this.dialog.jsonEditor.show = false;
+            },
+            showStdout(){
+                this.onViewText(this.metas.stdoutText, '标准输出','text')
             }
 
         }

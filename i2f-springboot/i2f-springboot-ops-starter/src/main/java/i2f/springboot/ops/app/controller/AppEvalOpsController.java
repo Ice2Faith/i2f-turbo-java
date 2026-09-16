@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -82,11 +85,14 @@ public class AppEvalOpsController {
             }
             AtomicReference<Object> refRet = new AtomicReference<>();
             AtomicReference<Throwable> refEx = new AtomicReference<>();
+            ByteArrayOutputStream bos=new ByteArrayOutputStream();
+            PrintStream printStream=new PrintStream(bos,true,"UTF-8");
             CountDownLatch latch = new CountDownLatch(1);
             Runnable task = () -> {
                 try {
 
                     Map<String, Object> context = new HashMap<>();
+                    context.put("out",printStream);
                     context.put("context", applicationContext);
                     context.put("env", applicationContext.getEnvironment());
                     Map<String, Object> beanMap = new HashMap<>();
@@ -137,7 +143,8 @@ public class AppEvalOpsController {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp);
+            String stdout=new String(bos.toByteArray(),"UTF-8");
+            return transfer.success(resp).withAttr("stdout",stdout);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e);

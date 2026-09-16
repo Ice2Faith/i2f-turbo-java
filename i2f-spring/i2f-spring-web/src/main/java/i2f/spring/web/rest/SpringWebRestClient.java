@@ -52,8 +52,10 @@ public class SpringWebRestClient implements IRestClient, BaseMutator<SpringWebRe
         }
         MultiValueMap<String, String> reqHeaders = new LinkedMultiValueMap<>();
         HttpHeaders rawHeaders = request.getHeaders();
-        for (Map.Entry<String, ArrayList<String>> entry : rawHeaders.entrySet()) {
-            reqHeaders.addAll(entry.getKey(), entry.getValue());
+        if(rawHeaders!=null) {
+            for (Map.Entry<String, ArrayList<String>> entry : rawHeaders.entrySet()) {
+                reqHeaders.addAll(entry.getKey(), entry.getValue());
+            }
         }
         HttpEntity<Object> reqEntity = new HttpEntity<>(request.getBody(), reqHeaders);
         ResponseEntity<T> respEntity = restTemplate.exchange(url,

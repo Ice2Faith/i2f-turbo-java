@@ -1,8 +1,8 @@
-package i2f.springboot.ai.mcp.client;
+package i2f.springboot.ai.mcp.client.stream;
 
 import i2f.ai.std.mcp.McpToolProvider;
-import i2f.springboot.ai.mcp.client.components.SimpleMcpClientMcpToolProviderFactoryBean;
-import i2f.springboot.ai.mcp.client.properties.SimpleMcpClientProperties;
+import i2f.springboot.ai.mcp.client.stream.components.StreamMcpClientMcpToolProviderFactoryBean;
+import i2f.springboot.ai.mcp.client.stream.properties.StreamMcpClientProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -24,25 +24,25 @@ import java.util.List;
  * @date 2026/7/17 21:01
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ai.mcp.client.enable:true}")
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.client.stream.enable:true}")
 @Configuration
 @EnableConfigurationProperties({
-        SimpleMcpClientProperties.class
+        StreamMcpClientProperties.class
 })
 @Slf4j
 @Data
-public class SpringAiMcpClientAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+public class StreamMcpClientAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
     protected ApplicationContext applicationContext;
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        SimpleMcpClientProperties proxyProperties = applicationContext.getBean(SimpleMcpClientProperties.class);
+        StreamMcpClientProperties proxyProperties = applicationContext.getBean(StreamMcpClientProperties.class);
         try {
-            List<SimpleMcpClientProperties.InstanceConfig> instances = proxyProperties.getInstances();
+            List<StreamMcpClientProperties.InstanceConfig> instances = proxyProperties.getInstances();
             if (instances == null) {
                 return;
             }
-            for (SimpleMcpClientProperties.InstanceConfig config : instances) {
+            for (StreamMcpClientProperties.InstanceConfig config : instances) {
                 Boolean enable = config.getEnable();
                 if (enable != null && !enable) {
                     continue;
@@ -60,7 +60,7 @@ public class SpringAiMcpClientAutoConfiguration implements ApplicationContextAwa
                         .getRawBeanDefinition();
                 definition.getPropertyValues().add("config", config);
                 definition.getPropertyValues().add("context", applicationContext);
-                definition.setBeanClass(SimpleMcpClientMcpToolProviderFactoryBean.class);
+                definition.setBeanClass(StreamMcpClientMcpToolProviderFactoryBean.class);
                 definition.setAutowireMode(GenericBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.setLazyInit(true);
                 beanDefinitionRegistry.registerBeanDefinition(beanName, definition);

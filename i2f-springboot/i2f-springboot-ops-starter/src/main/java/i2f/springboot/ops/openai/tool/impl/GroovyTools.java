@@ -19,8 +19,7 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -53,7 +52,6 @@ public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
             },
             description = "run groovy script, returns the result of the last statement, and the result must be JSON-serializable. \n" +
                     "Note: \n" +
-                    "   - Standard output is not captured. Please use the logger variable (`java.io.PrintWriter logger`) for logging.\n" +
                     "   - embed variables: \n" +
                     "       - `org.springframework.context.ApplicationContext applicationContext` \n" +
                     "       - `org.springframework.core.env.Environment environment` \n"
@@ -61,18 +59,18 @@ public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
     public Map<String, Object> groovy_run_script(@ToolParam(value = "script", description = "the script, groovy script")
                                                  String script,
                                                  @ToolParam(value = "parameters", description = "the optional parameters list, cloud be null, it will be embed variable as `HashMap<String,String> parameters`")
-                                                 StringPairMap parameters) {
+                                                 StringPairMap parameters) throws Exception {
         Map<String, Object> ret = new HashMap<>();
 
-        StringWriter writer = new StringWriter();
-        PrintWriter logger = new PrintWriter(writer);
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(bos,true,"UTF-8");
 
         if(parameters==null){
             parameters=new StringPairMap();
         }
 
         Map<String, Object> params = new HashMap<>();
-        params.put("logger", logger);
+        params.put("out",printStream);
         params.put("applicationContext", applicationContext);
         params.put("environment", environment);
         params.put("parameters",parameters.toMap());
@@ -80,7 +78,7 @@ public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
         Object obj = GroovyScript.evalScript(script, params);
 
         ret.put("returns", obj);
-        ret.put("logs", writer.toString());
+        ret.put("logs", new String(bos.toByteArray(),"UTF-8"));
         return ret;
     }
 }

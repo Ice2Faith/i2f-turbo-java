@@ -1188,6 +1188,18 @@
 
 - 详细文档：[i2f-extension-jce-sm-antherd](./i2f-extension/i2f-extension-jce-sm-antherd/readme.md)
 
+### i2f-extension-jdbc-procedure-datax
+
+> `i2f-jdbc-procedure` 的 DataX 节点扩展（零三方 Maven 依赖）：`DataxExecNode` 经 SPI 注册为 `<datax-exec>` 标签，把内联/变量 JSON 作业写入临时文件后以外部进程调用 `datax.py` 做异构数据批量 ETL，可选捕获标准输出回写上下文、`await` 控阻塞；与姊妹 `jdbc-procedure-flink`（JVM 内流批计算）构成数据工程双轨。
+
+- 详细文档：[i2f-extension-jdbc-procedure-datax](./i2f-extension/i2f-extension-jdbc-procedure-datax/readme.md)
+
+### i2f-extension-jdbc-procedure-flink
+
+> `i2f-jdbc-procedure` 的 Flink 节点扩展：8 个 `flink-*` 标签经 SPI 注册，把「建环境→执行/查询 FlinkSQL→转 Changelog 流→打印→提交作业」拆为可编排节点，Flink 对象经上下文变量流转；`org.apache.flink:*` 全 `provided`。与姊妹 `jdbc-procedure-datax`（外部进程批量同步）构成 JVM 内流批计算双轨。
+
+- 详细文档：[i2f-extension-jdbc-procedure-flink](./i2f-extension/i2f-extension-jdbc-procedure-flink/readme.md)
+
 ### i2f-extension-reverse-engineer-generator
 
 > 数据库反向工程与代码生成模块，基于 Velocity 模板从表结构或 Spring MVC 元数据生成分层代码、DDL、设计文档与 ER 图。
@@ -1205,6 +1217,40 @@
 > 基于 Java Instrumentation Agent + Javassist 的运行期字节码增强观测套件：`-javaagent`/动态附加无侵入打点，覆盖 JDBC/文件/RMI/异常/退出/进程等事件监听 + Spring 上下文捕获 + traceId 编织 + 活体 REPL。
 
 - 详细文档：[i2f-extension-agent-javassist](./i2f-extension/i2f-extension-agent-javassist/readme.md)
+
+### i2f-extension-log-slf4j
+
+> `i2f-log` 的 SLF4J 输出桥接：实现 `LogWriterProvider` SPI，探测到 `org.slf4j.Logger` 即挂载 `LogSlf4jLogWriter`，把 i2f 的 `LogData` 转投 SLF4J 后端，并在 `loaded()` 摘除 STDOUT 完成接管；`slf4j-api`/`i2f-log` 全 `provided`。与反向 `slf4j-log`（SLF4J→i2f）方向相反，不可共存否则成环。
+
+- 详细文档：[i2f-extension-log-slf4j](./i2f-extension/i2f-extension-log-slf4j/readme.md)
+
+### i2f-extension-minio
+
+> MinIO SDK（`io.minio:minio:7.1.0`，provided）的零内部依赖薄封装：`MinioMeta` 承载 url/ak/sk 连接配置，`MinioUtil` 包装 `MinioClient` 提供桶/对象上传下载/前缀/预签名 URL 便捷方法并将受检异常降级为 `IOException`。作 `filesystem-minio` 适配层与 oss-minio starter 的连接底座（实际仅复用构造器与 `getClient`）。
+
+- 详细文档：[i2f-extension-minio](./i2f-extension/i2f-extension-minio/readme.md)
+
+### i2f-extension-mongodb
+
+> MongoDB 旧版统一驱动（`mongo-java-driver:3.10.2`，provided）的 insert-only 薄门面：`MongoDbMeta` 承载 host/port/source/账号连接配置，`MongoDbUtil` 有状态持有 client/库/集合，链式「选库→选集合→插入(Document/Map/Bean/批量)」，Bean 经内部依赖 `i2f-reflect` 摊平为文档。仓库内无消费方；固定 PLAIN 认证、单点、无 close 为主要隐患。
+
+- 详细文档：[i2f-extension-mongodb](./i2f-extension/i2f-extension-mongodb/readme.md)
+
+## i2f-springboot
+
+> SpringBoot 生态的开箱即用 Starter 集合，以条件装配（`@ConditionalOnClass` / `@ConditionalOnExpression` / `@ConditionalOnMissingBean`）为核心，将 i2f 的 AI 工具链、数据访问、安全认证、缓存、分布式任务、运维控制台等能力自动配置为可插拔的 Spring Boot 组件。
+
+### i2f-springboot-ai-mcp-server
+
+> MCP 服务端 Starter：将 Spring 容器中的 `@Tool`/`@Tools` 工具以 HMAC-SHA256 签名认证的 Simple MCP 协议（`/mcp/tool/list`、`/mcp/tool/call`）对外暴露，内置 Spring Web MVC（共享宿主 Web 端口）与 Netty（独立端口）双传输模式的自动装配，支持 nonce 防重放与请求级上下文透传。
+
+- 详细文档：[i2f-springboot-ai-mcp-server](./i2f-springboot/i2f-springboot-ai-mcp-server/readme.md)
+
+### i2f-springboot-ai-mcp-client
+
+> MCP 客户端 Starter：按 `instances` 配置将远程 MCP Server 注册为本地 `McpToolProvider` Bean，内置三套客户端实现——自研 Simple MCP 私协议（HMAC-SHA256 签名认证）、自研标准 JSON-RPC Streamable HTTP（`Mcp-Session-Id` 会话管理）与 solon-ai-mcp SDK（STDIO/SSE/STREAMABLE 等多种通道），供 AI 工具网关聚合为「实例名.工具名」形式的动态工具。
+
+- 详细文档：[i2f-springboot-ai-mcp-client](./i2f-springboot/i2f-springboot-ai-mcp-client/readme.md)
 
 ## i2f-tools
 

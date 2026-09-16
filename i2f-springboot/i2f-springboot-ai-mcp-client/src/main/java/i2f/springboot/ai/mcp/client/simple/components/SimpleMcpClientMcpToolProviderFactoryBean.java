@@ -1,11 +1,11 @@
-package i2f.springboot.ai.mcp.client.components;
+package i2f.springboot.ai.mcp.client.simple.components;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.client.HttpSimpleMcpClientToolProvider;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.spring.web.rest.SpringWebRestClient;
-import i2f.springboot.ai.mcp.client.properties.SimpleMcpClientProperties;
+import i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.FactoryBean;
