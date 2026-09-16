@@ -10,6 +10,9 @@ async function sse(url, options, callback) {
     if (!options.signal) {
         options.signal = abortController.signal;
     }
+    if(options.data && !options.body){
+        options.body=options.data;
+    }
     if (options.body && typeof options.body !== 'string') {
         options.body = JSON.stringify(options.body)
     }
