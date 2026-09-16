@@ -43,6 +43,9 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<HttpEntityEnclosingRequestBase> handler = new HttpClientFormRequestBodyHandler();
+        if(request.getHeader()==null){
+            request.setHeader(HttpHeaders.create());
+        }
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
         if (contentType.contains(ContentTypeConstants.Json)) {
@@ -81,6 +84,7 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
                 req.addHeader(item.getKey(), val);
             }
         }
+
 
         Object data = request.getData();
         if (data != null) {
