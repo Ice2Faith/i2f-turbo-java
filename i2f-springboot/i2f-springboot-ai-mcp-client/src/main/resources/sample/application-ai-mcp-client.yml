@@ -1,0 +1,29 @@
+
+i2f:
+  springboot:
+    ai:
+      mcp:
+        client:
+          # simple mcp client protocol
+          simple:
+            enable: true
+            instances:
+              - enable: false
+                name: demo
+                description: a group utils tool
+                base-url: http://localhost:8811/
+                app-id: xxx
+                app-key: xxx
+                hmac-name: HmacSHA256
+          # solon implements official protocol mcp
+          solon:
+            enable: true
+            instances:
+              - enable: false
+                name: demo
+                description: a group utils tool
+                url: http://localhost:9999/mcp
+                channel: streamable
+                bearer-token: xxx
+                #headers:
+                #  key: value

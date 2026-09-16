@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.client.properties;
+package i2f.springboot.ai.mcp.client.simple.properties;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import lombok.Data;

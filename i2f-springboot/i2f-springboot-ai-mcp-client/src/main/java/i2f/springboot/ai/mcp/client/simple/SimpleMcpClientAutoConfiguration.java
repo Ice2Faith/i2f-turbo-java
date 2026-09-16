@@ -1,8 +1,8 @@
-package i2f.springboot.ai.mcp.client;
+package i2f.springboot.ai.mcp.client.simple;
 
 import i2f.ai.std.mcp.McpToolProvider;
-import i2f.springboot.ai.mcp.client.components.SimpleMcpClientMcpToolProviderFactoryBean;
-import i2f.springboot.ai.mcp.client.properties.SimpleMcpClientProperties;
+import i2f.springboot.ai.mcp.client.simple.components.SimpleMcpClientMcpToolProviderFactoryBean;
+import i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -24,14 +24,14 @@ import java.util.List;
  * @date 2026/7/17 21:01
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ai.mcp.client.enable:true}")
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.client.simple.enable:true}")
 @Configuration
 @EnableConfigurationProperties({
         SimpleMcpClientProperties.class
 })
 @Slf4j
 @Data
-public class SpringAiMcpClientAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+public class SimpleMcpClientAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
     protected ApplicationContext applicationContext;
 
     @Override

@@ -1,2 +1,3 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-    i2f.springboot.ai.mcp.client.SpringAiMcpClientAutoConfiguration
+    i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration,\
+    i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration

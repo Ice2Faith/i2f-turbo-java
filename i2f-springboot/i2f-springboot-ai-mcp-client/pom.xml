@@ -55,6 +55,22 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-web</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.noear</groupId>
+            <artifactId>solon-ai-mcp</artifactId>
+            <version>3.9.6</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.6.9</version>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
