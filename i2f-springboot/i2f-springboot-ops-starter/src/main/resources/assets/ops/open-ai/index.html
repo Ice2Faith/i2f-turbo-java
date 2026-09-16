@@ -3312,7 +3312,7 @@
                     window['_abort_'+options.sessionId] = abortController;
                     session.abortController = abortController
 
-                    sse('./stream',
+                    await sse('./stream',
                         {
                             method: 'POST',
                             headers: {

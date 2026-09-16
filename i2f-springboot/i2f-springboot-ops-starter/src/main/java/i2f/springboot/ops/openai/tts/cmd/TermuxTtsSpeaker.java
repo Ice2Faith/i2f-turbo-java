@@ -28,6 +28,14 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
     public static final int PRIOR = 100;
     protected static volatile Process lastProcess = null;
 
+
+    private static AtomicReference<AtomicReference<String>> cacheCommand = new AtomicReference<>();
+    private static ReentrantLock lockCommand = new ReentrantLock();
+
+    static {
+        getCommand();
+    }
+
     public static class AvaliableCondition implements Condition {
 
         @Override
@@ -36,12 +44,6 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
         }
     }
 
-    static {
-        getCommand();
-    }
-
-    private static AtomicReference<AtomicReference<String>> cacheCommand = new AtomicReference<>();
-    private static ReentrantLock lockCommand = new ReentrantLock();
 
     public static String getCommand() {
         AtomicReference<String> optional = cacheCommand.get();
@@ -100,20 +102,25 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
 
     @Override
     public void speak(String content) throws Throwable {
-        try {
-            if (lastProcess != null && lastProcess.isAlive()) {
-                lastProcess.destroyForcibly();
-                try {
-                    lastProcess.waitFor(3, TimeUnit.SECONDS);
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+        for (int i = 0; i < 5; i++) {
+            try {
+                if (lastProcess != null && lastProcess.isAlive()) {
+                    lastProcess.destroy();
+                    try {
+                        if (!lastProcess.waitFor(3, TimeUnit.SECONDS)) {
+                            lastProcess.destroyForcibly();
+                        }
+                    } catch (Exception e) {
+                        lastProcess.destroyForcibly();
+                    }
                 }
-                lastProcess = null;
+                Thread.sleep(300);
+            } catch (Throwable e) {
+                // ignore
             }
-        } catch (Throwable e) {
-            // ignore
-        }
 
+        }
+        lastProcess = null;
 
         lastProcess = new ProcessBuilder(COMMAND,
                 "-s", "MUSIC",
