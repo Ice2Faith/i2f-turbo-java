@@ -48,7 +48,7 @@ public class SpringAiMcpServerAutoConfiguration implements ApplicationContextAwa
     @Bean
     public HttpSimpleMcpServer httpSimpleMcpServer() {
         HttpSimpleMcpServerImpl ret = new HttpSimpleMcpServerImpl().toMutator()
-                .set(u -> u::setContext, new SpringContext())
+                .set(u -> u::setContext, new SpringContext(applicationContext))
                 .set(u -> u::setExpireWindowMinutes, httpSimpleMcpServerProperties.getExpireWindowMinutes())
                 .set(u -> u::setExpireCache, expireCache)
                 .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(new ObjectMapper()))
