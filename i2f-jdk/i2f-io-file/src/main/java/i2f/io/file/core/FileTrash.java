@@ -4,10 +4,8 @@ import i2f.io.file.FileUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Properties;
@@ -26,9 +24,9 @@ public class FileTrash {
 
     public static final String DEFAULT_ROOT = ".app_trash";
     public static final DateTimeFormatter DIR_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter FILE_FORMATTER = DateTimeFormatter.ofPattern("HHmmss");
+    public static final DateTimeFormatter FILE_FORMATTER = DateTimeFormatter.ofPattern("HHmmssSSS");
     public static final DateTimeFormatter CREATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
-    public static final String META_FILE_NAME = "metadata.properties";
+    public static final String META_FILE_NAME = "metadata.txt";
 
     protected String rootDir = getDefaultRootDir();
 
@@ -50,29 +48,23 @@ public class FileTrash {
         }
         LocalDateTime now = LocalDateTime.now();
         File dir = new File(rootDir);
+        // 按天隔离
         dir = new File(dir, DIR_FORMATTER.format(now));
+        // 同一天额按照时间大致有序
+        String name = FILE_FORMATTER.format(now) + "_" + (UUID.randomUUID().toString().replace("-", ""));
+        dir=new File(dir,name);
         dir.mkdirs();
 
-        String nameOnly = file.getName();
-        String suffix = "";
-        int idx = nameOnly.lastIndexOf(".");
-        if (idx >= 0) {
-            suffix = nameOnly.substring(idx);
-            nameOnly = nameOnly.substring(0, idx);
-        }
-        String name = FILE_FORMATTER.format(now) + "_" + (UUID.randomUUID().toString().replace("-", "")) + suffix;
-        File ret = new File(dir, name);
+        File ret = new File(dir, file.getName());
         FileUtil.move(ret, file);
 
         File metaFile = new File(dir, META_FILE_NAME);
-        Properties properties = new Properties();
-        properties.put("name", file.getName());
-        properties.put("originPath", new File(file.getAbsolutePath()).getParentFile().getAbsolutePath());
-        properties.put("createTime", CREATE_TIME_FORMATTER.format(now));
+        try(PrintWriter writer=new PrintWriter(new OutputStreamWriter(new FileOutputStream(metaFile), StandardCharsets.UTF_8))){
+            writer.println("name="+file.getName());
+            writer.println("originPath="+new File(file.getAbsolutePath()).getParentFile().getAbsolutePath());
+            writer.println("createTime="+CREATE_TIME_FORMATTER.format(now));
+        }
 
-        OutputStream fos = new FileOutputStream(metaFile);
-        properties.store(fos, null);
-        fos.close();
         return ret;
     }
 
