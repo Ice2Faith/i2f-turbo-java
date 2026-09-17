@@ -278,9 +278,10 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             JsonRpcInitialResult result = RichConverter.convert(obj, JsonRpcInitialResult.class);
             String serverVersion = result.getProtocolVersion();
             // TODO: 可在此处校验 response.get("result") 中的 protocolVersion 是否兼容
+
+            initialized.set(true);
         } finally {
             lock.unlock();
-            initialized.set(true);
         }
     }
 
