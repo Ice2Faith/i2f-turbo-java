@@ -13,6 +13,8 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +38,8 @@ public class SimpleMcpClientAutoConfiguration implements ApplicationContextAware
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        SimpleMcpClientProperties proxyProperties = applicationContext.getBean(SimpleMcpClientProperties.class);
+        Binder binder = Binder.get(applicationContext.getEnvironment());
+        SimpleMcpClientProperties proxyProperties = binder.bind(SimpleMcpClientProperties.CONFIG_PREFIX, SimpleMcpClientProperties.class).orElseGet(SimpleMcpClientProperties::new);
         try {
             List<SimpleMcpClientProperties.InstanceConfig> instances = proxyProperties.getInstances();
             if (instances == null) {

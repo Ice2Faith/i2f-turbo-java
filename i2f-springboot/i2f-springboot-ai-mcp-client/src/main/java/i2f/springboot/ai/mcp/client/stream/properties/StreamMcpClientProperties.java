@@ -16,6 +16,8 @@ import java.util.Map;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.client.stream")
 public class StreamMcpClientProperties {
+    public static final String CONFIG_PREFIX="i2f.springboot.ai.mcp.client.stream";
+
     protected List<InstanceConfig> instances;
 
     @Data

@@ -1,6 +1,7 @@
 package i2f.springboot.ai.mcp.client.stream;
 
 import i2f.ai.std.mcp.McpToolProvider;
+import i2f.springboot.ai.mcp.client.solon.properties.SolonMcpClientProperties;
 import i2f.springboot.ai.mcp.client.stream.components.StreamMcpClientMcpToolProviderFactoryBean;
 import i2f.springboot.ai.mcp.client.stream.properties.StreamMcpClientProperties;
 import lombok.Data;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProce
 import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -36,7 +38,8 @@ public class StreamMcpClientAutoConfiguration implements ApplicationContextAware
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        StreamMcpClientProperties proxyProperties = applicationContext.getBean(StreamMcpClientProperties.class);
+        Binder binder = Binder.get(applicationContext.getEnvironment());
+        StreamMcpClientProperties proxyProperties = binder.bind(StreamMcpClientProperties.CONFIG_PREFIX, StreamMcpClientProperties.class).orElseGet(StreamMcpClientProperties::new);
         try {
             List<StreamMcpClientProperties.InstanceConfig> instances = proxyProperties.getInstances();
             if (instances == null) {

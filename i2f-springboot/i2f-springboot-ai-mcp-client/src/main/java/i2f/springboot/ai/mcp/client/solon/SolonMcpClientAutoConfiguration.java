@@ -1,6 +1,7 @@
 package i2f.springboot.ai.mcp.client.solon;
 
 import i2f.ai.std.mcp.McpToolProvider;
+import i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties;
 import i2f.springboot.ai.mcp.client.solon.components.SolonMcpClientMcpToolProviderFactoryBean;
 import i2f.springboot.ai.mcp.client.solon.properties.SolonMcpClientProperties;
 import lombok.Data;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.support.GenericBeanDefinition;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
@@ -43,7 +45,8 @@ public class SolonMcpClientAutoConfiguration implements ApplicationContextAware,
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
-        SolonMcpClientProperties proxyProperties = applicationContext.getBean(SolonMcpClientProperties.class);
+        Binder binder = Binder.get(applicationContext.getEnvironment());
+        SolonMcpClientProperties proxyProperties = binder.bind(SolonMcpClientProperties.CONFIG_PREFIX, SolonMcpClientProperties.class).orElseGet(SolonMcpClientProperties::new);
         try {
             List<SolonMcpClientProperties.InstanceConfig> instances = proxyProperties.getInstances();
             if (instances == null) {
