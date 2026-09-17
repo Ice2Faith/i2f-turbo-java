@@ -323,6 +323,18 @@
             <artifactId>i2f-springboot-ai-mcp-client</artifactId>
             <version>1.0-jdk8</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.noear</groupId>
+            <artifactId>solon-ai-mcp</artifactId>
+            <version>3.9.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-core</artifactId>
+            <version>3.6.9</version>
+        </dependency>
     </dependencies>
 
     <dependencyManagement>
