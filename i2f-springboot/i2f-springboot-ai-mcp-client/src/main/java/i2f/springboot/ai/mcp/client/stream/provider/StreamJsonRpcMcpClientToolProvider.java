@@ -272,7 +272,9 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             if (this.mcpSessionId == null) {
                 System.out.println(headers);
                 System.out.println(rest.getBody());
-                throw new IllegalStateException("MCP Server did not return a valid Mcp-Session-Id in headers!");
+                // 服务端可能是无状态的，所以他可能不返回 session-id
+                // 所以，策略就变成了，有就携带，没有那也无所谓
+                //throw new IllegalStateException("MCP Server did not return a valid Mcp-Session-Id in headers!");
             }
 
             JsonRpcResponse<?> body = rest.getBody();
