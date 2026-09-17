@@ -59,6 +59,7 @@ public class SolonMcpClientMcpToolProviderFactoryBean implements FactoryBean<Mcp
         provider.setJsonSerializer(new JacksonJsonSerializer(new ObjectMapper()));
         provider.setName(config.getName());
         provider.setDescription(config.getDescription());
+        provider.setTagRules(config.getTagRules());
 
         Boolean initial = config.getInitial();
         if (initial != null && initial) {

@@ -24,6 +24,9 @@ i2f:
                 description: a group utils tool
                 url: http://localhost:9999/mcp
                 bearer-token: xxx
+                #tag-rules:
+                #  - pattern: "*web*"
+                #    tags: ["auto","readonly"]
                 #headers:
                 #  key: value
           # solon mcp client implements official protocol mcp
@@ -36,5 +39,8 @@ i2f:
                 url: http://localhost:9999/mcp
                 channel: streamable
                 bearer-token: xxx
+                #tag-rules:
+                #  - pattern: "*web*"
+                #    tags: ["auto","readonly"]
                 #headers:
                 #  key: value

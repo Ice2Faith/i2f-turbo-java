@@ -1,5 +1,6 @@
 package i2f.springboot.ai.mcp.client.solon.properties;
 
+import i2f.ai.std.tags.AiTagRule;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.noear.solon.ai.mcp.McpChannel;
@@ -32,6 +33,7 @@ public class SolonMcpClientProperties {
         protected Map<String, Object> headers;
         protected String name;
         protected String description;
+        protected List<AiTagRule> tagRules;
     }
 
     public static enum Channel {

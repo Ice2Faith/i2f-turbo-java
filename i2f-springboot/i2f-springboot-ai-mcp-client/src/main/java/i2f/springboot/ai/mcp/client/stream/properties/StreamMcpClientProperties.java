@@ -1,5 +1,6 @@
 package i2f.springboot.ai.mcp.client.stream.properties;
 
+import i2f.ai.std.tags.AiTagRule;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -30,6 +31,7 @@ public class StreamMcpClientProperties {
         protected Map<String, Object> headers;
         protected String name;
         protected String description;
+        protected List<AiTagRule> tagRules;
     }
 
 }

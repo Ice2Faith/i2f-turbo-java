@@ -1,6 +1,8 @@
 package i2f.springboot.ai.mcp.client.solon.provider;
 
 import i2f.ai.std.mcp.McpToolProvider;
+import i2f.ai.std.tags.AiTagRule;
+import i2f.ai.std.tags.AiTagRuleHelper;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
@@ -34,8 +36,9 @@ public class SolonMcpToolProvider implements McpToolProvider {
 
     protected String name;
     protected String description;
+    protected List<AiTagRule> tagRules;
 
-    protected long expireTtl = TimeUnit.SECONDS.toMillis(15);
+    protected long expireTtl = TimeUnit.MINUTES.toMillis(30);
     protected final CopyOnWriteArrayList<ToolDefinition> cache = new CopyOnWriteArrayList<>();
     protected final AtomicLong expireTs = new AtomicLong(0);
     protected final AtomicBoolean hasCache = new AtomicBoolean(false);
@@ -75,6 +78,11 @@ public class SolonMcpToolProvider implements McpToolProvider {
                 jsonSchema.setParameters(parameters);
                 jsonSchema.setStrict(true);
                 def.setJsonSchema(jsonSchema);
+
+                if(tagRules!=null){
+                    List<String> tags = AiTagRuleHelper.resolveTags(def.getName(), tagRules);
+                    def.getTags().addAll(tags);
+                }
 
                 ret.add(def);
             }
