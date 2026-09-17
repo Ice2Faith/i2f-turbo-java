@@ -77,7 +77,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
 
     @Override
     public List<ToolDefinition> getTools() {
-        if (hasCache.get() && System.currentTimeMillis() - expireTs.get() < expireTtl) {
+        if (hasCache.get() && System.currentTimeMillis() < expireTs.get()) {
             return new ArrayList<>(cache);
         }
         try {

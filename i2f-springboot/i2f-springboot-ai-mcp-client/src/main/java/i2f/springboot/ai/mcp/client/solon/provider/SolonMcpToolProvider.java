@@ -56,7 +56,7 @@ public class SolonMcpToolProvider implements McpToolProvider {
 
     @Override
     public List<ToolDefinition> getTools() {
-        if (hasCache.get() && System.currentTimeMillis() - expireTs.get() < expireTtl) {
+        if (hasCache.get() && System.currentTimeMillis() < expireTs.get()) {
             return new ArrayList<>(cache);
         }
         lock.lock();
