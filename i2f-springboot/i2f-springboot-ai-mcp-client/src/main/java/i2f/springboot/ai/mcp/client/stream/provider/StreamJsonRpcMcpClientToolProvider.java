@@ -270,6 +270,8 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             this.mcpSessionId = headers.getFirstHeader(HEADER_MCP_SESSION_ID);
 
             if (this.mcpSessionId == null) {
+                System.out.println(headers);
+                System.out.println(rest.getBody());
                 throw new IllegalStateException("MCP Server did not return a valid Mcp-Session-Id in headers!");
             }
 
