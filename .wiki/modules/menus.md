@@ -1236,6 +1236,108 @@
 
 - 详细文档：[i2f-extension-mongodb](./i2f-extension/i2f-extension-mongodb/readme.md)
 
+### i2f-extension-mybatis
+
+> MyBatis 桥接扩展层（MyBatis 经 `mybatis-spring-boot-starter:3.0.3` 以 provided 引入）：以「`@Intercepts` 空壳拦截器 + 适配器 + `IProxyInvocationHandler`」范式实现三条 ThreadLocal 驱动的功能线——Executor 物理分页（count 与分页 SQL 改写委托 i2f-bindsql-page 按方言执行）、SQL 执行记录（参数合并为可读 SQL，支持 Oracle TO_DATE 字面量）、结果集列元数据捕获（代理 Statement 抓取 ResultSetMetaData）；另含脱离 SqlSessionFactory 的动态 script 直连执行器、String↔LOB TypeHandler 三件与 OGNL 求值辅助，唯一源码消费方为 i2f-springboot-mybatis-starter。
+
+- 详细文档：[i2f-extension-mybatis](./i2f-extension/i2f-extension-mybatis/readme.md)
+
+### i2f-extension-netty
+
+> Netty 桥接扩展层（netty-all:4.1.65.Final 以 provided 引入）：三条独立能力线——注解驱动 HTTP 服务器（@NettyController 扫描路由 + URL/表单/JSON 三源参数绑定）、自定义 TCP 二进制协议栈（16 字节头 0xface1024 协议，拆包编解码 + 心跳/ECHO/BROADCAST flag 语义 + ISocketChannelHandler 扩展钩子）、同步风格 TCP-RPC（JDK 动态代理 + seqId→DefaultPromise + JSON 传输 + 服务端按类型查 bean 反射调用）；另含流式分片重组 NettyMessageCodec（未默认装配）与字符串 echo 工具，仓库内无源码级消费方（仅 i2f-extension-all 聚合）。
+
+- 详细文档：[i2f-extension-netty](./i2f-extension/i2f-extension-netty/readme.md)
+
+### i2f-extension-ocr-tesseract
+
+> Tesseract OCR 桥接扩展（tess4j:4.5.1 以 provided 引入）：单类 OcrTesseractProvider 全静态 API，recognize 三入口（InputStream/BufferedImage/File）识别；训练数据采用自备引导约定——datapath 固定 ./runtime/persist/tesseract/ocr，首次调用目录不存在则 mkdirs 后抛引导异常提示从 tesseract-ocr/tessdata 下载 *.traineddata；未实现任何 OCR 契约接口，仓库内无源码级消费方（仅 i2f-extension-all 聚合）。
+
+- 详细文档：[i2f-extension-ocr-tesseract](./i2f-extension/i2f-extension-ocr-tesseract/readme.md)
+
+### i2f-extension-ognl
+
+> OGNL 表达式桥接扩展（ognl:3.4.11 以 provided+optional 引入）：2 源文件极小模块——OgnlUtil 提供 LruMap(4096) 表达式 AST 树缓存 + evaluateExpression 求值（root 双通道：setRoot + #$root 变量），DefaultMemberAccess 提供默认全放行（private/protected/package）的 MemberAccess 单例；是 i2f 数据访问 DSL 的表达式引擎底座，消费方含 i2f-extension-xproc4j（存储过程脚本求值/预载/语法报告）、i2f-jdbc-proxy-xml（mapper XML OGNL inflate）与 i2f-springboot-jdbc-bql-starter（@ConditionalOnClass 条件装配退避），与 i2f-extension-mybatis 内嵌 shaded ognl 包为同源分叉。
+
+- 详细文档：[i2f-extension-ognl](./i2f-extension/i2f-extension-ognl/readme.md)
+
+### i2f-extension-okhttp
+
+> OkHttp HTTP 客户端桥接扩展（okhttp:4.9.3 以 provided 引入）：i2f-network 的 IHttpProcessor 统一 HTTP 契约在 OkHttp 上的适配实现——OkHttpHttpProcessor 按 Content-Type 分派 6 个 RequestBodyHandler（表单/JSON/XML/Multipart/RawBytes/RawInputStream，序列化器与 OkHttpClient 均可注入），响应以 HttpResponse + OkHttpCloser 双模释放；仓库内无源码级消费方（仅 i2f-extension-all 聚合），与 i2f-network 的 JDK 版实现平行可互换。
+
+- 详细文档：[i2f-extension-okhttp](./i2f-extension/i2f-extension-okhttp/readme.md)
+
+### i2f-extension-opencv
+
+> 原生 OpenCV 4.3.0 桥接扩展（system scope 指向 resources/lib/opencv-430.jar）：静态块自引导（init 释放 DLL 提示 + loadNative System.load ./runtime/persist/opencv 下的 opencv_java430_x64/x86.dll，DLL 需用户自备）+ 全静态门面——detectFrontFace/detectFullBody/detectEye/detectMultiScale（CascadeClassifier + opencv-data 的 Haar 级联，GUI 预览与标注保存）与 findContours（Sobel+二值化流水线）；核心静态缺陷：system 依赖不传递不入 fat jar 且 opencv-430.jar 成为不可加载的 jar-in-jar（独立运行产物 org.opencv 缺失）、DLL 释放链空转且 null 流 is.close() NPE、DLL 引导目录判定被 opencv-data cascade 释放连带短路；仓库内无源码级消费方（仅 i2f-extension-all 聚合）。
+
+- 详细文档：[i2f-extension-opencv](./i2f-extension/i2f-extension-opencv/readme.md)
+
+### i2f-extension-opencv-data
+
+> OpenCV 训练数据资源模块：单类 OpenCvDataFileProvider（26 行）+ 35 个 OpenCV 官方级联分类器 XML（约 25MB，Haar CPU/CUDA + HOG + LBP），无 OpenCV 运行时依赖；唯一职责是把 classpath lib/data/** 幂等释放到 ./runtime/persist/opencv/data 并返回 File（FileUtil.getClasspathExtraFile 契约，存在即复用），供 CascadeClassifier 加载；是 i2f-extension-opencv 与 i2f-extension-opencv-javacv 的共享数据底座，ROOT_PATH 常量兼作 OpenCvProvider 的 DLL 释放目录。核心静态缺陷：资源缺失静默黑洞（null 流静默返回不存在的 File）、首次释放非原子残缺永久化、cascade 释放短路 OpenCvProvider DLL 引导（exists 判定被连带目录欺骗）。
+
+- 详细文档：[i2f-extension-opencv-data](./i2f-extension/i2f-extension-opencv-data/readme.md)
+
+### i2f-extension-opencv-javacv
+
+> JavaCV 桥接人脸识别扩展（javacv/javacv-platform:1.5.9 双 provided、裁剪 11 项无关 platform 组件留 OpenCV 线，绑定 OpenCV 4.7.0）：单主类 OpenCvFaceRecognizer 封装「目录约定训练 + LBPH 识别」门面——子目录名即标签、文件即样本、non- 前缀即负样本；模型三件套持久化（*.xml 模型 + *.label.txt 标签 + *.properties 预处理参数）；预处理链 imread→灰度→detectMultiScale 取第一个脸 ROI→resize 256×256；置信度判定为应用层后置过滤（confidenceLimit<=40 且 >-0.5，LBPH setThreshold 未用）。级联 XML 来自 i2f-extension-opencv-data；唯一源码级消费方 i2f-tools-face-recognizer（可执行工具壳，把本模块测试类原样复制进自身 main 源集）。核心静态缺陷：标签文件名双分支单复数不一致、test() 未守卫 -1 标签越界、无脸静默整图参与识别、重复 train 覆盖模型但标签累积错位、构造即 IO 的字段初始化器。
+
+- 详细文档：[i2f-extension-opencv-javacv](./i2f-extension/i2f-extension-opencv-javacv/readme.md)
+
+### i2f-extension-oss-aliyun
+
+> 阿里云 OSS 对象存储桥接扩展（aliyun-sdk-oss:3.17.4 以 provided+optional 引入，附带 jaxb/activation java9+ 补偿三件）：2 类轻量适配——AliyunOssMeta 配置元数据（url/region/AK/SK/signVersion，无效签名版本静默回落默认 V4）+ AliyunOssUtil 全实例门面（桶管理、上传三形态/下载/元信息、prefix 0 字节对象模拟目录、presigned URL，SDK 异常统一包装 IOException）；与 i2f-extension-oss-aws-s3 平行同构无共享契约；唯一源码级消费方 i2f-extension-filesystem-oss-aliyun（AbsFileSystem 适配层，构造即 getClient）。核心静态缺陷：getClient 构建的 ClientBuilderConfiguration 从未传入 builder 链（javap 证实 fluent API 有 clientConfiguration(...) 而代码未调用）——签名版本配置整体架空走 SDK 默认签名，缺陷经构造注入传播到 filesystem 适配层；prefixExists 语义错位（精确 key 而非前缀）、upload 的 -1 哨兵泄漏到 setContentLength。
+
+- 详细文档：[i2f-extension-oss-aliyun](./i2f-extension/i2f-extension-oss-aliyun/readme.md)
+
+### i2f-extension-oss-aws-s3
+
+> AWS S3 对象存储桥接扩展（AWS SDK v2 s3/kms/s3control 以模块内硬编码 bom:2.17.100 配 provided+optional 引入，kms/s3control 源码零引用冗余）：与 i2f-extension-oss-aliyun 平行同构的 2 类轻量适配——AwsS3OssMeta 配置元数据（url/AK/SK/region 纯 POJO）+ AwsS3OssUtil 实例门面（S3Client+S3Presigner 双客户端、桶管理、上传三形态/下载/元信息、prefix 0 字节对象模拟目录、marker 分页列举、presigned URL，SDK 异常统一包装 IOException）；唯一源码级消费方 i2f-extension-filesystem-oss-aws-s3（仅静态复用 getClient，其余操作自行手写并复制了本模块三类缺陷模式）。核心静态缺陷（javap 铁证）：bucketExists 误用 getBucketPolicyStatus 判存在（未配 BPA 的桶恒 false → create 必重复建桶）、presigner 丢 endpointOverride（Builder 有该方法未调，第三方 S3 预签名 URL 指向 amazonaws.com）、fromInputStream(is,-1L) 哨兵无负数校验产出 Content-Length: -1、urlOf 999 年时长超 SigV4 上限 7 天、getObjectInfo 流不关闭连接泄漏。
+
+- 详细文档：[i2f-extension-oss-aws-s3](./i2f-extension/i2f-extension-oss-aws-s3/readme.md)
+
+### i2f-extension-qrcode
+
+> 二维码桥接扩展（zxing core/javase:3.4.1 双 provided 引入，模块内硬编码版本）：仓库最小扩展模块之一（2 文件约 180 行）——QrCodeWorker 链式封装「zxing 生成 + 2D 贴 Logo + zxing 解码」（QR_CODE + ErrorCorrectionLevel.H 约三成面积容错为 Logo 预留、圆角描边、logo 空/缺失静默降级纯码），QrCodeUtil 全静态门面（生成 4 重载 / 解析 2 重载，输出硬编码 JPG）；解码走 LuminanceSource→HybridBinarizer→MultiFormatReader 标准链。仓库内无源码级消费方（仅 i2f-extension-all 聚合）。核心静态缺陷：Logo 缩放逻辑自我矛盾（clamp 判断成死代码 + getScaledInstance 强制非等比拉伸正方形失真）、getScaledInstance 第三参 TYPE_INT_RGB magic number 值恰等于 SCALE_DEFAULT 语义侥幸、ImageIO.read 返 null 未判致 NPE、logoSize/codeSize 无比例校验超容错面积码不可扫无提示、JPG 有损压缩输出伤扫描率、setCharset(null) Hashtable NPE。
+
+- 详细文档：[i2f-extension-qrcode](./i2f-extension/i2f-extension-qrcode/readme.md)
+
+### i2f-extension-quartz
+
+> Quartz 调度桥接扩展（quartz:2.3.2 以 provided 引入，模块内硬编码版本）：双层结构——QuartzUtil 全静态门面（Scheduler 获取、JobDetail/Simple 间隔与 Cron Trigger 构建、schedule/reschedule/pause/resume/runOnce/delete 生命周期）+ 注解驱动线（@QuartzSchedule 方法注解 → QuartzScanner classpath 扫描 → QuartzJobMeta 双轨元数据 → 统一注册为固定 Job 类 QuartzAnnotationJob，meta 经 JobDataMap "meta" 传递，执行时反射回调，static 直调、非 static 优先 invokeObj 否则每次 newInstance）；唯一源码级消费方 i2f-springboot-quartz-starter（容器刷新事件触发扫描、getBeansOfType 单命中注入 bean 作 invokeObj）。核心静态缺陷：热更新路径仅 reschedule Trigger 而丢弃新 JobDetail（注解方法绑定变更不生效）、QuartzJobMeta 含 Method/Class 字段 JDBC JobStore 下不可序列化、重载方法按名解析错位、带参注解方法注册期无校验运行时炸。
+
+- 详细文档：[i2f-extension-quartz](./i2f-extension/i2f-extension-quartz/readme.md)
+
+### i2f-extension-redis-api
+
+> Redis 统一客户端契约模块（纯 SPI，零 Redis 客户端依赖，pom 仅 lombok 且源码零使用冗余）：单接口 IRedisClient（72 行 23 方法，Spring Data Redis 风格签名，string/list/hash 三组 + 过期管理）；是 i2f Redis 体系的 SPI 中枢——双实现 i2f-extension-jedis 的 JedisRedisClient（JedisPool 自管）与 i2f-spring-redis 的 SpringRedisClient（RedisTemplate 门面），双消费 i2f-extension-redis-cache 的 RedisCache（桥接 i2f-cache-std 三契约）与 i2f-springboot-redis-starter（@ConditionalOnMissingBean 可替换装配）。核心静态缺陷：接口层零语义文档（23 方法仅 2 个 javadoc，SETNX 语义/负数超时哨兵/del 返回旧值/push 方向全缺位）已实际引致双实现 6 方法行为分歧——listPush Jedis 左推 vs Spring 右推顺序相反、setUnique Jedis setnx+expire 两步（分布式锁死锁缺陷）vs Spring 单条原子、hashSet/listSet 返回值各异（Spring 版 listSet 还双重包 prefix 读错键、hashGetAll 向遍历 map put 恒返空）、RedisCache.clean 直接 flushDb 清空整库、Spring 版 flushDb 裸取连接泄漏。
+
+- 详细文档：[i2f-extension-redis-api](./i2f-extension/i2f-extension-redis-api/readme.md)
+
+### i2f-extension-redis-cache
+
+> Redis 缓存适配扩展（单类 RedisCache 92 行，依赖 redis-api + i2f-cache 传递的 cache-std + lombok 冗余）：把 IRedisClient string 型 KV 向上适配为 i2f-cache-std 三契约——IExpireContainerCache（容器+过期组合）、IPersistCache、IDistributedCache（空标记接口）；核心机制 prefix 键空间隔离（wrapKey）+ 可注入编解码器（Function 对，装配方注入 Jackson2JsonRedisSerializer）；是 i2f Redis 体系「缓存语义层」——starter RedisCacheConfiguration 自动装配 + security/shiro starter 两个 TokenHolder 窄化为 IExpireCache 存 30 分钟 token 会话。核心静态缺陷：clean() 直接 flushDb 清空整个 DB（prefix 隔离失效，数据灾难级）；keys() 返回带 prefix 存储键致 default forEach/remove 组合二次包装删错键静默失效；KEYS 阻塞命令；(int)unit.toSeconds 溢出压精度、-1 哨兵靠巧合命中；encoder/decoder null 语义双层缺位（starter encoder 无 null 判空 set(null) 必炸、new String UTF-8 往返损毁二进制序列化器数据）。
+
+- 详细文档：[i2f-extension-redis-cache](./i2f-extension/i2f-extension-redis-cache/readme.md)
+
+### i2f-extension-sftp
+
+> SFTP/SSH 桥接扩展（jsch:0.1.55 以 provided 引入，模块内硬编码版本且上游已停更）：三条能力线——basic 线 SftpUtil 单会话 ChannelSftp 门面（登录/递归建目录/上传下载/删除/列举 + ChannelShell/ChannelExec 直取 + 异步 exec）、proxy 线 ProxySftpUtil 经代理机 setPortForwardingL 两级会话的跳板 SFTP、tunnel 线 SshTunnelUtil 通用 SSH 本地端口正向隧道（daemon keepalive 重连 + shutdown hook 清理，可给 MySQL/Redis 等 TCP 服务套跳板）；配置契约继承 i2f-extension-ftp 的 FtpMeta（Commons Net provided 不传递）；源码级消费方为 i2f-springboot-ops-starter（ssh 文件管理/exec 控制台）与 i2f-springboot-ssh-tunnel-starter（环境准备期自动建隧道），i2f-extension-filesystem-sftp 为平行独立实现不消费本模块。核心静态缺陷：login 硬编码 PreferredAuthentications=password 使纯私钥认证必然失效、recursiveDelete 对普通文件双重路径拼接致 SSH_FX_NO_SUCH_FILE 被吞而静默无操作、exec 只读 stdout 不消费 stderr 撑满窗口即挂死且超时后半挂线程泄漏、无连接超时无限阻塞、SshTunnelUtil shutdown hook 与 keepalive 锁竞争可挂死 JVM 退出、starter 创建的隧道实例从未加入 SshTunnelManager.servers。
+
+- 详细文档：[i2f-extension-sftp](./i2f-extension/i2f-extension-sftp/readme.md)
+
+### i2f-extension-slf4j
+
+> SLF4J 桥接增强扩展（slf4j-api:1.7.36 以 provided 引入，版本根 POM 属性供给）：4 源文件三件工具——PerfLogger lambda 延迟求值门面（isXxxEnabled 预检查，5 级 × Supplier/异常/1~3 参/varargs 60+ 重载）、Slf4jPrintStream 控制台重定向（System.out/err 全方法代理进 slf4j，幂等重定向 + 可选堆栈定位 logger 名 + THREAD_CONSUMER 钩子）、Slf4jUtil 栈扫描调用点感知 logger；另含 Slf4jMdcManager——i2f-trace-mdc 的 MdcManager SPI 实现（META-INF/services 注册，MdcHolder 按名字优先自动选中），是 trace-mdc 全链路 MDC 传播的运行时底座；源码级消费方 i2f-springboot-spring-starter（启动期重定向）与 i2f-springboot-trace-mdc-starter（装配），另有 maven-project/tools-ops 两份包名分叉副本。核心静态缺陷：重定向先于日志系统初始化时 ConsoleAppender 捕获包装流可能无限递归（logbackEnv 防线探测的是 Spring Boot 专有属性不可靠）、write(byte[]) 数据黑洞/日志丢失、useTrace 每条日志 getStackTrace + 行级唯一 logger 名致 LoggerFactory 注册表无限增长、PerfLogger 异常/值版重载仅边界不同致异常堆栈静默丢失风险、MdcManager 契约零 javadoc 且 copyOf 空上下文返 null。
+
+- 详细文档：[i2f-extension-slf4j](./i2f-extension/i2f-extension-slf4j/readme.md)
+
+### i2f-extension-slf4j-log
+
+> SLF4J 绑定器扩展（slf4j-api:${slf4j.version}=1.7.36 以 provided+optional 引入，DM 重复声明）：SLF4J 1.x StaticLoggerBinder 绑定协议接到 i2f-log 的反向桥（与 i2f-extension-slf4j 方向相反）——org.slf4j.impl 包 5 个绑定器标准类（StaticLoggerBinder/StaticMarkerBinder/StaticMDCBinder + SimpleMarkerFactory + SimpleMdcAdapter，Marker/MDC 为 logback 同名类手写简化复制）+ i2f 包 2 个适配器（Slf4jLogLoggerAdapter 375 行全覆写 SLF4J Logger 转发 ILogger、FactoryAdapter LruMap(1024) 缓存）；落地链 LoggerProvider SPI（系统属性→log.properties→ServiceLoader）→ StdioLogger 兜底（ANSI 彩色 System.out/err）；仓库内无源码级消费方（仅 i2f-extension-all 聚合，聚合连带存在多绑定竞争风险）。核心静态缺陷：SLF4J {} 占位符语义在 i2f-log 侧完全失效（LogUtil.formatMsg 走 printf % 语义，{} 原样 + 参数 [0](Type)val 尾巴追加；消息偶发 % 被 String.format 误解析）、异常混入 varargs 丢堆栈、SLF4J 2.x 断代（REQUESTED_API_VERSION=1.7.30 与 pom 1.7.36 双源漂移）、冷启动竞态固化 StdioLogger（i2f-log-std 侧）。
+
+- 详细文档：[i2f-extension-slf4j-log](./i2f-extension/i2f-extension-slf4j-log/readme.md)
+
 ## i2f-springboot
 
 > SpringBoot 生态的开箱即用 Starter 集合，以条件装配（`@ConditionalOnClass` / `@ConditionalOnExpression` / `@ConditionalOnMissingBean`）为核心，将 i2f 的 AI 工具链、数据访问、安全认证、缓存、分布式任务、运维控制台等能力自动配置为可插拔的 Spring Boot 组件。
