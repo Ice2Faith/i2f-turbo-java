@@ -60,7 +60,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
     protected AtomicBoolean initialized = new AtomicBoolean(false);
     protected String mcpSessionId;
 
-    protected long expireTtl = TimeUnit.MINUTES.toMillis(30);
+    protected long expireTtl = TimeUnit.MINUTES.toMillis(5);
     protected final CopyOnWriteArrayList<ToolDefinition> cache = new CopyOnWriteArrayList<>();
     protected final AtomicLong expireTs = new AtomicLong(0);
     protected final AtomicBoolean hasCache = new AtomicBoolean(false);

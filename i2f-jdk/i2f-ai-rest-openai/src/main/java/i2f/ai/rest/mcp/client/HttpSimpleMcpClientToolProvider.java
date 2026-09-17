@@ -52,7 +52,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
     protected String name;
     protected String description;
 
-    protected long expireTtl = TimeUnit.MINUTES.toMillis(30);
+    protected long expireTtl = TimeUnit.MINUTES.toMillis(5);
     protected final CopyOnWriteArrayList<ToolDefinition> cache = new CopyOnWriteArrayList<>();
     protected final AtomicLong expireTs = new AtomicLong(0);
     protected final AtomicBoolean hasCache = new AtomicBoolean(false);
