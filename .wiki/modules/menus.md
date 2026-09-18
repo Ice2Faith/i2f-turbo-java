@@ -1338,6 +1338,89 @@
 
 - 详细文档：[i2f-extension-slf4j-log](./i2f-extension/i2f-extension-slf4j-log/readme.md)
 
+### i2f-extension-sqlparser
+
+> SQL 解析桥接扩展（JSqlParser:4.9 以 provided+optional 引入，版本模块内硬编码）：仓库最小扩展模块之一（单类单方法约 53 行），`SqlParserUtil.wrapAsCountSql(sql)` 把查询 SQL 改写为 count(1) 计数 SQL——快路径用 JSqlParser 将 PlainSelect 查询列替换为 `count(1) cnt` 并剥离 order by（保持单层、效率高），解析失败（如 MyBatis `#{}` 占位符）或非 PlainSelect 则降级为子查询包装 `select count(1) cnt from (sql) tmp_count`；解析器关闭 complexParsing/unsupportedStatements/errorRecovery 三关，支持 `?` 不支持 `#{}`。零 i2f 内部依赖、仓库内无源码级消费方（仅 extension-all 聚合；ops-starter 引用的是 JSqlParser 自身 CCJSqlParserUtil，同名易混）。核心静态缺陷：`catch(ParseException){}` 静默吞异常且仅捕获该型致 NoClassDefFoundError 穿透降级承诺失效、非查询语句被误包装为非法 count SQL、替换列丢弃 DISTINCT 且保留 GROUP BY 致计数语义错误、复杂查询普遍降级使快路径名不副实、以 Column 承载 `count(1)` 属脆弱用法。
+
+- 详细文档：[i2f-extension-sqlparser](./i2f-extension/i2f-extension-sqlparser/readme.md)
+
+### i2f-extension-swl
+
+> SWL 安全传输协议密码学引擎扩展（BouncyCastle:1.74 + sm-crypto:0.3.2.1 双 provided 硬编码版本）：为 i2f-swl-std 三大 SPI 接口提供 BC 六件套（RSA2048/AES256/SHA512/SM2/SM3/SM4 + 6 Supplier）与 Antherd 国密三件套（SM2/SM3/SM4 + 3 Supplier）共 18 主源文件约 900 行，含 9 个对等 Supplier 工厂供 SwlTransfer ObjectPool 池化；BC 路线以 Base64（国际算法）或 Hex（国密算法）编码密钥密文、统一 SwlException+SwlCode 包装异常，Antherd 路线直接委托 String-in-String-out 透传；内部依赖 i2f-swl-std（契约）+ i2f-code（AES 密钥字符）+ i2f-extension-jce-bc + i2f-extension-jce-sm-antherd（底层引擎）。下游 springboot/gateway 两个 swl-starter 以 POM compile 引入运行时 Spring 配置切换引擎，仓库内无其他源码级 import。核心静态缺陷：BC 对称加密器 6 处方法 catch 全用 ASYMMETRIC_ENCRYPT_EXCEPTION(1100) 而非 SYMMETRIC_* 码（复制粘贴）、AES-256 generateKey 走 CodeUtil.makeCheckCode(32) 有效熵仅约 190bit 不及 256 名义且 getKey 用 UTF8.encode 任意字节转 String 丢失密钥、Antherd 三件套 digest/verify/encrypt/decrypt 无 try-catch 破坏统一异常契约、SwlBcSm4SymmetricEncryptor 用 JDK 默认 Provider 的 SymmetricEncryptor 而非 BcSymmetricEncryptor 致 SM4 算法可能找不到、4 个测试引用已废弃 API 无法编译。
+
+- 详细文档：[i2f-extension-swl](./i2f-extension/i2f-extension-swl/readme.md)
+
+### i2f-extension-tokenlization-ansj
+
+> 中文分词扩展（ansj_seg:5.1.6 单三方 provided+optional 硬编码版本，零 i2f 内部依赖）：仓库四个并列分词桥接模块（ansj/hanlp/jcseg/jieba）之一，单类 AnsjTokenlizer 约 24 行、两静态方法——tokenlize(text) 委托 ToAnalysis.parse().getTerms() 透传带词性的 Term 列表，tokenlizeSplit(text) 取 Term::getName 展平为词串。桥接面收窄到 ToAnalysis 简分词，未暴露词性标注/自定义词典等其它 Ansj 分析器；与兄弟模块方法同名但返回类型互异（各自引擎原生 Term/IWord/SegToken），无公共接口、引擎不可运行时切换。仅 extension-all 聚合，仓库内无源码级消费方，测试为 main 方法跑地址分词样例。核心静态缺陷：tokenlization/Tokenlizer 系统性拼写错误已固化进坐标包名、throws Exception 过宽（底层不抛受检异常）、null 入参直穿 NPE 无防护、split 结果不过滤标点停用词、lombok 零使用冗余依赖、版本未纳根 DM、无 JUnit 断言测试。
+
+- 详细文档：[i2f-extension-tokenlization-ansj](./i2f-extension/i2f-extension-tokenlization-ansj/readme.md)
+
+### i2f-extension-tokenlization-hanlp
+
+> 中文分词扩展（hanlp:portable-1.8.2 单三方 provided+optional 硬编码版本，零 i2f 内部依赖）：四个并列分词桥接模块（ansj/hanlp/jcseg/jieba）中功能最全者，单类 HanlpTokenlizer 约 59 行，以类内 Mode 枚举（STANDARD/NLP/SPEED/NOTIONAL/INDEX/TRA_CN）+ if-else 链把 HanLP 六套静态分词器收拢到 tokenlize/tokenlizeSplit 两组重载（无 Mode 参默认 STANDARD，带 Mode 参分派对应器，末尾兜底降级 STANDARD），Split 取 Term::word 展平；透传 HanLP 原生 Term 不做适配。仅 extension-all 聚合，仓库内无源码级消费方，测试为 main 方法仅跑 STANDARD。核心静态缺陷：tokenlization/Tokenlizer 全组系统性拼写错误、throws Exception 过宽（底层不抛受检异常）、null/未匹配 Mode 静默降级 STANDARD 掩盖选择失效、if-else 链无穷尽检查、NOTIONAL 等 Mode 在 portable 版可能缺数据运行期异常、无 null 防护、split 不过滤标点停用词、lombok 零使用冗余、版本未纳根 DM、无 JUnit 且 6 Mode 仅测 1。
+
+- 详细文档：[i2f-extension-tokenlization-hanlp](./i2f-extension/i2f-extension-tokenlization-hanlp/readme.md)
+
+### i2f-extension-tokenlization-jcseg
+
+> 中文分词扩展（jcseg-core:2.5.0 单三方 provided+optional 硬编码版本，零 i2f 内部依赖）：四个并列分词桥接模块（ansj/hanlp/jcseg/jieba）之一，单类 JcsegTokenlizer 约 47 行，以两个 public static 共享字段 config(JcsegTaskConfig)+dic(ADictionary 类加载时建默认词典) 复用词典，tokenlize(mode,text) 每次 createJcseg 新建 ISegment + while(next()) 手动收集 IWord 列表，默认 COMPLEX_MODE（检索型含复合词），Split 取 getValue 展平。仅 extension-all 聚合，仓库内无源码级消费方，测试为 main 方法仅跑默认模式。核心静态缺陷：config/dic 是 public static 非 final 可变共享字段（破坏封装且 ISegment 非线程安全，并发读改存数据竞争）、每次新建 ISegment 对象抖动无池化、throws Exception 过宽（底层仅 JcsegException）、text.length() 当初始容量且 null 直穿 NPE、COMPLEX_MODE 输出复合冗余词不过滤、tokenlization/Tokenlizer 全组拼写错误、lombok 零使用冗余、版本未纳根 DM、int mode 常量与 hanlp 枚举风格不一、无 JUnit。
+
+- 详细文档：[i2f-extension-tokenlization-jcseg](./i2f-extension/i2f-extension-tokenlization-jcseg/readme.md)
+
+### i2f-extension-tokenlization-jieba
+
+> 中文分词扩展（jieba-analysis:1.0.2 单三方 provided+optional 硬编码版本，零 i2f 内部依赖）：四个并列分词桥接模块（ansj/hanlp/jcseg/jieba）中最后一个，单类 JiebaTokenlizer 约 34 行三静态方法——tokenlize(text) 默认以 SegMode.SEARCH 委托 tokenlize(mode,text) 调 process 返回带词性偏移的 SegToken，tokenlizeSplit(text) 另走 sentenceProcess 按句切分返回展平词串。仅 extension-all 普通 compile 聚合，仓库内无源码级消费方，测试为 main 方法跑地址分词样例。核心静态缺陷：getSegmenter() 每次 new JiebaSegmenter 触发全量词典重复加载（四兄弟中最严重性能缺陷，jcseg 至少 static dic 复用）、tokenlize/tokenlizeSplit 两路径算法不对称（process vs sentenceProcess）却命名对称易误导、throws Exception 过宽（底层不抛受检异常）、无 null 防护直穿 NPE、SEARCH 模式输出冗余细粒度子词、与兄弟无公共接口引擎不可运行时切换且返回类型互异（SegToken/Term/IWord）、SegToken 原生类型泄漏、tokenlization/Tokenlizer 全组系统性拼写错误、版本未纳根 DM、lombok 零使用冗余、无 JUnit 断言。
+
+- 详细文档：[i2f-extension-tokenlization-jieba](./i2f-extension/i2f-extension-tokenlization-jieba/readme.md)
+
+### i2f-extension-tts-espeak
+
+> 文本转语音（TTS）扩展（不同于分词四兄弟封装 Maven 三方库的范式，本模块走原生二进制内嵌+类加载自解压+外部进程调用路线）：将 espeak 命令行引擎（windows/espeak.zip 含 espeak.exe+espeak-data）作为 classpath 资源打进 jar，TtsEspeakProvider static 块触发 init() 以 AtomicBoolean getAndSet+目录 exists() 双幂等将 zip 解压至 {RUNTIME_PERSIST_DIR}/espeak/windows，再由 text2speech(String[,wavFile]) 写临时 txt 后 Runtime.exec 调 espeak.exe --path -b 1 -v zh -f（可选 -w 产 wav 再 move）合成。仅支持 Windows、中文语音 -v zh 硬编码、引擎不走 Maven 而是随 jar 打包的二进制。内部仅依赖 i2f-std-const（运行时目录常量）+ i2f-io-file（文件工具，并借其传递获得 i2f-io-stream 的 StreamUtil）。仅 extension-all 聚合、无源码级消费方、未出现在 bash 四目录分发 jar 中（推测因含大体积原生二进制被脚本排除）。核心静态缺陷：windows/espeak.zip 不在仓库源码树（缺失时 getResourceAsStream 返回 null、ZipInputStream 抛 NPE 被 static 块吞后 initialed 已置 true 致后续静默失败）、maven-jar-plugin 仅 include windows/**/* 可能排除 .class、initialed getAndSet 一旦置位异常不重试且 exists() 无法修复半成品目录、Runtime.exec(String) 单串含空格路径分词隐患、waitFor 不校验 exitValue 不消费 stdout/stderr 输出缓冲满可阻塞、临时 wav 无 finally 兜底、平台/语音硬编码不可配置、直接播放强依赖音频设备、StreamUtil 依赖传递未声明、throws Exception 过宽、lombok 零使用、无 JUnit。
+
+- 详细文档：[i2f-extension-tts-espeak](./i2f-extension/i2f-extension-tts-espeak/readme.md)
+
+### i2f-extension-tts-jacob
+
+> 文本转语音（TTS）扩展（与 tts-espeak 外置引擎命令行路线并列，本模块走 JACOB Java-COM Bridge + Windows SAPI Sapi.SpVoice 进程内 COM 桥接路线）：把 JACOB 桥接 jar（lib/jacob.jar，system scope 且随资源打包）与 jacob-1.21-x64/x86.dll 两份本地库内置进 jar，TtsJacobProvider static 块触发 init() 无条件写 LibraryLoader.JACOB_DLL_PATH 系统属性后以 AtomicBoolean getAndSet+目录 exists() 双幂等把首选位数 DLL 解压至 {RUNTIME_PERSIST_DIR}/jacob，再由 text2speech(String) 实例化 Sapi.SpVoice setProperty Volume80/Rate2 后 Dispatch.call Speak 本地播放、text2speech(String,File) 再接 SpFileStream+SpAudioFormat(Type22) 重定向 AudioOutputStream 落盘 wav。仅 Windows、参数全硬编码、双位数 DLL 择一。内部仅依赖 i2f-std-const（目录常量）+ i2f-io-file（FileUtil.save 落 DLL，借其传递 StreamUtil）。仅 extension-all 聚合，仓库内无源码级消费方，未纳入 bash 分发 jar。核心静态缺陷：com.jacob 用 system scope 不随 Maven 传递、内嵌 lib/jacob.jar 作嵌套资源又不会自动上运行时 classpath 极易 NoClassDefFoundError、同一 jacob.jar 既是 systemPath 编译目标又打进 jar 双重身份、getResourceAsStream 返 null 时 FileUtil.save 静默返回后 is.close() 立即 NPE 且无 try-with-resources、initialed 一旦置位异常不重试且 exists() 无法修复半成品/损坏 DLL 目录、setProperty 早于存在性判断、text2speech(File) 复用同一 ax 变量指向三 ActiveXComponent 释放归属易混且无 try-finally 泄漏 COM 句柄、Volume/Rate/Type22/Variant3 魔法数不可配、throws Exception 过宽（实为 ComFailException RuntimeException）、System.out 代替日志、OFFICIAL_URL 死常量、测试文案从 espeak 复制未改且非 JUnit、${pom.basedir} 已废弃。
+
+- 详细文档：[i2f-extension-tts-jacob](./i2f-extension/i2f-extension-tts-jacob/readme.md)
+
+### i2f-extension-velocity
+
+> Velocity 模板渲染与代码生成扩展（velocity-engine-core:2.3 单三方 provided 硬编码版本未走根 DM）：与 i2f-extension-freemarker 为同一设计在两种引擎上的同构兄弟，但显著更重——除共有的 VelocityGenerator 三源渲染门面（字符串/文件/classpath，字符串走 StringResourceLoader+UUID 键+finally 回收、config 空复用 DEFAULT_STRING_ENGINE 双检锁单例）+ batchRender 整目录镜像生成（#filename 动态输出名）+ _vm 工具对象（GeneratorTool implements AllMixins）+ Stringifier 责任链 SPI 外，独有 7 自定义指令：#trim（前后缀剥离+条件附加，变长参 0~4）、#sqlWhere/#sqlSet（trim 的 SQL 硬编码特例）、#richFor（Iterable/Iterator/Enumeration/Map/Array 五型迭代+$index+嵌套堆栈备份还原）、#fori（initState=begin<end 支持正反向）、#replaceAll（正则整体替换）、#script（body 交 VelocityScriptProvider 三级查找 THREAD_PROVIDERS→静态→ServiceLoader 求值）。12 主源文件约 1400 行。内部依赖 i2f-io-stream/typeof/os/serialize-impl/mixins/text 六模块，且仓库内有真实源码级消费方（document 渲染 Word XML/reverse-engineer-generator/xproc4j/velocity-bindsql 均 compile），是扩展组少见的被广泛复用模板底座，bash 四目录 jar 均在册。核心静态缺陷：测试 GeneratorTool.readFile 以静态调 AllMixins default 实例方法不编译且路径 i2f-velocity 陈旧失配、ObjectConvertor 属 i2f-convert 未声明靠传递、i2f-text 声明却无直接 import 疑似冗余、sqlWhere/sqlSet 与 trim 逻辑逐行拷贝未抽取、前/后缀各只剥首个命中 break 易误用、文件渲染与带 config 渲染每次新建引擎无缓存致批量 loadDirective 开销放大、GeneratorTool.fori 用 i!=end 保留死循环（与已修正的 #fori 指令语义不一致）、cmd 吞异常不校验 exitValue 不消费 stdout/stderr、#script THREAD_PROVIDERS 无写入入口近死路径、#replaceAll 正则强转+ReDoS、OUTPUT_ENCODING 注释未启用、#script+cmd 构成 RCE 安全面。
+
+- 详细文档：[i2f-extension-velocity](./i2f-extension/i2f-extension-velocity/readme.md)
+
+### i2f-extension-velocity-bindsql
+
+> Velocity 模板 + BindSql 桥接扩展（velocity-engine-core:2.3 单三方 provided 硬编码版本未走根 DM，与 velocity 兄弟重复声明）：把 i2f-extension-velocity 模板渲染与 i2f-bindsql 参数化模型对接，实现 MyBatis 风格 XML Mapper → 参数化 BindSql（? 占位 + args）动态 SQL 引擎。核心 VelocitySqlGenerator.renderSql 向模板前缀注入 #macro(sql $value)$__sql.wrap($value)#end、把 ValueWrapper 以 __sql 键塞入 params，模板 #sql($val) 调 wrap 登记 ${n}=值并回吐 ${n} 字面量，渲染后 RegexUtil.replace(\$\{\d+\}) 逐个改写为 ? 按序收集 args 产 new BindSql；VelocityResourceSqlTemplateResolver 解析 <mapper class> 下 query/update/call/sql 节点按 class.method 或全限定 method 归建 ConcurrentHashMap 缓存支持 refreshResources 热重载，类型映射 query→QUERY/update→UPDATE/call→CALL/sql→UNSET。3 主源约 239 行，内部依赖 velocity(底座+指令)/bindsql/match/xml/io-stream。仓库内真实 Spring Boot 消费方：jdbc-bql-starter 以 @ConditionalOnClass 条件装配 VelocityProxyRenderSqlProvider 接入 JDK 动态代理 Mapper，bash 四目录 jar 均在册。核心静态缺陷：renderSql 就地 params.put(__sql) 改入参违反洁癖契约循环复用污染、BindSql.Type 渲染后丢失(resolver 解析类型被 new BindSql 默认 UNSET 吞掉)、占位正则 \$\{\d+\} 过宽误匹配正文 ${数字} 字面量致 SQL 错位、两测试路径写 i2f-velocity-bindsql/i2f.velocity 陈旧目录且 readFile 静态调 default 方法不编译、SqlProxy.executeSql conn=null 直调 NPE 骨架、@Data 暴露 templateMap setter 破坏封装且 clear+putAll 非原子有空窗、sql 标签 demo 注释称自动探测类型实为恒 UNSET、表名列名裸插值 ${table}/$column 无白名单构成注入面、#sql 宏名与 ${n} 占位属脆弱隐式契约。
+
+- 详细文档：[i2f-extension-velocity-bindsql](./i2f-extension/i2f-extension-velocity-bindsql/readme.md)
+
+### i2f-extension-verifycode
+
+> Kaptcha 2.3.2（com.github.penggle，provided 硬编码版本未走根 DM）图形验证码极薄封装（2 主源约 167 行、无测试）：VerifyCodeUtil 单门面收敛两套 DefaultKaptcha 配置——getKaptchaBean 字符型（黑字 160×60 字长 4 ShadowGimpy）与 getKaptchaBeanMath 算术型（蓝字 字长 6 NoNoise），genVerifyCode(VerifyCodeType) 按枚举分派产 VerifyCodeData（VRFCD_+UUID 一次性 key / img / showText / code / imgBase64），MATH 分支以 lastIndexOf('@') 切分算式与答案，图片 ImageIO.write('jpg') 后经 i2f-codec-impl 的 Base64UrlStringByteCodec 转裸 base64url；VerifyCodeData @Data 附 getCacheEntry(key→code)/getWebShowEntry(key→imgBase64) 双视图对齐服务端存答案与前端取图闭环。仓库内无源码级消费方（仅 extension-all 聚合 + bash 四目录 jar 分发对外），与平行模块 i2f-jdk/i2f-verifycode（自绘看图答题型）互不依赖。核心静态缺陷：getKaptchaBeanMath 的 KAPTCHA_TEXTPRODUCER_IMPL 硬编码 com.ruoyi.framework.config.KaptchaTextCreator（RuoYi 脚手架外部类本仓不存在，MATH 模式必然实例化失败整体不可用）、@ 分隔契约脆弱（默认生产者无 @ 则 substring(0,-1) 越界）、genVerifyCode 无 else/null 兜底 img=null 致 ImageIO NPE、枚举 type 字段 private 无 getter 从不读取属死代码、每次调用 new DefaultKaptcha 无缓存且尺寸颜色字体全硬编码、只生成不校验比对全交调用方、imgBase64 裸编码无 data URI 前缀命名易误导、固定有损 JPEG 不利文本可读、kaptcha provided+版本写死脱离 DM、零测试零日志。
+
+- 详细文档：[i2f-extension-verifycode](./i2f-extension/i2f-extension-verifycode/readme.md)
+
+### i2f-extension-xproc4j
+
+> XProc4J 多语言脚本执行扩展（18 主源约 2900 行 + 2 测试，包名直接落 i2f.jdbc.procedure.* 与 JDK 底座共享命名空间）：DefaultJdbcProcedureExecutor extends BasicJdbcProcedureExecutor，向 i2f-jdbc-procedure 引擎补齐 Java/Groovy/JavaScript(Nashorn)/Funic/TinyScript/OGNL 六语言的 lang:eval-* 节点与 EVAL_* 特性通道，innerTest/Eval/Visit 走 OGNL、innerRender 走 Velocity+#script 回调，FunicJdbcProcedureExecutor 以 Funic 取代 OGNL 作默认语言；LangEvalJavaNode 用 MemoryCompiler 内存编译并 LruMap(2048) 缓存 RC<hash> 类，Procedure{Funic,TinyScript}Resolver 把脚本内 FUN_/SP_ 函数调用回落为嵌套 executor.exec 并经反射暴露 env/bean/sql_query_* 内建函数。第三方 groovy/nashorn-core/ognl/velocity/antlr4 + 三只 DB 驱动全 provided+optional 且版本硬编码未走根 DM。有真实深度消费方 i2f-springboot-xproc4j-starter（按 isEnableFunic 选 executor 并条件装配 ScriptPreload/GrammarReporter 两监听器）。核心静态缺陷：LangEvalJavaNode 的 LANG_JAVA_BODY 误置 bodyNode=node、MetaDependencyResolver SQL 名 substring 越界裁剪、双检锁 inflater 未二次判空、runScript 五分支空 catch 吞异常、JS 三处一致跳过静态检查、TestDefaultProcedureExecutor 实建 Basic 底座致六节点零覆盖、bash 仅 jdk8 无 jdk17 jar。
+- 详细文档：[i2f-extension-xproc4j](./i2f-extension/i2f-extension-xproc4j/readme.md)
+
+### i2f-extension-zip4j
+
+> Zip4J 2.9.1（net.lingala，provided 硬编码版本未走根 DM）的 ICompressor 契约适配器（1 主源 ZipZip4jCompressor 约 90 行 + 1 测试、无 SPI）：继承 AbsCompressor 骨架只补 compressBindData（写：new ZipFile→逐条 addStream，path=directory+'/'+fileName 剥前导 /，size>=0 时 setEntrySize）与 release(三参)（读：extractAll 全量落盘）两叶子方法；密码非空时构造 AES + KEY_STRENGTH_128 加密参数、读取按 isEncrypted() 自动 setPassword，是本压缩契约族唯一开箱提供 AES-128 加密的实现，与 commons-compress 的 i2f-extension-compress（多格式无强加密）互补。仓库内无源码级消费方（仅 extension-all 聚合 + bash 四目录 jar 分发）。核心静态缺陷：release(三参) 完全忽略 BiConsumer 违背 AbsCompressor 逐条目回调契约（父类 release(二参) 写盘 consumer 成死代码）、加密包未传密码时 password.toCharArray() NPE、is.close/zipFile.close 不在 finally 异常泄露、new ZipFile 对已存在文件追加不覆盖致重复条目、三参构造器只 setPassword 不 setEncryptFiles 与单参构造行为割裂、目录条目 inputStream==null 直接 continue 丢失空目录结构、仅支持 zip 读无格式探测、版本写死脱离 DM、lombok 依赖冗余。
+
+- 详细文档：[i2f-extension-zip4j](./i2f-extension/i2f-extension-zip4j/readme.md)
+
+### i2f-extension-zookeeper
+
+> Apache ZooKeeper 3.6.3 + Curator 4.0.0（三者 provided 硬编码未走根 DM）的分布式协调适配套件（17 主源约 1200 行、无测试无 SPI）：以 ZookeeperManager（312 行）为连接与 CRUD 核心（CountDownLatch 阻塞建连、Expired 递归 reload 重连、逐级 mkdirs、KV/TTL/addWatch 持久递归监听/multi 事务），向外派生三大 i2f 契约实现——ZookeeperCache 实现 IExpireContainerCache/IPersistCache/IDistributedCache（/cache 前缀）、ZookeeperLockProvider+ZookeeperInterMutexLock 适配 ILockProvider/ILock（Curator InterProcessMutex）、AbsClusterProvider/ZookeeperClusterProvider 以临时节点+递归 watch 做 |domainId|%count==myid 一致性取模任务分片。厚适配模块（自带连接/重连/监听续挂/分片算法），有真实消费方 i2f-springboot-zookeeper-starter 装配五类 Bean。核心静态缺陷：最严重——ZookeeperManager.serializer 无 setter/无初始化全仓无赋值恒 null，凡经 obj2ZkData/zkData2Obj 的 set/get/expire/带数据mkdirs/集群注册mkdirs(path,true) 必然 NPE（数据读写通道整体不可用）；另 ZookeeperCache.exists 误传 key 应传 path 漏拼前缀、expire 用 toSeconds 而 set 用 toMillis TTL 差千倍、clean 误删 /cache 自身触发 NotEmpty、AbsClusterProvider.GUID 为 static 同进程多实例互覆、myid 取未排序 index 而 count 取排序列表致分片漂移、getExpire 恒 null、isMy 先 count 后 myid 非原子、重连无退避、PERSISTENT_WITH_TTL 依赖服务端 3.6+ 配置。
+
+- 详细文档：[i2f-extension-zookeeper](./i2f-extension/i2f-extension-zookeeper/readme.md)
+
 ## i2f-springboot
 
 > SpringBoot 生态的开箱即用 Starter 集合，以条件装配（`@ConditionalOnClass` / `@ConditionalOnExpression` / `@ConditionalOnMissingBean`）为核心，将 i2f 的 AI 工具链、数据访问、安全认证、缓存、分布式任务、运维控制台等能力自动配置为可插拔的 Spring Boot 组件。
