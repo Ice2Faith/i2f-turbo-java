@@ -926,11 +926,53 @@
 
 > Spring 生态集成模块集合，封装 Spring 核心、MVC、安全、Redis、Web 等能力的增强与元数据解析。
 
+### i2f-spring-all
+
+> i2f-spring 子模块的 Maven 聚合分发包（仅 1 个 pom.xml 共 64 行、无 Java 源码、无测试无资源无 SPI）：以 7 枚 compile 依赖聚合本组全部功能模块——authentication/core/mvc-metadata/redis/security/swl/web——依赖均不写版本（由根 DM 以 ${i2f.version} 锁定），并继承根 pom pluginManagement 的 maven-assembly-plugin（jar-with-dependencies 描述符、appendAssemblyId=false）产出可脱离父 POM 直接 -cp 部署的 fat-jar，自身 <build> 仅覆盖 addMavenDescriptor=true。与 i2f-jdk-ext-all/i2f-extension-all/i2f-jdk-all 同构的组级聚合分发件；子模块 Spring/servlet 多为 provided+optional 故容器依赖不随门面外泄。仓库内无任何源码级或 POM 级消费方，仅面向外部项目/手工部署作统一依赖入口。登记 spring-pom:17（<modules> 首个）/根DM1310-1314，bash 四目录 jar 全含 jdk17。核心静态缺陷：pom:15-18 保留被注释的自依赖块（误启用即成循环依赖构建失败）、门面硬编码全量 7 依赖无法按需裁剪、同时充当 thin 门面与 fat-jar 易致重复类双份定义、无 DM/exclusions 治理 fat-jar 合并可能同名资源覆盖、新增子模块漏登记进本件时构建静默缺件无校验。
+
+- 详细文档：[i2f-spring-all](./i2f-spring/i2f-spring-all/readme.md)
+
+### i2f-spring-authentication
+
+> Spring Security / Shiro 认证结果的统一出口控制器（全模块仅 1 主源 SecurityForwardController 约 35 行、无测试无 SPI）：一个映射 /forward/response 的 @RestController，接收安全过滤器链内经 ServletContextUtil.forward(req,resp,FORWARD_PATH,ApiResp…) 转发的登录成功/失败/登出/鉴权异常结果，读 forward-data 属性、为 ApiResp 则原样透出、否则包 ApiResp.success，data 为空时回落 forward-exception 转 ApiResp.error(“internal error!”)，把跑在 DispatcherServlet 之外的认证 Handler 结果纳入统一 ApiResp JSON 序列化管线。路径与属性契约全部源自 i2f-jdk-ext-web.ServletContextUtil（经 i2f-spring-web 传递依赖）；真实消费方为 i2f-springboot-security-starter 与 shiro-starter 的两套认证 Handler。瑕疵：forward-exception 分支因消费方恒传 data 而几乎不可达（死代码）、ex.printStackTrace 绕过日志、@RequestMapping 未限定 HTTP method、lombok 声明冗余、零测试。
+
+- 详细文档：[i2f-spring-authentication](./i2f-spring/i2f-spring-authentication/readme.md)
+
+### i2f-spring-core
+
+> Spring Framework 基础能力到 i2f-jdk 契约的桥接基座（22 主源约 1400 行、零单元测试、横跨 core/enviroment/event/matcher/param/resource/scanner/spel/tx/cglib 子包）：把 spring-core/context/tx（provided+optional 且版本走父 DM ${spring.version} 非硬编码）收敛为四类 i2f 契约实现——SpringContext→IWritableNamingContext、SpringEnvironment→IEnvironment、CglibProxyProvider→IProxyProvider、SpringAntPathMatcher→IPriorMatcher——并附 SpringUtil（Aware+CountDownLatch 容器门面）、EnvironmentUtil（属性前缀/分组提取）、EventManager/Event（应用事件）、TransactionUtil（手动事务 + ScheduledExecutor 超时自动提交）、SpelExpressionResolver、PackageScanner/ClasspathScanner/ResourceResolver/MatcherUtil/ParamNameResolver 等工具。i2f-spring 组依赖面最广的基座件，被 ai/ops/security/shiro/spring/swl/xproc4j/gateway 等 10+ starter 消费，核心装配方 SpringCoreAutoConfiguration 以 @Import 注入六类 Bean（i2f.spring.core.enable 默认 true）。bash 四目录 jar 齐全含 jdk17。高危静态缺陷：Event 构造函数 source=source 自赋值致 getSource 恒 null、EventManager.publish 无条件 context.publishEvent 双发布且 publisher-only 构造 NPE、TransactionUtil 超时定时器提前 commit 与任务自身二次提交冲突且 pool 不 shutdown、SpringUtil.getResource 绕过闩锁读裸字段、CglibProxyProvider.proxy 把 obj 强转 Class、DEFAULT_ENHANCER/ClasspathScanner.provider 共享 static 并发不安全、getGroupMapConfigs 无点 key substring 越界、数值 getter 空 catch 吞异常、包名 enviroment 拼写错误已固化、TestPackageScanner main 演示类混入 src/main。
+
+- 详细文档：[i2f-spring-core](./i2f-spring/i2f-spring-core/readme.md)
+
 ### i2f-spring-mvc-metadata
 
 > 基于反射解析 Spring MVC Controller 的 API 元数据，提取 URL、HTTP 方法、参数、返回值与 Swagger 注释，为 API 文档生成提供结构化数据。
 
 - 详细文档：[i2f-spring-mvc-metadata](./i2f-spring/i2f-spring-mvc-metadata/readme.md)
+
+### i2f-spring-redis
+
+> IRedisClient 契约（i2f-extension-redis-api）的 Spring Data Redis 适配器（全模块仅 1 主源 SpringRedisClient 约 192 行、无测试无 SPI）：持有 RedisTemplate<String,Object> + 可选 prefix，wrapKey 统一收口键命名空间，把 21 个 String/List/Hash/TTL 契约方法一比一映射到 opsForValue/opsForList/opsForHash；spring-data-redis:2.3.5.RELEASE provided 但版本硬编码未走根 DM（与同组 spring-core 规范不一致）。真实消费方 i2f-springboot-redis-starter.RedisCacheConfiguration @ConditionalOnMissingBean 注册为 IRedisClient Bean，security/shiro starter 亦依赖。核心静态缺陷：hashGetAll 建空 ret 却从 map.put 回写源集从不填 ret → 恒返回空 map 且可能 CME；listSet 对 key 二次 wrapKey 读旧值取 prefix+prefix+key 恒 null；flushDb 取 RedisConnection 从不 close 泄漏且清空整库无视 prefix；del 先 get 后 delete 非原子、String.valueOf 对 Object 模板值类型不安全、keys 走阻塞 KEYS、lombok/i2f-cache 声明冗余。登记 spring-pom:21/根DM1330-1334/spring-all:33，bash 四目录 jar 全含 jdk17。
+
+- 详细文档：[i2f-spring-redis](./i2f-spring/i2f-spring-redis/readme.md)
+
+### i2f-spring-security
+
+> Spring Security 认证上下文与密码编码的极薄工具模块（全模块仅 3 主源约 92 行、无测试无 SPI 无资源）：SecurityUtil 把 SecurityContextHolder 的取上下文/取认证/取 principal/取权限四步收敛为静态门面，SecurityCryptoUtil 提供默认 BCryptPasswordEncoder 单例与 bCryptEncode/bCryptMatch 便捷法及可传任意 PasswordEncoder 的泛化 encode/match，SpringPasswordEncoder 把 Spring PasswordEncoder 适配到 i2f-authentication 的 IPasswordEncoder 契约（覆写 matches 走 Spring 原生 matches 以规避接口默认 re-encode+equals 对随机盐恒 false 的陷阱）。spring-security-core/crypto 均 provided 且版本走父 i2f-spring pom 的 ${spring.security.version} DM 非硬编码（但未叠加 optional，与同组 spring-core 的 provided+optional 不一致）。真实消费方 i2f-springboot-security-starter 的 AuthenticationTokenFilter 调 SecurityUtil.getAuthentication()。核心静态缺陷：getPrincipal/getAuthorities 对未认证请求的 getAuthentication()==null 无兜底致 NPE 级联、getPrincipal 泛型 (T) 未检查强转、bCryptPasswordEncoder 为 public static 非 final 可被外部重赋值、工具类无私有构造、BC 静态实例与无参构造双路径冗余、零测试。登记 spring-pom:22/根DM1335-1339/spring-all:37，bash 四目录 jar 全含 jdk17。
+
+- 详细文档：[i2f-spring-security](./i2f-spring/i2f-spring-security/readme.md)
+
+### i2f-spring-swl
+
+> SWL（Secure Web Layer）透明加解密的 Spring MVC 切面件（全模块仅 3 主源约 183 行、无测试无 SPI 无资源）：两个 @ControllerAdvice——SwlDecryptionRequestBodyAdvice extends RequestBodyAdviceAdapter（入站解密）与 SwlEncryptionResponseBodyAdvice implements ResponseBodyAdvice（出站加密），均 @Order(-1)，把 i2f-swl 的 SwlExchanger（RSA 加密随机对称密钥+AES 加密数据+SHA-256 签名+RSA 数字签名+时间戳/nonce 防重放）接到 MVC 消息读写管线，按控制器方法 @SwlCtrl(in/out) 逐方法开关，统一以 SwlData{header,parts,attaches,context} 信封收发、入站只取 parts[0]、String 返回型特判回串。spring 五件套+servlet-api 全 provided+optional 且版本走父 i2f-spring DM ${spring.version} 非硬编码（规范同 spring-core/web）。全模块无任何源码级消费方：i2f-springboot-swl-starter 用的是另一套 AOP/Filter 实现（i2f.springboot.swl.spring 包）并不依赖本模块，本件走 @ControllerAdvice 组件扫描路线需宿主显式扫 i2f.spring.swl.advice 才生效。核心静态缺陷：两 Advice 字段与 getServerCert 逐字重复且各 new 全套协作者无 @Autowired（SwlExchanger 各开关恒默认）、@Data 加在 Advice 上 toString 可能牵出证书状态、SwlAdviceConfig 各持独立实例改一处不影响另一处且无外部化、loadServer 返 null 后 cert.getCertId NPE、beforeBodyRead 反序列化无空/类型校验且 getParts().get(0) 空列表越界多 part 丢失、RequestContextHolder 强转 ServletRequestAttributes 非 servlet 线程 NPE、@SwlCtrl 类级不生效、i2f-jdk-ext-web 冗余依赖、bash 仅 3/4 目录有 jar 缺 backup-jdk8。
+
+- 详细文档：[i2f-spring-swl](./i2f-spring/i2f-spring-swl/readme.md)
+
+### i2f-spring-web
+
+> Spring Web MVC / WebFlux 能力工具箱 + i2f-network REST 契约的 RestTemplate 落地（13 主源约 1250 行、无测试无 SPI，横跨 mvc/mapping/file/proxy/rest/webflux/wrapper 七子包）：SpringMvcUtil（RequestContextHolder + 下沉 i2f-jdk-ext-web.ServletContextUtil 的取 req/resp/session/cookie/forward/redirect/respJson 静态门面）与 WebfluxContextUtil（响应式 ServerHttpRequest 取 token/cookie/ip）双栈覆盖，MappingUtil 为 RequestMappingHandlerMapping 建 path→HandlerMethod 索引供网关/运维反查 Controller 方法，HttpFileUtil 桥接 ServletFileUtil 断点续传/流式下载，HttpProxyHandler+HttpProxyFilter 是前缀映射 + 属性打标记防重入的轻量反向代理，SpringWebRestClient/SpringWebHttpProcessor/SpringWebAutoHttpRequestBodyHandler 把 i2f-network 的 IRestClient/IHttpProcessor 抽象契约落地到 RestTemplate.exchange/execute，三个 *MultipartFile（临时文件/byte[]/File）适配 Spring MultipartFile。spring-core/context/web/webmvc/webflux + javax.servlet-api 全 provided+optional 且版本走父 i2f-spring pom DM ${spring.version} 非硬编码（与同组 spring-core 一致的规范做法）。真实消费方 i2f-springboot-http-proxy-starter（@ConfigurationProperties("i2f.http.proxy") 装配代理）与 ai-mcp-client（new SpringWebRestClient 作 MCP REST 通道）。核心静态缺陷：SpringMvcUtil.include 误调 forward、FileMultipartFile.isEmpty 返回 file.exists() 语义反转、HttpProxyHandler.proxy 泄漏 ClientHttpResponse 且原样转发含 Host 的全量 header、静态 proxy 与实例 pathMapping 割裂且用废弃 HttpMethod.resolve、三 wrapper copy 缓冲 4086(应4096) 且 while len>0、MappingUtil fastMapping 对模板路径不命中恒回落全扫、@Data 破坏适配器封装、SpringWebRestClient params 一律拼 URL query、WebfluxContextUtil.getHeaders 缺 header new ArrayList(null) NPE、多处 printStackTrace、零测试。登记 spring-pom:24/spring-all:45/authentication 依赖本模块/根DM1345-1349，bash 四目录 jar 全含 jdk17。
+
+- 详细文档：[i2f-spring-web](./i2f-spring/i2f-spring-web/readme.md)
 
 ## i2f-extension
 
@@ -965,6 +1007,12 @@
 > sqlite-vec 原生扩展版的 RAG 存储层实现：单库 `SqliteRagEmbeddingStore` + 分桶记忆 `BucketRagEmbeddingStore` 双契约落地本地向量库（vec0 虚拟表 + KNN 检索），原生扩展自动释放。
 
 - 详细文档：[i2f-extension-ai-rag-sqlite](./i2f-extension/i2f-extension-ai-rag-sqlite/readme.md)
+
+### i2f-extension-all
+
+> i2f-extension 子模块的 Maven 聚合分发包（仅 1 个 pom.xml 共 359 行、无 Java 源码、无测试无资源无 SPI）：以 81 枚 compile 依赖「一处声明、整组引入」聚合本组除自身外全部功能模块（7zip/ai-*/antlr4-*/compress/groovy/jackson/mongodb/mybatis/netty/redis-*/velocity*/zookeeper 等，含末位追加的 freemarker/xproc4j，无漏件），依赖均不写版本（由根 DM 以 ${i2f.version} 锁定），并全继承根 pom pluginManagement 的 maven-assembly-plugin（jar-with-dependencies、appendAssemblyId=false）产 fat-jar——本模块 <build> 连 addMavenDescriptor 覆盖都没有，比 i2f-spring-all 更彻底全继承。是全仓库聚合规模最大的组级门面，与 i2f-jdk-all/i2f-jdk-ext-all/i2f-spring-all 同构。子模块对第三方普遍 provided（多未 optional）故容器/三方库不随门面 Maven 传递，代价是 fat-jar 非自足可运行包。仓库内无任何源码级或 POM 级消费方，仅面向外部/手工部署。核心静态缺陷：pom.xml:39-42 残留被注释的自依赖块（误启用即循环依赖构建失败）、门面硬编码全量 81 依赖无法按需裁剪、thin 门面与 fat-jar 双身份易致重复类、无 DM/exclusions 治理 81 模块合并时同名 META-INF/services 后者胜（本组多 SPI 尤险）、新增子模块漏登记时静默缺件无校验。
+
+- 详细文档：[i2f-extension-all](./i2f-extension/i2f-extension-all/readme.md)
 
 ### i2f-extension-antlr4
 
@@ -1425,6 +1473,12 @@
 
 > SpringBoot 生态的开箱即用 Starter 集合，以条件装配（`@ConditionalOnClass` / `@ConditionalOnExpression` / `@ConditionalOnMissingBean`）为核心，将 i2f 的 AI 工具链、数据访问、安全认证、缓存、分布式任务、运维控制台等能力自动配置为可插拔的 Spring Boot 组件。
 
+### i2f-springboot-activity-starter
+
+> Activiti 7 工作流 Starter：条件自动装配 `ProcessEngine` 与五大运行时服务（Repository/Runtime/History/Management/Task），数据源支持独立 JDBC 或复用容器二选一，`ActivityManager` 封装部署/启动/待办/完成/历史/挂起激活/组任务拾取归还转派全流程 API，另附默认关闭的 REST 演示接口与请假流程 BPMN 样例。
+
+- 详细文档：[i2f-springboot-activity-starter](./i2f-springboot/i2f-springboot-activity-starter/readme.md)
+
 ### i2f-springboot-ai-mcp-server
 
 > MCP 服务端 Starter：将 Spring 容器中的 `@Tool`/`@Tools` 工具以 HMAC-SHA256 签名认证的 Simple MCP 协议（`/mcp/tool/list`、`/mcp/tool/call`）对外暴露，内置 Spring Web MVC（共享宿主 Web 端口）与 Netty（独立端口）双传输模式的自动装配，支持 nonce 防重放与请求级上下文透传。
@@ -1436,6 +1490,48 @@
 > MCP 客户端 Starter：按 `instances` 配置将远程 MCP Server 注册为本地 `McpToolProvider` Bean，内置三套客户端实现——自研 Simple MCP 私协议（HMAC-SHA256 签名认证）、自研标准 JSON-RPC Streamable HTTP（`Mcp-Session-Id` 会话管理）与 solon-ai-mcp SDK（STDIO/SSE/STREAMABLE 等多种通道），供 AI 工具网关聚合为「实例名.工具名」形式的动态工具。
 
 - 详细文档：[i2f-springboot-ai-mcp-client](./i2f-springboot/i2f-springboot-ai-mcp-client/readme.md)
+
+### i2f-springboot-ai-starter
+
+> AI 能力 Starter：两级条件自动装配注册 `AiModel`（REST OpenAI / DashScope 二选一）、`IJsonSerializer`、`AiAgent`，并以 `BeanDefinitionRegistryPostProcessor` 扫描 `@AiService` 接口、用 `FactoryBean` + JDK 动态代理实例化为「方法即提示词、参数即上下文、返回值即结构化输出」的声明式 AI 服务，对齐 LangChain4j `@AiService` 范式。
+
+- 详细文档：[i2f-springboot-ai-starter](./i2f-springboot/i2f-springboot-ai-starter/readme.md)
+
+### i2f-springboot-auth-starter
+
+> RBAC 声明式权限校验 Starter：`@CheckPermissions` 注解承载 SpEL 表达式，`CheckPermissionAspect` 以 `@Before` 拦截并配合 `CheckPermissionContextProvider` 注入的 `user/auth/jp/args/pN` 上下文求值，非 `true` 抛 `PermissionDenyException`；`IRabcLoginUser` 承载身份、`RbacCheckPermissionHelper` 提供 hasAll/AnyRoles/Perms 判定，不绑定任何认证框架、零内部依赖。
+
+- 详细文档：[i2f-springboot-auth-starter](./i2f-springboot/i2f-springboot-auth-starter/readme.md)
+
+### i2f-springboot-dubbo-starter
+
+> Dubbo 集成 Starter：单个空壳 `@Configuration` 类 `DubboAutoConfiguration` 承载 `@EnableDubbo`，由 `@ConditionalOnExpression("${i2f.springboot.config.dubbo.enable:true}")` 一键开关，把「启用 Alibaba Dubbo 注解驱动」收敛为带开关的薄封装 Starter；零内部依赖，上游为 EOL 的 `com.alibaba.boot:dubbo-spring-boot-starter:0.2.0`（`com.alibaba.dubbo` 旧命名空间），Dubbo 运行时 `provided` 需宿主自备。
+
+- 详细文档：[i2f-springboot-dubbo-starter](./i2f-springboot/i2f-springboot-dubbo-starter/readme.md)
+
+### i2f-springboot-dynamic-datasource-starter
+
+> 多数据源动态路由 Starter：基于 `AbstractRoutingDataSource`，以 `@DataSource` 注解 + AOP 环绕切面将目标数据源写入 `ThreadLocal` 并路由；支持 `multiply.{id}.*` 批量声明、`group` 分组与 `ring`/`random` 组内负载均衡，缺失目标按 `strict` 抛 `DataSourceNotFoundException` 或回落 `primary`；内置 Druid/Hikari 两类 `DataSourceInitializer`。零内部依赖，`test-springboot` 为仓库内真实消费方。
+
+- 详细文档：[i2f-springboot-dynamic-datasource-starter](./i2f-springboot/i2f-springboot-dynamic-datasource-starter/readme.md)
+
+### i2f-springboot-encrypt-property-starter
+
+> 配置属性透明解密 Starter：`PropertiesDecryptAdapter`（`BeanFactoryPostProcessor`）在启动期把 Environment 的每个 `PropertySource` 包装为 `DecryptPropertySourceWrapper`，读值时按前缀自动解密——`aes.` 走 AES/ECB（`i2f-crypto-impl`）、`bs64.` 走 Base64（`i2f-codec-impl`），让敏感配置密文落盘、`@Value`/`getProperty` 透明还原。策略由 `IPropertyDecryptor` 契约可插拔；但两解密器 `@Bean` 同名 `propertyDecryptor` 且默认同开、AES key 默认 null 为高危瑕疵。
+
+- 详细文档：[i2f-springboot-encrypt-property-starter](./i2f-springboot/i2f-springboot-encrypt-property-starter/readme.md)
+
+### i2f-springboot-http-proxy-starter
+
+> HTTP 反向代理 Starter：`HttpProxyAutoConfiguration` 以 `@ConfigurationProperties("i2f.http.proxy")` 绑定「prefix→target」映射列表，`@ConditionalOnExpression` 默认开启，把 `i2f-spring-web` 的 `HttpProxyHandler`/`HttpProxyFilter` 注册为 `order=-1`、拦截 `/*` 的前置过滤器，命中前缀即透明转发（透传 method/header/body/query）。唯一内部依赖 `i2f-spring-web`；但 `mappings` 默认 null 无判空、未配即启动 NPE，且未登记进元数据为瑕疵。
+
+- 详细文档：[i2f-springboot-http-proxy-starter](./i2f-springboot/i2f-springboot-http-proxy-starter/readme.md)
+
+### i2f-springboot-jackson-sensible-starter
+
+> Jackson 脱敏处理器桥接 Starter：单类 `JacksonSensibleAutoConfiguration`（`ApplicationContextAware` + `ApplicationListener<ContextRefreshedEvent>`）在容器启动/刷新时把全部 `ISensibleHandler` Bean 收集进上游 `i2f-extension-jackson` 的静态注册表 `SensibleHandlersHolder.GLOBAL_HANDLERS`，让自定义脱敏「声明为 Spring Bean 即被全局感知」，`@ConditionalOnExpression` 默认开启。唯一内部依赖 `i2f-extension-jackson`；但 `clear()`+`addAll()` 非原子有空窗、`@ConfigurationProperties` 无对应字段、异常静默吞为瑕疵。
+
+- 详细文档：[i2f-springboot-jackson-sensible-starter](./i2f-springboot/i2f-springboot-jackson-sensible-starter/readme.md)
 
 ## i2f-tools
 
