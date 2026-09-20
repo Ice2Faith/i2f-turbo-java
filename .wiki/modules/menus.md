@@ -1569,6 +1569,12 @@
 
 - 详细文档：[i2f-springboot-nginx-rtmp-auth-server-starter](./i2f-springboot/i2f-springboot-nginx-rtmp-auth-server-starter/readme.md)
 
+### i2f-springboot-ops-starter
+
+> 一体化在线运维/开发/AI 控制台 Spring Boot 全量装载 Starter（组内体量最大：174 源文件 + 内嵌 Vue2 SPA，直接 compile 引入约 22 个 i2f 内部模块，处于依赖栈顶端聚合枢纽）：把应用自省（system/env/beans/deadlock/运行期日志级别 + `/ops/app/eval` Groovy 任意求值）、多数据源 SQL 控制台（`DatasourceProvider`+三 `DatasourceCollector`，query/update/runner/import/export）、SSH/SFTP 文件与远程 shell、Redis/ES/MinIO/AWS-S3/主机文件/xproc4j/xxl-job、OpenAI 对话 + 约 25 个 `@Tool` AI 工具 + Sqlite RAG + Groovy 技能 + TTS、DashScope 文生图/生视频/3D 全套能力，统一挂 `i2f.springboot.ops.base-url`（默认 `/ops`），全部入出站经 `OpsSecureTransfer` 的 SM2 密钥封装+SM4 加密+SM3 摘要+SM2 签名国密信封，`/ops/menus` 遍历 `IOpsProvider` 汇总导航。瑕疵含【高危】约 80 个 `@Controller`/`@Component`（含各 Tools/Collector）被直接登记进 `EnableAutoConfiguration`（spring.factories+AutoConfiguration.imports 双份一致）却无一为 `@Configuration`/`@AutoConfiguration`（误用装配机制、被扫则双注册，同 trace-mdc/websocket 族但规模空前）、【高危】`OpsSecureHelper.generateCertPair` 中 `clientPair = serverPair;` 覆盖刚生成的客户端密钥对致 server/client「证书」完全相同且均为含私钥完整密钥对 Base64(JSON)（拿 clientCert 即持服务端私钥可伪造）、【高危】`/ops/app/eval` Groovy RCE 端点与 datasource/ssh/host/redis/es 等 `ops.*.enable` 默认 true 而 AI `command/groovy/nodejs` 工具默认 false（同为执行能力姿态不一致）、【高危】`HostIdHelper.canAcceptHostId` 空 hostId 直接放行（实质只作集群定向非鉴权）、`RagAutoConfiguration.memoryTools` 缺 `@Bean` 致 MemoryTools 永不生成、`DefaultDatasourceProvider.refresh` 无数据源时 `put("primary",null)` NPE 被空 catch 吞+`detectPrimaryDatasource` 重复 isEmpty 死分支、`SkillAutoConfiguration` static `ScheduledExecutorService` 从不 shutdown+裸 `new Thread`、`AppEvalOpsController.eval` 每请求裸线程超时不中断致失控脚本泄漏、`OpsSecureAutoConfiguration` 无 cert 启动即 `System.out.println` 打印且每次换密钥+`test()` 自测死代码、SSH cmd/download 路径穿越+表名原样拼接标识符注入、元数据仅登记 `secure.cert` 一个属性数十真实开关零登记 `hints` 是 jsp/accesslog 死条目。**位于依赖栈顶端、被多上游文档标注为消费方，非孤岛**。
+
+- 详细文档：[i2f-springboot-ops-starter](./i2f-springboot/i2f-springboot-ops-starter/readme.md)
+
 ### i2f-springboot-oss-minio-starter
 
 > MinIO 对象存储 Spring Boot 自动装配 Starter（薄装配层，仅 2 个类）：`MinioProperties` 继承 `MinioMeta` 绑定 `i2f.minio.*`（url/accessKey/secretKey 三元连接参数），`MinioAutoConfiguration` 据此产出 `MinioUtil`（桶/对象/前缀/预签名 URL 原生 API 封装）与 `MinioFileSystem`（把对象存储适配为 `i2f-io-filesystem` 的 `IFileSystem`）两个共享同一 `MinioClient` 的 Bean，整体由 `i2f.minio.enable`（默认 true）开关控制；实现全部下沉 `i2f-extension-minio` / `i2f-extension-filesystem-minio`，minio 客户端 provided+optional。瑕疵含 `@Import(MinioClient.class)` 可疑且无消费、缺 `@ConditionalOnClass` 类存在保护、自动配置类未标 `@Configuration`、`@Data`+未用 `dateFormat` 遗留字段、两 Bean 日志文案复制粘贴相同、`enable` 未纳入属性类、元数据 hints 模板残留、无 region/桶/超时扩展参数。
@@ -1611,12 +1617,216 @@
 
 - 详细文档：[i2f-springboot-shiro-starter](./i2f-springboot/i2f-springboot-shiro-starter/readme.md)
 
+### i2f-springboot-spring-starter
+
+> Spring 基础 Starter（i2f-springboot 组的地基装配件）：以 14 个各带独立 `@ConditionalOnExpression`/`@ConditionalOnClass` 开关的自动配置类，一次性把 `i2f-spring`/`i2f-resp`/`i2f-extension-jackson`/`i2f-jdk-ext-web` 能力接入 Boot 应用——`@Import` 注册 `SpringUtil`/`EnvironmentUtil`/`EventManager`/`SpringContext`/`SpringEnvironment`/`TransactionUtil` 并回填 `SpringContextHolder`（三把 `CountDownLatch` 阻塞式静态持有器），装配异步/调度线程池、CORS 过滤器、全局异常→`ApiResp` 转换、全局响应体 `ApiResp` 包装（含 404 截获、`@StandardResp(false)` 逐点关闭）、Jackson「Long→String + 日期时间格式化」转换器、链路 `TraceFilter` 与约 80 项可配的 Web `SecurityFilter`，并附 `BaseBootApplication`/`WarBootApplication` 启动入口与富诊断 Banner；直接/传递引入 7+ 内部模块，compile 面最广。瑕疵含【高危】`startup` 对任意非 null webType 强制 `NONE`（逻辑反转禁用 Web）、元数据 `i2f.spring.{response,trace}.enable.enable` 键与实际 `...enable` 开关错位（IDE 补全永不生效）、async/schedule 把 `CallerRunsPolicy` 配错映射为 `DiscardOldestPolicy`、两类无 `@Configuration` 走 lite 模式致 `getAsyncExecutor`/`configureTasks` 直调 `@Bean` 方法再 new 一份脱离生命周期管理的重复线程池、`SecurityFilterAutoConfiguration` 约 80 属性零元数据登记且命名空间 `i2f.security.filter` 异类、`@Data`+类/方法级重复 `@ConditionalOnClass` 滥用、`SecurityFilter`/`TraceFilter` 靠 `i2f-spring-web` 传递未直声明、两个 `HandlerExceptionResolver` 无 `@Order`、零测试无 `<description>`。
+
+- 详细文档：[i2f-springboot-spring-starter](./i2f-springboot/i2f-springboot-spring-starter/readme.md)
+
+### i2f-springboot-ssh-tunnel-starter
+
+> SSH 隧道自动建立 Starter（5 类、唯一内部依赖 `i2f-extension-sftp`）：以「两阶段装配」把上游 `SshTunnelUtil` 接入 Boot 生命周期——阶段 A `TunnelSetupConfiguration`（实现 `ApplicationListener<ApplicationEnvironmentPreparedEvent>`，经 `spring.factories` + `ApplicationListener.imports` 双登记）抢在容器/数据源创建之前用 `Binder` 绑定 `i2f.springboot.ssh.tunnel.servers[]`，逐台跳板机 `new SshTunnelUtil(...).createTunnel(localPort,remoteHost,remotePort).setup()` 建立本地端口正向隧道（jsch `setPortForwardingL` + daemon keepalive 重连 + shutdown hook 清理），令内网 MySQL/Redis 可按 `localhost` 直连；阶段 B `TunnelAutoConfiguration`（`@Configuration`+`@ConditionalOnExpression(enable)`）把 `TunnelHolder` 静态持有器里的 `TunnelProperties`/`SshTunnelManager` 暴露为可注入 Bean。瑕疵含【高危】`sshTunnelManager()` 创建的 `SshTunnelUtil` 从不 `manager.servers.add(ret)` 致管理器 Bean 恒空、隧道不受管只能靠各自 shutdown hook、`@ConditionalOnExpression` 对 `spring.factories` 反射实例化的监听器不生效故 `enable=false` 仍会建隧道、`@Component`+`ApplicationListener` 双重身份且扫描版收不到 EnvironmentPrepared 事件、建隧道失败被 `log.info` 吞掉且照常 setup、`TunnelProperties` 的 `@ConfigurationProperties` 与 `Binder` 手工绑定双路径并存注解名不副实、`@Configuration`/`@Component` 类违反规范加 `@Data`、元数据仅登记 `enable`（描述占位 "all."）且 `hints` 段是别处拷来的 jsp/accesslog 死条目、`com.jcraft:jsch:0.1.55` 硬编码 provided 与根 DM 的 mwiede fork 不一致、`SshProperties` 仅 host/port/username/password 无法配 knownHost/私钥且上游硬编码 `StrictHostKeyChecking=no`。
+
+- 详细文档：[i2f-springboot-ssh-tunnel-starter](./i2f-springboot/i2f-springboot-ssh-tunnel-starter/readme.md)
+
+### i2f-springboot-swagger2-starter
+
+> Swagger2（Springfox 2.9.2）接口文档自动装配 Starter（5 类、无任何 i2f 内部 compile 依赖）：以 `Swagger2AutoConfiguration`（`@ConditionalOnExpression(i2f.swagger2.enable)`+`@EnableConfigurationProperties`+`@Import`）为入口，产 `ApiInfo`（`@ConditionalOnMissingBean`可覆盖）与 `groupName=all` 全量 `Docket`，`@Import` 的 `Swagger2RestfulConfiguration` 按注解维度静态产 `20-rest-all`/`30-web`/`40-get`/`50-post`/`60-put`/`70-delete` 六个 `Docket`，`DynamicSwaggerApisConfiguration`（`@Configuration`+`InitializingBean`）根据 `i2f.swagger2.apis.dynamic.group.*` 在 `afterPropertiesSet` 中用 `BeanDefinitionBuilder`+`DocketFactoryBean` 动态注册任意多个分组 `Docket`；每组独立开关默认全开，Boot/spring-web/springfox 全 provided。瑕疵含【高危】全 Starter 无 `@EnableSwagger2`（springfox 2.9.2 无 Boot 自动配置）故不自标则 Docket 无人消费、无 swagger-ui.html，“自动配置”名不副实、sample 承诺的 base-package/ant-path 逗号多值因 springfox `basePackage`/`ant` 只收单值而实际不生效、`Swagger2AutoConfiguration`/`Swagger2RestfulConfiguration` 缺 `@Configuration` 走 lite 模式、`@ConfigurationProperties(i2f.swagger2.apis)` 加在无字段类上纯属噪声、总开关 `i2f.swagger2.enable` 与 `apis.dynamic.enable` 零元数据登记且 `hints` 是别处拷来的 jsp/accesslog 死条目、`@Data` 滥用于自动配置类、`ApiInfo` 的 Contact 恒为 `new Contact(null,null,null)`、Guava `Predicates` 靠传递未直声明且 springfox 2.9.2 陈旧与 Boot 2.6+ 兼容风险、动态注册中为日志额外 `getBean` 触发 prototype 实例化、默认分组过密重叠、日志 `registrt`/`registry` 拼写错。
+
+- 详细文档：[i2f-springboot-swagger2-starter](./i2f-springboot/i2f-springboot-swagger2-starter/readme.md)
+
+### i2f-springboot-swl-starter
+
+> SWL（Secure Web Layer）安全传输协议 Spring Boot 透明加解密 Starter（9 类）：`SwlSpringAutoConfiguration`（`@ConditionalOnExpression(i2f.swl.enable)`+`@EnableConfigurationProperties`）按可插拔算法类装配 `SwlTransfer`（非对称/对称/摘要/混淆四套 Supplier，默认 RSA+AES+SHA256+Base64，`getBeanByTypeOrNewInstance` 优先取 Bean 否则反射 new）并以 `FilterRegistrationBean`（order -10、`/*`）注册继承自 `i2f-jdk-ext-swl` `SwlWebFilter` 的入站解密·出站加密过滤器，`SwlSpringAop` 环绕所有 `@*Mapping` 把过滤器暂存于 request attribute 的解密异常延迟重抛（绕开 Filter 抛异常不被 `@ControllerAdvice` 捕获）并逐方法标 `@SwlCtrl`，`SwlSpringController` 暴露 `/swl/swapKey` 密钥协商握手，`SwlExceptionHandler` 兜底，`SwlMissingBeanConfiguration` 无外部缓存时兜底进程内 `IExpireCache`。与 `i2f-spring-swl`（`@ControllerAdvice` 版）为两套并行互不依赖实现，消费方 `test-swl-starter`。瑕疵含【高危】`i2f.swl.filter.enable` 是死开关（`SwlSpringWebFilter` 未登记 spring.factories/无 @Component、仅 `new` 出来，`@Conditional` 永不对手动对象求值，总开关一开过滤器恒在）、【高危】`i2f.swl.web.enable` 是死开关（`@ConditionalOnExpression` 标在 `@PostMapping` handler 方法上对 MVC 无效）、四套供应商 catch 全错用 `SYMMETRIC_EXCEPTION` 码、`swlTransfer()` 含空 try-catch 死代码、`SwlExceptionHandler` 用 `printStackTrace` 且硬编码 status:500/`message`=枚举 name 掩盖错误类别、`SwlSpringAop` `@Autowired(required=false)` request 却无条件用、实际生效的 `i2f.swl.filter.order`/`url-pattern` 未登记元数据、`hints` 含 jsp/accesslog 拷贝死条目、`@Data` 滥用于配置类/Filter、兜底进程内缓存使集群防重放失效且关 missing 无外部缓存则启动失败、上游 `SwlWebFilter` 出站 `responseText="$."+responseBody`（byte[] 拼成数组地址）疑似缺陷被默认全开 out 直接触发。
+
+- 详细文档：[i2f-springboot-swl-starter](./i2f-springboot/i2f-springboot-swl-starter/readme.md)
+
+### i2f-springboot-totp-starter
+
+> TOTP/HOTP 动态口令（Google/Microsoft Authenticator、Steam Guard 兼容）Spring Boot 即装配 Starter（5 类、唯一内部依赖 `i2f-otpauth`）：`HmacOtpAutoConfiguration`（`@ConditionalOnExpression(i2f.springboot.totp.enable)`，无 `@Bean` 方法）经 `@Import` 拉入门面 `HmacOtpAccountAuthenticator`（`generateRandomKey`/`getAuthenticator(account)`/`verify`/`generate`/`makeUrl` 产 `otpauth://` 扫码地址，`InitializingBean` 启动期强校验 provider）与默认工厂 `DefaultTotpAuthenticatorFactory`（按 `type` 分派 totp/microsoft/steam），业务方实现 SPI `HmacOtpAccountKeyProvider`（按账号返 Base32 密钥）即可注入使用，另一 SPI `HmacOtpAuthenticatorFactory` 可覆盖分派。瑕疵含【高危】`algorithm`/`digits` 仅在 `type` 非 totp/microsoft/steam 的兜底分支才 `setXxx`，而默认 `type=totp` 提前 return，故对全部文档化取值二者均为死配置（`makeUrl` 里 URL 参数也因此恒为默认 SHA1/6）、元数据把工厂开关登记成 `i2f.springboot.totp.factory`（Boolean）而代码实为 `...factory.enable` 键错位、`HmacOtpAutoConfiguration` 无 `@Configuration` 走 lite 模式且 `@ConfigurationProperties` 加在无字段空类、`@ConditionalOnMissingBean` 用在 `@Import` 普通类上顺序不可靠有注入歧义风险、上游 `OtpAuthenticator.verify` 只比当前窗口无 ±1 时间偏移容错、`@Autowired(required=false)` provider 却在 `afterPropertiesSet` 硬抛异常语义矛盾、`@Data`/`@NoArgsConstructor` 滥用、`generateSecretKey` 固定 16 字节对 SHA256 偏短、`hints` 含 jsp/accesslog 拷贝死条目、全仓库无任何下游消费方与 test 样例属未验证生态孤岛。
+
+- 详细文档：[i2f-springboot-totp-starter](./i2f-springboot/i2f-springboot-totp-starter/readme.md)
+
+### i2f-springboot-trace-mdc-starter
+
+> 全链路 TraceId/MDC 上下文传播 Spring Boot 装配 Starter（11 源文件 = 10 组件类 + `@MdcTrace` 注解，内部依赖 `i2f-trace-mdc`+`i2f-extension-slf4j` 的 `Slf4jMdcManager` SPI）：一个 Starter 打通 Servlet（`MdcWebFilter` order -990）/Reactive（`MdcGatewayFilter`）两类入站从多别名头解析或生成 traceId 写 MDC 五键、Feign（`MdcFeignInterceptor`）/RestTemplate（`MdcHttpClientInterceptor`+`MdcRestTemplateInterceptorProcessor` BPP 自动注入每个 RestTemplate）两类出站注入 trace 头、`MdcTaskDecorator` 线程池复制 MDC、三切面环绕 `@Scheduled`/`@XxlJob`/`@PowerJobHandler` 与 `@MdcTrace` 生成新 traceId，各带独立 `@ConditionalOnExpression`（默认全开）+`@ConditionalOnClass`，Web/AOP/Feign/Gateway/xxl-job/powerjob 全 provided+optional。瑕疵含【高危】10 组件类被直接登记为自动配置类却无一为 `@Configuration`/`@AutoConfiguration`（误用装配机制）、全缺 `@ConditionalOnMissingBean` 致宿主自定义 `TaskDecorator` 时 `getIfAvailable` 抛 `NoUniqueBeanDefinitionException` 启动失败、【高危】`MdcGatewayFilter` put 五键只 remove 两键且 ThreadLocal MDC 与 Reactor 事件循环线程错配致跨请求污染（对照 servlet 版成对清理正确）、`@Component`+auto-config 双身份被扫则重复注册、BPP 构造器注入普通组件反模式且 `@Data` 暴露 setInterceptor、`@AutoConfigureAfter` 对 BPP 实例化时序语义不成立、10 真实开关零元数据登记 `hints` 是 jsp/accesslog 拷贝死条目、`MdcTaskDecorator` 不覆盖 i2f-springboot-spring-starter 自建异步/调度池致跨模块断层、切面 finally remove 与入口 filter 同名键冲突提前清空 MDC、三切面重复 `@EnableAspectJAutoProxy`、入口不回写响应 trace 头、`getIp` 的 `getAddress()` NPE 与 `printStackTrace`、全仓库无下游消费方与 test 样例属生态孤岛。
+
+- 详细文档：[i2f-springboot-trace-mdc-starter](./i2f-springboot/i2f-springboot-trace-mdc-starter/readme.md)
+
+### i2f-springboot-websocket-starter
+
+> WebSocket 轻量装配 Starter（5 类、唯一内部依赖 `i2f-reflect`、`spring-boot-starter-websocket` provided）：同时接入**两套并行独立**的 WebSocket 技术栈——JSR-356 `@ServerEndpoint` 风格（`BasicWebsocketEndpointHandler` 给出 onOpen/Close/Message/Error + 在线计数 + `ConcurrentHashMap` 会话表 + 广播/回显模板，`DefaultWebsocketEndpointHandler` 继承并 `@ServerEndpoint("${...path:/default/broadcast}")`+`@Component` 暴露默认广播端点，配 `ServerEndpointExporter` 让容器扫描）与 Spring WebSocket 风格（`WebSocketAutoConfiguration` `@EnableWebSocket`+`implements WebSocketConfigurer`+`@ConditionalOnExpression(i2f.springboot.websocket.enable)`+`@ConfigurationProperties`，按 `registry.*` Map 逐条 `addHandler`，`use-context-bean` 决定取 Bean 还是 `ReflectResolver` 反射 new，`impl` 包 `AbstractWebSocketHandler`/`AbstractWebsocketHandshakeInterceptor` 给可实例化基类）。瑕疵含【高危】`@ServerEndpoint` 端点用**实例字段**存 `clients`/`onlineCount` 而容器每连接 new 一实例致广播与在线数整体失效、【高危】`DefaultWebsocketEndpointHandler` 组件被登记进 `EnableAutoConfiguration` 却非 `@Configuration`（误用自动配置机制）、【高危】`default-endpoint.enable=false` 关不掉端点（`ServerEndpointExporter` 独立扫 classpath `@ServerEndpoint` 与 Spring 条件化无关）、`registerWebSocketHandlers` 只空 catch `IllegalAccessException` 漏 `ReflectResolver.getInstance` 抛的 `IllegalArgumentException` 与 `loadClass` 返 null 的 NPE、`interceptor==null` 仍 `addInterceptors(null)`、`@Data` 滥用于 `@Configuration`、sample 指向全仓库不存在的 `@EnableWebsocketConfig` 注解、`@ServerEndpoint` 的 `${...}` 占位符 Spring 不解析、war 部署下 `ServerEndpointExporter` 与外部容器 `WsSci` 冲突、两个 Abstract 命名类实为具体类且以 `user_<时间戳>` 为 key 同毫秒相撞、跨域全开无鉴权、registry 项零元数据 + `hints` 拷 jsp/accesslog 死条目、无测试无下游消费方属生态孤岛。
+
+- 详细文档：[i2f-springboot-websocket-starter](./i2f-springboot/i2f-springboot-websocket-starter/readme.md)
+
+### i2f-springboot-xproc4j-starter
+
+> XProc4J「去数据库存储过程」引擎 Spring Boot 全量装配 Starter（23 源文件、直接依赖 6 个 i2f compile 模块 `i2f-extension-xproc4j`/`-antlr4`/`-ognl`/`i2f-spring-core`/`-ai-dashscope`/`-ai-openai`，velocity/ognl/antlr4/dynamic-datasource/redisson/dashscope-sdk/spring-web 全 provided+optional，组内依赖面最广装配最重）：`SpringContextJdbcProcedureExecutorAutoConfiguration`（`@ConditionalOnExpression(xproc4j.enable)`+`@EnableConfigurationProperties`+`@Import(JdbcProcedureHelper)`，无 `@Configuration` 走 lite）以约 15 个各带独立 `@ConditionalOnExpression`+`@ConditionalOnMissingBean` 的 `@Bean` 装配 `INamingContext`/`IEnvironment`/`XProc4jEventHandler`/两套 `DataSourceProvider`（baomidou DynamicRouting + Spring AbstractRouting）/XML 扫描+目录 watch 热更新/Java caller/registry/`JdbcProcedureContext`/`JdbcProcedureExecutor`（`enable-funic` 选 Funic/Default）/慢SQL阈值/日志器/语法报告器/预加载与调用日志监听器；`SpringExtensionJdbcProcedureAutoConfiguration`（`@Configuration`+`InitializingBean`）把 `spring_bean`/`spring_env`/`redis_*`/`log_*`/`to_json`/`http_get` 静态方法注册进上游 `ContextHolder` 全局函数表；`SpringJdbcProcedureProxyMapperAutoConfiguration`（`BeanDefinitionRegistryPostProcessor`，`xproc4j.proxy.enable`）扫 `@ProcedureMapper` 接口经 `FactoryBean`+JDK 代理注册为方法名匹配过程 id 的声明式 Mapper；`JdbcProcedureHelper` 供 `call/invoke` 静态入口；另附 DashScope/OpenAI 各二 Provider 条件装配。瑕疵含【高危】`afterPropertiesSet` 在 applicationContext 赋值前先注册 `SpringContextFunctions` 且重复注册、`SpringEnvironmentFunctions`/`SpringSlf4jFunctions` 永不注册致 `spring_env`/全部 `log_*` 脚本函数静默不可用（复制粘贴错类）、【高危】`OpenAiAiAutoConfiguration` 错用 `@ConditionalOnClass(dashscope Generation)` 且调 `DashScopeAi.getPossibleApiKey` 致纯 openai 环境不装配、【高危】`mapperPackages` 默认空 List 非 null 使 BDRPP 的 `if(!=null)` 恒真、`else` 兜底扫描模式永不执行、不配 `mapper-packages` 则 `@ProcedureMapper` 全不生效、两核心配置类无 `@Configuration` 走 lite+`@Data` 滥用、BDRPP 冒充 auto-config、开关键错别字 `spring-routring-datasource`（关不掉）、上游 context/registry 关下游 executor 开则必填参数 `NoSuchBean` 启动失败、大量 enable/funic/mapper/report-options/dashscope/openai 键零元数据登记 `hints` 是 jsp/accesslog 死条目、xml-locations 等描述照抄 whether enable、`JdbcProcedureHelper` `CountDownLatch.await` 未就绪前调用永久阻塞吞 InterruptedException、`run()` 裸线程吞异常、代理 Handler 漏处理 equals 且报错 id 恒 null、AI Provider 缺 `@ConditionalOnMissingBean`、IO 异常空 catch、ForkJoinPool 不 shutdown、裸 `xproc4j.*`/`dashscope.ai.*`/`openai.ai.*` 异类命名空间、源码目录内嵌 readme 提及不存在的 `@JdbcProcedure`。**有真实消费方 `i2f-tools-ops`（compile 未注释）**，非孤岛。
+
+- 详细文档：[i2f-springboot-xproc4j-starter](./i2f-springboot/i2f-springboot-xproc4j-starter/readme.md)
+
+### i2f-springboot-xxl-job-starter
+
+> xxl-job 执行器（`xxl-job-core:2.4.1`）Spring Boot 装配 Starter（2 类、无任何 i2f 内部 compile 依赖）：把官方 `XxlJobConfig` 手动装配样例改造为自动配置——`XxlJobAutoConfiguration`（`@ConditionalOnExpression(${xxl.job.enable:true})`+`@ConditionalOnClass(XxlJobSpringExecutor,XxlJob)`+`@EnableConfigurationProperties`）产 `@Bean XxlJobSpringExecutor`，`XxlJobProperties`（`@ConfigurationProperties(xxl.job)`，嵌套 `AdminProperties{addresses}`/`ExecutorProperties{appname,address,ip,port,logPath,logRetentionDays}`）承载全量配置，注册/内嵌 server/`@XxlJob` 扫描/调度回调全外包给 xxl-core 自管。Boot 与 `xxl-job-core` 均 provided。瑕疵含自动配置类无 `@Configuration` 走 lite 模式（同 spring/totp/swagger2 家族）、`xxl.job.enable` 零元数据登记且非 `XxlJobProperties` 字段（仅被 `@ConditionalOnExpression` 读，宜改 `@ConditionalOnProperty`）、`xxlJobExecutor` 对八项 setter 无条件套用把未配字段的 Java 默认（port 0/地址 null）灌进执行器覆盖 xxl-core 自身默认且 `getAdmin()` 未配时 `.getAddresses()` 直接 NPE、元数据 `defaultValue` 仅供 IDE 提示不参与绑定与实际生效值脱节、缺 `@ConditionalOnMissingBean` 宿主自定义执行器会双注册冲突、`@Data`+`@NoArgsConstructor` 滥用于配置类、`xxl-job-core` provided 但未标 optional、sample/元数据 log-path 默认误拼 `xxj-job`、末尾 InetUtils 自动取 IP 注释是无实现死指引、唯一疑似消费方 `test-xxl-job` 已将本 Starter 依赖注释改直依 xxl-core 但残留全量 `xxl.job.*` 配置（本 Starter 元路径未经运行验证属孤岛）。
+
+- 详细文档：[i2f-springboot-xxl-job-starter](./i2f-springboot/i2f-springboot-xxl-job-starter/readme.md)
+
+### i2f-springboot-zookeeper-starter
+
+> ZooKeeper 分布式协调 Spring Boot 装配 Starter（2 类、内部 compile 依赖 `i2f-lock`+`i2f-extension-zookeeper`）：`ZookeeperAutoConfiguration`（`@ConditionalOnExpression(${i2f.zookeeper.enable:true})`+`@EnableConfigurationProperties`，无 `@Configuration` 走 lite 模式）一把注册 `ZookeeperManager`（原生 ZK 连接/CRUD/watch）、`ZookeeperCache`（`/cache` 前缀分布式过期缓存）、`ZookeeperClusterProvider`（按 `spring.application.name` 自动拼 `/apps/{name}/cluster` 临时节点 + 递归 watch 一致性取模分片）、`@ConditionalOnClass` 条件化的 `CuratorFramework`（`ZookeeperLockUtil.getClient` 指数退避）与 `ZookeeperLockProvider`（`InterProcessMutex` 适配 `ILockProvider`）五个 Bean；`ZookeeperProperties extends ZookeeperConfig`（`@ConfigurationProperties(i2f.zookeeper)` 仅 `connectString`/`sessionTimeout` 两字段）。zookeeper/curator 全 provided。瑕疵含【高危】`clusterProvider()` → `init()` → `mkdirs(path,true)` → `obj2ZkData` → `serializer`（上游恒 null）→ NPE 只要 ZK 可达应用启动必失败、【高危】`sessionTimeout` 默认 -1 传给 Curator `sessionTimeoutMs(-1)` 非法、【高危】ZK 不可达时 `CountDownLatch.await(Integer.MAX_VALUE)` 近乎无限阻塞无快速失败、元数据 group 名从 swagger2 拷贝未改为 `i2f.swagger2.apis`、`i2f.zookeeper..session-timeout` 双点号拼写错、`hints` 含 jsp/accesslog 死条目、`@Data` 暴露 `setEnvironment`/`setZkConfig`、全 5 Bean 无 `@ConditionalOnMissingBean`、`spring-boot-starter-aop` 死依赖、无下游消费方属生态孤岛。
+
+- 详细文档：[i2f-springboot-zookeeper-starter](./i2f-springboot/i2f-springboot-zookeeper-starter/readme.md)
+
+## i2f-springcloud
+
+> 面向 Spring Cloud 微服务生态的装配 Starter 集合，覆盖注册发现/配置中心/网关/负载均衡/熔断/链路追踪/监控等能力的自动装载，把「引依赖即生效」的即插即用风格从 SpringBoot 组延伸到 SpringCloud 全家桶。
+
+### i2f-springcloud-actuator-admin-starter
+
+> Spring Boot Admin 监控台自动装载 Starter（1 源文件 + 3 资源、零 i2f 内部 compile 依赖）：把 codecentric `spring-boot-admin-starter-server` 经一个空的 `@Configuration`+`@EnableAdminServer` 类改造为放 classpath 即自动拉起图形化监控中心，`@ConditionalOnExpression(${i2f.springcloud.actuator-server.enable:true})` 单布尔开关默认开启，双通道登记（`spring.factories`+`AutoConfiguration.imports`），配合同组 `i2f-springcloud-actuator-starter` 一监控系统一暴露端点。瑕疵含【高危】仅有布尔门无 `@ConditionalOnClass(EnableAdminServer)`，admin-server 依赖为 provided 非 optional 不具传递性，缺类时默认开仍装载致 `NoClassDefFoundError` 启动失败而非优雅退避、【版本错配】pin `spring-boot-admin-starter-server:2.2.3`（Boot 2.2.x 时代）与根 pom `spring-boot.version=2.7.18` 非兼容组合且版本硬编码未纳 DM、`@ConfigurationProperties` 加在无字段空类上属空挂（`enable` 实由 SpEL 直读非绑定字段）、`@Data`/`@NoArgsConstructor` 对空类纯装饰、封装价值单薄且 `@EnableAdminServer` 无 `@ConditionalOnMissingBean` 退避、元数据 `hints` 是 jsp/accesslog 跨模块拷贝死条目且仅登记 `enable` 一项、双通道登记过时冗余、全仓库无任何模块真实 compile 依赖本 Starter 亦无 test 样例属生态孤岛。
+
+- 详细文档：[i2f-springcloud-actuator-admin-starter](./i2f-springcloud/i2f-springcloud-actuator-admin-starter/readme.md)
+
+### i2f-springcloud-actuator-starter
+
+> Spring Boot Admin 客户端接入 + Actuator 端点暴露自动装载 Starter（`actuator-admin-starter` 的客户端对偶，1 源文件 + 4 资源、零 i2f 内部 compile 依赖）：设计意图是用单布尔开关 `i2f.springcloud.actuator-client.enable`（默认 true）控制本服务向 Admin Server 注册并暴露监控端点，双通道登记（`spring.factories`+`AutoConfiguration.imports`）。瑕疵含【高危·空转】唯一类 `ActuatorClientAutoConfiguration` 是完全空的 `@Configuration`（无 `@Bean`/`@Import`/`@Enable*`），装载它对容器零影响，真正的注册由 codecentric 自带 `SpringBootAdminClientAutoConfiguration` 读取 `spring.boot.admin.client.url` 独立驱动、【高危·开关名不副实】`enable:false` 亦不能阻止注册（因被门控的动作根本不存在，较 admin-starter 至少还有 `@EnableAdminServer` 更空）、【高危·provided 非 optional 不传递】`spring-boot-starter-actuator`+`spring-boot-admin-starter-client` 均 provided 非 optional 不随本 Starter 传递，使用方须自行补齐两依赖方能使本 Starter 意义成立、一旦补齐本 Starter 即彻底多余、【版本错配】硬编码 admin-client `2.2.3`（Boot 2.2.x 时代）与根 pom Boot `2.7.18` 非兼容且未纳 DM、`@ConfigurationProperties`/`@Data`/`@Slf4j` 加在空类上纯装饰空挂、元数据 `hints` 是 jsp/accesslog 跨模块拷贝死条目且仅登记 `enable` 一项、双通道登记过时冗余、全仓库无任何模块 compile/test 依赖本 Starter 属生态孤岛。
+
+- 详细文档：[i2f-springcloud-actuator-starter](./i2f-springcloud/i2f-springcloud-actuator-starter/readme.md)
+
+### i2f-springcloud-alibaba-nacos-starter
+
+> 阿里 Nacos（服务注册发现 + 配置中心）即插即用装配 Starter（本组注册中心子域核心接入件，1 源文件 + 6 资源、零 i2f 内部 compile 依赖）：将 `spring-cloud-starter-alibaba-nacos-discovery`/`-config` 与 `spring-cloud-starter-loadbalancer` 作为 provided 依赖引入，经带 `@EnableDiscoveryClient` 的 `@Configuration` 类 `NacosAutoConfiguration` + 单布尔开关 `i2f.springcloud.nacos.enable`（默认 true）门控自动装载，附三份翔实 sample bootstrap-nacos.yaml 作接入范本。版本由根 pom `spring-cloud-alibaba-dependencies:2021.0.5.0` BOM 统一治理（优于同组硬编码 actuator 件）。瑕疵含【中危·开关约束有限】`@ConditionalOnExpression` 只门控本类，`enable:false` 无法阻止 nacos 自身自动配置的注册与配置拉取、【冗余】Spring Cloud 2021 已默认自动注册，`@EnableDiscoveryClient` 已无实际作用且与本模块 sample 注释自相矛盾、`spring-cloud-starter-loadbalancer` provided 但未标 optional 且无代码引用、pom 注释建议排除 ribbon 但 `<exclusions>` 整段被注释未生效、`@ConfigurationProperties` 空挂在无字段类上、`InitializingBean` 仅一行日志、nacos 依赖 provided+optional 不传递需使用方自行补齐、元数据 hints 是 jsp/accesslog 跨模块拷贝死条目仅登记 enable、双通道登记过时冗余、全仓库无任何模块 compile/test 依赖本 Starter 属生态孤岛。
+
+- 详细文档：[i2f-springcloud-alibaba-nacos-starter](./i2f-springcloud/i2f-springcloud-alibaba-nacos-starter/readme.md)
+
+### i2f-springcloud-alibaba-seata-starter
+
+> Apache Seata 分布式事务即插即用装配 Starter（本组分布式事务子域唯一接入件，1 源文件 + 5 资源、零 i2f 内部 compile 依赖）：将 `spring-cloud-starter-alibaba-seata` 作 provided+optional 依赖引入，经 `@Configuration` 类 `SeataAutoConfiguration` + 布尔开关门控自动装载，附 sample bootstrap-seata.yaml（事务分组/registry/config 走 nacos），版本由根 BOM `2021.0.5.0` 治理。瑕疵含【高危·开关键拼写分裂】代码 `@ConditionalOnExpression`/`@ConfigurationProperties` 均用错拼 `i2f.springcloud.seate`（seate），而元数据与 sample 登记的是正确 `i2f.springcloud.seata`，全仓 grep 证实代码从不读 seata、文档从不读 seate，致用户按文档设 `seata.enable=false` 完全无效且真实键不可发现、【空壳】类无 `@Enable*`/`@Bean`/`@Import` 仅 InitializingBean 一行日志，真正的 Seata 能力由 seata 自身自动配置驱动、`@ConfigurationProperties` 空挂且前缀错拼、provided+optional 不传递需使用方自行补齐、sample 多处错拼（文件名 `application-seate.properties`、yaml `SETA_GROUP` 疑为 SEATA_GROUP）、元数据 hints 是 jsp/accesslog 拷贝死条目仅登记 enable、双通道登记过时冗余、全仓库无任何模块 compile/test 依赖本 Starter 属生态孤岛（封装质量弱于 nacos-starter）。
+
+- 详细文档：[i2f-springcloud-alibaba-seata-starter](./i2f-springcloud/i2f-springcloud-alibaba-seata-starter/readme.md)
+
+### i2f-springcloud-alibaba-sentinel-starter
+
+> 阿里 Sentinel（流控/熔断降级/热点参数/系统保护/授权）即插即用装配 Starter（本组「流量治理」子域核心接入件，2 源文件 + 5 资源，**本组首个含真实功能逻辑且有 i2f 内部 compile 依赖的模块**）：将 `spring-cloud-starter-alibaba-sentinel`/`sentinel-datasource-nacos`/`spring-cloud-alibaba-sentinel-gateway` 作 provided+optional 引入（版本由根 BOM `2021.0.5.0` 治理无硬编码错配），除标准空壳 `SentinelAutoConfiguration`（仅一行日志、`i2f.springcloud.sentinel.enable` 键拼写正确）外，核心提供 `DefaultSentinelBlockExceptionHandler`——implements Sentinel `BlockExceptionHandler` 并 compile 依赖本组首个内部件 `i2f-resp`，把 Flow/Degrade/ParamFlow/System/Authority 五类 BlockException 统一转为 `ApiResp.error(中文提示)` JSON，独立开关 `sentinel.global-exception-handler.enable`。瑕疵含【中危·HTTP 状态码语义错误】被限流仍恒 `setStatus(200)` 仅靠 body code 表达失败、网关/监控无法从状态码识别、【性能】每请求 `new ObjectMapper()`、【反模式】已 @Slf4j 仍 `e.printStackTrace()`、【高危·缺 @ConditionalOnClass】Handler 直接 implements provided+optional 的 BlockExceptionHandler 且 sentinel/boot-web 不传递，缺类时默认开即 NoClassDefFoundError 无优雅退避、【开关门控有限】`sentinel.enable:false` 只关空壳类不能停 Sentinel 自身自动配置、【元数据登记不全】更关键的 `global-exception-handler.enable` 未登记且 hints 是 jsp/accesslog 拷贝死条目、sentinel-datasource-nacos 与 gateway 两依赖引入但零代码引用、双通道登记过时、全仓无 compile/test 消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-alibaba-sentinel-starter](./i2f-springcloud/i2f-springcloud-alibaba-sentinel-starter/readme.md)
+
+### i2f-springcloud-config-client-starter
+
+> Spring Cloud Config 客户端装配 Starter（本组「配置中心」子域客户端端，3 源文件 + 5 资源、零 i2f 内部 compile 依赖，**本组功能最完整、封装深度最高且唯一带 `@ConditionalOnClass` 兜底的接入件**）：除布尔开关 `i2f.springcloud.config-client.enable`（默认 true）门控的标准薄壳 `ConfigClientAutoConfiguration`（带过时 `@EnableDiscoveryClient`）外，额外实现了 `EnvironmentPullBaseWithVersionCompareIntervalRefresher`——一个基于 Git commit 版本轮询、无需消息总线即可让 Config 客户端热更新配置的自定义刷新器（默认 `refresh.pull.enable:false` opt-in，周期 GET `{uri}/{name}/{profile}` 取 version 比对，变化则 `ConfigDataContextRefresher.refresh()`），配套真实字段 `EnvironmentPullBaseWithVersionProperties`（init/interval-delay-seconds 默认 30）。版本由根 pom `spring-cloud.version=2021.0.8` BOM 治理无硬编码。瑕疵含【高危·必需 @Autowired 但只门控类存在】`@ConditionalOnClass(ConfigDataContextRefresher.class)` 只保证类不保证 bean，`pull.enable=true` 而环境无该 bean 时 NoSuchBeanDefinitionException 启动失败、【中危】`new RestTemplate()` 无超时使单线程调度器可被卡死的 Config Server 永久阻塞、`ScheduledExecutorService` 无 shutdown 线程泄漏且裸 `new Thread` 跑 initConfig 冗余、【日志 Bug】L111 profiles 文案误打 configNameSet 且全类字符串拼接日志、initConfig/refreshTask 逻辑逐行重复、`@Component` 登记为自动配置双通道有双重注册风险、元数据仅登记 enable 而三个真实功能键全未登记、sample 用传统 bootstrap 与 2021 `spring.config.import` 脱节、spring-cloud-starter-config provided 未标 optional 不传递、全仓无 compile/test 消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-config-client-starter](./i2f-springcloud/i2f-springcloud-config-client-starter/readme.md)
+
+### i2f-springcloud-config-server-starter
+
+> Spring Cloud Config 服务端装配 Starter（本组「配置中心」子域服务端端，`config-client-starter` 的服务端对偶，2 源文件 + 11 资源含 9 份 native 示范配置、零 i2f 内部 compile 依赖）：`ConfigServerAutoConfiguration` 以 `@EnableConfigServer` + 布尔开关 `i2f.springcloud.config-server.enable`（默认 true）自动拉起 Config Server；核心功能 `EnvironmentControllerNativeVersionResponseAdvice`（`@RestControllerAdvice implements ResponseBodyAdvice<Environment>`，独立开关 `native.version.enable` 默认 true）专为 native 本地文件模式（官方 version 恒 null）合成 SHA-256 版本号，补齐 `config-client-starter` 版本轮询刷新器所缺的 version，实现免消息总线热更新闭环。版本由根 pom `spring-cloud-dependencies:2021.0.8` BOM 治理无硬编码。瑕疵含【高危·缺 @ConditionalOnClass】`@EnableConfigServer` 而 config-server 为 provided 未标 optional 不传递，缺类时默认开即 NoClassDefFoundError 崩溃非优雅退避（同 actuator-admin 族）、【高危·version 哈希实际忽略内容】Advice 用 `resourceLoader.getResource(PropertySource.getName())` 回读，但 name 是资源 description（classpath 型形如 `Class path resource [...]`）DefaultResourceLoader 无法解析→catch 仅 digest nop→classpath native 源 version 只由名称列表决定，改值不改名则哈希不变、客户端轮询永不 refresh，恰击穿设计目的且自带 sample 正是 classpath:/config、【中危】`@RestControllerAdvice` 被登记为 EnableAutoConfiguration 若组件扫描命中则双重注册、每响应全量重算哈希+磁盘IO、【低】@ConfigurationProperties 空挂无字段、关键键 native.version.enable 未登记元数据且 hints 是 jsp/accesslog 死条目、provided 未标 optional、双通道登记冗余、全仓无消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-config-server-starter](./i2f-springcloud/i2f-springcloud-config-server-starter/readme.md)
+
+### i2f-springcloud-consul-starter
+
+> HashiCorp Consul（服务注册发现 + 分布式配置中心）即插即用装配 Starter（本组「注册中心/配置中心」子域，`alibaba-nacos-starter` 的 Consul 技术栈对偶，1 源文件 + 5 资源、零 i2f 内部 compile 依赖）：将 `spring-cloud-starter-consul-discovery`/`-config` 作 provided 依赖引入（版本由根 pom `spring-cloud-dependencies:2021.0.8` BOM 治理无硬编码错配），经带 `@EnableDiscoveryClient` 的 `@Configuration` 类 `ConsulAutoConfiguration` + 单布尔开关 `i2f.springcloud.consul.enable`（默认 true）门控自动装载，附翔实 sample bootstrap-consul.yaml（host/port/service-name/heartbeat/config format）与 consul.md 二进制安装启动指引。瑕疵含【高危·缺 @ConditionalOnClass + provided 非 optional 不传递】consul-discovery/config 及带来的 spring-cloud-commons（含 @EnableDiscoveryClient 所在包）均不传递，本类登记进 EnableAutoConfiguration 仅有布尔门无类兜底，使用方未补齐时 enable 默认 true 装载即 NoClassDefFoundError 启动失败非优雅退避（同 actuator-admin/config-server 族）、【开关名不副实】`consul.enable:false` 只关本空类不能阻止 consul 自身自动配置的注册与拉取、`@ConfigurationProperties` 空挂无字段、`@EnableDiscoveryClient` 在 2021 已冗余、sample 依赖传统 bootstrap 机制与 2021 config.import 脱节、元数据仅登记 enable 且 hints 是 jsp/accesslog 拷贝死条目、双通道登记过时冗余、lombok 空引、全仓无 compile/test 消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-consul-starter](./i2f-springcloud/i2f-springcloud-consul-starter/readme.md)
+
+### i2f-springcloud-discovery-server-starter
+
+> 自研轻量级服务注册中心「服务端」装配 Starter（本组「服务发现」子域服务端，配套 `i2f-springcloud-discovery-starter` 客户端；5 源文件 + 4 资源、零 i2f 内部 compile 依赖）：与同组 nacos/consul/eureka 薄封装根本不同，本模块不依赖任何现成注册中心框架，改用 Redis 作实例存储后端 + 一组 HTTP POST 接口 + SHA-256 签名校验，从零实现最小可用注册/发现服务端（`POST /api/api/registry` 上报 `{uid,sign,serviceId,port}` 以 `http://{remoteAddr}:{port}` 写带 TTL 的 `{prefix}:services:{serviceId}:{URLEncode(url)}` 键、`POST /api/api/services` 拉全量实例表），三级独立布尔开关 `discovery.server.enable`/`api.enable`/`redis-manager.enable` 键拼写全部正确并登记元数据，`RedisServiceInstanceManager` 带 `@ConditionalOnClass(RedisTemplate)` 兜底。瑕疵含【高危·默认密钥极弱且被 sample 固化】`DiscoveryServerProperties.secretKey` 默认硬编码 `"123456"` 且 sample 原样写死，未覆盖则整套签名鉴权形同虚设可被投毒/侦察、【高危·条件不一致致启动崩溃】`RedisServiceInstanceManager` 可 `@ConditionalOnClass`+`redis-manager.enable` 优雅退避，但 `DiscoverServerController` 仅受 `api.enable`（默认 true）门控且 `@Autowired`(required) 注入 `IServiceInstanceManager`，Redis 缺失/关管理器时 `NoSuchBeanDefinitionException` 启动失败（应加 `@ConditionalOnBean` 或 required=false）、【中危】`redisTemplate.keys()` 用 Redis `KEYS` O(N) 阻塞主线程应改 `SCAN`、`makeSign` 载荷仅 uid 无 timestamp/nonce 可无限重放、`getRemoteAddr()` 在网关/代理后取到代理 IP 且 host(远端)与 port(自报)来源割裂、`secret-key`/`keepalive-seconds`/`redis-manager.prefix` 三关键属性完全未登记元数据、Controller/Manager 既 `@Import` 又带 stereotype 有双重注册风险、键解析 `split(":",2)` 隐含 serviceId 不含冒号假设、`spring-cloud-starter` provided 未 optional 却零 import 是死依赖、hints 是 jsp/accesslog 拷贝死条目且 `redis-manager.enable` 描述误写 "api"、全仓无真实消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-discovery-server-starter](./i2f-springcloud/i2f-springcloud-discovery-server-starter/readme.md)
+
+### i2f-springcloud-discovery-starter
+
+> 自研轻量级服务发现「客户端」装配 Starter（本组「服务发现」子域客户端，`i2f-springcloud-discovery-server-starter` 的客户端对偶；6 源文件 + 6 资源、零 i2f 内部 compile 依赖）：与同组 nacos/consul/eureka 薄封装根本不同，不依赖任何现成注册中心框架，而是自研实现 Spring Cloud `DiscoveryClient`，提供两种并存来源——配置式 `DiscoveryClientProvider`（读 `i2f.springcloud.discovery.instances` 静态表 + 自动纳入本应用自身，`@Configuration(proxyBeanMethods=false)`+`@AutoConfigureBefore` 抢先官方类+`WebServerInitializedEvent` 纠端口，写法相对规范）与远程注册式 `RemoteDiscoveryClientProvider`（`@PostConstruct` 起双线程 `RestTemplate` 每 10s 心跳上报 / 每 30s 拉全量，`sign=SHA-256(secretKey#uid)` 与服务端一致）。瑕疵含【高危·远程式默认开】`registry.enable:true` 使任何引本件的应用后台线程持续向 `localhost:9999` POST、无 server 时刷屏错误日志且线程池从不 shutdown；【高危·开箱 404】客户端 `base-url+/api/registry` 与服务端实际双重前缀 `/api/api/registry` 不对齐，这对官方 CP 默认打不通须手改 registry-path；【高危·弱密钥】`secretKey` 默认硬编码 `123456`；另含 `@PostConstruct` 早于 Web 启动且无端口事件纠正（随机端口注册错误）、`RestTemplate` 无超时挂死调度线程、`@Component` 登记为自动配置双通道双重注册、两 `DiscoveryClient` bean 语义重叠、`@ConfigurationProperties` 空挂无 enable 字段、registry 8 真实键零登记元数据、spring-web/jackson 硬编码版本绕开 DM、`spring-cloud-starter` provided 未 optional 缺 InetUtils 无优雅退避、`setUri` 无端口 port=-1、全仓无消费方属生态孤岛。
+
+- 详细文档：[i2f-springcloud-discovery-starter](./i2f-springcloud/i2f-springcloud-discovery-starter/readme.md)
+
+### i2f-springcloud-gateway-starter
+
+> Spring Cloud Gateway 增强装配 Starter（本组「服务网关」子域核心，**本组功能最完整、非薄封装的网关增强件**：9 源文件 + 6 资源、零 i2f 内部 compile 依赖、版本由根 BOM `spring-cloud-dependencies:2021.0.8` 治理）：`GatewayAutoConfiguration`（`i2f.springcloud.gateway.enable:true`）经 `@Import` 一把拉入代码式 CORS（`GatewayCorsConfig` `@Bean CorsWebFilter`）、自定义断言 `RequestAttrRoutePredicateFactory`（`RequestAttr=param,regexp`）、自定义过滤器 `RequestAttrGatewayFilterFactory`、请求日志全局过滤器 `RequestLogGlobalFilter`（注入 trace-id + `TimeStatistic` 按 path/IP 统计）、可选重复参数裁剪 `RequestQueryRepeatFilter`（默认 `query-repeat.enable:false` opt-in），另有抽象 token 鉴权模板 `AbsAuthTokenFilter`，各子件独立开关分层控制，附 457 行翔实 sample 教学文档。瑕疵含【高危·缺 @ConditionalOnClass + provided 非 optional】gateway 核心不传递且装配仅布尔门无类兜底，使用方未补齐时默认开装载 `@Import` 的 implements gateway 类型件即 NoClassDefFoundError 崩溃（同 actuator-admin/config-server/consul 族）、【高危·RequestAttrGatewayFilterFactory NPE+402 不断链】value==null 设 402+setComplete 后不 return 继续 `value.matches(regex)` NPE 且末尾仍 chain.filter 放行，注释承诺的 402 拦截不成立、【高危·默认 CORS 不安全】allowCredentials=true + allowOrigins=* 转 allowedOriginPatterns=* 反射任意 Origin 带凭证、【中危】RequestLogGlobalFilter 统计 Map 按 path/IP 无界增长泄漏 + builder 请求头重复打印两遍、【中危】元数据 show-querys/show-statistic/enable-repeat-form 默认值与代码相反且 repeat-props 三功能键零登记、GatewayAutoConfiguration/GatewayCorsConfig 无 @Configuration 走 lite、AbsAuthTokenFilter 抽象类未注册（默认零鉴权）+ subPath(*2) 魔法数 + getOrder 与日志 filter 同为 -1、RequestQueryRepeatProperties @Configuration+@EnableConfigurationProperties 双注册、enableAccessLog 用 System.setProperty 污染全局 JVM、repeat filter 全量缓冲 body OOM 风险、双通道登记冗余 + hints jsp/accesslog 死条目。**有真实消费方 同组示例 test-gateway-swl**，非孤岛。
+
+- 详细文档：[i2f-springcloud-gateway-starter](./i2f-springcloud/i2f-springcloud-gateway-starter/readme.md)
+
+### i2f-springcloud-gateway-swl-starter
+
+> Spring Cloud Gateway「SWL 安全传输（加解密）网关装配 Starter」（本组「服务网关」子域，Servlet 侧 `i2f-springboot-swl-starter` 的**响应式对偶**；7 源文件 + 3 资源、**含 5 个 i2f 内部 compile 依赖** i2f-spring-core/i2f-swl/i2f-sm-crypto-swl/i2f-jdk-ext-swl/i2f-extension-swl，本组少见）：把 `i2f.web.swl.filter.SwlWebConfig`/`SwlTransfer` 加解密协议搬到网关边缘——`SwlGatewayFilter`（`GlobalFilter` order -100，单文件 667 行核心）请求侧缓冲 body 解密重建 `ServerHttpRequestDecorator`、响应侧 `buffer()` 全量加密包装 `ServerHttpResponseDecorator`，`SwlGatewayApiFilter`（order -999）拦 `POST /swl/swapKey` 完成公钥握手，`SwlMissingBeanConfiguration` `@ConditionalOnMissingBean(IExpireCache)` 兜底进程内缓存，四独立开关 gateway/filter/api/missing 分层条件化，算法供应商经 asym/symm/digest/obfuscate-algo-class 四属性可插拔。瑕疵含【高危·无 Content-Type 请求解密 NPE】`mediaType=getContentType()` 可 null 但 `ctrl.isIn()` 分支 `mediaType.getCharset()` 无判空、默认 in=true 未配 url-patterns 时几乎所有请求进入即崩、【高危·swapKey 吞异常后 NPE/越界】握手反序列化包空 catch 失败后 `reqHandleShake.getAttaches().get(0)` NPE/IOOBE、【高危·缺 @ConditionalOnClass+provided 非 optional】gateway 不传递且仅布尔门无类兜底装载即 NoClassDefFoundError 崩溃（同 gateway-starter/actuator-admin/config-server/consul 族）、【高危·clientIp 可伪造且作会话隔离键】getIp 优先取可伪造 x-forwarded-for 用作 `transfer.receive(clientIp,...)` 会话/nonce 隔离键且 unknown 时回落本机 IP、【中危】握手路由硬编码 `http://localhost:80` 与 api filter 强耦合、api-route.enable/api-swap-key-path/enable-url-path-check/cert-id-name/url-path-name 等大量功能键零登记元数据、命名国密+provided sm-crypto/bcprov 但默认装配实为国际算法 RSA/AES/SHA256/Base64、URL 路径校验 swlu 头缺失 decode NPE、4 自动配置类全无 @Configuration 走 lite 且两个 implements GlobalFilter 的 filter 类直接登记当自动配置类、@Import 空挂+@ConfigurationProperties 空挂、多处空 catch 吞异常+响应全量缓冲 OOM（无响应侧白名单）+ISwlExceptionAdvideConverter 死接口、双通道登记冗余+jsp/accesslog 死 hints+sm-crypto/bcprov 硬编码版本绕开 BOM。**有真实消费方 同组示例 test-gateway-swl**，非孤岛。
+
+- 详细文档：[i2f-springcloud-gateway-swl-starter](./i2f-springcloud/i2f-springcloud-gateway-swl-starter/readme.md)
+
+### i2f-springcloud-loadbalancer-starter
+
+> Spring Cloud LoadBalancer 客户端负载均衡装配 Starter（本组「客户端负载均衡」子域，`i2f-springcloud-netflix-ribbon-starter` 旧 Ribbon 的新一代对偶；**仅 1 个 27 行源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组最典型**纯空壳转发件**）：`LoadBalancerAutoConfiguration` 除 `afterPropertiesSet` 打一行日志外**不做任何定制增强**——无 `@Bean`、无自定义 `ReactorLoadBalancer`、无 Ribbon 排斥逻辑，负载均衡能力全靠使用方自行引官方 `spring-cloud-starter-loadbalancer`（本件 provided 引入）。瑕疵含【纯空壳零增强】`@ConfigurationProperties` 前缀挂在零字段类上、唯一属性 enable 由 `@ConditionalOnExpression` SpEL 直读非绑定，引与不引行为一致、【provided 非 optional 不传递·名不副实】仅引本 loadbalancer-starter 并不真正获得 LoadBalancer 能力须再自引官方 starter、【sample 开关键拼写错误】`application-loadbalancer.properties` 写 `i2f.springcloud.config.loadbalancer.enable` 多一段 `.config.` 与实际键 `i2f.springcloud.loadbalancer.enable` 不符照抄即开关永不生效、Ribbon 排斥须手动（pom 注释/sample 均要求 `spring.cloud.loadbalancer.ribbon.enabled=false` 或排除 ribbon，本件不代处理）、双通道登记冗余 + jsp/accesslog 死 hints。相对规范处：自动配置类带了 `@Configuration`（不同于 gateway 族 lite）。**全仓零消费方属纯孤岛**。
+
+- 详细文档：[i2f-springcloud-loadbalancer-starter](./i2f-springcloud/i2f-springcloud-loadbalancer-starter/readme.md)
+
+### i2f-springcloud-netflix-eureka-client-starter
+
+> Netflix Eureka 服务注册**客户端**装配 Starter（本组「服务注册与发现」子域，与 `netflix-eureka-server-starter` 为 client/server 对；**仅 1 个 25 行源文件 + 5 资源、零 i2f 内部 compile 依赖**，纯空壳件但比 loadbalancer-starter 多一个实质功能）：`EurekaClientAutoConfiguration` 类体零字段，唯一行为是携带 `@EnableEurekaClient` 注解——作为官方同名自动配置的**布尔门代理**，通过 `i2f.springcloud.eureka-client.enable:true` 控制是否触发 Eureka 客户端注册。瑕疵含【provided 非 optional + 无 @ConditionalOnClass → 缺 classpath 即 NoClassDefFoundError 启动崩溃（高危，同 gateway/actuator-admin/config-server/consul 族）】、@ConfigurationProperties 挂零字段类（与 loadbalancer 同病）、布尔门语义与官方 `eureka.client.enabled` 重叠属多余抽象层、sample `instance_id` 下划线非 canonical kebab-case、双通道登记冗余 + jsp/accesslog 死 hints + configuration-processor 形同虚设。**全仓零消费方属纯孤岛**。
+
+- 详细文档：[i2f-springcloud-netflix-eureka-client-starter](./i2f-springcloud/i2f-springcloud-netflix-eureka-client-starter/readme.md)
+
+### i2f-springcloud-netflix-eureka-server-starter
+
+> Netflix Eureka 注册中心**服务端**装配 Starter（本组「服务注册与发现」子域，与 `netflix-eureka-client-starter` 为**完全镜像对称的 client/server 对**；同作者同日同结构，仅 `@EnableEurekaClient` → `@EnableEurekaServer`；**仅 1 个 25 行源文件 + 4 资源、零 i2f 内部 compile 依赖**，纯空壳布尔门代理）：`EurekaServerAutoConfiguration` 类体零字段，唯一行为是携带 `@EnableEurekaServer` 注解触发官方 Eureka Server 自动配置（管理面板/注册表/驱逐线程）。瑕疵含【provided 非 optional + 无 @ConditionalOnClass → 缺 classpath 即 NoClassDefFoundError（高危，同 eureka-client/gateway/actuator-admin 族）】、@ConfigurationProperties 挂零字段类、布尔门可被 Main 类 `@EnableEurekaServer` 静默绕过（开关假象）、sample L13 分隔符混用冒号与等号、双通道登记冗余 + jsp/accesslog 死 hints + configuration-processor 形同虚设。**全仓零消费方属纯孤岛**。sample 含完整独立部署推荐配置（关自注册+关自保存+驱逐 5s）有参考价值。
+
+- 详细文档：[i2f-springcloud-netflix-eureka-server-starter](./i2f-springcloud/i2f-springcloud-netflix-eureka-server-starter/readme.md)
+
+### i2f-springcloud-netflix-hystrix-starter
+
+> Netflix Hystrix 熔断降级装配 Starter（本组「熔断降级」子域，`alibaba-sentinel-starter` 的旧 Netflix 对偶、已 EOL；**仅 1 个 29 行源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组唯一「版本时间胶囊」——模块级自引 `spring-boot:2.3.7` / `spring-cloud:Hoxton.SR12` BOM 覆盖根 2.7.18/2021.0.8，与项目主版本不兼容）：`HystrixAutoConfiguration` 类体零字段，`@EnableHystrix` 触发断路器 + `InitializingBean` 打一行日志。瑕疵含【模块级 BOM 覆盖根版本治理·架构级危险】、【引用已被 Spring Cloud 2020.0+ 移除的组件】、【provided 非 optional + 无 @ConditionalOnClass → NCDNF 崩溃族】、@ConfigurationProperties 挂零字段类、`spring.version` 死属性、sample `feign.hystrix.enabled` 为 Hoxton 废弃键、双通道冗余 + 死 hints。**全仓零消费方属纯孤岛**。应迁移至 Sentinel/Resilience4j。
+
+- 详细文档：[i2f-springcloud-netflix-hystrix-starter](./i2f-springcloud/i2f-springcloud-netflix-hystrix-starter/readme.md)
+
+### i2f-springcloud-netflix-openfeign-starter
+
+> Spring Cloud OpenFeign 声明式 HTTP 客户端装配 Starter（本组「服务调用」子域，Netflix 三件套中唯一仍被 Spring Cloud 2021.0.8 积极维护的组件；**仅 1 个 29 行源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组功能最重的“Enable...”注解代理）：`FeignAutoConfiguration` 类体零字段，`@EnableFeignClients` 触发 `FeignClientsRegistrar` 扫描应用包下 `@FeignClient` 接口并注册 HTTP 代理 Bean。模块名/包名中 "netflix" 为 Hoxton 历史分组遗留误导（OpenFeign 非 Netflix 组件）。瑕疵含【provided 非 optional + 无 @ConditionalOnClass → NCDNF 崩溃族】、默认开启全局 Feign 扫描（违反显式优于隐式原则）、sample 含大量 Hoxton 废弃键（feign.hystrix.enabled/hystrix.command/ribbon）、@ConfigurationProperties 挂零字段类、双通道冗余 + 死 hints。**全仓零消费方属纯孤岛**。
+
+- 详细文档：[i2f-springcloud-netflix-openfeign-starter](./i2f-springcloud/i2f-springcloud-netflix-openfeign-starter/readme.md)
+
+### i2f-springcloud-netflix-ribbon-starter
+
+> Netflix Ribbon 客户端负载均衡装配 Starter（本组「客户端负载均衡」子域，`loadbalancer-starter` 的旧 Ribbon 对偶、已 EOL；**仅 1 个 27 行源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组最纯粹空壳件——类体零字段、零 @Enable 注解、零 @Bean，仅 `InitializingBean` 打一行日志，引与不引行为完全一致）：Ribbon 无 `@EnableRibbon` 注解，激活靠 classpath 存在 + `@LoadBalanced`，本件无法通过注解启用 Ribbon，退化为纯日志标记。与 `netflix-hystrix-starter` 同为「Hoxton 版本时间胶囊」（模块级自引 Boot 2.3.7/Cloud Hoxton.SR12 BOM 覆盖根 2.7.18/2021.0.8）。相对规范处：provided 正确标了 optional（无 NCDNF 崩溃风险）。瑕疵含【BOM 覆盖架构级】、纯空壳零功能、开关名不副实（enable=false 不能关 Ribbon）、sample L28 `${client-name}` 未注释占位符、spring.version 死属性、sample 引用已弃用 Ribbon 超时键。**全仓零消费方属纯孤岛**。应迁移至 LoadBalancer。
+
+- 详细文档：[i2f-springcloud-netflix-ribbon-starter](./i2f-springcloud/i2f-springcloud-netflix-ribbon-starter/readme.md)
+
+### i2f-springcloud-netflix-zuul-starter
+
+> Netflix Zuul 1.x 边缘网关装配 Starter（本组「服务网关」子域的 Servlet 阻塞式分支，与响应式 `gateway-starter` 互为新/旧网关对偶、已 EOL；**2 个 Java 源文件（`ZuulAutoConfiguration` 25 行 + 真实过滤器 `ZuulResponseCharsetFilter` 50 行）+ 4 资源、零 i2f 内部 compile 依赖**，本组 Netflix 薄壳件中少见的带实际增强逻辑件）：`ZuulAutoConfiguration` 类体零字段、`@EnableZuulProxy` 布尔门代理；`ZuulResponseCharsetFilter`（`extends ZuulFilter` pre/0）在响应写出前 `setCharacterEncoding(charset)` 规避中文乱码。与 `netflix-hystrix`/`netflix-ribbon` 同为「Hoxton 版本时间胶囊」（模块级自引 Boot 2.3.7/Cloud Hoxton.SR12 BOM 覆盖根 2.7.18/2021.0.8）。瑕疵含【BOM 覆盖架构级】、【provided 非 optional + 无 @ConditionalOnClass → NCDNF 崩溃族】、ZuulFilter 被误登记为自动配置类（应用 @Bean 暴露）、`@Component`+双通道登记重叠、元数据仅登记 enable 而 response-charset-filter.enable/charset 两功能键未登记、hints 拷贝死条目、@ConfigurationProperties 挂零字段类、spring.version 死属性、run() 恒 null/shouldFilter 恒 true 无差别设编码。**全仓零消费方属纯孤岛**。应迁移至 Spring Cloud Gateway。
+
+- 详细文档：[i2f-springcloud-netflix-zuul-starter](./i2f-springcloud/i2f-springcloud-netflix-zuul-starter/readme.md)
+
+### i2f-springcloud-refresh-starter
+
+> Spring Cloud Context 动态刷新装配 Starter（本组「配置外部化与动态刷新」子域，与 `config-client-starter` 互补——后者负责取新配置、本件负责怎么触发刷新；**3 源文件 60+60+64 行、本组功能最完整的自研件、唯一依赖 i2f 自研 `i2f-otpauth` 的 Spring Cloud 件**）：在官方 `ContextRefresher`/`RefreshScope` 之上叠加「定时自动刷新」`AutoRefreshConfiguration`（默认 5min）+ 「TOTP 二次口令鉴权的 REST 手动刷新端点」`RefreshController`（`POST /refresh/trigger`，默认关）。`RefreshAutoConfiguration` 经 `@Import` 装配三能力、`@EventListener` 监听 `EnvironmentChangeEvent`。无 Hoxton BOM 覆盖（不同于 netflix 三件）。瑕疵含【高危·线程池泄漏】`afterPropertiesSet` 先建池后判 `delayTime<=0` 且 return 时不 shutdown、【高危·鉴权旁路】`totpKey==null` 时端点完全无鉴权可被滥用、【元数据 vs 代码默认值背离】`api-refresh.enable` 元数据 true/代码 false、`Base32.decode(encode(x))` 编解码空转、Base32 靠传递依赖 i2f-codec 未直接声明、入口缺 @Configuration lite、@ConditionalOnBean 顺序敏感。**全仓零消费方属纯孤岛**。
+
+- 详细文档：[i2f-springcloud-refresh-starter](./i2f-springcloud/i2f-springcloud-refresh-starter/readme.md)
+
+### i2f-springcloud-sleuth-starter
+
+> Spring Cloud Sleuth 分布式链路跟踪装配 Starter（本组「链路跟踪」子域，与 `zipkin-starter` 为观测性配对——sleuth 生成 traceId/注 MDC、zipkin 上报 span；**仅 1 个 27 行零字段源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组典型**纯空壳转发件**，与 loadbalancer/eureka-client/server/ribbon 同族）：`SleuthAutoConfiguration` 类体零字段，`afterPropertiesSet()` 仅打一行 `SleuthConfig config done.`，无任何 `@Bean`/自定义 Sampler/属性绑定，链路跟踪能力全靠使用方自引官方 `spring-cloud-starter-sleuth`。相对规范处：自动配置类带了 `@Configuration`（不同于 gateway lite 族，但无 @Bean 故无意义）。瑕疵含【纯空壳零增强】@ConfigurationProperties 挂零字段类、enable 由 SpEL 直读非绑定、【provided 非 optional 不传递·名不副实】、【无 @ConditionalOnClass → NCDNF 崩溃族】、【开关语义误导】enable=false 关不掉跟踪（真正须 spring.sleuth.enabled=false）、**【sample 高危误导】写废弃键 spring.sleuth.sampler.rate/percentage（3.1.x 正确为 .probability 0.0-1.0）两值均不生效且互相冲突**、@Data/无参构造冗余、双通道登记冗余、元数据 hints 死条目拷贝。**全仓零消费方属纯孤岛**。
+
+- 详细文档：[i2f-springcloud-sleuth-starter](./i2f-springcloud/i2f-springcloud-sleuth-starter/readme.md)
+
+### i2f-springcloud-zipkin-starter
+
+> Zipkin 链路跟踪数据上报装配 Starter（本组「链路跟踪/可观测性」子域、**本组最后一个建档模块**，与 `sleuth-starter` 为上报端/生成端配对且源码逐行对称（同作者同日 2022/5/28 19:45）；**仅 1 个 27 行零字段源文件 + 4 资源、零 i2f 内部 compile 依赖**，本组典型**纯空壳转发件**）：`ZipkinAutoConfiguration` 类体零字段，`afterPropertiesSet()` 仅打一行 `ZipkinConfig config done.`，无任何 `@Bean`/自定义 Reporter/Sender/属性绑定。pom 代引 `spring-cloud-sleuth-zipkin`（provided 未 optional）——它是 Sleuth 3.1.x 中承载 Zipkin 自动配置、绑定 `spring.zipkin.*` 的正式组件（官方已弃用 spring-cloud-starter-zipkin），但须 Sleuth tracing 核心在位才产出可上报 span，本件不引核心。相对规范处：自动配置类带了 `@Configuration`（不同于 gateway lite 族，但无 @Bean 故无意义）。瑕疵含【纯空壳零增强】@ConfigurationProperties 挂零字段类、enable 由 SpEL 直读非绑定、【本件对上报链路零贡献·名带 starter 实为占位壳】、【provided 非 optional 不传递】、【无 @ConditionalOnClass → NCDNF 崩溃族】、【开关语义误导】enable=false 关不掉上报（真正须 spring.zipkin.enabled=false）、【sample 依赖未引入的 Sleuth 核心】键拼写正确但单独引无 span 来源、@Data/无参构造冗余、双通道登记冗余、元数据 hints 死条目拷贝。**全仓零消费方属纯孤岛**。
+
+> 至此 `i2f-springcloud` 组 22 个真实模块（跳过 `test-gateway-swl`）已全部建档并登记索引。
+
+- 详细文档：[i2f-springcloud-zipkin-starter](./i2f-springcloud/i2f-springcloud-zipkin-starter/readme.md)
+
 ## i2f-tools
 
 > 开发/构建辅助工具集合，提供与工程构建、代码生成集成的独立能力。
 
+### i2f-jdbc-procedure-idea-plugin
+
+> IntelliJ IDEA 平台桌面插件「XProc4J 智能开发插件」（`i2f-tools` 组第 2 个建档模块，全仓**唯一 Gradle + `org.jetbrains.intellij` 构建件、唯一 JetBrains 平台件**，与运行期 Starter / 构建期 Maven 插件性质根本不同；`<id>` `i2f.turbo.jdbc-procedure-plugin`、`<name>` XProc4J、`version` 1.0、JDK17、sinceBuild 232/untilBuild 253.*；**规模 601 个 Java 源文件**，本组最重）：为 XProc4J（XML 存储过程）配置与 4 门自定义语言（TinyScript `.tis`/Ognl `.ognl`/Funic `.fic`/Funvi `.fvi`）提供完整 IDE 能力——标签名→Java 类/refid→定义引用跳转、`$变量` 高亮、SQL/Java/Groovy/JS/Velocity 等多语言注入、补全、DOM 描述、行标记导航、断点调试（xdebugger breakpointType + positionManagerFactory）、Live Templates、Oracle→XProc4J/TinyScript/OGNL 语法转换（ANTLR4）。功能真实完整、非空壳。瑕疵集中在**工程治理与可复现性**：【完全游离 Maven reactor，Gradle 无 parent、未列入 i2f-tools modules、version 1.0 脱离 1.0-jdk8】、【硬编码本机 IDEA localPath `C:\Program Files\...\2024.1`、下载式 version/type 被注释，换机即构建失败·高危】、【仓库硬编码阿里云、mavenCentral 注释】、【`lib/` 目录缺失且未被 gitignore 排除 → flatDir 声明的 `i2f-extension-xproc4j:1.0-jdk8` 内部依赖干净克隆不可解析，buildPlugin 失败】、【自带 plugin-intro.md 版本矛盾：称 IDEA>=2021.1/示例 jar `...-2021.1-211.jar` 但 sinceBuild=232、产物实为 `jdbc-procedure-plugin-1.0.jar`】、【intro 依赖清单漂移漏列 yaml/intelliLang】、【目录/rootProject.name/`<name>`/`<id>` 四处命名不一致】、【plugin.xml `<depends>xml` 与 gradle 注释掉 xml 供给不对齐】、【ANTLR/Grammar-Kit 生成码手工提交进 src 无再生任务】、【静态块起常驻 15s 轮询守护线程】、【Test*Debugger 挂 main 源集】。与运行期 `i2f-extension-xproc4j` 为「框架/IDE 前端」配对，自成产品不被 compile 消费。
+
+- 详细文档：[i2f-jdbc-procedure-idea-plugin](./i2f-tools/i2f-jdbc-procedure-idea-plugin/readme.md)
+
 ### i2f-maven-plugin
 
-> i2f 构建期 Maven 插件，提供 `i2f:spi` 目标，基于 ASM 扫描 `@Spi` 注解，自动生成并合并 `META-INF/services/` 服务描述文件。
+> i2f 构建期 Maven 插件（`i2f-tools` 组首个建档模块，全仓**唯一 `packaging=maven-plugin`** 件，与 springboot/springcloud 组的运行期 Starter 性根本不同）：提供单目标 `i2f:spi`（`SpiComponentScanMojo` 341 行），绑定 `process-classes` 阶段，基于 ASM（`SKIP_CODE|DEBUG|FRAMES` 零类加载）扫描 `target/classes` 下标 `@Spi` 的 class，为 `value` 声明的接口自动生成并合并 `META-INF/services/` 描述文件。与 `i2f-spi-annotations`（注解契约）/`i2f-spi`（`ServiceLoader`）构成「声明→构建期生成→运行期加载」SPI 闭环，本件为中枢。功能完整无 NPE 硬伤，瑕疵集中在工程治理层：【游离 reactor、无 `<parent>` 且未列入 `i2f-tools` 的 modules、`version=1.0` 脱离 1.0-jdk8 约定、需单独 install、**全仓零消费方**】、【自带 readme 「项目结构」谎称 `Spi.java` 在本模块内（实际在 i2f-spi-annotations）、与自身依赖说明矛盾】、【`maven-project:2.2.1` Maven2 死依赖源码零引用】、【`i2f.version` 死属性】、【`requiresDependencyResolution=COMPILE` 多余开销】、【合并静默丢弃注释/空行、删除类后旧条目残留（幂等仅对新增成立）】。
 
 - 详细文档：[i2f-maven-plugin](./i2f-tools/i2f-maven-plugin/readme.md)
