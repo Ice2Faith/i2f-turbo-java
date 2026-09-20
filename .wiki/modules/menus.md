@@ -1533,6 +1533,84 @@
 
 - 详细文档：[i2f-springboot-jackson-sensible-starter](./i2f-springboot/i2f-springboot-jackson-sensible-starter/readme.md)
 
+### i2f-springboot-jdbc-bql-starter
+
+> BQL 与 JdbcProxy 双引擎 Spring Boot 自动装配 Starter：`JdbcBqlAutoConfiguration` 装配 `BqlTemplate` 程序化查询，`JdbcProxyAutoConfiguration` 以 `BeanDefinitionRegistryPostProcessor` 扫描 Mapper 接口注册动态代理 Bean，支持 MyBatis XML → Velocity 模板 → 简单注解三级 SQL 渲染降级链；`@ConditionalOnClass` 让 Velocity/OGNL 可选引入自动适配，两套引擎各由独立开关 `i2f.jdbc.bql.enable`/`i2f.jdbc.proxy.enable` 控制启停。
+
+- 详细文档：[i2f-springboot-jdbc-bql-starter](./i2f-springboot/i2f-springboot-jdbc-bql-starter/readme.md)
+
+### i2f-springboot-kafka-starter
+
+> Kafka 消息队列 Spring Boot 自动装配 Starter，分两层：`KafkaAutoConfiguration` 产出原生 `AdminClient`/`KafkaProducer`/`KafkaConsumer`，`SpringKafkaConfiguration` 产出 `KafkaTemplate`/`KafkaListenerContainerFactory` 等 spring-kafka 抽象 Bean（含事务变体与消费错误日志处理器），参数统一由 `KafkaConfigProperties` 绑定构建；两层各由 `kafka.enable`/`spring-kafka.enable` 独立开关，`client-id`/`group-id` 缺省回退 `spring.application.name`；零内部依赖，kafka-clients/spring-kafka 为 provided；但事务工厂强转复用 `@Primary` 单例致非事务模板被污染、原生 `KafkaConsumer` 单例线程不安全为瑕疵。
+
+- 详细文档：[i2f-springboot-kafka-starter](./i2f-springboot/i2f-springboot-kafka-starter/readme.md)
+
+### i2f-springboot-limit-starter
+
+> 请求限流 Spring Boot 自动装配 Starter：`LimitManager` 为核心枢纽，启动守护线程每 5s 从可插拔的 `LimitRuleItemProvider`（配置/JDBC/Redis 三种来源）刷新规则到内存，基于 Redis `INCR`+`EXPIRE` 做分布式固定窗口计数；`LimitFilter`（过滤器）与 `LimitAop`（`@Limited` 注解）两条入口按 global/ip/path/api/ant-path/user 六维判定超限抛 `LimitException`，各组件由独立 `@ConditionalOnExpression` 开关控制；瑕疵含 `scanRule()` 返回空 Map 致 `applyRule` 成死逻辑、扫描线程与 Redis 游标读取静默吞异常、`Cursor` 未关闭、限流后端故障时 fail-open 放行、规则写入 Redis 后不再更新。
+
+- 详细文档：[i2f-springboot-limit-starter](./i2f-springboot/i2f-springboot-limit-starter/readme.md)
+
+### i2f-springboot-maven-project
+
+> Spring Boot 应用**脚手架/模板工程**（非发布型 Starter，已在父 pom `<modules>` 注释排除、不参与 reactor 聚合）：`BaseBootApplication` 统一启动并一次性打印含 JVM/MBean/SPI/网络/内存画像的诊断 Banner，`Slf4jPrintStream`+`PerfLogger` 将 `System.out/err` 重定向为 SLF4J 延迟求值日志；构建层以 `maven-jar-plugin` 产出配置外置瘦 jar（`Class-Path` 清单）+ `maven-assembly-plugin` 产出全量/增量 `tar.gz`，部署层提供 `jarctrl.sh`（进程/JVM/JMX/Agent）、`deploy.sh`（OTA+备份清理）、`startup.bat`（JDK9+ 模块自适应）；瑕疵含 `startup` 的 web 类型判断反向、Banner 编译 MBean 判空变量写错可 NPE、反射主类脆弱、静态可变全局态、演示用 system 依赖缺失 jar。
+
+- 详细文档：[i2f-springboot-maven-project](./i2f-springboot/i2f-springboot-maven-project/readme.md)
+
+### i2f-springboot-mybatis-starter
+
+> MyBatis / MyBatis-Plus Spring Boot 自动装配 Starter，在三方 starter（均 provided、零版本绑定）之上叠加 i2f 增强：`MybatisAutoConfiguration` 以 `@MapperScan` 扫描 `com.**.mapper`/`com.**.dao` 并按开关经 `ConfigurationCustomizer` 注册分页拦截器，`MybatisDynamicAutoConfiguration` 产出 SQL 记录/结果集元数据两个拦截器 Bean，`SpringMybatisDynamicScriptExecutor` 借 `DataSourceUtils` 对 MyBatis `<script>` XML 片段直接 find/query/update（反射探测 `MybatisProperties`/`MybatisPlusProperties` 复用全局 Configuration，并持 `CountDownLatch` 静态单例）；三能力各由独立 `@ConditionalOnExpression` 开关控制。瑕疵含结果集拦截器配置的 handler 被无参构造丢弃、执行器以普通服务类冒充自动配置类、静态单例未初始化时 `getInstance()` 永久阻塞、反射探测空 catch 吞异常、`@MapperScan` 包范围硬编码、`@EnableScheduling` 冗余、元数据 hints 模板残留与键登记不全。
+
+- 详细文档：[i2f-springboot-mybatis-starter](./i2f-springboot/i2f-springboot-mybatis-starter/readme.md)
+
+### i2f-springboot-nginx-rtmp-auth-server-starter
+
+> Nginx-RTMP 推/拉流鉴权回调服务端 Spring Boot 自动装配 Starter：`NginxRtmpAuthController` 暴露 `POST /api/rtmp/auth` 整体承接 nginx 回调的 `call/addr/name/tcUrl…` 表单参数与 `token`，委托函数式接口 `NginxRtmpAuthTokenValidator` 判定后以 HTTP 状态码（2xx 放行/500 拒绝）回应 nginx；默认 `DefaultNginxRtmpAuthTokenValidator` 按固定 `access-token` 比对，可注册自定义校验器覆盖。零内部依赖、spring-boot-starter-web 为 provided+optional。瑕疵含默认校验器空 token 直接放行（fail-open 安全隐患）、无 `@ConditionalOnMissingBean` 致覆盖时多候选注入失败、控制器与 `@Component` 冒充自动配置类登记、缺 Web 环境条件保护、响应声明 JSON 实为 text/plain。
+
+- 详细文档：[i2f-springboot-nginx-rtmp-auth-server-starter](./i2f-springboot/i2f-springboot-nginx-rtmp-auth-server-starter/readme.md)
+
+### i2f-springboot-oss-minio-starter
+
+> MinIO 对象存储 Spring Boot 自动装配 Starter（薄装配层，仅 2 个类）：`MinioProperties` 继承 `MinioMeta` 绑定 `i2f.minio.*`（url/accessKey/secretKey 三元连接参数），`MinioAutoConfiguration` 据此产出 `MinioUtil`（桶/对象/前缀/预签名 URL 原生 API 封装）与 `MinioFileSystem`（把对象存储适配为 `i2f-io-filesystem` 的 `IFileSystem`）两个共享同一 `MinioClient` 的 Bean，整体由 `i2f.minio.enable`（默认 true）开关控制；实现全部下沉 `i2f-extension-minio` / `i2f-extension-filesystem-minio`，minio 客户端 provided+optional。瑕疵含 `@Import(MinioClient.class)` 可疑且无消费、缺 `@ConditionalOnClass` 类存在保护、自动配置类未标 `@Configuration`、`@Data`+未用 `dateFormat` 遗留字段、两 Bean 日志文案复制粘贴相同、`enable` 未纳入属性类、元数据 hints 模板残留、无 region/桶/超时扩展参数。
+
+- 详细文档：[i2f-springboot-oss-minio-starter](./i2f-springboot/i2f-springboot-oss-minio-starter/readme.md)
+
+### i2f-springboot-quartz-starter
+
+> Quartz 定时任务 Spring Boot 自动装配 Starter：`QuartzAutoConfiguration` 装配 `SchedulerFactoryBean`/`Scheduler`，`SpringJobFactory`（继承 `AdaptableJobFactory`）令 Quartz 反射创建的 Job 实例接受 Spring 注入，`QuartzScannerConfig` 在 `ContextRefreshedEvent` 时扫描 `base-packages` 下 `@QuartzSchedule` 方法并注册/更新 Interval/Cron 触发器（幂等走 `updateTrigger`）；调度核心下沉内部依赖 `i2f-extension-quartz`，附带标准 `QRTZ_*` 建表 SQL 支持持久化/集群；quartz/spring-boot-starter-quartz/c3p0 全 provided+optional，调度器与扫描器各由独立 `@ConditionalOnExpression` 开关。瑕疵含配置探测 `if (rs != null)` 恒真从不校验资源存在（降级链失效）、`scheduler()` 直接取 `getScheduler()` 存在初始化时机风险、与 Boot 自带 Quartz 自动配置冲突且无 `@ConditionalOnMissingBean`、缺 `@ConditionalOnClass` 保护、`SpringJobFactory` 以 `@Component` 混入自动配置登记、非唯一 Bean 目标类裸实例化丢失注入、`ContextRefreshedEvent` 重复扫描、元数据 `scaner` 拼写错误且主配置项未登记。
+
+- 详细文档：[i2f-springboot-quartz-starter](./i2f-springboot/i2f-springboot-quartz-starter/readme.md)
+
+### i2f-springboot-rabbitmq-starter
+
+> RabbitMQ Spring Boot 自动装配 Starter（薄装配层，仅 4 类、零内部依赖）：`RabbitMqAutoConfiguration`（`@ConfigurationProperties` 绑 `i2f.springboot.config.rabbit.*`）在 `enable`（默认 true）开关下以 `@ConditionalOnMissingBean` 产出全局 `RabbitTemplate`，按 `mandatory` 设强制回退并按 `log-confirm-callback`/`log-return-callback` 可选挂载两个仅打印日志的 `ConfirmCallback`/`ReturnCallback` 观测桩；`RabbitMqManager` 提供 `send(exchange, routing, msg)`→`convertAndSend` 极简门面；连接/序列化全委托 provided+optional 的 `spring-boot-starter-amqp`。瑕疵含 `@ConditionalOnMissingBean(RabbitTemplate.class)` 致 Boot 自带模板先产出使本模块 mandatory+回调常态静默空转、`enable=false` 无法关停恒定注册且强依赖模板的 `RabbitMqManager`、`RabbitMqManager` 以 `@Component` 冒充自动配置类登记、回调触发依赖 Boot 侧 `publisher-confirm-type`/`publisher-returns` 却不被校验联动、回调一律 info 级无失败区分补救、`@Data` 用于配置类、元数据未登记 `enable` 且 hints 为 JSP/Tomcat 模板残留。
+
+- 详细文档：[i2f-springboot-rabbitmq-starter](./i2f-springboot/i2f-springboot-rabbitmq-starter/readme.md)
+
+### i2f-springboot-redis-starter
+
+> Redis Spring Boot 自动装配 Starter，4 个自动配置类分层装配：`RedisAutoConfiguration` 产出带 Jackson 默认类型的 `Jackson2JsonRedisSerializer`（+`@EnableRedisRepositories`），`RedisTemplateAutoConfiguration` 组装 String-key/JSON-value 的 `RedisTemplate<String,Object>`，`RedisCacheConfiguration` 将二者桥接为 i2f 统一分布式缓存 `IRedisClient`（`SpringRedisClient`）+`RedisCache`，`LettuceRedisHeartbeatConfiguration`（`@ConditionalOnClass`）后台线程周期 `validateConnection` 规避 Lettuce 15 分钟 TCP 重传假死；缓存/客户端下沉内部依赖 `i2f-extension-redis-cache`/`i2f-spring-redis`，data-redis/starter-json 为 provided；四者各由独立 `@ConditionalOnExpression` 开关。瑕疵含心跳 `run()` 无 try/catch 而 `scheduleAtFixedRate` 遇未捕获异常即取消后续执行致保活永久停摆、开关强依赖链不可独立关停、`redisStringKeyTemplate` 缺 `@ConditionalOnMissingBean` 与 Boot 模板叠加多候选、4 类均无 `@Configuration` 走轻量模式、`enableDefaultTyping` 已废弃且反序列化隐患、`@Data` 误用、元数据 hints 模板残留。
+
+- 详细文档：[i2f-springboot-redis-starter](./i2f-springboot/i2f-springboot-redis-starter/readme.md)
+
+### i2f-springboot-redisson-starter
+
+> Redisson 分布式锁/原子自增 Spring Boot 自动装配 Starter：`RedissonAutoConfiguration` 复用 Boot `RedisProperties`（单点/集群/哨兵三模式）构建 `RedissonClient`，并 `@Import` 装配 `RedissonLockProvider`（i2f `ILockProvider` 抽象 + 裸 `RLock`/`RReadWriteLock`）、`RedissonAtomic`（`RAtomicLong` 自增 ID）、`RedissonLockAop`（切面解析 `@RedisLock`/`@RedisReadLock`/`@RedisWriteLock` 按优先级自动加解锁）；锁接口下沉内部依赖 `i2f-lock`，redisson-spring-boot-starter 为 provided。瑕疵含 `kidx > 0` 使文档示例的 `keyIdx=0` 首参分区锁永远失效（功能级 bug）、`redissonClient` 缺 `@ConditionalOnMissingBean` 与 redisson 自带客户端多候选冲突、自动配置类无 `@Configuration` 且缺 `@ConditionalOnClass`、三模式全不落空静默产无效 Config、仅支持 `redis://` 不支持 TLS、前缀拼写 `redission`、元数据默认值/描述错误与 hints 模板残留、AOP 三分支复制粘贴。
+
+- 详细文档：[i2f-springboot-redisson-starter](./i2f-springboot/i2f-springboot-redisson-starter/readme.md)
+
+### i2f-springboot-security-starter
+
+> Spring Security 无状态 token 认证/授权 Spring Boot 自动装配 Starter：`SecurityAutoConfiguration`（继承 `WebSecurityConfigurerAdapter`）以一堆 `@Value` 布尔开关与白名单驱动 STATELESS 安全链，`JsonSupportUsernamePasswordAuthenticationFilter` 按 Content-Type 分流 JSON/表单双登录，`AbstractTokenHolder`（进程内 `DefaultTokenHolder` / 可选 `RedisTokenHolder`）以 UUID token 缓存 `UserDetails` 并支持单点登录互踢，`LoginGuarder`+`LoginLockBeforeLoginChecker` 做账号/IP 失败锁定，成功/失败/登出/异常经 `ServletContextUtil.forward` 转发 `/forward/response` 统一 `ApiResp` 输出；登录/登出/令牌/异常入口/用户详情均 `@ConditionalOnMissingBean` 可覆盖，配 `ISecurityConfigListener`/`BeforeLoginChecker`/`LoginPasswordDecoder` 三扩展点；security/web 均 provided+optional。瑕疵含 spring.factories 注册了不存在的 `i2f.springboot.security.impl.SecurityForwardController`（真类在 `i2f.spring.authentication.forward`）可致启动 ClassNotFound、大量 `@Component` 又进自动配置登记双重身份致 `@ConditionalOnMissingBean` 求值不确定、`SecurityAutoConfiguration` 职责过载叠加 `@Data`/`@ControllerAdvice`、默认用户每次加载重编码且 admin/admin 弱口令、`e.printStackTrace()` 绕过日志、绝大多数配置项未登记元数据且 hints 为 JSP/Tomcat 残留、token/用户名 INFO 日志泄露、`DisableSecurityConfiguration` 关总开关仍不排除本模块 `@Component` 默认 Bean。
+
+- 详细文档：[i2f-springboot-security-starter](./i2f-springboot/i2f-springboot-security-starter/readme.md)
+
+### i2f-springboot-shiro-starter
+
+> Apache Shiro 无状态 token 认证/授权 Spring Boot 自动装配 Starter（23 类，手写全套装配、不用官方 shiro-starter）：`ShiroAutoConfiguration`（`@Configuration`+`@ConfigurationProperties("i2f.springboot.config.shiro")`）产出 `SecurityManager`/`SessionControlWebSubjectFactory`/`HashedCredentialsMatcher`(MD5/256)/`ShiroFilterFactoryBean`/`DelegatingFilterProxy`/`FilterRegistrationBean`，`ShiroCoreFilter`（全局 filter）拦截 `/login`（JSON/表单双登录）`/logout` 并对带 token 请求以 `CustomerAuthToken` 自动登录续期，`AbstractShiroTokenHolder`（进程内 `DefaultShiroTokenHolder` MapCache / 可选 `RedisShiroTokenHolder` RedisCache）以 UUID token 缓存 `IShiroUser` 支持单点互踢，多 Realm 按优先级编排、`@ConditionalOnMissingBean` 默认 Realm/handler 可覆盖、`filters.*`+反射动态注册额外过滤器、`ShiroExceptionHandler` 兜底；shiro-spring provided+optional，依赖 9 个 i2f 内部模块。瑕疵含 `RedisShiroTokenHolder` 无 `@Component`/未进 spring.factories 实为死代码、`AuthorizationAttributeSourceAdvisor` 缺 `DefaultAdvisorAutoProxyCreator` 致注解授权静默失效、缺 `@ConditionalOnClass`、默认 admin/admin 弱口令且以用户名作盐、JSON 登录 `printStackTrace` 吞异常后以字符串 "null" 续登、常量 `shiroCoreFiler` 拼写错、`removeSingleToken` 删错目标且无调用、`i2f-spring-redis`/`IHttpRequestHandler` 闲置、元数据仅登记 `enable`。
+
+- 详细文档：[i2f-springboot-shiro-starter](./i2f-springboot/i2f-springboot-shiro-starter/readme.md)
+
 ## i2f-tools
 
 > 开发/构建辅助工具集合，提供与工程构建、代码生成集成的独立能力。
