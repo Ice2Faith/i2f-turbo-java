@@ -318,6 +318,18 @@
 
 - 详细文档：[i2f-check-filter](./i2f-jdk/i2f-check-filter/readme.md)
 
+### i2f-clock-impl
+
+> 时钟源契约的默认实现层（`i2f-jdk` 组，实现 `i2f-clock-std.IClock`，内部依赖仅 `i2f-clock-std`）：`SystemClock` 用单线程守护 `ScheduledThreadPoolExecutor` 每 1ms 刷新一个 `volatile long ts`，把 `System.currentTimeMillis()` 的 native/内核态系统调用移出业务热路径（热路径只读 `volatile`），面向雪花 ID 等高频取时提速（类注释基准 17x~149x）；入口含静态 `currentTimeMillis()`/`currentTimeSeconds()` 与 `INSTANCE.currentMillis()`，另附带独立分段秒表 `TimeCounter`。被 `i2f-uid-impl`、`i2f-event`、`i2f-jdbc-procedure`、`i2f-extension-agent-javassist`、`i2f-extension-xproc4j` 等消费。瑕疵：【`scheduleAtFixedRate` 任务无 try/catch，异常即静默停刷→时间冻结隐患】、【`TestClock`/基准注释混入 src/main 且 `tcc.begin()` 误调静态工厂致计时不重置·基准不可信】、【`TimeCounter.sum()` 漏加读锁、且直用 `System.currentTimeMillis` 与加速主张自相矛盾】、【返回缓存值默认滞后≈1ms 峰值数百ms 非实时】、【包名 `i2f.clock` 与契约 `i2f.clock.std` 不对称、秒/分/毫秒双实现易漂移】。
+
+- 详细文档：[i2f-clock-impl](./i2f-jdk/i2f-clock-impl/readme.md)
+
+### i2f-clock-std
+
+> 时钟源标准契约层（`i2f-jdk` 组，纯接口/零实现/零内部依赖）：单接口 `IClock` 只强制 `currentMillis()` 一个毫秒原语，`currentSeconds()`/`currentMinutes()` 为 default 派生（整型除法截断），把「读时间」从获取策略（native `System.currentTimeMillis()` vs 定时缓存代理）解耦，供上层面向契约注入可替换时钟；由 `i2f-clock-impl.SystemClock` 实现，被 `i2f-uid-impl`（雪花 ID 默认 `SystemClock.INSTANCE`+构造器注入）、`i2f-extension-xproc4j`（生成 Java 源码模板 import）消费。瑕疵：【lombok 声明但零使用·冗余】、【包名 `i2f.clock.std` 与实现包 `i2f.clock` 不对称】、【无 nanoTime/无单调不回拨语义约束】、【继承 assembly 对纯契约件无意义】。
+
+- 详细文档：[i2f-clock-std](./i2f-jdk/i2f-clock-std/readme.md)
+
 ### i2f-code
 
 > 码值/密钥生成器（单静态门面 `CodeUtil`）：`makeUUID` 去连字符大写压缩 + `makeCheckCode` 基于 SecureRandom 的 62 字符均匀采样（避免模偏差），被 SWL 加密器用于生成 AES 密钥。
@@ -1182,6 +1194,12 @@
 
 - 详细文档：[i2f-extension-groovy](./i2f-extension/i2f-extension-groovy/readme.md)
 
+### i2f-extension-fory-json
+
+> JSON 序列化契约 `IJsonSerializer` 的 Apache Fory 实现适配层（`fory-json:1.7.4` provided、模块内硬编码未走根 DM；组内今日新增件）：单类 `ForyJsonSerializer` 把 Apache Fory（Fury 改名继任者）的 `ForyJson` 门面适配到 i2f 序列化契约族（`IJsonSerializer`←`IStringObjectSerializer`←`IStringTypeSerializer`←`ITypeSerializer`←`ISerializer`←`ICodec`），实现 `serialize`/`deserialize` 全变体（`Class`/`Type`/`TypeRef`/泛型 `Object` token 分派）与 `bean2Map`/`deserializeAsMap`，与 `JacksonJsonSerializer`/`GsonJsonSerializer`/fastjson 系列构成一契约多引擎并列。核心静态缺陷：无参构造与 `INSTANCE` 共享裸默认配置 `static final ForyJson`（未开线程安全模式，Fory 实例非线程安全→并发数据竞争）、与兄弟实现日期/null/包含策略不一致（裸 builder 无 Jackson 式日期格式与 Include.ALWAYS 设定，跨引擎切换输出漂移）、异常未统一包装为 `JsonSerializeException` 且未匹配分支抛 `UnsupportedOperationException`（消息拼写 `un-support`）、`@Data` 用于无状态适配器语义不当、`bean2Map` 双重转换+冗余 unchecked 强转、`INSTANCE` 非 final、全仓零消费方/无 SPI 仅 extension-all 聚合。
+
+- 详细文档：[i2f-extension-fory-json](./i2f-extension/i2f-extension-fory-json/readme.md)
+
 ### i2f-extension-gson
 
 > 基于 Google Gson（2.10.1，provided）的 `IJsonSerializer` 契约适配器：`GsonJsonSerializer` 把 `toJson`/`fromJson` 装配为契约实现，支持 `Class`/`Type`/`TypeToken` 类型化反序列化与 `bean2Map`/`deserializeAsMap`；可经注入构造器携带定制 `Gson`，与 fastjson/fastjson2/jackson 为可替换多实现。
@@ -1355,6 +1373,12 @@
 > Quartz 调度桥接扩展（quartz:2.3.2 以 provided 引入，模块内硬编码版本）：双层结构——QuartzUtil 全静态门面（Scheduler 获取、JobDetail/Simple 间隔与 Cron Trigger 构建、schedule/reschedule/pause/resume/runOnce/delete 生命周期）+ 注解驱动线（@QuartzSchedule 方法注解 → QuartzScanner classpath 扫描 → QuartzJobMeta 双轨元数据 → 统一注册为固定 Job 类 QuartzAnnotationJob，meta 经 JobDataMap "meta" 传递，执行时反射回调，static 直调、非 static 优先 invokeObj 否则每次 newInstance）；唯一源码级消费方 i2f-springboot-quartz-starter（容器刷新事件触发扫描、getBeansOfType 单命中注入 bean 作 invokeObj）。核心静态缺陷：热更新路径仅 reschedule Trigger 而丢弃新 JobDetail（注解方法绑定变更不生效）、QuartzJobMeta 含 Method/Class 字段 JDBC JobStore 下不可序列化、重载方法按名解析错位、带参注解方法注册期无校验运行时炸。
 
 - 详细文档：[i2f-extension-quartz](./i2f-extension/i2f-extension-quartz/readme.md)
+
+### i2f-extension-jedis
+
+> Redis 客户端契约 `IRedisClient` 的 Jedis 实现适配层（`jedis:3.8.0` provided、模块内硬编码未走根 DM）：单类 `JedisRedisClient`（自管 `JedisPool`）+ `JedisMeta` 连接参数模型，以 `delegate(Function<Jedis,R>)` 模板统一「借出—执行—归还」实现 23 契约方法，`prefix` 前缀隔离键空间；是 i2f「一契约双实现」的 Jedis 路线（另一路 `i2f-spring-redis.SpringRedisClient`），与消费方 `RedisCache` 经 redis-api 契约解耦。核心静态缺陷：`setUnique` 丢弃 setnx 结果恒返 true（分布式锁必误判）、`returnResource` 用 Jedis 2.7+ 废弃 API、`getJedis` 加 `synchronized` 串行化借连接抵消池并发、取不到连接静默返 null + 异常消息拼写 `cloud`、`del` get+del 两步非原子、`set`+`expire` 两步非原子且超时 0 立即删 key、`keys()` 用阻塞 KEYS 命令、`listAll` 的 `lrange(0,llen)` 越取一位、池参数硬编码且四 test 全开、`i2f-cache` 声明却零使用·冗余、仅 extension-all 聚合仓内零激活。
+
+- 详细文档：[i2f-extension-jedis](./i2f-extension/i2f-extension-jedis/readme.md)
 
 ### i2f-extension-redis-api
 
@@ -1830,3 +1854,30 @@
 > i2f 构建期 Maven 插件（`i2f-tools` 组首个建档模块，全仓**唯一 `packaging=maven-plugin`** 件，与 springboot/springcloud 组的运行期 Starter 性根本不同）：提供单目标 `i2f:spi`（`SpiComponentScanMojo` 341 行），绑定 `process-classes` 阶段，基于 ASM（`SKIP_CODE|DEBUG|FRAMES` 零类加载）扫描 `target/classes` 下标 `@Spi` 的 class，为 `value` 声明的接口自动生成并合并 `META-INF/services/` 描述文件。与 `i2f-spi-annotations`（注解契约）/`i2f-spi`（`ServiceLoader`）构成「声明→构建期生成→运行期加载」SPI 闭环，本件为中枢。功能完整无 NPE 硬伤，瑕疵集中在工程治理层：【游离 reactor、无 `<parent>` 且未列入 `i2f-tools` 的 modules、`version=1.0` 脱离 1.0-jdk8 约定、需单独 install、**全仓零消费方**】、【自带 readme 「项目结构」谎称 `Spi.java` 在本模块内（实际在 i2f-spi-annotations）、与自身依赖说明矛盾】、【`maven-project:2.2.1` Maven2 死依赖源码零引用】、【`i2f.version` 死属性】、【`requiresDependencyResolution=COMPILE` 多余开销】、【合并静默丢弃注释/空行、删除类后旧条目残留（幂等仅对新增成立）】。
 
 - 详细文档：[i2f-maven-plugin](./i2f-tools/i2f-maven-plugin/readme.md)
+
+### i2f-tools-face-recognizer
+
+> 人脸识别可执行工具壳（`i2f-tools` 组建档模块，纯 `main` 示例件、零自研算法）：把 `i2f-extension-opencv-javacv` 的 `OpenCvFaceRecognizer`（JavaCV/OpenCV 4.7.0 LBPH）经 `maven-assembly-plugin` 打成带 `Main-Class` 的自包含 fat jar，演示「目录约定训练→保存/载入模型三件套→批量测试→预测并画框标注 `.mark.png`」离线全流程；双运行模式（无参读 `trained`/`testing` 自检、有参逐文件预测），一切走 `./runtime/persist` 目录约定无配置文件。关键设计：上游 opencv-javacv 把 `javacv`/`javacv-platform` 定 `provided` 不打包，本壳在自身 pom 重声明为 `compile` 并各排除 11 项无关原生组件（ffmpeg/tesseract 等）仅留 OpenCV 线以实现自包含。核心瑕疵：【游离 reactor，`i2f-tools` modules 中被注释不参与默认构建】、【主类与上游 `src/test` 同名测试类逐行重复两处维护】、【可执行入口置于 `...javacv.test` 包 main 源集命名误导】、【无参模式硬编码 `testing/s7/4.pgm.verify.png` 无守卫】、【`trained` 空目录 train 静默 return 后 `labelNameList.get(-1)` 越界】、【lombok 零使用冗余、StdConst/OpenCvDataFileProvider 靠传递未显式声明】、【javacv 与 javacv-platform 双份排除清单需同步】、【fat jar 携全平台原生库体积巨大】、【无 src/test 无 JUnit】。
+
+- 详细文档：[i2f-tools-face-recognizer](./i2f-tools/i2f-tools-face-recognizer/readme.md)
+
+### i2f-tools-ops
+
+> 可部署运维控制台 / AI 工具宿主应用（`i2f-tools` 组唯一成品级 SpringBoot 应用，依赖面最宽：聚合 7 内部 compile + 30 余三方）：清单两级启动 `Main-Class=ExtApplicationLauncher`（来自 `i2f-launcher`）+ `Ext-Main-Class=i2f.tools.ToolOpsApplication`，扫描 `Ext-Path=plugins` 建 `ExtClasspathClassLoader`、回调 `ExtLauncherSpi.premain` 后反射启真实 main，实现「丢 starter 进 plugins 即扩展 AI 工具/覆盖资源」；`ToolOpsApplication` 继承 `WarBootApplication`（`SpringBootServletInitializer`）故 jar/war 双形态，`BaseBootApplication` 启动打印超详尽诊断横幅（JVM/网卡 URL/`ServiceLoader` 枚举全部 JDBC/JCE/IIO/GC）。核心功能：`@Tools`+`@ConditionalOnExpression(${ai.tools.*.enable})`+`AiTags` 授权标签条件装配 AI 工具集（干支/八字/Funic 数学求值/Form 弹窗/Robot 截屏/Pandoc/Selenium/Playwright 网搜，多数默认关且部分仅 Windows）、`yi` 易经八字引擎（借 lunar）、内置 9+ JDBC 驱动含国产库 + 国密 sm-crypto/nashorn + dynamic-datasource/redisson/ssh-tunnel/xproc4j，配置分离打包 + `make-all`/`make-upgrade` 双 assembly 出 tar.gz。核心瑕疵：【完全游离 reactor，pom 注释 `<parent>` 自声明 `1.0-jdk8` 且未列 modules，描述属性 `root.maven.version=1.0` 与实版不符】、【`maven-compiler-plugin` 配 `skip=true` 异常】、【诊断横幅 `CompilationMXBean` 判空用错 `classLoadingMXBean` 存在 NPE 隐患】、【`startup` 中 `if(webType!=null)` 反而强制 `NONE` 关闭 Web 语义反转】、【`Test*` 类混入 main 源集、`runtime`/`lib`/`rags_history` 二进制大文件入库污染】、【GBase `system` scope 硬编码 jar 名不可移植】、【Slf4jPrintStream/PerfLogger/BaseBoot 等基建本模块副本重复】、【默认 `autoconfigure.exclude` 全关数据源/Redis 易踩不生效】。
+- 详细文档：[i2f-tools-ops](./i2f-tools/i2f-tools-ops/readme.md)
+
+### i2f-tools-agent
+
+> Java Agent 可执行发行壳（`i2f-tools` 组装档模块，**零自研源码、纯 pom 打包件**）：把 `i2f-extension-agent-javassist` 的 Javassist 运行时增强引擎（`AgentMain` + 11 个 `ClassFileTransformer`）经 `maven-assembly-plugin` 打成单一自包含 `jar-with-dependencies`（重声明 `javassist:3.28.0-GA` 为 compile 以打入，上游为 provided），清单声明**双身份**——`Main-Class=i2f.agent.AppMain`（`java -jar` 启动交互式「列举本机 JVM→选中→`VirtualMachine.attach`+`loadAgent` 自注入」投放器）与 `Premain-Class`/`Agent-Class=i2f.extension.agent.javassist.AgentMain`（`-javaagent`/动态挂载入口），配 `Can-Redefine/Retransform-Classes=true`；`agentProxy` 注册文件/SQL(Statement+Connection)/进程启动/RMI/URL/Spring 上下文与 Bean 捕获/Shutdown/Throwable/WebFilter traceId/XXE 防护共 11 个 transformer，并起 `LocalFileExpressionEvaluator` 守护线程热编译 `./expression/expression.java`。核心瑕疵：【游离 reactor，`i2f-tools` modules 中被注释不参与默认构建】、【清单 `Main-Class` 所在 `i2f-agent` 非直接依赖、仅经 extension 传递而来，上游调整即静默失效】、【类路径存在两个同名 `AgentMain`（`i2f.agent` 简易版永不激活 vs `extension` 完整版），清单只引后者易挂错】、【`tools.jar` system 依赖 assembly 不打包且 `${java.home}/lib/tools.jar` 写死 JDK8 布局，JRE/JDK9+ 下 attach 失败】、【`appendAssemblyId=false` 使 fat jar 覆盖主产物、被引用时污染下游 classpath】、【javassist 版本本地硬编码未走根 DM】、【`Class-Path=./resources/` 无源码无资源空约定】、【XXE 全局改写误伤依赖 DTD 的解析、表达式热编译等同运行时执行后门、观测输出裸 `System.out`】。
+
+- 详细文档：[i2f-tools-agent](./i2f-tools/i2f-tools-agent/readme.md)
+
+### i2f-tools-encrypt
+
+> 命令行加解密/编解码一体化工具壳（`i2f-tools` 组装档模块，**纯 `main` 分发件、零自研密码算法**）：以单一契约 `IMenuHandler`（`name()`+`execute(args)`）+ `CryptMain` 静态 `ConcurrentHashMap` 注册表，把 JDK 编码、`i2f-crypto-impl` 摘要/HMAC/AES/RSA、Spring Security `PasswordEncoder`（`pe-*`）、jasypt（`jasypt-*`，输出附 `ENC(...)`）、BouncyCastle 国密（`bc-*`）、antherd sm-crypto 国密（`antherd-sm*`）约 104 个算法入口收敛为 `java -jar i2f-tools-encrypt.jar <菜单名> [参数]` 单发命令，无参/未命中回退 `help.txt`；经父 pom 继承的 `maven-assembly-plugin` `jar-with-dependencies`（`appendAssemblyId=false`、`Main-Class=i2f.tools.encrypt.CryptMain`）打自包含 fat jar。依赖 5 内部（crypto-impl/codec-impl/jce-bc/jce-sm-antherd/resources）+ 7 三方全 compile 全打入。核心瑕疵：【重复注册旁路】显式 import `bc.digest.BcSm3MenuHandler` 使第 124/138 行两次 `new` 均落 digest 版，`bc.encrypt.BcSm3MenuHandler` 成永不注册的孤儿类、【孤儿 handler】`JasyptStrongText*` 两类 help.txt 列了却未注册实际不可用、【help.txt 张冠李戴】html/ucode/xcode 全标 `Base32StringByteCodec`（实为 `UCodeStringCodec`）、`bc-shake-128` 重复、SM2 误标 Symmetric、【BC 双版本并存】`bcprov-jdk15to18:1.74` 与 `bcprov-jdk15on:1.64` 同包冲突、【依赖过宽】引入 `spring-security-core`/`jasypt-spring-boot` 全量、【游离 reactor】`i2f-tools` modules 中被注释不参与默认构建、`e.printStackTrace()` 兜底退出码恒 0 等共 9 条（均静态识别未实证）。
+- 详细文档：[i2f-tools-encrypt](./i2f-tools/i2f-tools-encrypt/readme.md)
+
+### i2f-tools-source-copier
+
+> Java 源码「依赖闭包抽取」命令行工具壳（`i2f-tools` 组装档模块，**单类 `main` 分发件、仅 1 内部依赖 `i2f-io-file`、零三方**，且是组内**唯一仍参与 Maven reactor 默认构建**的壳件——其余 face-recognizer/agent/encrypt 均从 `<modules>` 注释摘出）：单类 `JavaSourceCodeCopier`（全 static 无状态）以 `-s`(搜索根建 `FQN→File` 全量索引)/`-c`(抽取入口)/`-o`(输出目录，默认 `./output/src`) 三参数命令行，从入口出发做 **BFS 传递依赖闭包**——逐文件按行文本解析 `package`/`import` 头、`.*` 通配展开、跳过 `java*/javax*/jakarta*`，并用「同目录兄弟 `.java` 简单类名是否被正文 `contains`」补捕同包隐式引用，把所有可达源码按包名→目录 `FileUtil.copy` 保结构落地，实现「从大仓精准摘出带依赖的最小源码子集」。经父 pom 继承的 `maven-assembly-plugin` `jar-with-dependencies`（`appendAssemblyId=false`、`Main-Class=i2f.tools.soure.copier.JavaSourceCodeCopier`）打自包含 fat jar。核心瑕疵：【包名拼写错误 `soure`(应 `source`) 且 pom `main.class` 一致写错】、【`import static` 被把 `static` 当导入名静默丢失】、【同包探测裸 `contains` 短名假阳性过度引入】、【头部遇首个 `public`/`class` 行即 break 的脆弱行解析】、【FQN 索引 key 冲突静默覆盖】、【无 `/src/main/java/` 布局降级裸类名致落地扁平/重名覆盖】、【`test()` 硬编码 Windows 路径混入 main 源集随 jar 携带】、【无抽取结果/未命中 import 反馈可观测性弱】、【只搬 `.java` 不含资源与非标准源码根、子集未必可编译】等共 10 条(静态识别、未实证)。
+- 详细文档：[i2f-tools-source-copier](./i2f-tools/i2f-tools-source-copier/readme.md)
