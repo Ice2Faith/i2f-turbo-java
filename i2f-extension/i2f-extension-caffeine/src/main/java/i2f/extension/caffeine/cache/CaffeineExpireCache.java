@@ -3,19 +3,22 @@ package i2f.extension.caffeine.cache;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Expiry;
-import i2f.cache.std.expire.IExpireCache;
+import i2f.cache.std.ext.IExpireContainerCache;
 import lombok.Data;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
+import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
  * @date 2026/9/21 11:10
  * @desc
  */
-public class CaffeineExpireCache<K, V> implements IExpireCache<K, V> {
+@Data
+public class CaffeineExpireCache<K, V> implements IExpireContainerCache<K, V> {
     protected static final Object NULL_PLACEHOLDER = new Object();
 
     @Data
@@ -75,6 +78,19 @@ public class CaffeineExpireCache<K, V> implements IExpireCache<K, V> {
 
     public Object wrap(Object obj) {
         return obj == null ? NULL_PLACEHOLDER : obj;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<K> keys() {
+        return cache.asMap().keySet().stream()
+                .map(e -> (K) unwrap(e))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void clean() {
+        cache.invalidateAll();
     }
 
     @Override
