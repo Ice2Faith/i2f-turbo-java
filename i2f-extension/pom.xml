@@ -29,6 +29,7 @@
         <module>i2f-extension-asr-vosk</module>
         <module>i2f-extension-browser-playwright</module>
         <module>i2f-extension-browser-selenium</module>
+        <module>i2f-extension-caffeine</module>
         <module>i2f-extension-canal</module>
         <module>i2f-extension-cglib</module>
         <module>i2f-extension-compress</module>
