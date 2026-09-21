@@ -83,6 +83,7 @@ public class CaffeineExpireCache<K, V> implements IExpireContainerCache<K, V> {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<K> keys() {
+        cache.cleanUp();
         return cache.asMap().keySet().stream()
                 .map(e -> (K) unwrap(e))
                 .collect(Collectors.toList());

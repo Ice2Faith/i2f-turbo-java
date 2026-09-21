@@ -2,8 +2,11 @@ package i2f.extension.caffeine.cache;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import i2f.cache.std.base.ICache;
+import i2f.cache.std.container.IContainerCache;
 import lombok.Data;
+
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -11,7 +14,7 @@ import lombok.Data;
  * @desc
  */
 @Data
-public class CaffeineCache<K, V> implements ICache<K, V> {
+public class CaffeineCache<K, V> implements IContainerCache<K, V> {
     protected static final Object NULL_PLACEHOLDER = new Object();
 
     protected final Cache<Object, Object> cache;
@@ -62,5 +65,19 @@ public class CaffeineCache<K, V> implements ICache<K, V> {
     @Override
     public void remove(K key) {
         cache.invalidate(wrap(key));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<K> keys() {
+        cache.cleanUp();
+        return cache.asMap().keySet().stream()
+                .map(e -> (K) unwrap(e))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void clean() {
+        cache.invalidateAll();
     }
 }
