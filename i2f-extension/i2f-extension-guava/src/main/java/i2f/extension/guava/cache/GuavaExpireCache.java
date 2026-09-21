@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * 建议使用 caffeine 代替此实现
  */
 @Data
-public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V> {
+public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>,AutoCloseable {
     protected static final Object NULL_PLACEHOLDER = new Object();
 
     @Data
@@ -176,5 +176,10 @@ public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V> {
         for (Object key : keys) {
             innerGetIfPresent(key);
         }
+    }
+
+    @Override
+    public void close() throws Exception {
+        cleanPool.shutdownNow();
     }
 }
