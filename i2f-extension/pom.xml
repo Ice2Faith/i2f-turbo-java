@@ -46,6 +46,8 @@
         <module>i2f-extension-filesystem-oss-aliyun</module>
         <module>i2f-extension-filesystem-oss-aws-s3</module>
         <module>i2f-extension-filesystem-sftp</module>
+        <module>i2f-extension-fory-json</module>
+        <module>i2f-extension-freemarker</module>
         <module>i2f-extension-ftp</module>
         <module>i2f-extension-gif</module>
         <module>i2f-extension-groovy</module>
@@ -93,10 +95,9 @@
         <module>i2f-extension-velocity</module>
         <module>i2f-extension-velocity-bindsql</module>
         <module>i2f-extension-verifycode</module>
+        <module>i2f-extension-xproc4j</module>
         <module>i2f-extension-zip4j</module>
         <module>i2f-extension-zookeeper</module>
-        <module>i2f-extension-freemarker</module>
-        <module>i2f-extension-xproc4j</module>
 
         <module>test-flink</module>
         <module>test-extension</module>
