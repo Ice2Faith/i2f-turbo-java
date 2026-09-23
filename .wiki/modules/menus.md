@@ -1014,6 +1014,12 @@
 
 - 详细文档：[i2f-extension-ai-openai](./i2f-extension/i2f-extension-ai-openai/readme.md)
 
+### i2f-extension-ai-rag-lucene
+
+> Lucene 全文检索版 RAG 存储实现：以 `IKAnalyzer` 中文分词 + `MultiFieldQueryParser` 关键词召回替代向量 KNN，Model/Store 经 UTF-8 字节强映射成对使用（向量无真实语义）；lucene 8.11.4 与 ik-analyzer 9.0.0 均 provided+optional。
+
+- 详细文档：[i2f-extension-ai-rag-lucene](./i2f-extension/i2f-extension-ai-rag-lucene/readme.md)
+
 ### i2f-extension-ai-rag-sqlite
 
 > sqlite-vec 原生扩展版的 RAG 存储层实现：单库 `SqliteRagEmbeddingStore` + 分桶记忆 `BucketRagEmbeddingStore` 双契约落地本地向量库（vec0 虚拟表 + KNN 检索），原生扩展自动释放。
