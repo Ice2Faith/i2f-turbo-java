@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/redis")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/redis")
 public class RedisOpsController implements IOpsProvider {
     @Autowired
     private ApplicationContext applicationContext;

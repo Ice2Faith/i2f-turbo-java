@@ -206,7 +206,7 @@ public class SqlCursorNode extends AbstractExecutorNode {
                     // use iterator.remove() help gc
                     Iterator<?> iterator = list.iterator();
                     while (iterator.hasNext()) {
-                        Object obj=iterator.next();
+                        Object obj = iterator.next();
                         iterator.remove();
 
                         long bts = SystemClock.currentTimeMillis();

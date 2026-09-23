@@ -46,7 +46,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/minio")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/minio")
 public class MinioOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

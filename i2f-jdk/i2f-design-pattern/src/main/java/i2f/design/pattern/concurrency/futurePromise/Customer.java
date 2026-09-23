@@ -49,7 +49,7 @@ public class Customer {
      * <p>顾客点单后，创建 FutureTask（取餐凭据），
      * 将 Promise 端交给厨房制作，自己保留 Future 端等待取餐。</p>
      *
-     * @param food 要点的菜品
+     * @param food    要点的菜品
      * @param kitchen 负责制作的厨房
      * @return Future 对象（取餐凭据）
      */
@@ -98,7 +98,7 @@ public class Customer {
      * <p>顾客最多等待指定时间，超时后不再等待。
      * 适用于顾客有其他事情要做，不能无限等待的场景。</p>
      *
-     * @param future Future 对象（取餐凭据）
+     * @param future        Future 对象（取餐凭据）
      * @param timeoutMillis 超时时间（毫秒）
      * @return 制作完成的菜品，如果超时则返回 null
      */
@@ -128,7 +128,7 @@ public class Customer {
      * <p>顾客不阻塞等待，而是定期查看订单是否完成。
      * 适用于顾客想做其他事情（如刷手机）的场景。</p>
      *
-     * @param future Future 对象（取餐凭据）
+     * @param future             Future 对象（取餐凭据）
      * @param pollIntervalMillis 轮询间隔（毫秒）
      */
     public void pollOrderStatus(Future<Food> future, long pollIntervalMillis) {

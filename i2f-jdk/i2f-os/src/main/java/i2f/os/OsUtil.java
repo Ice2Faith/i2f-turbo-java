@@ -75,13 +75,14 @@ public class OsUtil {
     public static String execCmd(boolean requireOutput, long waitForMillsSeconds, String cmd, String[] envp, File dir, String charset) {
         return execCmdForResult(requireOutput, waitForMillsSeconds, cmd, envp, dir, charset).getStdout();
     }
+
     public static CommandResult execCmdForResult(boolean requireOutput, long waitForMillsSeconds, String cmd, String[] envp, File dir, String charset) {
         try {
             Runtime runtime = Runtime.getRuntime();
 
             Process process = runtime.exec(cmd, envp, dir);
             String stdout = getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
-            return CommandResult.of(process,stdout);
+            return CommandResult.of(process, stdout);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -113,7 +114,7 @@ public class OsUtil {
     }
 
     public static String execCmd(boolean requireOutput, long waitForMillsSeconds, String[] cmdArr, String[] envp, File dir, String charset) {
-        return execCmdForResult(requireOutput,waitForMillsSeconds,cmdArr,envp,dir,charset).getStdout();
+        return execCmdForResult(requireOutput, waitForMillsSeconds, cmdArr, envp, dir, charset).getStdout();
     }
 
     public static CommandResult execCmdForResult(boolean requireOutput, long waitForMillsSeconds, String[] cmdArr, String[] envp, File dir, String charset) {
@@ -122,7 +123,7 @@ public class OsUtil {
 
             Process process = runtime.exec(cmdArr, envp, dir);
             String stdout = getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
-            return CommandResult.of(process,stdout);
+            return CommandResult.of(process, stdout);
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

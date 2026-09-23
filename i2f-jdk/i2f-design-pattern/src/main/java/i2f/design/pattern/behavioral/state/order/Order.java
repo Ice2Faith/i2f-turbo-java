@@ -129,8 +129,8 @@ public class Order {
         this.currentState = newState;
     }
 
-    public String getStateName(){
-        if(this.currentState==null){
+    public String getStateName() {
+        if (this.currentState == null) {
             return "状态未知";
         }
         return this.currentState.getStateName();

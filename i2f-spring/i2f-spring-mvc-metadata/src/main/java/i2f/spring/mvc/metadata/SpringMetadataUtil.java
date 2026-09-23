@@ -10,10 +10,10 @@ import org.springframework.core.env.Environment;
  */
 public class SpringMetadataUtil {
     public static String resolveParameters(String url, Environment environment) {
-        if(environment==null || url==null){
+        if (environment == null || url == null) {
             return url;
         }
-        if(!url.contains("$")){
+        if (!url.contains("$")) {
             return url;
         }
         return RegexUtil.regexFindAndReplace(url, "\\$\\{[^}]}+\\}", str -> {

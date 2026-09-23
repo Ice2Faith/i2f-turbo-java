@@ -8,7 +8,7 @@ package i2f.springboot.ops.home.data;
 public interface OpsMenuGroup {
     String text();
 
-    default int order(){
+    default int order() {
         return 0x0ffff;
     }
 }

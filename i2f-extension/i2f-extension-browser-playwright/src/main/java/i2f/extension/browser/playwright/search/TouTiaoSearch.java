@@ -82,8 +82,8 @@ public class TouTiaoSearch {
                 enterElem.click();
             }
 
-            int nopCount=0;
-            while (nopCount<1000) {
+            int nopCount = 0;
+            while (nopCount < 1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
@@ -98,7 +98,7 @@ public class TouTiaoSearch {
                     }
                     continue;
                 }
-                nopCount=0;
+                nopCount = 0;
 
                 try {
 
@@ -138,7 +138,7 @@ public class TouTiaoSearch {
                     enterElem.press("Enter");
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()
-                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
+                            || SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector(".s-result-list .result-content .cs-card-content", new Page.WaitForSelectorOptions()
@@ -147,7 +147,7 @@ public class TouTiaoSearch {
                                 break;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                if(i==2){
+                                if (i == 2) {
                                     return context;
                                 }
                                 continue;

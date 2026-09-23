@@ -42,7 +42,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/ssh")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/ssh")
 public class SshOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

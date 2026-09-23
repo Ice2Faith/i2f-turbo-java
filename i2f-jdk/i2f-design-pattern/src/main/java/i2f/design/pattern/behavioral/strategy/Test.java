@@ -52,7 +52,7 @@ public class Test {
         System.out.println("用户先选择支付宝，后改为微信支付：\n");
 
         OrderContext order4 = new OrderContext("ORDER-20260521-004");
-        
+
         // 第一次选择支付宝
         System.out.println("【第一次尝试】");
         order4.setPaymentStrategy(new AliPay());
@@ -72,11 +72,11 @@ public class Test {
         System.out.println("通过统一接口调度不同的支付策略：\n");
 
         PaymentStrategy[] strategies = {
-            new AliPay(),
-            new WeChatPay(),
-            new CreditCardPay()
+                new AliPay(),
+                new WeChatPay(),
+                new CreditCardPay()
         };
-        
+
         String[] orderNos = {"ORDER-A-001", "ORDER-A-002", "ORDER-A-003"};
         double[] amounts = {100.00, 200.00, 300.00};
 

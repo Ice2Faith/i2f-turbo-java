@@ -15,5 +15,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ToolIntentItem {
     String value() default "";
+
     String description() default "";
 }

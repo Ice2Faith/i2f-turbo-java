@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2026/8/12 18:51
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="session_record",description = "提供基于session级别的持久化存储读写能力"))
+@ToolIntent(items = @ToolIntentItem(value = "session_record", description = "提供基于session级别的持久化存储读写能力"))
 @ConditionalOnExpression("${ai.tools.session-record.enable:true}")
 @Component
 @Tools

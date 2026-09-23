@@ -23,7 +23,7 @@ import java.util.Map;
  * @date 2026/6/8 20:08
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="lunar",description = "提供给定日期的农历、八字、纳音、五行等信息"))
+@ToolIntent(items = @ToolIntentItem(value = "lunar", description = "提供给定日期的农历、八字、纳音、五行等信息"))
 @ConditionalOnClass(Lunar.class)
 @ConditionalOnExpression("${ai.tools.lunar.enable:true}")
 @Component

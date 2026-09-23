@@ -1,7 +1,6 @@
 package i2f.springboot.redisson.aop;
 
 import i2f.springboot.redisson.annotation.RedisLimiter;
-import i2f.springboot.redisson.annotation.RedisLock;
 import i2f.springboot.redisson.exception.RedissonLimitException;
 import i2f.springboot.redisson.limit.RedissonRateLimiter;
 import lombok.extern.slf4j.Slf4j;
@@ -53,9 +52,9 @@ public class RedissonLimitAop {
 
         RedisLimiter lann = getAnnotation(method, RedisLimiter.class);
         if (lann != null) {
-            String key="redisson:limit:method:"+method;
+            String key = "redisson:limit:method:" + method;
             RRateLimiter rateLimiter = redissonClient.getRateLimiter(key);
-            if(!rateLimiter.isExists()){
+            if (!rateLimiter.isExists()) {
                 rateLimiter.setRate(RateType.OVERALL, lann.value(), lann.rateInterval(), lann.unit());
             }
             RedissonRateLimiter limiter = new RedissonRateLimiter(rateLimiter);

@@ -49,7 +49,7 @@ public class Kitchen {
      * <p>此方法立即返回，不阻塞调用线程。
      * 厨房会在后台线程中制作菜品，制作完成后通过 Promise 端更新结果。</p>
      *
-     * @param food 要制作的菜品
+     * @param food    要制作的菜品
      * @param promise Promise 端（用于写入结果）
      */
     public void cookAsync(Food food, Promise<Food> promise) {

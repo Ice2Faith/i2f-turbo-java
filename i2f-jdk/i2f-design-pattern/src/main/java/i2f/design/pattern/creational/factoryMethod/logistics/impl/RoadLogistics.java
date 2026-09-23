@@ -1,8 +1,8 @@
 package i2f.design.pattern.creational.factoryMethod.logistics.impl;
 
+import i2f.design.pattern.creational.factoryMethod.logistics.Logistics;
 import i2f.design.pattern.creational.factoryMethod.transport.Transport;
 import i2f.design.pattern.creational.factoryMethod.transport.impl.Truck;
-import i2f.design.pattern.creational.factoryMethod.logistics.Logistics;
 
 /**
  * 工厂方法模式 —— 公路物流（Concrete Creator：RoadLogistics）

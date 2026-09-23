@@ -10,5 +10,5 @@ import i2f.springboot.ops.openai.data.OpenAiMeta;
 public interface AsyncTaskResolver {
     boolean support(AsyncTaskItem item, OpenAiMeta meta) throws Exception;
 
-    AsyncTaskItem resolve(AsyncTaskItem item,OpenAiMeta meta) throws Exception;
+    AsyncTaskItem resolve(AsyncTaskItem item, OpenAiMeta meta) throws Exception;
 }

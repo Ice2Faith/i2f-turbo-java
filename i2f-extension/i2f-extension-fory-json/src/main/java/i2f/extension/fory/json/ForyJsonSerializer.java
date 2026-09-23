@@ -2,7 +2,6 @@ package i2f.extension.fory.json;
 
 import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.apache.fory.json.ForyJson;
 import org.apache.fory.reflect.TypeRef;
 
@@ -15,15 +14,15 @@ import java.util.Map;
  * @desc
  */
 @Data
-public class ForyJsonSerializer  implements IJsonSerializer {
+public class ForyJsonSerializer implements IJsonSerializer {
     public static ForyJsonSerializer INSTANCE = new ForyJsonSerializer();
 
     public static final ForyJson JSON = ForyJson.builder().build();
 
     protected final ForyJson fory;
 
-    public ForyJsonSerializer(){
-        this.fory=JSON;
+    public ForyJsonSerializer() {
+        this.fory = JSON;
     }
 
     public ForyJsonSerializer(ForyJson fory) {

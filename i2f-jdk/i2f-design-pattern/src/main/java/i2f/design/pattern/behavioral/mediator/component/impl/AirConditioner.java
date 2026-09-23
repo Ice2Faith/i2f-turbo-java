@@ -72,7 +72,7 @@ public class AirConditioner extends Component {
     /**
      * 由中介者调用的控制方法。
      *
-     * @param on         true=开启，false=关闭
+     * @param on          true=开启，false=关闭
      * @param temperature 设定温度
      */
     public void setState(boolean on, double temperature) {

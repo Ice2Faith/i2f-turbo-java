@@ -98,7 +98,7 @@ public class FileUtil {
             isFirst = false;
         }
         String ret = builder.toString();
-        if(!ret.isEmpty()){
+        if (!ret.isEmpty()) {
             if (orginalPath.endsWith(orginalPathSep) && !ret.endsWith(orginalPathSep)) {
                 ret += orginalPathSep;
             }

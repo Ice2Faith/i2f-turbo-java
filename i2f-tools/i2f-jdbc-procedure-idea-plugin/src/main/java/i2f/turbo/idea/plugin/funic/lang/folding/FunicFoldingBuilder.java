@@ -47,12 +47,12 @@ public class FunicFoldingBuilder extends FoldingBuilderEx implements DumbAware {
 
                 placeholder = "{...}";
 
-            }else if (child instanceof FunicMapValueExpress) {
+            } else if (child instanceof FunicMapValueExpress) {
                 FunicMapValueExpress block = (FunicMapValueExpress) child;
 
                 placeholder = "{...}";
 
-            }else if (child instanceof FunicListValueExpress) {
+            } else if (child instanceof FunicListValueExpress) {
                 FunicListValueExpress block = (FunicListValueExpress) child;
 
                 placeholder = "[...]";
@@ -86,9 +86,9 @@ public class FunicFoldingBuilder extends FoldingBuilderEx implements DumbAware {
         IElementType tokenType = child.getElementType();
         if (tokenType.equals(FunicTypes.SCRIPT_BLOCK)) {
             return "{...}";
-        }else if (tokenType.equals(FunicTypes.MAP_VALUE_EXPRESS)) {
+        } else if (tokenType.equals(FunicTypes.MAP_VALUE_EXPRESS)) {
             return "{...}";
-        }else if (tokenType.equals(FunicTypes.LIST_VALUE_EXPRESS)) {
+        } else if (tokenType.equals(FunicTypes.LIST_VALUE_EXPRESS)) {
             return "[...]";
         }
         return null;

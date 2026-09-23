@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/datasource")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/datasource")
 public class DatasourceOpsController implements IOpsProvider {
 
     @Autowired

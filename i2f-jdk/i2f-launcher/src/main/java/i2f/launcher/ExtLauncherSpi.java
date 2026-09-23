@@ -7,5 +7,5 @@ package i2f.launcher;
  */
 @FunctionalInterface
 public interface ExtLauncherSpi {
-    void premain(Class<?> mainClass,String[] args);
+    void premain(Class<?> mainClass, String[] args);
 }

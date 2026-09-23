@@ -51,11 +51,11 @@ public class BaZi implements Runnable {
         cangGanShiShenCountMap.clear();
     }
 
-    public String getSimpleInfo(Boolean isMale,GanZhiDate liuNian){
+    public String getSimpleInfo(Boolean isMale, GanZhiDate liuNian) {
         StringBuilder builder = new StringBuilder();
         getBasicSimpleInfo(isMale, builder);
-        if(liuNian==null){
-            liuNian=GanZhiDate.of(LocalDateTime.now());
+        if (liuNian == null) {
+            liuNian = GanZhiDate.of(LocalDateTime.now());
         }
         getLiuNianSimpleInfo(liuNian, builder);
         return builder.toString();

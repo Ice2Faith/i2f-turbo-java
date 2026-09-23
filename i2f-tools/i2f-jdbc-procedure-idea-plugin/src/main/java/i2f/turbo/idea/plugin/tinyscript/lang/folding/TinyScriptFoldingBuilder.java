@@ -47,12 +47,12 @@ public class TinyScriptFoldingBuilder extends FoldingBuilderEx implements DumbAw
 
                 placeholder = "{...}";
 
-            }else if (child instanceof TinyScriptJsonMapValue) {
+            } else if (child instanceof TinyScriptJsonMapValue) {
                 TinyScriptJsonMapValue block = (TinyScriptJsonMapValue) child;
 
                 placeholder = "{...}";
 
-            }else if (child instanceof TinyScriptJsonArrayValue) {
+            } else if (child instanceof TinyScriptJsonArrayValue) {
                 TinyScriptJsonArrayValue block = (TinyScriptJsonArrayValue) child;
 
                 placeholder = "[...]";
@@ -86,9 +86,9 @@ public class TinyScriptFoldingBuilder extends FoldingBuilderEx implements DumbAw
         IElementType tokenType = child.getElementType();
         if (tokenType.equals(TinyScriptTypes.SCRIPT_BLOCK)) {
             return "{...}";
-        }else  if (tokenType.equals(TinyScriptTypes.JSON_MAP_VALUE)) {
+        } else if (tokenType.equals(TinyScriptTypes.JSON_MAP_VALUE)) {
             return "{...}";
-        }else  if (tokenType.equals(TinyScriptTypes.JSON_ARRAY_VALUE)) {
+        } else if (tokenType.equals(TinyScriptTypes.JSON_ARRAY_VALUE)) {
             return "{...}";
         }
         return null;

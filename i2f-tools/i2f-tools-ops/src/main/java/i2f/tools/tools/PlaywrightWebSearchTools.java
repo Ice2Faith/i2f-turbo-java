@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
  * @date 2026/6/30 10:37
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="playwright",description = "提供基于playwright的网页搜索能力"))
+@ToolIntent(items = @ToolIntentItem(value = "playwright", description = "提供基于playwright的网页搜索能力"))
 @ConditionalOnExpression("${ai.tools.playwright-web-search.enable:false}")
 @Conditional(PlaywrightWebSearchTools.WindowsPlaywrightCondition.class)
 @Data

@@ -1,9 +1,9 @@
 package i2f.design.pattern.behavioral.visitor.emplyee;
 
-import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.ExecutiveEmployee;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.ManagerEmployee;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.StaffEmployee;
+import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 
 /**
  * 访问者模式 —— 员工（Element：Employee）

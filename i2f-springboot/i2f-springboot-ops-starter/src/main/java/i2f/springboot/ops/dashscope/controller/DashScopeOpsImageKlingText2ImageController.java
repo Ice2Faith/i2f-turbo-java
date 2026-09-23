@@ -7,14 +7,11 @@ import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.dashscope.data.DashScopeImageKlingText2ImageOperateDto;
-import i2f.springboot.ops.dashscope.data.DashScopeImageWanText2ImageOperateDto;
-import i2f.springboot.ops.dashscope.data.DashScopeVideoHappyHorseOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
@@ -40,7 +37,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/image/kling/text2image")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/image/kling/text2image")
 public class DashScopeOpsImageKlingText2ImageController {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -93,7 +90,7 @@ public class DashScopeOpsImageKlingText2ImageController {
     @PostMapping("/generate")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> imageText2Image(@RequestBody OpsSecureDto reqDto,
-                                                            HttpServletRequest request) throws Exception {
+                                                         HttpServletRequest request) throws Exception {
         try {
             DashScopeImageKlingText2ImageOperateDto req = transfer.recv(reqDto, DashScopeImageKlingText2ImageOperateDto.class);
 

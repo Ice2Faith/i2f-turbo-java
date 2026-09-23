@@ -13,16 +13,18 @@ import java.util.Map;
  * @desc
  */
 public class ToolIntentHelper {
-    private static final LruMap<Method,Map<String,IToolIntent>> cacheParse=new LruMap<>(4096);
+    private static final LruMap<Method, Map<String, IToolIntent>> cacheParse = new LruMap<>(4096);
+
     public static Map<String, IToolIntent> parse(Method method) {
         Map<String, IToolIntent> ret = cacheParse.get(method);
-        if(ret!=null){
+        if (ret != null) {
             return new LinkedHashMap<>(ret);
         }
         Map<String, IToolIntent> map = parse0(method);
-        cacheParse.put(method,new LinkedHashMap<>(map));
+        cacheParse.put(method, new LinkedHashMap<>(map));
         return map;
     }
+
     public static Map<String, IToolIntent> parse0(Method method) {
         Map<String, IToolIntent> ret = new LinkedHashMap<>();
         Class<?> declaringClass = method.getDeclaringClass();

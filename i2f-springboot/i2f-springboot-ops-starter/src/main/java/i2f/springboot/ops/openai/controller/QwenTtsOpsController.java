@@ -38,7 +38,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/open-ai")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/open-ai")
 public class QwenTtsOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;

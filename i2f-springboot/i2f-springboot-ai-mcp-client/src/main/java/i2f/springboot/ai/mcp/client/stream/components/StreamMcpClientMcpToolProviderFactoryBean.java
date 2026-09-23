@@ -6,8 +6,8 @@ import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.net.http.data.HttpHeaders;
 import i2f.spring.web.rest.SpringWebRestClient;
-import i2f.springboot.ai.mcp.client.stream.provider.StreamJsonRpcMcpClientToolProvider;
 import i2f.springboot.ai.mcp.client.stream.properties.StreamMcpClientProperties;
+import i2f.springboot.ai.mcp.client.stream.provider.StreamJsonRpcMcpClientToolProvider;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +34,10 @@ public class StreamMcpClientMcpToolProviderFactoryBean implements FactoryBean<Mc
         StreamJsonRpcMcpClientToolProvider provider = new StreamJsonRpcMcpClientToolProvider();
         provider.setBaseUrl(config.getUrl());
         provider.setHeaders(HttpHeaders.create());
-        if(config.getBearerToken()!=null && !config.getBearerToken().isEmpty()){
+        if (config.getBearerToken() != null && !config.getBearerToken().isEmpty()) {
             provider.getHeaders().add("Authorization", "Bearer " + config.getBearerToken());
         }
-        if(config.getHeaders()!=null){
+        if (config.getHeaders() != null) {
             provider.getHeaders().addAll(config.getHeaders());
         }
         provider.setRestClient(new SpringWebRestClient(new RestTemplate()));

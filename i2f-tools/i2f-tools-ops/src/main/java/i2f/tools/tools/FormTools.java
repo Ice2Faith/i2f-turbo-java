@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @date 2026/8/29 14:35
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="form",description = "提供用户交互弹窗、单选框、多选框等"))
+@ToolIntent(items = @ToolIntentItem(value = "form", description = "提供用户交互弹窗、单选框、多选框等"))
 @ConditionalOnExpression("${ai.tools.form.enable:false}")
 @Conditional(FormTools.WindowsFormCondition.class)
 @Data

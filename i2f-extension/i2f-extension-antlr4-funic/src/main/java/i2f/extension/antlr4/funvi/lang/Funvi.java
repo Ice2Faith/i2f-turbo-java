@@ -1,6 +1,7 @@
 package i2f.extension.antlr4.funvi.lang;
 
 import i2f.extension.antlr4.funvi.grammar.FunviLexer;
+import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
 import i2f.extension.antlr4.funvi.lang.errors.FunviErrorStrategy;
 import i2f.extension.antlr4.funvi.lang.impl.DefaultFunviVisitor;
@@ -8,7 +9,6 @@ import i2f.extension.antlr4.funvi.lang.listener.DefaultAntlrErrorListener;
 import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
 import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
-import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import org.antlr.v4.runtime.ANTLRErrorListener;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;

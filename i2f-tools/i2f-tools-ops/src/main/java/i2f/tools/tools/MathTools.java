@@ -23,7 +23,7 @@ import java.util.List;
  * @date 2026/7/6 14:27
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="math",description = "提供基于轻量级脚本语言的强有力的数学运算能力"))
+@ToolIntent(items = @ToolIntentItem(value = "math", description = "提供基于轻量级脚本语言的强有力的数学运算能力"))
 @ConditionalOnExpression("${ai.tools.math.enable:true}")
 @Component
 @Tools(tags = {
@@ -32,7 +32,9 @@ import java.util.List;
 })
 public class MathTools {
     private static final FunicResolver resolver = SandboxFunicResolver.createDefault().toMutator()
-            .apply(u->{u.getUseVisitorRegistryGlobalMethods().set(true);})
+            .apply(u -> {
+                u.getUseVisitorRegistryGlobalMethods().set(true);
+            })
             .done();
 
     @Data
@@ -89,7 +91,7 @@ public class MathTools {
             ret.add(item);
 
             try {
-                Object val = Funic.script(expression, new HashMap<>(),resolver);
+                Object val = Funic.script(expression, new HashMap<>(), resolver);
                 item.setSuccess(true);
                 item.setResult(val);
             } catch (Exception e) {

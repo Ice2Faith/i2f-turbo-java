@@ -14,13 +14,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "ai.openai")
 public class OpenAiOpsProperties {
 
-    protected VisionOptions vision=new VisionOptions();
+    protected VisionOptions vision = new VisionOptions();
 
     @Data
     @NoArgsConstructor
-    public static class VisionOptions{
-        protected int imageMaxSizeKb=256;
-        protected int imageMaxDimension=960;
+    public static class VisionOptions {
+        protected int imageMaxSizeKb = 256;
+        protected int imageMaxDimension = 960;
     }
 
 }

@@ -39,7 +39,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/7/15 15:51
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="tmp_file",description = "提供针对上传的临时文件的读写能力"))
+@ToolIntent(items = @ToolIntentItem(value = "tmp_file", description = "提供针对上传的临时文件的读写能力"))
 @ConditionalOnExpression("${ai.tools.tmp-file.enable:true}")
 @Data
 @NoArgsConstructor
@@ -257,7 +257,7 @@ public class TmpFileTools {
         return metadata;
     }
 
-    public String signContent(String content)  {
+    public String signContent(String content) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             String payload = signSalt + "@" + content + "#" + signSalt;
@@ -270,7 +270,7 @@ public class TmpFileTools {
             sign = sign.substring(0, 5) + sign.substring(sign.length() - 5);
             return sign;
         } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException(e.getMessage(),e);
+            throw new IllegalArgumentException(e.getMessage(), e);
         }
     }
 
@@ -280,16 +280,16 @@ public class TmpFileTools {
         return url.substring(0, idx) + "://" + sign + "@" + url.substring(idx + "://".length());
     }
 
-    public String verifyUrl(String url){
-        int idx=url.indexOf("://");
-        String protocol=url.substring(0,idx);
-        String path=url.substring(idx+"://".length());
-        idx=path.indexOf("@");
-        String sign=path.substring(0,idx);
-        path=path.substring(idx+1);
-        String originUrl=protocol+"://"+path;
+    public String verifyUrl(String url) {
+        int idx = url.indexOf("://");
+        String protocol = url.substring(0, idx);
+        String path = url.substring(idx + "://".length());
+        idx = path.indexOf("@");
+        String sign = path.substring(0, idx);
+        path = path.substring(idx + 1);
+        String originUrl = protocol + "://" + path;
         String reSign = signContent(originUrl);
-        if(!reSign.equalsIgnoreCase(sign)){
+        if (!reSign.equalsIgnoreCase(sign)) {
             throw new IllegalArgumentException("illegal url, verify url signature failure!");
         }
         return originUrl;
@@ -350,7 +350,7 @@ public class TmpFileTools {
         String protocol = fileUrl.substring(0, idx);
         if (PROTOCOL.equals(protocol)) {
             try {
-                fileUrl=verifyUrl(fileUrl);
+                fileUrl = verifyUrl(fileUrl);
                 String realPath = fileUrl.substring(idx + 3);
                 File file = getFile(realPath);
                 if (!file.exists()) {

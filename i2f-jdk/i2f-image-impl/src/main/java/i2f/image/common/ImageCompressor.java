@@ -227,7 +227,7 @@ public class ImageCompressor {
         int maxDimension = 2080;
 
         double bestQuality = compressImage(new File(input), new File(output), maxSizeKb, maxDimension);
-        System.out.println("图像质量："+bestQuality);
+        System.out.println("图像质量：" + bestQuality);
         if (bestQuality >= 0) {
             System.out.println("处理成功：" + output);
         } else {

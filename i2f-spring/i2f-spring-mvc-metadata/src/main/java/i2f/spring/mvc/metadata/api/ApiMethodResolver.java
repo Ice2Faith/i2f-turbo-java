@@ -77,11 +77,11 @@ public class ApiMethodResolver {
     protected ApiMethod api;
     protected boolean withClassAnnotation = true;
 
-    public static ApiMethod resolveParameters(ApiMethod method, Environment environment){
+    public static ApiMethod resolveParameters(ApiMethod method, Environment environment) {
         List<String> urls = method.getUrls();
-        if(urls!=null){
-            urls=urls.stream()
-                    .map(url-> SpringMetadataUtil.resolveParameters(url,environment))
+        if (urls != null) {
+            urls = urls.stream()
+                    .map(url -> SpringMetadataUtil.resolveParameters(url, environment))
                     .collect(Collectors.toList());
         }
         method.setUrls(urls);
@@ -139,7 +139,7 @@ public class ApiMethodResolver {
         return api;
     }
 
-    public ApiMethod parse(Environment environment){
+    public ApiMethod parse(Environment environment) {
         return resolveParameters(parse(), environment);
     }
 

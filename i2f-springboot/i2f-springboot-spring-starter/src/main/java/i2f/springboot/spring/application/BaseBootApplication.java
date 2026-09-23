@@ -22,7 +22,6 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.security.Provider;
 import java.sql.Driver;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -139,18 +138,18 @@ public class BaseBootApplication {
                 builder.append("\tnet    : \thttp://").append(ip).append(":").append(port).append(contextPath).append("/\n");
 
                 String preferredIp = NetworkUtil.getPreferredIp();
-                if(preferredIp!=null){
+                if (preferredIp != null) {
                     builder.append("\tprefer : \thttp://").append(preferredIp).append(":").append(port).append(contextPath).append("/\n");
                 }
 
                 List<NetworkUtil.IpEntry> addresses = NetworkUtil.getUsefulAddresses();
-                String interfaceName=null;
+                String interfaceName = null;
                 for (NetworkUtil.IpEntry entry : addresses) {
                     NetworkInterface networkInterface = entry.getNetworkInterface();
                     String name = networkInterface.getName();
-                    if(!name.equals(interfaceName)){
+                    if (!name.equals(interfaceName)) {
                         builder.append("\t\t").append(" ").append(networkInterface.getName()).append(": ").append(networkInterface.getDisplayName()).append("\n");
-                        interfaceName=name;
+                        interfaceName = name;
                     }
                     InetAddress addr = entry.getInetAddress();
                     String pip = addr.getHostAddress();

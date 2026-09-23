@@ -6,24 +6,23 @@ package i2f.springboot.ops.home.data;
  * @desc
  */
 public enum OpsHomeMenuGroup implements OpsMenuGroup {
-    Default("Default",10),
-    App("App",20),
-    Host("Host",30),
-    SQL("SQL",40),
-    NoSQL("NoSQL",50),
-    Oss("Oss",60),
-    Schedule("Schedule",70),
-    Component("Component",80),
-    AI("AI",90)
-    ;
+    Default("Default", 10),
+    App("App", 20),
+    Host("Host", 30),
+    SQL("SQL", 40),
+    NoSQL("NoSQL", 50),
+    Oss("Oss", 60),
+    Schedule("Schedule", 70),
+    Component("Component", 80),
+    AI("AI", 90);
 
 
     private String text;
     private int order;
 
-    private OpsHomeMenuGroup(String text,int order) {
+    private OpsHomeMenuGroup(String text, int order) {
         this.text = text;
-        this.order=order;
+        this.order = order;
     }
 
     @Override

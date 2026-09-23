@@ -256,7 +256,7 @@ public class ObjectConvertor {
     }
 
     public static boolean isDateType(Class<?> clazz) {
-        if(isNumericType(clazz)){
+        if (isNumericType(clazz)) {
             return false;
         }
         for (Class<?> item : dateTypeConverterMap.keySet()) {

@@ -35,7 +35,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2026/8/7 18:42
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="robot",description = "提供基于robot的本机控制能力、截屏等"))
+@ToolIntent(items = @ToolIntentItem(value = "robot", description = "提供基于robot的本机控制能力、截屏等"))
 @ConditionalOnExpression("${ai.tools.robot.enable:false}")
 @Conditional(FormTools.WindowsFormCondition.class)
 @Data
@@ -55,6 +55,7 @@ public class RobotTools {
             return true;
         }
     }
+
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     @Autowired(required = false)

@@ -90,7 +90,7 @@ public class RemoteControl {
 
         System.out.println(String.format("\n  [遥控器] 按下按钮 %d → 执行：%s", slot, command.getName()));
         command.execute();
-        
+
         // 记录到历史（用于撤销）
         history.add(command);
     }

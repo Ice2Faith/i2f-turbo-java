@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
@@ -38,7 +37,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/video/wan/instead-people")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/video/wan/instead-people")
 public class DashScopeOpsVideoWanInsteadPeopleController {
     @Autowired
     protected OpsSecureTransfer transfer;

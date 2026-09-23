@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/9/10 19:57
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value=CommandTools.TOOL_INTENT_VALUE,description = CommandTools.TOOL_INTENT_DESCRIPTION))
+@ToolIntent(items = @ToolIntentItem(value = CommandTools.TOOL_INTENT_VALUE, description = CommandTools.TOOL_INTENT_DESCRIPTION))
 @ConditionalOnExpression("${ai.tools.powershell.enable:false}")
 @Conditional(PowershellTools.WindowsFormCondition.class)
 @Data
@@ -59,9 +59,9 @@ public class PowershellTools {
             }, description = "run an powershell command line."
     )
     public CommandResult run_powershell_command(@ToolParam(value = "command", description = "the powershell command, for example \"Get-Process | Select-Object -First 5\"")
-                                   String command,
-                                   @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
-                                   String workdir) {
+                                                String command,
+                                                @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
+                                                String workdir) {
         File dir = null;
         if (workdir == null || workdir.isEmpty()) {
             workdir = ".";
@@ -83,9 +83,9 @@ public class PowershellTools {
             }, description = "run an powershell script, command will run as a temp ps1 script."
     )
     public CommandResult run_powershell_script(@ToolParam(value = "script", description = "the powershell full script content, for example \"Get-Process | Select-Object -First 5\"")
-                                   String script,
-                                   @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
-                                   String workdir) {
+                                               String script,
+                                               @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
+                                               String workdir) {
         File dir = null;
         if (workdir == null || workdir.isEmpty()) {
             workdir = ".";

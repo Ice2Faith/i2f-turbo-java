@@ -86,7 +86,7 @@
  *
  * <h3>核心思想</h3>
  * <p><strong>"抽象与实现分离"</strong> —— 遥控器（控制逻辑）不继承设备（执行逻辑），
- * 而是通过组合 {@link Device} 接口来调用设备功能。这样：
+ * 而是通过组合 {@link i2f.design.pattern.structural.bridge.device.Device} 接口来调用设备功能。这样：
  * <ul>
  *   <li>新增遥控器类型（如语音遥控）→ 只需扩展 RemoteControl，无需修改设备</li>
  *   <li>新增设备类型（如空调）→ 只需实现 Device 接口，无需修改遥控器</li>

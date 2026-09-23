@@ -18,7 +18,7 @@ import java.util.Map;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.client.solon")
 public class SolonMcpClientProperties {
-    public static final String CONFIG_PREFIX="i2f.springboot.ai.mcp.client.solon";
+    public static final String CONFIG_PREFIX = "i2f.springboot.ai.mcp.client.solon";
 
     protected List<InstanceConfig> instances;
 

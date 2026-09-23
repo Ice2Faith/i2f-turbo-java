@@ -613,6 +613,7 @@ public class Yi {
 
     /**
      * 根据地支获取对应的藏干
+     *
      * @param zhi 地支
      * @return
      */
@@ -748,10 +749,10 @@ public class Yi {
      * @param date 需要的是月柱
      * @return
      */
-    public static String getTaiYuanGanZhi(GanZhiDate date){
+    public static String getTaiYuanGanZhi(GanZhiDate date) {
         String[] arr = date.getMonth().split("");
-        String monthGan=arr[0];
-        String monthZhi=arr[1];
+        String monthGan = arr[0];
+        String monthZhi = arr[1];
         int monthGanOffset = getStringOffset(monthGan, GAN);
         int monthZhiOffset = getStringOffset(monthZhi, ZHI);
         return GAN[(monthGanOffset + 1) % 12] + ZHI[(monthZhiOffset + 3) % 12];
@@ -771,29 +772,29 @@ public class Yi {
      * @param date 八字
      * @return
      */
-    public static String getShenGongGanZhi(GanZhiDate date){
+    public static String getShenGongGanZhi(GanZhiDate date) {
         String monthZhi = date.getMonth().substring(1);
         String hourZhi = date.getHour().substring(1);
         int monthZhiOffset = getStringOffset(monthZhi, ZHI);
         int hourZhiOffset = getStringOffset(hourZhi, ZHI);
         int sumNum = (monthZhiOffset + 1) + (hourZhiOffset + 1);
-        if(sumNum<=12){
+        if (sumNum <= 12) {
             // do nothing
-        }else{
-            sumNum=sumNum-12;
+        } else {
+            sumNum = sumNum - 12;
         }
-        int zhiOffset=sumNum-1;
-        int ganOffset=0;
+        int zhiOffset = sumNum - 1;
+        int ganOffset = 0;
         String year = date.getYear();
-        String yearGan=year.substring(0,1);
+        String yearGan = year.substring(0, 1);
         for (Map.Entry<String, String> entry : WU_HU_DUN_MONTH_OF_YEAR_RULE.entrySet()) {
-            if(yearGan.equals(entry.getKey())){
+            if (yearGan.equals(entry.getKey())) {
                 String startGan = entry.getValue();
                 ganOffset = getStringOffset(startGan, GAN);
             }
         }
-        ganOffset=(ganOffset+10+(zhiOffset-2))%10;
-        return GAN[ganOffset]+ZHI[zhiOffset];
+        ganOffset = (ganOffset + 10 + (zhiOffset - 2)) % 10;
+        return GAN[ganOffset] + ZHI[zhiOffset];
     }
 
     /**
@@ -803,12 +804,12 @@ public class Yi {
      * @param ganZhi 干支
      * @return
      */
-    public static List<String> getPengZuBaiJiByGanZhi(String ganZhi){
-        List<String> ret=new ArrayList<>();
+    public static List<String> getPengZuBaiJiByGanZhi(String ganZhi) {
+        List<String> ret = new ArrayList<>();
         String[] arr = ganZhi.split("");
         for (String item : arr) {
             String str = PENG_ZHU_BAI_JI_RULE.get(item);
-            if(str!=null){
+            if (str != null) {
                 ret.add(str);
             }
         }

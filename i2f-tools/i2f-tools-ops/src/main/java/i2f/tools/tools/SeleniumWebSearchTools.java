@@ -29,7 +29,7 @@ import org.springframework.util.ClassUtils;
  * @date 2026/6/30 10:37
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="selenium",description = "提供基于selenium的网页搜索能力"))
+@ToolIntent(items = @ToolIntentItem(value = "selenium", description = "提供基于selenium的网页搜索能力"))
 @ConditionalOnExpression("${ai.tools.selenium-web-search.enable:false}")
 @Conditional(SeleniumWebSearchTools.WindowsSeleniumCondition.class)
 @Data
@@ -57,7 +57,7 @@ public class SeleniumWebSearchTools {
     }
 
     @Value("${ai.tools.selenium-web-search.web-ui:true}")
-    protected boolean webUi=true;
+    protected boolean webUi = true;
 
     @Tool(
             tags = {
@@ -71,7 +71,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_kaifa_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduKaifaSearch.search(content, 5,webUi, null);
+        SearchContext ret = BaiduKaifaSearch.search(content, 5, webUi, null);
         return ret;
     }
 
@@ -87,7 +87,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_baidu(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BaiduSearch.search(content, 5,webUi, null);
+        SearchContext ret = BaiduSearch.search(content, 5, webUi, null);
         return ret;
     }
 
@@ -103,7 +103,7 @@ public class SeleniumWebSearchTools {
     public SearchContext selenium_web_search_by_biying(
             @ToolParam(value = "content", description = "the content of search, for example \"what's update of springboot3?\"")
             String content) {
-        SearchContext ret = BiYingSearch.search(content, 5,webUi, null);
+        SearchContext ret = BiYingSearch.search(content, 5, webUi, null);
         return ret;
     }
 
@@ -119,7 +119,7 @@ public class SeleniumWebSearchTools {
     public SearchResult selenium_scrape_web_page(
             @ToolParam(value = "url", description = "the url of scrape, for example \"https://spring.io/projects/spring-boot\"")
             String url) throws Exception {
-        SearchResult ret = WebPageScraper.scraper(url,webUi, null);
+        SearchResult ret = WebPageScraper.scraper(url, webUi, null);
         return ret;
     }
 }

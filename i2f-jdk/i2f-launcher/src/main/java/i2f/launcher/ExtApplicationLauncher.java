@@ -68,9 +68,9 @@ public class ExtApplicationLauncher {
         List<ExtLauncherSpi> list = getExtLauncherSpis(loader);
         for (ExtLauncherSpi spi : list) {
             try {
-                spi.premain(clazz,args);
+                spi.premain(clazz, args);
             } catch (Throwable e) {
-                System.err.println("ext launcher spi premain error: "+e.getMessage());
+                System.err.println("ext launcher spi premain error: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -80,7 +80,7 @@ public class ExtApplicationLauncher {
     }
 
     private static List<ExtLauncherSpi> getExtLauncherSpis(ClassLoader loader) {
-        List<ExtLauncherSpi> list=new ArrayList<>();
+        List<ExtLauncherSpi> list = new ArrayList<>();
         ServiceLoader<ExtLauncherSpi> loaders = ServiceLoader.load(ExtLauncherSpi.class, loader);
         for (ExtLauncherSpi spi : loaders) {
             list.add(spi);

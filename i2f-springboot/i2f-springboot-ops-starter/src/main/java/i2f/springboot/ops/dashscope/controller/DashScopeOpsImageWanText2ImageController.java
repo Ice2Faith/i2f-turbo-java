@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
@@ -40,7 +39,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/image/wan/text2image")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/image/wan/text2image")
 public class DashScopeOpsImageWanText2ImageController {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -63,51 +62,51 @@ public class DashScopeOpsImageWanText2ImageController {
         body.put("input", inputMap);
 
 
-        List<Map<String,Object>> messages=new ArrayList<>();
-        inputMap.put("messages",messages);
+        List<Map<String, Object>> messages = new ArrayList<>();
+        inputMap.put("messages", messages);
 
-        Map<String,Object> messageMap=new HashMap<>();
+        Map<String, Object> messageMap = new HashMap<>();
         messages.add(messageMap);
 
-        messageMap.put("role","user");
+        messageMap.put("role", "user");
 
-        List<Map<String,Object>> contents=new ArrayList<>();
-        messageMap.put("content",contents);
+        List<Map<String, Object>> contents = new ArrayList<>();
+        messageMap.put("content", contents);
 
-        Map<String,Object> contentMap=new HashMap<>();
+        Map<String, Object> contentMap = new HashMap<>();
         contents.add(contentMap);
-        contentMap.put("text",req.getPrompt());
+        contentMap.put("text", req.getPrompt());
 
         String imageUrl = req.getImageUrl();
-        if(imageUrl!=null){
-            imageUrl=imageUrl.trim();
+        if (imageUrl != null) {
+            imageUrl = imageUrl.trim();
         }
 
-        if(imageUrl!=null && !imageUrl.isEmpty()){
-            Map<String,Object> imageContentMap=new HashMap<>();
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            Map<String, Object> imageContentMap = new HashMap<>();
             contents.add(imageContentMap);
-            imageContentMap.put("image",imageUrl);
+            imageContentMap.put("image", imageUrl);
         }
 
         Map<String, Object> parametersMap = new HashMap<>();
         body.put("parameters", parametersMap);
 
         String negativePrompt = req.getNegativePrompt();
-        if(negativePrompt!=null){
-            negativePrompt=negativePrompt.trim();
-            if(!negativePrompt.isEmpty()){
-                parametersMap.put("negative_prompt",negativePrompt);
+        if (negativePrompt != null) {
+            negativePrompt = negativePrompt.trim();
+            if (!negativePrompt.isEmpty()) {
+                parametersMap.put("negative_prompt", negativePrompt);
             }
         }
-        parametersMap.put("prompt_extend",req.isExtendPrompt());
-        parametersMap.put("watermark",req.isWatermark());
-        parametersMap.put("size",req.getSize());
-        parametersMap.put("n",req.getCount());
+        parametersMap.put("prompt_extend", req.isExtendPrompt());
+        parametersMap.put("watermark", req.isWatermark());
+        parametersMap.put("size", req.getSize());
+        parametersMap.put("n", req.getCount());
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.add("Authorization", "Bearer " + req.getMeta().getApiKey());
-        if (imageUrl!=null && imageUrl.startsWith("oss://")) {
+        if (imageUrl != null && imageUrl.startsWith("oss://")) {
             headers.add("X-DashScope-OssResourceResolve", "enable");
         }
 
@@ -124,8 +123,8 @@ public class DashScopeOpsImageWanText2ImageController {
         });
 
         Map<String, Object> outputMap = (Map<String, Object>) respMap.get("output");
-        if(outputMap==null){
-            throw new IllegalArgumentException(respMap.get("code")+": "+ respMap.get("message"));
+        if (outputMap == null) {
+            throw new IllegalArgumentException(respMap.get("code") + ": " + respMap.get("message"));
         }
 
         return outputMap;
@@ -134,7 +133,7 @@ public class DashScopeOpsImageWanText2ImageController {
     @PostMapping("/generate")
     @ResponseBody
     public OpsSecureReturn<OpsSecureDto> imageText2Image(@RequestBody OpsSecureDto reqDto,
-                                                            HttpServletRequest request) throws Exception {
+                                                         HttpServletRequest request) throws Exception {
         try {
             DashScopeImageWanText2ImageOperateDto req = transfer.recv(reqDto, DashScopeImageWanText2ImageOperateDto.class);
 

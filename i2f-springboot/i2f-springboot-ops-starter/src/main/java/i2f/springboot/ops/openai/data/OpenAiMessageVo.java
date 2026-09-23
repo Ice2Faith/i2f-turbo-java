@@ -6,7 +6,6 @@ import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.mutator.BaseMutator;
 import i2f.springboot.ops.openai.async.AsyncTaskItem;
-import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;

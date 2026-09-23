@@ -16,7 +16,7 @@ import java.util.List;
 @NoArgsConstructor
 @ConfigurationProperties(prefix = SimpleMcpClientProperties.CONFIG_PREFIX)
 public class SimpleMcpClientProperties {
-    public static final String CONFIG_PREFIX="i2f.springboot.ai.mcp.client.simple";
+    public static final String CONFIG_PREFIX = "i2f.springboot.ai.mcp.client.simple";
     protected List<InstanceConfig> instances;
 
     @Data

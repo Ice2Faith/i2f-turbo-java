@@ -29,12 +29,12 @@ public class FileToolUtils {
                 pattern = "/" + pattern;
             }
         }
-		if (startFile.isDirectory()) {
-			// 如果直接是目录，层级+1，多展开一级，否则只会有目录本身
-            if(maxDeep>=0) {
+        if (startFile.isDirectory()) {
+            // 如果直接是目录，层级+1，多展开一级，否则只会有目录本身
+            if (maxDeep >= 0) {
                 maxDeep += 1;
             }
-		}
+        }
         search_files_next(ret, startFile, pattern, maxDeep, rootFile);
         return ret;
     }
@@ -181,14 +181,14 @@ public class FileToolUtils {
 
     public static File normalizeFile(File file) {
         String fullPath = FileUtil.pathGen(file.getAbsolutePath());
-        fullPath=fullPath==null?".":fullPath;
-        
-		if(fullPath.endsWith("/")
-        ||fullPath.endsWith("\\")){
-            String subPath=fullPath.substring(0,fullPath.length()-1);
-			if(!subPath.isEmpty() && !subPath.endsWith(":")){
-				fullPath=subPath;
-			}
+        fullPath = fullPath == null ? "." : fullPath;
+
+        if (fullPath.endsWith("/")
+                || fullPath.endsWith("\\")) {
+            String subPath = fullPath.substring(0, fullPath.length() - 1);
+            if (!subPath.isEmpty() && !subPath.endsWith(":")) {
+                fullPath = subPath;
+            }
         }
         file = new File(fullPath);
         return file;
@@ -240,8 +240,8 @@ public class FileToolUtils {
         startFile = rootFile;
         if (startPath != null && !startPath.isEmpty()) {
             if (new File(startPath).isAbsolute()) {
-                startFile=new File(startPath);
-            }else {
+                startFile = new File(startPath);
+            } else {
                 startFile = new File(rootFile, startPath);
             }
             startFile = normalizeFile(startFile);

@@ -25,11 +25,11 @@ public class FunviConsts {
         Set<String> completions = new TreeSet<>();
         completions.addAll(Arrays.asList("null", "true", "false", "class"));
         completions.addAll(Arrays.asList(
-                "#sharp","#dollar",
-                "#if","#else","##",
-                "#foreach","#for","#while",
-                "#break","#continue",
-                "#trim","#bind","#set",
+                "#sharp", "#dollar",
+                "#if", "#else", "##",
+                "#foreach", "#for", "#while",
+                "#break", "#continue",
+                "#trim", "#bind", "#set",
                 "#where"));
         Field[] fields = FunviTypes.class.getDeclaredFields();
         for (Field field : fields) {

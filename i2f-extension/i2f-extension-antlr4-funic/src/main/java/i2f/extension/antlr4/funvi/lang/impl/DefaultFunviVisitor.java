@@ -2,14 +2,15 @@ package i2f.extension.antlr4.funvi.lang.impl;
 
 import i2f.extension.antlr4.funvi.grammar.FunviParser;
 import i2f.extension.antlr4.funvi.grammar.FunviVisitor;
-import i2f.extension.antlr4.funvi.lang.exception.impl.*;
-import i2f.extension.antlr4.funvi.lang.resolver.impl.DefaultFunviResolver;
-import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
-import i2f.jvm.JvmUtil;
 import i2f.extension.antlr4.funvi.lang.exception.FunviException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviBreakException;
+import i2f.extension.antlr4.funvi.lang.exception.impl.FunviContinueException;
 import i2f.extension.antlr4.funvi.lang.exception.impl.FunviEvaluateException;
 import i2f.extension.antlr4.funvi.lang.exception.impl.FunviReturnException;
+import i2f.extension.antlr4.funvi.lang.resolver.FunviResolver;
+import i2f.extension.antlr4.funvi.lang.resolver.impl.DefaultFunviResolver;
 import i2f.extension.antlr4.funvi.lang.value.ParameterValue;
+import i2f.jvm.JvmUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -176,7 +177,7 @@ public class DefaultFunviVisitor implements FunviVisitor<Object> {
             ret = resolver.block(blockName == null ? null : String.valueOf(blockName),
                     parameterList,
                     bodyCtx,
-                     this);
+                    this);
 
             return ret;
         } catch (Throwable e) {
@@ -223,7 +224,7 @@ public class DefaultFunviVisitor implements FunviVisitor<Object> {
                 if (parameterCtx != null) {
                     List<ParameterValue> elseParameterList = (List<ParameterValue>) visitParameters(parameterCtx);
                     ParameterValue elseParameter = elseParameterList.get(0);
-                    Object elseVal = resolver.parameter(elseParameter.getExpression(),  this);
+                    Object elseVal = resolver.parameter(elseParameter.getExpression(), this);
                     cond = resolver.toBoolean(elseVal);
                 } else {
                     cond = true;
@@ -396,7 +397,7 @@ public class DefaultFunviVisitor implements FunviVisitor<Object> {
                 TerminalNode nextCtx = (TerminalNode) next;
                 Object nextValue = visitTerminal(nextCtx);
                 ret = resolver.value(nextValue == null ? null : String.valueOf(nextValue),
-                         this);
+                        this);
             }
             return ret;
         } catch (Throwable e) {

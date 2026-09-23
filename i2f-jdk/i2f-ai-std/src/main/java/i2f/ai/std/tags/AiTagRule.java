@@ -1,9 +1,9 @@
 package i2f.ai.std.tags;
 
-import java.util.*;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 /**
  * @author Ice2Faith

@@ -1,6 +1,6 @@
 package i2f.design.pattern.behavioral.command;
 
-import i2f.design.pattern.behavioral.command.command.*;
+import i2f.design.pattern.behavioral.command.command.Command;
 import i2f.design.pattern.behavioral.command.command.impl.DimmerCommand;
 import i2f.design.pattern.behavioral.command.command.impl.FanOnCommand;
 import i2f.design.pattern.behavioral.command.command.impl.LightOffCommand;

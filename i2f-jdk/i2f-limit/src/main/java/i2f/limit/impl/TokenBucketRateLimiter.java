@@ -57,7 +57,7 @@ public class TokenBucketRateLimiter implements ILimiter {
             double tokensToAdd = elapsedTime * ratePerSecond;
             currentTokens = Math.min(capacity, currentTokens + tokensToAdd);
             lastRefillTime = now;
-            if(currentTokens>0) {
+            if (currentTokens > 0) {
                 // 只要有令牌可消费时，唤醒等待线程
                 notEmpty.signalAll();
             }
@@ -185,7 +185,7 @@ public class TokenBucketRateLimiter implements ILimiter {
         }
         lock.lock();
         try {
-            this.ratePerSecond=ratePerSecond;
+            this.ratePerSecond = ratePerSecond;
         } finally {
             lock.unlock();
         }
@@ -197,7 +197,7 @@ public class TokenBucketRateLimiter implements ILimiter {
         }
         lock.lock();
         try {
-            this.capacity=capacity;
+            this.capacity = capacity;
         } finally {
             lock.unlock();
         }

@@ -63,10 +63,10 @@ public class TextContext {
     /**
      * 构造函数：创建文本上下文。
      *
-     * @param x X 坐标
-     * @param y Y 坐标
-     * @param color 颜色
-     * @param fontSize 字号
+     * @param x          X 坐标
+     * @param y          Y 坐标
+     * @param color      颜色
+     * @param fontSize   字号
      * @param fontFamily 字体
      */
     public TextContext(int x, int y, String color, int fontSize, String fontFamily) {
@@ -80,9 +80,9 @@ public class TextContext {
     /**
      * 构造函数：创建文本上下文（使用默认字体）。
      *
-     * @param x X 坐标
-     * @param y Y 坐标
-     * @param color 颜色
+     * @param x        X 坐标
+     * @param y        Y 坐标
+     * @param color    颜色
      * @param fontSize 字号
      */
     public TextContext(int x, int y, String color, int fontSize) {

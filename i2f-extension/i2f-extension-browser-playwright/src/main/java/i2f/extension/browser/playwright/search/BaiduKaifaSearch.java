@@ -83,8 +83,8 @@ public class BaiduKaifaSearch {
                 enterElem.click();
             }
 
-            int nopCount=0;
-            while (nopCount<1000) {
+            int nopCount = 0;
+            while (nopCount < 1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
@@ -99,7 +99,7 @@ public class BaiduKaifaSearch {
                     }
                     continue;
                 }
-                nopCount=0;
+                nopCount = 0;
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
@@ -134,7 +134,7 @@ public class BaiduKaifaSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()
-                    ||SearchType.SEARCH_PAGE == entry.getValue()) {
+                            || SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector("#content-left .ant-list-items .ant-list-item", new Page.WaitForSelectorOptions()

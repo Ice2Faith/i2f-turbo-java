@@ -88,8 +88,8 @@ public class BiYingSearch {
         }
         try {
 
-            int nopCount=0;
-            while (nopCount<1000) {
+            int nopCount = 0;
+            while (nopCount < 1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
@@ -104,7 +104,7 @@ public class BiYingSearch {
                     }
                     continue;
                 }
-                nopCount=0;
+                nopCount = 0;
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
@@ -138,7 +138,7 @@ public class BiYingSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()
-                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
+                            || SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(60));
                             try {
@@ -146,7 +146,7 @@ public class BiYingSearch {
                                 break;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                if (i==2) {
+                                if (i == 2) {
                                     // 无法加载搜索主页，可能有人机验证，继续加载也无济于事，直接失败返回
                                     return context;
                                 }

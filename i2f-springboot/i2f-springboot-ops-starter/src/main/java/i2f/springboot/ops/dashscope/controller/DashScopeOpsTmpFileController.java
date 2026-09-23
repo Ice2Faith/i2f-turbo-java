@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.FileSystemResource;
@@ -45,7 +44,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/tmp-file")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/tmp-file")
 public class DashScopeOpsTmpFileController {
     @Autowired
     protected OpsSecureTransfer transfer;

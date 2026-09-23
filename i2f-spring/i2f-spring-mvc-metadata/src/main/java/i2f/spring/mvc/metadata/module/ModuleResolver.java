@@ -31,16 +31,16 @@ public class ModuleResolver {
         this.clazz = clazz;
     }
 
-    public static ModuleController resolveParameters(ModuleController controller,Environment environment) {
+    public static ModuleController resolveParameters(ModuleController controller, Environment environment) {
         String baseUrl = controller.getBaseUrl();
         if (baseUrl != null) {
             baseUrl = SpringMetadataUtil.resolveParameters(baseUrl, environment);
         }
         controller.setBaseUrl(baseUrl);
         List<ApiMethod> methods = controller.getMethods();
-        if(methods!=null){
+        if (methods != null) {
             for (ApiMethod method : methods) {
-                ApiMethodResolver.resolveParameters(method,environment);
+                ApiMethodResolver.resolveParameters(method, environment);
             }
         }
         return controller;
@@ -57,7 +57,7 @@ public class ModuleResolver {
         return module;
     }
 
-    public ModuleController parse(Environment environment){
+    public ModuleController parse(Environment environment) {
         return resolveParameters(parse(), environment);
     }
 

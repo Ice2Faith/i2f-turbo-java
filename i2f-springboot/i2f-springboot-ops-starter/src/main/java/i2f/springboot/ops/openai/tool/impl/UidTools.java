@@ -16,7 +16,7 @@ import java.util.UUID;
  * @date 2026/6/1 19:13
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="uid",description = "提供唯一ID的生成能力"))
+@ToolIntent(items = @ToolIntentItem(value = "uid", description = "提供唯一ID的生成能力"))
 @ConditionalOnExpression("${ai.tools.uid.enable:true}")
 @Component
 @Tools(tags = {

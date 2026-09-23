@@ -69,7 +69,7 @@ public class McpProviderTools {
             "\t- 【注意】直接找不到时，可以通过供应商列举查看方式逐步探索\n" +
             "- 工具需要被加载才能使用\n" +
             "- 使用 `" + NAME_LOAD_TOOLS + "` 来加载工具\n" +
-            "\t- 【重要】只能加载来自 `" + NAME_LIST_TOOLS + "` 或 `"+NAME_SEARCH_TOOLS+"` 中能够提供的工具\n" +
+            "\t- 【重要】只能加载来自 `" + NAME_LIST_TOOLS + "` 或 `" + NAME_SEARCH_TOOLS + "` 中能够提供的工具\n" +
             "- 工具数量有限制，使用LRU策略自动卸载最久未使用的工具\n" +
             "- 因此，需要动态加载工具";
     ;
@@ -94,9 +94,9 @@ public class McpProviderTools {
             },
             description = "list all tool provider names"
     )
-    public Map<String,Object> tools_provider_list() {
-        Map<String,Object> ret = new HashMap<>();
-        
+    public Map<String, Object> tools_provider_list() {
+        Map<String, Object> ret = new HashMap<>();
+
         List<McpToolProvider> mcpProviders = gatewayManager.getMcpProviders();
         List<McpCategoryItem> items = new ArrayList<>();
         for (McpToolProvider provider : mcpProviders) {
@@ -106,9 +106,9 @@ public class McpProviderTools {
 
             items.add(item);
         }
-        
+
         ret.put("providers", items);
-        
+
         return ret;
     }
 
@@ -119,10 +119,10 @@ public class McpProviderTools {
             },
             description = "list all tools in tool provider(s)"
     )
-    public Map<String,Object> list_tools_from_providers(
+    public Map<String, Object> list_tools_from_providers(
             @ToolParam(value = "providerNames", description = "provider name(s), provider name must from `" + NAME_LIST_PROVIDER + "` returns, cloud be null means all providers, for example [\"app_context\"] or [\"file\", \"command\"]")
             List<String> providerNames) {
-        Map<String,Object> ret=new HashMap<>();
+        Map<String, Object> ret = new HashMap<>();
 
         if (providerNames == null) {
             providerNames = new ArrayList<>();
@@ -145,11 +145,11 @@ public class McpProviderTools {
             items.add(item);
         }
 
-        ret.put("tools",items);
-        if(items.isEmpty()){
-            ret.put("hint","not found any tools, maybe you need list `"+ContextAppMcpToolProvider.DEFAULT_NAME+"` provider");
-        }else{
-            ret.put("hint",items.size()+" tools found, next you maybe need use `"+NAME_LOAD_TOOLS+"` to load tools");
+        ret.put("tools", items);
+        if (items.isEmpty()) {
+            ret.put("hint", "not found any tools, maybe you need list `" + ContextAppMcpToolProvider.DEFAULT_NAME + "` provider");
+        } else {
+            ret.put("hint", items.size() + " tools found, next you maybe need use `" + NAME_LOAD_TOOLS + "` to load tools");
         }
         return ret;
     }
@@ -161,29 +161,29 @@ public class McpProviderTools {
             },
             description = "search tool in all tool provider(s) which name or description partial matched regex. Note: use `^$` to full match, implements by java `matcher.find()`"
     )
-    public Map<String,Object> search_tools(
+    public Map<String, Object> search_tools(
             @ToolParam(value = "regex", description = "the regex for search , use java style, for example \"file|read|write\" or \"(?i)command\"")
-            String regex){
-        Map<String,Object> ret=new HashMap<>();
+            String regex) {
+        Map<String, Object> ret = new HashMap<>();
         List<ToolDefinition> tools = gatewayManager.getTools();
         Pattern pattern = Pattern.compile(regex);
 
         List<McpCategoryItem> items = new ArrayList<>();
         for (ToolDefinition tool : tools) {
             Matcher matcher = pattern.matcher(tool.getName());
-            if(matcher.find()){
+            if (matcher.find()) {
                 McpCategoryItem item = new McpCategoryItem();
                 item.setName(tool.getName());
                 item.setDescription(tool.getDescription());
                 items.add(item);
             }
         }
-        
-        ret.put("tools",items);
-        if(items.isEmpty()){
-            ret.put("hint","not found any tools, maybe you need list `"+ContextAppMcpToolProvider.DEFAULT_NAME+"` provider");
-        }else{
-            ret.put("hint",items.size()+" tools found, next you maybe need use `"+NAME_LOAD_TOOLS+"` to load tools");
+
+        ret.put("tools", items);
+        if (items.isEmpty()) {
+            ret.put("hint", "not found any tools, maybe you need list `" + ContextAppMcpToolProvider.DEFAULT_NAME + "` provider");
+        } else {
+            ret.put("hint", items.size() + " tools found, next you maybe need use `" + NAME_LOAD_TOOLS + "` to load tools");
         }
         return ret;
     }

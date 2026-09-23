@@ -17,7 +17,7 @@ import java.security.MessageDigest;
  * @date 2026/6/2 14:13
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="jce",description = "提供基于jce的digest能力"))
+@ToolIntent(items = @ToolIntentItem(value = "jce", description = "提供基于jce的digest能力"))
 @ConditionalOnExpression("${ai.tools.jce.enable:true}")
 @Component
 @Tools(tags = {
