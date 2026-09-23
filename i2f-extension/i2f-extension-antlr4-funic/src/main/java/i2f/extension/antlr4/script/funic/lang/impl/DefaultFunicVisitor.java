@@ -2140,7 +2140,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
 
         return new PipelineFunctionFunicValue().toMutator()
                 .set(u -> u::setType, PipelineFunctionFunicValue.Type.GLOBAL)
-                .set(u -> u::setClazz, null)
+                .set(u -> u::setClazz, (Class<?>) null)
                 .set(u -> u::setName, name)
                 .set(u -> u::setArgs, args)
                 .done();
@@ -2406,7 +2406,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 Object obj = value.get();
                 return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .set(u -> u::setKey, null)
+                        .set(u -> u::setKey, (String)null)
                         .set(u -> u::setValue, obj)
                         .done();
             } else if (count == 3) {
