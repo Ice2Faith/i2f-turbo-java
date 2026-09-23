@@ -4,6 +4,7 @@ package i2f.spring.ai.tool;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 import i2f.spring.ai.model.SpringAiJsonSerializer;
 import org.springframework.ai.tool.ToolCallback;
@@ -68,9 +69,9 @@ public class SpringAiToolHelper {
     public static SpringAiToolDefinition fromRaw(ToolRawDefinition definition) {
         SpringAiToolDefinition ret = new SpringAiToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getJsonSchema();
+        FunctionJsonSchema functionSchema = definition.getJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
+        Map<String, Object> parametersSchema = functionSchema.getParameters();
 
 
         ToolDefinition def = ToolDefinition.builder()

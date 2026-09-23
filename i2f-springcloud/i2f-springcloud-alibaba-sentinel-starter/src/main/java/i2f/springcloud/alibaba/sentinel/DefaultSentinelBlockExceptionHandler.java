@@ -1,6 +1,6 @@
 package i2f.springcloud.alibaba.sentinel;
 
-import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
+import com.alibaba.csp.sentinel.adapter.spring.webmvc_v6x.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.csp.sentinel.slots.block.authority.AuthorityException;
 import com.alibaba.csp.sentinel.slots.block.degrade.DegradeException;
@@ -27,7 +27,7 @@ import org.springframework.http.MediaType;
 public class DefaultSentinelBlockExceptionHandler implements BlockExceptionHandler {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, BlockException e) throws Exception {
+    public void handle(HttpServletRequest request, HttpServletResponse response, String resourceName, BlockException e) throws Exception {
         log.warn("DefaultSentinelBlockExceptionHandler handle exception by rule:" + e.getRule());
         e.printStackTrace();
 
@@ -51,4 +51,6 @@ public class DefaultSentinelBlockExceptionHandler implements BlockExceptionHandl
 
         new ObjectMapper().writeValue(response.getWriter(), ret);
     }
+
+
 }

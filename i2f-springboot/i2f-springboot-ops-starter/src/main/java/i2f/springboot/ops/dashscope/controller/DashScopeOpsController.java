@@ -1,8 +1,6 @@
 package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.org.apache.xpath.internal.operations.Bool;
-import i2f.os.OsUtil;
 import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureTransfer;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
@@ -15,7 +13,6 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Condition;
@@ -41,7 +38,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope")
 public class DashScopeOpsController implements IOpsProvider {
 
     public static class DashScopeCondition implements Condition {
