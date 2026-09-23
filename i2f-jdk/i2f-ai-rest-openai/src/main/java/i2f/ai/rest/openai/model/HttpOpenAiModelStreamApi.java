@@ -6,6 +6,7 @@ import i2f.ai.rest.openai.model.data.chunk.OpenAiCompletionChunkRespDto;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
 import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
@@ -187,7 +188,7 @@ public class HttpOpenAiModelStreamApi implements BaseMutator<HttpOpenAiModelStre
             httpProcessor.http(HttpRequest.doPost(getChatCompletionsUrl())
                             .set(u -> u::json)
                             .set2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
-                            .set(u -> u::applyHeader, headers -> {
+                            .set(u -> u::applyHeader, (Consumer<HttpHeaders>)  headers -> {
                                 if (apiKey != null && !apiKey.isEmpty()) {
                                     headers.add("Authorization", "Bearer " + apiKey);
                                 }

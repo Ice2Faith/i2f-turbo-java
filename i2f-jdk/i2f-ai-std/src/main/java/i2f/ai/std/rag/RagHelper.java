@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 /**
  * @author Ice2Faith
@@ -38,13 +39,13 @@ public class RagHelper {
         if (options == null) {
             options = new RagLoadDocumentsOptions().toMutator()
                     .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
-                    .set(u -> u::setFileFilter, TextFileRagFileReader::isTextFile)
+                    .set(u -> u::setFileFilter, (Predicate<File>) TextFileRagFileReader::isTextFile)
                     .set(u -> u::setStoreBatchSize, -1)
                     .done();
         }
         options.toMutator()
                 .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
-                .fieldIfAbsentV(u -> u::getFileFilter, TextFileRagFileReader::isTextFile)
+                .fieldIfAbsentV(u -> u::getFileFilter, (Predicate<File>)TextFileRagFileReader::isTextFile)
                 .done();
         if (path.isFile()) {
             boolean supportProcess = false;
