@@ -31,47 +31,47 @@ public class WindowLruMap<T> extends LruMap<String, T> {
     }
 
     public T get(String key, Duration duration) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.get(windowKey(key, duration));
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     public T put(String key, Duration duration, T value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.put(windowKey(key, duration), value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     public boolean containsKey(String key, Duration duration) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.containsKey(windowKey(key, duration));
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     public T getOrDefault(String key, Duration duration, T defaultValue) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.getOrDefault(windowKey(key, duration), defaultValue);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     public boolean remove(String key, Duration duration, Object value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.remove(windowKey(key, duration), value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 }

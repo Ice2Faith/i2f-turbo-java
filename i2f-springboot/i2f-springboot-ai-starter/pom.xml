@@ -31,13 +31,30 @@
         </dependency>
 
         <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-ai-std</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-ai-rest-openai</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spring-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spring-web</artifactId>
         </dependency>
 
         <dependency>

@@ -4,18 +4,14 @@ import i2f.reflect.RichConverter;
 import i2f.typeof.token.TypeToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.lang.reflect.Type;
 
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class Json2 {
-    public static final JsonGenerator INSTANCE = new JsonGenerator();
-    public static final JsonGenerator INSTANCE_WITHOUT_NULL = JsonGenerator.builder()
-            .nullExclude(true)
-            .build();
+    public static final JsonGenerator INSTANCE = JsonGenerator.INSTANCE;
+    public static final JsonGenerator INSTANCE_WITHOUT_NULL = JsonGenerator.INSTANCE_WITHOUT_NULL;
 
     public static String toJson(Object obj) {
         return INSTANCE.toJson(obj);

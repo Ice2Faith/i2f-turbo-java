@@ -1,0 +1,7 @@
+global.user.type in {1, 2}
+and role.key.startsWith('user:')
+and (
+order.status not in {99, -1}
+or
+(sale.count >= 1 and sale.count <= 20)
+)

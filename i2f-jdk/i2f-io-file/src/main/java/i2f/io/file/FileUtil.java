@@ -2,6 +2,7 @@ package i2f.io.file;
 
 import i2f.io.file.core.FileMime;
 import i2f.io.file.core.FileSpecies;
+import i2f.io.file.core.FileTrash;
 import i2f.io.stream.StreamUtil;
 import i2f.resources.ResourceUtil;
 import i2f.text.StringUtils;
@@ -56,6 +57,7 @@ public class FileUtil {
 
 
     public static String pathGen(String path) {
+        String orginalPath = path;
         String orginalPathSep = "/";
         int iwdx = path.indexOf("\\");
         int iudx = path.indexOf("/");
@@ -82,7 +84,10 @@ public class FileUtil {
             pathArr = path.split("\\\\");
         }
         Vector<String> vector = new Vector<>();
-        pathRoute(pathArr, vector);
+        boolean ok = pathRoute(pathArr, vector);
+        if (!ok) {
+            return null;
+        }
         StringBuilder builder = new StringBuilder();
         boolean isFirst = true;
         for (String item : vector) {
@@ -92,45 +97,80 @@ public class FileUtil {
             builder.append(item);
             isFirst = false;
         }
-        return builder.toString();
+        String ret = builder.toString();
+        if(!ret.isEmpty()){
+            if (orginalPath.endsWith(orginalPathSep) && !ret.endsWith(orginalPathSep)) {
+                ret += orginalPathSep;
+            }
+        }
+        if (orginalPath.startsWith(orginalPathSep) && !ret.startsWith(orginalPathSep)) {
+            ret = orginalPathSep + ret;
+        }
+
+        return ret;
     }
 
     public static String pathGen(String basePath, String relativePath) {
-        String orginalPathSep = "/";
+        if (basePath == null && relativePath == null) {
+            return null;
+        }
+        basePath = basePath == null ? "" : basePath;
+        relativePath = relativePath == null ? "" : relativePath;
+        if (basePath.isEmpty() && relativePath.isEmpty()) {
+            return "";
+        }
 
-        String workPathSep = "/";
-        String workPathSepRegex = "\\/";
-        if (basePath.indexOf("\\") >= 0) {
-            orginalPathSep = "\\";
-            basePath = basePath.replaceAll("\\\\", workPathSep);
+        if (basePath.isEmpty()) {
+            return pathGen(relativePath);
         }
-        if (relativePath.indexOf("\\") >= 0) {
-            relativePath = relativePath.replaceAll("\\\\", workPathSep);
-        }
-        String[] baseArr = basePath.split(workPathSepRegex);
-        String[] relativeArr = relativePath.split(workPathSepRegex);
 
-        Vector<String> vector = new Vector<>();
-        for (String item : baseArr) {
-            if (StringUtils.isEmpty(item)) {
-                continue;
-            }
-            vector.add(item);
+        if (relativePath.isEmpty()) {
+            return pathGen(basePath);
         }
-        pathRoute(relativeArr, vector);
-        StringBuilder builder = new StringBuilder();
-        boolean isFirst = true;
-        for (String item : vector) {
-            if (!isFirst) {
-                builder.append(orginalPathSep);
+
+        String orginalPathSep = null;
+
+        if (orginalPathSep == null) {
+            if (basePath.contains("\\")) {
+                orginalPathSep = "\\";
             }
-            builder.append(item);
-            isFirst = false;
         }
-        return builder.toString();
+        if (orginalPathSep == null) {
+            if (relativePath.contains("\\")) {
+                orginalPathSep = "\\";
+            }
+        }
+        if (orginalPathSep == null) {
+            orginalPathSep = "/";
+        }
+
+        basePath = basePath.replace("\\", "/");
+        relativePath = relativePath.replace("\\", "/");
+
+        if (basePath.isEmpty()) {
+            return relativePath;
+        }
+
+        String fullPath = null;
+        if (basePath.endsWith("/")) {
+            if (relativePath.startsWith("/")) {
+                fullPath = basePath + relativePath.substring(1);
+            } else {
+                fullPath = basePath + relativePath;
+            }
+        } else {
+            if (relativePath.startsWith("/")) {
+                fullPath = basePath + relativePath;
+            } else {
+                fullPath = basePath + "/" + relativePath;
+            }
+        }
+
+        return pathGen(fullPath.replace("/", orginalPathSep));
     }
 
-    private static void pathRoute(String[] relativeArr, Vector<String> vector) {
+    public static boolean pathRoute(String[] relativeArr, Vector<String> vector) {
+        boolean ret = true;
         for (String item : relativeArr) {
             if (StringUtils.isEmpty(item)) {
                 continue;
@@ -141,11 +181,14 @@ public class FileUtil {
             if ("..".equals(item)) {
                 if (!vector.isEmpty()) {
                     vector.remove(vector.size() - 1);
+                } else {
+                    ret = false;
                 }
             } else {
                 vector.add(item);
             }
         }
+        return ret;
     }
 
     /**
@@ -339,14 +382,17 @@ public class FileUtil {
         if (srcFile.isFile()) {
             if (checkWhenFilter(srcFile, filter)) {
                 useParentDir(dstFile);
-                InputStream is = new FileInputStream(srcFile);
-                OutputStream os = new FileOutputStream(dstFile);
-                StreamUtil.streamCopy(is, os, true);
+                if (!srcFile.renameTo(dstFile) || !dstFile.exists()) {
+                    InputStream is = new FileInputStream(srcFile);
+                    OutputStream os = new FileOutputStream(dstFile);
+                    StreamUtil.streamCopy(is, os, true);
+                }
             }
         } else if (srcFile.isDirectory()) {
             File[] files = srcFile.listFiles();
             for (File item : files) {
                 File newFile = new File(dstFile, item.getName());
+                useDir(newFile);
                 copy(newFile, item, filter);
             }
         }
@@ -648,5 +694,9 @@ public class FileUtil {
             FileUtil.save(is, extraFile);
         }
         return extraFile;
+    }
+
+    public static File moveToTrash(File file) throws IOException {
+        return FileTrash.DEFAULT.moveToTrash(file);
     }
 }

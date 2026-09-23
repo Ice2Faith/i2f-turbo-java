@@ -1,5 +1,6 @@
 package i2f.spring.web.rest;
 
+import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
@@ -7,7 +8,6 @@ import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.url.FormUrlEncodedEncoder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +26,12 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class SpringWebRestClient implements IRestClient {
+public class SpringWebRestClient implements IRestClient, BaseMutator<SpringWebRestClient> {
     protected RestTemplate restTemplate;
+
+    public SpringWebRestClient(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
@@ -49,8 +52,10 @@ public class SpringWebRestClient implements IRestClient {
         }
         MultiValueMap<String, String> reqHeaders = new LinkedMultiValueMap<>();
         HttpHeaders rawHeaders = request.getHeaders();
-        for (Map.Entry<String, ArrayList<String>> entry : rawHeaders.entrySet()) {
-            reqHeaders.addAll(entry.getKey(), entry.getValue());
+        if(rawHeaders!=null) {
+            for (Map.Entry<String, ArrayList<String>> entry : rawHeaders.entrySet()) {
+                reqHeaders.addAll(entry.getKey(), entry.getValue());
+            }
         }
         HttpEntity<Object> reqEntity = new HttpEntity<>(request.getBody(), reqHeaders);
         ResponseEntity<T> respEntity = restTemplate.exchange(url,
@@ -58,13 +63,13 @@ public class SpringWebRestClient implements IRestClient {
                 reqEntity,
                 responseType);
 
-        return (RestHttpResponse<T>) RestHttpResponse.builder()
-                .statusCode(respEntity.getStatusCodeValue())
-                .statusMessage(String.valueOf(respEntity.getStatusCode()))
-                .headers(HttpHeaders.create()
+        return new RestHttpResponse<T>().toMutator()
+                .set(u -> u::setStatusCode, respEntity.getStatusCodeValue())
+                .set(u -> u::setStatusMessage, String.valueOf(respEntity.getStatusCode()))
+                .set(u -> u::setHeaders, HttpHeaders.create()
                         .addAll(respEntity.getHeaders())
                 )
-                .body(respEntity.getBody())
-                .build();
+                .set(u -> u::setBody, respEntity.getBody())
+                .done();
     }
 }

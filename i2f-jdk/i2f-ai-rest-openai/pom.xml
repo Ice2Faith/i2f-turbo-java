@@ -32,6 +32,16 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-network</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mutator</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-resp</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

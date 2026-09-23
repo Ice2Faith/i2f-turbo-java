@@ -3483,4 +3483,12 @@ public class WinApi {
             WinAppCallbacker callbacker) {
         return NativesWindows.winAppCreateWin32App(className, windowTitle, iconFileName, nCmdShow, showConsole, mdcResizeMode, callbacker);
     }
+
+    public static boolean deleteToRecycleBinModern(String filePath){
+        return NativesWindows.deleteToRecycleBinModern(filePath);
+    }
+
+    public static boolean deleteToRecycleBinModern(File file){
+        return NativesWindows.deleteToRecycleBinModern(file.getAbsolutePath());
+    }
 }

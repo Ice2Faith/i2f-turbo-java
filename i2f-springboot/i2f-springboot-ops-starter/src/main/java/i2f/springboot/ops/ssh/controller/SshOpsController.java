@@ -3,10 +3,7 @@ package i2f.springboot.ops.ssh.controller;
 import com.jcraft.jsch.ChannelSftp;
 import i2f.extension.sftp.basic.SftpUtil;
 import i2f.os.OsUtil;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -21,6 +18,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -38,12 +36,13 @@ import java.util.*;
  * @date 2025/11/13 20:57
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.ssh.enable:true}")
 @ConditionalOnClass(ChannelSftp.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/ssh")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/ssh")
 public class SshOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

@@ -1,14 +1,15 @@
 package i2f.ai.rest.openai.metadata.model;
 
 import i2f.ai.rest.openai.metadata.model.data.OpenAiModelsRespDto;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
+import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.IOException;
 
@@ -19,9 +20,8 @@ import java.io.IOException;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class HttpOpenAiModelsApi {
-    protected IRestClient restClient;
+public class HttpOpenAiModelsApi implements BaseMutator<HttpOpenAiModelsApi> {
+    protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
 
@@ -36,17 +36,17 @@ public class HttpOpenAiModelsApi {
 
     public OpenAiModelsRespDto models() {
         try {
-            RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(RestHttpRequest.builder()
-                            .url(getModelsUrl())
-                            .method(HttpMethodConstants.GET)
-                            .headers(HttpHeaders.create()
+            RestHttpResponse<OpenAiModelsRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
+                            .set(u -> u::setUrl, getModelsUrl())
+                            .set(u -> u::setMethod, HttpMethodConstants.GET)
+                            .set(u -> u::setHeaders, HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {
                                             headers.add("Authorization", "Bearer " + apiKey);
                                         }
                                     })
                             )
-                            .build(),
+                            .done(),
                     OpenAiModelsRespDto.class);
             OpenAiModelsRespDto ret = resp.getBody();
             return ret;

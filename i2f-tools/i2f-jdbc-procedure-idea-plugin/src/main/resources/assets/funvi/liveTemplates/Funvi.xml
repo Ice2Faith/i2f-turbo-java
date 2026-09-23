@@ -1,0 +1,91 @@
+<templateSet group="Funvi">
+    <template name="#else" value="#else($COND$)&#10;    $END$&#10;##" toReformat="false" toShortenFQNames="true">
+        <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#for" value="#for(${$BEGIN$},${$COND$},${$INCR$})&#10;    $END$&#10;##" toReformat="false"
+              toShortenFQNames="true">
+        <variable name="BEGIN" expression="" defaultValue="&quot;i=0&quot;" alwaysStopAt="true"/>
+        <variable name="COND" expression="" defaultValue="&quot;i&lt;10&quot;" alwaysStopAt="true"/>
+        <variable name="INCR" expression="" defaultValue="&quot;i++&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#foreach" value="#foreach($ITEM$,${$COND$})&#10;    $END$&#10;##" toReformat="false"
+              toShortenFQNames="true">
+        <variable name="ITEM" expression="" defaultValue="&quot;item&quot;" alwaysStopAt="true"/>
+        <variable name="COND" expression="" defaultValue="&quot;list&quot;" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#if" value="#if(${$COND$})&#10;    $END$&#10;#else($EL_COND$)&#10;    &#10;##" toReformat="false"
+              toShortenFQNames="true">
+        <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+        <variable name="EL_COND" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#while" value="#while(${$COND$})&#10;    $END$&#10;##" toReformat="false" toShortenFQNames="true">
+        <variable name="COND" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#dollar" value="#dollar($CNT$)$END$" toReformat="false" toShortenFQNames="true">
+        <variable name="CNT" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#sharp" value="#sharp($CNT$)$END$" toReformat="false" toShortenFQNames="true">
+        <variable name="CNT" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#break" value="#break()$END$" toReformat="false" toShortenFQNames="true">
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#continue" value="#continue()$END$" toReformat="false" toShortenFQNames="true">
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#trim" value="#trim($VARS$)&#10;    $END$&#10;##" toReformat="false" toShortenFQNames="true">
+        <variable name="VARS" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#bind" value="#bind($NAME$,${$EXPR$})$END$" toReformat="false" toShortenFQNames="true">
+        <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
+        <variable name="EXPR" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#set" value="#set($NAME$,${$EXPR$})$END$" toReformat="false" toShortenFQNames="true">
+        <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true"/>
+        <variable name="EXPR" expression="" defaultValue="" alwaysStopAt="true"/>
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#set_sql" value="#set()&#10;    $END$&#10;##" toReformat="false" toShortenFQNames="true">
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+    <template name="#where" value="#where()&#10;    $END$&#10;##" toReformat="false" toShortenFQNames="true">
+        <context>
+            <option name="Funvi" value="true"/>
+        </context>
+    </template>
+</templateSet>

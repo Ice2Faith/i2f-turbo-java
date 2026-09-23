@@ -16,4 +16,7 @@ public interface OpenAiConsts {
     String TOOL_CALLS = "tool_calls";
 
     String FUNCTION = "function";
+
+    String TEXT="text";
+    String IMAGE_URL="image_url";
 }

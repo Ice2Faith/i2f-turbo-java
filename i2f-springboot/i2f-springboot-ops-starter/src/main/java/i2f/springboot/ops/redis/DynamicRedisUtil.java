@@ -70,10 +70,27 @@ public class DynamicRedisUtil {
         if (factory == null) {
             return;
         }
-        LettuceFactoryResolver.closeFactory(factory);
-        JedisFactoryResolver.closeFactory(factory);
-        RedissonFactoryResolver.closeFactory(factory);
+        try {
+            if (ClassUtils.isPresent(LETTUCE_CLIENT_CLASS, null)) {
+                LettuceFactoryResolver.closeFactory(factory);
+            }
+        }catch (Exception e){
+            // ignore
+        }
+        try {
+            if (ClassUtils.isPresent(JEDIS_CLIENT_CLASS, null)) {
+                JedisFactoryResolver.closeFactory(factory);
+            }
+        }catch (Exception e){
+            // ignore
+        }
+        try {
+            if (ClassUtils.isPresent(REDISSON_CLIENT_CLASS, null)) {
+                RedissonFactoryResolver.closeFactory(factory);
+            }
+        }catch (Exception e){
+            // ignore
+        }
     }
-
 
 }

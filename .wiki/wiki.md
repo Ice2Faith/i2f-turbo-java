@@ -12,6 +12,18 @@
 - **GitHub**: https://github.com/Ice2Faith/i2f-turbo-java
 - **Gitee**: https://gitee.com/Ice2Faith/i2f-turbo-java
 
+## 项目全景概览
+
+> 大致介绍项目全景地图
+
+- 详细目录：[readme.md](graph/readme.md)
+
+## 模块文档目录
+
+> 详细介绍每个模块的内容
+
+- 详细目录：[menus.md](modules/menus.md)
+- 
 ## 技术栈
 
 | 技术                   | 版本         | 说明            |
@@ -312,6 +324,8 @@ Funic（Functional Logic）是基于 ANTLR4 构建的函数逻辑驱动脚本引
 - **核心入口**: `AiAgent.generate()` / `AiModel.generate()`
 - **声明式代理**: `@AiService` + `@AiSystem` + `@AiTools` 注解驱动
 - **核心特性**: Re-Act 循环、Function Calling、并行工具调用、结构化输出、RAG（被动+主动）、技能系统、SSE 流式、JSON Schema 自动生成
+- **技术全景网页**: `i2f-springboot/i2f-springboot-ops-starter/spec/index.html`（ops-starter OpenAI 兼容 AI
+  对话框架设计全景，HTML+SVG 静态站点，可离线阅读）
 
 > 详细文档见 [docs/ai-framework.md](docs/ai-framework.md)
 

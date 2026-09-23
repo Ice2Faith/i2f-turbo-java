@@ -30,6 +30,14 @@
 
     <!-- 需要打包的文件 -->
     <fileSets>
+        <!-- 技能包 -->
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>skills/**</include>
+            </includes>
+        </fileSet>
 
         <!-- 每一个fileSet做的工作都是将编译出来的target目录下的文件directory，按照一定规则输出到outputDirectory -->
         <!-- 项目根目录下的情况，也就是和src目录同级 -->

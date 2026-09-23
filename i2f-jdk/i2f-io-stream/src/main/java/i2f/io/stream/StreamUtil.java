@@ -15,8 +15,9 @@ import java.util.function.Function;
  * @desc
  */
 public class StreamUtil {
+    public static final int BUFF_SIZE = 1024 * 1024;
     public static void broadcastStream(InputStream is, boolean closeIs, boolean closeOs, OutputStream... oss) throws IOException {
-        byte[] buf = new byte[4096];
+        byte[] buf = new byte[BUFF_SIZE];
         int len = 0;
         while ((len = is.read(buf)) > 0) {
             for (OutputStream item : oss) {
@@ -64,7 +65,7 @@ public class StreamUtil {
         OutputStream bos = (os instanceof BufferedOutputStream) ? os : new BufferedOutputStream(os);
 
         int len = 0;
-        byte[] buf = new byte[8192];
+        byte[] buf = new byte[BUFF_SIZE];
         while ((len = bis.read(buf)) > 0) {
             bos.write(buf, 0, len);
         }
@@ -93,11 +94,10 @@ public class StreamUtil {
         if (offset > 0) {
             is.skip(offset);
         }
-        int batchCount = 1024 * 16;
-        byte[] buf = new byte[batchCount];
+        byte[] buf = new byte[BUFF_SIZE];
         long count = 0;
         int len = 0;
-        while ((count + batchCount) <= size) {
+        while ((count + BUFF_SIZE) <= size) {
             len = is.read(buf);
             if (len <= 0) {
                 break;

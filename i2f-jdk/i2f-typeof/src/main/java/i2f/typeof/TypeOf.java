@@ -20,8 +20,7 @@ public class TypeOf {
             Integer.class, Long.class, Short.class,
             Byte.class, Character.class,
             Float.class, Double.class,
-            Boolean.class,
-            BigInteger.class, BigDecimal.class
+            Boolean.class
     };
 
     public static final Class[] BIG_DECIMAL_COMPATIBLE_TYPES_ARRAY = {
@@ -57,7 +56,6 @@ public class TypeOf {
             map.put(boolean.class, Boolean.class);
             map.put(void.class, Void.class);
 
-
             Map<Class<?>, Class<?>> reverseBasicTypeMap = new LinkedHashMap<>();
             for (Map.Entry<Class<?>, Class<?>> entry : map.entrySet()) {
                 reverseBasicTypeMap.put(entry.getValue(), entry.getKey());
@@ -66,6 +64,22 @@ public class TypeOf {
 
             basicTypeMap = Collections.unmodifiableMap(map);
         }
+    }
+
+    public static boolean isSameBasicType(Class<?> type1, Class<?> type2) {
+        Class<?> clazz = basicTypeMap.get(type1);
+        if (clazz != null) {
+            if (clazz.equals(type2)) {
+                return true;
+            }
+        }
+        clazz = basicTypeMap.get(type2);
+        if (clazz != null) {
+            if (clazz.equals(type1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static boolean isBaseType(Class<?> ckType) {

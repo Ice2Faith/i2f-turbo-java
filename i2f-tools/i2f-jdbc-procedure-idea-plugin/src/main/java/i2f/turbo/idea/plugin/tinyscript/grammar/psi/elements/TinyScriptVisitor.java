@@ -187,10 +187,6 @@ public class TinyScriptVisitor extends PsiElementVisitor {
         visitPsiElement(o);
     }
 
-    public void visitNegtiveSegment(@NotNull TinyScriptNegtiveSegment o) {
-        visitPsiElement(o);
-    }
-
     public void visitNewInstance(@NotNull TinyScriptNewInstance o) {
         visitPsiElement(o);
     }

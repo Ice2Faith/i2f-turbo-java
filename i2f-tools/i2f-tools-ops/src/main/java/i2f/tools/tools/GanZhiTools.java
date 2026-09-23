@@ -4,6 +4,8 @@ import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.tools.yi.GanZhiDate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -16,9 +18,12 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/10 15:42
  * @desc
  */
-@ConditionalOnExpression("${i2f.tools.gan-zhi.enable:true}")
+@ToolIntent(items = @ToolIntentItem(value="gan_zhi",description = "提供根据标准世界时间获取生辰八字的能力"))
+@ConditionalOnExpression("${ai.tools.gan-zhi.enable:true}")
 @Component
-@Tools
+@Tools(tags = {
+        AiTags.DATETIME_VALUE
+})
 public class GanZhiTools {
     public static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 

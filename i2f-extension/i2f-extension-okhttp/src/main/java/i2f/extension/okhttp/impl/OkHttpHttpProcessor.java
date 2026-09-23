@@ -16,7 +16,6 @@ import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import okhttp3.*;
 
 import java.io.Closeable;
@@ -34,7 +33,6 @@ import java.util.concurrent.TimeUnit;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class OkHttpHttpProcessor implements IHttpProcessor {
     private OkHttpClient client = createClient();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
@@ -63,6 +61,9 @@ public class OkHttpHttpProcessor implements IHttpProcessor {
                     .build();
         }
         IHttpRequestBodyHandler<Request.Builder> handler = new OkHttpFormRequestBodyHandler();
+        if(request.getHeader()==null){
+            request.setHeader(HttpHeaders.create());
+        }
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
         if (contentType.contains(ContentTypeConstants.Json)) {

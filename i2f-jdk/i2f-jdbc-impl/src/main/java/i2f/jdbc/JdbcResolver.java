@@ -8,6 +8,8 @@ import i2f.database.type.DatabaseType;
 import i2f.jdbc.cursor.JdbcCursor;
 import i2f.jdbc.cursor.impl.JdbcCursorImpl;
 import i2f.jdbc.data.*;
+import i2f.jdbc.extract.JdbcResultObjectExtractor;
+import i2f.jdbc.extract.impl.SqliteResultObjectExtractor;
 import i2f.jdbc.handler.ResultSetObjectConvertHandler;
 import i2f.jdbc.handler.StatementParameterSetHandler;
 import i2f.jdbc.meta.JdbcMeta;
@@ -16,6 +18,7 @@ import i2f.jdbc.std.func.SQLFunction;
 import i2f.match.regex.RegexUtil;
 import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
+import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
 import i2f.reflect.vistor.Visitor;
 import i2f.typeof.TypeOf;
@@ -51,6 +54,7 @@ public class JdbcResolver {
 
     public static final CopyOnWriteArrayList<StatementParameterSetHandler> STATEMENT_PARAMETER_HANDLERS = new CopyOnWriteArrayList<>();
     public static final CopyOnWriteArrayList<ResultSetObjectConvertHandler> RESULT_SET_OBJECT_CONVERT_HANDLERS = new CopyOnWriteArrayList<>();
+    public static final CopyOnWriteArrayList<JdbcResultObjectExtractor> RESULT_OBJECT_EXTRACTORS = new CopyOnWriteArrayList<>();
 
     static {
         ServiceLoader<StatementParameterSetHandler> parameterSetHandlers = ServiceLoader.load(StatementParameterSetHandler.class);
@@ -59,12 +63,21 @@ public class JdbcResolver {
                 STATEMENT_PARAMETER_HANDLERS.add(item);
             }
         }
+
         ServiceLoader<ResultSetObjectConvertHandler> objectConvertHandlers = ServiceLoader.load(ResultSetObjectConvertHandler.class);
         if (objectConvertHandlers != null) {
             for (ResultSetObjectConvertHandler item : objectConvertHandlers) {
                 RESULT_SET_OBJECT_CONVERT_HANDLERS.add(item);
             }
         }
+
+        ServiceLoader<JdbcResultObjectExtractor> resultObjectExtractors = ServiceLoader.load(JdbcResultObjectExtractor.class);
+        if (resultObjectExtractors != null) {
+            for (JdbcResultObjectExtractor item : resultObjectExtractors) {
+                RESULT_OBJECT_EXTRACTORS.add(item);
+            }
+        }
+        RESULT_OBJECT_EXTRACTORS.add(SqliteResultObjectExtractor.INSTANCE);
     }
 
     public static Connection getConnection(String driver,
@@ -758,7 +771,7 @@ public class JdbcResolver {
      */
     public static <T> void batch(Connection conn, String sql, Iterator<T> iterator, Predicate<T> filter, int batchSize) throws SQLException {
         List<String> expression = new ArrayList<>();
-        sql=RegexUtil.regexFindAndReplace(sql, "('[^']*')" + // 字符串，保持不变
+        sql = RegexUtil.regexFindAndReplace(sql, "('[^']*')" + // 字符串，保持不变
                 "|(--[^\\n]*($|\\n))" + // 单行注释，不变
                 "|(/\\*[^*]*\\*/)" + // 多行注释，不变
                 "|(\\$\\{[^}]+\\})", (result) -> {
@@ -767,7 +780,7 @@ public class JdbcResolver {
                     || result.startsWith("/*")) {
                 return result;
             }
-            expression.add(result.substring(2,result.length()-1).trim());
+            expression.add(result.substring(2, result.length() - 1).trim());
             return "?";
         });
         batch(conn, sql, expression, iterator, filter, batchSize);
@@ -1959,6 +1972,11 @@ public class JdbcResolver {
         } else {
             val = rs.getObject(columnIndex);
         }
+
+        return postProcessResultObject(val);
+    }
+
+    public static Object postProcessResultObject(Object val) {
         boolean hasHandle = false;
         for (ResultSetObjectConvertHandler handler : RESULT_SET_OBJECT_CONVERT_HANDLERS) {
             if (handler.support(val)) {
@@ -1972,7 +1990,6 @@ public class JdbcResolver {
                 val = ObjectConvertor.tryConvertAsType(val, String.class);
             }
         }
-
         return val;
     }
 
@@ -2048,11 +2065,33 @@ public class JdbcResolver {
         if (columns == null || columns.isEmpty()) {
             columns = parseResultSetColumns(rs);
         }
+        JdbcResultObjectExtractor extractor = null;
+        for (JdbcResultObjectExtractor item : RESULT_OBJECT_EXTRACTORS) {
+            if (item == null) {
+                continue;
+            }
+            if (item.support(rs)) {
+                extractor = item;
+                break;
+            }
+        }
+
         Map<String, Object> map = new LinkedHashMap<>();
         int size = columns.size();
         for (int i = 1; i <= size; i++) {
             QueryColumn col = columns.get(i - 1);
-            Object val = getResultObject(rs, i, col.getType());
+            Object val = null;
+            boolean resolved = false;
+            if (extractor != null) {
+                Reference<Object> ref = extractor.extract(rs, i, col);
+                if (ref != null && ref.isValue()) {
+                    val = ref.get();
+                    resolved = true;
+                }
+            }
+            if (!resolved) {
+                val = getResultObject(rs, i, col.getType());
+            }
             map.put(col.getName(), val);
         }
         return map;

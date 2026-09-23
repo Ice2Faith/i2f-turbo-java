@@ -1,0 +1,3 @@
+i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration
+i2f.springboot.ai.mcp.client.stream.StreamMcpClientAutoConfiguration
+i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration

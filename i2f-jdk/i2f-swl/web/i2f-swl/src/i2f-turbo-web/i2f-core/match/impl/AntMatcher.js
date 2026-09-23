@@ -136,6 +136,41 @@ AntMatcher.prototype.matchRate = function (str, pattern) {
                         break;
                     }
 
+                    let nextTestStr = str.substring(si);
+                    let nextTestPattern = pattern.substring(pi + 2);
+
+                    // ** 多级的时候，需要尝试贪婪匹配，任意一个匹配即满足
+                    let tryCount = 100;
+                    do {
+                        tryCount--;
+
+                        let nextRate = this.matchRate(nextTestStr, nextTestPattern);
+                        if (this.matched(nextRate)) {
+                            let currRate = this.calcMatchRate(si, pi, slen, plen, mlen);
+                            let currPer = si * 1.0 / str.length;
+                            return currRate * currRate + nextRate * (1.0 - currPer);
+                        }
+
+                        if (nextTestStr.startsWith(this.sep)) {
+                            nextTestStr = nextTestStr.substring(this.sep.length);
+                        }
+                        let arr = nextTestStr.split(this.sep, 2);
+                        if (arr.length != 2) {
+                            break;
+                        }
+                        let tmpTestStr = arr[1];
+                        if (tmpTestStr == "") {
+                            break;
+                        }
+                        if (!tmpTestStr.startsWith(this.sep)) {
+                            tmpTestStr = this.sep + tmpTestStr;
+                        }
+                        if (tmpTestStr.equals(nextTestStr)) {
+                            break;
+                        }
+                        nextTestStr = tmpTestStr;
+                    } while (tryCount > 0);
+
 
                     let m = 0;
                     while ((m + si) < slen) {

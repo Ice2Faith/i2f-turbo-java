@@ -31,6 +31,7 @@
         <module>i2f-bindsql-page</module>
         <module>i2f-bindsql-stringify</module>
         <module>i2f-bql</module>
+        <module>i2f-browser-std</module>
         <module>i2f-bytes</module>
         <module>i2f-cache</module>
         <module>i2f-cache-std</module>
@@ -101,6 +102,7 @@
         <module>i2f-jdk-all</module>
         <module>i2f-jvm</module>
         <module>i2f-lambda</module>
+        <module>i2f-lambda-core</module>
         <module>i2f-launcher</module>
         <module>i2f-lifecycle</module>
         <module>i2f-limit</module>
@@ -113,6 +115,7 @@
         <module>i2f-match-std</module>
         <module>i2f-math</module>
         <module>i2f-mixins</module>
+        <module>i2f-mutator</module>
         <module>i2f-native-core</module>
         <module>i2f-native-windows</module>
         <module>i2f-native-windows-easyx</module>
@@ -140,6 +143,7 @@
         <module>i2f-sm-crypto</module>
         <module>i2f-sm-crypto-swl</module>
         <module>i2f-spi</module>
+        <module>i2f-spi-annotations</module>
         <module>i2f-std-const</module>
         <module>i2f-streaming</module>
         <module>i2f-swl</module>

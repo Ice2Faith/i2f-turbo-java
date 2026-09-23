@@ -4,10 +4,13 @@ import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.lang.java.JavaLanguage;
+import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlAttributeValue;
@@ -658,7 +661,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
     }
 
     public Language getPossibleEvalLanguage() {
-        Language lang = Language.findLanguageByID("Spring EL");
+        Language lang = Language.findLanguageByID("Ognl");
+        if (lang != null) {
+            return lang;
+        }
+        lang = Language.findLanguageByID("Spring EL");
         if (lang != null) {
             return lang;
         }
@@ -752,9 +759,46 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
 
         if (true) {
-            Language ret = findPossibleTagNameLanguage(name);
-            if (ret != null) {
-                return ret;
+            boolean searchByTagName = ApplicationUtil.tryRunReadAction(() -> {
+                try {
+                    PsiFile psiFile = null;
+                    PsiElement rootElem = CompletionHelper.getRootElement(tag, null);
+                    if (rootElem != null) {
+                        psiFile = rootElem.getContainingFile();
+                    }
+                    if (psiFile == null) {
+                        psiFile = tag.getContainingFile();
+                    }
+                    if (psiFile == null) {
+                        return false;
+                    }
+                    VirtualFile virtualFile = psiFile.getVirtualFile();
+                    if (virtualFile == null) {
+                        return false;
+                    }
+                    String extension = virtualFile.getExtension();
+                    if (extension == null || !extension.isEmpty()) {
+                        return false;
+                    }
+                    if (extension.startsWith(".")) {
+                        extension = extension.substring(1);
+                    }
+                    extension = extension.toLowerCase();
+                    if ("xml".equals(extension)) {
+                        return true;
+                    }
+
+                } catch (Exception e) {
+                    log.debug(e.getMessage(), e);
+                }
+                return false;
+            });
+
+            if (searchByTagName) {
+                Language ret = findPossibleTagNameLanguage(name);
+                if (ret != null) {
+                    return ret;
+                }
             }
         }
 
@@ -1016,6 +1060,11 @@ final class JdbcProcedureXmlLangInjectInjector implements MultiHostInjector {
         }
         XmlTag tag = attr.getParent();
         String tagName = tag.getName();
+        if (TagConsts.PROCEDURE.equals(tagName)
+                || TagConsts.SCRIPT_SEGMENT.equals(tagName)) {
+            // 声明参数，不进行注入
+            return;
+        }
         String attrName = attr.getName();
         if (attrName == null) {
             attrName = "";

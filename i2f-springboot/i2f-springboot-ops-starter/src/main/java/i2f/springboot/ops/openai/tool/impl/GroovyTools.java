@@ -1,0 +1,84 @@
+package i2f.springboot.ops.openai.tool.impl;
+
+import groovy.lang.GroovyShell;
+import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.annotations.Tool;
+import i2f.ai.std.tool.annotations.ToolParam;
+import i2f.ai.std.tool.annotations.Tools;
+import i2f.ai.std.tool.data.StringPairMap;
+import i2f.ai.std.tool.intent.ToolIntent;
+import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.extension.groovy.GroovyScript;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author Ice2Faith
+ * @date 2026/8/30 21:06
+ * @desc
+ */
+@ToolIntent(items = @ToolIntentItem(value="groovy",description = "提供基于groovy的脚本运行能力"))
+@ConditionalOnExpression("${ai.tools.groovy.enable:false}")
+@ConditionalOnClass({
+        GroovyShell.class,
+        GroovyScript.class
+})
+@Data
+@NoArgsConstructor
+@Component
+@Tools(tags = {
+        "groovy"
+})
+public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
+    private ApplicationContext applicationContext;
+    private Environment environment;
+
+    @Tool(
+            tags = {
+                    AiTags.EXECUTABLE_VALUE,
+                    AiTags.HUMAN_VALUE,
+                    AiTags.SCRIPT_VALUE
+            },
+            description = "run groovy script, returns the result of the last statement, and the result must be JSON-serializable. \n" +
+                    "Note: \n" +
+                    "   - embed variables: \n" +
+                    "       - `org.springframework.context.ApplicationContext applicationContext` \n" +
+                    "       - `org.springframework.core.env.Environment environment` \n"
+    )
+    public Map<String, Object> groovy_run_script(@ToolParam(value = "script", description = "the script, groovy script")
+                                                 String script,
+                                                 @ToolParam(value = "parameters", description = "the optional parameters list, cloud be null, it will be embed variable as `HashMap<String,String> parameters`")
+                                                 StringPairMap parameters) throws Exception {
+        Map<String, Object> ret = new HashMap<>();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        PrintStream printStream = new PrintStream(bos,true,"UTF-8");
+
+        if(parameters==null){
+            parameters=new StringPairMap();
+        }
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("out",printStream);
+        params.put("applicationContext", applicationContext);
+        params.put("environment", environment);
+        params.put("parameters",parameters.toMap());
+
+        Object obj = GroovyScript.evalScript(script, params);
+
+        ret.put("returns", obj);
+        ret.put("logs", new String(bos.toByteArray(),"UTF-8"));
+        return ret;
+    }
+}

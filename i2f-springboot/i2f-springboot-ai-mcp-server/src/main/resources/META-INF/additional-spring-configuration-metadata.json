@@ -1,0 +1,54 @@
+{
+  "groups": [
+    {
+      "name": "i2f.springboot.ai.mcp.server.netty",
+      "type": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.proxy",
+      "type": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration"
+    }
+  ],
+  "properties": [
+    {
+      "name": "i2f.springboot.ai.mcp.server.netty.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai mcp server on netty.",
+      "sourceType": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai mcp server on springweb.",
+      "sourceType": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration",
+      "defaultValue": true
+    }
+  ],
+  "hints": [
+    {
+      "name": "server.servlet.jsp.class-name",
+      "providers": [
+        {
+          "name": "class-reference",
+          "parameters": {
+            "target": "javax.servlet.http.HttpServlet"
+          }
+        }
+      ]
+    },
+    {
+      "name": "server.tomcat.accesslog.encoding",
+      "providers": [
+        {
+          "name": "handle-as",
+          "parameters": {
+            "target": "java.nio.charset.Charset"
+          }
+        }
+      ]
+    }
+  ]
+}

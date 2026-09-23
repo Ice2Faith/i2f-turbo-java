@@ -202,7 +202,13 @@ public class SqlCursorNode extends AbstractExecutorNode {
                 } else {
                     boolean breakSignal = false;
                     int count = 0;
-                    for (Object obj : list) {
+
+                    // use iterator.remove() help gc
+                    Iterator<?> iterator = list.iterator();
+                    while (iterator.hasNext()) {
+                        Object obj=iterator.next();
+                        iterator.remove();
+
                         long bts = SystemClock.currentTimeMillis();
 
                         pointContext.put(POINT_KEY_BEGIN_TS, bts);

@@ -482,7 +482,12 @@ public class SqlEtlNode extends AbstractExecutorNode {
                     }
 
                     int currentCount = 0;
-                    for (Object obj : list) {
+                    // use iterator.remove() help gc
+                    Iterator<?> iterator = list.iterator();
+                    while (iterator.hasNext()) {
+                        Object obj = iterator.next();
+                        iterator.remove();
+
                         List<Object> elems = new ArrayList<>();
                         for (Map.Entry<String, Map.Entry<String, List<String>>> entry : targetMap.entrySet()) {
                             Map.Entry<String, List<String>> value = entry.getValue();

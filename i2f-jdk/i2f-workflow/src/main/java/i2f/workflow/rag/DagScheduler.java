@@ -2,7 +2,6 @@ package i2f.workflow.rag;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -15,7 +14,6 @@ import java.util.function.Predicate;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class DagScheduler implements Runnable {
     // key: nodeId, value:node
     protected Map<String, DagNode> nodes = new ConcurrentHashMap<>();

@@ -2,10 +2,7 @@ package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.dashscope.data.DashScopeBaseOperateDto;
 import i2f.springboot.ops.dashscope.data.DashScopeUploadOperateDto;
 import jakarta.servlet.http.HttpServletRequest;
@@ -14,7 +11,9 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
@@ -40,12 +39,13 @@ import java.util.UUID;
  * @date 2026/4/28 19:09
  * @desc
  */
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/tmp-file")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/tmp-file")
 public class DashScopeOpsTmpFileController {
     @Autowired
     protected OpsSecureTransfer transfer;

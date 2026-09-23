@@ -262,7 +262,6 @@ expressSegment::=
         | constValue
         | refValue
         | jsonValue
-        | negtiveSegment
         | scriptBlock
         ;
 
@@ -276,11 +275,6 @@ declareFunction::=
 
 parameterList::=
     NAMING ( TERM_COMMA NAMING )*
-    ;
-
-
-negtiveSegment::=
-    OP_SUB express
     ;
 
 debuggerSegment::=
@@ -316,7 +310,7 @@ parenSegment::=
     ;
 
 prefixOperatorSegment::=
-    (OP_EXCLAM | KEY_NOT) express
+    (OP_SUB | OP_EXCLAM | KEY_NOT) express
     ;
 
 controlSegment::=

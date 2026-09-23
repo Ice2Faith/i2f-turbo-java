@@ -1,10 +1,10 @@
 package i2f.ai.std.tool;
 
+import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -13,10 +13,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class ToolBaseDefinition {
-    protected Map<String, Object> jsonSchema;
-    protected String name;
-    protected String description;
-    protected Map<String, Object> parametersJsonSchema;
+public class ToolBaseDefinition extends DefaultToolDefinition {
     protected List<String> parameterNames;
 }

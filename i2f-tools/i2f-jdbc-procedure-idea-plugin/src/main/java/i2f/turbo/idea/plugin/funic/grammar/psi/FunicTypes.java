@@ -94,6 +94,8 @@ public interface FunicTypes {
   IElementType IDENTIFIER = new FunicTokenType("IDENTIFIER");
   IElementType KW_AND = new FunicTokenType("and");
   IElementType KW_AS = new FunicTokenType("as");
+    IElementType KW_BAND = new FunicTokenType("band");
+    IElementType KW_BOR = new FunicTokenType("bor");
   IElementType KW_BREAK = new FunicTokenType("break");
   IElementType KW_CATCH = new FunicTokenType("catch");
   IElementType KW_CONST_BOOLEAN = new FunicTokenType("KW_CONST_BOOLEAN");
@@ -125,12 +127,16 @@ public interface FunicTypes {
   IElementType KW_NOT = new FunicTokenType("not");
   IElementType KW_OR = new FunicTokenType("or");
   IElementType KW_RETURN = new FunicTokenType("return");
+    IElementType KW_SHL = new FunicTokenType("shl");
+    IElementType KW_SHR = new FunicTokenType("shr");
   IElementType KW_SYNCHRONIZED = new FunicTokenType("synchronized");
   IElementType KW_TEQ = new FunicTokenType("teq");
   IElementType KW_THROW = new FunicTokenType("throw");
   IElementType KW_TNEQ = new FunicTokenType("tneq");
   IElementType KW_TRY = new FunicTokenType("try");
+    IElementType KW_USHR = new FunicTokenType("ushr");
   IElementType KW_WHILE = new FunicTokenType("while");
+    IElementType KW_XOR = new FunicTokenType("xor");
   IElementType OP_ADD = new FunicTokenType("+");
   IElementType OP_AND = new FunicTokenType("&&");
   IElementType OP_ASSIGN = new FunicTokenType("=");
@@ -160,7 +166,7 @@ public interface FunicTypes {
   IElementType OP_GT = new FunicTokenType(">");
   IElementType OP_GTE = new FunicTokenType(">=");
   IElementType OP_INCR = new FunicTokenType("++");
-  IElementType OP_INT_DIV = new FunicTokenType("//");
+    IElementType OP_INT_DIV = new FunicTokenType("\\\\");
   IElementType OP_LT = new FunicTokenType("<");
   IElementType OP_LTE = new FunicTokenType("<=");
   IElementType OP_MOD = new FunicTokenType("%");

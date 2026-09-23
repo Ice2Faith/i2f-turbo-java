@@ -1,12 +1,14 @@
 package i2f.ai.std.rag;
 
+import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
+import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
+import i2f.ai.std.rag.impl.TextFileRagFileReader;
 import i2f.io.stream.StreamUtil;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -14,74 +16,105 @@ import java.util.function.Predicate;
  * @desc
  */
 public class RagHelper {
-    public static final String[] TEXT_FILE_SUFFIXES = {
-            ".txt", ".md",
-            ".xml", ".json", ".html",
-            ".java", ".py", ".groovy",
-            ".js", ".css", ".vue", ".ts",
-            ".sql", ".sh", ".bash", ".cmd",
-            ".properties", ".yaml", ".yml"
-    };
-    public static final Set<String> TEXT_FILE_SUFFIXES_SET = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(TEXT_FILE_SUFFIXES)));
     public static final String DEFAULT_RAG_DIR = "./rags";
 
     public static void loadDocuments(RagWorker worker,
                                      RagTextSplitter splitter) throws IOException {
-        loadDocuments(new File(DEFAULT_RAG_DIR), worker, splitter);
+        loadDocuments(new File(DEFAULT_RAG_DIR), worker, new RagLoadDocumentsOptions().toMutator()
+                .set(p -> p::setSplitter, splitter)
+                .done());
     }
+
 
     public static void loadDocuments(File path,
                                      RagWorker worker,
-                                     RagTextSplitter splitter) throws IOException {
-        loadDocuments(path, worker, splitter, (file) -> {
-            String name = file.getName();
-            String suffix = "";
-            int idx = name.lastIndexOf(".");
-            if (idx >= 0) {
-                suffix = name.substring(idx).toLowerCase();
-            }
-            if (TEXT_FILE_SUFFIXES_SET.contains(suffix)) {
-                return true;
-            }
-            return false;
-        }, null);
-    }
-
-    public static void loadDocuments(File path,
-                                     RagWorker worker,
-                                     RagTextSplitter splitter,
-                                     Predicate<File> textFileFilter) throws IOException {
-        loadDocuments(path, worker, splitter, textFileFilter, null);
-    }
-
-    public static void loadDocuments(File path,
-                                     RagWorker worker,
-                                     RagTextSplitter splitter,
-                                     Predicate<File> textFileFilter,
-                                     Consumer<RagEmbedding> listener) throws IOException {
+                                     RagLoadDocumentsOptions options) throws IOException {
         if (path == null) {
             return;
         }
         if (!path.exists()) {
             return;
         }
+        if (options == null) {
+            options = new RagLoadDocumentsOptions().toMutator()
+                    .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
+                    .set(u -> u::setFileFilter, TextFileRagFileReader::isTextFile)
+                    .set(u -> u::setStoreBatchSize, -1)
+                    .done();
+        }
+        options.toMutator()
+                .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
+                .fieldIfAbsentV(u -> u::getFileFilter, TextFileRagFileReader::isTextFile)
+                .done();
         if (path.isFile()) {
-            if (textFileFilter.test(path)) {
-                String text = StreamUtil.readString(path);
-                List<String> list = splitter.split(text);
+            boolean supportProcess = false;
+            boolean useCustomReader = false;
+            if (options.getFileFilter() == null || options.getFileFilter().test(path)) {
+                supportProcess = true;
+            }
+            if (options.getFileReader() != null && options.getFileReader().support(path)) {
+                useCustomReader = true;
+                supportProcess = true;
+            }
+            if (!supportProcess) {
+                return;
+            }
+            String text = null;
+            if (useCustomReader) {
+                text = options.getFileReader().read(path);
+            } else {
+                text = StreamUtil.readString(path);
+            }
+            if (text == null) {
+                return;
+            }
+            if (text.trim().isEmpty()) {
+                return;
+            }
+            List<String> list = options.getSplitter().split(text);
+            if (options.getStoreBatchSize() > 0) {
+                List<String> once = new ArrayList<>();
+                int count = 0;
+                for (String str : list) {
+                    once.add(str);
+                    count++;
+                    if (count == options.getStoreBatchSize()) {
+                        List<RagEmbedding> embeddings = worker.storeAll(once);
+                        if (options.getListener() != null) {
+                            for (RagEmbedding item : embeddings) {
+                                options.getListener().accept(item);
+                            }
+                        }
+                        once.clear();
+                        count = 0;
+                    }
+                }
+                if (count > 0) {
+                    List<RagEmbedding> embeddings = worker.storeAll(once);
+                    if (options.getListener() != null) {
+                        for (RagEmbedding item : embeddings) {
+                            options.getListener().accept(item);
+                        }
+                    }
+                    once.clear();
+                    count = 0;
+                }
+            } else {
                 List<RagEmbedding> embeddings = worker.storeAll(list);
-                if (listener != null) {
+                if (options.getListener() != null) {
                     for (RagEmbedding item : embeddings) {
-                        listener.accept(item);
+                        options.getListener().accept(item);
                     }
                 }
             }
+
+
         }
         if (path.isDirectory()) {
             File[] files = path.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    loadDocuments(file, worker, splitter, textFileFilter, listener);
+                    loadDocuments(file, worker, options);
                 }
             }
         }

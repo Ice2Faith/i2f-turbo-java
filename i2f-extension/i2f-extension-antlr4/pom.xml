@@ -19,45 +19,17 @@
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-reflect</artifactId>
+            <artifactId>i2f-extension-antlr4-calculator</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-convert</artifactId>
+            <artifactId>i2f-extension-antlr4-funic</artifactId>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-typeof</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-match</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-invokable</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-mixins</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>i2f.turbo</groupId>
-            <artifactId>i2f-jvm</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr4-runtime</artifactId>
-            <version>4.13.2</version>
-            <scope>provided</scope>
-            <optional>true</optional>
+            <artifactId>i2f-extension-antlr4-tinyscript</artifactId>
         </dependency>
 
     </dependencies>

@@ -605,16 +605,16 @@ function start() {
 
   if [ $ENABLE_LOGBACK_CFG == $BOOL_TRUE ];then
     if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
-      nohup $JAVA_PATH $JVM_OPTS  -jar $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
-    else
       $JAVA_PATH $JVM_OPTS -jar $JarName > /dev/null 2>&1 echo $! > $PID_FILE
+    else
+      nohup $JAVA_PATH $JVM_OPTS  -jar $JarName > /dev/null 2>&1 & echo $! > $PID_FILE
     fi
     echo -e "\033[0;34m logback \033[0m start ..."
   else
     if [ $ENABLE_FRONTEND_STARTUP == $BOOL_TRUE ];then
-      nohup $JAVA_PATH  $JVM_OPTS -jar $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
-    else
       $JAVA_PATH  $JVM_OPTS -jar $JarName > $LOG_FILE 2>&1 echo $! > $PID_FILE
+    else
+      nohup $JAVA_PATH  $JVM_OPTS -jar $JarName > $LOG_FILE 2>&1 & echo $! > $PID_FILE
     fi
     echo -e "\033[0;34m sysout \033[0m start ..."
   fi

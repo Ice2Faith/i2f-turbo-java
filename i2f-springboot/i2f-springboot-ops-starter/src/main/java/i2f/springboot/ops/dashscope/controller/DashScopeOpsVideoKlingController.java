@@ -2,10 +2,11 @@ package i2f.springboot.ops.dashscope.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
-import i2f.springboot.ops.dashscope.data.DashScopeVideoViduOperateDto;
+import i2f.springboot.ops.dashscope.data.DashScopeVideoKlingOperateDto;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -29,12 +31,13 @@ import java.util.Map;
  * @date 2026/4/28 19:09
  * @desc
  */
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/video/kling")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/video/kling")
 public class DashScopeOpsVideoKlingController {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -49,7 +52,7 @@ public class DashScopeOpsVideoKlingController {
     @Autowired
     private DashScopeOpsController controller;
 
-    public String videoKling(DashScopeVideoViduOperateDto req) throws Exception {
+    public String videoKling(DashScopeVideoKlingOperateDto req) throws Exception {
 
         Map<String, Object> body = new HashMap<>();
         body.put("model", req.getModelName());
@@ -88,7 +91,7 @@ public class DashScopeOpsVideoKlingController {
     public OpsSecureReturn<OpsSecureDto> videoInsteadPeople(@RequestBody OpsSecureDto reqDto,
                                                             HttpServletRequest request) throws Exception {
         try {
-            DashScopeVideoViduOperateDto req = transfer.recv(reqDto, DashScopeVideoViduOperateDto.class);
+            DashScopeVideoKlingOperateDto req = transfer.recv(reqDto, DashScopeVideoKlingOperateDto.class);
 
             String taskId = videoKling(req);
             return transfer.success(taskId);

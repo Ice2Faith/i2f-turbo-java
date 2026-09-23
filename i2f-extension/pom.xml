@@ -19,12 +19,19 @@
         <module>i2f-extension-ai-dashscope</module>
         <module>i2f-extension-ai-langchain4j8</module>
         <module>i2f-extension-ai-openai</module>
+        <module>i2f-extension-ai-rag-lucene</module>
+        <module>i2f-extension-ai-rag-sqlite</module>
         <module>i2f-extension-ai-langchain4j</module>
         <module>i2f-extension-all</module>
         <module>i2f-extension-antlr4</module>
+        <module>i2f-extension-antlr4-calculator</module>
+        <module>i2f-extension-antlr4-funic</module>
+        <module>i2f-extension-antlr4-tinyscript</module>
         <module>i2f-extension-aspectj</module>
         <module>i2f-extension-asr-vosk</module>
+        <module>i2f-extension-browser-playwright</module>
         <module>i2f-extension-browser-selenium</module>
+        <module>i2f-extension-caffeine</module>
         <module>i2f-extension-canal</module>
         <module>i2f-extension-cglib</module>
         <module>i2f-extension-compress</module>
@@ -42,10 +49,13 @@
         <module>i2f-extension-filesystem-oss-aliyun</module>
         <module>i2f-extension-filesystem-oss-aws-s3</module>
         <module>i2f-extension-filesystem-sftp</module>
+        <module>i2f-extension-fory-json</module>
+        <module>i2f-extension-freemarker</module>
         <module>i2f-extension-ftp</module>
         <module>i2f-extension-gif</module>
         <module>i2f-extension-groovy</module>
         <module>i2f-extension-gson</module>
+        <module>i2f-extension-guava</module>
         <module>i2f-extension-hazelcast</module>
         <module>i2f-extension-hdfs</module>
         <module>i2f-extension-httpclient</module>
@@ -64,6 +74,7 @@
         <module>i2f-extension-netty</module>
         <module>i2f-extension-ocr-tesseract</module>
         <module>i2f-extension-ognl</module>
+        <module>i2f-extension-okhttp</module>
         <module>i2f-extension-opencv</module>
         <module>i2f-extension-opencv-data</module>
         <module>i2f-extension-opencv-javacv</module>
@@ -88,14 +99,12 @@
         <module>i2f-extension-velocity</module>
         <module>i2f-extension-velocity-bindsql</module>
         <module>i2f-extension-verifycode</module>
+        <module>i2f-extension-xproc4j</module>
         <module>i2f-extension-zip4j</module>
         <module>i2f-extension-zookeeper</module>
-        <module>i2f-extension-freemarker</module>
-        <module>i2f-extension-xproc4j</module>
 
         <module>test-flink</module>
         <module>test-extension</module>
-        <module>i2f-extension-okhttp</module>
     </modules>
 
 

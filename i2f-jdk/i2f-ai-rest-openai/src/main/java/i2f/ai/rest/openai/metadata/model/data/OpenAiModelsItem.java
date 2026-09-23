@@ -1,8 +1,8 @@
 package i2f.ai.rest.openai.metadata.model.data;
 
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -11,8 +11,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class OpenAiModelsItem {
+public class OpenAiModelsItem implements BaseMutator<OpenAiModelsItem> {
     protected String id;
     protected String object;
     protected String created;

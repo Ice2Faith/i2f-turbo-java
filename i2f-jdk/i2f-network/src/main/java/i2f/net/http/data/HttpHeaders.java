@@ -1,5 +1,6 @@
 package i2f.net.http.data;
 
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpHeaderConstants;
 
 import java.math.BigDecimal;
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
  * @date 2026/6/24 19:53
  * @desc
  */
-public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
+public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> implements BaseMutator<HttpHeaders> {
     public HttpHeaders(int initialCapacity, float loadFactor) {
         super(initialCapacity, loadFactor);
     }
@@ -74,13 +75,14 @@ public class HttpHeaders extends LinkedHashMap<String, ArrayList<String>> {
 
     public HttpHeaders add(String key, Object value) {
         ArrayList<String> list = computeIfAbsent(key, k -> new ArrayList<>());
-        if (value instanceof Collection) {
-            Collection<?> col = (Collection<?>) value;
+        if (value instanceof Iterable) {
+            Iterable<?> col = (Iterable<?>) value;
             for (Object item : col) {
                 list.add(valueToString(item));
             }
+        } else {
+            list.add(valueToString(value));
         }
-        list.add(valueToString(value));
         mergeNames(key);
         return this;
     }

@@ -15,10 +15,7 @@ import i2f.rowset.std.IRowHeader;
 import i2f.rowset.std.IRowSet;
 import i2f.rowset.std.impl.SimpleIteratorRowSet;
 import i2f.rowset.std.impl.SimpleRowHeader;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.datasource.data.DatasourceImportOperateDto;
 import i2f.springboot.ops.datasource.data.DatasourceListRespDto;
 import i2f.springboot.ops.datasource.data.DatasourceOperateDto;
@@ -36,6 +33,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,12 +54,13 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @date 2025/11/1 21:44
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.datasource.enable:true}")
 @ConditionalOnClass(DataSource.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/datasource")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/datasource")
 public class DatasourceOpsController implements IOpsProvider {
 
     @Autowired

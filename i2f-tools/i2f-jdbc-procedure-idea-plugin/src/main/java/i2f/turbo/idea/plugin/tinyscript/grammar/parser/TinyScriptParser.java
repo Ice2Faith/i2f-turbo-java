@@ -5,7 +5,6 @@ import com.intellij.lang.PsiBuilder;
 import com.intellij.lang.PsiBuilder.Marker;
 import static i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes.*;
 import static i2f.turbo.idea.plugin.tinyscript.lang.parser.TinyScriptParserUtil.*;
-
 import com.intellij.psi.tree.IElementType;
 import com.intellij.lang.ASTNode;
 import com.intellij.psi.tree.TokenSet;
@@ -259,8 +258,8 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //     |TERM_CONST_STRING_MULTILINE_QUOTE
   public static boolean constMultilineString(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "constMultilineString")) return false;
-    if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
-      return false;
+      if (!nextTokenIs(b, "<const multiline string>", TERM_CONST_STRING_MULTILINE, TERM_CONST_STRING_MULTILINE_QUOTE))
+          return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONST_MULTILINE_STRING, "<const multiline string>");
     r = consumeToken(b, TERM_CONST_STRING_MULTILINE);
@@ -286,8 +285,8 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //     |TERM_CONST_STRING_RENDER_SINGLE
   public static boolean constRenderString(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "constRenderString")) return false;
-    if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
-      return false;
+      if (!nextTokenIs(b, "<const render string>", TERM_CONST_STRING_RENDER, TERM_CONST_STRING_RENDER_SINGLE))
+          return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, CONST_RENDER_STRING, "<const render string>");
     r = consumeToken(b, TERM_CONST_STRING_RENDER);
@@ -581,7 +580,6 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   //         | constValue
   //         | refValue
   //         | jsonValue
-  //         | negtiveSegment
   //         | scriptBlock
   public static boolean expressSegment(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "expressSegment")) return false;
@@ -606,7 +604,6 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     if (!r) r = constValue(b, l + 1);
     if (!r) r = refValue(b, l + 1);
     if (!r) r = jsonValue(b, l + 1);
-    if (!r) r = negtiveSegment(b, l + 1);
     if (!r) r = scriptBlock(b, l + 1);
     exit_section_(b, l, m, r, false, null);
     return r;
@@ -1153,19 +1150,6 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // OP_SUB express
-  public static boolean negtiveSegment(PsiBuilder b, int l) {
-    if (!recursion_guard_(b, l, "negtiveSegment")) return false;
-    if (!nextTokenIs(b, OP_SUB)) return false;
-    boolean r;
-    Marker m = enter_section_(b);
-    r = consumeToken(b, OP_SUB);
-    r = r && express(b, l + 1);
-    exit_section_(b, m, NEGTIVE_SEGMENT, r);
-    return r;
-  }
-
-  /* ********************************************************** */
   // KEY_NEW invokeFunction
   public static boolean newInstance(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "newInstance")) return false;
@@ -1358,10 +1342,9 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
   }
 
   /* ********************************************************** */
-  // (OP_EXCLAM | KEY_NOT) express
+  // (OP_SUB | OP_EXCLAM | KEY_NOT) express
   public static boolean prefixOperatorSegment(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "prefixOperatorSegment")) return false;
-    if (!nextTokenIs(b, "<prefix operator segment>", KEY_NOT, OP_EXCLAM)) return false;
     boolean r;
     Marker m = enter_section_(b, l, _NONE_, PREFIX_OPERATOR_SEGMENT, "<prefix operator segment>");
     r = prefixOperatorSegment_0(b, l + 1);
@@ -1370,11 +1353,12 @@ public class TinyScriptParser implements PsiParser, LightPsiParser {
     return r;
   }
 
-  // OP_EXCLAM | KEY_NOT
+    // OP_SUB | OP_EXCLAM | KEY_NOT
   private static boolean prefixOperatorSegment_0(PsiBuilder b, int l) {
     if (!recursion_guard_(b, l, "prefixOperatorSegment_0")) return false;
     boolean r;
-    r = consumeToken(b, OP_EXCLAM);
+      r = consumeToken(b, OP_SUB);
+      if (!r) r = consumeToken(b, OP_EXCLAM);
     if (!r) r = consumeToken(b, KEY_NOT);
     return r;
   }

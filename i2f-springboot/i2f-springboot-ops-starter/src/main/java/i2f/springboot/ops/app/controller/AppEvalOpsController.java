@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -29,12 +33,13 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.app.enable:true}")
 @ConditionalOnClass(GroovyShell.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/app")
+@RequestMapping(OpsConsts.SPEL_BASE_URL+"/app")
 public class AppEvalOpsController {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -80,11 +85,14 @@ public class AppEvalOpsController {
             }
             AtomicReference<Object> refRet = new AtomicReference<>();
             AtomicReference<Throwable> refEx = new AtomicReference<>();
+            ByteArrayOutputStream bos=new ByteArrayOutputStream();
+            PrintStream printStream=new PrintStream(bos,true,"UTF-8");
             CountDownLatch latch = new CountDownLatch(1);
             Runnable task = () -> {
                 try {
 
                     Map<String, Object> context = new HashMap<>();
+                    context.put("out",printStream);
                     context.put("context", applicationContext);
                     context.put("env", applicationContext.getEnvironment());
                     Map<String, Object> beanMap = new HashMap<>();
@@ -94,6 +102,7 @@ public class AppEvalOpsController {
                         beanMap.put(name, bean);
                     }
                     context.put("beanMap", beanMap);
+                    context.put("request",request);
                     Object eval = GroovyScript.eval(script, context);
                     refRet.set(eval);
                 } catch (Throwable e) {
@@ -134,7 +143,8 @@ public class AppEvalOpsController {
                     resp = "response value cannot serialize as json: " + (ret.getClass().getName());
                 }
             }
-            return transfer.success(resp);
+            String stdout=new String(bos.toByteArray(),"UTF-8");
+            return transfer.success(resp).withAttr("stdout",stdout);
         } catch (Throwable e) {
             log.warn(e.getMessage(), e);
             return transfer.error(e);

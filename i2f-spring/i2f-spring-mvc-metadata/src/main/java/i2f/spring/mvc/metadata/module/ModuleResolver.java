@@ -1,9 +1,11 @@
 package i2f.spring.mvc.metadata.module;
 
 import i2f.reflect.ReflectResolver;
+import i2f.spring.mvc.metadata.SpringMetadataUtil;
 import i2f.spring.mvc.metadata.api.ApiMethod;
 import i2f.spring.mvc.metadata.api.ApiMethodResolver;
 import io.swagger.annotations.Api;
+import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -29,6 +31,21 @@ public class ModuleResolver {
         this.clazz = clazz;
     }
 
+    public static ModuleController resolveParameters(ModuleController controller,Environment environment) {
+        String baseUrl = controller.getBaseUrl();
+        if (baseUrl != null) {
+            baseUrl = SpringMetadataUtil.resolveParameters(baseUrl, environment);
+        }
+        controller.setBaseUrl(baseUrl);
+        List<ApiMethod> methods = controller.getMethods();
+        if(methods!=null){
+            for (ApiMethod method : methods) {
+                ApiMethodResolver.resolveParameters(method,environment);
+            }
+        }
+        return controller;
+    }
+
     public ModuleController parse() {
         module = new ModuleController();
         parseClassBasic();
@@ -38,6 +55,10 @@ public class ModuleResolver {
 
 
         return module;
+    }
+
+    public ModuleController parse(Environment environment){
+        return resolveParameters(parse(), environment);
     }
 
     public void parseClassBasic() {

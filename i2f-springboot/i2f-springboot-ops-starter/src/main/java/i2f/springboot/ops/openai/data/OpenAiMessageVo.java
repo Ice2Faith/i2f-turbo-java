@@ -4,11 +4,16 @@ import i2f.ai.rest.openai.model.data.OpenAiAssistantMessage;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiToolMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
+import i2f.mutator.BaseMutator;
+import i2f.springboot.ops.openai.async.AsyncTaskItem;
+import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.RequestOpenAiToolMessage;
+import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
+
+import java.util.List;
 
 /**
  * @author Ice2Faith
@@ -17,8 +22,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class OpenAiMessageVo {
+public class OpenAiMessageVo implements BaseMutator<OpenAiMessageVo> {
     protected String type;
     protected OpenAiSystemMessage system;
     protected OpenAiUserMessage user;
@@ -27,4 +31,14 @@ public class OpenAiMessageVo {
     protected EchoOpenAiToolMessage echo_tool;
     protected RequestOpenAiToolMessage request_tool;
     protected OpenAiSystemMessage echo_skill;
+    protected OpenAiSystemMessage echo_dynamic_tool;
+    protected OpenAiSystemMessage echo_loop_engineering;
+    protected OpenAiSystemMessage echo_truth_prompt;
+    protected OpenAiSystemMessage echo_truth_content;
+    protected OpenAiSystemMessage echo_truth_sync;
+    protected OpenAiSystemMessage echo_tool_intent_recommend;
+    protected OpenAiSystemMessage echo_attach_files;
+    protected List<TmpFileTools.UploadTmpFileMetadata> attachFiles;
+    protected OpenAiSystemMessage echo_async_tasks;
+    protected List<AsyncTaskItem> asyncTasks;
 }
