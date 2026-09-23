@@ -19,6 +19,7 @@
         <module>i2f-extension-ai-dashscope</module>
         <module>i2f-extension-ai-langchain4j8</module>
         <module>i2f-extension-ai-openai</module>
+        <module>i2f-extension-ai-rag-lucene</module>
         <module>i2f-extension-ai-rag-sqlite</module>
         <module>i2f-extension-all</module>
         <module>i2f-extension-antlr4</module>
@@ -53,6 +54,7 @@
         <module>i2f-extension-gif</module>
         <module>i2f-extension-groovy</module>
         <module>i2f-extension-gson</module>
+        <module>i2f-extension-guava</module>
         <module>i2f-extension-hazelcast</module>
         <module>i2f-extension-hdfs</module>
         <module>i2f-extension-httpclient</module>
@@ -102,7 +104,6 @@
 
         <module>test-flink</module>
         <module>test-extension</module>
-        <module>i2f-extension-guava</module>
     </modules>
 
 

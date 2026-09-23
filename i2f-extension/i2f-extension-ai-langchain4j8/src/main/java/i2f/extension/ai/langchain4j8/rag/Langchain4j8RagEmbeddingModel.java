@@ -16,7 +16,10 @@ import java.util.List;
 /**
  * @author Ice2Faith
  * @date 2026/3/25 14:47
- * @desc
+ * @desc 可以使用内嵌的小模型，而不接入api模型
+ * public static Langchain4j8RagEmbeddingModel createEmbed(){
+ * return new Langchain4j8RagEmbeddingModel(new BgeSmallZhEmbeddingModel());
+ * }
  */
 @Data
 @NoArgsConstructor
