@@ -45,7 +45,7 @@ public class RagHelper {
         }
         options.toMutator()
                 .fieldIfAbsent(u -> u::getSplitter, SimpleRecursiveRagTextSplitter::new)
-                .fieldIfAbsentV(u -> u::getFileFilter, (Predicate<File>)TextFileRagFileReader::isTextFile)
+                .fieldIfAbsentV(u -> u::getFileFilter, (Predicate<File>) TextFileRagFileReader::isTextFile)
                 .done();
         if (path.isFile()) {
             boolean supportProcess = false;

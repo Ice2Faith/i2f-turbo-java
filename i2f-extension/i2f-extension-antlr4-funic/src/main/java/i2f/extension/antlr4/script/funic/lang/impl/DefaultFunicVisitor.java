@@ -2406,7 +2406,7 @@ public class DefaultFunicVisitor implements FunicVisitor<FunicValue> {
                 Object obj = value.get();
                 return new KeyPairFunicValue().toMutator()
                         .set(u -> u::setNode, ctx)
-                        .set(u -> u::setKey, (String)null)
+                        .set(u -> u::setKey, (String) null)
                         .set(u -> u::setValue, obj)
                         .done();
             } else if (count == 3) {

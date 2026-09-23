@@ -188,7 +188,7 @@ public class HttpOpenAiModelStreamApi implements BaseMutator<HttpOpenAiModelStre
             httpProcessor.http(HttpRequest.doPost(getChatCompletionsUrl())
                             .set(u -> u::json)
                             .set2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
-                            .set(u -> u::applyHeader, (Consumer<HttpHeaders>)  headers -> {
+                            .set(u -> u::applyHeader, (Consumer<HttpHeaders>) headers -> {
                                 if (apiKey != null && !apiKey.isEmpty()) {
                                     headers.add("Authorization", "Bearer " + apiKey);
                                 }

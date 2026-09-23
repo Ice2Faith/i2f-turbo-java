@@ -3,7 +3,6 @@ package i2f.spring.ai.tool;
 
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 import i2f.spring.ai.model.SpringAiJsonSerializer;
