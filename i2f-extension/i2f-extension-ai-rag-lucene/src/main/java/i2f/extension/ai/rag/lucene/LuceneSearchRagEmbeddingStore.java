@@ -150,13 +150,13 @@ public class LuceneSearchRagEmbeddingStore implements RagEmbeddingStore {
                 embedding.setId(doc.get("id"));
                 embedding.setContent(doc.get("content"));
                 String vector = doc.get("vector");
-                if (vector == null || "null".equals(vector)) {
+                if (vector == null || vector.isEmpty() || "null".equals(vector)) {
                     // lucene 没有有效向量，直接返回固定编码无意义向量
                     embedding.setVector(RagVector.fromArray(LuceneRagEmbeddingUtil.string2vector(embedding.getContent())));
                 } else {
                     // lucene 如果有有效向量，则取出设置
                     try {
-                        List list = (List) jsonSerializer.deserialize(embedding.getContent());
+                        List list = (List) jsonSerializer.deserialize(vector);
                         List<Double> vec = new ArrayList<>();
                         for (Object obj : list) {
                             if (obj instanceof Number) {
