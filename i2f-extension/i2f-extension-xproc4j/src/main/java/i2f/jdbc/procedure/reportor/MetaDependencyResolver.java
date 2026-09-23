@@ -293,7 +293,8 @@ public class MetaDependencyResolver {
                 if (Arrays.asList(FeatureConsts.EVAL_TINYSCRIPT,
                         FeatureConsts.EVAL_TS).contains(feature)) {
                     getTinyScriptDependencyMapNext(dependencies, value);
-                }if (Arrays.asList(FeatureConsts.EVAL_FUNIC).contains(feature)) {
+                }
+                if (Arrays.asList(FeatureConsts.EVAL_FUNIC).contains(feature)) {
                     getFunicDependencyMapNext(dependencies, value);
                 } else if (Arrays.asList(FeatureConsts.EVAL_GROOVY,
                         FeatureConsts.EVAL_JAVA,
@@ -403,9 +404,9 @@ public class MetaDependencyResolver {
         }
         if (tree instanceof FunicParser.GlobalFunctionCallContext) {
             ParseTree child = tree.getChild(0);
-            if(child instanceof FunicParser.FunctionNameContext){
+            if (child instanceof FunicParser.FunctionNameContext) {
                 child = child.getChild(0);
-                if(child instanceof TerminalNode){
+                if (child instanceof TerminalNode) {
                     String naming = child.getText();
                     if (isDependencyNaming(naming)) {
                         dependencies.add(naming);
@@ -415,9 +416,9 @@ public class MetaDependencyResolver {
         }
         if (tree instanceof FunicParser.StaticFunctionCallContext) {
             ParseTree child = tree.getChild(1);
-            if(child instanceof FunicParser.FunctionNameContext){
+            if (child instanceof FunicParser.FunctionNameContext) {
                 child = child.getChild(0);
-                if(child instanceof TerminalNode){
+                if (child instanceof TerminalNode) {
                     String naming = child.getText();
                     if (isDependencyNaming(naming)) {
                         dependencies.add(naming);
@@ -427,9 +428,9 @@ public class MetaDependencyResolver {
         }
         if (tree instanceof FunicParser.InstanceFunctionCallRightPartContext) {
             ParseTree child = tree.getChild(1);
-            if(child instanceof FunicParser.FunctionNameContext){
+            if (child instanceof FunicParser.FunctionNameContext) {
                 child = child.getChild(0);
-                if(child instanceof TerminalNode){
+                if (child instanceof TerminalNode) {
                     String naming = child.getText();
                     if (isDependencyNaming(naming)) {
                         dependencies.add(naming);

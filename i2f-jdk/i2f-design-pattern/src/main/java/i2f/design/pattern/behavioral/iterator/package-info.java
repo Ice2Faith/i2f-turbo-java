@@ -19,7 +19,7 @@
  *
  * <h3>典型案例</h3>
  * <ul>
- *   <li>JDK：{@link java.util.Iterator}、{@link java.util.Enumeration}、{@link Iterable} 接口</li>
+ *   <li>JDK：{@link java.util.Iterator}、{@link java.util.Enumeration}、{@link java.lang.Iterable} 接口</li>
  *   <li>Spring Data：{@code Page<T>} 与 {@code Slice<T>} 分页迭代</li>
  *   <li>JDBC：{@link java.sql.ResultSet}（游标式迭代数据库结果集）</li>
  *   <li>MyBatis：{@code Cursor} 游标查询（流式迭代大数据集）</li>
@@ -29,10 +29,10 @@
  * <p>以"书架遍历"为场景演示迭代器模式：</p>
  * <ul>
  *   <li>{@link Iterator} —— 抽象迭代器接口（定义 hasNext/next 方法）</li>
- *   <li>{@link Aggregate} —— 抽象聚合接口（定义 createIterator 方法）</li>
+ *   <li>{@link i2f.design.pattern.behavioral.iterator.Aggregate} —— 抽象聚合接口（定义 createIterator 方法）</li>
  *   <li>{@link Book} —— 聚合元素（书籍实体）</li>
- *   <li>{@link BookShelf} —— 具体聚合（书架，管理多本书）</li>
- *   <li>{@link BookIterator} —— 具体迭代器（遍历书架的迭代器实现）</li>
+ *   <li>{@link i2f.design.pattern.behavioral.iterator.book.BookShelf} —— 具体聚合（书架，管理多本书）</li>
+ *   <li>{@link i2f.design.pattern.behavioral.iterator.book.BookIterator} —— 具体迭代器（遍历书架的迭代器实现）</li>
  *   <li>{@link Test} —— 演示类（展示迭代器的创建、遍历、重置、异常处理等）</li>
  * </ul>
  *
@@ -57,10 +57,10 @@
  * @author Ice2Faith
  * @date 2026/5/21 10:30
  * @see Iterator
- * @see Aggregate
+ * @see i2f.design.pattern.behavioral.iterator.Aggregate
  * @see Book
- * @see BookShelf
- * @see BookIterator
+ * @see i2f.design.pattern.behavioral.iterator.book.BookShelf
+ * @see i2f.design.pattern.behavioral.iterator.book.BookIterator
  * @see Test
  */
 package i2f.design.pattern.behavioral.iterator;

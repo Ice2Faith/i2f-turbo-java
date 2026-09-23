@@ -23,29 +23,29 @@ public class Test {
         // ==================== 2. 正常流程：待支付 → 已支付 → 配送中 → 已完成 ====================
         System.out.println("────── 场景一：订单正常完成流程 ──────");
         Order order1 = new Order("ORD-20260521-001", "iPhone 16 Pro", 8999.00);
-        
+
         // 尝试在待支付状态下执行非法操作
         order1.ship();
         order1.confirmReceive();
-        
+
         // 支付订单：待支付 → 已支付
         order1.pay();
-        
+
         // 尝试在已支付状态下执行非法操作
         order1.pay();
         order1.confirmReceive();
-        
+
         // 发货：已支付 → 配送中
         order1.ship();
-        
+
         // 尝试在配送中状态下执行非法操作
         order1.pay();
         order1.ship();
         order1.cancel();
-        
+
         // 确认收货：配送中 → 已完成
         order1.confirmReceive();
-        
+
         // 尝试在已完成状态下执行任何操作（均为非法）
         order1.pay();
         order1.ship();
@@ -59,10 +59,10 @@ public class Test {
         // ==================== 3. 取消流程：待支付 → 已取消 ====================
         System.out.println("────── 场景二：订单取消流程（待支付阶段取消） ──────");
         Order order2 = new Order("ORD-20260521-002", "MacBook Pro 14寸", 14999.00);
-        
+
         // 取消订单：待支付 → 已取消
         order2.cancel();
-        
+
         // 尝试在已取消状态下执行任何操作（均为非法）
         order2.pay();
         order2.ship();
@@ -75,13 +75,13 @@ public class Test {
         // ==================== 4. 取消流程：已支付 → 已取消 ====================
         System.out.println("────── 场景三：订单取消流程（已支付阶段取消） ──────");
         Order order3 = new Order("ORD-20260521-003", "AirPods Pro 2", 1899.00);
-        
+
         // 支付订单：待支付 → 已支付
         order3.pay();
-        
+
         // 取消订单：已支付 → 已取消（退款）
         order3.cancel();
-        
+
         // 尝试在已取消状态下执行任何操作（均为非法）
         order3.pay();
         order3.ship();
@@ -95,9 +95,9 @@ public class Test {
         System.out.println("通过统一接口调度不同状态的订单：\n");
 
         Order[] orders = {
-            new Order("ORD-20260521-004", "iPad Air", 4799.00),
-            new Order("ORD-20260521-005", "Apple Watch", 2999.00),
-            new Order("ORD-20260521-006", "HomePod mini", 799.00)
+                new Order("ORD-20260521-004", "iPad Air", 4799.00),
+                new Order("ORD-20260521-005", "Apple Watch", 2999.00),
+                new Order("ORD-20260521-006", "HomePod mini", 799.00)
         };
 
         // 批量处理订单

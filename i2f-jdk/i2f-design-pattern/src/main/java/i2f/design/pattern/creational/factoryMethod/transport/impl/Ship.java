@@ -1,7 +1,7 @@
 package i2f.design.pattern.creational.factoryMethod.transport.impl;
 
-import i2f.design.pattern.creational.factoryMethod.transport.Transport;
 import i2f.design.pattern.creational.factoryMethod.logistics.impl.SeaLogistics;
+import i2f.design.pattern.creational.factoryMethod.transport.Transport;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;

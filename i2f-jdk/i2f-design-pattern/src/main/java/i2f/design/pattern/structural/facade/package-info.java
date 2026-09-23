@@ -28,7 +28,7 @@
  *
  * <h3>角色说明</h3>
  * <ul>
- *   <li><b>Facade（外观类）：</b>{@link SmartHomeFacade} - 为子系统提供统一接口</li>
+ *   <li><b>Facade（外观类）：</b>{@link i2f.design.pattern.structural.facade.SmartHomeFacade} - 为子系统提供统一接口</li>
  *   <li><b>Subsystem（子系统）：</b>{@link i2f.design.pattern.structural.facade.subsystem.LightSystem} 等 - 实现具体功能</li>
  *   <li><b>Client（客户端）：</b>{@link Test} - 通过外观类访问子系统</li>
  * </ul>

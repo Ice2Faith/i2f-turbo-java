@@ -29,7 +29,7 @@ public class OpenAiRichUserMessage implements OpenAiMessage, BaseMutator<OpenAiR
     @Override
     public String content() {
         for (OpenAiUserContent item : content) {
-            if(item instanceof OpenAiUserContentText){
+            if (item instanceof OpenAiUserContentText) {
                 OpenAiUserContentText text = (OpenAiUserContentText) item;
                 return text.getText();
             }

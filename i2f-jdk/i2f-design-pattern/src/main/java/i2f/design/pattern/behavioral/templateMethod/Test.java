@@ -51,9 +51,9 @@ public class Test {
         System.out.println("通过统一接口调用模板方法制作不同饮品：\n");
 
         BeverageMaker[] makers = {
-            new CoffeeMaker(),
-            new TeaMaker(true),
-            new TeaMaker(false)
+                new CoffeeMaker(),
+                new TeaMaker(true),
+                new TeaMaker(false)
         };
 
         for (int i = 0; i < makers.length; i++) {

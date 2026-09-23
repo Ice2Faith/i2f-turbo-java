@@ -19,10 +19,10 @@ public class StringPairMap {
     @ToolParam(description = "dict pair list")
     protected List<StringPair> pairList;
 
-    public Map<String,String> toMap(){
-        Map<String,String> map = new HashMap<>();
-        for(StringPair pair : pairList){
-            map.put(pair.getKey(),pair.getValue());
+    public Map<String, String> toMap() {
+        Map<String, String> map = new HashMap<>();
+        for (StringPair pair : pairList) {
+            map.put(pair.getKey(), pair.getValue());
         }
         return map;
     }

@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/10 15:42
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="gan_zhi",description = "提供根据标准世界时间获取生辰八字的能力"))
+@ToolIntent(items = @ToolIntentItem(value = "gan_zhi", description = "提供根据标准世界时间获取生辰八字的能力"))
 @ConditionalOnExpression("${ai.tools.gan-zhi.enable:true}")
 @Component
 @Tools(tags = {

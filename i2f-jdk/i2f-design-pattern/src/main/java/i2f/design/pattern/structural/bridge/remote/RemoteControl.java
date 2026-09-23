@@ -1,10 +1,8 @@
 package i2f.design.pattern.structural.bridge.remote;
 
 import i2f.design.pattern.structural.bridge.device.Device;
-import i2f.design.pattern.structural.bridge.device.impl.TV;
-import i2f.design.pattern.structural.bridge.device.impl.Radio;
-import i2f.design.pattern.structural.bridge.remote.impl.BasicRemote;
 import i2f.design.pattern.structural.bridge.remote.impl.AdvancedRemote;
+import i2f.design.pattern.structural.bridge.remote.impl.BasicRemote;
 
 /**
  * 桥接模式 —— 遥控器（Abstraction：RemoteControl）

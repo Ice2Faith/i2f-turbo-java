@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 public class WindowsOsUtil {
     public static CommandResult execPowershell(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
-        if(!OsUtil.isWindows()){
+        if (!OsUtil.isWindows()) {
             throw new IllegalStateException("current os is not windows, not support powershell");
         }
         List<String> cmdList = new ArrayList<>();
@@ -32,11 +32,11 @@ public class WindowsOsUtil {
     }
 
     public static CommandResult execPowershellScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
-        if(!OsUtil.isWindows()){
+        if (!OsUtil.isWindows()) {
             throw new IllegalStateException("current os is not windows, not support powershell");
         }
-        String fileName= "ps-"+UUID.randomUUID().toString().replace("-", "").toLowerCase()+".ps1";
-        File scriptFile=new File(fileName);
+        String fileName = "ps-" + UUID.randomUUID().toString().replace("-", "").toLowerCase() + ".ps1";
+        File scriptFile = new File(fileName);
         try {
             if (dir != null) {
                 if (!dir.exists()) {
@@ -65,8 +65,8 @@ public class WindowsOsUtil {
             ));
             cmdList.add(fileName);
             return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
-        }finally {
-            if(scriptFile.exists()){
+        } finally {
+            if (scriptFile.exists()) {
                 scriptFile.delete();
             }
         }

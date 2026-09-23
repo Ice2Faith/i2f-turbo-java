@@ -33,9 +33,9 @@ public interface StringMixins {
     }
 
     default String newline(int count) {
-        String ret="";
+        String ret = "";
         for (int i = 0; i < count; i++) {
-            ret+="\n";
+            ret += "\n";
         }
         return ret;
     }
@@ -49,17 +49,17 @@ public interface StringMixins {
     }
 
     default String sharp(int count) {
-        String ret="";
+        String ret = "";
         for (int i = 0; i < count; i++) {
-            ret+="#";
+            ret += "#";
         }
         return ret;
     }
 
     default String dollar(int count) {
-        String ret="";
+        String ret = "";
         for (int i = 0; i < count; i++) {
-            ret+="$";
+            ret += "$";
         }
         return ret;
     }

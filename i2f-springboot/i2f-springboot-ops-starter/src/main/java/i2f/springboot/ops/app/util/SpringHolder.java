@@ -25,12 +25,12 @@ public class SpringHolder implements ApplicationContextAware, EnvironmentAware {
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringHolder.context=applicationContext;
+        SpringHolder.context = applicationContext;
     }
 
     @Override
     public void setEnvironment(Environment environment) {
-        SpringHolder.env=environment;
+        SpringHolder.env = environment;
     }
 
     public static ApplicationContext context() {

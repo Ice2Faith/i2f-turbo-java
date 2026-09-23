@@ -40,7 +40,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/datasource/metadata")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/datasource/metadata")
 public class DatasourceOpsMetadataController {
 
     @Autowired

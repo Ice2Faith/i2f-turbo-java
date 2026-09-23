@@ -33,7 +33,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="database_metadata",description = "提供数据库元数据查询能力、获取数据源、数据库类型、表结构等"))
+@ToolIntent(items = @ToolIntentItem(value = "database_metadata", description = "提供数据库元数据查询能力、获取数据源、数据库类型、表结构等"))
 @ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DefaultDatasourceProvider.class)
 @ConditionalOnBean(DatasourceProvider.class)

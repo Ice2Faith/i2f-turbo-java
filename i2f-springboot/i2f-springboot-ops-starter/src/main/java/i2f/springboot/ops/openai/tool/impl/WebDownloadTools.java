@@ -25,7 +25,7 @@ import java.util.UUID;
  * @date 2026/6/22 16:55
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="web_download",description = "提供网络地址文件的下载能力"))
+@ToolIntent(items = @ToolIntentItem(value = "web_download", description = "提供网络地址文件的下载能力"))
 @ConditionalOnExpression("${ai.tools.web-download.enable:true}")
 @Component
 @Data

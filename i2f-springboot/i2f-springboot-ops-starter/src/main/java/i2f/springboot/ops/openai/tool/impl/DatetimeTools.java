@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/1 19:13
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="datetime",description = "提供日期时间的获取、判断、当前时间、天数、闰年等"))
+@ToolIntent(items = @ToolIntentItem(value = "datetime", description = "提供日期时间的获取、判断、当前时间、天数、闰年等"))
 @ConditionalOnExpression("${ai.tools.datetime.enable:true}")
 @Component
 @Tools(tags = {

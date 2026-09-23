@@ -26,7 +26,7 @@ public class Test {
         // ==================== 2. 第一次存档 ====================
         System.out.println("────── 步骤 1：创建存档管理器并保存第一个存档 ──────");
         SaveManager saveManager = new SaveManager();
-        
+
         // 保存初始状态（新手村存档）
         Memento save1 = hero.createMemento();
         saveManager.addMemento("新手村", save1);
@@ -38,7 +38,7 @@ public class Test {
         hero.levelUp();
         hero.levelUp();
         System.out.println("  升级后状态：" + hero.displayStatus());
-        
+
         // 保存升级后的状态（Boss 战前存档）
         Memento save2 = hero.createMemento();
         saveManager.addMemento("Boss战前", save2);
@@ -50,7 +50,7 @@ public class Test {
         hero.takeDamage(150);
         System.out.println("  战斗后状态：" + hero.displayStatus());
         System.out.println("  ⚠ HP 归零，挑战失败！准备读取存档...\n");
-        
+
         // 读取 Boss 战前存档
         System.out.println("  读取存档：[Boss战前]");
         Memento restoreSave = saveManager.getMemento(1);
@@ -62,7 +62,7 @@ public class Test {
         System.out.println("────── 步骤 4：准备充分后保存第三个存档 ──────");
         hero.levelUp();
         System.out.println("  再次升级后：" + hero.displayStatus());
-        
+
         Memento save3 = hero.createMemento();
         saveManager.addMemento("最终决战前", save3);
         System.out.println("  存档内容：" + save3);
@@ -76,11 +76,11 @@ public class Test {
         // ==================== 7. 演示撤销操作 ====================
         System.out.println("────── 步骤 6：演示撤销（Undo）功能 ──────");
         System.out.println("  当前状态：" + hero.displayStatus());
-        
+
         // 模拟一次战斗
         hero.takeDamage(30);
         System.out.println("  战斗后：" + hero.displayStatus());
-        
+
         // 使用撤销功能
         System.out.println("\n  执行撤销操作：");
         Memento undoSave = saveManager.undo();
@@ -95,7 +95,7 @@ public class Test {
         System.out.println("Caretaker（SaveManager）只能保存和提供 Memento，");
         System.out.println("但无法直接访问或修改 Memento 内部的状态数据。");
         System.out.println("只有 Originator（GameRole）才能读取和应用备忘录。\n");
-        
+
         Memento testMemento = saveManager.getLatestMemento();
         System.out.println("从 SaveManager 获取的备忘录：");
         System.out.println("  " + testMemento);
@@ -108,7 +108,7 @@ public class Test {
         System.out.println("3. 支持撤销/重做：通过保存多个备忘录实现历史回溯");
         System.out.println("4. 状态快照不可变：Memento 使用 final 字段，确保存档不被篡改");
         System.out.println("5. 职责分离：Originator 专注业务逻辑，Caretaker 专注状态管理");
-        
+
         System.out.println("\n====== 典型应用场景 ======");
         System.out.println("• 文本编辑器的 Ctrl+Z 撤销功能");
         System.out.println("• 游戏的存档/读档系统");

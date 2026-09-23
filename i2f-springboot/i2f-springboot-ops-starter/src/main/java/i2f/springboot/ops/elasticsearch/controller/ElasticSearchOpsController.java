@@ -41,7 +41,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/elasticsearch")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/elasticsearch")
 public class ElasticSearchOpsController implements IOpsProvider {
 
     @Autowired

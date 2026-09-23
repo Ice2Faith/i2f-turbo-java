@@ -37,7 +37,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/dashscope/video/kling")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/video/kling")
 public class DashScopeOpsVideoKlingController {
     @Autowired
     protected OpsSecureTransfer transfer;

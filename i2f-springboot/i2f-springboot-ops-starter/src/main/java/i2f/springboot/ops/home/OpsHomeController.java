@@ -28,7 +28,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "")
 public class OpsHomeController {
     @Autowired
     private ApplicationContext applicationContext;

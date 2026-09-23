@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class OpenAiUserContentText implements OpenAiUserContent {
-    protected String type=OpenAiConsts.TEXT;
+    protected String type = OpenAiConsts.TEXT;
     protected String text;
 
     public OpenAiUserContentText(String text) {

@@ -61,7 +61,7 @@ public class OkHttpHttpProcessor implements IHttpProcessor {
                     .build();
         }
         IHttpRequestBodyHandler<Request.Builder> handler = new OkHttpFormRequestBodyHandler();
-        if(request.getHeader()==null){
+        if (request.getHeader() == null) {
             request.setHeader(HttpHeaders.create());
         }
 

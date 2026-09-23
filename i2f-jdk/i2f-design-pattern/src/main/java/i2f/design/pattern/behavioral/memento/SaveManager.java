@@ -58,7 +58,7 @@ public class SaveManager {
      * 并更新当前索引指向最新存档。</p>
      *
      * @param saveName 存档名称（如"存档1"、"Boss战前"）
-     * @param memento 包含角色状态的备忘录对象
+     * @param memento  包含角色状态的备忘录对象
      */
     public void addMemento(String saveName, Memento memento) {
         saveNames.add(saveName);

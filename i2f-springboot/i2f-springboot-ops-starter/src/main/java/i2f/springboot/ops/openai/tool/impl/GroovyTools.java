@@ -19,7 +19,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +29,7 @@ import java.util.Map;
  * @date 2026/8/30 21:06
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="groovy",description = "提供基于groovy的脚本运行能力"))
+@ToolIntent(items = @ToolIntentItem(value = "groovy", description = "提供基于groovy的脚本运行能力"))
 @ConditionalOnExpression("${ai.tools.groovy.enable:false}")
 @ConditionalOnClass({
         GroovyShell.class,
@@ -63,22 +64,22 @@ public class GroovyTools implements ApplicationContextAware, EnvironmentAware {
         Map<String, Object> ret = new HashMap<>();
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        PrintStream printStream = new PrintStream(bos,true,"UTF-8");
+        PrintStream printStream = new PrintStream(bos, true, "UTF-8");
 
-        if(parameters==null){
-            parameters=new StringPairMap();
+        if (parameters == null) {
+            parameters = new StringPairMap();
         }
 
         Map<String, Object> params = new HashMap<>();
-        params.put("out",printStream);
+        params.put("out", printStream);
         params.put("applicationContext", applicationContext);
         params.put("environment", environment);
-        params.put("parameters",parameters.toMap());
+        params.put("parameters", parameters.toMap());
 
         Object obj = GroovyScript.evalScript(script, params);
 
         ret.put("returns", obj);
-        ret.put("logs", new String(bos.toByteArray(),"UTF-8"));
+        ret.put("logs", new String(bos.toByteArray(), "UTF-8"));
         return ret;
     }
 }

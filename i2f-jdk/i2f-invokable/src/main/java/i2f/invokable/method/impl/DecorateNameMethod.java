@@ -15,7 +15,7 @@ public class DecorateNameMethod extends MethodWrapper {
 
     public DecorateNameMethod(IMethod method, Function<String, String> decorator) {
         super(method);
-        this.decorator=decorator;
+        this.decorator = decorator;
     }
 
     @Override

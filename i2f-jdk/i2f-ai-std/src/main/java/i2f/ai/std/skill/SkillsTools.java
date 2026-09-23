@@ -15,7 +15,6 @@ import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -125,11 +124,11 @@ public class SkillsTools {
         if (!scriptFile.isFile()) {
             throw new IllegalStateException("skill [" + skillName + "] script file [" + scriptPath + "] not is file");
         }
-        return runScript(scriptFile,commandArguments);
+        return runScript(scriptFile, commandArguments);
     }
 
     public SkillScriptRunner getScriptRunner(String suffix) {
-        if(context==null){
+        if (context == null) {
             return null;
         }
         try {
@@ -145,7 +144,7 @@ public class SkillsTools {
         return null;
     }
 
-    public CommandResult runScript(File scriptFile,List<String> commandArguments) throws Exception {
+    public CommandResult runScript(File scriptFile, List<String> commandArguments) throws Exception {
         String name = scriptFile.getName();
         String suffix = "";
         int idx = name.lastIndexOf(".");
@@ -154,8 +153,8 @@ public class SkillsTools {
         }
 
         SkillScriptRunner runner = getScriptRunner(suffix);
-        if(runner!=null){
-            return runner.runScript(scriptFile,commandArguments);
+        if (runner != null) {
+            return runner.runScript(scriptFile, commandArguments);
         }
 
         List<String> commandArr = new ArrayList<>();

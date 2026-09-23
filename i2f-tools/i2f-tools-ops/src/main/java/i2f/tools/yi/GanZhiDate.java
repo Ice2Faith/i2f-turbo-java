@@ -413,7 +413,7 @@ public class GanZhiDate {
         }
 
         int dateHour = datetime.getHour(); // 0-23
-        int houtOffset=(dateHour+1) / 2;
+        int houtOffset = (dateHour + 1) / 2;
         hourGanOffset = (hourGanOffset + houtOffset) % 10;
         int hourZhiOffset = (0 + houtOffset) % 12;
         ret.hour = Yi.GAN[hourGanOffset] + "" + Yi.ZHI[hourZhiOffset];

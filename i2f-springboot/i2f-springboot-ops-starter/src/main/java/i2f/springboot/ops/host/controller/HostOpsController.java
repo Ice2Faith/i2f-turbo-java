@@ -42,7 +42,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/host")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/host")
 public class HostOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

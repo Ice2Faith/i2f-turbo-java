@@ -13,24 +13,25 @@ import java.util.List;
  * @desc
  */
 public class AiTagRuleHelper {
-    public static IMatcher matcher=new AntMatcher(".");
-    public static List<String> resolveTags(String toolName, Collection<AiTagRule> rules){
+    public static IMatcher matcher = new AntMatcher(".");
+
+    public static List<String> resolveTags(String toolName, Collection<AiTagRule> rules) {
         List<String> tags = new ArrayList<>();
-        if(toolName==null||toolName.isEmpty()){
+        if (toolName == null || toolName.isEmpty()) {
             return tags;
         }
-        if(rules==null||rules.isEmpty()){
+        if (rules == null || rules.isEmpty()) {
             return tags;
         }
         for (AiTagRule rule : rules) {
-            if(rule==null){
+            if (rule == null) {
                 continue;
             }
-            if (rule.getTags()==null) {
+            if (rule.getTags() == null) {
                 continue;
             }
             String pattern = rule.getPattern();
-            if(matcher.matches(toolName,pattern)){
+            if (matcher.matches(toolName, pattern)) {
                 tags.addAll(rule.getTags());
             }
         }

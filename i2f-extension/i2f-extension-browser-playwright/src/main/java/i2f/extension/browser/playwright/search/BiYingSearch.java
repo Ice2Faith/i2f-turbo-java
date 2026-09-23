@@ -82,8 +82,8 @@ public class BiYingSearch {
                 enterElem.click();
             }
 
-            int nopCount=0;
-            while (nopCount<1000) {
+            int nopCount = 0;
+            while (nopCount < 1000) {
 
                 Map.Entry<SearchResult, SearchType> entry = urlQueue.pollFirst();
                 if (maxFetchCount.get() <= 0) {
@@ -98,7 +98,7 @@ public class BiYingSearch {
                     }
                     continue;
                 }
-                nopCount=0;
+                nopCount = 0;
 
                 try {
                     if (SearchType.SEARCH_FIRST != entry.getValue()) {
@@ -133,8 +133,8 @@ public class BiYingSearch {
                     }
 
                     if (SearchType.SEARCH_FIRST == entry.getValue()
-                    ||SearchType.SEARCH_PAGE == entry.getValue()
-                            ||SearchType.SEARCH_PAGE == entry.getValue()) {
+                            || SearchType.SEARCH_PAGE == entry.getValue()
+                            || SearchType.SEARCH_PAGE == entry.getValue()) {
                         for (int i = 0; i < 3; i++) {
                             try {
                                 driver.getPage().waitForSelector("#b_results .b_algo", new Page.WaitForSelectorOptions()
@@ -143,7 +143,7 @@ public class BiYingSearch {
                                 break;
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                if (i==2) {
+                                if (i == 2) {
                                     // 无法加载搜索主页，可能有人机验证，继续加载也无济于事，直接失败返回
                                     return context;
                                 }
@@ -214,8 +214,8 @@ public class BiYingSearch {
 
                             if (context != null) {
                                 SearchResult result = new SearchResult();
-                                if(!href.contains("://")){
-                                    href = (String) page.evaluate("() => new URL('"+href+"', window.location.href).href");
+                                if (!href.contains("://")) {
+                                    href = (String) page.evaluate("() => new URL('" + href + "', window.location.href).href");
                                 }
                                 result.setUrl(href);
                                 urlQueue.addLast(new AbstractMap.SimpleEntry<>(result, SearchType.SEARCH_PAGE));

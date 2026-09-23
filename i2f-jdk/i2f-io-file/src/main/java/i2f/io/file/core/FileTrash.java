@@ -8,7 +8,6 @@ import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Properties;
 import java.util.UUID;
 
 /**
@@ -52,17 +51,17 @@ public class FileTrash {
         dir = new File(dir, DIR_FORMATTER.format(now));
         // 同一天额按照时间大致有序
         String name = FILE_FORMATTER.format(now) + "_" + (UUID.randomUUID().toString().replace("-", ""));
-        dir=new File(dir,name);
+        dir = new File(dir, name);
         dir.mkdirs();
 
         File ret = new File(dir, file.getName());
         FileUtil.move(ret, file);
 
         File metaFile = new File(dir, META_FILE_NAME);
-        try(PrintWriter writer=new PrintWriter(new OutputStreamWriter(new FileOutputStream(metaFile), StandardCharsets.UTF_8))){
-            writer.println("name="+file.getName());
-            writer.println("originPath="+new File(file.getAbsolutePath()).getParentFile().getAbsolutePath());
-            writer.println("createTime="+CREATE_TIME_FORMATTER.format(now));
+        try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(new FileOutputStream(metaFile), StandardCharsets.UTF_8))) {
+            writer.println("name=" + file.getName());
+            writer.println("originPath=" + new File(file.getAbsolutePath()).getParentFile().getAbsolutePath());
+            writer.println("createTime=" + CREATE_TIME_FORMATTER.format(now));
         }
 
         return ret;

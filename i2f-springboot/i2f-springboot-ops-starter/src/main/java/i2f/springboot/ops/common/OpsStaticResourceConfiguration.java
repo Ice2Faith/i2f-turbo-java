@@ -21,18 +21,19 @@ import java.util.concurrent.TimeUnit;
 @NoArgsConstructor
 public class OpsStaticResourceConfiguration implements WebMvcConfigurer, EnvironmentAware {
     protected Environment environment;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         String baseUrl = environment.getProperty(OpsConsts.BASE_URL_PROPERTY, OpsConsts.DEFAULT_BASE_URL);
         // 依赖库7天缓存
-        registry.addResourceHandler(baseUrl+"/lib/**")
+        registry.addResourceHandler(baseUrl + "/lib/**")
                 .addResourceLocations("classpath:/assets/ops/lib/")
                 .setCacheControl(CacheControl.maxAge(7, TimeUnit.DAYS)
                         .cachePublic()
                         .mustRevalidate());
 
         // 其他文件1天缓存
-        registry.addResourceHandler(baseUrl+"/**")
+        registry.addResourceHandler(baseUrl + "/**")
                 .addResourceLocations("classpath:/assets/ops/")
                 .setCacheControl(CacheControl.maxAge(1, TimeUnit.DAYS)
                         .cachePublic()

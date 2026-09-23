@@ -10,18 +10,19 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @NoArgsConstructor
-public class CommandResult{
+public class CommandResult {
     protected int exitCode;
     protected boolean executeTimeout;
     protected String stdout;
-    public static CommandResult of(Process process,String stdout){
+
+    public static CommandResult of(Process process, String stdout) {
         CommandResult ret = new CommandResult();
         ret.setStdout(stdout);
-        try{
+        try {
             int code = process.exitValue();
             ret.setExitCode(code);
             ret.setExecuteTimeout(false);
-        }catch(Exception e){
+        } catch (Exception e) {
             ret.setExecuteTimeout(true);
             ret.setExitCode(Integer.MIN_VALUE);
         }

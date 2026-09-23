@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class OpenAiUserContentImageUrl implements OpenAiUserContent {
-    protected String type=OpenAiConsts.IMAGE_URL;
+    protected String type = OpenAiConsts.IMAGE_URL;
     protected OpenAiImageUrl image_url;
 
     public OpenAiUserContentImageUrl(OpenAiImageUrl image_url) {

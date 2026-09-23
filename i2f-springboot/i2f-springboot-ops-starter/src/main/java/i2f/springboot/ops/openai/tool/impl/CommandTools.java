@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/6/22 16:38
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value=CommandTools.TOOL_INTENT_VALUE,description = CommandTools.TOOL_INTENT_DESCRIPTION))
+@ToolIntent(items = @ToolIntentItem(value = CommandTools.TOOL_INTENT_VALUE, description = CommandTools.TOOL_INTENT_DESCRIPTION))
 @ConditionalOnExpression("${ai.tools.command.enable:false}")
 @Component
 @Data
@@ -32,8 +32,8 @@ import java.util.concurrent.TimeUnit;
 @AllArgsConstructor
 @Tools
 public class CommandTools {
-    public static final String TOOL_INTENT_VALUE="command";
-    public static final String TOOL_INTENT_DESCRIPTION="提供命令行执行、操作系统类型判断";
+    public static final String TOOL_INTENT_VALUE = "command";
+    public static final String TOOL_INTENT_DESCRIPTION = "提供命令行执行、操作系统类型判断";
 
     @Autowired(required = false)
     private LocalFileTools localFileTools;
@@ -68,9 +68,9 @@ public class CommandTools {
             }, description = "run an normal command line, implements by java process, some command maybe need in `cmd /c` or `sh -c` when not found command."
     )
     public CommandResult run_command_line(@ToolParam(value = "commandArray", description = "the command array, for example [\"ipconfig\",\"/all\"] or [\"cmd\",\"/c\",\"start\",\"calc\"]")
-                                   List<String> commandArray,
-                                   @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
-                                   String workdir) {
+                                          List<String> commandArray,
+                                          @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
+                                          String workdir) {
         File dir = null;
         if (workdir == null || workdir.isEmpty()) {
             workdir = ".";

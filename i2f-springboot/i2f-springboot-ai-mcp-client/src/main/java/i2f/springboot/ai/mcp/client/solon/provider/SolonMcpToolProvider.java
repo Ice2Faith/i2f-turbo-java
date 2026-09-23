@@ -79,7 +79,7 @@ public class SolonMcpToolProvider implements McpToolProvider {
                 jsonSchema.setStrict(true);
                 def.setJsonSchema(jsonSchema);
 
-                if(tagRules!=null){
+                if (tagRules != null) {
                     List<String> tags = AiTagRuleHelper.resolveTags(def.getName(), tagRules);
                     def.getTags().addAll(tags);
                 }

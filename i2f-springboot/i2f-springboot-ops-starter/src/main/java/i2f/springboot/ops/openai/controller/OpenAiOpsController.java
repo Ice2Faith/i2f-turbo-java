@@ -85,7 +85,7 @@ import java.util.stream.Collectors;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/open-ai")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/open-ai")
 public class OpenAiOpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -375,9 +375,9 @@ public class OpenAiOpsController implements IOpsProvider {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             List<AsyncTaskItem> asyncTasks = req.getAsyncTasks();
             for (int i = 0; i < asyncTasks.size(); i++) {
-                AsyncTaskItem asyncTaskItem=asyncTasks.get(i);
+                AsyncTaskItem asyncTaskItem = asyncTasks.get(i);
                 AsyncTaskItem ret = asyncTaskDispatcher.query(asyncTaskItem, req.getMeta());
-                asyncTasks.set(i,ret);
+                asyncTasks.set(i, ret);
             }
             return transfer.success(asyncTasks);
         } catch (Throwable e) {
@@ -488,7 +488,7 @@ public class OpenAiOpsController implements IOpsProvider {
         AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
         AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
         CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
-        CopyOnWriteArrayList<AsyncTaskMessage>  asyncTaskMessages=new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<AsyncTaskMessage> asyncTaskMessages = new CopyOnWriteArrayList<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
@@ -805,18 +805,18 @@ public class OpenAiOpsController implements IOpsProvider {
                                                         }
                                                     }
 
-                                                    boolean isWebjsResolved=false;
+                                                    boolean isWebjsResolved = false;
                                                     List<OpenAiWebjsToolResult> webjsToolResults = req.getWebjsToolResults();
-                                                    if(webjsToolResults!=null && !webjsToolResults.isEmpty()) {
+                                                    if (webjsToolResults != null && !webjsToolResults.isEmpty()) {
                                                         for (OpenAiWebjsToolResult result : webjsToolResults) {
-                                                            if(Objects.equals(id,result.getTool_call_id())){
-                                                                callRet=result.getContent();
-                                                                isWebjsResolved=true;
+                                                            if (Objects.equals(id, result.getTool_call_id())) {
+                                                                callRet = result.getContent();
+                                                                isWebjsResolved = true;
                                                             }
                                                         }
                                                     }
 
-                                                    if(!isWebjsResolved) {
+                                                    if (!isWebjsResolved) {
                                                         if (!toolManager.support(toolCallRequest)) {
                                                             throw new IllegalArgumentException("cannot found tool definition: " + toolCallRequest.getName());
                                                         }
@@ -933,15 +933,15 @@ public class OpenAiOpsController implements IOpsProvider {
                         for (TmpFileTools.FileAttachMessage item : toolFileMessages) {
                             List<TmpFileTools.UploadTmpFileMetadata> files = item.getFiles();
                             if (files != null) {
-                                if(item.isSendToLlm()) {
+                                if (item.isSendToLlm()) {
                                     sendToLLmAttachFiles.addAll(files);
-                                }else{
+                                } else {
                                     sendToUserAttachFiles.addAll(files);
                                 }
                             }
                         }
 
-                        if(!sendToUserAttachFiles.isEmpty()){
+                        if (!sendToUserAttachFiles.isEmpty()) {
                             OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
                                     .set(u -> u::setType, OpsOpenAiConsts.ECHO_ATTACH_FILES)
                                     .set(u -> u::setEcho_attach_files, new OpenAiSystemMessage("tool response files"))
@@ -961,7 +961,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             emitter.send(respJson);
                         }
 
-                        if(!sendToLLmAttachFiles.isEmpty()) {
+                        if (!sendToLLmAttachFiles.isEmpty()) {
                             OpenAiMessageVo toolUserMsg = new OpenAiMessageVo().toMutator()
                                     .set(u -> u::setType, OpenAiConsts.USER)
                                     .set(u -> u::setUser, new OpenAiUserMessage(TOOL_RETURNS_FILE_CONTENT))
@@ -986,11 +986,11 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     }
 
-                    if(!asyncTaskMessages.isEmpty()){
-                        List<AsyncTaskItem> asyncTasks=new ArrayList<>();
+                    if (!asyncTaskMessages.isEmpty()) {
+                        List<AsyncTaskItem> asyncTasks = new ArrayList<>();
                         for (AsyncTaskMessage msg : asyncTaskMessages) {
                             List<AsyncTaskItem> list = msg.getList();
-                            if(list!=null){
+                            if (list != null) {
                                 asyncTasks.addAll(list);
                             }
                         }
@@ -1057,13 +1057,13 @@ public class OpenAiOpsController implements IOpsProvider {
                             if (cmpUserMsgContent != null) {
                                 cmpUserMsgContent = cmpUserMsgContent.trim();
                             }
-                            boolean hasAssitantMsg=false;
+                            boolean hasAssitantMsg = false;
                             for (OpenAiMessage msg : completion.getMessages()) {
-                                if(msg instanceof OpenAiAssistantMessage){
-                                    hasAssitantMsg=true;
+                                if (msg instanceof OpenAiAssistantMessage) {
+                                    hasAssitantMsg = true;
                                 }
                             }
-                            boolean needIntentRecognize=hasAssitantMsg?(random.nextDouble()<0.3):true;
+                            boolean needIntentRecognize = hasAssitantMsg ? (random.nextDouble() < 0.3) : true;
 
                             if (cmpUserMsgContent != null && !cmpUserMsgContent.isEmpty()
                                     && !TOOL_RETURNS_FILE_CONTENT.equals(cmpUserMsgContent)

@@ -18,12 +18,10 @@ import java.util.stream.Collectors;
 /**
  * @author Ice2Faith
  * @date 2026/9/21 11:10
- * @desc
- *
- * 建议使用 caffeine 代替此实现
+ * @desc 建议使用 caffeine 代替此实现
  */
 @Data
-public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>,AutoCloseable {
+public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>, AutoCloseable {
     protected static final Object NULL_PLACEHOLDER = new Object();
 
     @Data
@@ -41,19 +39,19 @@ public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>,AutoC
 
     protected final Cache<Object, CacheEntry<V>> cache;
 
-    protected static final AtomicInteger POOL_GROUP_COUNTER=new AtomicInteger(0);
-    protected final ScheduledExecutorService cleanPool= Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
+    protected static final AtomicInteger POOL_GROUP_COUNTER = new AtomicInteger(0);
+    protected final ScheduledExecutorService cleanPool = Executors.newSingleThreadScheduledExecutor(new ThreadFactory() {
         @Override
         public Thread newThread(Runnable r) {
             Thread ret = new Thread(r);
-            ret.setName("guava-cache-cleanup-"+POOL_GROUP_COUNTER.incrementAndGet());
+            ret.setName("guava-cache-cleanup-" + POOL_GROUP_COUNTER.incrementAndGet());
             ret.setDaemon(true);
             return ret;
         }
     });
 
     {
-        cleanPool.scheduleAtFixedRate(this::cleanerTask,30,30,TimeUnit.SECONDS);
+        cleanPool.scheduleAtFixedRate(this::cleanerTask, 30, 30, TimeUnit.SECONDS);
     }
 
     public GuavaExpireCache(int capital) {
@@ -113,7 +111,7 @@ public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>,AutoC
         return innerGetIfPresent(wrap(key));
     }
 
-    protected CacheEntry<V> innerGetIfPresent(Object wrappedKey){
+    protected CacheEntry<V> innerGetIfPresent(Object wrappedKey) {
         return cache.asMap().compute(wrappedKey, (k, entry) -> {
             if (entry == null) {
                 return null;
@@ -162,15 +160,15 @@ public class GuavaExpireCache<K, V> implements IExpireContainerCache<K, V>,AutoC
         cache.invalidate(wrap(key));
     }
 
-    protected void cleanerTask(){
-        try{
+    protected void cleanerTask() {
+        try {
             cleanUp();
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public void cleanUp(){
+    public void cleanUp() {
         cache.cleanUp();
         Set<Object> keys = new HashSet<>(cache.asMap().keySet());
         for (Object key : keys) {

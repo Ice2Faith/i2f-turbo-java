@@ -1,10 +1,10 @@
 package i2f.design.pattern.structural.decorator;
 
 import i2f.design.pattern.structural.decorator.coffee.Coffee;
-import i2f.design.pattern.structural.decorator.coffee.impl.EspressoCoffee;
+import i2f.design.pattern.structural.decorator.coffee.decorator.impl.CreamDecorator;
 import i2f.design.pattern.structural.decorator.coffee.decorator.impl.MilkDecorator;
 import i2f.design.pattern.structural.decorator.coffee.decorator.impl.SugarDecorator;
-import i2f.design.pattern.structural.decorator.coffee.decorator.impl.CreamDecorator;
+import i2f.design.pattern.structural.decorator.coffee.impl.EspressoCoffee;
 
 /**
  * 装饰器模式 —— 调用演示

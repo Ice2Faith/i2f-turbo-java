@@ -237,17 +237,17 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             bodySegment = "";
         }
 
-        Set<String> additionalImports=new LinkedHashSet<>();
-        memberSegment=RegexUtil.regexFindAndReplace(memberSegment,"(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;",s->{
+        Set<String> additionalImports = new LinkedHashSet<>();
+        memberSegment = RegexUtil.regexFindAndReplace(memberSegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
             additionalImports.add(s);
-            return "/*"+s+"*/";
+            return "/*" + s + "*/";
         });
-        bodySegment=RegexUtil.regexFindAndReplace(bodySegment,"(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;",s->{
+        bodySegment = RegexUtil.regexFindAndReplace(bodySegment, "(\\s|^|;)import\\s+[a-zA-Z0-9_\\$\\.]+(\\.\\*)?;", s -> {
             additionalImports.add(s);
             return "";
         });
-        if(!additionalImports.isEmpty()){
-            importSegment+="\n"+String.join("\n",additionalImports);
+        if (!additionalImports.isEmpty()) {
+            importSegment += "\n" + String.join("\n", additionalImports);
         }
 
 

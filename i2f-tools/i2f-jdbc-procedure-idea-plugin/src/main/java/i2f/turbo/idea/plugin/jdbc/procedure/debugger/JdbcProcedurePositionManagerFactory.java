@@ -295,7 +295,7 @@ public class JdbcProcedurePositionManagerFactory extends PositionManagerFactory 
 
                     sb.append("isFireBreakpoint(")
                             .append("\"").append(escapeJava(fileName)).append("\"")
-                                    .append(",");
+                            .append(",");
 
                     boolean isFirst = true;
                     for (Integer line : lines) {
@@ -305,7 +305,7 @@ public class JdbcProcedurePositionManagerFactory extends PositionManagerFactory 
                         sb.append(line);
                         isFirst = false;
                     }
-;
+                    ;
                     sb.append(")");
                 }
 

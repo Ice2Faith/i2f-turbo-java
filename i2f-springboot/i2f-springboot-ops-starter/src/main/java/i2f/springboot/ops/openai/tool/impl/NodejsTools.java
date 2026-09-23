@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2026/9/10 19:57
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="nodejs",description = "提供执行nodejs脚本的能力"))
+@ToolIntent(items = @ToolIntentItem(value = "nodejs", description = "提供执行nodejs脚本的能力"))
 @ConditionalOnExpression("${ai.tools.nodejs.enable:false}")
 @Conditional(NodejsTools.NodejsInstalledCondition.class)
 @Data
@@ -50,16 +50,17 @@ public class NodejsTools {
 
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            return getNodejsCommand()!=null;
+            return getNodejsCommand() != null;
         }
     }
 
     private static AtomicReference<AtomicReference<String>> cacheNodejsCommand = new AtomicReference<>();
     private static ReentrantLock lockNodejsCommand = new ReentrantLock();
-    public static String getNodejsCommand(){
+
+    public static String getNodejsCommand() {
         AtomicReference<String> optional = cacheNodejsCommand.get();
         // 这里借助atomic来存储null无值的情况
-        if(optional!=null){
+        if (optional != null) {
             return optional.get();
         }
         lockNodejsCommand.lock();
@@ -80,7 +81,7 @@ public class NodejsTools {
             }
             cacheNodejsCommand.set(new AtomicReference<>(ret));
             return ret;
-        }finally {
+        } finally {
             lockNodejsCommand.unlock();
         }
     }
@@ -112,9 +113,9 @@ public class NodejsTools {
             }, description = "run an nodejs script, command will run as a temp js script."
     )
     public CommandResult run_nodejs_script(@ToolParam(value = "script", description = "the nodejs full script content, for example \"print(1)\"")
-                                   String script,
-                                   @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
-                                   String workdir) {
+                                           String script,
+                                           @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
+                                           String workdir) {
         File dir = null;
         if (workdir == null || workdir.isEmpty()) {
             workdir = ".";
@@ -129,9 +130,9 @@ public class NodejsTools {
     }
 
     public static CommandResult execNodejsScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
-        String fileName= "nodejs-"+ UUID.randomUUID().toString().replace("-", "").toLowerCase()+".js";
-        File scriptFile=new File(fileName);
-        String nodejs= getNodejsCommand();
+        String fileName = "nodejs-" + UUID.randomUUID().toString().replace("-", "").toLowerCase() + ".js";
+        File scriptFile = new File(fileName);
+        String nodejs = getNodejsCommand();
         try {
             if (dir != null) {
                 if (!dir.exists()) {
@@ -150,8 +151,8 @@ public class NodejsTools {
             cmdList.add(nodejs);
             cmdList.add(fileName);
             return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
-        }finally {
-            if(scriptFile.exists()){
+        } finally {
+            if (scriptFile.exists()) {
                 scriptFile.delete();
             }
         }

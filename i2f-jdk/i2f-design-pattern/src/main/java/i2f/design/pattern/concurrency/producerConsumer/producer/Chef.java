@@ -48,9 +48,9 @@ public class Chef implements Runnable {
     /**
      * 构造厨师。
      *
-     * @param name           厨师名称
-     * @param buffer         共享缓冲区
-     * @param dishesToCook   要生产的菜品列表
+     * @param name         厨师名称
+     * @param buffer       共享缓冲区
+     * @param dishesToCook 要生产的菜品列表
      */
     public Chef(String name, FixedSizeBuffer buffer, Dish[] dishesToCook) {
         this.name = name;

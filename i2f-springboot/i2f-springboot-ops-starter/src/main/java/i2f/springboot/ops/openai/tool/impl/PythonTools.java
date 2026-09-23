@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2026/9/10 19:57
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="python",description = "提供执行python脚本的能力"))
+@ToolIntent(items = @ToolIntentItem(value = "python", description = "提供执行python脚本的能力"))
 @ConditionalOnExpression("${ai.tools.python.enable:false}")
 @Conditional(PythonTools.PythonInstalledCondition.class)
 @Data
@@ -48,16 +50,17 @@ public class PythonTools {
 
         @Override
         public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
-            return getPythonCommand()!=null;
+            return getPythonCommand() != null;
         }
     }
 
     private static AtomicReference<AtomicReference<String>> cachePythonCommand = new AtomicReference<>();
     private static ReentrantLock lockPythonCommand = new ReentrantLock();
-    public static String getPythonCommand(){
+
+    public static String getPythonCommand() {
         AtomicReference<String> optional = cachePythonCommand.get();
         // 这里借助atomic来存储null无值的情况
-        if(optional!=null){
+        if (optional != null) {
             return optional.get();
         }
         lockPythonCommand.lock();
@@ -78,7 +81,7 @@ public class PythonTools {
             }
             cachePythonCommand.set(new AtomicReference<>(ret));
             return ret;
-        }finally {
+        } finally {
             lockPythonCommand.unlock();
         }
     }
@@ -110,9 +113,9 @@ public class PythonTools {
             }, description = "run an python script, command will run as a temp py script."
     )
     public CommandResult run_python_script(@ToolParam(value = "script", description = "the python full script content, for example \"print(1)\"")
-                                   String script,
-                                   @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
-                                   String workdir) {
+                                           String script,
+                                           @ToolParam(value = "workdir", description = "command workdir, cloud be null, means default user dir, for example 'user' or '/home' ")
+                                           String workdir) {
         File dir = null;
         if (workdir == null || workdir.isEmpty()) {
             workdir = ".";
@@ -127,9 +130,9 @@ public class PythonTools {
     }
 
     public static CommandResult execPythonScript(boolean requireOutput, long waitForMillsSeconds, String command, String[] envp, File dir, String charset) {
-        String fileName= "py-"+ UUID.randomUUID().toString().replace("-", "").toLowerCase()+".py";
-        File scriptFile=new File(fileName);
-        String python=getPythonCommand();
+        String fileName = "py-" + UUID.randomUUID().toString().replace("-", "").toLowerCase() + ".py";
+        File scriptFile = new File(fileName);
+        String python = getPythonCommand();
         try {
             if (dir != null) {
                 if (!dir.exists()) {
@@ -149,8 +152,8 @@ public class PythonTools {
             cmdList.add(python);
             cmdList.add(fileName);
             return OsUtil.execCmdForResult(requireOutput, waitForMillsSeconds, cmdList.toArray(new String[0]), envp, dir, charset);
-        }finally {
-            if(scriptFile.exists()){
+        } finally {
+            if (scriptFile.exists()) {
                 scriptFile.delete();
             }
         }

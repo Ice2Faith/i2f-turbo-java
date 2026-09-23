@@ -23,7 +23,6 @@ public abstract class AbstractAppMcpToolProvider implements McpToolProvider {
     public abstract IProxyInvocationHandler getInvocationHandler();
 
 
-
     @Override
     public boolean support(ToolBaseCallRequest request) {
         List<ToolDefinition> tools = getTools();

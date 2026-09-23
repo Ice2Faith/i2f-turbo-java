@@ -1,6 +1,5 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
 import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
@@ -19,7 +18,6 @@ import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
@@ -68,7 +66,7 @@ public class AgentTools {
         return msg.getContent();
     }
 
-    @ToolIntent(items = @ToolIntentItem(value="sql_safe",description = "SQL语句安全性校验"))
+    @ToolIntent(items = @ToolIntentItem(value = "sql_safe", description = "SQL语句安全性校验"))
     @Tool(
             tags = {
                     AiTags.READONLY_VALUE,
@@ -133,7 +131,7 @@ public class AgentTools {
 
     @Data
     @NoArgsConstructor
-    public static class IntentResult{
+    public static class IntentResult {
         protected String prompt;
         protected String rawResult;
         protected Set<String> result;
@@ -164,16 +162,16 @@ public class AgentTools {
                 "\n" +
                 "## Labels: 标签列表\n\n";
 
-        Map<String,IntentItem> intentMap=new LinkedHashMap<>();
+        Map<String, IntentItem> intentMap = new LinkedHashMap<>();
 
         // 去重
         for (IntentItem intent : intents) {
-            intentMap.put(intent.getLabel(),intent);
+            intentMap.put(intent.getLabel(), intent);
         }
 
         // 去重后组装
-        for (Map.Entry<String,IntentItem> entry : intentMap.entrySet()) {
-            IntentItem intent=entry.getValue();
+        for (Map.Entry<String, IntentItem> entry : intentMap.entrySet()) {
+            IntentItem intent = entry.getValue();
 
             String description = intent.getDescription();
             if (description != null && !description.isEmpty()) {
@@ -203,13 +201,13 @@ public class AgentTools {
                 continue;
             }
             // 原始输入没有的，直接过滤
-            if(!intentMap.containsKey(item)){
+            if (!intentMap.containsKey(item)) {
                 continue;
             }
             result.add(item);
         }
 
-        IntentResult ret=new IntentResult();
+        IntentResult ret = new IntentResult();
         ret.setPrompt(system);
         ret.setRawResult(resp);
         ret.setResult(result);

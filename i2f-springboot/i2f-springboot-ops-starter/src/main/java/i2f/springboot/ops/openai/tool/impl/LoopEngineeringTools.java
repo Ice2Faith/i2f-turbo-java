@@ -11,6 +11,7 @@ public class LoopEngineeringTools {
     public static Set<String> toolNames() {
         return SessionRecordTools.toolNames();
     }
+
     public static String convertSystemPrompt() {
         /*language=markdown*/
         String ret = "# 工程化用户需求解决方案指南\n" +

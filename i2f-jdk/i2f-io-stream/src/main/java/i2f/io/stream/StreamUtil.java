@@ -16,6 +16,7 @@ import java.util.function.Function;
  */
 public class StreamUtil {
     public static final int BUFF_SIZE = 1024 * 1024;
+
     public static void broadcastStream(InputStream is, boolean closeIs, boolean closeOs, OutputStream... oss) throws IOException {
         byte[] buf = new byte[BUFF_SIZE];
         int len = 0;

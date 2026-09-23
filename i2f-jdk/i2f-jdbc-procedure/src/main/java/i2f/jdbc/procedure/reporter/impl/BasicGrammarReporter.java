@@ -102,11 +102,11 @@ public class BasicGrammarReporter implements IGrammarReporter {
 
     @Override
     public void reportGrammar(XmlNode node,
-                                     Map<String, ProcedureMeta> metaMap,
-                                     JdbcProcedureExecutor executor,
-                                     Consumer<String> warnPoster,
-                                     AtomicInteger reportCount,
-                                     AtomicInteger nodeCount) {
+                              Map<String, ProcedureMeta> metaMap,
+                              JdbcProcedureExecutor executor,
+                              Consumer<String> warnPoster,
+                              AtomicInteger reportCount,
+                              AtomicInteger nodeCount) {
         if (node == null) {
             return;
         }

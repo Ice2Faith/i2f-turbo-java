@@ -7,5 +7,6 @@ package i2f.ai.std.tool.intent;
  */
 public interface IToolIntent {
     String label();
+
     String description();
 }

@@ -46,7 +46,7 @@ import java.util.*;
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping(OpsConsts.SPEL_BASE_URL+"/aws-s3")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/aws-s3")
 public class AwsS3OpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

@@ -43,7 +43,7 @@ public class OpsHomeMenuDto {
     }
 
     public OpsHomeMenuDto group(OpsMenuGroup group) {
-        this.group = group.order()+"/"+group.text();
+        this.group = group.order() + "/" + group.text();
         return this;
     }
 

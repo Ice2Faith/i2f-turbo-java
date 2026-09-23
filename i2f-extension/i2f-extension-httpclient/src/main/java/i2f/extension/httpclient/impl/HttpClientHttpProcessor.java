@@ -43,7 +43,7 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<HttpEntityEnclosingRequestBase> handler = new HttpClientFormRequestBodyHandler();
-        if(request.getHeader()==null){
+        if (request.getHeader() == null) {
             request.setHeader(HttpHeaders.create());
         }
 

@@ -33,12 +33,12 @@ public class AsyncTaskDispatcher implements ApplicationContextAware {
         for (Map.Entry<String, AsyncTaskResolver> entry : resolvers.entrySet()) {
             AsyncTaskResolver resolver = entry.getValue();
             try {
-                if (resolver.support(item,meta)) {
-                    return resolver.resolve(item,meta);
+                if (resolver.support(item, meta)) {
+                    return resolver.resolve(item, meta);
                 }
             } catch (Throwable e) {
                 // ignore
-                log.warn("query async task status failure: "+e.getMessage(),e);
+                log.warn("query async task status failure: " + e.getMessage(), e);
             }
         }
         return item;

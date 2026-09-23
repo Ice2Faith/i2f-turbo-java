@@ -1,9 +1,9 @@
 package i2f.design.pattern.creational.abstractFactory.factory.impl;
 
 import i2f.design.pattern.creational.abstractFactory.chair.Chair;
+import i2f.design.pattern.creational.abstractFactory.chair.impl.ClassicChair;
 import i2f.design.pattern.creational.abstractFactory.factory.FurnitureFactory;
 import i2f.design.pattern.creational.abstractFactory.table.Table;
-import i2f.design.pattern.creational.abstractFactory.chair.impl.ClassicChair;
 import i2f.design.pattern.creational.abstractFactory.table.impl.ClassicTable;
 
 /**

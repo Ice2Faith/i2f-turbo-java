@@ -7,6 +7,6 @@ package i2f.springboot.ops.common;
  */
 public interface OpsConsts {
     String BASE_URL_PROPERTY = "i2f.springboot.ops.base-url";
-    String DEFAULT_BASE_URL="/ops";
-    String SPEL_BASE_URL="${"+BASE_URL_PROPERTY+":"+DEFAULT_BASE_URL+"}";
+    String DEFAULT_BASE_URL = "/ops";
+    String SPEL_BASE_URL = "${" + BASE_URL_PROPERTY + ":" + DEFAULT_BASE_URL + "}";
 }

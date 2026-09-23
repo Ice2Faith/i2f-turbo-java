@@ -505,7 +505,7 @@ public class CompletionHelper {
             XmlTag rootTag = null;
             try {
                 VirtualFile file = (VirtualFile) meta.getTarget();
-                if(file!=null && file.isValid()) {
+                if (file != null && file.isValid()) {
                     PsiFile psiFile = PsiManager.getInstance(project).findFile(file);
                     if (psiFile instanceof XmlFile) {
                         XmlFile xmlFile = (XmlFile) psiFile;

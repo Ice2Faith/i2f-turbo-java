@@ -19,7 +19,7 @@ import java.util.Base64;
  * @date 2026/6/2 14:12
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="codec",description = "提供字符串的编解码，base64/url"))
+@ToolIntent(items = @ToolIntentItem(value = "codec", description = "提供字符串的编解码，base64/url"))
 @ConditionalOnExpression("${ai.tools.codec.enable:true}")
 @Component
 @Tools(tags = {

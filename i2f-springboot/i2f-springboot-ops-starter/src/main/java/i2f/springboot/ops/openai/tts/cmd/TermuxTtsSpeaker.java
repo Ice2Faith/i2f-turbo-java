@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -102,15 +101,15 @@ public class TermuxTtsSpeaker implements CommandTtsSpeaker {
     @Override
     public void speak(String content) throws Throwable {
         // 消除上次命令残留
-        new ProcessBuilder("sh","-c",
+        new ProcessBuilder("sh", "-c",
                 "ps -ef | grep -v grep | grep termux-tts-speak | awk '{print $2}' | xargs kill -9"
         ).start();
-        new ProcessBuilder("sh","-c",
+        new ProcessBuilder("sh", "-c",
                 "ps -ef | grep -v grep | grep termux-api | grep TextToSpeech | awk '{print $2}' | xargs kill -9"
         ).start();
 
         // 强制终止正在运行的任务
-        new ProcessBuilder("sh","-c",
+        new ProcessBuilder("sh", "-c",
                 "ps -ef | grep -v grep | grep com.termux.api | awk '{print $2}' | xargs kill -9"
         ).start();
 

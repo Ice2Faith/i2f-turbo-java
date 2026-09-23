@@ -14,8 +14,8 @@
  *
  * @author Ice2Faith
  * @date 2026/5/21 10:30
- * @see BookShelf
- * @see BookIterator
+ * @see i2f.design.pattern.behavioral.iterator.book.BookShelf
+ * @see i2f.design.pattern.behavioral.iterator.book.BookIterator
  */
 package i2f.design.pattern.behavioral.iterator;
 

@@ -1,6 +1,7 @@
 package i2f.springboot.ai.mcp.client.stream.provider;
 
 import i2f.ai.std.mcp.McpToolProvider;
+import i2f.ai.std.tags.AiTagRule;
 import i2f.ai.std.tags.AiTagRuleHelper;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
@@ -22,7 +23,6 @@ import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcInitialResult;
 import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolCallResult;
 import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolListItem;
 import i2f.springboot.ai.mcp.client.stream.data.result.JsonRpcToolListResult;
-import i2f.ai.std.tags.AiTagRule;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -92,7 +92,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
             request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
-            if(headers!=null){
+            if (headers != null) {
                 request.getHeaders().addAll(headers);
             }
             request.setBody(wrapJsonRpcHttpBody("tools/list", null));
@@ -136,7 +136,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 jsonSchema.setParameters(item.getInputSchema());
                 def.setJsonSchema(jsonSchema);
 
-                if(tagRules!=null){
+                if (tagRules != null) {
                     List<String> tags = AiTagRuleHelper.resolveTags(def.getName(), tagRules);
                     def.getTags().addAll(tags);
                 }
@@ -187,7 +187,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         request.setUrl(getEndpointUrl());
         request.setMethod(HttpMethodConstants.POST);
         request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
-        if(headers!=null){
+        if (headers != null) {
             request.getHeaders().addAll(headers);
         }
         request.setBody(wrapJsonRpcHttpBody("tools/call", params));
@@ -258,7 +258,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
             request.setHeaders(HttpHeaders.create());
-            if(headers!=null){
+            if (headers != null) {
                 request.getHeaders().addAll(headers);
             }
             request.setBody(wrapJsonRpcHttpBody("initialize", params));
@@ -307,7 +307,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         request.setMethod(HttpMethodConstants.DELETE);
         request.setBody(null);
         request.setHeaders(HttpHeaders.create().add(HEADER_MCP_SESSION_ID, mcpSessionId));
-        if(headers!=null){
+        if (headers != null) {
             request.getHeaders().addAll(headers);
         }
         RestHttpResponse<String> rest = restClient.rest(request, String.class);

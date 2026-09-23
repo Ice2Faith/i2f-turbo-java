@@ -24,7 +24,7 @@ import java.util.*;
  * @date 2026/3/25 15:09
  * @desc
  */
-@ToolIntent(items = @ToolIntentItem(value="memory",description = "基于向量检索的长期记忆功能"))
+@ToolIntent(items = @ToolIntentItem(value = "memory", description = "基于向量检索的长期记忆功能"))
 @Data
 @NoArgsConstructor
 @Tools(tags = {

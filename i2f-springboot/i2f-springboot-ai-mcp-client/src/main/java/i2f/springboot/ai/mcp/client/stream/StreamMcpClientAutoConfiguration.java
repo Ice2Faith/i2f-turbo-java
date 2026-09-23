@@ -1,7 +1,6 @@
 package i2f.springboot.ai.mcp.client.stream;
 
 import i2f.ai.std.mcp.McpToolProvider;
-import i2f.springboot.ai.mcp.client.solon.properties.SolonMcpClientProperties;
 import i2f.springboot.ai.mcp.client.stream.components.StreamMcpClientMcpToolProviderFactoryBean;
 import i2f.springboot.ai.mcp.client.stream.properties.StreamMcpClientProperties;
 import lombok.Data;
