@@ -14,6 +14,14 @@ import java.util.jar.JarFile;
 public class MavenRepoVersionScanner {
 
     public static void main(String[] args) throws Exception {
+        if (args.length == 1) {
+            if ("--help".equals(args[0])
+                    || "-h".equals(args[0])) {
+                System.out.println("java -jar this.jar [maven-repo-path] [save-file-name]");
+                System.out.println("    such: java -jar this.jar D:\\maven\\mvn output.txt");
+                return;
+            }
+        }
         String repoPath = args.length > 0 ? args[0]
                 : System.getProperty("user.home") + "/.m2/repository";
 
