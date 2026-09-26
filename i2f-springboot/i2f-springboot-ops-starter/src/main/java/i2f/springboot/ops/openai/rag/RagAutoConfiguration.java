@@ -1,6 +1,6 @@
 package i2f.springboot.ops.openai.rag;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.rag.HttpOpenAiRagEmbeddingModel;
 import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;

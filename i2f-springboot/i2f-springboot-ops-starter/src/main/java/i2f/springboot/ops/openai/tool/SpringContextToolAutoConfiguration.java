@@ -1,6 +1,6 @@
 package i2f.springboot.ops.openai.tool;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
 import i2f.ai.std.mcp.gateway.impl.ContextMcpToolGatewayManager;
 import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
