@@ -1,29 +1,29 @@
 {
   "groups": [
     {
-      "name": "i2f.springboot.ai.mcp.server.netty",
-      "type": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.server.simple.netty",
+      "type": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration"
     },
     {
       "name": "i2f.springboot.ai.proxy",
-      "type": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration"
+      "type": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration"
     }
   ],
   "properties": [
     {
-      "name": "i2f.springboot.ai.mcp.server.netty.enable",
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.enable",
       "type": "java.lang.Boolean",
       "description": "enable ai mcp server on netty.",
-      "sourceType": "i2f.springboot.ai.mcp.server.netty.SpringAiNettyMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
       "defaultValue": false
     },
     {
       "name": "i2f.springboot.ai.model.dashscope.enable",
       "type": "java.lang.Boolean",
       "description": "enable ai mcp server on springweb.",
-      "sourceType": "i2f.springboot.ai.mcp.server.springweb.SpringAiSpringWebMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
       "defaultValue": true
     }
   ],

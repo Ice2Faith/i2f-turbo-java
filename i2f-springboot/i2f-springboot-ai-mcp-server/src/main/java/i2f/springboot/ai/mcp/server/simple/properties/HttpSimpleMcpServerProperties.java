@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.properties;
+package i2f.springboot.ai.mcp.server.simple.properties;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.server.data.HttpSimpleMcpAppItem;
@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.server.simple-server")
+@ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.server.simple")
 public class HttpSimpleMcpServerProperties {
     protected long expireWindowMinutes = 30;
     protected String hmacName = HttpSimpleMcpConstants.DEFAULT_HMAC_NAME;

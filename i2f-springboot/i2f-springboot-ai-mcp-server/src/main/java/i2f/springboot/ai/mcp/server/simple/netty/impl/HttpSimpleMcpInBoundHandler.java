@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.netty.impl;
+package i2f.springboot.ai.mcp.server.simple.netty.impl;
 
 import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.data.McpCallPayloadDto;

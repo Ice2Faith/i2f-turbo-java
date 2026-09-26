@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.netty.properties;
+package i2f.springboot.ai.mcp.server.simple.netty.properties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.server.netty")
+@ConfigurationProperties(prefix = "i2f.springboot.ai.mcp.server.simple.netty")
 public class NettySimpleMcpServerProperties {
     protected int port = 23745;
     private int bossThread = 4;

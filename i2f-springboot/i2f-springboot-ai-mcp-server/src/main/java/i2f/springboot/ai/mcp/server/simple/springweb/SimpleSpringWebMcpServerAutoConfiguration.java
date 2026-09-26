@@ -1,10 +1,10 @@
-package i2f.springboot.ai.mcp.server.springweb;
+package i2f.springboot.ai.mcp.server.simple.springweb;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
-import i2f.springboot.ai.mcp.server.SpringAiMcpServerAutoConfiguration;
-import i2f.springboot.ai.mcp.server.springweb.impl.SpringHttpSimpleMcpController;
+import i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration;
+import i2f.springboot.ai.mcp.server.simple.springweb.impl.SpringHttpSimpleMcpController;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,13 +21,13 @@ import org.springframework.web.bind.annotation.RestController;
  * @date 2026/7/17 21:01
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.springweb.enable:true}")
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.springweb.enable:true}")
 @ConditionalOnClass(RestController.class)
-@AutoConfigureAfter(SpringAiMcpServerAutoConfiguration.class)
+@AutoConfigureAfter(SimpleMcpServerAutoConfiguration.class)
 @Configuration
 @Slf4j
 @Data
-public class SpringAiSpringWebMcpServerAutoConfiguration {
+public class SimpleSpringWebMcpServerAutoConfiguration {
 
     @ConditionalOnMissingBean(SpringHttpSimpleMcpController.class)
     @Bean

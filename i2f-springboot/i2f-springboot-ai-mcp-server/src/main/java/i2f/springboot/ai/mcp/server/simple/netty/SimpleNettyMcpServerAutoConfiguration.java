@@ -1,12 +1,12 @@
-package i2f.springboot.ai.mcp.server.netty;
+package i2f.springboot.ai.mcp.server.simple.netty;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
-import i2f.springboot.ai.mcp.server.SpringAiMcpServerAutoConfiguration;
-import i2f.springboot.ai.mcp.server.netty.impl.HttpSimpleMcpInBoundHandler;
-import i2f.springboot.ai.mcp.server.netty.impl.NettyHttpSimpleMcpServer;
-import i2f.springboot.ai.mcp.server.netty.properties.NettySimpleMcpServerProperties;
+import i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration;
+import i2f.springboot.ai.mcp.server.simple.netty.impl.HttpSimpleMcpInBoundHandler;
+import i2f.springboot.ai.mcp.server.simple.netty.impl.NettyHttpSimpleMcpServer;
+import i2f.springboot.ai.mcp.server.simple.netty.properties.NettySimpleMcpServerProperties;
 import io.netty.bootstrap.ServerBootstrap;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -24,21 +24,21 @@ import org.springframework.context.annotation.Configuration;
  * @date 2026/7/17 21:01
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.netty.enable:false}")
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.netty.enable:false}")
 @ConditionalOnClass(ServerBootstrap.class)
-@AutoConfigureAfter(SpringAiMcpServerAutoConfiguration.class)
+@AutoConfigureAfter(SimpleMcpServerAutoConfiguration.class)
 @EnableConfigurationProperties({
         NettySimpleMcpServerProperties.class
 })
 @Configuration
 @Slf4j
 @Data
-public class SpringAiNettyMcpServerAutoConfiguration {
+public class SimpleNettyMcpServerAutoConfiguration {
 
     @Autowired
     protected NettySimpleMcpServerProperties nettySimpleMcpServerProperties;
 
-    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.netty.handler.enable:true}")
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.netty.handler.enable:true}")
     @ConditionalOnMissingBean(HttpSimpleMcpInBoundHandler.class)
     @Bean
     public HttpSimpleMcpInBoundHandler httpSimpleMcpInBoundHandler(@Autowired HttpSimpleMcpServer httpSimpleMcpServer) {
@@ -48,7 +48,7 @@ public class SpringAiNettyMcpServerAutoConfiguration {
                 .done();
     }
 
-    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.netty.server.enable:true}")
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.netty.server.enable:true}")
     @ConditionalOnMissingBean(NettyHttpSimpleMcpServer.class)
     @Bean
     public NettyHttpSimpleMcpServer nettyHttpSimpleMcpServer(@Autowired HttpSimpleMcpInBoundHandler httpSimpleMcpInBoundHandler) {

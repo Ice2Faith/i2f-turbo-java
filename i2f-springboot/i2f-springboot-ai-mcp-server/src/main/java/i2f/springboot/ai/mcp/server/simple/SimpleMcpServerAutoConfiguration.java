@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server;
+package i2f.springboot.ai.mcp.server.simple;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
@@ -7,7 +7,7 @@ import i2f.cache.std.expire.IExpireCache;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.spring.core.SpringContext;
-import i2f.springboot.ai.mcp.server.properties.HttpSimpleMcpServerProperties;
+import i2f.springboot.ai.mcp.server.simple.properties.HttpSimpleMcpServerProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,14 +24,14 @@ import org.springframework.context.annotation.Configuration;
  * @date 2026/7/21 15:37
  * @desc
  */
-@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.enable:true}")
+@ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.enable:true}")
 @Configuration
 @EnableConfigurationProperties({
         HttpSimpleMcpServerProperties.class
 })
 @Slf4j
 @Data
-public class SpringAiMcpServerAutoConfiguration implements ApplicationContextAware {
+public class SimpleMcpServerAutoConfiguration implements ApplicationContextAware {
     protected ApplicationContext applicationContext;
 
     @Autowired
@@ -43,7 +43,7 @@ public class SpringAiMcpServerAutoConfiguration implements ApplicationContextAwa
     @Autowired(required = false)
     protected IProxyInvocationHandler invocationHandler;
 
-    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple-server.enable:true}")
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.simple.server.enable:true}")
     @ConditionalOnMissingBean(HttpSimpleMcpServer.class)
     @Bean
     public HttpSimpleMcpServer httpSimpleMcpServer() {
