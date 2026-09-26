@@ -212,8 +212,11 @@ public class RichConverter {
         Object ret = null;
         // 如果能实例化就实例化，否则使用默认子类实例化
         try {
-            // 如果目标类型为Array，则先按照集合处理，因为数组长度不确定
-            if (targetClass.isArray()) {
+            if(targetClass.isRecord()){
+                // 如果目标类型为Record，则先不初始化，因为要使用构造函数进行构造
+                ret=null;
+            } else if (targetClass.isArray()) {
+                // 如果目标类型为Array，则先按照集合处理，因为数组长度不确定
                 ret = new ArrayList<>();
             } else {
                 ret = targetClass.newInstance();
@@ -231,7 +234,7 @@ public class RichConverter {
             }
         }
 
-        if (ret == null) {
+        if (ret == null && !targetClass.isRecord()) {
             if (TypeOf.instanceOf(cvt, targetClass)) {
                 return (T) cvt;
             }
@@ -361,22 +364,48 @@ public class RichConverter {
             }
         } else {
             // 目标类型为bean
-            if (Map.class.isAssignableFrom(objClass)) {
-                Map<Field, Class<?>> dstFields = ReflectResolver.getFields(targetClass);
-                Map<String, Field> dstFieldsMap = new LinkedHashMap<>();
-                Map<String, Field> dstWeakFieldsMap = new LinkedHashMap<>();
-                for (Field field : dstFields.keySet()) {
-                    dstFieldsMap.put(field.getName(), field);
+            Map<String,Object> dstFieldValueMap=new LinkedHashMap<>();
+            Map<String,Type> dstFieldTypeMap=new LinkedHashMap<>();
+
+            Map<String, String> dstFieldsMap = new LinkedHashMap<>();
+            Map<String, String> dstWeakFieldsMap = new LinkedHashMap<>();
+
+            RecordComponent[] recordComponents=null;
+            Map<Field, Class<?>> dstFields=null;
+
+            // 采集字段信息映射
+            if(targetClass.isRecord()){
+                // 目标类型为 record 类型
+                recordComponents = targetClass.getRecordComponents();
+
+                for (RecordComponent field : recordComponents) {
+                    dstFieldTypeMap.put(field.getName(), field.getGenericType());
+                    dstFieldsMap.put(field.getName(), field.getName());
                     if (weakMatchField) {
-                        dstWeakFieldsMap.put(weakName(field.getName()), field);
+                        dstWeakFieldsMap.put(weakName(field.getName()), field.getName());
                     }
                 }
+            }else {
+                // 目标类型为普通bean类型
+                dstFields = ReflectResolver.getFields(targetClass);
 
+                for (Field field : dstFields.keySet()) {
+                    dstFieldTypeMap.put(field.getName(), field.getGenericType());
+                    dstFieldsMap.put(field.getName(), field.getName());
+                    if (weakMatchField) {
+                        dstWeakFieldsMap.put(weakName(field.getName()), field.getName());
+                    }
+                }
+            }
+
+            if (Map.class.isAssignableFrom(objClass)) {
+
+                // 转换目标字段
                 Map<?, ?> map = (Map<?, ?>) obj;
                 for (Map.Entry<?, ?> entry : map.entrySet()) {
                     Object key = entry.getKey();
                     String keyName = convert2Type(key, String.class, null, weakMatchField);
-                    Field field = dstFieldsMap.get(keyName);
+                    String field = dstFieldsMap.get(keyName);
                     if (weakMatchField) {
                         if (field == null) {
                             field = dstWeakFieldsMap.get(weakName(keyName));
@@ -386,7 +415,7 @@ public class RichConverter {
                         continue;
                     }
                     boolean useRelTypes = false;
-                    Type fieldType = field.getGenericType();
+                    Type fieldType = dstFieldTypeMap.get(field);
                     if (fieldType instanceof TypeVariable) {
                         if (typeParameters == null) {
                             if (relTypes != null) {
@@ -419,14 +448,50 @@ public class RichConverter {
                     }
                     try {
                         Object value = convert2Type(entry.getValue(), fieldType, useRelTypes ? null : relTypes, weakMatchField);
-                        ReflectResolver.valueSet(ret, field, value);
+                        dstFieldValueMap.put(field,value);
                     } catch (Exception e) {
 
                     }
                 }
 
+                // 填充值
+                if(targetClass.isRecord()){
+
+                    Object[] recordArgs=new Object[recordComponents.length];
+                    for (int i = 0; i < recordComponents.length; i++) {
+                        RecordComponent cmp = recordComponents[i];
+                        Object value = dstFieldValueMap.get(cmp.getName());
+                        recordArgs[i]=value;
+                    }
+                    Constructor<?> recordConstructor=null;
+                    Constructor<?>[] constructors = targetClass.getConstructors();
+                    for (Constructor<?> constructor : constructors) {
+                        if (constructor.getParameterCount()==recordArgs.length) {
+                            recordConstructor=constructor;
+                        }
+                    }
+                    if(recordConstructor==null){
+                        throw new IllegalArgumentException("un-support instance type:" + targetClass);
+                    }
+                    try {
+                        ret=recordConstructor.newInstance(recordArgs);
+                    } catch (Exception e) {
+
+                    }
+                }else{
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        Field dstField = entry.getKey();
+                        Object value = dstFieldValueMap.get(dstField.getName());
+                        try {
+                            ReflectResolver.valueSet(ret, dstField, value);
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
             } else {
                 // bean 转 bean 处理
+
 
                 Map<Field, Class<?>> srcFields = ReflectResolver.getFields(objClass);
                 Map<String, Field> srcFieldsMap = new LinkedHashMap<>();
@@ -434,21 +499,11 @@ public class RichConverter {
                     srcFieldsMap.put(field.getName(), field);
                 }
 
-                Map<Field, Class<?>> dstFields = ReflectResolver.getFields(targetClass);
-                Map<String, Field> dstFieldsMap = new LinkedHashMap<>();
-                Map<String, Field> dstWeakFieldsMap = new LinkedHashMap<>();
-                for (Field field : dstFields.keySet()) {
-                    dstFieldsMap.put(field.getName(), field);
-                    if (weakMatchField) {
-                        dstWeakFieldsMap.put(weakName(field.getName()), field);
-                    }
-                }
-
+                // 转换目标字段
                 // 对同名字段进行复制
-
                 for (Map.Entry<String, Field> entry : srcFieldsMap.entrySet()) {
                     Field srcField = entry.getValue();
-                    Field dstField = dstFieldsMap.get(entry.getKey());
+                    String dstField = dstFieldsMap.get(entry.getKey());
                     if (weakMatchField) {
                         dstField = dstWeakFieldsMap.get(entry.getKey());
                     }
@@ -460,7 +515,7 @@ public class RichConverter {
                         Object value = ReflectResolver.valueGet(obj, srcField);
 
                         boolean useRelTypes = false;
-                        Type fieldType = dstField.getGenericType();
+                        Type fieldType = dstFieldTypeMap.get(dstField);
                         if (fieldType instanceof TypeVariable) {
                             if (typeParameters == null) {
                                 if (relTypes != null) {
@@ -492,12 +547,48 @@ public class RichConverter {
                             }
                         }
                         value = convert2Type(value, fieldType, useRelTypes ? null : relTypes, weakMatchField);
-                        ReflectResolver.valueSet(ret, dstField, value);
+
+                        dstFieldValueMap.put(dstField,value);
                     } catch (Exception e) {
                         // 处理异常
                     }
                 }
 
+                // 填充值
+                if(targetClass.isRecord()){
+
+                    Object[] recordArgs=new Object[recordComponents.length];
+                    for (int i = 0; i < recordComponents.length; i++) {
+                        RecordComponent cmp = recordComponents[i];
+                        Object value = dstFieldValueMap.get(cmp.getName());
+                        recordArgs[i]=value;
+                    }
+                    Constructor<?> recordConstructor=null;
+                    Constructor<?>[] constructors = targetClass.getConstructors();
+                    for (Constructor<?> constructor : constructors) {
+                        if (constructor.getParameterCount()==recordArgs.length) {
+                            recordConstructor=constructor;
+                        }
+                    }
+                    if(recordConstructor==null){
+                        throw new IllegalArgumentException("un-support instance type:" + targetClass);
+                    }
+                    try {
+                        ret=recordConstructor.newInstance(recordArgs);
+                    } catch (Exception e) {
+
+                    }
+                }else{
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        Field dstField = entry.getKey();
+                        Object value = dstFieldValueMap.get(dstField.getName());
+                        try {
+                            ReflectResolver.valueSet(ret, dstField, value);
+                        } catch (Exception e) {
+
+                        }
+                    }
+                }
             }
         }
 

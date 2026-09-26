@@ -1677,6 +1677,157 @@ public class ReflectResolver {
         return dst;
     }
 
+
+    public static <T> T map2beanWeak(Map<String, Object> src, Class<T> targetClass) {
+        return map2bean(src, targetClass, null, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T map2beanWeak(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter) {
+        return map2bean(src, targetClass, fieldFilter, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass) {
+        return map2bean(src, targetClass, null, null, null);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter) {
+        return map2bean(src, targetClass, fieldFilter, null, null);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter,
+                                 Function<String, String> srcMapNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
+        if (src == null || targetClass == null) {
+            return null;
+        }
+
+        Object ret=null;
+        if(targetClass.isRecord()){
+            ret=null;
+        }else{
+            try {
+                ret=getInstance(targetClass);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+        }
+
+        Map<String, Object> dstValueMap = new HashMap<>();
+
+        Map<String, String> dstNameMap = new HashMap<>();
+        Map<String, Class<?>> dstTypeMap = new HashMap<>();
+
+        RecordComponent[] recordComponents=null;
+        Map<Field, Class<?>> dstFields =null;
+
+        if(targetClass.isRecord()){
+            dstFields = getFields(targetClass);
+
+            recordComponents=targetClass.getRecordComponents();
+
+            for (RecordComponent item : recordComponents) {
+                String name = item.getName();
+                if (dstFieldNameMapper != null) {
+                    Field field=null;
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        if(entry.getKey().getName().equals(item.getName())){
+                            field=entry.getKey();
+                            break;
+                        }
+                    }
+                    String str = dstFieldNameMapper.apply(field);
+                    if (str != null) {
+                        name = str;
+                    }
+                }
+                dstTypeMap.put(item.getName(),item.getType());
+                dstNameMap.put(name, item.getName());
+            }
+        }else{
+            dstFields = getFields(targetClass);
+
+            for (Field item : dstFields.keySet()) {
+                String name = item.getName();
+                if (dstFieldNameMapper != null) {
+                    String str = dstFieldNameMapper.apply(item);
+                    if (str != null) {
+                        name = str;
+                    }
+                }
+                dstTypeMap.put(item.getName(),item.getType());
+                dstNameMap.put(name, item.getName());
+            }
+        }
+
+
+        for (Map.Entry<String, Object> entry : src.entrySet()) {
+            String name = entry.getKey();
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(name)) {
+                isTarget = true;
+            }
+            if (srcMapNameMapper != null) {
+                String str = srcMapNameMapper.apply(name);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            String dstField = dstNameMap.get(name);
+            if (dstField == null) {
+                isTarget = false;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            try {
+                Object val = entry.getValue();
+                Class<?> dstType=dstTypeMap.get(dstField);
+                val = ObjectConvertor.tryConvertAsType(val, dstType);
+                dstValueMap.put(dstField,val);
+            } catch (Throwable e) {
+
+            }
+        }
+
+        // 填充值
+        if(targetClass.isRecord()){
+
+            Object[] recordArgs=new Object[recordComponents.length];
+            for (int i = 0; i < recordComponents.length; i++) {
+                RecordComponent cmp = recordComponents[i];
+                Object value = dstValueMap.get(cmp.getName());
+                recordArgs[i]=value;
+            }
+            Constructor<?> recordConstructor=null;
+            Constructor<?>[] constructors = targetClass.getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount()==recordArgs.length) {
+                    recordConstructor=constructor;
+                }
+            }
+            if(recordConstructor==null){
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+            try {
+                ret=recordConstructor.newInstance(recordArgs);
+            } catch (Exception e) {
+
+            }
+        }else{
+            for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                Field dstField = entry.getKey();
+                Object value = dstValueMap.get(dstField.getName());
+                try {
+                    valueSet(ret, dstField, value);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        return (T)ret;
+    }
+
     public static <M extends Map<String, Object>> M bean2map(Object src, M dst) {
         return bean2map(src, dst, null, null);
     }
@@ -2012,6 +2163,237 @@ public class ReflectResolver {
         }
 
         return dst;
+    }
+
+    public static <T> T beanCopyWeak(Object src, Class<T> targetClass) {
+        return beanCopy(src, targetClass, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanCopyWeak(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy(src, targetClass, fieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass) {
+        return beanCopy(src, targetClass, null, null, null, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy(src, targetClass, fieldFilter, null, null, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
+        return beanCopy(src, targetClass, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper,
+                                 Function<Object, Object> valueMapper,
+                                 Predicate<Object> newValueCopyFilter) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                srcFieldNameMapper == null ? null : (field) -> {
+                    String name = srcFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, dstFieldNameMapper == null ? null : (field) -> {
+                    String name = dstFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, valueMapper,
+                newValueCopyFilter);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass) {
+        return beanCopy0(src, targetClass, null,
+                null, null,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                null, null,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                srcFieldNameMapper, dstFieldNameMapper,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper,
+                                  Function<Object, Object> valueMapper,
+                                  Predicate<Object> newValueCopyFilter) {
+        if (src == null || targetClass == null) {
+            return null;
+        }
+        Object ret=null;
+        if(targetClass.isRecord()){
+            ret=null;
+        }else{
+            try {
+                ret=getInstance(targetClass);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+        }
+
+        Map<String, Object> dstValueMap = new HashMap<>();
+
+        Map<String, String> dstNameMap = new HashMap<>();
+        Map<String, Class<?>> dstTypeMap = new HashMap<>();
+
+        RecordComponent[] recordComponents=null;
+        Map<Field, Class<?>> dstFields =null;
+
+        Map<Field, Class<?>> srcFields = getFields(src.getClass());
+        if (srcFields.isEmpty()) {
+            return null;
+        }
+
+        if(targetClass.isRecord()) {
+            dstFields = getFields(targetClass);
+            if (dstFields.isEmpty()) {
+                return null;
+            }
+
+            recordComponents = targetClass.getRecordComponents();
+            if(recordComponents.length==0){
+                return null;
+            }
+
+            for (RecordComponent item : recordComponents) {
+                dstTypeMap.put(item.getName(), item.getType());
+                if (dstFieldNameMapper != null) {
+                    Field field=null;
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        if(entry.getKey().getName().equals(item.getName())){
+                            field=entry.getKey();
+                            break;
+                        }
+                    }
+                    List<String> list = dstFieldNameMapper.apply(field);
+                    for (String name : list) {
+                        if (name != null) {
+                            dstNameMap.put(name, item.getName());
+                        }
+                    }
+
+                }
+                dstNameMap.put(item.getName(), item.getName());
+            }
+        }else{
+            dstFields = getFields(targetClass);
+            if (dstFields.isEmpty()) {
+                return null;
+            }
+
+            for (Field item : dstFields.keySet()) {
+                dstTypeMap.put(item.getName(), item.getType());
+                if (dstFieldNameMapper != null) {
+                    List<String> list = dstFieldNameMapper.apply(item);
+                    for (String name : list) {
+                        if (name != null) {
+                            dstNameMap.put(name, item.getName());
+                        }
+                    }
+
+                }
+                dstNameMap.put(item.getName(), item.getName());
+            }
+        }
+
+        HashSet<String> list = new HashSet<>();
+        for (Field srcField : srcFields.keySet()) {
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(srcField)) {
+                isTarget = true;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            list.clear();
+            if (srcFieldNameMapper != null) {
+                List<String> names = srcFieldNameMapper.apply(srcField);
+                for (String name : names) {
+                    if (name != null) {
+                        list.add(name);
+                    }
+                }
+            }
+            list.add(srcField.getName());
+
+            for (String name : list) {
+                String dstField = dstNameMap.get(name);
+                if (dstField == null) {
+                    continue;
+                }
+
+                try {
+                    Object val = valueGet(src, srcField);
+                    if (valueMapper != null) {
+                        val = valueMapper.apply(val);
+                    }
+                    if (newValueCopyFilter != null && !newValueCopyFilter.test(val)) {
+                        continue;
+                    }
+                    Class<?> dstType = dstTypeMap.get(dstField);
+                    val = ObjectConvertor.tryConvertAsType(val, dstType);
+                    dstValueMap.put(dstField,val);
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+
+
+        // 填充值
+        if(targetClass.isRecord()){
+
+            Object[] recordArgs=new Object[recordComponents.length];
+            for (int i = 0; i < recordComponents.length; i++) {
+                RecordComponent cmp = recordComponents[i];
+                Object value = dstValueMap.get(cmp.getName());
+                recordArgs[i]=value;
+            }
+            Constructor<?> recordConstructor=null;
+            Constructor<?>[] constructors = targetClass.getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount()==recordArgs.length) {
+                    recordConstructor=constructor;
+                }
+            }
+            if(recordConstructor==null){
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+            try {
+                ret=recordConstructor.newInstance(recordArgs);
+            } catch (Exception e) {
+
+            }
+        }else{
+            for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                Field dstField = entry.getKey();
+                Object value = dstValueMap.get(dstField.getName());
+                try {
+                    ReflectResolver.valueSet(ret, dstField, value);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        return (T)ret;
     }
 
     private static final String[] jdkPackages = {
