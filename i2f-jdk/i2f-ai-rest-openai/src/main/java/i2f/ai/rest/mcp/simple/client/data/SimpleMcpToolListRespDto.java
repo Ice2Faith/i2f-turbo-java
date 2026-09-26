@@ -1,0 +1,14 @@
+package i2f.ai.rest.mcp.simple.client.data;
+
+import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
+import i2f.resp.ApiResp;
+
+import java.util.List;
+
+/**
+ * @author Ice2Faith
+ * @date 2026/7/13 10:31
+ * @desc
+ */
+public class SimpleMcpToolListRespDto extends ApiResp<List<DefaultToolDefinition>> {
+}

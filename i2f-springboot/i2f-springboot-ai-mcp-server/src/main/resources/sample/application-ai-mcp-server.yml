@@ -1,1 +1,42 @@
 
+i2f:
+  springboot:
+    ai:
+      mcp:
+        server:
+          # simple mcp server implements privacy protocol mcp (with hmac signature verify)
+          simple:
+            enable: true
+            # disable to skip creating HttpSimpleMcpServer bean itself
+            server:
+              enable: true
+            expire-window-minutes: 30
+            hmac-name: HmacSHA256
+            app-list:
+              - app-id: xxx
+                app-key: xxx
+            # springweb transport (based on RestController, enabled by default)
+            springweb:
+              enable: true
+            # netty transport (standalone port, disabled by default)
+            netty:
+              enable: false
+              port: 23745
+              boss-thread: 4
+              worker-thread: 0
+              max-content-length: 65536
+              handler:
+                enable: true
+              server:
+                enable: true
+          # stream mcp server implements official protocol mcp (streamable http, json-rpc 2.0 only)
+          stream:
+            server-name: i2f-mcp-server
+            server-version: 1.0.0
+            # springweb transport (based on RestController, enabled by default)
+            springweb:
+              enable: true
+            bearer-token:
+              enable: true
+              allow-tokens:
+                - xxx
