@@ -44,7 +44,7 @@
 
 ### i2f-ai-rest-openai
 
-> `i2f-ai-std` 抽象契约的 OpenAI 兼容 HTTP 实现，基于 `i2f-network` 对接对话/Embedding/Rerank/Models 端点（支持 SSE 流式），并提供自研 HMAC 签名的 Simple MCP 跨进程工具网关（客户端 + 服务端）。
+> `i2f-ai-std` 抽象契约的 OpenAI 兼容 HTTP 实现，基于 `i2f-network` 对接对话/Embedding/Rerank/Models 端点（支持 SSE 流式），提供自研 HMAC 签名的 Simple MCP 跨进程工具网关（客户端 + 服务端），并对外提供官方 MCP（Streamable HTTP / JSON-RPC 2.0）协议栈的共享 DTO 与常量。
 
 - 详细文档：[i2f-ai-rest-openai](./i2f-jdk/i2f-ai-rest-openai/readme.md)
 
@@ -1523,13 +1523,13 @@
 
 ### i2f-springboot-ai-mcp-server
 
-> MCP 服务端 Starter：将 Spring 容器中的 `@Tool`/`@Tools` 工具以 HMAC-SHA256 签名认证的 Simple MCP 协议（`/mcp/tool/list`、`/mcp/tool/call`）对外暴露，内置 Spring Web MVC（共享宿主 Web 端口）与 Netty（独立端口）双传输模式的自动装配，支持 nonce 防重放与请求级上下文透传。
+> MCP 服务端 Starter，同模块并列两套协议栈：**simple** 私有协议（HMAC-SHA256 验签，`/mcp/tool/*`，Spring Web MVC + Netty 双传输）与 **stream** 官方 MCP 协议（Streamable HTTP，单 `POST /mcp`、JSON-RPC 2.0、Bearer Token 鉴权、直连 `ToolRawHelper` 复用容器 `@Tool`），把 Spring 容器工具以 MCP 协议对外暴露。
 
 - 详细文档：[i2f-springboot-ai-mcp-server](./i2f-springboot/i2f-springboot-ai-mcp-server/readme.md)
 
 ### i2f-springboot-ai-mcp-client
 
-> MCP 客户端 Starter：按 instances 配置把远程 MCP Server 注册为本地 McpToolProvider Bean，内置 Simple MCP 私协议（HMAC 签名）、标准 JSON-RPC Streamable HTTP 与 solon-ai-mcp SDK 三套客户端，供 AI 工具网关聚合为动态工具。
+> MCP 客户端 Starter：按 instances 配置把远程 MCP Server 注册为本地 McpToolProvider Bean，内置 Simple MCP 私协议（HMAC 签名）、标准 JSON-RPC Streamable HTTP（复用上游 mcp.official 共享契约）与 solon-ai-mcp SDK 三套客户端，支持 tag-rules 为远程工具追加标签，供 AI 工具网关聚合为动态工具。
 
 - 详细文档：[i2f-springboot-ai-mcp-client](./i2f-springboot/i2f-springboot-ai-mcp-client/readme.md)
 

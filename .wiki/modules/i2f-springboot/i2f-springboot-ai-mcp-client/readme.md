@@ -1,6 +1,6 @@
 # i2f-springboot-ai-mcp-client
 
-> MCP 客户端 Starter —— 按 `instances` 配置将远程 MCP Server 自动注册为本地 `McpToolProvider` Bean，内置三套客户端实现：自研 Simple MCP 私协议（HMAC-SHA256 签名认证）、自研标准 JSON-RPC Streamable HTTP（`Mcp-Session-Id` 会话管理）与 solon-ai-mcp SDK（STDIO/SSE/STREAMABLE 等多种通道），供 AI 工具网关聚合为「前缀.工具名」形式的动态工具。
+> MCP 客户端 Starter —— 按 `instances` 配置将远程 MCP Server 自动注册为本地 `McpToolProvider` Bean，内置三套客户端实现：自研 Simple MCP 私协议（HMAC-SHA256 签名认证）、标准 JSON-RPC Streamable HTTP（复用上游 `mcp.official` 共享契约、`Mcp-Session-Id` 会话管理）与 solon-ai-mcp SDK（STDIO/SSE/STREAMABLE 等多种通道），并支持按 `tag-rules` 为远程工具追加本地标签，供 AI 工具网关聚合为「前缀.工具名」形式的动态工具。
 
 ## 模块路径
 
@@ -11,7 +11,7 @@
 | GroupId | ArtifactId | Scope | Optional | 说明 |
 |---------|------------|-------|----------|------|
 | i2f.turbo | i2f-ai-std | compile | false | AI 标准契约：`McpToolProvider`、`ToolDefinition`、`ToolBaseCallRequest`、`ToolCallContextHolder` |
-| i2f.turbo | i2f-ai-rest-openai | compile | false | Simple MCP 客户端实现 `HttpSimpleMcpClientToolProvider` 与常量 `HttpSimpleMcpConstants` |
+| i2f.turbo | i2f-ai-rest-openai | compile | false | simple 客户端实现 `HttpSimpleMcpClientToolProvider` 与常量 `HttpSimpleMcpConstants`；并提供 stream 模式复用的 `mcp.official` 共享契约（`OfficialMcpConstants` + `JsonRpcRequest`/`JsonRpcResponse`/`JsonRpcError` + `data.result.*` 结果模型） |
 | i2f.turbo | i2f-spring-core | compile | false | POM 声明依赖；当前源码未见直接引用 |
 | i2f.turbo | i2f-spring-web | compile | false | `SpringWebRestClient`（基于 `RestTemplate` 的 `IRestClient` 实现） |
 | org.projectlombok | lombok | compile | false | 编译期代码生成（`@Data`/`@Slf4j`） |
@@ -31,7 +31,7 @@
 
 - **装配层**（`*AutoConfiguration`）：三个自动配置类分别对应 simple / stream / solon 三种客户端，均在 `BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry` 阶段读取 `instances` 配置，为每个启用的实例注册一个 `{name}_McpToolProvider` Bean 定义
 - **工厂层**（`*McpToolProviderFactoryBean`）：每个实例一个 `FactoryBean<McpToolProvider>`，负责把配置项装配为具体协议实现（`lazyInit=true`，首次使用时才创建）；`BeanDefinitionBuilder.genericBeanDefinition(McpToolProvider.class)` 使 `expectType` 为 `McpToolProvider`，从而可被容器按类型检索
-- **协议实现层**（三种客户端）：simple 复用上游 `HttpSimpleMcpClientToolProvider`（自研私协议 + HMAC 签名）；stream 使用模块内自研 `StreamJsonRpcMcpClientToolProvider`（标准 JSON-RPC over Streamable HTTP）；solon 使用模块内 `SolonMcpToolProvider` 封装第三方 `McpClientProvider`
+- **协议实现层**（三种客户端）：simple 复用上游 `HttpSimpleMcpClientToolProvider`（自研私协议 + HMAC 签名）；stream 使用模块内自研 `StreamJsonRpcMcpClientToolProvider`（标准 JSON-RPC over Streamable HTTP，其信封/结果 DTO 与常量复用上游 `mcp.official` 共享契约，模块内不再有 `stream/data` 包）；solon 使用模块内 `SolonMcpToolProvider` 封装第三方 `McpClientProvider`
 
 ### 自动装配结构
 
@@ -73,7 +73,7 @@ sequenceDiagram
     participant S as 远程 MCP Server
 
     G->>P: getTools
-    P->>P: 15 秒缓存未命中则继续
+    P->>P: 5 分钟缓存未命中则继续
     P->>S: POST 端点 initialize
     S-->>P: 响应头 Mcp-Session-Id
     P->>S: POST 端点 tools/list 携带会话头
@@ -105,14 +105,8 @@ i2f.springboot.ai.mcp.client
 │   │   └── StreamMcpClientMcpToolProviderFactoryBean    # 构建 StreamJsonRpcMcpClientToolProvider
 │   ├── properties
 │   │   └── StreamMcpClientProperties                    # stream.instances 配置属性
-│   ├── provider
-│   │   └── StreamJsonRpcMcpClientToolProvider           # 自研 JSON-RPC 客户端（initialize/tools/list/tools/call/close）
-│   └── data
-│       ├── JsonRpcRequest / JsonRpcResponse             # JSON-RPC 2.0 信封
-│       └── result
-│           ├── JsonRpcInitialResult                     # initialize 响应（protocolVersion/capabilities/serverInfo）
-│           ├── JsonRpcToolListResult / JsonRpcToolListItem  # tools/list 响应
-│           └── JsonRpcToolCallResult                    # tools/call 响应（content/isError）
+│   └── provider
+│       └── StreamJsonRpcMcpClientToolProvider           # 自研 JSON-RPC 客户端（initialize/tools/list/tools/call/close）；信封与常量复用上游 mcp.official 共享契约
 └── solon
     ├── SolonMcpClientAutoConfiguration                  # solon 模式装配
     ├── components
@@ -128,10 +122,11 @@ i2f.springboot.ai.mcp.client
 1. **统一装配骨架、按实例注册 Bean**：三个自动配置类结构完全一致——`@ConditionalOnExpression` 总开关 → 遍历 `instances` → `name.replace("-", "_")` 规范化 → 注册 `{name}_McpToolProvider`（`GenericBeanDefinition` + `FactoryBean` + `lazyInit=true`）；`name` 为空或 `enable=false` 的实例被跳过。
 2. **工厂 Bean 与预期类型**：`BeanDefinitionBuilder.genericBeanDefinition(McpToolProvider.class)` 保留 `expectType`，配合 `FactoryBean#getObjectType` 返回 `McpToolProvider`，使 AI 工具网关可通过容器类型检索拿到全部远程工具提供者。
 3. **懒加载 + 可选预热**：实例 Bean 默认 `lazyInit=true`（首次使用时才发起连接与协议握手）；stream / solon 支持 `initial=true`，在工厂创建时启动后台线程预拉取工具目录（`log.info` 记录工具数量）。
-4. **目录缓存**：simple（上游实现）与 stream / solon（模块内实现）均自带 15 秒 TTL 的手写缓存（`CopyOnWriteArrayList` + `AtomicLong` 过期时间 + `ReentrantLock` 双检），避免 AI 高频列举工具时反复请求远程；solon 模式同时在 SDK 层配置 `cacheSeconds(30)`。
+4. **目录缓存**：simple（上游实现）与 stream / solon（模块内实现）均自带 5 分钟 TTL 的手写缓存（`CopyOnWriteArrayList` + `AtomicLong` 存过期时刻 + `ReentrantLock` 双检，判定为 `System.currentTimeMillis() < expireTs`，语义正确），避免 AI 高频列举工具时反复请求远程；solon 模式同时在 SDK 层配置 `cacheSeconds(30)`。
 5. **上下文透传（simple 专属）**：复用上游 `HttpSimpleMcpClientToolProvider`，调用工具前用 `ToolCallContextHolder.copyOf()` 取出请求级上下文，与工具参数一起序列化为 `content`/`context` 上送，使远端工具可像本地调用一样访问上下文。
-6. **实体类内聚**：stream 模式自带 `JsonRpcRequest`/`JsonRpcResponse` 与四个 `result` 数据类，仅表达 JSON-RPC 2.0 信封与 `tools/list`、`tools/call`、`initialize` 的最小响应结构，由 `RichConverter` 从 `Map` 宽松转换。
+6. **协议契约复用上游 `mcp.official`**：stream 模式的 JSON-RPC 2.0 信封（`JsonRpcRequest`/`JsonRpcResponse`/`JsonRpcError`）、`initialize`/`tools/list`/`tools/call` 结果模型与 `OfficialMcpConstants` 常量均直接复用 `i2f-ai-rest-openai` 的 `mcp.official` 共享契约包（与服务端同源），响应体由 `RichConverter` 从 `Map` 宽松转换；旧版本模块内自带的 `stream/data` 包已删除。
 7. **双注册文件与配置元数据**：同时提供 `META-INF/spring.factories`（Spring Boot 2.6 之前）与 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（Spring Boot 2.7+），并在 `additional-spring-configuration-metadata.json` 中补充三个开关属性说明。
+8. **远程工具标签解析**：stream / solon 实例可配置 `tag-rules`，Provider 在 `getTools` 时用 `AiTagRuleHelper.resolveTags` 按规则把本地标签追加到远程 `ToolDefinition`（simple 模式由上游实现、本模块实例配置未提供该字段）。
 
 ## 模块目的
 
@@ -149,9 +144,9 @@ i2f.springboot.ai.mcp.client
 | stream 客户端装配 | `StreamMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `stream.instances` 注册 `{name}_McpToolProvider` |
 | solon 客户端装配 | `SolonMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `solon.instances` 注册 `{name}_McpToolProvider`（含 `@ConditionalOnClass` 保护） |
 | simple Provider 构建 | `SimpleMcpClientMcpToolProviderFactoryBean#getObject` | 装配 `SpringWebRestClient`(RestTemplate) + `JacksonJsonSerializer` + baseUrl/appId/appKey/hmacName |
-| stream Provider 构建 | `StreamMcpClientMcpToolProviderFactoryBean#getObject` | 装配 headers（bearer-token/自定义）与可选预加载线程 |
+| stream Provider 构建 | `StreamMcpClientMcpToolProviderFactoryBean#getObject` | 装配 `SpringWebRestClient`(RestTemplate)+`JacksonJsonSerializer`、headers（bearer-token/自定义）、tagRules 与可选预加载线程 |
 | solon Provider 构建 | `SolonMcpClientMcpToolProviderFactoryBean#getObject` | 构建 `McpClientProvider`（channel/url/cacheSeconds=30）并包装为 `SolonMcpToolProvider` |
-| 工具目录获取 | 各 Provider `#getTools` | 拉取远程工具目录并转换为 `ToolDefinition`（含 `FunctionJsonSchema`），15 秒缓存 |
+| 工具目录获取 | 各 Provider `#getTools` | 拉取远程工具目录并转换为 `ToolDefinition`（含 `FunctionJsonSchema` 与 `tag-rules` 解析出的标签），5 分钟缓存 |
 | 工具调用 | 各 Provider `#callTool` | simple：签名 + `POST /mcp/tool/call`；stream：JSON-RPC `tools/call`；solon：`mcpClient.callTool` |
 | 工具支持判定 | 各 Provider `#support` | 按工具名匹配本地缓存目录，决定该 Provider 是否处理调用请求 |
 | 会话管理 | `StreamJsonRpcMcpClientToolProvider#initial / close` | `initialize` 握手取 `Mcp-Session-Id`；`close` 发 `DELETE` 并清理会话与缓存 |
@@ -252,14 +247,15 @@ ai:
 
 ## 模块瑕疵或错误
 
-1. **stream 模式初始化失败被标记成功**：`StreamJsonRpcMcpClientToolProvider#initial()` 在 `finally` 块中无条件执行 `initialized.set(true)`，即使 `initialize` 请求抛异常（网络失败、服务端未返回 `Mcp-Session-Id`）也会被标记为已初始化；后续 `getTools`/`callTool` 会跳过握手，携带 `null` 会话头直接请求，通常会持续失败且无法自动重试（仅 `close()` 能重置标记）。
-2. **缓存过期判定语义偏差**：三种客户端的缓存判定均为 `System.currentTimeMillis() - expireTs < expireTtl`，而写入为 `expireTs = System.currentTimeMillis() + expireTtl`（未来时刻），两者组合使缓存实际有效期约为 `2 × expireTtl`（默认 15 秒 → 实际约 30 秒）；simple 模式的上游实现、本模块 stream 与 solon 实现均为同一写法。
-3. **stream 模式工具调用错误消息截断**：`StreamJsonRpcMcpClientToolProvider#callTool` 在 `isError=true` 时抛出 `IllegalStateException("invoke mcp tool error, cause reason is: ")`，消息尾部未拼接远程错误详情，排障困难。
-4. **重复新建基础设施对象**：三个 FactoryBean 均为每个实例 `new RestTemplate()` 与 `new JacksonJsonSerializer(new ObjectMapper())`，不复用宿主容器中已定制（如注册 `JavaTimeModule`）的 `RestTemplate`/`ObjectMapper` Bean，序列化与 HTTP 行为可能与宿主应用不一致；且 `JacksonJsonSerializer` 属传递依赖未显式声明。
-5. **预热线程未命名且非守护**：stream / solon 的 `initial=true` 使用 `new Thread(...)` 裸创建线程（未命名、非守护、未复用线程池），失败仅 `log.warn`，且两处日志文案将 "warning" 误拼为 "warring"。
-6. **`support()` 空安全不一致**：`SolonMcpToolProvider#support` 使用 `request.getName().equals(tool.getName())`，`request.getName()` 为 `null` 时抛 NPE；`StreamJsonRpcMcpClientToolProvider#support` 为 `tool.getName().equals(...)`，两处行为不一致。
-7. **simple / stream 模式缺少 Classpath 条件保护**：solon 模式有 `@ConditionalOnClass(McpClientProvider, ContextView)`，而 simple / stream 模式的自动配置在类路径缺少 `RestTemplate`（spring-web）时无显式条件，仅靠懒加载推迟失败点。
-8. **配置元数据冗余**：`additional-spring-configuration-metadata.json` 的 `hints` 中 `server.servlet.jsp.class-name`、`server.tomcat.accesslog.encoding` 两条与本模块无关（疑似自 Spring Boot 官方元数据复制），IDE 配置提示存在噪声。
+> 注：旧版记录的两处缺陷已修复——① `initial()` 中 `initialized.set(true)` 已从 `finally` 移入 `try`，握手失败不再被误标为已初始化；② 三套缓存过期判定统一为 `System.currentTimeMillis() < expireTs`（存过期时刻），2× TTL 语义偏差消除，默认 TTL 亦调为 5 分钟。
+
+1. **stream 无状态握手以 `System.out` 打印调试**：`StreamJsonRpcMcpClientToolProvider#initial()` 在服务端未返回 `Mcp-Session-Id`（视为无状态服务）时，用 `System.out.println` 直接打印响应头与响应体，属调试遗留，污染标准输出；该分支静默继续、不记日志级别。
+2. **stream 模式工具调用错误消息截断**：`StreamJsonRpcMcpClientToolProvider#callTool` 在 `isError=true` 时抛出 `IllegalStateException("invoke mcp tool error, cause reason is: ")`，未拼接远程 `content` 错误详情，排障困难（solon 模式已改为可读提示）。
+3. **重复新建基础设施对象**：三个 FactoryBean 均为每个实例 `new RestTemplate()` 与 `new JacksonJsonSerializer(new ObjectMapper())`，不复用宿主容器中已定制（如注册 `JavaTimeModule`）的 `RestTemplate`/`ObjectMapper` Bean，序列化与 HTTP 行为可能与宿主应用不一致；且 `JacksonJsonSerializer` 属传递依赖未显式声明。
+4. **预热线程未命名且非守护**：stream / solon 的 `initial=true` 使用 `new Thread(...)` 裸创建线程（未命名、非守护、未复用线程池），失败仅 `log.warn`，且两处日志文案将 "warning" 误拼为 "warring"。
+5. **`support()` 空安全不一致**：`SolonMcpToolProvider#support` 使用 `request.getName().equals(tool.getName())`，`request.getName()` 为 `null` 时抛 NPE；`StreamJsonRpcMcpClientToolProvider#support` 为 `tool.getName().equals(...)`，两处行为不一致。
+6. **simple / stream 模式缺少 Classpath 条件保护**：solon 模式有 `@ConditionalOnClass(McpClientProvider, ContextView)`，而 simple / stream 模式的自动配置在类路径缺少 `RestTemplate`（spring-web）时无显式条件，仅靠懒加载推迟失败点。
+7. **配置元数据冗余**：`additional-spring-configuration-metadata.json` 的 `hints` 中 `server.servlet.jsp.class-name`、`server.tomcat.accesslog.encoding` 两条与本模块无关（疑似自 Spring Boot 官方元数据复制），IDE 配置提示存在噪声。
 
 ## 三套协议对比
 
@@ -271,7 +267,8 @@ ai:
 | 认证 | HMAC-SHA256 签名头 | `bearer-token` / 自定义 `headers` | `bearer-token` / 自定义 `headers` |
 | 会话 | 无会话 | `Mcp-Session-Id`（initialize 获取、DELETE 释放） | SDK 内部管理 |
 | 上下文透传 | 支持（`ToolCallContextHolder`） | 不支持 | 不支持 |
-| 目录缓存 | 15 秒 TTL（上游实现） | 15 秒 TTL（自建） | 15 秒 TTL（自建）+ SDK `cacheSeconds(30)` |
+| 标签解析（tag-rules） | 不支持 | 支持 | 支持 |
+| 目录缓存 | 5 分钟 TTL（上游实现） | 5 分钟 TTL（自建） | 5 分钟 TTL（自建）+ SDK `cacheSeconds(30)` |
 | 预热 | 无（`initial` 未提供） | `initial=true` | `initial=true` |
 | 额外依赖 | 无 | 无 | `solon-ai-mcp`、`reactor-core` |
 | 对端 | `i2f-springboot-ai-mcp-server` | 任意标准 MCP Server | 任意标准 MCP Server |
@@ -304,6 +301,7 @@ stream（前缀 `i2f.springboot.ai.mcp.client.stream`）：
 | `instances[].url` | `String` | 无 | 服务端地址（自动补 `/mcp` 后缀） |
 | `instances[].bearer-token` | `String` | 无 | 非空时添加 `Authorization: Bearer {token}` 头 |
 | `instances[].headers` | `Map` | 无 | 附加请求头 |
+| `instances[].tag-rules` | `List<AiTagRule>` | 无 | 按规则为远程工具追加本地标签 |
 
 solon（前缀 `i2f.springboot.ai.mcp.client.solon`）：
 
@@ -318,6 +316,7 @@ solon（前缀 `i2f.springboot.ai.mcp.client.solon`）：
 | `instances[].channel` | `Channel` | `STREAMABLE` | 通道：`stdio` / `sse` / `streamable` / `streamable_stateless` |
 | `instances[].bearer-token` | `String` | 无 | 非空时添加 `Authorization: Bearer {token}` 头 |
 | `instances[].headers` | `Map` | 无 | 附加请求头 |
+| `instances[].tag-rules` | `List<AiTagRule>` | 无 | 按规则为远程工具追加本地标签 |
 
 ## 自动注册清单
 
@@ -330,7 +329,7 @@ i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration
 
 ## 与相关模块的关系
 
-- **`i2f-ai-rest-openai`**：提供 simple 模式的客户端实现 `HttpSimpleMcpClientToolProvider`（含 HMAC 签名与上下文透传逻辑）与协议常量 `HttpSimpleMcpConstants`；本模块仅负责装配与参数注入。
+- **`i2f-ai-rest-openai`**：提供 simple 模式的客户端实现 `HttpSimpleMcpClientToolProvider`（含 HMAC 签名与上下文透传逻辑）与协议常量 `HttpSimpleMcpConstants`；同时其 `mcp.official` 共享契约包（`OfficialMcpConstants` + JSON-RPC 信封/结果模型）为 stream 模式提供与服务端同源的协议定义，本模块仅负责装配与参数注入。
 - **`i2f-ai-std`**：提供 `McpToolProvider` 契约、`ToolDefinition`/`ToolBaseCallRequest` 与工具网关抽象（`AbstractMcpToolGatewayManager`、`ContextMcpToolGatewayManager`）。
 - **`i2f-springboot-ai-mcp-server`**：simple 协议的服务端对端模块，与本模块 simple 模式构成本仓库自研「MCP Server ↔ Client」的完整链路（注意服务端 Spring MVC 模式的 `/mcp/tool/call` 方法不一致缺陷会影响配套调用）。
 - **`i2f-springboot-ops-starter`**：消费方。`SpringContextToolAutoConfiguration` 注册 `ContextMcpToolGatewayManager`（聚合容器内全部 `McpToolProvider`）与 `McpProviderTools`（AI 侧动态工具发现四件套），本模块注册的实例 Bean 由此接入 AI 工具链。
