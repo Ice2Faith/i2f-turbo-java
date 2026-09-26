@@ -1,6 +1,6 @@
-package i2f.ai.rest.mcp.server.data;
+package i2f.ai.rest.mcp.simple.server.data;
 
-import i2f.ai.rest.mcp.data.McpCallPayloadDto;
+import i2f.ai.rest.mcp.simple.data.McpCallPayloadDto;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import lombok.Data;

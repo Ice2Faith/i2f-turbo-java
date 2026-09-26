@@ -1,7 +1,7 @@
 package i2f.springboot.ai.mcp.server.simple.properties;
 
-import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.server.data.HttpSimpleMcpAppItem;
+import i2f.ai.rest.mcp.simple.HttpSimpleMcpConstants;
+import i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpAppItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;

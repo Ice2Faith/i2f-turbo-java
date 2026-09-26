@@ -1,8 +1,8 @@
-package i2f.ai.rest.mcp.client;
+package i2f.ai.rest.mcp.simple.client;
 
-import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.client.data.SimpleMcpToolListRespDto;
-import i2f.ai.rest.mcp.data.McpCallPayloadDto;
+import i2f.ai.rest.mcp.simple.HttpSimpleMcpConstants;
+import i2f.ai.rest.mcp.simple.client.data.SimpleMcpToolListRespDto;
+import i2f.ai.rest.mcp.simple.data.McpCallPayloadDto;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolCallContextHolder;

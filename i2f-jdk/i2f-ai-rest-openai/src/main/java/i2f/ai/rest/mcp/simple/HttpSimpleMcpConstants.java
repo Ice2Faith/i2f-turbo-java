@@ -1,4 +1,4 @@
-package i2f.ai.rest.mcp;
+package i2f.ai.rest.mcp.simple;
 
 /**
  * @author Ice2Faith

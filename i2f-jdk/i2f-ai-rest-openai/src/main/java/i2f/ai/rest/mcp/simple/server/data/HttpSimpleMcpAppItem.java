@@ -1,4 +1,4 @@
-package i2f.ai.rest.mcp.server.data;
+package i2f.ai.rest.mcp.simple.server.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

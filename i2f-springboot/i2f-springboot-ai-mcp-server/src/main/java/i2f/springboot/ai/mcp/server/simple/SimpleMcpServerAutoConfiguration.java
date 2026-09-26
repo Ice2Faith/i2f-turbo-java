@@ -1,8 +1,8 @@
 package i2f.springboot.ai.mcp.server.simple;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
-import i2f.ai.rest.mcp.server.impl.HttpSimpleMcpServerImpl;
+import i2f.ai.rest.mcp.simple.server.HttpSimpleMcpServer;
+import i2f.ai.rest.mcp.simple.server.impl.HttpSimpleMcpServerImpl;
 import i2f.cache.std.expire.IExpireCache;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.proxy.std.IProxyInvocationHandler;

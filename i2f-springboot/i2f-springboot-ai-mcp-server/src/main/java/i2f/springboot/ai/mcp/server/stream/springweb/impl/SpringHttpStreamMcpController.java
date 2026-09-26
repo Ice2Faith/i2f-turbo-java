@@ -31,7 +31,7 @@ import java.util.*;
 /**
  * 官方 MCP 协议（protocolVersion: 2024-11-05）Streamable HTTP 传输的 SpringMVC 服务端实现。
  * <p>
- * 区别于 {@code simple} 私有协议（{@link i2f.ai.rest.mcp.server.HttpSimpleMcpServer}，带 HMAC 签名验证），
+ * 区别于 {@code simple} 私有协议（{@link i2f.ai.rest.mcp.simple.server.HttpSimpleMcpServer}，带 HMAC 签名验证），
  * 本实现直接使用官方标准的 JSON-RPC 2.0 报文格式（initialize / tools/list / tools/call），
  * 不依赖官方 SDK（官方SDK要求 JDK17），也不做 HMAC 签名校验，
  * 而是直接桥接 {@link IContext} + {@link JsonSchemaAnnotationResolver} + {@link ToolRawHelper}

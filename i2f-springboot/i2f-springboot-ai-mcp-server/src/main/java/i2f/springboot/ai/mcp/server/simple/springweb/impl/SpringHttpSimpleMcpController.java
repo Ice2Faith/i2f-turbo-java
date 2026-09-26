@@ -1,9 +1,9 @@
 package i2f.springboot.ai.mcp.server.simple.springweb.impl;
 
-import i2f.ai.rest.mcp.HttpSimpleMcpConstants;
-import i2f.ai.rest.mcp.data.McpCallPayloadDto;
-import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
-import i2f.ai.rest.mcp.server.data.HttpSimpleMcpRequest;
+import i2f.ai.rest.mcp.simple.HttpSimpleMcpConstants;
+import i2f.ai.rest.mcp.simple.data.McpCallPayloadDto;
+import i2f.ai.rest.mcp.simple.server.HttpSimpleMcpServer;
+import i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.definition.ToolDefinition;
