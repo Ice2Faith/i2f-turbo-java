@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.stream.consts;
+package i2f.ai.rest.mcp.official.consts;
 
 /**
  * @author Ice2Faith
@@ -13,6 +13,8 @@ public interface OfficialMcpConstants {
     String METHOD_INITIALIZE = "initialize";
     String METHOD_TOOLS_LIST = "tools/list";
     String METHOD_TOOLS_CALL = "tools/call";
+
+    String HEADER_MCP_SESSION_ID = "Mcp-Session-Id";
 
     // JSON-RPC 2.0 预定义错误码，MCP 官方协议沿用同一套编码
     // @see https://www.jsonrpc.org/specification#error_object

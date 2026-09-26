@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.stream.data;
+package i2f.ai.rest.mcp.official.data;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,11 +12,12 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 public class JsonRpcError {
-    protected int code;
+    protected Integer code;
     protected String message;
 
     public JsonRpcError(int code, String message) {
         this.code = code;
         this.message = message;
     }
+
 }

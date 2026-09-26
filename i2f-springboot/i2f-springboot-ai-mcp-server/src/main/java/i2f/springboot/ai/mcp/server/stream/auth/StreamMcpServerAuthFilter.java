@@ -1,7 +1,7 @@
 package i2f.springboot.ai.mcp.server.stream.auth;
 
 import i2f.net.http.data.HttpHeaders;
-import i2f.springboot.ai.mcp.server.stream.data.JsonRpcRequest;
+import i2f.springboot.ai.mcp.server.stream.data.ServerJsonRpcRequest;
 
 /**
  * @author Ice2Faith
@@ -9,5 +9,5 @@ import i2f.springboot.ai.mcp.server.stream.data.JsonRpcRequest;
  * @desc
  */
 public interface StreamMcpServerAuthFilter {
-    boolean verify(JsonRpcRequest payload, HttpHeaders headers);
+    boolean verify(ServerJsonRpcRequest payload, HttpHeaders headers);
 }

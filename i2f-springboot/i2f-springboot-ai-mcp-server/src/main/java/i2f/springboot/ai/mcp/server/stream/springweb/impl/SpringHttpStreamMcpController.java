@@ -1,6 +1,9 @@
 package i2f.springboot.ai.mcp.server.stream.springweb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.rest.mcp.official.consts.OfficialMcpConstants;
+import i2f.ai.rest.mcp.official.data.JsonRpcResponse;
+import i2f.ai.rest.mcp.official.data.result.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
@@ -9,12 +12,10 @@ import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import i2f.proxy.std.IProxyInvocationHandler;
+import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.server.stream.auth.StreamMcpServerAuthFilter;
-import i2f.springboot.ai.mcp.server.stream.consts.OfficialMcpConstants;
-import i2f.springboot.ai.mcp.server.stream.data.JsonRpcError;
-import i2f.springboot.ai.mcp.server.stream.data.JsonRpcRequest;
-import i2f.springboot.ai.mcp.server.stream.data.JsonRpcResponse;
+import i2f.springboot.ai.mcp.server.stream.data.ServerJsonRpcRequest;
 import i2f.springboot.ai.mcp.server.stream.properties.OfficialMcpServerProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -57,7 +58,7 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
 
 
     @PostMapping(OfficialMcpConstants.URL_PATH_MCP)
-    public JsonRpcResponse<?> handle(@RequestBody JsonRpcRequest payload,
+    public JsonRpcResponse<?> handle(@RequestBody ServerJsonRpcRequest payload,
                                      HttpServletRequest request,
                                      HttpServletResponse response) {
         try {
@@ -74,12 +75,12 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
                     }
                 }
                 if (!streamMcpServerAuthFilter.verify(payload, filterHeaders)) {
-                    return error(payload.getId(), OfficialMcpConstants.CODE_INVALID_REQUEST, "auth not passed!");
+                    return JsonRpcResponse.error(payload.getId(), OfficialMcpConstants.CODE_INVALID_REQUEST, "auth not passed!");
                 }
             }
             String method = payload.getMethod();
             if (method == null || method.isEmpty()) {
-                return error(payload.getId(), OfficialMcpConstants.CODE_INVALID_REQUEST, "missing jsonrpc method!");
+                return JsonRpcResponse.error(payload.getId(), OfficialMcpConstants.CODE_INVALID_REQUEST, "missing jsonrpc method!");
             }
             switch (method) {
                 case OfficialMcpConstants.METHOD_INITIALIZE:
@@ -89,11 +90,11 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
                 case OfficialMcpConstants.METHOD_TOOLS_CALL:
                     return callTool(payload);
                 default:
-                    return error(payload.getId(), OfficialMcpConstants.CODE_METHOD_NOT_FOUND, "method not found: " + method);
+                    return JsonRpcResponse.error(payload.getId(), OfficialMcpConstants.CODE_METHOD_NOT_FOUND, "method not found: " + method);
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return error(payload.getId(), OfficialMcpConstants.CODE_INTERNAL_ERROR, e.getMessage());
+            return JsonRpcResponse.error(payload.getId(), OfficialMcpConstants.CODE_INTERNAL_ERROR, e.getMessage());
         }
     }
 
@@ -102,99 +103,73 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
         // TODO: 当前实现为无状态服务，未生成/校验 Mcp-Session-Id，此处仅作为会话终止的占位实现
     }
 
-    protected JsonRpcResponse<?> initialize(JsonRpcRequest request) {
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("protocolVersion", OfficialMcpConstants.PROTOCOL_VERSION);
+    protected JsonRpcResponse<?> initialize(ServerJsonRpcRequest request) {
+        JsonRpcInitialResult result = new JsonRpcInitialResult();
+        result.setProtocolVersion(OfficialMcpConstants.PROTOCOL_VERSION);
 
         Map<String, Object> tools = new LinkedHashMap<>();
         tools.put("listChanged", false);
         Map<String, Object> capabilities = new LinkedHashMap<>();
         capabilities.put("tools", tools);
-        result.put("capabilities", capabilities);
+        result.setCapabilities(capabilities);
 
         Map<String, Object> serverInfo = new LinkedHashMap<>();
         serverInfo.put("name", properties.getServerName());
         serverInfo.put("version", properties.getServerVersion());
-        result.put("serverInfo", serverInfo);
 
-        return success(request.getId(), result);
+        result.setServerInfo(serverInfo);
+
+        return JsonRpcResponse.success(request.getId(), result);
     }
 
-    protected JsonRpcResponse<?> listTools(JsonRpcRequest request) {
+    protected JsonRpcResponse<?> listTools(ServerJsonRpcRequest request) {
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
-        List<Map<String, Object>> tools = new ArrayList<>();
+
+        List<JsonRpcToolListItem> tools = new ArrayList<>();
         for (ToolRawDefinition definition : definitionMap.values()) {
-            tools.add(toToolListItem(definition));
+            JsonRpcToolListItem item = new JsonRpcToolListItem();
+            item.setName(definition.getName());
+            item.setDescription(definition.getDescription());
+            item.setInputSchema(definition.getJsonSchema().getParameters());
+            tools.add(item);
         }
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("tools", tools);
-        return success(request.getId(), result);
-    }
 
-    protected Map<String, Object> toToolListItem(ToolRawDefinition definition) {
-        Map<String, Object> item = new LinkedHashMap<>();
-        item.put("name", definition.getName());
-        item.put("description", definition.getDescription());
-
-        Map<String, Object> parameters = definition.getJsonSchema().getParameters();
-        item.put("inputSchema", parameters);
-        return item;
+        JsonRpcToolListResult result = new JsonRpcToolListResult();
+        result.setTools(tools);
+        return JsonRpcResponse.success(request.getId(), result);
     }
 
 
     @SuppressWarnings("unchecked")
-    protected JsonRpcResponse<?> callTool(JsonRpcRequest request) {
-        Map<String, Object> params = request.getParams();
-        if (params == null) {
-            return error(request.getId(), OfficialMcpConstants.CODE_INVALID_PARAMS, "missing tools/call params!");
+    protected JsonRpcResponse<?> callTool(ServerJsonRpcRequest request) {
+        Map<String, Object> map = request.getParams();
+        if (map == null) {
+            return JsonRpcResponse.error(request.getId(), OfficialMcpConstants.CODE_INVALID_PARAMS, "missing tools/call params!");
         }
-        String toolName = (String) params.get("name");
+        JsonRpcToolCallParam params = RichConverter.convert(map, JsonRpcToolCallParam.class);
+
+        String toolName = params.getName();
         if (toolName == null || toolName.isEmpty()) {
-            return error(request.getId(), OfficialMcpConstants.CODE_INVALID_PARAMS, "missing tools/call params.name!");
+            return JsonRpcResponse.error(request.getId(), OfficialMcpConstants.CODE_INVALID_PARAMS, "missing tools/call params.name!");
         }
 
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
         ToolRawDefinition rawTool = definitionMap.get(toolName);
         if (rawTool == null) {
-            return success(request.getId(), toolErrorContent("un-support tool call request, tool not found: " + toolName));
+            return JsonRpcResponse.success(request.getId(), JsonRpcToolCallResult.error("un-support tool call request, tool not found: " + toolName));
         }
 
-        Object argumentsObj = params.get("arguments");
-        Map<String, Object> argumentsMap = new LinkedHashMap<>();
-        if (argumentsObj instanceof Map) {
-            argumentsMap.putAll((Map<String, Object>) argumentsObj);
-        }
+        Map<String, Object> argumentsMap = params.getArguments();
 
         try {
             Object ret = ToolRawHelper.invokeTool(rawTool, argumentsMap, invocationHandler);
-            return success(request.getId(), toolSuccessContent(ret));
+            return JsonRpcResponse.success(request.getId(), JsonRpcToolCallResult.success(toText(ret)));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
-            return success(request.getId(), toolErrorContent(e.getMessage()));
+            return JsonRpcResponse.success(request.getId(), JsonRpcToolCallResult.error(e.getMessage()));
         }
     }
 
-    protected Map<String, Object> toolSuccessContent(Object ret) {
-        return toolContent(toText(ret), false);
-    }
-
-    protected Map<String, Object> toolErrorContent(String message) {
-        return toolContent(message, true);
-    }
-
-    protected Map<String, Object> toolContent(String text, boolean isError) {
-        Map<String, Object> textContent = new LinkedHashMap<>();
-        textContent.put("type", "text");
-        textContent.put("text", text);
-
-        List<Map<String, Object>> content = new ArrayList<>();
-        content.add(textContent);
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("content", content);
-        result.put("isError", isError);
-        return result;
-    }
 
     protected String toText(Object ret) {
         if (ret == null) {
@@ -210,19 +185,5 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
         }
     }
 
-    protected JsonRpcResponse<Object> success(Long id, Object result) {
-        JsonRpcResponse<Object> ret = new JsonRpcResponse<>();
-        ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
-        ret.setId(id);
-        ret.setResult(result);
-        return ret;
-    }
 
-    protected JsonRpcResponse<Object> error(Long id, int code, String message) {
-        JsonRpcResponse<Object> ret = new JsonRpcResponse<>();
-        ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
-        ret.setId(id);
-        ret.setError(new JsonRpcError(code, message));
-        return ret;
-    }
 }

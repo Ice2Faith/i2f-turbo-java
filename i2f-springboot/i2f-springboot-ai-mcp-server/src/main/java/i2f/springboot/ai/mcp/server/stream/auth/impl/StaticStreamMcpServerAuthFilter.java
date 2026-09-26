@@ -2,7 +2,7 @@ package i2f.springboot.ai.mcp.server.stream.auth.impl;
 
 import i2f.net.http.data.HttpHeaders;
 import i2f.springboot.ai.mcp.server.stream.auth.StreamMcpServerAuthFilter;
-import i2f.springboot.ai.mcp.server.stream.data.JsonRpcRequest;
+import i2f.springboot.ai.mcp.server.stream.data.ServerJsonRpcRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -21,7 +21,7 @@ public class StaticStreamMcpServerAuthFilter implements StreamMcpServerAuthFilte
     protected Set<String> allowBearerTokens = new HashSet<>();
 
     @Override
-    public boolean verify(JsonRpcRequest payload, HttpHeaders headers) {
+    public boolean verify(ServerJsonRpcRequest payload, HttpHeaders headers) {
         if (!enable) {
             return true;
         }

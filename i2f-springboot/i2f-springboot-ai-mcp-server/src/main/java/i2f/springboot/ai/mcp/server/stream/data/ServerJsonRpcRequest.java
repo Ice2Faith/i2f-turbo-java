@@ -1,5 +1,6 @@
 package i2f.springboot.ai.mcp.server.stream.data;
 
+import i2f.ai.rest.mcp.official.data.JsonRpcRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,9 +14,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class JsonRpcRequest {
-    protected String jsonrpc;
-    protected Long id;
-    protected String method;
-    protected Map<String, Object> params;
+public class ServerJsonRpcRequest extends JsonRpcRequest<Map<String, Object>> {
+
 }
