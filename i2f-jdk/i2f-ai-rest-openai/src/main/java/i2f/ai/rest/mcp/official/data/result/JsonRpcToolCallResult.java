@@ -17,7 +17,7 @@ import java.util.Map;
 @NoArgsConstructor
 public class JsonRpcToolCallResult {
     protected List<Map<String, Object>> content;
-    private boolean isError;
+    protected boolean isError;
 
     public static JsonRpcToolCallResult success(String text) {
         return of(text, false);
