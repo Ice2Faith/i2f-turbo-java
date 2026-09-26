@@ -1,8 +1,8 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -13,8 +13,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class OpenAiAssistantMessage implements OpenAiMessage {
+public class OpenAiAssistantMessage implements OpenAiMessage, BaseMutator<OpenAiAssistantMessage> {
     protected final String role = OpenAiConsts.ASSISTANT;
     protected String content;
     protected List<OpenAiToolCall> tool_calls;

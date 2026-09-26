@@ -8,8 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -21,7 +20,7 @@ import java.util.function.Function;
  */
 public class LruMap<K, V> extends LinkedHashMap<K, V> {
     protected final AtomicInteger maxSize = new AtomicInteger(4096);
-    protected final ReadWriteLock lock = new ReentrantReadWriteLock();
+    protected final ReentrantLock lock = new ReentrantLock();
 
     public LruMap() {
     }
@@ -71,7 +70,7 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
     }
 
     protected void shrink() {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             Map<K, V> map = new LinkedHashMap<>(this);
             clear();
@@ -85,308 +84,308 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
                 max--;
             }
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
 
     public <R> R atomic(Function<LruMap<K, V>, R> wrapper) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return wrapper.apply(this);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return size() > maxSize.get();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     protected void finalize() throws Throwable {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             super.finalize();
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean containsValue(Object value) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.containsValue(value);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V get(Object key) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.get(key);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V getOrDefault(Object key, V defaultValue) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.getOrDefault(key, defaultValue);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void clear() {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             super.clear();
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
 
     @Override
     public Set<K> keySet() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.keySet();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Collection<V> values() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.values();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Set<Map.Entry<K, V>> entrySet() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.entrySet();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void forEach(BiConsumer<? super K, ? super V> action) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             super.forEach(action);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void replaceAll(BiFunction<? super K, ? super V, ? extends V> function) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             super.replaceAll(function);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int size() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.size();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean isEmpty() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.isEmpty();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean containsKey(Object key) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.containsKey(key);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V put(K key, V value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.put(key, value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public void putAll(Map<? extends K, ? extends V> m) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             super.putAll(m);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V remove(Object key) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.remove(key);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V putIfAbsent(K key, V value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.putIfAbsent(key, value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean remove(Object key, Object value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.remove(key, value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean replace(K key, V oldValue, V newValue) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.replace(key, oldValue, newValue);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V replace(K key, V value) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.replace(key, value);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.computeIfAbsent(key, mappingFunction);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V computeIfPresent(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.computeIfPresent(key, remappingFunction);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V compute(K key, BiFunction<? super K, ? super V, ? extends V> remappingFunction) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.compute(key, remappingFunction);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public V merge(K key, V value, BiFunction<? super V, ? super V, ? extends V> remappingFunction) {
-        lock.writeLock().lock();
+        lock.lock();
         try {
             return super.merge(key, value, remappingFunction);
         } finally {
-            lock.writeLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public Object clone() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.clone();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public boolean equals(Object o) {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.equals(o);
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public int hashCode() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.hashCode();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 
     @Override
     public String toString() {
-        lock.readLock().lock();
+        lock.lock();
         try {
             return super.toString();
         } finally {
-            lock.readLock().unlock();
+            lock.unlock();
         }
     }
 

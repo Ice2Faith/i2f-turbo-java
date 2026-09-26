@@ -1,7 +1,7 @@
 package i2f.design.pattern.behavioral.visitor.emplyee.impl;
 
-import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 import i2f.design.pattern.behavioral.visitor.emplyee.Employee;
+import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 
 /**
  * 访问者模式 —— 高管（ConcreteElement：ExecutiveEmployee）
@@ -36,8 +36,8 @@ public class ExecutiveEmployee extends Employee {
      */
     private double companyProfit;
 
-    public ExecutiveEmployee(String name, double baseSalary, double profitSharingPercentage, 
-                            double stockOptions, double companyProfit) {
+    public ExecutiveEmployee(String name, double baseSalary, double profitSharingPercentage,
+                             double stockOptions, double companyProfit) {
         super(name, "高管", baseSalary);
         this.profitSharingPercentage = profitSharingPercentage;
         this.stockOptions = stockOptions;

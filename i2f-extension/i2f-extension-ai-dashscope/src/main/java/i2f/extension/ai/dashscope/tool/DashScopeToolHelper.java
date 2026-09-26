@@ -7,8 +7,8 @@ import com.alibaba.dashscope.utils.JsonUtils;
 import com.google.gson.JsonObject;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -69,9 +69,9 @@ public class DashScopeToolHelper {
     public static DashScopeToolDefinition fromRaw(ToolRawDefinition definition) {
         DashScopeToolDefinition ret = new DashScopeToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getJsonSchema();
+        FunctionJsonSchema functionSchema = definition.getJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
+        Map<String, Object> parametersSchema = functionSchema.getParameters();
         String json = JsonUtils.toJson(parametersSchema);
         JsonObject jsonObject = JsonUtils.parseString(json).getAsJsonObject();
         ToolFunction function = ToolFunction.builder().function(

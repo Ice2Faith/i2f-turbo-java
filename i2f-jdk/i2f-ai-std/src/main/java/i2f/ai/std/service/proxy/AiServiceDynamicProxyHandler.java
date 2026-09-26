@@ -13,6 +13,7 @@ import i2f.context.std.INamingContext;
 import i2f.invokable.IInvokable;
 import i2f.invokable.method.impl.jdk.JdkMethod;
 import i2f.match.regex.RegexUtil;
+import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.proxy.std.impl.MethodHandlesUtil;
 import i2f.reflect.vistor.Visitor;
@@ -21,8 +22,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -35,7 +34,7 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler {
+public class AiServiceDynamicProxyHandler implements IProxyInvocationHandler, BaseMutator<AiServiceDynamicProxyHandler> {
     protected INamingContext context;
     protected JsonSchemaAnnotationResolver resolver = JsonSchemaAnnotationResolver.INSTANCE;
 

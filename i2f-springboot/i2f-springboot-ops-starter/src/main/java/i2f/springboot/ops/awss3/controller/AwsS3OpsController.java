@@ -5,10 +5,7 @@ import i2f.io.filesystem.IFile;
 import i2f.io.stream.StreamUtil;
 import i2f.match.impl.SimpleMatcher;
 import i2f.springboot.ops.awss3.data.AwsS3OperateDto;
-import i2f.springboot.ops.common.OpsException;
-import i2f.springboot.ops.common.OpsSecureDto;
-import i2f.springboot.ops.common.OpsSecureReturn;
-import i2f.springboot.ops.common.OpsSecureTransfer;
+import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
 import i2f.springboot.ops.home.data.OpsHomeMenuGroup;
 import i2f.springboot.ops.home.provider.IOpsProvider;
@@ -22,6 +19,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -42,12 +40,13 @@ import java.util.*;
  * @date 2025/11/8 17:55
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.aws-s3.enable:true}")
 @ConditionalOnClass(S3Client.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/aws-s3")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/aws-s3")
 public class AwsS3OpsController implements IOpsProvider {
     @Autowired
     protected OpsSecureTransfer transfer;

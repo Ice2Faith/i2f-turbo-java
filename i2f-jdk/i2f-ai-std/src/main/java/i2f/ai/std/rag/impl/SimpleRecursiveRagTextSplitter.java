@@ -3,6 +3,7 @@ package i2f.ai.std.rag.impl;
 import i2f.ai.std.rag.RagTextSplitter;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -16,7 +17,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class SimpleRecursiveRagTextSplitter implements RagTextSplitter {
+public class SimpleRecursiveRagTextSplitter implements RagTextSplitter, BaseMutator<SimpleRecursiveRagTextSplitter> {
 
     public int maxSegmentSizeInChars = 512;
     public double maxOverlapRate = 0.15;

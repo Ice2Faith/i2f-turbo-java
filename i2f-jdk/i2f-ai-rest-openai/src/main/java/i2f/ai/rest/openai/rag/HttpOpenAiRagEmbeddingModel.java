@@ -4,14 +4,15 @@ import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingReqDto;
 import i2f.ai.rest.openai.rag.data.HttpOpenAiEmbeddingRespDto;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.ai.std.rag.RagVector;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.rest.IRestClient;
 import i2f.net.http.rest.data.RestHttpRequest;
 import i2f.net.http.rest.data.RestHttpResponse;
+import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,9 +24,8 @@ import java.util.*;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
-    protected IRestClient restClient;
+public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel, BaseMutator<HttpOpenAiRagEmbeddingModel> {
+    protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
     protected String apiKey;
     protected String model;
@@ -77,18 +77,18 @@ public class HttpOpenAiRagEmbeddingModel implements RagEmbeddingModel {
 
     public HttpOpenAiEmbeddingRespDto embedding(HttpOpenAiEmbeddingReqDto req) {
         try {
-            RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(RestHttpRequest.builder()
-                            .url(getEmbeddingUrl())
-                            .method(HttpMethodConstants.POST)
-                            .headers(HttpHeaders.create()
+            RestHttpResponse<HttpOpenAiEmbeddingRespDto> resp = restClient.rest(new RestHttpRequest().toMutator()
+                            .set(u -> u::setUrl, getEmbeddingUrl())
+                            .set(u -> u::setMethod, HttpMethodConstants.POST)
+                            .set(u -> u::setHeaders, HttpHeaders.create()
                                     .apply(headers -> {
                                         if (apiKey != null && !apiKey.isEmpty()) {
                                             headers.add("Authorization", "Bearer " + apiKey);
                                         }
                                     })
                             )
-                            .body(req)
-                            .build(),
+                            .set(u -> u::setBody, req)
+                            .done(),
                     HttpOpenAiEmbeddingRespDto.class);
             HttpOpenAiEmbeddingRespDto ret = resp.getBody();
             return ret;

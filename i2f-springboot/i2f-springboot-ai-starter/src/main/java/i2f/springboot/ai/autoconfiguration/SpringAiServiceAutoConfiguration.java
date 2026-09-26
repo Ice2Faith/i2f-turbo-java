@@ -1,5 +1,6 @@
 package i2f.springboot.ai.autoconfiguration;
 
+import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
 import i2f.ai.std.agent.AiAgent;
 import i2f.ai.std.model.AiModel;
 import i2f.ai.std.rag.RagWorker;
@@ -7,7 +8,9 @@ import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.extension.ai.dashscope.model.DashScopeModel;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.spring.web.rest.SpringWebRestClient;
 import i2f.springboot.ai.properties.SpringAiModelDashScopeProperties;
+import i2f.springboot.ai.properties.SpringAiModelRestOpenAiProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +18,15 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.databind.ObjectMapper;
+
+import java.time.Duration;
 
 /**
  * @author Ice2Faith
@@ -31,13 +38,30 @@ import tools.jackson.databind.ObjectMapper;
 @Slf4j
 @Data
 @EnableConfigurationProperties({
-        SpringAiModelDashScopeProperties.class
+        SpringAiModelDashScopeProperties.class,
+        SpringAiModelRestOpenAiProperties.class
 })
 public class SpringAiServiceAutoConfiguration implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    @ConditionalOnExpression("${i2f.springboot.ai.model.dashscope.enable:true}")
+    @ConditionalOnExpression("${i2f.springboot.ai.model.rest-openai.enable:true}")
+    @ConditionalOnMissingBean(AiModel.class)
+    @Bean
+    public AiModel aiModel(@Autowired SpringAiModelRestOpenAiProperties springAiModelRestOpenAiProperties) {
+        RestTemplate restTemplate = new RestTemplateBuilder()
+                .setConnectTimeout(Duration.ofSeconds(30))
+                .setReadTimeout(Duration.ofMinutes(10))
+                .build();
+        return new HttpOpenAiAiModel().toMutator()
+                .set(u -> u::setRestClient, new SpringWebRestClient(restTemplate))
+                .set(u -> u::setBaseUrl, springAiModelRestOpenAiProperties.getBaseUrl())
+                .set(u -> u::setApiKey, springAiModelRestOpenAiProperties.getApiKey())
+                .set(u -> u::setModel, springAiModelRestOpenAiProperties.getModel())
+                .done();
+    }
+
+    @ConditionalOnExpression("${i2f.springboot.ai.model.dashscope.enable:false}")
     @ConditionalOnMissingBean(AiModel.class)
     @Bean
     public AiModel aiModel(@Autowired SpringAiModelDashScopeProperties springAiModelDashScopeProperties) {

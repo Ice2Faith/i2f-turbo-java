@@ -78,6 +78,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-browser-std</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-bytes</artifactId>
         </dependency>
         <dependency>
@@ -362,6 +366,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-lambda-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-launcher</artifactId>
         </dependency>
         <dependency>
@@ -407,6 +415,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-mixins</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-mutator</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
@@ -515,6 +527,10 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spi-annotations</artifactId>
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>

@@ -2,8 +2,8 @@ package i2f.design.pattern.concurrency.producerConsumer;
 
 import i2f.design.pattern.concurrency.producerConsumer.buffer.FixedSizeBuffer;
 import i2f.design.pattern.concurrency.producerConsumer.consumer.Waiter;
-import i2f.design.pattern.concurrency.producerConsumer.product.Dish;
 import i2f.design.pattern.concurrency.producerConsumer.producer.Chef;
+import i2f.design.pattern.concurrency.producerConsumer.product.Dish;
 
 /**
  * 生产者-消费者模式 —— 调用演示

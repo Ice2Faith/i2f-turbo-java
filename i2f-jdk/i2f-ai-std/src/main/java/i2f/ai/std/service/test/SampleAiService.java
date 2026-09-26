@@ -2,6 +2,7 @@ package i2f.ai.std.service.test;
 
 import i2f.ai.std.agent.AiAgent;
 import i2f.ai.std.service.annotations.*;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 
@@ -26,7 +27,10 @@ public interface SampleAiService {
     String orderProcess(@AiUser String question,
                         @AiParam(value = "orderId", description = "订单号") String orderId);
 
-    @Tool(description = "撤销订单")
+    @Tool(tags = {
+            AiTags.WRITABLE_VALUE,
+            AiTags.SENSIBLE_VALUE
+    }, description = "撤销订单")
     default String cancelOrder(@ToolParam(description = "订单号") String orderId) {
         return "撤销成功";
     }

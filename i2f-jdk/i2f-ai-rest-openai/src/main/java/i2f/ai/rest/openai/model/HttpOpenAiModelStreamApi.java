@@ -3,9 +3,12 @@ package i2f.ai.rest.openai.model;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.rest.openai.model.data.chunk.OpenAiCompletionChoiceChunk;
 import i2f.ai.rest.openai.model.data.chunk.OpenAiCompletionChunkRespDto;
+import i2f.mutator.BaseMutator;
 import i2f.net.http.consts.CharsetConstants;
 import i2f.net.http.consts.HttpHeaderConstants;
+import i2f.net.http.data.HttpHeaders;
 import i2f.net.http.data.HttpRequest;
+import i2f.net.http.impl.HttpUrlConnectProcessor;
 import i2f.net.http.interfaces.IHttpProcessor;
 import i2f.reference.Reference;
 import i2f.reflect.ReflectResolver;
@@ -13,7 +16,6 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,9 +31,8 @@ import java.util.function.Consumer;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class HttpOpenAiModelStreamApi {
-    protected IHttpProcessor httpProcessor;
+public class HttpOpenAiModelStreamApi implements BaseMutator<HttpOpenAiModelStreamApi> {
+    protected IHttpProcessor httpProcessor = new HttpUrlConnectProcessor();
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected String baseUrl;
     protected String apiKey;
@@ -185,14 +186,15 @@ public class HttpOpenAiModelStreamApi {
             }
 
             httpProcessor.http(HttpRequest.doPost(getChatCompletionsUrl())
-                            .json()
-                            .addHeader(HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
-                            .applyHeader(headers -> {
+                            .set(u -> u::json)
+                            .set2(u -> u::addHeader, HttpHeaderConstants.ContentEncoding, CharsetConstants.Utf8)
+                            .set(u -> u::applyHeader, (Consumer<HttpHeaders>) headers -> {
                                 if (apiKey != null && !apiKey.isEmpty()) {
                                     headers.add("Authorization", "Bearer " + apiKey);
                                 }
                             })
-                            .setData(reqMap)
+                            .set(u -> u::setData, reqMap)
+                            .done()
                     , response -> {
                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
                             String line = null;

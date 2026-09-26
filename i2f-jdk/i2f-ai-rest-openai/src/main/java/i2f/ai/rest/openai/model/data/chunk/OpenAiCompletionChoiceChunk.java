@@ -1,9 +1,9 @@
 package i2f.ai.rest.openai.model.data.chunk;
 
 import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -12,8 +12,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class OpenAiCompletionChoiceChunk {
+public class OpenAiCompletionChoiceChunk implements BaseMutator<OpenAiCompletionChoiceChunk> {
     protected Integer index;
     protected OpenAiAssistantMessageRespDto delta;
     protected Object logprobs;

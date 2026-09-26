@@ -10,6 +10,22 @@
 - provide some useful utils package
 - tiny,unique,simple
 
+## 建议
+
+- 随着AI工具对jdk版本的要求
+- 以及行业对jdk版本的逐步升级
+- 项目将会逐步建议到 jdk17/jdk21 分支
+- 部分功能受到jdk限制，不在 jdk8 分支继续
+- jdk8 分支可能只用于定义契约/标准接口
+
+## suggestions
+
+- driven by the JDK version requirements of `AI` tools
+- and the industry's gradual shift toward newer JDK versions
+- the project will progressively transition to the `jdk17` / `jdk21` branches
+- certain features restricted by JDK limitations will no longer be maintained on the `jdk8` branch
+- the `jdk8` branch may be retained solely for defining contracts and standard interfaces
+
 ## 打包文件
 
 - 个人项目

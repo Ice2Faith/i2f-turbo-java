@@ -61,10 +61,10 @@ public class Memento {
      * <p>使用 final 字段确保备忘录一旦创建就不可修改，
      * 这是备忘录模式的重要特性——状态快照应该是不可变的。</p>
      *
-     * @param level 角色等级
-     * @param hp 生命值
-     * @param mp 魔法值
-     * @param attack 攻击力
+     * @param level   角色等级
+     * @param hp      生命值
+     * @param mp      魔法值
+     * @param attack  攻击力
      * @param defense 防御力
      */
     public Memento(int level, int hp, int mp, int attack, int defense) {

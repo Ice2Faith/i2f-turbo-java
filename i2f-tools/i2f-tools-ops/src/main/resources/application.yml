@@ -6,7 +6,80 @@ xproc4j:
   xml-locations: classpath*:procedure/**/*.xml;classpath*:com/**/procedure/*.xml
   watching-directories: classpath*:procedure/;classpath*:com/
 
+
 ai:
   tools:
     file:
       root-path: ./ai-root
+      full-access: false
+    webjs:
+      enable: true
+    selenium-web-search:
+      enable: false
+    playwright-web-search:
+      enable: false
+    command:
+      enable: false
+    powershell:
+      enable: false
+    mcp-gateway:
+      enable: true
+    robot:
+      enable: false
+    pandoc:
+      enable: false
+    form:
+      enable: false
+    groovy:
+      enable: false
+    python:
+      enable: false
+    nodejs:
+      enable: false
+    dashscope-t2i:
+      enable: false
+    kling-t2i:
+      enable: false
+    vidu-t2i:
+      enable: false
+    happyhorse-t2v:
+      enable: false
+    kling-t2v:
+      enable: false
+    pixverse-t2v:
+      enable: false
+    vidu-t2v:
+      enable: false
+  rags:
+    enable: false
+    embedding:
+      baseUrl: http://localhost:11434/v1
+      apiKey: xxx
+      model: qwen3-embedding:0.6b
+      dimension: 1024
+      enableLoadDocs: false
+      docsPath: ./rags
+      maxSegmentSizeInChars: 512
+      docsEmbedBatchSize: 10
+      maxOverlapRate: 0.15
+      enableMarkitdownDocReader: false
+      enableEasyocrDocReader: false
+      enablePandocDocReader: false
+  tts:
+    qwen:
+      enable: false
+      url: wss://llm-xxxx.cn-beijing.maas.aliyuncs.com/api-ws/v1/inference
+      apiKey: sk-xxxx
+      model: qwen-audio-3.0-tts-flash
+      voice: longanhuan_v3.6
+
+# ops 操作面板
+i2f:
+  springboot:
+    ops:
+      open-ai:
+        enable: true
+      dashscope:
+        enable: true
+      secure:
+#         cert:

@@ -133,6 +133,10 @@
         <debugger.positionManagerFactory
                 implementation="i2f.turbo.idea.plugin.jdbc.procedure.debugger.JdbcProcedurePositionManagerFactory"/>
 
+        <!-- 自定义属性不报错 -->
+        <xml.elementDescriptorProvider
+                implementation="i2f.turbo.idea.plugin.jdbc.procedure.xml.XProcOpenAttrDescriptorProvider"/>
+
         <!-- *************************** TinyScript  begin *************************** -->
         <!-- 注册文件类型 -->
         <fileType name="TinyScript"
@@ -176,6 +180,10 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.completion.TinyScriptCompletionContributor"/>
 
+        <lang.foldingBuilder
+                language="TinyScript"
+                implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.folding.TinyScriptFoldingBuilder"/>
+
         <lang.formatter
                 language="TinyScript"
                 implementationClass="i2f.turbo.idea.plugin.tinyscript.lang.formatter.TinyScriptFormattingModelBuilder"/>
@@ -190,6 +198,42 @@
 
         <!-- *************************** TinyScript  end *************************** -->
 
+        <!-- *************************** Ognl  begin *************************** -->
+
+        <!-- 注册文件类型 -->
+        <fileType name="Ognl"
+                  implementationClass="i2f.turbo.idea.plugin.ognl.OgnlFileType"
+                  fieldName="INSTANCE"
+                  language="Ognl"
+                  extensions="ognl"/>
+
+        <!-- 注册语言解析器 -->
+        <lang.parserDefinition
+                language="Ognl"
+                implementationClass="i2f.turbo.idea.plugin.ognl.lang.OgnlParserDefinition"/>
+
+        <!-- 定义语法高亮 -->
+        <lang.syntaxHighlighterFactory
+                language="Ognl"
+                implementationClass="i2f.turbo.idea.plugin.ognl.lang.highlighter.OgnlSyntaxHighlighterFactory"/>
+
+        <!-- 定义颜色配置页 -->
+        <colorSettingsPage
+                implementation="i2f.turbo.idea.plugin.ognl.lang.highlighter.OgnlColorSettingsPage"/>
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="Ognl"
+                           implementationClass="i2f.turbo.idea.plugin.ognl.lang.bracket.OgnlPairedBraceMatcher"/>
+
+        <completion.contributor
+                language="Ognl"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.ognl.lang.completion.OgnlCompletionContributor"/>
+
+        <lang.formatter
+                language="Ognl"
+                implementationClass="i2f.turbo.idea.plugin.ognl.lang.formatter.OgnlFormattingModelBuilder"/>
+        <!-- *************************** Ognl  end *************************** -->
 
         <!-- *************************** funic  begin *************************** -->
 
@@ -235,6 +279,10 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.funic.lang.completion.FunicCompletionContributor"/>
 
+        <lang.foldingBuilder
+                language="Funic"
+                implementationClass="i2f.turbo.idea.plugin.funic.lang.folding.FunicFoldingBuilder"/>
+
         <lang.formatter
                 language="Funic"
                 implementationClass="i2f.turbo.idea.plugin.funic.lang.formatter.FunicFormattingModelBuilder"/>
@@ -247,8 +295,55 @@
         <debugger.positionManagerFactory
                 implementation="i2f.turbo.idea.plugin.funic.lang.debugger.FunicPositionManagerFactory"/>
 
+
         <!-- *************************** funic  end *************************** -->
 
+
+        <!-- *************************** funvi  begin *************************** -->
+
+        <!-- 注册文件类型 -->
+        <fileType name="Funvi"
+                  implementationClass="i2f.turbo.idea.plugin.funvi.FunviFileType"
+                  fieldName="INSTANCE"
+                  language="Funvi"
+                  extensions="fvi"/>
+
+        <!-- 注册语言解析器 -->
+        <lang.parserDefinition
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.FunviParserDefinition"/>
+
+        <!-- 定义语法高亮 -->
+        <lang.syntaxHighlighterFactory
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.highlighter.FunviSyntaxHighlighterFactory"/>
+
+        <!-- 定义颜色配置页 -->
+        <colorSettingsPage
+                implementation="i2f.turbo.idea.plugin.funvi.lang.highlighter.FunviColorSettingsPage"/>
+
+
+        <!-- 括号代码块配对高亮 -->
+        <lang.braceMatcher language="Funvi"
+                           implementationClass="i2f.turbo.idea.plugin.funvi.lang.bracket.FunviPairedBraceMatcher"/>
+
+        <!-- 定义语句模版 -->
+        <defaultLiveTemplatesProvider order="first"
+                                      implementation="i2f.turbo.idea.plugin.funvi.lang.live.templates.FunviLiveTemplatesProvider"/>
+
+        <!-- 注册 Live Templates 上下文类型，使 Funic 在 Live Templates 设置中可选 -->
+        <liveTemplateContextProvider
+                implementation="i2f.turbo.idea.plugin.funvi.lang.live.templates.FunviLiveTemplateContextProvider"/>
+
+        <completion.contributor
+                language="Funvi"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.completion.FunviCompletionContributor"/>
+
+        <lang.foldingBuilder
+                language="Funvi"
+                implementationClass="i2f.turbo.idea.plugin.funvi.lang.folding.FunviFoldingBuilder"/>
+        <!-- *************************** funvi  end *************************** -->
     </extensions>
 
 

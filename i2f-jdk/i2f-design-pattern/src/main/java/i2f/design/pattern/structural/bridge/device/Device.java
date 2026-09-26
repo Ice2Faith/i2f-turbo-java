@@ -1,7 +1,7 @@
 package i2f.design.pattern.structural.bridge.device;
 
-import i2f.design.pattern.structural.bridge.device.impl.TV;
 import i2f.design.pattern.structural.bridge.device.impl.Radio;
+import i2f.design.pattern.structural.bridge.device.impl.TV;
 import i2f.design.pattern.structural.bridge.remote.RemoteControl;
 
 /**

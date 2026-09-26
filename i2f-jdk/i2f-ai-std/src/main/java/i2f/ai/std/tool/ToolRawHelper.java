@@ -1,7 +1,10 @@
 package i2f.ai.std.tool;
 
+import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.definition.impl.DelegateToolDefinition;
 import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 import i2f.convert.obj.ObjectConvertor;
 import i2f.invokable.Invocation;
@@ -23,6 +26,16 @@ import java.util.function.Function;
  * @desc
  */
 public class ToolRawHelper {
+    public static ToolRawDefinition extractRawDefinition(ToolDefinition tool) {
+        if (tool instanceof DelegateToolDefinition) {
+            DelegateToolDefinition delegate = (DelegateToolDefinition) tool;
+            tool = delegate.getDelegate();
+        }
+        if (tool instanceof ToolRawDefinition) {
+            return (ToolRawDefinition) tool;
+        }
+        return null;
+    }
 
     public static <R> List<R> convertTools(Map<String, ToolRawDefinition> list, Function<ToolRawDefinition, R> convertor) {
         List<R> ret = new ArrayList<>();
@@ -125,17 +138,15 @@ public class ToolRawHelper {
             return null;
         }
         List<String> parameterNames = new ArrayList<>();
-        Map<String, Object> functionSchema = JsonSchema.getFunctionJsonSchema(resolver, method, parameterNames);
+        FunctionJsonSchema functionSchema = JsonSchema.getFunctionJsonSchema(resolver, method, parameterNames);
 
-        String name = (String) functionSchema.get(JsonSchema.SchemaField.NAME);
-        String description = (String) functionSchema.get(JsonSchema.SchemaField.DESCRIPTION);
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
+        String name = functionSchema.getName();
+        String description = functionSchema.getDescription();
 
         ToolRawDefinition definition = new ToolRawDefinition();
         definition.setJsonSchema(functionSchema);
         definition.setName(name);
         definition.setDescription(description);
-        definition.setParametersJsonSchema(parametersSchema);
         definition.setParameterNames(parameterNames);
         definition.setBindMethod(method);
         definition.setBindClass(method.getDeclaringClass());

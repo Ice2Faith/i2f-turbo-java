@@ -41,6 +41,7 @@ public class FileMime {
             {".pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"},
             {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
             {".docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"},
+            {".vue", "text/plain"},
             {".c", "text/plain"},
             {".cpp", "text/plain"},
             {".h", "text/plain"},

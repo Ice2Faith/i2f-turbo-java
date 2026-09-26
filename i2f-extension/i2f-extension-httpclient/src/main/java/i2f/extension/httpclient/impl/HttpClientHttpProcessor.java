@@ -16,7 +16,6 @@ import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.serialize.str.xml.impl.Xml2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.config.RequestConfig;
@@ -37,7 +36,6 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class HttpClientHttpProcessor implements IHttpProcessor {
     protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IXmlSerializer xmlSerializer = new Xml2Serializer();
@@ -45,6 +43,9 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
     @Override
     public <T> T http(HttpRequest request, IHttpResponseExtractor<T> extractor) throws IOException {
         IHttpRequestBodyHandler<HttpEntityEnclosingRequestBase> handler = new HttpClientFormRequestBodyHandler();
+        if (request.getHeader() == null) {
+            request.setHeader(HttpHeaders.create());
+        }
 
         String contentType = request.getHeader().getFirstHeader(HttpHeaderConstants.ContentType);
         if (contentType.contains(ContentTypeConstants.Json)) {
@@ -83,6 +84,7 @@ public class HttpClientHttpProcessor implements IHttpProcessor {
                 req.addHeader(item.getKey(), val);
             }
         }
+
 
         Object data = request.getData();
         if (data != null) {

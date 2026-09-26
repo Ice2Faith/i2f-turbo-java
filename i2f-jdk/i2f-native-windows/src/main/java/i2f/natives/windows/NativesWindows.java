@@ -913,5 +913,6 @@ public class NativesWindows {
             int mdcResizeMode,
             WinAppCallbacker callbacker);
 
+    public static native boolean deleteToRecycleBinModern(String filePath);
 }
 

@@ -1,8 +1,8 @@
 package i2f.ai.rest.openai.model.data;
 
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 /**
  * @author Ice2Faith
@@ -11,8 +11,7 @@ import lombok.experimental.SuperBuilder;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
-public class OpenAiToolCallFunction {
+public class OpenAiToolCallFunction implements BaseMutator<OpenAiToolCallFunction> {
     protected String name;
     protected String arguments;
 

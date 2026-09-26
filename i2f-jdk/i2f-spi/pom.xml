@@ -11,6 +11,13 @@
 
     <artifactId>i2f-spi</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-spi-annotations</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

@@ -11,6 +11,7 @@ import i2f.turbo.idea.plugin.funic.FunicConsts;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionScope;
 import i2f.turbo.idea.plugin.tinyscript.TinyScriptConsts;
+import i2f.turbo.idea.plugin.utils.CompletionUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -106,6 +107,17 @@ public class AnyHelpXmlCompletionContributor extends CompletionContributor {
                     result.addElement(item);
                 }
             }
+
+            Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
+            if (functions != null && !functions.isEmpty()) {
+                for (Map.Entry<String, Class<?>> attr : functions.entrySet()) {
+                    LookupElement item = LookupElementBuilder.create(attr.getKey())
+                            .withTypeText(attr.getValue().getSimpleName() + " Functions")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
         }
         if (scopes.contains(CompletionScope.SQL_IDENTIFIER)) {
             Set<String> candidates = CompletionHelper.getXmlFileSqlIdentifiersFast(position);
@@ -142,6 +154,17 @@ public class AnyHelpXmlCompletionContributor extends CompletionContributor {
                     result.addElement(item);
                 }
             }
+
+            Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
+            if (functions != null && !functions.isEmpty()) {
+                for (Map.Entry<String, Class<?>> attr : functions.entrySet()) {
+                    LookupElement item = LookupElementBuilder.create(attr.getKey())
+                            .withTypeText(attr.getValue().getSimpleName() + " Functions")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
         }
         if (scopes.contains(CompletionScope.FUNIC)) {
             Set<String> candidates = FunicConsts.KEYWORDS;
@@ -149,6 +172,17 @@ public class AnyHelpXmlCompletionContributor extends CompletionContributor {
                 for (String candidate : candidates) {
                     LookupElement item = LookupElementBuilder.create(candidate)
                             .withTypeText(FunicConsts.LANGUAGE_ID + " Keywords")
+                            .withIcon(XProc4jConsts.ICON)
+                            .withItemTextItalic(true);
+                    result.addElement(item);
+                }
+            }
+
+            Map<String, Class<?>> functions = CompletionUtils.FUNCTIONS;
+            if (functions != null && !functions.isEmpty()) {
+                for (Map.Entry<String, Class<?>> attr : functions.entrySet()) {
+                    LookupElement item = LookupElementBuilder.create(attr.getKey())
+                            .withTypeText(attr.getValue().getSimpleName() + " Functions")
                             .withIcon(XProc4jConsts.ICON)
                             .withItemTextItalic(true);
                     result.addElement(item);

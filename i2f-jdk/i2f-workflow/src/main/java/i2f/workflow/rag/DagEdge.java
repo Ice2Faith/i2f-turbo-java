@@ -2,7 +2,6 @@ package i2f.workflow.rag;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.function.Predicate;
 
@@ -16,7 +15,6 @@ import java.util.function.Predicate;
  */
 @Data
 @NoArgsConstructor
-@SuperBuilder
 public class DagEdge {
     /**
      * 起始节点ID

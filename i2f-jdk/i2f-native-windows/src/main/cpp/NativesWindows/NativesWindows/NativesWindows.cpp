@@ -23,15 +23,15 @@
 #include<winnt.h>//NT 系统支持
 #include<winsvc.h>//service 支持
 // shell依赖
+#include <shobjidl.h> // 包含 IFileOperation
 #include<ShellAPI.h>
-#include <ShlObj.h>
+#include <ShlObj.h> // 包含 SHCreateItemFromParsingName
 #pragma comment (lib,"shell32.lib")
 // msci
 #include<mmsystem.h>
 #pragma comment(lib,"winmm.lib")
 // gdi 附加依赖
 #pragma comment(lib,"msimg32.lib")
-
 
 template<typename PTR>
 PTR ptrOf(jlong hwnd){
@@ -5969,4 +5969,75 @@ jobject callbacker
 	appEnv->method = env->GetMethodID(appEnv->clazz, "callback", "(JJJJJ)J");
 
 	return createWin32App(&config);
+}
+
+
+
+
+std::wstring GetAbsolutePath(const std::wstring& relativePath) {
+	DWORD bufferSize = GetFullPathNameW(relativePath.c_str(), 0, NULL, NULL);
+	if (bufferSize == 0) {
+		return L"";
+	}
+
+	std::wstring absPath(bufferSize, L'\0');
+	DWORD result = GetFullPathNameW(relativePath.c_str(), bufferSize, &absPath[0], NULL);
+
+	if (result == 0 || result >= bufferSize){
+		return L"";
+	}
+
+	// 去除末尾多余的 \0 字符
+	absPath.resize(result);
+	return absPath;
+}
+
+bool DeleteToRecycleBinModern(const std::wstring& inputPath) {
+	std::wstring absPath = GetAbsolutePath(inputPath);
+	if (absPath.empty()) {
+		// 路径解析失败，直接返回
+		return false;
+	}
+
+	HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	if (FAILED(hr)){
+		return false;
+	}
+
+	bool success = false;
+	IFileOperation *pFileOp = NULL;
+	IShellItem *psiFrom = NULL;
+
+	hr = CoCreateInstance(CLSID_FileOperation, NULL, CLSCTX_ALL, IID_PPV_ARGS(&pFileOp));
+	if (SUCCEEDED(hr)) {
+		// 设置标志：允许撤销（进回收站）、静默、不弹确认框
+		pFileOp->SetOperationFlags(FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT);
+
+		hr = SHCreateItemFromParsingName(absPath.c_str(), NULL, IID_PPV_ARGS(&psiFrom));
+		if (SUCCEEDED(hr)) {
+			hr = pFileOp->DeleteItem(psiFrom, NULL);
+			if (SUCCEEDED(hr)) {
+				hr = pFileOp->PerformOperations();
+				success = SUCCEEDED(hr);
+			}
+			psiFrom->Release();
+		}
+		pFileOp->Release();
+	}
+
+	CoUninitialize();
+	return success;
+}
+
+extern "C" JNIEXPORT jboolean JNICALL
+JNI_METHOD(deleteToRecycleBinModern)(
+JNIEnv* env,
+jobject obj,
+jstring filePath
+){
+	wchar_t* filePath_ptr = jstring2wchar(env, filePath);
+	bool ret=DeleteToRecycleBinModern(filePath_ptr);
+	freeWchar(filePath_ptr);
+
+	return ret == true;
 }

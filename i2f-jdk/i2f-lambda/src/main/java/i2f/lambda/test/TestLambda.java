@@ -1,6 +1,6 @@
 package i2f.lambda.test;
 
-import i2f.lambda.inflater.LambdaInflater;
+import i2f.lambda.core.Lambda;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -72,7 +72,7 @@ public class TestLambda {
 
     public static void testByteArraySupplier(ByteArraySupplier supplier) throws Exception {
         System.out.println("-------------------");
-        SerializedLambda lambda = LambdaInflater.getSerializedLambda(supplier);
+        SerializedLambda lambda = Lambda.getSerializedLambda(supplier);
         System.out.println(lambda.getImplClass());
         System.out.println(lambda.getImplMethodName());
         System.out.println(lambda.getImplMethodSignature());
@@ -80,7 +80,7 @@ public class TestLambda {
 
     public static <T> void testExceptionConsumer(ExceptionConsumer<T> consumer) throws Exception {
         System.out.println("-------------------");
-        SerializedLambda lambda = LambdaInflater.getSerializedLambda(consumer);
+        SerializedLambda lambda = Lambda.getSerializedLambda(consumer);
         System.out.println(lambda.getImplClass());
         System.out.println(lambda.getImplMethodName());
         System.out.println(lambda.getImplMethodSignature());
@@ -88,7 +88,7 @@ public class TestLambda {
 
     public static <T> void testIoExceptionConsumer(IoExceptionConsumer<T> consumer) throws Exception {
         System.out.println("-------------------");
-        SerializedLambda lambda = LambdaInflater.getSerializedLambda(consumer);
+        SerializedLambda lambda = Lambda.getSerializedLambda(consumer);
         System.out.println(lambda.getImplClass());
         System.out.println(lambda.getImplMethodName());
         System.out.println(lambda.getImplMethodSignature());
@@ -96,7 +96,7 @@ public class TestLambda {
 
     public static <T> void testIntConsumer(IntConsumer consumer) throws Exception {
         System.out.println("-------------------");
-        SerializedLambda lambda = LambdaInflater.getSerializedLambda(consumer);
+        SerializedLambda lambda = Lambda.getSerializedLambda(consumer);
         System.out.println(lambda.getImplClass());
         System.out.println(lambda.getImplMethodName());
         System.out.println(lambda.getImplMethodSignature());

@@ -2,6 +2,7 @@ package i2f.springboot.ops.elasticsearch.controller;
 
 import i2f.extension.elasticsearch.EsManager;
 import i2f.page.Page;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -19,6 +20,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,12 +35,13 @@ import java.util.Map;
  * @author Ice2Faith
  * @date 2025/11/27 11:15
  */
+@ConditionalOnExpression("${i2f.springboot.ops.elasticsearch.enable:true}")
 @ConditionalOnClass(RestHighLevelClient.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/elasticsearch")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/elasticsearch")
 public class ElasticSearchOpsController implements IOpsProvider {
 
     @Autowired

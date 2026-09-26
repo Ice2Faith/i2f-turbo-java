@@ -1,11 +1,15 @@
 package i2f.ai.std.rag;
 
+import i2f.ai.std.rag.data.RagSearchResultItem;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,30 +19,37 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@Tools
-public class RagTools {
+@Tools(tags = {
+        AiTags.RAG_VALUE
+})
+public class RagTools implements BaseMutator<RagTools> {
     protected RagWorker worker;
 
     public RagTools(RagWorker worker) {
         this.worker = worker;
     }
 
-    @Tool(description = "获取与文本内容具有高相关性的文档资料")
-    public String ragSearch(@ToolParam(description = "文本内容") String text,
-                            @ToolParam(description = "最多返回的条数，一般建议小于10，常用 3 或者 5") int topN) {
+    @Tool(tags = {
+            AiTags.READONLY_VALUE
+    }, description = "search relative documents from knowledge(include internal docs, organ info etc.) base by similar query. Note: work on system level.")
+    public List<RagSearchResultItem> rag_search(@ToolParam(value = "text", description = "the query content")
+                                                String text,
+                                                @ToolParam(value = "topN", description = "max returns count, cloud be null, default is 3, suggest lower than 10, for example 3 or 5")
+                                                Integer topN) {
+        List<RagSearchResultItem> ret = new ArrayList<>();
+        if (topN == null) {
+            topN = 3;
+        }
         List<RagEmbedding> list = worker.similar(text, topN);
-        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < list.size(); i++) {
             RagEmbedding rag = list.get(i);
-            if (i > 0) {
-                builder.append("\n");
-            }
-            builder.append("------------------------------------------").append("\n");
-            builder.append("## 相关度排名：").append(i + 1).append("\n");
-            builder.append("### 正文如下").append("\n");
-            builder.append(rag.getContent());
+
+            RagSearchResultItem item = new RagSearchResultItem();
+            item.setRank(i + 1);
+            item.setContent(rag.getContent());
+            ret.add(item);
         }
 
-        return builder.toString();
+        return ret;
     }
 }

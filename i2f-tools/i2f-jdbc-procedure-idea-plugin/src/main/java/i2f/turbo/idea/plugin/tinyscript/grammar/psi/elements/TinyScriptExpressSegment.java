@@ -42,9 +42,6 @@ public interface TinyScriptExpressSegment extends PsiElement {
     TinyScriptJsonValue getJsonValue();
 
     @Nullable
-    TinyScriptNegtiveSegment getNegtiveSegment();
-
-    @Nullable
     TinyScriptNewInstance getNewInstance();
 
     @Nullable

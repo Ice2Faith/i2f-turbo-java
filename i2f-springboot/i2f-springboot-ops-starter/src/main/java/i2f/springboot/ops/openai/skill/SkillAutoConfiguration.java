@@ -3,11 +3,14 @@ package i2f.springboot.ops.openai.skill;
 import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
+import i2f.spring.core.SpringContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -34,8 +37,8 @@ public class SkillAutoConfiguration implements ApplicationRunner {
 
     @ConditionalOnExpression("${ai.skills.tool.enable:true}")
     @Bean
-    public SkillsTools skillsTools() {
-        return new SkillsTools();
+    public SkillsTools skillsTools(@Autowired ApplicationContext applicationContext) {
+        return new SkillsTools(new SpringContext(applicationContext));
     }
 
     @Override

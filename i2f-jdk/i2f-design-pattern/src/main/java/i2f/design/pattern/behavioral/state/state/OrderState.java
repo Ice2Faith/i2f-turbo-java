@@ -1,11 +1,7 @@
 package i2f.design.pattern.behavioral.state;
 
 import i2f.design.pattern.behavioral.state.order.Order;
-import i2f.design.pattern.behavioral.state.state.impl.CancelledState;
-import i2f.design.pattern.behavioral.state.state.impl.CompletedState;
-import i2f.design.pattern.behavioral.state.state.impl.PaidState;
-import i2f.design.pattern.behavioral.state.state.impl.PendingState;
-import i2f.design.pattern.behavioral.state.state.impl.ShippingState;
+import i2f.design.pattern.behavioral.state.state.impl.*;
 
 /**
  * 状态模式 —— 订单状态（State：OrderState）

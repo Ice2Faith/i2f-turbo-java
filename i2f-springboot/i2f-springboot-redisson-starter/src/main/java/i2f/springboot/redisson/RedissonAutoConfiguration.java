@@ -1,5 +1,6 @@
 package i2f.springboot.redisson;
 
+import i2f.springboot.redisson.aop.RedissonLimitAop;
 import i2f.springboot.redisson.aop.RedissonLockAop;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +23,8 @@ import org.springframework.util.StringUtils;
 @Import({
         RedissonLockProvider.class,
         RedissonAtomic.class,
-        RedissonLockAop.class
+        RedissonLockAop.class,
+        RedissonLimitAop.class
 })
 @Data
 @ConfigurationProperties(prefix = "i2f.redission")

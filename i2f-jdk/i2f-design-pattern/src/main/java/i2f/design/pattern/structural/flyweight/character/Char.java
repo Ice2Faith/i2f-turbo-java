@@ -1,7 +1,7 @@
 package i2f.design.pattern.structural.flyweight.character;
 
-import i2f.design.pattern.structural.flyweight.context.TextContext;
 import i2f.design.pattern.structural.flyweight.character.impl.ConcreteChar;
+import i2f.design.pattern.structural.flyweight.context.TextContext;
 
 /**
  * 享元模式 —— 字符（Flyweight：Character）

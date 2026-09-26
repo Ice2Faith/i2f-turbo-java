@@ -62,7 +62,7 @@ public class CharacterFactory {
     public Char getCharacter(char symbol) {
         // 使用 Character.valueOf(symbol) 确保包装类型的一致性
         Character key = Character.valueOf(symbol);
-        
+
         // 检查享元池中是否已存在该字符
         if (!flyweightPool.containsKey(key)) {
             // 不存在：创建新享元并放入池中
@@ -71,7 +71,7 @@ public class CharacterFactory {
             flyweightPool.put(key, newChar);
             return newChar;
         }
-        
+
         // 已存在：返回共享实例
         System.out.println("  [工厂] 复用已有享元: '" + symbol + "'");
         return flyweightPool.get(key);

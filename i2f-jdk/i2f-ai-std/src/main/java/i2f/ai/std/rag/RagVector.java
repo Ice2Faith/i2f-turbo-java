@@ -1,5 +1,6 @@
 package i2f.ai.std.rag;
 
+import i2f.mutator.BaseMutator;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +14,7 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-public class RagVector {
+public class RagVector implements BaseMutator<RagVector> {
     protected double[] array;
 
     public RagVector(double[] arr) {

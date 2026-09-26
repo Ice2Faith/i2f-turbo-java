@@ -1,6 +1,7 @@
 package i2f.springboot.ops.dashscope.controller;
 
 import i2f.io.stream.StreamUtil;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +32,13 @@ import java.util.Map;
  * @date 2026/4/28 19:09
  * @desc
  */
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/d3/tripo")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/d3/tripo")
 public class DashScopeOpsD3TripoController {
     @Autowired
     protected OpsSecureTransfer transfer;
@@ -104,7 +107,7 @@ public class DashScopeOpsD3TripoController {
     public void downloadModel(@RequestParam("modelUrl") String modelUrl,
                               HttpServletResponse response) throws Exception {
 
-        controller.getRestTemplate().execute(modelUrl, HttpMethod.GET,null,(resp)->{
+        controller.getRestTemplate().execute(modelUrl, HttpMethod.GET, null, (resp) -> {
             MediaType contentType = resp.getHeaders().getContentType();
             response.setContentType(contentType.getType());
             long contentLength = resp.getHeaders().getContentLength();
@@ -112,7 +115,7 @@ public class DashScopeOpsD3TripoController {
 
             InputStream is = resp.getBody();
             ServletOutputStream os = response.getOutputStream();
-            StreamUtil.streamCopy(is,os,true);
+            StreamUtil.streamCopy(is, os, true);
 
             return null;
         });

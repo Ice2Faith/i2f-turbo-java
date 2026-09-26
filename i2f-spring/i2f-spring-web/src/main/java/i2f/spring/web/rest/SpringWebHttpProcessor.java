@@ -51,6 +51,9 @@ public class SpringWebHttpProcessor implements IHttpProcessor {
         }
 
         IHttpRequestBodyHandler<ClientHttpRequest> handler = new SpringWebAutoHttpRequestBodyHandler(restTemplate);
+        if (request.getHeader() == null) {
+            request.setHeader(HttpHeaders.create());
+        }
 
         String reqUrl = HttpUtil.generateUrl(request);
 

@@ -1,5 +1,6 @@
 package i2f.springboot.ops.dashscope.controller;
 
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -11,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,12 +30,13 @@ import java.util.Map;
  * @date 2026/4/28 19:09
  * @desc
  */
+@Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnClass(RestTemplate.class)
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/dashscope/task")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/dashscope/task")
 public class DashScopeOpsTaskController {
     @Autowired
     protected OpsSecureTransfer transfer;

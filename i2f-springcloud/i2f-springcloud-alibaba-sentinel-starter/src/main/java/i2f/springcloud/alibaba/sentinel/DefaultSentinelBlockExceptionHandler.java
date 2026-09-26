@@ -27,7 +27,7 @@ import tools.jackson.databind.ObjectMapper;
 public class DefaultSentinelBlockExceptionHandler implements BlockExceptionHandler {
 
     @Override
-    public void handle(HttpServletRequest request, HttpServletResponse response, String reason, BlockException e) throws Exception {
+    public void handle(HttpServletRequest request, HttpServletResponse response, String resourceName, BlockException e) throws Exception {
         log.warn("DefaultSentinelBlockExceptionHandler handle exception by rule:" + e.getRule());
         e.printStackTrace();
 
@@ -51,4 +51,6 @@ public class DefaultSentinelBlockExceptionHandler implements BlockExceptionHandl
 
         new ObjectMapper().writeValue(response.getWriter(), ret);
     }
+
+
 }

@@ -9,6 +9,7 @@ import i2f.database.metadata.reverse.ddl.impl.MysqlDdlDatabaseReverseEngineer;
 import i2f.database.metadata.reverse.ddl.impl.OracleDdlDatabaseReverseEngineer;
 import i2f.database.metadata.reverse.ddl.impl.PostgreDdlDatabaseReverseEngineer;
 import i2f.database.metadata.std.DatabaseMetadataProvider;
+import i2f.springboot.ops.common.OpsConsts;
 import i2f.springboot.ops.common.OpsSecureDto;
 import i2f.springboot.ops.common.OpsSecureReturn;
 import i2f.springboot.ops.common.OpsSecureTransfer;
@@ -19,6 +20,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,11 +35,12 @@ import java.util.List;
  * @date 2025/11/1 21:44
  * @desc
  */
+@ConditionalOnExpression("${i2f.springboot.ops.datasource.enable:true}")
 @Slf4j
 @Data
 @NoArgsConstructor
 @Controller
-@RequestMapping("/ops/datasource/metadata")
+@RequestMapping(OpsConsts.SPEL_BASE_URL + "/datasource/metadata")
 public class DatasourceOpsMetadataController {
 
     @Autowired

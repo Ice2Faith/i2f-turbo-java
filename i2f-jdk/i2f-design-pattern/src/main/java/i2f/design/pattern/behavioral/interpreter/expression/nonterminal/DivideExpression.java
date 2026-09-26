@@ -49,12 +49,12 @@ public class DivideExpression implements Expression {
     public double interpret(Context context) {
         // 递归解释左右子表达式
         double divisor = right.interpret(context);
-        
+
         // 卫语句：检查除数是否为零
         if (divisor == 0.0) {
             throw new ArithmeticException("除法运算错误：除数不能为零");
         }
-        
+
         return left.interpret(context) / divisor;
     }
 

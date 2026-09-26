@@ -7,11 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -56,15 +53,15 @@ public class HostIdHelper {
                 return ret;
             }
         }
-        List<Map.Entry<InetAddress, NetworkInterface>> list = NetworkUtil.getUsefulAddresses();
+        List<NetworkUtil.IpEntry> list = NetworkUtil.getUsefulAddresses();
         int port = getAppPort();
         int count = 0;
         String hostId = port + "@";
-        for (Map.Entry<InetAddress, NetworkInterface> entry : list) {
+        for (NetworkUtil.IpEntry entry : list) {
             if (count > 0) {
                 hostId += "|";
             }
-            hostId += "[" + entry.getKey().getHostAddress() + "#" + entry.getValue().getName() + "]";
+            hostId += "[" + entry.getInetAddress().getHostAddress() + "#" + entry.getNetworkInterface().getName() + "]";
             count++;
             if (count == 3) {
                 break;

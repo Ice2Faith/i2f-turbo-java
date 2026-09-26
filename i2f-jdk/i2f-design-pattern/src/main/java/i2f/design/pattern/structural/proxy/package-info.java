@@ -43,9 +43,9 @@
  *
  * <p><b>角色说明：</b></p>
  * <ul>
- *   <li>{@link IVideoPlayer} —— 抽象主题（Subject）：定义真实主题和代理的共同接口</li>
- *   <li>{@link VideoPlayer} —— 真实主题（RealSubject）：实际的视频播放器，负责播放业务</li>
- *   <li>{@link ProxyVideoPlayer} —— 代理（Proxy）：持有真实播放器引用，控制访问权限</li>
+ *   <li>{@link i2f.design.pattern.structural.proxy.player.IVideoPlayer} —— 抽象主题（Subject）：定义真实主题和代理的共同接口</li>
+ *   <li>{@link i2f.design.pattern.structural.proxy.player.impl.VideoPlayer} —— 真实主题（RealSubject）：实际的视频播放器，负责播放业务</li>
+ *   <li>{@link i2f.design.pattern.structural.proxy.ProxyVideoPlayer} —— 代理（Proxy）：持有真实播放器引用，控制访问权限</li>
  *   <li>{@link Test} —— 调用演示</li>
  * </ul>
  *
@@ -57,9 +57,9 @@
  *   <li>智能引用代理（Smart Reference Proxy）：访问时执行额外操作</li>
  * </ul>
  *
- * @see IVideoPlayer
- * @see VideoPlayer
- * @see ProxyVideoPlayer
+ * @see i2f.design.pattern.structural.proxy.player.IVideoPlayer
+ * @see i2f.design.pattern.structural.proxy.player.impl.VideoPlayer
+ * @see i2f.design.pattern.structural.proxy.ProxyVideoPlayer
  * @see Test
  */
 package i2f.design.pattern.structural.proxy;

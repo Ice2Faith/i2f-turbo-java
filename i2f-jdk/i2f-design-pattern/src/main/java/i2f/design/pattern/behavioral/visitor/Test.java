@@ -126,7 +126,7 @@ public class Test {
         System.out.println("3. 双分派机制：在运行时同时确定元素和访问者的具体类型，实现真正多态");
         System.out.println("4. 适用于\"对象结构稳定、操作频繁变化\"的场景");
         System.out.println("5. 访问者可以累积状态（如 SalaryCalculatorVisitor 累计总薪资）");
-        
+
         System.out.println();
         System.out.println("====== 访问者模式局限 ======");
         System.out.println("1. 增加新的元素类很困难（需要修改所有访问者接口和实现）");

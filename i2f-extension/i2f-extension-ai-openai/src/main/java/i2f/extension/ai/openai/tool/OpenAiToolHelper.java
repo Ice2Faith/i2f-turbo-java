@@ -7,8 +7,8 @@ import com.openai.models.chat.completions.ChatCompletionFunctionTool;
 import com.openai.models.chat.completions.ChatCompletionTool;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
-import i2f.ai.std.tool.schema.JsonSchema;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -70,9 +70,9 @@ public class OpenAiToolHelper {
     public static OpenAiToolDefinition fromRaw(ToolRawDefinition definition) {
         OpenAiToolDefinition ret = new OpenAiToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getJsonSchema();
+        FunctionJsonSchema functionSchema = definition.getJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
+        Map<String, Object> parametersSchema = functionSchema.getParameters();
 
         ChatCompletionTool tool = ChatCompletionTool.ofFunction(ChatCompletionFunctionTool.builder()
                 .function(FunctionDefinition.builder()

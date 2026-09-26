@@ -1,7 +1,7 @@
 package i2f.design.pattern.behavioral.visitor.emplyee.impl;
 
-import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 import i2f.design.pattern.behavioral.visitor.emplyee.Employee;
+import i2f.design.pattern.behavioral.visitor.visitor.EmployeeVisitor;
 
 /**
  * 访问者模式 —— 经理（ConcreteElement：ManagerEmployee）

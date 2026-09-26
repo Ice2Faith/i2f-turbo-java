@@ -5,6 +5,7 @@ import dev.langchain4j.model.chat.request.json.*;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchema;
+import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.context.std.IContext;
 
 import java.util.*;
@@ -65,9 +66,9 @@ public class Langchain4jToolHelper {
     public static Langchain4jToolDefinition fromRaw(ToolRawDefinition definition) {
         Langchain4jToolDefinition ret = new Langchain4jToolDefinition();
 
-        Map<String, Object> functionSchema = definition.getJsonSchema();
+        FunctionJsonSchema functionSchema = definition.getJsonSchema();
 
-        Map<String, Object> parametersSchema = (Map<String, Object>) functionSchema.get(JsonSchema.SchemaField.PARAMETERS);
+        Map<String, Object> parametersSchema = functionSchema.getParameters();
 
         ToolSpecification function = ToolSpecification.builder()
                 .name(definition.getName())

@@ -1,10 +1,10 @@
 package i2f.design.pattern.creational.factoryMethod.logistics;
 
+import i2f.design.pattern.creational.factoryMethod.logistics.impl.RoadLogistics;
+import i2f.design.pattern.creational.factoryMethod.logistics.impl.SeaLogistics;
 import i2f.design.pattern.creational.factoryMethod.transport.Transport;
 import i2f.design.pattern.creational.factoryMethod.transport.impl.Ship;
 import i2f.design.pattern.creational.factoryMethod.transport.impl.Truck;
-import i2f.design.pattern.creational.factoryMethod.logistics.impl.RoadLogistics;
-import i2f.design.pattern.creational.factoryMethod.logistics.impl.SeaLogistics;
 
 /**
  * 工厂方法模式 —— 物流公司（Creator：Logistics）

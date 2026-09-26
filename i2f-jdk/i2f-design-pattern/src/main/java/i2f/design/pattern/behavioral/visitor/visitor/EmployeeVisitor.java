@@ -1,11 +1,11 @@
 package i2f.design.pattern.behavioral.visitor.visitor;
 
-import i2f.design.pattern.behavioral.visitor.visitor.impl.AnnualReportVisitor;
-import i2f.design.pattern.behavioral.visitor.visitor.impl.SalaryCalculatorVisitor;
 import i2f.design.pattern.behavioral.visitor.emplyee.Employee;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.ExecutiveEmployee;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.ManagerEmployee;
 import i2f.design.pattern.behavioral.visitor.emplyee.impl.StaffEmployee;
+import i2f.design.pattern.behavioral.visitor.visitor.impl.AnnualReportVisitor;
+import i2f.design.pattern.behavioral.visitor.visitor.impl.SalaryCalculatorVisitor;
 
 /**
  * 访问者模式 —— 员工访问者（Visitor：EmployeeVisitor）

@@ -727,10 +727,10 @@ public class ReflectResolver {
             }
             return true;
         });
-        if(constructors==null || constructors.isEmpty()){
+        if (constructors == null || constructors.isEmpty()) {
             try {
-                T ret=getDefaultInstanceForJuc(clazz,args);
-                if(ret!=null){
+                T ret = getDefaultInstanceForJuc(clazz, args);
+                if (ret != null) {
                     return ret;
                 }
             } catch (Exception e) {
@@ -750,10 +750,10 @@ public class ReflectResolver {
         } catch (Throwable e) {
             ex = e;
         }
-        if(!success){
+        if (!success) {
             try {
-                ret=getDefaultInstanceForJuc(clazz,args);
-                if(ret!=null){
+                ret = getDefaultInstanceForJuc(clazz, args);
+                if (ret != null) {
                     return ret;
                 }
             } catch (Exception e) {
@@ -772,48 +772,48 @@ public class ReflectResolver {
         return ret;
     }
 
-    protected static <T> T getDefaultInstanceForJuc(Class<T> clazz,Object ... args){
-        if(Map.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new LinkedHashMap<>();
+    protected static <T> T getDefaultInstanceForJuc(Class<T> clazz, Object... args) {
+        if (Map.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new LinkedHashMap<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Map){
-                    return (T)new LinkedHashMap<>((Map)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Map) {
+                    return (T) new LinkedHashMap<>((Map) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new HashMap<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new HashMap<>((int) args[0]);
                 }
             }
         }
-        if(Set.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new LinkedHashSet<>();
+        if (Set.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new LinkedHashSet<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Collection){
-                    return (T)new LinkedHashSet<>((Collection)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Collection) {
+                    return (T) new LinkedHashSet<>((Collection) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new HashSet<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new HashSet<>((int) args[0]);
                 }
             }
-            return (T)new HashSet<>(Arrays.asList(args));
+            return (T) new HashSet<>(Arrays.asList(args));
         }
-        if(Collection.class.equals(clazz)
-        ||List.class.equals(clazz)){
-            if(args.length==0){
-                return (T)new ArrayList<>();
+        if (Collection.class.equals(clazz)
+                || List.class.equals(clazz)) {
+            if (args.length == 0) {
+                return (T) new ArrayList<>();
             }
-            if(args.length==1){
-                if(args[0] instanceof Collection){
-                    return (T)new ArrayList<>((Collection)args[0]);
+            if (args.length == 1) {
+                if (args[0] instanceof Collection) {
+                    return (T) new ArrayList<>((Collection) args[0]);
                 }
-                if(args[0] instanceof Integer){
-                    return (T)new ArrayList<>((int)args[0]);
+                if (args[0] instanceof Integer) {
+                    return (T) new ArrayList<>((int) args[0]);
                 }
             }
-            return (T)new ArrayList<>(Arrays.asList(args));
+            return (T) new ArrayList<>(Arrays.asList(args));
         }
         return null;
     }
@@ -1143,12 +1143,15 @@ public class ReflectResolver {
         if (realType.equals(requireType)) {
             return dis;
         }
+        if (TypeOf.isSameBasicType(realType, requireType)) {
+            return dis + 1;
+        }
         if (realType.equals(Object.class)) {
             return Integer.MAX_VALUE;
         }
         Class<?> superclass = realType.getSuperclass();
         if (superclass != null) {
-            int next = getTypeDistance(superclass, requireType, dis + 1);
+            int next = getTypeDistance(superclass, requireType, dis + 2);
             if (next != Integer.MAX_VALUE) {
                 return next;
             }
@@ -1156,7 +1159,7 @@ public class ReflectResolver {
         Class<?>[] interfaces = realType.getInterfaces();
         if (interfaces != null) {
             for (Class<?> nextClass : interfaces) {
-                int next = getTypeDistance(nextClass, requireType, dis + 1);
+                int next = getTypeDistance(nextClass, requireType, dis + 2);
                 if (next != -1) {
                     return next;
                 }
@@ -1306,35 +1309,29 @@ public class ReflectResolver {
         return valueGet(ivkObj, ivkObj.getClass(), fieldName);
     }
 
-    public static Object valueGet(Object ivkObj, Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
-        Field field = getField(clazz, fieldName);
-        if (field == null) {
-            throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
-        }
-        return valueGet(ivkObj, field);
-    }
-
     public static Object valueGetStatic(Field field) throws IllegalArgumentException, IllegalAccessException {
         return valueGet(null, field);
     }
 
     public static Object valueGet(Object ivkObj, Field field) throws IllegalArgumentException, IllegalAccessException {
-        Method getter = getGetter(field);
+        return valueGet(ivkObj, field.getDeclaringClass(), field.getName());
+    }
+
+    public static Object valueGet(Object ivkObj, Class<?> clazz, String fieldName) throws IllegalArgumentException, IllegalAccessException {
+        Method getter = getGetter(clazz, fieldName);
         boolean success = false;
         Object ret = null;
         Throwable ex = null;
         if (!success) {
             try {
                 if (getter != null) {
-                    boolean ok = true;
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        if (ivkObj == null) {
-                            if (!Modifier.isStatic(getter.getModifiers())) {
-                                ok = false;
-                            }
-                        }
+                    if (!Modifier.isPublic(getter.getModifiers())) {
+                        getter.setAccessible(true);
                     }
-                    if (ok) {
+                    if (Modifier.isStatic(getter.getModifiers())) {
+                        ret = getter.invoke(null);
+                        success = true;
+                    } else {
                         ret = getter.invoke(ivkObj);
                         success = true;
                     }
@@ -1345,9 +1342,20 @@ public class ReflectResolver {
         }
         if (!success) {
             try {
-                field.setAccessible(true);
-                ret = field.get(ivkObj);
-                success = true;
+                Field field = getField(clazz, fieldName);
+                if (field == null) {
+                    throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
+                }
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    field.setAccessible(true);
+                }
+                if (Modifier.isStatic(field.getModifiers())) {
+                    ret = field.get(null);
+                    success = true;
+                } else {
+                    ret = field.get(ivkObj);
+                    success = true;
+                }
             } catch (Throwable e) {
                 ex = e;
             }
@@ -1372,36 +1380,31 @@ public class ReflectResolver {
         return valueSet(ivkObj, ivkObj.getClass(), fieldName, value);
     }
 
-    public static Object valueSet(Object ivkObj, Class<?> clazz, String fieldName, Object value) throws IllegalArgumentException, IllegalAccessException {
-        Field field = getField(clazz, fieldName);
-        if (field == null) {
-            throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
-        }
-        return valueSet(ivkObj, field, value);
-    }
 
     public static Object valueSetStatic(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
         return valueSet(null, field, value);
     }
 
     public static Object valueSet(Object ivkObj, Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-        Method setter = getSetter(field);
+        return valueSet(ivkObj, field.getDeclaringClass(), field.getName(), value);
+    }
+
+    public static Object valueSet(Object ivkObj, Class<?> clazz, String fieldName, Object value) throws IllegalArgumentException, IllegalAccessException {
+        Method setter = getSetter(clazz, fieldName);
         boolean success = false;
         Object ret = null;
         Throwable ex = null;
         if (!success) {
             try {
                 if (setter != null) {
-                    boolean ok = true;
-                    if (Modifier.isStatic(field.getModifiers())) {
-                        if (ivkObj == null) {
-                            if (!Modifier.isStatic(setter.getModifiers())) {
-                                ok = false;
-                            }
-                        }
+                    if (!Modifier.isPublic(setter.getModifiers())) {
+                        setter.setAccessible(true);
                     }
-                    if (ok) {
-                        value = ObjectConvertor.tryConvertAsType(value, setter.getParameterTypes()[0]);
+                    value = ObjectConvertor.tryConvertAsType(value, setter.getParameterTypes()[0]);
+                    if (Modifier.isStatic(setter.getModifiers())) {
+                        ret = setter.invoke(null, value);
+                        success = true;
+                    } else {
                         ret = setter.invoke(ivkObj, value);
                         success = true;
                     }
@@ -1412,11 +1415,21 @@ public class ReflectResolver {
         }
         if (!success) {
             try {
-                field.setAccessible(true);
-                ret = field.get(ivkObj);
+                Field field = getField(clazz, fieldName);
+                if (field == null) {
+                    throw new IllegalAccessException("field [" + fieldName + "] not found in class [" + clazz + "]");
+                }
+                if (!Modifier.isPublic(field.getModifiers())) {
+                    field.setAccessible(true);
+                }
                 value = ObjectConvertor.tryConvertAsType(value, field.getType());
-                field.set(ivkObj, value);
-                success = true;
+                if (Modifier.isStatic(field.getModifiers())) {
+                    field.set(null, value);
+                    success = true;
+                } else {
+                    field.set(ivkObj, value);
+                    success = true;
+                }
             } catch (Throwable e) {
                 ex = e;
             }
@@ -1662,6 +1675,157 @@ public class ReflectResolver {
             }
         }
         return dst;
+    }
+
+
+    public static <T> T map2beanWeak(Map<String, Object> src, Class<T> targetClass) {
+        return map2bean(src, targetClass, null, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T map2beanWeak(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter) {
+        return map2bean(src, targetClass, fieldFilter, ReflectResolver::weakName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass) {
+        return map2bean(src, targetClass, null, null, null);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter) {
+        return map2bean(src, targetClass, fieldFilter, null, null);
+    }
+
+    public static <T> T map2bean(Map<String, Object> src, Class<T> targetClass, Predicate<String> fieldFilter,
+                                 Function<String, String> srcMapNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
+        if (src == null || targetClass == null) {
+            return null;
+        }
+
+        Object ret=null;
+        if(targetClass.isRecord()){
+            ret=null;
+        }else{
+            try {
+                ret=getInstance(targetClass);
+            } catch (IllegalAccessException e) {
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+        }
+
+        Map<String, Object> dstValueMap = new HashMap<>();
+
+        Map<String, String> dstNameMap = new HashMap<>();
+        Map<String, Class<?>> dstTypeMap = new HashMap<>();
+
+        RecordComponent[] recordComponents=null;
+        Map<Field, Class<?>> dstFields =null;
+
+        if(targetClass.isRecord()){
+            dstFields = getFields(targetClass);
+
+            recordComponents=targetClass.getRecordComponents();
+
+            for (RecordComponent item : recordComponents) {
+                String name = item.getName();
+                if (dstFieldNameMapper != null) {
+                    Field field=null;
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        if(entry.getKey().getName().equals(item.getName())){
+                            field=entry.getKey();
+                            break;
+                        }
+                    }
+                    String str = dstFieldNameMapper.apply(field);
+                    if (str != null) {
+                        name = str;
+                    }
+                }
+                dstTypeMap.put(item.getName(),item.getType());
+                dstNameMap.put(name, item.getName());
+            }
+        }else{
+            dstFields = getFields(targetClass);
+
+            for (Field item : dstFields.keySet()) {
+                String name = item.getName();
+                if (dstFieldNameMapper != null) {
+                    String str = dstFieldNameMapper.apply(item);
+                    if (str != null) {
+                        name = str;
+                    }
+                }
+                dstTypeMap.put(item.getName(),item.getType());
+                dstNameMap.put(name, item.getName());
+            }
+        }
+
+
+        for (Map.Entry<String, Object> entry : src.entrySet()) {
+            String name = entry.getKey();
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(name)) {
+                isTarget = true;
+            }
+            if (srcMapNameMapper != null) {
+                String str = srcMapNameMapper.apply(name);
+                if (str != null) {
+                    name = str;
+                }
+            }
+            String dstField = dstNameMap.get(name);
+            if (dstField == null) {
+                isTarget = false;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            try {
+                Object val = entry.getValue();
+                Class<?> dstType=dstTypeMap.get(dstField);
+                val = ObjectConvertor.tryConvertAsType(val, dstType);
+                dstValueMap.put(dstField,val);
+            } catch (Throwable e) {
+
+            }
+        }
+
+        // 填充值
+        if(targetClass.isRecord()){
+
+            Object[] recordArgs=new Object[recordComponents.length];
+            for (int i = 0; i < recordComponents.length; i++) {
+                RecordComponent cmp = recordComponents[i];
+                Object value = dstValueMap.get(cmp.getName());
+                recordArgs[i]=value;
+            }
+            Constructor<?> recordConstructor=null;
+            Constructor<?>[] constructors = targetClass.getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount()==recordArgs.length) {
+                    recordConstructor=constructor;
+                }
+            }
+            if(recordConstructor==null){
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+            try {
+                ret=recordConstructor.newInstance(recordArgs);
+            } catch (Exception e) {
+
+            }
+        }else{
+            for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                Field dstField = entry.getKey();
+                Object value = dstValueMap.get(dstField.getName());
+                try {
+                    valueSet(ret, dstField, value);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        return (T)ret;
     }
 
     public static <M extends Map<String, Object>> M bean2map(Object src, M dst) {
@@ -2001,6 +2165,237 @@ public class ReflectResolver {
         return dst;
     }
 
+    public static <T> T beanCopyWeak(Object src, Class<T> targetClass) {
+        return beanCopy(src, targetClass, null, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanCopyWeak(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy(src, targetClass, fieldFilter, ReflectResolver::weakFieldName, ReflectResolver::weakFieldName);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass) {
+        return beanCopy(src, targetClass, null, null, null, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy(src, targetClass, fieldFilter, null, null, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper) {
+        return beanCopy(src, targetClass, fieldFilter, srcFieldNameMapper, dstFieldNameMapper, null, null);
+    }
+
+    public static <T> T beanCopy(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                 Function<Field, String> srcFieldNameMapper,
+                                 Function<Field, String> dstFieldNameMapper,
+                                 Function<Object, Object> valueMapper,
+                                 Predicate<Object> newValueCopyFilter) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                srcFieldNameMapper == null ? null : (field) -> {
+                    String name = srcFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, dstFieldNameMapper == null ? null : (field) -> {
+                    String name = dstFieldNameMapper.apply(field);
+                    if (name == null) {
+                        return Collections.emptyList();
+                    }
+                    return Collections.singletonList(name);
+                }, valueMapper,
+                newValueCopyFilter);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass) {
+        return beanCopy0(src, targetClass, null,
+                null, null,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                null, null,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper) {
+        return beanCopy0(src, targetClass, fieldFilter,
+                srcFieldNameMapper, dstFieldNameMapper,
+                null, null);
+    }
+
+    public static <T> T beanCopy0(Object src, Class<T> targetClass, Predicate<Field> fieldFilter,
+                                  Function<Field, List<String>> srcFieldNameMapper,
+                                  Function<Field, List<String>> dstFieldNameMapper,
+                                  Function<Object, Object> valueMapper,
+                                  Predicate<Object> newValueCopyFilter) {
+        if (src == null || targetClass == null) {
+            return null;
+        }
+        Object ret=null;
+        if(targetClass.isRecord()){
+            ret=null;
+        }else{
+            try {
+                ret=getInstance(targetClass);
+            } catch (Exception e) {
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+        }
+
+        Map<String, Object> dstValueMap = new HashMap<>();
+
+        Map<String, String> dstNameMap = new HashMap<>();
+        Map<String, Class<?>> dstTypeMap = new HashMap<>();
+
+        RecordComponent[] recordComponents=null;
+        Map<Field, Class<?>> dstFields =null;
+
+        Map<Field, Class<?>> srcFields = getFields(src.getClass());
+        if (srcFields.isEmpty()) {
+            return null;
+        }
+
+        if(targetClass.isRecord()) {
+            dstFields = getFields(targetClass);
+            if (dstFields.isEmpty()) {
+                return null;
+            }
+
+            recordComponents = targetClass.getRecordComponents();
+            if(recordComponents.length==0){
+                return null;
+            }
+
+            for (RecordComponent item : recordComponents) {
+                dstTypeMap.put(item.getName(), item.getType());
+                if (dstFieldNameMapper != null) {
+                    Field field=null;
+                    for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                        if(entry.getKey().getName().equals(item.getName())){
+                            field=entry.getKey();
+                            break;
+                        }
+                    }
+                    List<String> list = dstFieldNameMapper.apply(field);
+                    for (String name : list) {
+                        if (name != null) {
+                            dstNameMap.put(name, item.getName());
+                        }
+                    }
+
+                }
+                dstNameMap.put(item.getName(), item.getName());
+            }
+        }else{
+            dstFields = getFields(targetClass);
+            if (dstFields.isEmpty()) {
+                return null;
+            }
+
+            for (Field item : dstFields.keySet()) {
+                dstTypeMap.put(item.getName(), item.getType());
+                if (dstFieldNameMapper != null) {
+                    List<String> list = dstFieldNameMapper.apply(item);
+                    for (String name : list) {
+                        if (name != null) {
+                            dstNameMap.put(name, item.getName());
+                        }
+                    }
+
+                }
+                dstNameMap.put(item.getName(), item.getName());
+            }
+        }
+
+        HashSet<String> list = new HashSet<>();
+        for (Field srcField : srcFields.keySet()) {
+            boolean isTarget = false;
+            if (fieldFilter == null || fieldFilter.test(srcField)) {
+                isTarget = true;
+            }
+            if (!isTarget) {
+                continue;
+            }
+            list.clear();
+            if (srcFieldNameMapper != null) {
+                List<String> names = srcFieldNameMapper.apply(srcField);
+                for (String name : names) {
+                    if (name != null) {
+                        list.add(name);
+                    }
+                }
+            }
+            list.add(srcField.getName());
+
+            for (String name : list) {
+                String dstField = dstNameMap.get(name);
+                if (dstField == null) {
+                    continue;
+                }
+
+                try {
+                    Object val = valueGet(src, srcField);
+                    if (valueMapper != null) {
+                        val = valueMapper.apply(val);
+                    }
+                    if (newValueCopyFilter != null && !newValueCopyFilter.test(val)) {
+                        continue;
+                    }
+                    Class<?> dstType = dstTypeMap.get(dstField);
+                    val = ObjectConvertor.tryConvertAsType(val, dstType);
+                    dstValueMap.put(dstField,val);
+                } catch (Throwable e) {
+
+                }
+            }
+        }
+
+
+        // 填充值
+        if(targetClass.isRecord()){
+
+            Object[] recordArgs=new Object[recordComponents.length];
+            for (int i = 0; i < recordComponents.length; i++) {
+                RecordComponent cmp = recordComponents[i];
+                Object value = dstValueMap.get(cmp.getName());
+                recordArgs[i]=value;
+            }
+            Constructor<?> recordConstructor=null;
+            Constructor<?>[] constructors = targetClass.getConstructors();
+            for (Constructor<?> constructor : constructors) {
+                if (constructor.getParameterCount()==recordArgs.length) {
+                    recordConstructor=constructor;
+                }
+            }
+            if(recordConstructor==null){
+                throw new IllegalArgumentException("un-support instance type:" + targetClass);
+            }
+            try {
+                ret=recordConstructor.newInstance(recordArgs);
+            } catch (Exception e) {
+
+            }
+        }else{
+            for (Map.Entry<Field, Class<?>> entry : dstFields.entrySet()) {
+                Field dstField = entry.getKey();
+                Object value = dstValueMap.get(dstField.getName());
+                try {
+                    ReflectResolver.valueSet(ret, dstField, value);
+                } catch (Exception e) {
+
+                }
+            }
+        }
+
+        return (T)ret;
+    }
+
     private static final String[] jdkPackages = {
             "java.lang.",
             "java.util.",
@@ -2148,9 +2543,6 @@ public class ReflectResolver {
         if (!Modifier.isPublic(modifiers)) {
             return false;
         }
-        if (Modifier.isStatic(modifiers)) {
-            return false;
-        }
         if (method.getParameterCount() != 0) {
             return false;
         }
@@ -2220,9 +2612,6 @@ public class ReflectResolver {
     public static boolean isSetter(Method method) {
         int modifiers = method.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            return false;
-        }
-        if (Modifier.isStatic(modifiers)) {
             return false;
         }
         if (method.getParameterCount() != 1) {
