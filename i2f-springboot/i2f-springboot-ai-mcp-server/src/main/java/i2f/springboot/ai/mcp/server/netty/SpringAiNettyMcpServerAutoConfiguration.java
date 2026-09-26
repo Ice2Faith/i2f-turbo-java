@@ -1,6 +1,6 @@
 package i2f.springboot.ai.mcp.server.netty;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.server.HttpSimpleMcpServer;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.springboot.ai.mcp.server.SpringAiMcpServerAutoConfiguration;
