@@ -18,7 +18,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
@@ -49,10 +48,7 @@ public class SpringAiServiceAutoConfiguration implements ApplicationContextAware
     @ConditionalOnMissingBean(AiModel.class)
     @Bean
     public AiModel aiModel(@Autowired SpringAiModelRestOpenAiProperties springAiModelRestOpenAiProperties) {
-        RestTemplate restTemplate = new RestTemplateBuilder()
-                .setConnectTimeout(Duration.ofSeconds(30))
-                .setReadTimeout(Duration.ofMinutes(10))
-                .build();
+        RestTemplate restTemplate = new RestTemplate();
         return new HttpOpenAiAiModel().toMutator()
                 .set(u -> u::setRestClient, new SpringWebRestClient(restTemplate))
                 .set(u -> u::setBaseUrl, springAiModelRestOpenAiProperties.getBaseUrl())
