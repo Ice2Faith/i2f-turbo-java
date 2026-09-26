@@ -1,6 +1,6 @@
 package i2f.springboot.ai.mcp.client.simple.components;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.client.HttpSimpleMcpClientToolProvider;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
