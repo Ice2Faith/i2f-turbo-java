@@ -1,4 +1,5 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration,\
     i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration,\
-    i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration
+    i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration,\
+    i2f.springboot.ai.mcp.server.stream.springweb.StreamSpringWebMcpServerAutoConfiguration

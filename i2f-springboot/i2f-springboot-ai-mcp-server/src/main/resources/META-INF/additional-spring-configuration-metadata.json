@@ -9,6 +9,11 @@
       "name": "i2f.springboot.ai.proxy",
       "type": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.stream.springweb",
+      "type": "i2f.springboot.ai.mcp.server.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.stream.springweb.StreamSpringWebMcpServerAutoConfiguration"
     }
   ],
   "properties": [
@@ -24,6 +29,13 @@
       "type": "java.lang.Boolean",
       "description": "enable ai mcp server on springweb.",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.stream.springweb.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable official mcp (streamable http) server on springweb.",
+      "sourceType": "i2f.springboot.ai.mcp.server.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
       "defaultValue": true
     }
   ],
