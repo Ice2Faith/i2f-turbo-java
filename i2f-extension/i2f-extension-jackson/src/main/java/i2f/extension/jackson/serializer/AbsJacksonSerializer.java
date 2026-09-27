@@ -46,6 +46,7 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
         }
     }
 
+
     @Override
     public Object deserialize(String text, Object typeToken) {
         if (typeToken instanceof Type) {
@@ -65,7 +66,8 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
         }
     }
 
-    public <T> T deserialize(String text, Type typeToken) {
+    @Override
+    public Object deserialize(String text, Type typeToken) {
         try {
             Object obj = getMapper().readValue(text, new TypeReference<Object>() {
                 @Override

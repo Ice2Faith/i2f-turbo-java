@@ -37,6 +37,12 @@ public class Json2Serializer implements IJsonSerializer {
     }
 
     @Override
+    public Object deserialize(String enc, Type type) {
+        Object obj = JsonParser.parse(enc);
+        return RichConverter.convert2Type(obj, type, weakMatchField);
+    }
+
+    @Override
     public Object deserialize(String enc, Object type) {
         if (type instanceof Type) {
             Object obj = JsonParser.parse(enc);

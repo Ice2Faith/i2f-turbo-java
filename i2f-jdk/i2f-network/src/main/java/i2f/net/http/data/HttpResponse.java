@@ -4,10 +4,12 @@ package i2f.net.http.data;
 import i2f.io.stream.StreamUtil;
 import i2f.mutator.BaseMutator;
 import i2f.serialize.std.str.IStringObjectSerializer;
+import i2f.typeof.token.TypeToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -82,6 +84,26 @@ public class HttpResponse implements Closeable, BaseMutator<HttpResponse> {
     public <T> T getContentAsObject(IStringObjectSerializer processor, Class<T> clazz, String charset) throws IOException {
         String json = getContentAsString(charset);
         return (T) processor.deserialize(json, clazz);
+    }
+
+    public <T> T getContentAsType(IStringObjectSerializer processor, Type refToken) throws IOException {
+        String json = getContentAsString();
+        return (T) processor.deserialize(json, refToken);
+    }
+
+    public <T> T getContentAsType(IStringObjectSerializer processor, Type refToken, String charset) throws IOException {
+        String json = getContentAsString(charset);
+        return (T) processor.deserialize(json, refToken);
+    }
+
+    public <T> T getContentAsType(IStringObjectSerializer processor, TypeToken<T> refToken) throws IOException {
+        String json = getContentAsString();
+        return (T) processor.deserialize(json, refToken);
+    }
+
+    public <T> T getContentAsType(IStringObjectSerializer processor, TypeToken<T> refToken, String charset) throws IOException {
+        String json = getContentAsString(charset);
+        return (T) processor.deserialize(json, refToken);
     }
 
     public <T> T getContentAsRef(IStringObjectSerializer processor, Object refToken) throws IOException {

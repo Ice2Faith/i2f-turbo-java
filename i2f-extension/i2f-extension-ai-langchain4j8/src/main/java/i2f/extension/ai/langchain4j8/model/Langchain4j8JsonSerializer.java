@@ -45,6 +45,11 @@ public class Langchain4j8JsonSerializer implements IJsonSerializer {
     }
 
     @Override
+    public Object deserialize(String enc, Type type) {
+        return gson.fromJson(enc, type);
+    }
+
+    @Override
     public Object deserialize(String enc, Object type) {
         if (type instanceof Type) {
             return gson.fromJson(enc, (Type) type);

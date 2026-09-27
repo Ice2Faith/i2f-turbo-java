@@ -58,7 +58,8 @@ public class ForyJsonSerializer implements IJsonSerializer {
         return fory.fromJson(text, typeToken);
     }
 
-    public <T> T deserialize(String text, Type typeToken) {
+    @Override
+    public Object deserialize(String text, Type typeToken) {
         return fory.fromJson(text, TypeRef.of(typeToken));
     }
 

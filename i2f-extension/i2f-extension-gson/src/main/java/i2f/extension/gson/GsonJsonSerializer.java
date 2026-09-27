@@ -65,7 +65,8 @@ public class GsonJsonSerializer implements IJsonSerializer {
         throw new UnsupportedOperationException("Gson un-support parseText.");
     }
 
-    public <T> T deserialize(String text, Type token) {
+    @Override
+    public Object deserialize(String text, Type token) {
         return getGson().fromJson(text, token);
     }
 

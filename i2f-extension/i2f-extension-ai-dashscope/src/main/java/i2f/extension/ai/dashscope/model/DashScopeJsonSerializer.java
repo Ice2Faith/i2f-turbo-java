@@ -37,6 +37,11 @@ public class DashScopeJsonSerializer implements IJsonSerializer {
     }
 
     @Override
+    public Object deserialize(String enc, Type type) {
+        return JsonUtils.fromJson(enc, type);
+    }
+
+    @Override
     public Object deserialize(String enc, Object type) {
         if (type instanceof Type) {
             return JsonUtils.fromJson(enc, (Type) type);

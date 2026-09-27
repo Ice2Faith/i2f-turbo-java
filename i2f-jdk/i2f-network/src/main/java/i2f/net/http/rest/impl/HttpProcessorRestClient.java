@@ -16,6 +16,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 /**
  * @author Ice2Faith
@@ -30,6 +31,26 @@ public class HttpProcessorRestClient implements IRestClient, BaseMutator<HttpPro
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
+        return delegate(request, resp -> {
+            return resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
+        });
+    }
+
+    @Override
+    public <T> RestHttpResponse<T> rest(RestHttpRequest request, Type responseType) throws IOException {
+        return delegate(request, resp -> {
+            return resp.getContentAsType(jsonSerializer, responseType, CharsetConstants.Utf8);
+        });
+    }
+
+
+    @FunctionalInterface
+    public static interface IoFunction<T, R> {
+        R apply(T t) throws IOException;
+    }
+
+
+    public <T> RestHttpResponse<T> delegate(RestHttpRequest request, IoFunction<HttpResponse, T> bodyExtractor) throws IOException {
         HttpRequest req = new HttpRequest().toMutator()
                 .set(u -> u::setUrl, request.getUrl())
                 .set(u -> u::setMethod, request.getMethod())
@@ -42,7 +63,7 @@ public class HttpProcessorRestClient implements IRestClient, BaseMutator<HttpPro
 
         RestHttpResponse<T> ret = httpProcessor.http(req, response -> {
             try (HttpResponse resp = response) {
-                T obj = resp.getContentAsObject(jsonSerializer, responseType, CharsetConstants.Utf8);
+                T obj = bodyExtractor.apply(resp);
                 return new RestHttpResponse<T>().toMutator()
                         .set(u -> u::setStatusCode, resp.getStatusCode())
                         .set(RestHttpResponse::setBody, obj)

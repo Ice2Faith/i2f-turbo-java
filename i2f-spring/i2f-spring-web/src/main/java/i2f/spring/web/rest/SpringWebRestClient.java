@@ -8,6 +8,7 @@ import i2f.net.http.rest.data.RestHttpResponse;
 import i2f.url.FormUrlEncodedEncoder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -35,6 +37,15 @@ public class SpringWebRestClient implements IRestClient, BaseMutator<SpringWebRe
 
     @Override
     public <T> RestHttpResponse<T> rest(RestHttpRequest request, Class<T> responseType) throws IOException {
+        return delegate(request, responseType);
+    }
+
+    @Override
+    public <T> RestHttpResponse<T> rest(RestHttpRequest request, Type responseType) throws IOException {
+        return delegate(request, responseType);
+    }
+
+    public <T> RestHttpResponse<T> delegate(RestHttpRequest request, Type responseType) throws IOException {
         String rawMethod = request.getMethod();
         Object rawParams = request.getParams();
         String url = request.getUrl();
@@ -61,7 +72,7 @@ public class SpringWebRestClient implements IRestClient, BaseMutator<SpringWebRe
         ResponseEntity<T> respEntity = restTemplate.exchange(url,
                 HttpMethod.resolve(rawMethod.toUpperCase()),
                 reqEntity,
-                responseType);
+                ParameterizedTypeReference.forType(responseType));
 
         return new RestHttpResponse<T>().toMutator()
                 .set(u -> u::setStatusCode, respEntity.getStatusCodeValue())

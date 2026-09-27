@@ -1,7 +1,9 @@
 package i2f.serialize.std.type;
 
 import i2f.serialize.std.ISerializer;
+import i2f.typeof.token.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 /**
@@ -12,6 +14,14 @@ import java.util.Map;
 public interface ITypeSerializer<E, D> extends ISerializer<E, D> {
     default D deserialize(E enc, Class<?> clazz) {
         return deserialize(enc);
+    }
+
+    default D deserialize(E enc, Type type) {
+        return deserialize(enc);
+    }
+
+    default D deserialize(E enc, TypeToken<D> type) {
+        return deserialize(enc, type.type());
     }
 
     default D deserialize(E enc, Object type) {

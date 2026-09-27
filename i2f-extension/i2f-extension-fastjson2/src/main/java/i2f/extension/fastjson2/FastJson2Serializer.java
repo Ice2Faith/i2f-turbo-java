@@ -44,7 +44,8 @@ public class FastJson2Serializer implements IJsonSerializer {
         return JSON.parseObject(text, typeToken);
     }
 
-    public <T> T deserialize(String text, Type typeToken) {
+    @Override
+    public Object deserialize(String text, Type typeToken) {
         return JSON.parseObject(text, typeToken);
     }
 
