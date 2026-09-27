@@ -83,3 +83,66 @@ i2f:
         enable: true
       secure:
 #         cert:
+
+    ai:
+      mcp:
+        server:
+          # simple mcp server implements privacy protocol mcp (with hmac signature verify)
+          simple:
+            enable: false
+            # disable to skip creating HttpSimpleMcpServer bean itself
+            server:
+              enable: true
+            expire-window-minutes: 30
+            hmac-name: HmacSHA256
+            app-list:
+              - app-id: xxx
+                app-key: xxx
+            # springweb transport (based on RestController, enabled by default)
+            springweb:
+              enable: false
+            # netty transport (standalone port, disabled by default)
+            netty:
+              enable: false
+              port: 23745
+              boss-thread: 4
+              worker-thread: 0
+              max-content-length: 65536
+              handler:
+                enable: true
+              server:
+                enable: true
+          # official mcp client
+          official:
+            # for 2024 stateful version
+            v2024:
+              # stream mcp server implements official protocol mcp (streamable http, json-rpc 2.0 only)
+              stream:
+                server-name: i2f-mcp-server
+                server-version: 1.0.0
+                # springweb transport (based on RestController, enabled by default)
+                springweb:
+                  enable: false
+                bearer-token:
+                  enable: true
+                  allow-tokens:
+                    - ik-123456
+            # for 2026 stateless version (no initialize handshake, tools/list + tools/call only)
+            v2026:
+              # stream mcp server implements official 2026-07-28 stateless protocol (streamable http, json-rpc 2.0 only)
+              stream:
+                server-name: i2f-mcp-server
+                server-version: 1.0.0
+                # optional natural-language guidance for LLMs returned by server/discover
+                instructions: This server provides tool utilities.
+                # springweb transport (based on RestController, enabled by default)
+                springweb:
+                  enable: false
+                bearer-token:
+                  enable: true
+                  allow-tokens:
+                    - ik-123456
+                # tools/list cache semantics (CacheableResult)
+                tool-list:
+                  ttl-ms: 300000
+                  cache-scope: private
