@@ -56,9 +56,16 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
 
     protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
 
-
     @PostMapping(OfficialMcpConstants.URL_PATH_MCP)
-    public JsonRpcResponse<?> handle(@RequestBody ServerJsonRpcRequest payload,
+    public Map<String,Object> handle(@RequestBody ServerJsonRpcRequest payload,
+                                     HttpServletRequest request,
+                                     HttpServletResponse response) {
+        JsonRpcResponse<?> resp = mcp(payload, request, response);
+        // 需要处理rpc协议的字段互斥问题，因此转换为map
+        return resp.toMap();
+    }
+
+    public JsonRpcResponse<?> mcp(@RequestBody ServerJsonRpcRequest payload,
                                      HttpServletRequest request,
                                      HttpServletResponse response) {
         try {

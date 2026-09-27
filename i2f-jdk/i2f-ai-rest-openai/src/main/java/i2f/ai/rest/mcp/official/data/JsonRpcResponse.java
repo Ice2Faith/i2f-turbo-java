@@ -4,6 +4,9 @@ import i2f.ai.rest.mcp.official.consts.OfficialMcpConstants;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author Ice2Faith
  * @date 2026/7/21 17:54
@@ -30,6 +33,19 @@ public class JsonRpcResponse<T> {
         ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
         ret.setId(id);
         ret.setError(new JsonRpcError(code, message));
+        return ret;
+    }
+
+    public Map<String,Object> toMap(){
+        Map<String,Object> ret = new HashMap<>();
+        ret.put("jsonrpc",jsonrpc);
+        ret.put("id",id);
+        if(result != null){
+            ret.put("result",result);
+        }
+        if(error != null){
+            ret.put("error",error);
+        }
         return ret;
     }
 }
