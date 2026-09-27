@@ -40,6 +40,7 @@ public class JsonSchema {
         String ENUM = "enum";
         String ITEMS = "items";
         String PROPERTIES = "properties";
+        String ADDITIONAL_PROPERTIES="additionalProperties";
     }
 
     public static FunctionJsonSchema getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method) {
