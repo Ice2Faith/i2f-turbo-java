@@ -14,7 +14,7 @@ import i2f.net.http.data.HttpHeaders;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.springboot.ai.mcp.server.official.v2024.stream.auth.StreamMcpServerAuthFilter;
+import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties;
 import lombok.Data;

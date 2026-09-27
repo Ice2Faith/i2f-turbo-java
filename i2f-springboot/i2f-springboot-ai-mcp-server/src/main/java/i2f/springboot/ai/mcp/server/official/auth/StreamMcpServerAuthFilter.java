@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.official.v2024.stream.auth;
+package i2f.springboot.ai.mcp.server.official.auth;
 
 import i2f.net.http.data.HttpHeaders;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;

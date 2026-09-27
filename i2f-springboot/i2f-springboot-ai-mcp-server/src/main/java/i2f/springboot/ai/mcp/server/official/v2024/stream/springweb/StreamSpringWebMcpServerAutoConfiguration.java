@@ -2,8 +2,8 @@ package i2f.springboot.ai.mcp.server.official.v2024.stream.springweb;
 
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.spring.core.SpringContext;
-import i2f.springboot.ai.mcp.server.official.v2024.stream.auth.StreamMcpServerAuthFilter;
-import i2f.springboot.ai.mcp.server.official.v2024.stream.auth.impl.StaticStreamMcpServerAuthFilter;
+import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
+import i2f.springboot.ai.mcp.server.official.auth.impl.StaticStreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.impl.SpringHttpStreamMcpController;
 import lombok.Data;

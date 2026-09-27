@@ -1,7 +1,7 @@
-package i2f.springboot.ai.mcp.server.official.v2024.stream.auth.impl;
+package i2f.springboot.ai.mcp.server.official.auth.impl;
 
 import i2f.net.http.data.HttpHeaders;
-import i2f.springboot.ai.mcp.server.official.v2024.stream.auth.StreamMcpServerAuthFilter;
+import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
