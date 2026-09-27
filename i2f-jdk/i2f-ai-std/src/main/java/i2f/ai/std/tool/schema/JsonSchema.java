@@ -75,11 +75,15 @@ public class JsonSchema {
             }
         }
 
+        Map<String,Object> schemaParameters=new HashMap<>();
+        schemaParameters.put(SchemaField.TYPE,SchemaType.OBJECT);
+        schemaParameters.put(SchemaField.PROPERTIES,jsonSchema);
+
         FunctionJsonSchema ret = new FunctionJsonSchema();
         ret.setName(name);
         ret.setDescription(description);
         ret.setStrict(true);
-        ret.setParameters(jsonSchema);
+        ret.setParameters(schemaParameters);
 
         return ret;
     }
