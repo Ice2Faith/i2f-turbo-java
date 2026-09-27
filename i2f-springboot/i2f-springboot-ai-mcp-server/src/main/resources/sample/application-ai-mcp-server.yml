@@ -29,14 +29,18 @@ i2f:
                 enable: true
               server:
                 enable: true
-          # stream mcp server implements official protocol mcp (streamable http, json-rpc 2.0 only)
-          stream:
-            server-name: i2f-mcp-server
-            server-version: 1.0.0
-            # springweb transport (based on RestController, enabled by default)
-            springweb:
-              enable: true
-            bearer-token:
-              enable: true
-              allow-tokens:
-                - xxx
+          # official mcp client
+          official:
+            # for 2024 stateful version
+            v2024:
+              # stream mcp server implements official protocol mcp (streamable http, json-rpc 2.0 only)
+              stream:
+                server-name: i2f-mcp-server
+                server-version: 1.0.0
+                # springweb transport (based on RestController, enabled by default)
+                springweb:
+                  enable: true
+                bearer-token:
+                  enable: true
+                  allow-tokens:
+                    - xxx

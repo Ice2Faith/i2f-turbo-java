@@ -6,14 +6,14 @@
       "sourceType": "i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration"
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.stream",
-      "type": "i2f.springboot.ai.mcp.client.stream.StreamMcpClientAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.client.stream.StreamMcpClientAutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream",
+      "type": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration"
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.solon",
-      "type": "i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon",
+      "type": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration"
     }
   ],
   "properties": [
@@ -25,17 +25,17 @@
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.stream.enable",
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.enable",
       "type": "java.lang.Boolean",
       "description": "enable ai stream mcp client.",
-      "sourceType": "i2f.springboot.ai.mcp.client.stream.StreamMcpClientAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration",
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.solon.enable",
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.enable",
       "type": "java.lang.Boolean",
       "description": "enable ai solon mcp client.",
-      "sourceType": "i2f.springboot.ai.mcp.client.solon.SolonMcpClientAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
       "defaultValue": true
     }
   ],
