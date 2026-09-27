@@ -14,6 +14,11 @@
       "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb",
       "type": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb",
+      "type": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration"
     }
   ],
   "properties": [
@@ -36,6 +41,13 @@
       "type": "java.lang.Boolean",
       "description": "enable official mcp (streamable http) server on springweb.",
       "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable official mcp 2026 stateless (streamable http) server on springweb.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration",
       "defaultValue": true
     }
   ],

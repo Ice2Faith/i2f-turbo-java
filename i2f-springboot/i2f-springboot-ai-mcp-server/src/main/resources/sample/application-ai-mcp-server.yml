@@ -44,3 +44,22 @@ i2f:
                   enable: true
                   allow-tokens:
                     - xxx
+            # for 2026 stateless version (no initialize handshake, tools/list + tools/call only)
+            v2026:
+              # stream mcp server implements official 2026-07-28 stateless protocol (streamable http, json-rpc 2.0 only)
+              stream:
+                server-name: i2f-mcp-server
+                server-version: 1.0.0
+                # optional natural-language guidance for LLMs returned by server/discover
+                instructions: This server provides tool utilities.
+                # springweb transport (based on RestController, enabled by default)
+                springweb:
+                  enable: true
+                bearer-token:
+                  enable: true
+                  allow-tokens:
+                    - xxx
+                # tools/list cache semantics (CacheableResult)
+                tool-list:
+                  ttl-ms: 300000
+                  cache-scope: private
