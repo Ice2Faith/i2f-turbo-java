@@ -32,13 +32,13 @@
         <dependency>
             <groupId>net.java.dev.jna</groupId>
             <artifactId>jna</artifactId>
-            <version>5.7.0</version>
+            <version>5.19.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alphacephei</groupId>
             <artifactId>vosk</artifactId>
-            <version>0.3.32</version>
+            <version>0.3.45</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

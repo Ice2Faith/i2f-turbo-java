@@ -21,7 +21,7 @@
         <dependency>
             <groupId>com.hankcs</groupId>
             <artifactId>hanlp</artifactId>
-            <version>portable-1.8.2</version>
+            <version>portable-1.8.6</version>
             <scope>provided</scope>
             <optional>true</optional>
         </dependency>

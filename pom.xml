@@ -41,7 +41,7 @@
 
         <maven.build.timestamp.format>yyyy-MM-dd HH:mm:ss</maven.build.timestamp.format>
 
-        <lombok.version>1.18.44</lombok.version>
+        <lombok.version>1.18.48</lombok.version>
 
         <!-- spring 体系 -->
         <spring.version>5.3.31</spring.version>
@@ -1911,11 +1911,34 @@
                             <ignoreVersions>
                                 <ignoreVersion>
                                     <type>regex</type>
-                                    <version>.*-(alpha|beta|rc|snapshot).*</version>
+                                    <version>.*-(alpha|beta|rc|snapshot|BETA|ALPHA|Alpha|Snapshot|RC).*</version>
                                 </ignoreVersion>
                             </ignoreVersions>
                         </ruleSet>
                     </configuration>
+                </plugin>
+
+                <!-- 代码规范检查 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <!-- 直接引用内置规则，无需额外文件 -->
+                        <configLocation>google_checks.xml</configLocation>
+                        <encoding>UTF-8</encoding>
+                        <consoleOutput>true</consoleOutput>
+                        <failOnViolation>true</failOnViolation>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>validate</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
