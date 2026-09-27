@@ -40,7 +40,7 @@ public class JsonSchema {
         String ENUM = "enum";
         String ITEMS = "items";
         String PROPERTIES = "properties";
-        String ADDITIONAL_PROPERTIES="additionalProperties";
+        String ADDITIONAL_PROPERTIES = "additionalProperties";
     }
 
     public static FunctionJsonSchema getFunctionJsonSchema(JsonSchemaAnnotationResolver resolver, Method method) {
@@ -76,9 +76,9 @@ public class JsonSchema {
             }
         }
 
-        Map<String,Object> schemaParameters=new HashMap<>();
-        schemaParameters.put(SchemaField.TYPE,SchemaType.OBJECT);
-        schemaParameters.put(SchemaField.PROPERTIES,jsonSchema);
+        Map<String, Object> schemaParameters = new HashMap<>();
+        schemaParameters.put(SchemaField.TYPE, SchemaType.OBJECT);
+        schemaParameters.put(SchemaField.PROPERTIES, jsonSchema);
 
         FunctionJsonSchema ret = new FunctionJsonSchema();
         ret.setName(name);

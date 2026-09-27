@@ -36,15 +36,15 @@ public class JsonRpcResponse<T> {
         return ret;
     }
 
-    public Map<String,Object> toMap(){
-        Map<String,Object> ret = new HashMap<>();
-        ret.put("jsonrpc",jsonrpc);
-        ret.put("id",id);
-        if(result != null){
-            ret.put("result",result);
+    public Map<String, Object> toMap() {
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("jsonrpc", jsonrpc);
+        ret.put("id", id);
+        if (result != null) {
+            ret.put("result", result);
         }
-        if(error != null){
-            ret.put("error",error);
+        if (error != null) {
+            ret.put("error", error);
         }
         return ret;
     }

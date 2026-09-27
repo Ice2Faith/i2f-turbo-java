@@ -55,17 +55,17 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
     protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
 
     @PostMapping(OfficialMcpConstants.URL_PATH_MCP)
-    public Map<String,Object> handle(@RequestBody ServerJsonRpcRequest payload,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) {
+    public Map<String, Object> handle(@RequestBody ServerJsonRpcRequest payload,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response) {
         JsonRpcResponse<?> resp = mcp(payload, request, response);
         // 需要处理rpc协议的字段互斥问题，因此转换为map
         return resp.toMap();
     }
 
     public JsonRpcResponse<?> mcp(@RequestBody ServerJsonRpcRequest payload,
-                                     HttpServletRequest request,
-                                     HttpServletResponse response) {
+                                  HttpServletRequest request,
+                                  HttpServletResponse response) {
         try {
             // 如果配置了身份验证器，则进行验证身份
             if (streamMcpServerAuthFilter != null) {

@@ -75,7 +75,7 @@ public abstract class AbsJacksonSerializer implements IStringObjectSerializer {
                     return (Type) typeToken;
                 }
             });
-            return (T) obj;
+            return obj;
         } catch (Exception e) {
             throw new IllegalArgumentException(e.getMessage(), e);
         }

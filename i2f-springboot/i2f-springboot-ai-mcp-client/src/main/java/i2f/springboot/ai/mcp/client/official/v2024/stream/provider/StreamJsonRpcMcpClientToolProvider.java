@@ -118,10 +118,10 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             JsonRpcResponse<?> body = rest.getBody();
 
             JsonRpcError error = body.getError();
-            if(error!=null){
+            if (error != null) {
                 Integer code = error.getCode();
-                if(code!=null){
-                    throw new IllegalStateException("mcp server response get tools error, "+error.getCode()+": " + error.getMessage());
+                if (code != null) {
+                    throw new IllegalStateException("mcp server response get tools error, " + error.getCode() + ": " + error.getMessage());
                 }
             }
 
@@ -186,7 +186,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         //   "name": "get_weather",
         //   "arguments": { "city": "Beijing" }
         // }
-        JsonRpcToolCallParam params=new JsonRpcToolCallParam();
+        JsonRpcToolCallParam params = new JsonRpcToolCallParam();
         params.setName(callRequest.getName());
         params.setArguments(jsonSerializer.deserializeAsMap(callRequest.getArguments())); // 直接透传 Map
 
@@ -214,10 +214,10 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         JsonRpcResponse<?> body = rest.getBody();
 
         JsonRpcError error = body.getError();
-        if(error!=null){
+        if (error != null) {
             Integer code = error.getCode();
-            if(code!=null){
-                throw new IllegalStateException("mcp server response call tool error, "+error.getCode()+": " + error.getMessage());
+            if (code != null) {
+                throw new IllegalStateException("mcp server response call tool error, " + error.getCode() + ": " + error.getMessage());
             }
         }
 
@@ -293,10 +293,10 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             JsonRpcResponse<?> body = rest.getBody();
 
             JsonRpcError error = body.getError();
-            if(error!=null){
+            if (error != null) {
                 Integer code = error.getCode();
-                if(code!=null){
-                    throw new IllegalStateException("mcp server response get tools error, "+error.getCode()+": " + error.getMessage());
+                if (code != null) {
+                    throw new IllegalStateException("mcp server response get tools error, " + error.getCode() + ": " + error.getMessage());
                 }
             }
 
@@ -350,7 +350,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
     public <T> JsonRpcRequest<T> wrapJsonRpcHttpBody(String method, T params) {
         JsonRpcRequest<T> ret = new JsonRpcRequest<>();
         ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
-        ret.setId(""+idGenerator.getAndIncrement());
+        ret.setId("" + idGenerator.getAndIncrement());
         ret.setMethod(method);
         ret.setParams(params);
 

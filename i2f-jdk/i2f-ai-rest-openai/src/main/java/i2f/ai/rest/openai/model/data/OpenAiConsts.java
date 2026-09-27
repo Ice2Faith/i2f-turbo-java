@@ -17,6 +17,6 @@ public interface OpenAiConsts {
 
     String FUNCTION = "function";
 
-    String TEXT="text";
-    String IMAGE_URL="image_url";
+    String TEXT = "text";
+    String IMAGE_URL = "image_url";
 }
