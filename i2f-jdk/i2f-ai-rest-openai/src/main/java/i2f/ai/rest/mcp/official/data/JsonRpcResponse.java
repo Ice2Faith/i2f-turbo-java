@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JsonRpcResponse<T> {
     protected String jsonrpc = OfficialMcpConstants.JSON_RPC_VERSION;
-    protected Long id;
+    protected String id;
     protected T result;
     protected JsonRpcError error;
 
-    public static <T> JsonRpcResponse<T> success(Long id, T result) {
+    public static <T> JsonRpcResponse<T> success(String id, T result) {
         JsonRpcResponse<T> ret = new JsonRpcResponse<>();
         ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
         ret.setId(id);
@@ -25,7 +25,7 @@ public class JsonRpcResponse<T> {
         return ret;
     }
 
-    public static JsonRpcResponse<?> error(Long id, int code, String message) {
+    public static JsonRpcResponse<?> error(String id, int code, String message) {
         JsonRpcResponse<?> ret = new JsonRpcResponse<>();
         ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
         ret.setId(id);

@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class JsonRpcRequest<T> {
     protected String jsonrpc;
-    protected Long id;
+    protected String id;
     protected String method;
     protected T params;
 

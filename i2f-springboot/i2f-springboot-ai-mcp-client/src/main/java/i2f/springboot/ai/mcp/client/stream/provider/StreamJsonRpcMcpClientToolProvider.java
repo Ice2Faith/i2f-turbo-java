@@ -350,7 +350,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
     public <T> JsonRpcRequest<T> wrapJsonRpcHttpBody(String method, T params) {
         JsonRpcRequest<T> ret = new JsonRpcRequest<>();
         ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
-        ret.setId(idGenerator.getAndIncrement());
+        ret.setId(""+idGenerator.getAndIncrement());
         ret.setMethod(method);
         ret.setParams(params);
 
