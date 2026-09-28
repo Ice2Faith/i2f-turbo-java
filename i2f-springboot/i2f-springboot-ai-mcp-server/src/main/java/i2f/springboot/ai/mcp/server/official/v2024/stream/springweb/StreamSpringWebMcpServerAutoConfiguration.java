@@ -6,6 +6,7 @@ import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.auth.impl.StaticStreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.impl.SpringHttpStreamMcpController;
+import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * 官方 MCP 协议（protocolVersion: 2024-11-05）Streamable HTTP 传输的 SpringWeb 服务端自动配置。
@@ -47,8 +49,14 @@ public class StreamSpringWebMcpServerAutoConfiguration {
     @Bean
     public StreamMcpServerAuthFilter streamMcpServerAuthFilter() {
         StaticStreamMcpServerAuthFilter ret = new StaticStreamMcpServerAuthFilter();
-        ret.setEnable(officialMcpServerProperties.getBearerToken().isEnable());
-        ret.setAllowBearerTokens(new HashSet<>(officialMcpServerProperties.getBearerToken().getAllowTokens()));
+        OfficialMcpServerProperties.BearerTokenOptions bearerToken = officialMcpServerProperties.getBearerToken();
+        if(bearerToken!=null) {
+            ret.setEnable(officialMcpServerProperties.getBearerToken().isEnable());
+            List<String> allowTokens = officialMcpServerProperties.getBearerToken().getAllowTokens();
+            if (allowTokens != null) {
+                ret.setAllowBearerTokens(new HashSet<>(allowTokens));
+            }
+        }
         return ret;
     }
 

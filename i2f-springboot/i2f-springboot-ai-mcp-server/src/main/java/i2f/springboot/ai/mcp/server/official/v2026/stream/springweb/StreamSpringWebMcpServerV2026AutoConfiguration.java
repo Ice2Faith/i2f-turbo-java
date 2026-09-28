@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * 官方 MCP 协议（protocolVersion: 2026-07-28 无状态版本）Streamable HTTP 传输的 SpringWeb 服务端自动配置。
@@ -47,8 +48,14 @@ public class StreamSpringWebMcpServerV2026AutoConfiguration {
     @Bean
     public StreamMcpServerAuthFilter streamMcpServerAuthFilter() {
         StaticStreamMcpServerAuthFilter ret = new StaticStreamMcpServerAuthFilter();
-        ret.setEnable(officialMcpServerV2026Properties.getBearerToken().isEnable());
-        ret.setAllowBearerTokens(new HashSet<>(officialMcpServerV2026Properties.getBearerToken().getAllowTokens()));
+        OfficialMcpServerV2026Properties.BearerTokenOptions bearerToken = officialMcpServerV2026Properties.getBearerToken();
+        if(bearerToken!=null) {
+            ret.setEnable(officialMcpServerV2026Properties.getBearerToken().isEnable());
+            List<String> allowTokens = officialMcpServerV2026Properties.getBearerToken().getAllowTokens();
+            if (allowTokens != null) {
+                ret.setAllowBearerTokens(new HashSet<>(allowTokens));
+            }
+        }
         return ret;
     }
 
