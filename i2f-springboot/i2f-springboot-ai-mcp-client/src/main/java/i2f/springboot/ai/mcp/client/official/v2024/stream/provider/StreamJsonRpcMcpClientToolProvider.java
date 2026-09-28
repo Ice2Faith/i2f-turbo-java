@@ -22,6 +22,7 @@ import i2f.net.http.rest.impl.HttpProcessorRestClient;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.typeof.token.TypeToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -94,7 +95,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 request.getHeaders().addAll(headers);
             }
             request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_LIST, null));
-            RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
+            RestHttpResponse<JsonRpcResponse<JsonRpcToolListResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolListResult>>() {});
 
             // 【Map 结构示例】tools/list 响应
             // {
@@ -115,7 +116,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             //   }
             // }
 
-            JsonRpcResponse<?> body = rest.getBody();
+            JsonRpcResponse<JsonRpcToolListResult> body = rest.getBody();
 
             JsonRpcError error = body.getError();
             if (error != null) {
@@ -125,8 +126,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 }
             }
 
-            Object obj = body.getResult();
-            JsonRpcToolListResult result = RichConverter.convert(obj, JsonRpcToolListResult.class);
+            JsonRpcToolListResult result = body.getResult();
             List<JsonRpcToolListItem> tools = result.getTools();
 
             List<ToolDefinition> ret = new ArrayList<>();
@@ -198,7 +198,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             request.getHeaders().addAll(headers);
         }
         request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params));
-        RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
+        RestHttpResponse<JsonRpcResponse<JsonRpcToolCallResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {});
 
         // 【Map 结构示例】tools/call 响应
         // {
@@ -211,7 +211,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         //     "isError": false
         //   }
         // }
-        JsonRpcResponse<?> body = rest.getBody();
+        JsonRpcResponse<JsonRpcToolCallResult> body = rest.getBody();
 
         JsonRpcError error = body.getError();
         if (error != null) {
@@ -221,8 +221,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             }
         }
 
-        Object obj = body.getResult();
-        JsonRpcToolCallResult result = RichConverter.convert(obj, JsonRpcToolCallResult.class);
+        JsonRpcToolCallResult result = body.getResult();
         if (result.isError()) {
             throw new IllegalStateException("invoke mcp tool error, cause reason is: ");
         }
@@ -278,7 +277,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 request.getHeaders().addAll(headers);
             }
             request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_INITIALIZE, params));
-            RestHttpResponse<JsonRpcResponse> rest = restClient.rest(request, JsonRpcResponse.class);
+            RestHttpResponse<JsonRpcResponse<JsonRpcInitialResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcInitialResult>>() {});
             // 【Map 结构示例】initialize 响应
             // {
             //   "jsonrpc": "2.0",
@@ -290,7 +289,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             //   }
             // }
 
-            JsonRpcResponse<?> body = rest.getBody();
+            JsonRpcResponse<JsonRpcInitialResult> body = rest.getBody();
 
             JsonRpcError error = body.getError();
             if (error != null) {
@@ -312,8 +311,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 //throw new IllegalStateException("MCP Server did not return a valid Mcp-Session-Id in headers!");
             }
 
-            Object obj = body.getResult();
-            JsonRpcInitialResult result = RichConverter.convert(obj, JsonRpcInitialResult.class);
+            JsonRpcInitialResult result = body.getResult();
             String serverVersion = result.getProtocolVersion();
             // TODO: 可在此处校验 response.get("result") 中的 protocolVersion 是否兼容
 
