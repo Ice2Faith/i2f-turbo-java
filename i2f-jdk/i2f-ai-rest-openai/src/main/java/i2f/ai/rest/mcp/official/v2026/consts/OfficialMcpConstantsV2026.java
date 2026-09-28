@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.server.official.v2026.stream.consts;
+package i2f.ai.rest.mcp.official.v2026.consts;
 
 import java.util.Collections;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.List;
  * @author Ice2Faith
  * @desc 2026-07-28 无状态 MCP 协议常量
  */
-public interface OfficialMcpV2026Constants {
+public interface OfficialMcpConstantsV2026 {
     String URL_BASE_PATH = "/v2026";
     String URL_PATH_MCP = "/mcp";
 
@@ -82,7 +82,7 @@ public interface OfficialMcpV2026Constants {
      */
     String META_LOG_LEVEL = META_KEY_PREFIX + "logLevel";
 
-    String RESULT_TYPE = "complete";
+    String RESULT_TYPE_COMPLETE = "complete";
     String RESULT_TYPE_INPUT_REQUIRED = "input_required";
 
     String CACHE_SCOPE_PUBLIC = "public";

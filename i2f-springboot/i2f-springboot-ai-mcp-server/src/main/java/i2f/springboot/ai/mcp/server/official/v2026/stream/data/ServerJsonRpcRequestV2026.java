@@ -1,6 +1,7 @@
 package i2f.springboot.ai.mcp.server.official.v2026.stream.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
+import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -19,18 +20,13 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class V2026ServerJsonRpcRequest {
-    protected String jsonrpc;
-    protected String id;
-    protected String method;
-    protected Map<String, Object> params;
+public class ServerJsonRpcRequestV2026 extends ServerJsonRpcRequest {
 
     /**
      * 读取 params._meta，缺失时返回空 Map（不返回 null，便于直接取值）。
      *
      * @return params._meta 内容
      */
-    @JsonIgnore
     @SuppressWarnings("unchecked")
     public Map<String, Object> meta() {
         if (params == null) {
@@ -48,9 +44,8 @@ public class V2026ServerJsonRpcRequest {
      *
      * @return 协议版本，未声明时返回 null
      */
-    @JsonIgnore
     public String metaProtocolVersion() {
-        Object version = meta().get("io.modelcontextprotocol/protocolVersion");
+        Object version = meta().get(OfficialMcpConstantsV2026.META_PROTOCOL_VERSION);
         return version == null ? null : String.valueOf(version);
     }
 }

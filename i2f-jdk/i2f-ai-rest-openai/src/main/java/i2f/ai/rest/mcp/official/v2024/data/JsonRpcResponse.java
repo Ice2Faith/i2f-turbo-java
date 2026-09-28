@@ -1,5 +1,6 @@
 package i2f.ai.rest.mcp.official.v2024.data;
 
+import i2f.ai.rest.mcp.official.IJsonRpcDto;
 import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class JsonRpcResponse<T> {
+public class JsonRpcResponse<T> implements IJsonRpcDto {
     protected String jsonrpc = OfficialMcpConstants.JSON_RPC_VERSION;
     protected String id;
     protected T result;
@@ -36,12 +37,18 @@ public class JsonRpcResponse<T> {
         return ret;
     }
 
+    @Override
     public Map<String, Object> toMap() {
         Map<String, Object> ret = new HashMap<>();
         ret.put("jsonrpc", jsonrpc);
         ret.put("id", id);
         if (result != null) {
-            ret.put("result", result);
+            Object obj = result;
+            if (obj instanceof IJsonRpcDto) {
+                IJsonRpcDto dto = (IJsonRpcDto) obj;
+                obj = dto.toMap();
+            }
+            ret.put("result", obj);
         }
         if (error != null) {
             ret.put("error", error);

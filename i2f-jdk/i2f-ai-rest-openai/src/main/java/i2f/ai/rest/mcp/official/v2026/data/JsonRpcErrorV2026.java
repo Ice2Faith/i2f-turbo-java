@@ -1,5 +1,6 @@
-package i2f.springboot.ai.mcp.server.official.v2026.stream.data;
+package i2f.ai.rest.mcp.official.v2026.data;
 
+import i2f.ai.rest.mcp.official.IJsonRpcDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,22 +18,23 @@ import java.util.Map;
  */
 @Data
 @NoArgsConstructor
-public class V2026JsonRpcError {
+public class JsonRpcErrorV2026 implements IJsonRpcDto {
     protected int code;
     protected String message;
     protected Map<String, Object> data;
 
-    public V2026JsonRpcError(int code, String message) {
+    public JsonRpcErrorV2026(int code, String message) {
         this.code = code;
         this.message = message;
     }
 
-    public V2026JsonRpcError(int code, String message, Map<String, Object> data) {
+    public JsonRpcErrorV2026(int code, String message, Map<String, Object> data) {
         this.code = code;
         this.message = message;
         this.data = data;
     }
 
+    @Override
     public Map<String, Object> toMap() {
         Map<String, Object> ret = new LinkedHashMap<>();
         ret.put("code", code);

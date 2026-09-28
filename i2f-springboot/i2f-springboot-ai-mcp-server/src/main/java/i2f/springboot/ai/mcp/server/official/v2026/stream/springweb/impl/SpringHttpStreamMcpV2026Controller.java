@@ -1,22 +1,33 @@
 package i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
+import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolCallParam;
+import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolListItem;
+import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.mutator.BaseMutator;
+import i2f.net.http.data.HttpHeaders;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.springboot.ai.mcp.server.official.v2026.stream.consts.OfficialMcpV2026Constants;
-import i2f.springboot.ai.mcp.server.official.v2026.stream.data.V2026JsonRpcResponse;
-import i2f.springboot.ai.mcp.server.official.v2026.stream.data.V2026ServerJsonRpcRequest;
+import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
+import i2f.ai.rest.mcp.official.v2026.data.JsonRpcResponseV2026;
+import i2f.springboot.ai.mcp.server.official.v2026.stream.data.MvcJsonRpcResponse;
+import i2f.springboot.ai.mcp.server.official.v2026.stream.data.ServerJsonRpcRequestV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerDiscoverResult;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerInfo;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolCallResultV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolListResultV2026;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,7 +62,7 @@ import java.util.regex.Pattern;
 @NoArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping(OfficialMcpV2026Constants.URL_BASE_PATH)
+@RequestMapping(OfficialMcpConstantsV2026.URL_BASE_PATH)
 public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHttpStreamMcpV2026Controller> {
 
     /**
@@ -66,75 +77,73 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
     protected IProxyInvocationHandler invocationHandler;
     protected IJsonSerializer jsonSerializer = new JacksonJsonSerializer(new ObjectMapper());
 
-    @PostMapping(OfficialMcpV2026Constants.URL_PATH_MCP)
-    public ResponseEntity<Map<String, Object>> handle(@RequestBody V2026ServerJsonRpcRequest payload,
+    protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
+
+    @PostMapping(OfficialMcpConstantsV2026.URL_PATH_MCP)
+    public ResponseEntity<Map<String, Object>> handle(@RequestBody ServerJsonRpcRequestV2026 payload,
                                                       HttpServletRequest request) {
-        return mcp(payload, request);
+        // 统一进行rpc字段转换
+        MvcJsonRpcResponse<JsonRpcResponseV2026<?>> resp = mcp(payload, request);
+        Map<String, Object> map = new HashMap<>();
+        JsonRpcResponseV2026<?> body = resp.getBody();
+        if (body != null) {
+            map = body.toMap();
+        }
+        return ResponseEntity.status(resp.getHttpStatus())
+                .body(map);
     }
 
-    public ResponseEntity<Map<String, Object>> mcp(V2026ServerJsonRpcRequest payload,
-                                                   HttpServletRequest request) {
+    public MvcJsonRpcResponse<JsonRpcResponseV2026<?>> mcp(ServerJsonRpcRequestV2026 payload,
+                                                           HttpServletRequest request) {
         try {
-            // 1. 身份验证（Bearer Token，失败以 401 + JSON-RPC 错误信封返回）
-            ResponseEntity<Map<String, Object>> authError = verifyAuth(payload, request);
-            if (authError != null) {
-                return authError;
+            // 如果配置了身份验证器，则进行验证身份
+            if (streamMcpServerAuthFilter != null) {
+                HttpHeaders filterHeaders = HttpHeaders.create();
+                Enumeration<String> names = request.getHeaderNames();
+                while (names.hasMoreElements()) {
+                    String name = names.nextElement();
+                    Enumeration<String> headers = request.getHeaders(name);
+                    while (headers.hasMoreElements()) {
+                        String value = headers.nextElement();
+                        filterHeaders.add(name, value);
+                    }
+                }
+                if (!streamMcpServerAuthFilter.verify(payload, filterHeaders)) {
+                    return MvcJsonRpcResponse.error(HttpStatus.UNAUTHORIZED, JsonRpcResponseV2026.error(payload.getId(), OfficialMcpConstants.CODE_INVALID_REQUEST, "auth not passed!"));
+                }
             }
 
             String method = payload.getMethod();
 
             // 2. 请求头与请求体一致性校验（规范强制：处理请求体的服务端 MUST 校验）
-            ResponseEntity<Map<String, Object>> headerError = validateHeaders(payload, request, method);
+            MvcJsonRpcResponse<JsonRpcResponseV2026<?>> headerError = validateHeaders(payload, request, method);
             if (headerError != null) {
                 return headerError;
             }
 
             // 3. 信封校验
             if (method == null || method.isEmpty()) {
-                return jsonError(payload.getId(), OfficialMcpV2026Constants.CODE_INVALID_REQUEST,
-                        "missing jsonrpc method!", 200);
+                return MvcJsonRpcResponse.success(JsonRpcResponseV2026.error(payload.getId(), OfficialMcpConstantsV2026.CODE_INVALID_REQUEST,
+                        "missing jsonrpc method!"));
             }
 
             // 4. 方法路由：无状态版本保留 server/discover 与 tools/list、tools/call
             switch (method) {
-                case OfficialMcpV2026Constants.METHOD_SERVER_DISCOVER:
-                    return ok(discover(payload));
-                case OfficialMcpV2026Constants.METHOD_TOOLS_LIST:
-                    return ok(listTools(payload));
-                case OfficialMcpV2026Constants.METHOD_TOOLS_CALL:
-                    return ok(callTool(payload));
+                case OfficialMcpConstantsV2026.METHOD_SERVER_DISCOVER:
+                    return MvcJsonRpcResponse.success(discover(payload));
+                case OfficialMcpConstantsV2026.METHOD_TOOLS_LIST:
+                    return MvcJsonRpcResponse.success(listTools(payload));
+                case OfficialMcpConstantsV2026.METHOD_TOOLS_CALL:
+                    return MvcJsonRpcResponse.success(callTool(payload));
                 default:
-                    return jsonError(payload.getId(), OfficialMcpV2026Constants.CODE_METHOD_NOT_FOUND,
-                            "method not found: " + method, 404);
+                    return MvcJsonRpcResponse.error(HttpStatus.NOT_FOUND, JsonRpcResponseV2026.error(payload.getId(), OfficialMcpConstantsV2026.CODE_METHOD_NOT_FOUND,
+                            "method not found: " + method));
             }
         } catch (Exception e) {
             log.error(e.getMessage(), e);
-            return jsonError(payload.getId(), OfficialMcpV2026Constants.CODE_INTERNAL_ERROR,
-                    e.getMessage(), 200);
+            return MvcJsonRpcResponse.success(JsonRpcResponseV2026.error(payload.getId(), OfficialMcpConstantsV2026.CODE_INTERNAL_ERROR,
+                    "internal error, " + e.getMessage()));
         }
-    }
-
-    /**
-     * Bearer Token 身份验证：仅在配置开启时执行。返回 null 表示通过。
-     */
-    protected ResponseEntity<Map<String, Object>> verifyAuth(V2026ServerJsonRpcRequest payload,
-                                                             HttpServletRequest request) {
-        OfficialMcpServerV2026Properties.BearerTokenOptions token = properties.getBearerToken();
-        if (token == null || !token.isEnable()) {
-            return null;
-        }
-        List<String> allowTokens = token.getAllowTokens();
-        String header = request.getHeader("Authorization");
-        if (header == null || !header.startsWith("Bearer")) {
-            return jsonError(payload.getId(), OfficialMcpV2026Constants.CODE_INVALID_REQUEST,
-                    "auth not passed!", 401);
-        }
-        String[] arr = header.split("\\s+", 2);
-        if (arr.length != 2 || allowTokens == null || allowTokens.isEmpty() || !allowTokens.contains(arr[1])) {
-            return jsonError(payload.getId(), OfficialMcpV2026Constants.CODE_INVALID_REQUEST,
-                    "auth not passed!", 401);
-        }
-        return null;
     }
 
     /**
@@ -148,48 +157,52 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
      *     <li>tools/call 时 Mcp-Name 必须存在且等于 params.name（区分大小写，头部为镜像值）</li>
      * </ol>
      */
-    protected ResponseEntity<Map<String, Object>> validateHeaders(V2026ServerJsonRpcRequest payload,
-                                                                  HttpServletRequest request,
-                                                                  String method) {
+    protected MvcJsonRpcResponse<JsonRpcResponseV2026<?>> validateHeaders(ServerJsonRpcRequestV2026 payload,
+                                                                          HttpServletRequest request,
+                                                                          String method) {
         String id = payload.getId();
 
         // MCP-Protocol-Version
-        String versionHeader = trimToNull(request.getHeader(OfficialMcpV2026Constants.HEADER_MCP_PROTOCOL_VERSION));
+        String versionHeader = trimToNull(request.getHeader(OfficialMcpConstantsV2026.HEADER_MCP_PROTOCOL_VERSION));
         String metaVersion = trimToNull(payload.metaProtocolVersion());
         if (versionHeader == null) {
-            return headerMismatch(id, "missing header: " + OfficialMcpV2026Constants.HEADER_MCP_PROTOCOL_VERSION);
+            return headerMismatch(id, "missing header: " + OfficialMcpConstantsV2026.HEADER_MCP_PROTOCOL_VERSION);
         }
         if (metaVersion != null && !metaVersion.equals(versionHeader)) {
-            return headerMismatch(id, OfficialMcpV2026Constants.HEADER_MCP_PROTOCOL_VERSION
+            return headerMismatch(id, OfficialMcpConstantsV2026.HEADER_MCP_PROTOCOL_VERSION
                     + " header value '" + versionHeader + "' does not match _meta value '" + metaVersion + "'");
         }
-        if (!OfficialMcpV2026Constants.SUPPORTED_PROTOCOL_VERSIONS.contains(versionHeader)) {
+        if (!OfficialMcpConstantsV2026.SUPPORTED_PROTOCOL_VERSIONS.contains(versionHeader)) {
             Map<String, Object> data = new LinkedHashMap<>();
-            data.put("supported", OfficialMcpV2026Constants.SUPPORTED_PROTOCOL_VERSIONS);
+            data.put("supported", OfficialMcpConstantsV2026.SUPPORTED_PROTOCOL_VERSIONS);
             data.put("requested", versionHeader);
-            return jsonError(id, OfficialMcpV2026Constants.CODE_UNSUPPORTED_PROTOCOL_VERSION,
-                    "Unsupported protocol version", 400, data);
+            return MvcJsonRpcResponse.error(HttpStatus.BAD_REQUEST, JsonRpcResponseV2026.error(id, OfficialMcpConstantsV2026.CODE_UNSUPPORTED_PROTOCOL_VERSION,
+                    "Unsupported protocol version", data));
         }
 
         // Mcp-Method
-        String methodHeader = trimToNull(request.getHeader(OfficialMcpV2026Constants.HEADER_MCP_METHOD));
+        String methodHeader = trimToNull(request.getHeader(OfficialMcpConstantsV2026.HEADER_MCP_METHOD));
         if (methodHeader == null) {
-            return headerMismatch(id, "missing header: " + OfficialMcpV2026Constants.HEADER_MCP_METHOD);
+            return headerMismatch(id, "missing header: " + OfficialMcpConstantsV2026.HEADER_MCP_METHOD);
         }
         if (method != null && !method.isEmpty() && !methodHeader.equals(method)) {
-            return headerMismatch(id, OfficialMcpV2026Constants.HEADER_MCP_METHOD
+            return headerMismatch(id, OfficialMcpConstantsV2026.HEADER_MCP_METHOD
                     + " header value '" + methodHeader + "' does not match body method '" + method + "'");
         }
 
         // Mcp-Name（仅 tools/call 需要）
-        if (OfficialMcpV2026Constants.METHOD_TOOLS_CALL.equals(method)) {
-            String nameHeader = decodeHeaderValue(trimToNull(request.getHeader(OfficialMcpV2026Constants.HEADER_MCP_NAME)));
-            String bodyName = trimToNull(stringOf(param(payload, "name")));
+        if (OfficialMcpConstantsV2026.METHOD_TOOLS_CALL.equals(method)) {
+            String nameHeader = decodeHeaderValue(trimToNull(request.getHeader(OfficialMcpConstantsV2026.HEADER_MCP_NAME)));
             if (nameHeader == null) {
-                return headerMismatch(id, "missing header: " + OfficialMcpV2026Constants.HEADER_MCP_NAME);
+                return headerMismatch(id, "missing header: " + OfficialMcpConstantsV2026.HEADER_MCP_NAME);
             }
+
+            Map<String, Object> map = payload.getParams();
+            JsonRpcToolCallParam params = RichConverter.convert(map, JsonRpcToolCallParam.class);
+
+            String bodyName = params.getName();
             if (bodyName != null && !nameHeader.equals(bodyName)) {
-                return headerMismatch(id, OfficialMcpV2026Constants.HEADER_MCP_NAME
+                return headerMismatch(id, OfficialMcpConstantsV2026.HEADER_MCP_NAME
                         + " header value '" + nameHeader + "' does not match body name '" + bodyName + "'");
             }
         }
@@ -202,109 +215,93 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
      * 返回 DiscoverResult：resultType + supportedVersions + capabilities（本服务端仅 tools）
      * + _meta.serverInfo；instructions、ttlMs、cacheScope 为可选字段，仅在配置提供时输出。
      */
-    protected V2026JsonRpcResponse discover(V2026ServerJsonRpcRequest request) {
+    protected JsonRpcResponseV2026<?> discover(ServerJsonRpcRequestV2026 request) {
         Map<String, Object> tools = new LinkedHashMap<>();
         tools.put("listChanged", false);
         Map<String, Object> capabilities = new LinkedHashMap<>();
         capabilities.put("tools", tools);
 
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("resultType", OfficialMcpV2026Constants.RESULT_TYPE);
-        result.put("supportedVersions", OfficialMcpV2026Constants.SUPPORTED_PROTOCOL_VERSIONS);
-        result.put("capabilities", capabilities);
-        result.put("_meta", serverInfoMeta());
+        JsonRpcServerDiscoverResult result = new JsonRpcServerDiscoverResult();
+        result.setResultType(OfficialMcpConstantsV2026.RESULT_TYPE_COMPLETE);
+        result.setSupportedVersions(OfficialMcpConstantsV2026.SUPPORTED_PROTOCOL_VERSIONS);
+        result.setCapabilities(capabilities);
+        result.set_meta(serverInfoMeta());
 
         String instructions = properties.getInstructions();
         if (instructions != null && !instructions.isEmpty()) {
-            result.put("instructions", instructions);
+            result.setInstructions(instructions);
         }
         OfficialMcpServerV2026Properties.ToolListOptions listOptions = properties.getToolList();
-        result.put("ttlMs", listOptions.getTtlMs());
-        result.put("cacheScope", listOptions.getCacheScope());
+        result.setTtlMs(listOptions.getTtlMs());
+        result.setCacheScope(listOptions.getCacheScope());
 
-        return V2026JsonRpcResponse.success(request.getId(), result);
+        return JsonRpcResponseV2026.success(request.getId(), result.toMap());
     }
 
-    protected V2026JsonRpcResponse listTools(V2026ServerJsonRpcRequest request) {
+    protected JsonRpcResponseV2026<?> listTools(ServerJsonRpcRequestV2026 request) {
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
 
-        List<Map<String, Object>> tools = new ArrayList<>();
+        List<JsonRpcToolListItem> tools = new ArrayList<>();
         for (ToolRawDefinition definition : definitionMap.values()) {
-            Map<String, Object> item = new LinkedHashMap<>();
-            item.put("name", definition.getName());
-            item.put("description", definition.getDescription());
-            item.put("inputSchema", definition.getJsonSchema().getParameters());
+            JsonRpcToolListItem item = new JsonRpcToolListItem();
+            item.setName(definition.getName());
+            item.setDescription(definition.getDescription());
+            item.setInputSchema(definition.getJsonSchema().getParameters());
             tools.add(item);
         }
 
         OfficialMcpServerV2026Properties.ToolListOptions listOptions = properties.getToolList();
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("resultType", OfficialMcpV2026Constants.RESULT_TYPE);
-        result.put("tools", tools);
-        result.put("ttlMs", listOptions.getTtlMs());
-        result.put("cacheScope", listOptions.getCacheScope());
-        result.put("_meta", serverInfoMeta());
+        JsonRpcToolListResultV2026 result = new JsonRpcToolListResultV2026();
+        result.setResultType(OfficialMcpConstantsV2026.RESULT_TYPE_COMPLETE);
+        result.setTools(tools);
+        result.setTtlMs(listOptions.getTtlMs());
+        result.setCacheScope(listOptions.getCacheScope());
+        result.set_meta(serverInfoMeta());
 
-        return V2026JsonRpcResponse.success(request.getId(), result);
+        return JsonRpcResponseV2026.success(request.getId(), result.toMap());
     }
 
-    protected V2026JsonRpcResponse callTool(V2026ServerJsonRpcRequest request) {
-        Map<String, Object> params = request.getParams();
-        if (params == null) {
-            return V2026JsonRpcResponse.error(request.getId(),
-                    OfficialMcpV2026Constants.CODE_INVALID_PARAMS, "missing tools/call params!");
+    protected JsonRpcResponseV2026<?> callTool(ServerJsonRpcRequestV2026 request) {
+        Map<String, Object> map = request.getParams();
+        if (map == null) {
+            return JsonRpcResponseV2026.error(request.getId(), OfficialMcpConstantsV2026.CODE_INVALID_PARAMS, "missing tools/call params!");
         }
-        String toolName = trimToNull(stringOf(params.get("name")));
-        if (toolName == null) {
-            return V2026JsonRpcResponse.error(request.getId(),
-                    OfficialMcpV2026Constants.CODE_INVALID_PARAMS, "missing tools/call params.name!");
+        JsonRpcToolCallParam params = RichConverter.convert(map, JsonRpcToolCallParam.class);
+
+        String toolName = params.getName();
+        if (toolName == null || toolName.isEmpty()) {
+            return JsonRpcResponseV2026.error(request.getId(), OfficialMcpConstantsV2026.CODE_INVALID_PARAMS, "missing tools/call params.name!");
         }
 
-        Map<String, Object> arguments = RichConverter.convert(params.get("arguments"), LinkedHashMap.class);
+        Map<String, Object> arguments = params.getArguments();
 
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
         ToolRawDefinition rawTool = definitionMap.get(toolName);
         if (rawTool == null) {
             // 工具不存在属于业务层结果，按规范以 isError=true 承载而非 JSON-RPC error
-            return V2026JsonRpcResponse.success(request.getId(),
-                    toolCallResult("un-support tool call request, tool not found: " + toolName, true));
+            return JsonRpcResponseV2026.success(request.getId(), JsonRpcToolCallResultV2026.error("un-support tool call request, tool not found: " + toolName).withMeta(serverInfoMeta()));
         }
 
         try {
             Object ret = ToolRawHelper.invokeTool(rawTool, arguments, invocationHandler);
-            return V2026JsonRpcResponse.success(request.getId(), toolCallResult(toText(ret), false));
+            return JsonRpcResponseV2026.success(request.getId(), JsonRpcToolCallResultV2026.success(toText(ret)).withMeta(serverInfoMeta()));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
-            return V2026JsonRpcResponse.success(request.getId(), toolCallResult(e.getMessage(), true));
+            return JsonRpcResponseV2026.success(request.getId(), JsonRpcToolCallResultV2026.error("tool call error, " + e.getMessage()).withMeta(serverInfoMeta()));
         }
     }
 
-    protected Map<String, Object> toolCallResult(String text, boolean isError) {
-        Map<String, Object> textContent = new LinkedHashMap<>();
-        textContent.put("type", "text");
-        textContent.put("text", text);
-
-        List<Map<String, Object>> content = new ArrayList<>();
-        content.add(textContent);
-
-        Map<String, Object> result = new LinkedHashMap<>();
-        result.put("resultType", OfficialMcpV2026Constants.RESULT_TYPE);
-        result.put("content", content);
-        result.put("isError", isError);
-        result.put("_meta", serverInfoMeta());
-        return result;
-    }
 
     /**
      * 构造 result._meta，回带服务端身份（io.modelcontextprotocol/serverInfo）。
      */
     protected Map<String, Object> serverInfoMeta() {
-        Map<String, Object> serverInfo = new LinkedHashMap<>();
-        serverInfo.put("name", properties.getServerName());
-        serverInfo.put("version", properties.getServerVersion());
+        JsonRpcServerInfo serverInfo = new JsonRpcServerInfo();
+        serverInfo.setName(properties.getServerName());
+        serverInfo.setVersion(properties.getServerVersion());
 
         Map<String, Object> meta = new LinkedHashMap<>();
-        meta.put(OfficialMcpV2026Constants.META_SERVER_INFO, serverInfo);
+        meta.put(OfficialMcpConstantsV2026.META_SERVER_INFO, serverInfo);
         return meta;
     }
 
@@ -326,29 +323,11 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
     // 响应封装与工具方法
     // ------------------------------------------------------------------
 
-    protected ResponseEntity<Map<String, Object>> ok(V2026JsonRpcResponse response) {
-        return ResponseEntity.ok(response.toMap());
+
+    protected MvcJsonRpcResponse<JsonRpcResponseV2026<?>> headerMismatch(String id, String message) {
+        return MvcJsonRpcResponse.error(HttpStatus.BAD_REQUEST, JsonRpcResponseV2026.error(id, OfficialMcpConstantsV2026.CODE_HEADER_MISMATCH, "Header mismatch: " + message));
     }
 
-    protected ResponseEntity<Map<String, Object>> headerMismatch(String id, String message) {
-        return jsonError(id, OfficialMcpV2026Constants.CODE_HEADER_MISMATCH,
-                "Header mismatch: " + message, 400);
-    }
-
-    protected ResponseEntity<Map<String, Object>> jsonError(String id, int code, String message, int status) {
-        return jsonError(id, code, message, status, null);
-    }
-
-    protected ResponseEntity<Map<String, Object>> jsonError(String id, int code, String message, int status,
-                                                            Map<String, Object> data) {
-        return ResponseEntity.status(status)
-                .body(V2026JsonRpcResponse.error(id, code, message, data).toMap());
-    }
-
-    protected Object param(V2026ServerJsonRpcRequest payload, String key) {
-        Map<String, Object> params = payload.getParams();
-        return params == null ? null : params.get(key);
-    }
 
     protected String decodeHeaderValue(String value) {
         if (value == null) {
@@ -365,10 +344,6 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
             }
         }
         return value;
-    }
-
-    protected String stringOf(Object value) {
-        return value == null ? null : String.valueOf(value);
     }
 
     protected String trimToNull(String value) {
