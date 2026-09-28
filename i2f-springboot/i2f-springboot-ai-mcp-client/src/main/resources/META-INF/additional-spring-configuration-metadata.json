@@ -14,6 +14,11 @@
       "name": "i2f.springboot.ai.mcp.client.official.v2024.solon",
       "type": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream",
+      "type": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration"
     }
   ],
   "properties": [
@@ -36,6 +41,13 @@
       "type": "java.lang.Boolean",
       "description": "enable ai solon mcp client.",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai stream mcp client.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
       "defaultValue": true
     }
   ],

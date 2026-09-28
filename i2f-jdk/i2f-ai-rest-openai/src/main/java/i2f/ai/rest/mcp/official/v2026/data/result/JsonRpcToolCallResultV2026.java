@@ -1,7 +1,7 @@
 package i2f.ai.rest.mcp.official.v2026.data.result;
 
-import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
 import i2f.ai.rest.mcp.official.IJsonRpcDto;
+import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

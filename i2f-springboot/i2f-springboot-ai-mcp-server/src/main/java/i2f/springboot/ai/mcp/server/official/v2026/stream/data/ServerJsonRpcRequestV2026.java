@@ -1,7 +1,7 @@
 package i2f.springboot.ai.mcp.server.official.v2026.stream.data;
 
-import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
 import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
+import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

@@ -1,10 +1,15 @@
-package i2f.springboot.ai.mcp.client.official.v2024.stream.provider;
+package i2f.springboot.ai.mcp.client.official.v2026.stream.provider;
 
-import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
-import i2f.ai.rest.mcp.official.v2024.data.JsonRpcError;
+import i2f.ai.rest.mcp.official.IJsonRpcDto;
 import i2f.ai.rest.mcp.official.v2024.data.JsonRpcRequest;
-import i2f.ai.rest.mcp.official.v2024.data.JsonRpcResponse;
-import i2f.ai.rest.mcp.official.v2024.data.result.*;
+import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolCallParam;
+import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolListItem;
+import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
+import i2f.ai.rest.mcp.official.v2026.data.JsonRpcErrorV2026;
+import i2f.ai.rest.mcp.official.v2026.data.JsonRpcResponseV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerDiscoverResult;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolCallResultV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolListResultV2026;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tags.AiTagRule;
 import i2f.ai.std.tags.AiTagRuleHelper;
@@ -25,7 +30,6 @@ import i2f.typeof.token.TypeToken;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -36,12 +40,12 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
- * @date 2026/7/21 17:42
+ * @date 2026/9/28 15:50
  * @desc
  */
 @Data
 @NoArgsConstructor
-public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Closeable, BaseMutator<StreamJsonRpcMcpClientToolProvider> {
+public class StreamJsonRpcMcpClientV2026ToolProvider implements McpToolProvider, BaseMutator<StreamJsonRpcMcpClientV2026ToolProvider> {
 
     protected IRestClient restClient = new HttpProcessorRestClient();
     protected String baseUrl;
@@ -56,7 +60,6 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
 
     protected ReentrantLock lock = new ReentrantLock();
     protected AtomicBoolean initialized = new AtomicBoolean(false);
-    protected String mcpSessionId;
 
     protected long expireTtl = TimeUnit.MINUTES.toMillis(5);
     protected final CopyOnWriteArrayList<ToolDefinition> cache = new CopyOnWriteArrayList<>();
@@ -72,6 +75,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
     public String getDescription() {
         return description;
     }
+
 
     @Override
     public List<ToolDefinition> getTools() {
@@ -89,12 +93,14 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             RestHttpRequest request = new RestHttpRequest();
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
-            request.setHeaders(HttpHeaders.create().add(OfficialMcpConstants.HEADER_MCP_SESSION_ID, mcpSessionId));
+            request.setHeaders(HttpHeaders.create());
+            fillHeaders(OfficialMcpConstantsV2026.METHOD_TOOLS_LIST, request.getHeaders());
             if (headers != null) {
                 request.getHeaders().addAll(headers);
             }
-            request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_LIST, null));
-            RestHttpResponse<JsonRpcResponse<JsonRpcToolListResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolListResult>>() {
+
+            request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstantsV2026.METHOD_TOOLS_LIST, null));
+            RestHttpResponse<JsonRpcResponseV2026<JsonRpcToolListResultV2026>> rest = restClient.rest(request, new TypeToken<JsonRpcResponseV2026<JsonRpcToolListResultV2026>>() {
             });
 
             // 【Map 结构示例】tools/list 响应
@@ -116,9 +122,9 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             //   }
             // }
 
-            JsonRpcResponse<JsonRpcToolListResult> body = rest.getBody();
+            JsonRpcResponseV2026<JsonRpcToolListResultV2026> body = rest.getBody();
 
-            JsonRpcError error = body.getError();
+            JsonRpcErrorV2026 error = body.getError();
             if (error != null) {
                 Integer code = error.getCode();
                 if (code != null) {
@@ -126,7 +132,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
                 }
             }
 
-            JsonRpcToolListResult result = body.getResult();
+            JsonRpcToolListResultV2026 result = body.getResult();
             List<JsonRpcToolListItem> tools = result.getTools();
 
             List<ToolDefinition> ret = new ArrayList<>();
@@ -193,12 +199,14 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         RestHttpRequest request = new RestHttpRequest();
         request.setUrl(getEndpointUrl());
         request.setMethod(HttpMethodConstants.POST);
-        request.setHeaders(HttpHeaders.create().add(OfficialMcpConstants.HEADER_MCP_SESSION_ID, mcpSessionId));
+        request.setHeaders(HttpHeaders.create());
+        request.getHeaders().add(OfficialMcpConstantsV2026.HEADER_MCP_NAME, params.getName());
+        fillHeaders(OfficialMcpConstantsV2026.METHOD_TOOLS_CALL, request.getHeaders());
         if (headers != null) {
             request.getHeaders().addAll(headers);
         }
-        request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params));
-        RestHttpResponse<JsonRpcResponse<JsonRpcToolCallResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {
+        request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstantsV2026.METHOD_TOOLS_CALL, params));
+        RestHttpResponse<JsonRpcResponseV2026<JsonRpcToolCallResultV2026>> rest = restClient.rest(request, new TypeToken<JsonRpcResponseV2026<JsonRpcToolCallResultV2026>>() {
         });
 
         // 【Map 结构示例】tools/call 响应
@@ -212,9 +220,9 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         //     "isError": false
         //   }
         // }
-        JsonRpcResponse<JsonRpcToolCallResult> body = rest.getBody();
+        JsonRpcResponseV2026<JsonRpcToolCallResultV2026> body = rest.getBody();
 
-        JsonRpcError error = body.getError();
+        JsonRpcErrorV2026 error = body.getError();
         if (error != null) {
             Integer code = error.getCode();
             if (code != null) {
@@ -222,7 +230,7 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             }
         }
 
-        JsonRpcToolCallResult result = body.getResult();
+        JsonRpcToolCallResultV2026 result = body.getResult();
         if (result.isError()) {
             throw new IllegalStateException("invoke mcp tool error, cause reason is: ");
         }
@@ -230,13 +238,14 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         return contentList;
     }
 
+
     public String getEndpointUrl() {
         String ret = baseUrl;
         if (ret.endsWith("/")) {
             ret = ret.substring(0, ret.length() - 1);
         }
-        if (!ret.endsWith(OfficialMcpConstants.URL_PATH_MCP)) {
-            ret = ret + OfficialMcpConstants.URL_PATH_MCP;
+        if (!ret.endsWith(OfficialMcpConstantsV2026.URL_PATH_MCP)) {
+            ret = ret + OfficialMcpConstantsV2026.URL_PATH_MCP;
         }
         return ret;
     }
@@ -250,50 +259,22 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
             if (initialized.get()) {
                 return;
             }
-            // 【Map 结构示例】JSON-RPC initialize 请求
-            // {
-            //   "jsonrpc": "2.0",
-            //   "id": 1,
-            //   "method": "initialize",
-            //   "params": {
-            //     "protocolVersion": "2024-11-05",
-            //     "capabilities": {},
-            //     "clientInfo": { "name": "java-mcp-bridge", "version": "1.0.0" }
-            //   }
-            // }
-            Map<String, Object> params = new HashMap<>();
-            params.put("protocolVersion", OfficialMcpConstants.PROTOCOL_VERSION);
-            params.put("capabilities", new HashMap<>());
-
-            Map<String, Object> clientInfo = new HashMap<>();
-            clientInfo.put("name", "java-mcp-bridge");
-            clientInfo.put("version", "1.0.0");
-            params.put("clientInfo", clientInfo);
 
             RestHttpRequest request = new RestHttpRequest();
             request.setUrl(getEndpointUrl());
             request.setMethod(HttpMethodConstants.POST);
             request.setHeaders(HttpHeaders.create());
+            fillHeaders(OfficialMcpConstantsV2026.METHOD_SERVER_DISCOVER, request.getHeaders());
             if (headers != null) {
                 request.getHeaders().addAll(headers);
             }
-            request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_INITIALIZE, params));
-            RestHttpResponse<JsonRpcResponse<JsonRpcInitialResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcInitialResult>>() {
+            request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstantsV2026.METHOD_SERVER_DISCOVER, null));
+            RestHttpResponse<JsonRpcResponseV2026<JsonRpcServerDiscoverResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponseV2026<JsonRpcServerDiscoverResult>>() {
             });
-            // 【Map 结构示例】initialize 响应
-            // {
-            //   "jsonrpc": "2.0",
-            //   "id": 1,
-            //   "result": {
-            //     "protocolVersion": "2024-11-05",
-            //     "capabilities": { "tools": { "listChanged": false } },
-            //     "serverInfo": { "name": "xxx-server", "version": "1.0.0" }
-            //   }
-            // }
 
-            JsonRpcResponse<JsonRpcInitialResult> body = rest.getBody();
+            JsonRpcResponseV2026<JsonRpcServerDiscoverResult> body = rest.getBody();
 
-            JsonRpcError error = body.getError();
+            JsonRpcErrorV2026 error = body.getError();
             if (error != null) {
                 Integer code = error.getCode();
                 if (code != null) {
@@ -303,18 +284,8 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
 
             HttpHeaders headers = rest.getHeaders();
 
-            this.mcpSessionId = headers.getFirstHeader(OfficialMcpConstants.HEADER_MCP_SESSION_ID);
-
-            if (this.mcpSessionId == null) {
-                System.out.println(headers);
-                System.out.println(rest.getBody());
-                // 服务端可能是无状态的，所以他可能不返回 session-id
-                // 所以，策略就变成了，有就携带，没有那也无所谓
-                //throw new IllegalStateException("MCP Server did not return a valid Mcp-Session-Id in headers!");
-            }
-
-            JsonRpcInitialResult result = body.getResult();
-            String serverVersion = result.getProtocolVersion();
+            JsonRpcServerDiscoverResult result = body.getResult();
+            List<String> serverVersion = result.getSupportedVersions();
             // TODO: 可在此处校验 response.get("result") 中的 protocolVersion 是否兼容
 
             initialized.set(true);
@@ -323,37 +294,55 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         }
     }
 
-    @Override
-    public void close() throws IOException {
-        if (!initialized.get()) {
-            return;
-        }
-        RestHttpRequest request = new RestHttpRequest();
-        request.setUrl(getEndpointUrl());
-        request.setMethod(HttpMethodConstants.DELETE);
-        request.setBody(null);
-        request.setHeaders(HttpHeaders.create().add(OfficialMcpConstants.HEADER_MCP_SESSION_ID, mcpSessionId));
-        if (headers != null) {
-            request.getHeaders().addAll(headers);
-        }
-        RestHttpResponse<String> rest = restClient.rest(request, String.class);
+    public void fillHeaders(String method, HttpHeaders headers) {
+        headers.add(OfficialMcpConstantsV2026.HEADER_MCP_PROTOCOL_VERSION, OfficialMcpConstantsV2026.PROTOCOL_VERSION);
 
-        HttpHeaders headers = rest.getHeaders();
-        String body = rest.getBody();
-
-        mcpSessionId = null;
-        this.initialized.set(false);
-        this.cache.clear();
-        this.hasCache.set(false);
+        headers.add(OfficialMcpConstantsV2026.HEADER_MCP_METHOD, method);
     }
 
-    public <T> JsonRpcRequest<T> wrapJsonRpcHttpBody(String method, T params) {
-        JsonRpcRequest<T> ret = new JsonRpcRequest<>();
-        ret.setJsonrpc(OfficialMcpConstants.JSON_RPC_VERSION);
+
+    public JsonRpcRequest<Map<String, Object>> wrapJsonRpcHttpBody(String method, IJsonRpcDto params) {
+        JsonRpcRequest<Map<String, Object>> ret = new JsonRpcRequest<>();
+        ret.setJsonrpc(OfficialMcpConstantsV2026.JSON_RPC_VERSION);
         ret.setId("" + idGenerator.getAndIncrement());
         ret.setMethod(method);
-        ret.setParams(params);
+
+        Map<String, Object> map = new LinkedHashMap<>();
+        if (params != null) {
+            map.putAll(params.toMap());
+        }
+
+        Map<String, Object> meta = getMeta();
+        map.put("_meta", meta);
+
+        ret.setParams(map);
 
         return ret;
     }
+
+    public Map<String, Object> getMeta() {
+        /*
+        "_meta": {
+          "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+          "io.modelcontextprotocol/clientInfo": {
+            "name": "MyClient",
+            "version": "1.0.0"
+          },
+          "io.modelcontextprotocol/clientCapabilities": {}
+        }
+        */
+        Map<String, Object> ret = new LinkedHashMap<>();
+        ret.put(OfficialMcpConstantsV2026.META_PROTOCOL_VERSION, OfficialMcpConstantsV2026.PROTOCOL_VERSION);
+
+        Map<String, Object> clientInfo = new HashMap<>();
+        clientInfo.put("name", "java-mcp-bridge");
+        clientInfo.put("version", "1.0.0");
+        ret.put(OfficialMcpConstantsV2026.META_CLIENT_INFO, clientInfo);
+
+        Map<String, Object> capabilities = new HashMap<>();
+        ret.put(OfficialMcpConstantsV2026.META_CLIENT_CAPABILITIES, capabilities);
+
+        return ret;
+    }
+
 }

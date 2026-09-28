@@ -5,6 +5,11 @@ import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
 import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolCallParam;
 import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolListItem;
 import i2f.ai.rest.mcp.official.v2026.consts.OfficialMcpConstantsV2026;
+import i2f.ai.rest.mcp.official.v2026.data.JsonRpcResponseV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerDiscoverResult;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerInfo;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolCallResultV2026;
+import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolListResultV2026;
 import i2f.ai.std.tool.ToolRawDefinition;
 import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
@@ -16,13 +21,8 @@ import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
-import i2f.ai.rest.mcp.official.v2026.data.JsonRpcResponseV2026;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.MvcJsonRpcResponse;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.ServerJsonRpcRequestV2026;
-import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerDiscoverResult;
-import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerInfo;
-import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolCallResultV2026;
-import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolListResultV2026;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -235,7 +235,7 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
         result.setTtlMs(listOptions.getTtlMs());
         result.setCacheScope(listOptions.getCacheScope());
 
-        return JsonRpcResponseV2026.success(request.getId(), result.toMap());
+        return JsonRpcResponseV2026.success(request.getId(), result);
     }
 
     protected JsonRpcResponseV2026<?> listTools(ServerJsonRpcRequestV2026 request) {

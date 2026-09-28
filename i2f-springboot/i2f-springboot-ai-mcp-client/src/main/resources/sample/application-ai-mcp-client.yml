@@ -1,4 +1,3 @@
-
 i2f:
   springboot:
     ai:
@@ -42,6 +41,22 @@ i2f:
                     description: a group utils tool
                     url: http://localhost:9999/mcp
                     channel: streamable
+                    bearer-token: xxx
+                    #tag-rules:
+                    #  - pattern: "*web*"
+                    #    tags: ["auto","readonly"]
+                    #headers:
+                    #  key: value
+            # for 2026 stateless version (no initialize handshake, tools/list + tools/call only)
+            v2026:
+              # stream mcp client implements official protocol mcp (streamable channel only)
+              stream:
+                enable: true
+                instances:
+                  - enable: false
+                    name: demo
+                    description: a group utils tool
+                    url: http://localhost:9999/mcp
                     bearer-token: xxx
                     #tag-rules:
                     #  - pattern: "*web*"
