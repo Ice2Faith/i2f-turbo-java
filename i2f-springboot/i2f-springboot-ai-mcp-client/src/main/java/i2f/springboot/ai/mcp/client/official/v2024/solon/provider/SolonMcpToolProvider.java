@@ -68,6 +68,7 @@ public class SolonMcpToolProvider implements McpToolProvider {
                 DefaultToolDefinition def = new DefaultToolDefinition();
                 def.setName(tool.name());
                 def.setDescription(tool.description());
+                def.setTags(new HashSet<>());
 
                 String json = tool.inputSchema();
                 Map<String, Object> parameters = jsonSerializer.deserializeAsMap(json);
