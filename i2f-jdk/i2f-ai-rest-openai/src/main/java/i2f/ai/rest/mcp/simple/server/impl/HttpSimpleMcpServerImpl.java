@@ -146,6 +146,7 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
     @Override
     public ApiResp<?> callTool(ToolBaseCallRequest request, HttpSimpleMcpRequest mcpRequest) {
         try {
+            assertValidMcpRequest(mcpRequest);
             List<ToolDefinition> tools = listTools();
             for (ToolDefinition tool : tools) {
                 ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
