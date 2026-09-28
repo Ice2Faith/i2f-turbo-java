@@ -2,6 +2,8 @@ package i2f.springboot.ai.mcp.server.official.v2026.stream.springweb;
 
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.spring.core.SpringContext;
+import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
+import i2f.springboot.ai.mcp.server.official.auth.impl.StaticStreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.impl.SpringHttpStreamMcpV2026Controller;
 import lombok.Data;
@@ -15,6 +17,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.HashSet;
 
 /**
  * 官方 MCP 协议（protocolVersion: 2026-07-28 无状态版本）Streamable HTTP 传输的 SpringWeb 服务端自动配置。
@@ -39,15 +43,26 @@ public class StreamSpringWebMcpServerV2026AutoConfiguration {
     @Autowired
     private OfficialMcpServerV2026Properties officialMcpServerV2026Properties;
 
+    @ConditionalOnMissingBean(StreamMcpServerAuthFilter.class)
+    @Bean
+    public StreamMcpServerAuthFilter streamMcpServerAuthFilter() {
+        StaticStreamMcpServerAuthFilter ret = new StaticStreamMcpServerAuthFilter();
+        ret.setEnable(officialMcpServerV2026Properties.getBearerToken().isEnable());
+        ret.setAllowBearerTokens(new HashSet<>(officialMcpServerV2026Properties.getBearerToken().getAllowTokens()));
+        return ret;
+    }
+
     @ConditionalOnMissingBean(SpringHttpStreamMcpV2026Controller.class)
     @Bean
     public SpringHttpStreamMcpV2026Controller springHttpStreamMcpV2026Controller(
             @Autowired ApplicationContext applicationContext,
-            @Autowired(required = false) IProxyInvocationHandler invocationHandler) {
+            @Autowired(required = false) IProxyInvocationHandler invocationHandler,
+            @Autowired(required = false) StreamMcpServerAuthFilter streamMcpServerAuthFilter) {
         return new SpringHttpStreamMcpV2026Controller().toMutator()
                 .set(u -> u::setProperties, officialMcpServerV2026Properties)
                 .set(u -> u::setContext, new SpringContext(applicationContext))
                 .set(u -> u::setInvocationHandler, invocationHandler)
+                .set(u -> u::setStreamMcpServerAuthFilter, streamMcpServerAuthFilter)
                 .done();
     }
 }
