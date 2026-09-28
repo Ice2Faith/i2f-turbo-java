@@ -1685,6 +1685,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
             </plugin>
+            <!-- 如果要启用checkstyle,先保证install一次，再启用此插件 -->
             <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-checkstyle-plugin</artifactId>
@@ -1940,7 +1941,11 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.6.0</version>
-                    <!-- 关键：通过依赖引入 build-tools，使规则文件进入 classpath -->
+                    <!-- 关键：通过依赖引入 build-tools，使规则文件进入 classpath，
+                    只会使用本地仓库，而不会检查模块内依赖
+                    所以，需要先install，或者不适用此宽松检查，使用默认的 google_checks.xml
+                     -->
+                    <!-- mvn clean install -pl i2f-build-tools -DskipTests -->
                     <dependencies>
                         <dependency>
                             <groupId>i2f.turbo</groupId>
