@@ -1,6 +1,12 @@
 # i2f-springboot-ai-mcp-server
 
-> MCP 服务端 Starter，在同一模块内并列三套服务端协议栈：**simple** 私有协议栈（HMAC-SHA256 验签，`/mcp/tool/*`，Spring Web MVC 与 Netty 双 HTTP 传输）、**official.v2024** 官方有状态栈（protocolVersion 2024-11-05，`POST /v2024/mcp`，initialize 握手 + tools，Bearer Token 鉴权）与 **official.v2026** 官方无状态栈（2026-07-28，`POST /v2026/mcp`，无 initialize、server/discover 发现 + 镜像请求头一致性校验），把 Spring 容器中的 `@Tool` 工具以 MCP 协议对外暴露给远程 AI 主控调用。
+> MCP 服务端 Starter，在同一模块内并列三套服务端协议栈：**simple** 私有协议栈（HMAC-SHA256 验签，`/mcp/tool/*`，Spring Web
+> MVC 与 Netty 双 HTTP 传输）、**official.v2024** 官方有状态栈（protocolVersion 2024-11-05，`POST /v2024/mcp`，initialize
+> 握手 + tools，Bearer Token 鉴权）与 **official.v2026** 官方无状态栈（2026-07-28，`POST /v2026/mcp`，无
+> initialize、server/discover 发现 + 镜像请求头一致性校验）。三套栈的工具来源不再各自反射，而是统一委托 `provider`
+> 层装配的单一 `McpServerProvider`（`i2f-ai-std` 的 mcp/server 契约：`ToolManager` + `McpServerExposer`
+> ），据 `provider.rules`/`default-expose` 与 `@McpServerExpose` 选择性把 Spring 容器中的 `@Tool` 工具开放为 MCP 工具供远程
+> AI 主控调用。
 
 ## 模块路径
 
@@ -8,17 +14,17 @@
 
 ## 模块依赖
 
-| GroupId | ArtifactId | Scope | Optional | 说明 |
-|---------|------------|-------|----------|------|
-| i2f.turbo | i2f-ai-std | compile | false | 工具链标准契约：`ToolBaseCallRequest`、`ToolRawHelper`、`ToolRawDefinition`、`JsonSchemaAnnotationResolver`、`ToolCallContextHolder`、`@Tool`/`@Tools`/`@ToolParam` |
-| i2f.turbo | i2f-ai-rest-openai | compile | false | MCP 契约层：`simple` 协议（`HttpSimpleMcpServer`/`Impl`、`HttpSimpleMcpConstants`、`McpCallPayloadDto`）与 `official` 共享协议模型（`v2024`：`OfficialMcpConstants`、`JsonRpcRequest/Response`、`JsonRpc*Result`；`v2026`：`OfficialMcpConstantsV2026`、`JsonRpcResponseV2026`、`JsonRpc*ResultV2026`） |
-| i2f.turbo | i2f-spring-core | compile | false | `SpringContext`（`IContext` 的 Spring 容器适配，三套栈共同的工具扫描来源） |
-| i2f.turbo | i2f-spring-web | compile | false | Spring Web 工具集（源码直接使用其传递引入的 `JacksonJsonSerializer`） |
-| org.projectlombok | lombok | compile | false | 编译期代码生成（`@Data`/`@Slf4j`） |
-| org.springframework.boot | spring-boot-starter | provided | true | Spring Boot 自动装配基础 |
-| org.springframework.boot | spring-boot-configuration-processor | provided | true | `@ConfigurationProperties` 配置元数据生成 |
-| org.springframework.boot | spring-boot-starter-web | provided | true | 各栈的 Spring MVC 传输所需（Servlet、`RestController`） |
-| io.netty | netty-all | provided | true | Netty 传输所需（模块内显式指定 4.1.65.Final） |
+| GroupId                  | ArtifactId                          | Scope    | Optional | 说明                                                                                                                                                                                                                                                                            |
+|--------------------------|-------------------------------------|----------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| i2f.turbo                | i2f-ai-std                          | compile  | false    | 工具链与 MCP 服务端标准契约：`@Tool`/`@Tools`/`@ToolParam`、`ToolBaseCallRequest`、`ToolManager`/`ContextAppToolManager`，及 `mcp.server` 的 `McpServerProvider`/`BasicMcpServerProvider`/`McpServerExposer`/`BasicMcpServerExposer`/`McpServerExposeRule`（三栈共享的工具暴露/调用内核）                     |
+| i2f.turbo                | i2f-ai-rest-openai                  | compile  | false    | MCP 契约层：`simple` 协议（`HttpSimpleMcpServer`/`Impl`、`HttpSimpleMcpConstants`、`McpCallPayloadDto`）与 `official` 共享协议模型（`v2024`：`OfficialMcpConstants`、`JsonRpcRequest/Response`、`JsonRpc*Result`；`v2026`：`OfficialMcpConstantsV2026`、`JsonRpcResponseV2026`、`JsonRpc*ResultV2026`） |
+| i2f.turbo                | i2f-spring-core                     | compile  | false    | `SpringContext`（`IContext` 的 Spring 容器适配）——现仅由 `provider` 层的 `ContextAppToolManager` 使用，作为工具扫描来源                                                                                                                                                                              |
+| i2f.turbo                | i2f-spring-web                      | compile  | false    | Spring Web 工具集（源码直接使用其传递引入的 `JacksonJsonSerializer`）                                                                                                                                                                                                                          |
+| org.projectlombok        | lombok                              | compile  | false    | 编译期代码生成（`@Data`/`@Slf4j`）                                                                                                                                                                                                                                                     |
+| org.springframework.boot | spring-boot-starter                 | provided | true     | Spring Boot 自动装配基础                                                                                                                                                                                                                                                            |
+| org.springframework.boot | spring-boot-configuration-processor | provided | true     | `@ConfigurationProperties` 配置元数据生成                                                                                                                                                                                                                                            |
+| org.springframework.boot | spring-boot-starter-web             | provided | true     | 各栈的 Spring MVC 传输所需（Servlet、`RestController`）                                                                                                                                                                                                                                 |
+| io.netty                 | netty-all                           | provided | true     | Netty 传输所需（模块内显式指定 4.1.65.Final）                                                                                                                                                                                                                                              |
 
 > 注意：源码直接使用的 `JacksonJsonSerializer` 属于 `i2f-extension-jackson`，本模块 POM 未显式声明，实际由 `i2f-spring-web` 传递引入。
 
@@ -26,13 +32,23 @@
 
 ### 三套并列协议栈
 
-本模块是 MCP 服务端的「Spring Boot 装配 + 传输适配层」，三套协议栈互不复用、各自独立装配：
+本模块是 MCP 服务端的「Spring Boot 装配 + 传输适配层」，三套协议栈在
+HTTP/验签/协议边界上互不复用、各自独立装配，但共享一个由 `provider` 层产出的 `McpServerProvider` 作为工具暴露与调用内核：
+
+- **provider 共享层（新增）**：`McpServerProviderAutoConfiguration` 依 `i2f.springboot.ai.mcp.server.provider.*`
+  装配 `ToolManager`（`ContextAppToolManager`：`SpringContext` +
+  宿主 `ObjectMapper`）、`McpServerExposer`（`BasicMcpServerExposer`：`rules` + `default-expose`
+  ）与 `McpServerProvider`（`BasicMcpServerProvider` 组合二者），三个 Bean 均 `@ConditionalOnMissingBean`
+  可被应用覆盖；三栈控制器统一注入该 `McpServerProvider`。
 
 - **simple 私有协议栈**：内核为 `i2f-ai-rest-openai` 的 `HttpSimpleMcpServerImpl`，带 HMAC-SHA256 验签 + 时间窗 + nonce 防重放 + 上下文透传；REST 路径分离（`GET /mcp/tool/list`、`/mcp/tool/call`），提供 Spring Web MVC（共享宿主端口）与 Netty（独立端口）两条传输。
 - **official.v2024 有状态栈**：对齐官方 MCP 规范（protocolVersion `2024-11-05`，底层 JSON-RPC 2.0），单一 `POST /v2024/mcp` 端点按请求体 `method` 路由 `initialize`/`tools/list`/`tools/call`，`DELETE /v2024/mcp` 为会话终止占位；鉴权为可插拔的 `StreamMcpServerAuthFilter`（内置 Bearer Token 静态实现）。
 - **official.v2026 无状态栈**：对齐官方 `2026-07-28` 无状态规范——无 initialize 握手与会话，方法路由为 `server/discover`/`tools/list`/`tools/call`；协议版本随每个请求经 `MCP-Protocol-Version` 头与 `params._meta` 双通道声明且须一致；`Mcp-Method`/`Mcp-Name` 镜像头须与请求体一致；result 携带必填 `resultType` 与 `_meta.serverInfo`，`tools/list`/`server/discover` 另带 `ttlMs`/`cacheScope` 缓存语义。
 
-> 关键不变量：官方两版栈均不得复用带 HMAC 语义的 `HttpSimpleMcpServer`（与官方标准冲突），故其控制器独立持有 `IContext` 并直连 `ToolRawHelper` 工具内核；三套栈均**不依赖官方 MCP SDK（其要求 JDK17）**。
+> 关键不变量：官方两版栈均不得复用带 HMAC 语义的 `HttpSimpleMcpServer`（与官方标准冲突）——三套栈在 **HTTP/验签/协议边界上互不复用
+**；但自本版本起，工具枚举与调用**统一收敛到 `provider` 层装配的单一 `McpServerProvider` Bean
+**（`@AutoConfigureAfter(McpServerProviderAutoConfiguration.class)`），控制器不再各自持有 `IContext`/直连 `ToolRawHelper`
+。三套栈均**不依赖官方 MCP SDK（其要求 JDK17）**。
 
 ```mermaid
 flowchart TD
@@ -52,27 +68,40 @@ flowchart TD
         C24["SpringHttpStreamMcpController (POST/DELETE /v2024/mcp)"]
         A24 --> AUTH
         A24 --> C24
-        C24 -->|ToolRawHelper 直连| TOOL["@Tool 工具内核"]
     end
     subgraph v2026["official.v2026 无状态栈 (2026-07-28)"]
         A26["StreamSpringWebMcpServerV2026AutoConfiguration"]
         C26["SpringHttpStreamMcpV2026Controller (POST /v2026/mcp)"]
-        C26 -->|ToolRawHelper 直连| TOOL
+    end
+    subgraph provider["provider 共享暴露控制层 (新增)"]
+        PV["McpServerProviderAutoConfiguration"]
+        MSP["McpServerProvider (BasicMcpServerProvider)"]
+        TM["ToolManager (ContextAppToolManager)"]
+        EXP["McpServerExposer (rules/defaultExpose)"]
+        TOOL["@Tool 工具内核"]
+        PV --> MSP
+        MSP --> TM --> TOOL
+        MSP -. "过滤 getTools" .-> EXP
     end
     APP --> SM
     APP --> A24
     APP --> A26
+    APP --> PV
+    SS -->|"getTools()/callTool()"| MSP
+    C24 -->|"getTools()/callTool()"| MSP
+    C26 -->|"getTools()/callTool()"| MSP
 ```
 
 ### 自动装配结构
 
-| 自动配置类 | 开关（默认值） | 装配产物 | 附加条件 |
-|-----------|---------------|---------|---------|
-| `simple.SimpleMcpServerAutoConfiguration` | `...server.simple.enable`（true） | `httpSimpleMcpServer`（`HttpSimpleMcpServerImpl`） | Bean 级子开关 `...simple.server.enable`（true）+ `@ConditionalOnMissingBean(HttpSimpleMcpServer)` |
-| `simple.springweb.SimpleSpringWebMcpServerAutoConfiguration` | `...simple.springweb.enable`（true） | `springHttpSimpleMcpController` | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter` simple 主配置 |
-| `simple.netty.SimpleNettyMcpServerAutoConfiguration` | `...simple.netty.enable`（false） | `httpSimpleMcpInBoundHandler` + `nettyHttpSimpleMcpServer` | `@ConditionalOnClass(ServerBootstrap)`、子开关 `...netty.handler.enable`（true）/`...netty.server.enable`（true） |
-| `official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration` | `...official.v2024.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`）+ `springHttpStreamMcpController` | `@ConditionalOnClass(RestController)`，完全独立于 simple 内核 |
-| `official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration` | `...official.v2026.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`，取 v2026 自身 `bearer-token.*` 配置）+ `springHttpStreamMcpV2026Controller` | `@ConditionalOnClass(RestController)`；过滤器 `@ConditionalOnMissingBean`，并显式注入控制器（与 v2024 同构） |
+| 自动配置类                                                                            | 开关（默认值）                                           | 装配产物                                                                                                                                                        | 附加条件                                                                                                                                                    |
+|----------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `provider.McpServerProviderAutoConfiguration`（新增）                                | `...server.provider.enable`（true）                 | `toolManager`（`ContextAppToolManager`）+ `mcpServerExposer`（`BasicMcpServerExposer`）+ `mcpServerProvider`（`BasicMcpServerProvider`）                          | 三个 Bean 各带 `@ConditionalOnMissingBean`；`exposer` 由 `provider.rules`/`default-expose` 驱动；是三栈的共享上游                                                        |
+| `simple.SimpleMcpServerAutoConfiguration`                                        | `...server.simple.enable`（true）                   | `httpSimpleMcpServer`（`HttpSimpleMcpServerImpl`，注入 `mcpServerProvider`）                                                                                     | `@AutoConfigureAfter(McpServerProviderAutoConfiguration)` + Bean 级子开关 `...simple.server.enable`（true）+ `@ConditionalOnMissingBean(HttpSimpleMcpServer)` |
+| `simple.springweb.SimpleSpringWebMcpServerAutoConfiguration`                     | `...simple.springweb.enable`（true）                | `springHttpSimpleMcpController`                                                                                                                             | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter` simple 主配置                                                                                  |
+| `simple.netty.SimpleNettyMcpServerAutoConfiguration`                             | `...simple.netty.enable`（false）                   | `httpSimpleMcpInBoundHandler` + `nettyHttpSimpleMcpServer`                                                                                                  | `@ConditionalOnClass(ServerBootstrap)`、子开关 `...netty.handler.enable`（true）/`...netty.server.enable`（true）                                               |
+| `official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration`      | `...official.v2024.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`）+ `springHttpStreamMcpController`（注入 `mcpServerProvider`）                                     | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`                                                         |
+| `official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration` | `...official.v2026.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`，取 v2026 自身 `bearer-token.*` 配置）+ `springHttpStreamMcpV2026Controller`（注入 `mcpServerProvider`） | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`；过滤器 `@ConditionalOnMissingBean`                         |
 
 ### 2026 无状态协议请求处理
 
@@ -81,14 +110,14 @@ sequenceDiagram
     participant C as 无状态 MCP Client
     participant K as SpringHttpStreamMcpV2026Controller
     participant H as 镜像头校验 validateHeaders
-    participant R as ToolRawHelper / IContext
+    participant R as McpServerProvider / ToolManager
     C->>K: POST /v2026/mcp (JSON-RPC 2.0 报文)
     K->>K: streamMcpServerAuthFilter.verify(默认装配内置 Bearer 实现, 失败 401)
     K->>H: MCP-Protocol-Version / Mcp-Method / Mcp-Name 与请求体一致性
     H-->>K: 不一致 HeaderMismatch(-32020, 400); 版本不支持 -32022 + supported 列表
     K->>K: 按 method 分发 server/discover / tools/list / tools/call
-    K->>R: parseTools / invokeTool
-    R-->>K: 工具定义 / 调用结果
+    K->>R: getTools() / callTool(ToolBaseCallRequest)
+    R-->>K: 暴露过滤后的工具定义 / 委托 ToolManager 调用结果
     K-->>C: result 均带 resultType + _meta.serverInfo; 工具失败用 isError
 ```
 
@@ -96,6 +125,9 @@ sequenceDiagram
 
 ```
 i2f.springboot.ai.mcp.server
+├── provider                                           # 三栈共享的 MCP 服务端暴露控制层（新增）
+│   ├── McpServerProviderAutoConfiguration            # 装配 ToolManager + McpServerExposer + McpServerProvider
+│   └── properties/McpServerProviderProperties        # 前缀 ...provider（rules/defaultExpose）
 ├── simple                                             # 私有 simple 协议栈
 │   ├── SimpleMcpServerAutoConfiguration               # 装配 HttpSimpleMcpServer
 │   ├── properties/HttpSimpleMcpServerProperties       # 前缀 ...simple
@@ -118,15 +150,29 @@ i2f.springboot.ai.mcp.server
 
 ### 关键设计点
 
-1. **三栈并列、内核不复用**：simple 走 `HttpSimpleMcpServer` 内核 + HMAC；v2024/v2026 各自独立控制器直连 `ToolRawHelper` + `SpringContext`，三者可同一应用共存，路径互不冲突（`/mcp/tool/*`、`/v2024/mcp`、`/v2026/mcp`）。
+1. **协议边界并列不复用、工具内核共享**：simple 走 `HttpSimpleMcpServer` + HMAC；v2024/v2026 各自独立控制器处理 JSON-RPC
+   协议——三者在传输/验签/协议边界互不复用，可同一应用共存、路径互不冲突（`/mcp/tool/*`、`/v2024/mcp`、`/v2026/mcp`
+   ）。但三栈的工具枚举与调用统一委托 `provider` 层的同一个 `McpServerProvider` Bean，不再各自 `parseTools`；`getTools()`
+   经 `McpServerExposer` 暴露过滤，`callTool()` 委托 `ToolManager`（`ContextAppToolManager` → `ToolRawHelper.invokeTool`）。
 2. **版本即包名**：官方协议按 `v2024`/`v2026` 分包隔离 DTO、配置前缀与开关，新版本协议接入不改动旧版本，实现协议演进零破坏。
 3. **2026 无状态强校验**：镜像头（`MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name`）与请求体一致性为规范强制（MUST），不一致以 `-32020` + HTTP 400 拒绝；不支持的版本以 `-32022` 拒绝并回带 `data.supported`；`Mcp-Name` 支持 `=?base64?...=` 哨兵编码解码（非 ASCII 工具名）。
 4. **v2026 首次引入 HTTP 状态码语义**：以 `MvcJsonRpcResponse` 把 JSON-RPC 报文与 HTTP 状态成对返回——鉴权失败 401、头不一致/版本不支持 400、method 未路由 404（v2024 全部 HTTP 200）。
 5. **`@RestController` 作为独立 Bean 注册**：三个控制器均带 `@RestController` 但通过 `@Bean` 方法产出，配合 `@ConditionalOnMissingBean` 允许应用覆盖。
 6. **条件装配与分级开关**：每套栈「栈开关 → 传输开关 → （Netty）handler/server 子开关」，配合 `@ConditionalOnClass` 按 Classpath 探测框架，未引入目标框架时自动退让。
-7. **mutator 链式装配**：Bean 构造统一 `toMutator().set(...).apply(...).done()`，可选依赖（`IExpireCache`、`IProxyInvocationHandler`、`StreamMcpServerAuthFilter`）以 `@Autowired(required = false)` 注入后按需装配。
+7. **mutator 链式装配**：Bean 构造统一 `toMutator().set(...).apply(...).done()`
+   ，可选依赖（`IExpireCache`、`StreamMcpServerAuthFilter`）以 `@Autowired(required = false)`
+   注入后按需装配；`McpServerProvider` 则以必填 Bean 注入各控制器（由 `provider` 层统一提供）。
 8. **错误码规范**：三套官方错误沿用 JSON-RPC 2.0 预定义码 `-32600/-32601/-32602/-32603`，v2026 追加 MCP 协议保留码 `-32020/-32022`；**工具执行失败/不存在属业务结果**，正常 `success` + 结果体 `isError` 标记。
-9. **鉴权与上下文透传**：simple 传输在调用前 `ToolCallContextHolder.replaceAs` 恢复、`finally` 中 `clear`；v2024/v2026 均以 `StreamMcpServerAuthFilter.verify` 为可插拔鉴权扩展点：两版自动配置各自以 `@ConditionalOnMissingBean` 装配 `StaticStreamMcpServerAuthFilter`（Bearer Token 白名单取自本版本 `bearer-token.*` 配置）并注入控制器；应用提供自己的过滤器 Bean 即可覆盖内置实现。
+9. **鉴权与上下文透传**：simple 传输在调用前 `ToolCallContextHolder.replaceAs` 恢复、`finally` 中 `clear`；v2024/v2026
+   均以 `StreamMcpServerAuthFilter.verify` 为可插拔鉴权扩展点：两版自动配置各自以 `@ConditionalOnMissingBean`
+   装配 `StaticStreamMcpServerAuthFilter`（Bearer Token 白名单取自本版本 `bearer-token.*`
+   配置，且已对 `bearerToken`/`allowTokens` 做空值防护）并注入控制器；应用提供自己的过滤器 Bean 即可覆盖内置实现。
+10. **工具暴露选择性控制与调用门控的栈间差异（`provider` 层）**：三栈共享的 `McpServerProvider.getTools()`
+    会经 `BasicMcpServerExposer` 按 `rules`（Ant 匹配，最后命中胜出）→ `@McpServerExpose`（方法/类）→ `default-expose`
+    三级判定过滤，被隐藏的工具不出现在 `tools/list`；但底层 `BasicMcpServerProvider.callTool()` 直接透传 `ToolManager`
+    不再复核暴露策略。**由此产生栈间差异**：v2024/v2026 控制器在 `tools/call` 前先以 `getTools()` 计算 `existsTool`
+    ，未暴露工具会以业务错误（`tool not found`）拒绝——暴露策略在官方栈同时门控「列举 + 调用」；simple 栈则把 `callTool`
+    直接透传，未做该存在性校验（见瑕疵章节越权项）。
 
 ## 模块目的
 
@@ -138,17 +184,18 @@ i2f.springboot.ai.mcp.server
 
 ## 模块功能
 
-| 功能 | 入口类/方法 | 协议栈 | 说明 |
-|------|------------|--------|------|
-| simple 内核装配 | `SimpleMcpServerAutoConfiguration#httpSimpleMcpServer` | simple | 注册 `HttpSimpleMcpServer`，注入配置、可选缓存与调用处理器 |
-| simple 工具列表/调用端点 | `SpringHttpSimpleMcpController`（MVC）、`HttpSimpleMcpInBoundHandler`（Netty） | simple | `GET /mcp/tool/list`、`/mcp/tool/call`，返回 `ApiResp` |
-| simple 验签 | `HttpSimpleMcpServerImpl#assertValidMcpRequest`（上游） | simple | appId → 时间窗 → nonce 防重放 → HMAC-SHA256 比对 |
-| 有状态 initialize/tools | `SpringHttpStreamMcpController` | v2024 | `initialize` 返回 protocolVersion/capabilities(tools)/serverInfo；`tools/list`/`tools/call` 桥接 `ToolRawHelper` |
-| 有状态鉴权 | `StreamMcpServerAuthFilter` / `StaticStreamMcpServerAuthFilter` | v2024 | `Authorization: Bearer <token>` 白名单校验 |
-| 无状态 server/discover | `SpringHttpStreamMcpV2026Controller#discover` | v2026 | 宣告 supportedVersions/capabilities/身份，可选 instructions、ttlMs/cacheScope |
-| 无状态 tools 端点 | `SpringHttpStreamMcpV2026Controller#listTools/#callTool` | v2026 | result 带 `resultType`、`_meta.serverInfo`、`ttlMs`/`cacheScope`；失败以 `isError` 承载 |
-| 无状态镜像头校验 | `SpringHttpStreamMcpV2026Controller#validateHeaders` | v2026 | 版本/方法/名称头与请求体一致性，`-32020`/`-32022` 拒绝 |
-| 配置属性 | `HttpSimpleMcpServerProperties` / `NettySimpleMcpServerProperties` / `OfficialMcpServerProperties` / `OfficialMcpServerV2026Properties` | — | 四组 `@ConfigurationProperties` |
+| 功能                   | 入口类/方法                                                                                                                                                                  | 协议栈          | 说明                                                                                                                                      |
+|----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| 工具暴露控制装配             | `McpServerProviderAutoConfiguration#mcpServerProvider`                                                                                                                  | provider（共享） | 装配 `ToolManager`+`McpServerExposer`+`McpServerProvider`，按 `rules`/`default-expose` 选择性开放工具                                              |
+| simple 内核装配          | `SimpleMcpServerAutoConfiguration#httpSimpleMcpServer`                                                                                                                  | simple       | 注册 `HttpSimpleMcpServer`，注入配置、可选缓存与共享 `mcpServerProvider`                                                                               |
+| simple 工具列表/调用端点     | `SpringHttpSimpleMcpController`（MVC）、`HttpSimpleMcpInBoundHandler`（Netty）                                                                                               | simple       | `GET /mcp/tool/list`、`/mcp/tool/call`，返回 `ApiResp`                                                                                      |
+| simple 验签            | `HttpSimpleMcpServerImpl#assertValidMcpRequest`（上游）                                                                                                                     | simple       | appId → 时间窗 → nonce 防重放 → HMAC-SHA256 比对                                                                                                |
+| 有状态 initialize/tools | `SpringHttpStreamMcpController`                                                                                                                                         | v2024        | `initialize` 返回 protocolVersion/capabilities(tools)/serverInfo；`tools/list`/`tools/call` 桥接 `McpServerProvider`（call 前 `existsTool` 门控） |
+| 有状态鉴权                | `StreamMcpServerAuthFilter` / `StaticStreamMcpServerAuthFilter`                                                                                                         | v2024        | `Authorization: Bearer <token>` 白名单校验                                                                                                   |
+| 无状态 server/discover  | `SpringHttpStreamMcpV2026Controller#discover`                                                                                                                           | v2026        | 宣告 supportedVersions/capabilities/身份，可选 instructions、ttlMs/cacheScope                                                                   |
+| 无状态 tools 端点         | `SpringHttpStreamMcpV2026Controller#listTools/#callTool`                                                                                                                | v2026        | result 带 `resultType`、`_meta.serverInfo`、`ttlMs`/`cacheScope`；失败以 `isError` 承载                                                          |
+| 无状态镜像头校验             | `SpringHttpStreamMcpV2026Controller#validateHeaders`                                                                                                                    | v2026        | 版本/方法/名称头与请求体一致性，`-32020`/`-32022` 拒绝                                                                                                   |
+| 配置属性                 | `McpServerProviderProperties` / `HttpSimpleMcpServerProperties` / `NettySimpleMcpServerProperties` / `OfficialMcpServerProperties` / `OfficialMcpServerV2026Properties` | —            | 五组 `@ConfigurationProperties`                                                                                                           |
 
 ## 模块主要使用方法
 
@@ -181,6 +228,12 @@ i2f:
     ai:
       mcp:
         server:
+          provider:                   # 三栈共享的工具暴露控制（新增）
+            enable: true              # 装配 McpServerProvider/ToolManager/McpServerExposer
+            default-expose: true      # 未在 rules/@McpServerExpose 命中时的兜底
+            rules:                    # Ant 匹配（. 分隔），最后命中规则胜出
+              - pattern: webjs_*      # 匹配的工具名（前缀）
+                expose: false         # 关闭这些工具的对外暴露
           simple:                     # 私有 HMAC 协议栈
             enable: true
             server:
@@ -211,7 +264,7 @@ i2f:
                   enable: true
                 bearer-token:
                   enable: true        # 关闭则放行所有请求
-                  allow-tokens:       # 未配置（null）启动装配 NPE，见瑕疵章节
+                  allow-tokens:       # 未配置(null)不再 NPE（已加空值防护），但 enable=true 且空名单会拒绝所有请求
                     - "xxxx"
             v2026:                    # 官方 2026-07-28 无状态栈
               stream:
@@ -241,19 +294,27 @@ i2f:
 ### 5. 可选增强与 Bean 覆盖
 
 - **nonce 防重放**（simple）：提供任意 `IExpireCache<String,Object>` Bean 后，验签通过即写入 nonce（TTL 为窗口 2 倍），重复拒绝。
-- **调用代理**：提供 `IProxyInvocationHandler` Bean，工具反射调用经过该处理器（日志/鉴权/埋点）。
+- **调用代理**：自 `provider` 层起，`McpServerProviderAutoConfiguration` 自动装配的 `ContextAppToolManager` *
+  *不再注入 `IProxyInvocationHandler`**（仅设 `context`+`jsonSerializer`
+  ）；如需工具反射调用经过代理处理器（日志/鉴权/埋点），须提供自己的 `ToolManager`
+  Bean（`@ConditionalOnMissingBean(ToolManager.class)` 会退让）并在其中装配 `invocationHandler`。
 - **自定义鉴权**（v2024/v2026）：提供自己的 `StreamMcpServerAuthFilter` Bean 覆盖内置 Bearer 实现（两栈共用同一接口，`@ConditionalOnMissingBean` 后者优先）。
 - **Bean 覆盖**：所有自动装配 Bean 均带 `@ConditionalOnMissingBean`，可完全接管。
 
 ### 注意事项
 
-- simple 的 `app-list` 未配置时任何 `appId` 验签均失败；v2024/v2026 的 `allow-tokens` 未配置时的启动风险见瑕疵章节。
+- simple 的 `app-list` 未配置时任何 `appId` 验签均失败；v2024/v2026 的 `allow-tokens` 现以空值防护兜底（不再启动
+  NPE），但 `bearer-token.enable=true` 且白名单为空时会拒绝所有请求。
+- 三栈共享同一 `McpServerProvider`：`provider.rules`/`default-expose` 只影响 `tools/list` 列举；能否据此拦下 `tools/call`
+  取决于各栈是否做 `existsTool` 门控（官方栈有、simple 栈无，见瑕疵章节）。
 - 客户端侧：simple 配对 `i2f-springboot-ai-mcp-client` 的 simple provider（自动构造签名头），官方栈配对标准 MCP 客户端或该 starter 的 stream provider。
 - 命中端点响应统一为信封体：simple 为 `ApiResp`（HTTP 200），v2024 为 `JsonRpcResponse`（HTTP 200），v2026 为 `JsonRpcResponseV2026` 且按语义附带 HTTP 状态码（400/401/404/200）。
 
 ## 模块特性总结
 
 - **三协议栈并列**：simple（私有 HMAC）+ official v2024（有状态）+ official v2026（无状态），按对端能力择用
+- **工具暴露共享控制**：三栈统一委托 `provider` 层单一 `McpServerProvider`，以 `rules`/`@McpServerExpose`/`default-expose`
+  选择性开放 `@Tool`，协议边界与工具内核解耦
 - **官方协议零 SDK**：JDK8 下用 `mcp.official` 共享契约落地 Streamable HTTP 两版规范
 - **多传输形态**：simple 支持 Spring MVC（共享端口）与 Netty（独立端口）
 - **条件装配**：`@ConditionalOnClass` + 分级开关 + 全程 `@ConditionalOnMissingBean`，零侵入可替换
@@ -269,8 +330,13 @@ i2f:
 
 ### 三套栈共性
 
-1. **传递依赖直接使用**：源码直接引用 `JacksonJsonSerializer`（属 `i2f-extension-jackson`），POM 未显式声明，仅靠 `i2f-spring-web` 传递引入；且 `new JacksonJsonSerializer(new ObjectMapper())` 新建独立 `ObjectMapper`，不复用宿主已定制（如注册 JavaTimeModule）的 Bean，序列化行为可能与宿主不一致。
-2. **工具解析无缓存**：`ToolRawHelper.parseTools` 每次列表/调用都全量遍历容器 Bean 反射解析，工具多时开销大；v2024/v2026 的 `callTool` 亦在每次调用重新 `parseTools` 全量扫描后再定位单个工具。
+1. **传递依赖直接使用**：源码直接引用 `JacksonJsonSerializer`（属 `i2f-extension-jackson`），POM
+   未显式声明，仅靠 `i2f-spring-web` 传递引入。（改进：`provider` 层与两官方控制器现均以 `@Autowired` 的宿主 `ObjectMapper`
+   构造 `new JacksonJsonSerializer(objectMapper)`，旧「`new ObjectMapper()` 不复用宿主定制 Bean」的隐患已消除，但显式声明依赖仍缺失。）
+2. **工具解析无缓存**：`McpServerProvider.getTools()` → `ContextAppToolManager.getTools()`
+   每次调用 `ToolRawHelper.parseTools` 全量遍历容器 Bean 反射解析，无缓存。重构后官方 v2024/v2026 的 `tools/call` 存在*
+   *双次全量解析**：先 `getTools()` 计算 `existsTool`，随后 `mcpServerProvider.callTool()` 内部 `ToolManager.callTool`
+   又 `getTools()` 一次再定位，单次调用至少扫描容器两遍。
 
 ### simple 私有栈
 
@@ -282,7 +348,11 @@ i2f:
 
 ### official.v2024 有状态栈
 
-8. **`allow-tokens` 未配置可能启动即 NPE（潜在致命）**：`StreamSpringWebMcpServerAutoConfiguration#streamMcpServerAuthFilter` 中 `new HashSet<>(...getAllowTokens())`，而 `allowTokens` 默认 `null`；`bearer-token.enable` 默认 `true`，用户若开启 v2024 栈却不配 `allow-tokens`，Bean 构造将传入 `null` 集合，存在 NPE 风险。
+8. **~~`allow-tokens` 未配置可能启动即 NPE（潜在致命）~~（已修复）
+   **：`StreamSpringWebMcpServerAutoConfiguration#streamMcpServerAuthFilter` 现先判 `bearerToken != null`
+   、再判 `allowTokens != null` 才 `new HashSet<>(allowTokens)`，未配 `allow-tokens` 不再触发
+   NPE。残余风险：`bearer-token.enable=true` 且白名单为空时 `StaticStreamMcpServerAuthFilter` 一律拒绝（见瑕疵
+   9），与「启动崩溃」相比是行为问题而非装配崩溃。
 9. **鉴权失败返回 `-32600`（语义混用）**：`verify` 未通过时与「信封非法」共用同一码；`StaticStreamMcpServerAuthFilter` 在 `enable=true` 且白名单为空时一律拒绝，合法客户端难以排查。
 10. **会话生命周期缺失**：`initialize` 不生成、`handle` 不校验 `Mcp-Session-Id`，`DELETE /v2024/mcp` 为空 TODO 占位；为完全无状态实现，依赖会话的官方客户端行为可能不符预期。
 11. **`initialize` 能力声明固定**：`capabilities.tools.listChanged` 恒为 `false`，`serverInfo` 仅取配置名/版本，无协议通知（`notifications/*`）支持；仅覆盖 tools 单能力面。
@@ -294,9 +364,34 @@ i2f:
 14. **HTTP 状态码语义不统一**：同为「请求非法」，头不一致/版本不支持返回 400、method 未路由返回 404、缺 `method` 字段却返回 HTTP 200 + `-32600`，客户端按状态码分派时行为难预期。
 15. **注释与实现不符**：`ServerJsonRpcRequestV2026` 注释称「为遵循自包含要求，不再继承其他模块的 DTO」，实际仍继承 v2024 包的 `ServerJsonRpcRequest`（其继承上游 `JsonRpcRequest<Map>`）。
 
+### provider 共享层（新增）
+
+16. **暴露过滤仅作用于列举，simple 栈 `callTool` 可越权**：`BasicMcpServerProvider.callTool()` 直接透传 `ToolManager`
+    ，不复核目标工具是否命中「未暴露」策略。官方 v2024/v2026 控制器以 `getTools()` 的 `existsTool`
+    预检做了补偿门控（隐藏工具 `tools/call` 会被拒为 `tool not found`）；但 simple 栈的 `HttpSimpleMcpServerImpl.callTool`
+    验签通过后直接透传，**未做该存在性校验**
+    ——即便某工具被 `provider.rules`/`@McpServerExpose(false)`/`default-expose=false` 隐藏、不出现在 `/mcp/tool/list`
+    ，外部持合法签名仍能直接 `POST /mcp/tool/call` 调用它。同一 `McpServerProvider` 在两类传输上的暴露语义不对等。
+17. **`default-expose` 默认 `true` 即「全开」**：`McpServerProviderProperties.defaultExpose` 默认 `true`，配合空 `rules`
+    ，默认装配等价于把容器内全部 `@Tool` 无差别开放为 MCP 工具（除非逐个标注 `@McpServerExpose(false)`）；白名单式（默认关、按
+    rules 逐个放开）需显式配置，易被忽略而意外暴露敏感工具。
+18. **调用代理 `IProxyInvocationHandler` 不再自动接线**：旧版各栈自动配置注入并装配 `invocationHandler`
+    ，现 `McpServerProviderAutoConfiguration#toolManager`
+    仅设 `context`+`jsonSerializer`，`ContextAppToolManager.invocationHandler` 恒为 `null`
+    ；仅提供 `IProxyInvocationHandler` Bean 已无法让工具反射调用经过它（须自行覆盖 `ToolManager`
+    Bean），对依赖该扩展点做统一埋点/鉴权的应用是隐性行为回归。
+
 ## 自动装配与配置参考
 
 ### 配置属性总览
+
+provider（前缀 `i2f.springboot.ai.mcp.server.provider`，三栈共享）：
+
+| 属性                           | 类型                          | 默认值    | 说明                                                                      |
+|------------------------------|-----------------------------|--------|-------------------------------------------------------------------------|
+| `...provider.enable`         | `boolean`                   | `true` | `McpServerProviderAutoConfiguration` 总开关                                |
+| `...provider.default-expose` | `boolean`                   | `true` | `BasicMcpServerExposer` 兜底：未被 rules/`@McpServerExpose` 命中时是否开放（true=全开） |
+| `...provider.rules`          | `List<McpServerExposeRule>` | `null` | 暴露规则列表，每项含 `pattern`（Ant，`.` 分隔）+ `expose`；最后命中者胜出                      |
 
 simple（前缀 `i2f.springboot.ai.mcp.server.simple`）：
 
@@ -358,7 +453,8 @@ official.v2026.stream（前缀 `i2f.springboot.ai.mcp.server.official.v2026.stre
 ### 自动注册清单
 
 ```
-# META-INF/spring.factories 与 META-INF/spring/...AutoConfiguration.imports 均登记以下五个：
+# META-INF/spring.factories 与 META-INF/spring/...AutoConfiguration.imports 均登记以下六个：
+i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration
@@ -369,6 +465,10 @@ i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpS
 ## 与相关模块的关系
 
 - **`i2f-ai-rest-openai`**：提供 simple 协议契约与默认实现，及 `mcp.official.v2024/v2026` 官方共享协议模型（常量 + JSON-RPC DTO）；本模块只做 Spring Boot 装配与传输/桥接适配。
-- **`i2f-ai-std`**：提供 `@Tool`/`@Tools`/`@ToolParam`、`ToolBaseCallRequest`、`ToolRawHelper`、`JsonSchemaAnnotationResolver`、`ToolCallContextHolder` 等工具链标准契约。
-- **`i2f-spring-core`**：`SpringContext` 把 Spring 容器适配为 `IContext`，作为三套栈共同的工具扫描来源。
+- **`i2f-ai-std`**：提供 `@Tool`/`@Tools`/`@ToolParam`、`ToolBaseCallRequest`、`ToolManager`/`ContextAppToolManager`
+  等工具链契约，及 `mcp.server`
+  的 `McpServerProvider`/`BasicMcpServerProvider`/`McpServerExposer`/`BasicMcpServerExposer`/`McpServerExposeRule`
+  ——本模块 `provider` 层即据其装配三栈共享的暴露/调用内核。
+- **`i2f-spring-core`**：`SpringContext` 把 Spring 容器适配为 `IContext`，现仅由 `provider` 层的 `ContextAppToolManager`
+  用作工具扫描来源（控制器不再直接持有）。
 - **`i2f-springboot-ai-mcp-client`**：对端客户端 Starter（simple provider + stream provider），与本模块配对实现「AI 主控 → 远程工具」；两端 JSON-RPC DTO 各自平行维护，本模块 pom 不依赖 client 模块。

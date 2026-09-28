@@ -32,7 +32,8 @@
 
 ### i2f-ai-std
 
-> AI 能力标准抽象（SPI）模块，模型无关地定义大模型对话、工具（function-calling）、RAG、技能、MCP 网关、记忆与 Re-Act Agent 引擎，并提供声明式 `@AiService` 动态代理。
+> AI 能力标准抽象（SPI）模块，模型无关地定义大模型对话、工具（function-calling）、RAG、技能、MCP 工具网关（消费侧）与服务端暴露（生产侧）、记忆与
+> Re-Act Agent 引擎，并提供声明式 `@AiService` 动态代理。
 
 - 详细文档：[i2f-ai-std](./i2f-jdk/i2f-ai-std/readme.md)
 
@@ -1523,7 +1524,11 @@
 
 ### i2f-springboot-ai-mcp-server
 
-> MCP 服务端 Starter，同模块并列三套服务端协议栈：**simple** 私有协议（HMAC-SHA256 验签，`/mcp/tool/*`，MVC+Netty 双传输）；**official.v2024** 官方有状态栈（2024-11-05，`POST /v2024/mcp`，initialize 握手 + tools，Bearer 鉴权）；**official.v2026** 官方无状态栈（2026-07-28，`POST /v2026/mcp`，server/discover + 镜像头一致性校验，resultType/缓存字段），以 MCP 协议对外暴露容器 `@Tool` 工具。
+> MCP 服务端 Starter，同模块并列三套服务端协议栈：**simple** 私有协议（HMAC-SHA256 验签，`/mcp/tool/*`，MVC+Netty 双传输）；*
+*official.v2024** 官方有状态栈（2024-11-05，`POST /v2024/mcp`，initialize 握手 + tools，Bearer 鉴权）；**official.v2026**
+> 官方无状态栈（2026-07-28，`POST /v2026/mcp`，server/discover +
+> 镜像头一致性校验，resultType/缓存字段），三栈统一委托 `provider` 层单一 `McpServerProvider`
+> 按规则/注解选择性暴露容器 `@Tool`。
 
 - 详细文档：[i2f-springboot-ai-mcp-server](./i2f-springboot/i2f-springboot-ai-mcp-server/readme.md)
 
