@@ -3,6 +3,7 @@ i2f:
     ai:
       mcp:
         server:
+          # expose tools as mcp tools
           provider:
             enable: true
             default-expose: true
