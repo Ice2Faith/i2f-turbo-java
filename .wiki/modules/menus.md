@@ -44,7 +44,7 @@
 
 ### i2f-ai-rest-openai
 
-> `i2f-ai-std` 抽象契约的 OpenAI 兼容 HTTP 实现，基于 `i2f-network` 对接对话/Embedding/Rerank/Models 端点（支持 SSE 流式），提供自研 HMAC 签名的 Simple MCP 跨进程工具网关（客户端 + 服务端），并对外提供官方 MCP（Streamable HTTP / JSON-RPC 2.0）协议栈的共享 DTO 与常量。
+> `i2f-ai-std` 抽象契约的 OpenAI 兼容 HTTP 实现，基于 `i2f-network` 对接对话/Embedding/Rerank/Models 端点（支持 SSE 流式），提供自研 HMAC 签名的 Simple MCP 跨进程工具网关（客户端 + 服务端），并以纯共享模型层对外提供**双版本**官方 MCP（JSON-RPC 2.0）契约：`official.v2024`（有状态 initialize + `Mcp-Session-Id`）与 `official.v2026`（无状态 server/discover + 镜像头 + `_meta`/`resultType`），根级 `IJsonRpcDto` 统一剔空。
 
 - 详细文档：[i2f-ai-rest-openai](./i2f-jdk/i2f-ai-rest-openai/readme.md)
 
@@ -1523,13 +1523,13 @@
 
 ### i2f-springboot-ai-mcp-server
 
-> MCP 服务端 Starter，同模块并列两套协议栈：**simple** 私有协议（HMAC-SHA256 验签，`/mcp/tool/*`，Spring Web MVC + Netty 双传输）与 **stream** 官方 MCP 协议（Streamable HTTP，单 `POST /mcp`、JSON-RPC 2.0、Bearer Token 鉴权、直连 `ToolRawHelper` 复用容器 `@Tool`），把 Spring 容器工具以 MCP 协议对外暴露。
+> MCP 服务端 Starter，同模块并列三套服务端协议栈：**simple** 私有协议（HMAC-SHA256 验签，`/mcp/tool/*`，MVC+Netty 双传输）；**official.v2024** 官方有状态栈（2024-11-05，`POST /v2024/mcp`，initialize 握手 + tools，Bearer 鉴权）；**official.v2026** 官方无状态栈（2026-07-28，`POST /v2026/mcp`，server/discover + 镜像头一致性校验，resultType/缓存字段），以 MCP 协议对外暴露容器 `@Tool` 工具。
 
 - 详细文档：[i2f-springboot-ai-mcp-server](./i2f-springboot/i2f-springboot-ai-mcp-server/readme.md)
 
 ### i2f-springboot-ai-mcp-client
 
-> MCP 客户端 Starter：按 instances 配置把远程 MCP Server 注册为本地 McpToolProvider Bean，内置 Simple MCP 私协议（HMAC 签名）、标准 JSON-RPC Streamable HTTP（复用上游 mcp.official 共享契约）与 solon-ai-mcp SDK 三套客户端，支持 tag-rules 为远程工具追加标签，供 AI 工具网关聚合为动态工具。
+> MCP 客户端 Starter：按 instances 配置把远程 MCP Server 注册为本地 McpToolProvider Bean（tag-rules 追加标签，供 AI 工具网关聚合），内置四套客户端：Simple MCP 私协议（HMAC 签名、上下文透传）；official.v2024 stream 有状态栈（initialize 握手取 `Mcp-Session-Id`、`DELETE` 释放）；official.v2024 solon（solon-ai-mcp SDK 多通道）；official.v2026 stream 无状态栈（server/discover 加 `Mcp-Method`/`Mcp-Name` 镜像头与 `_meta`），协议契约复用上游 `mcp.official.v2024|v2026` 与服务端同源。
 
 - 详细文档：[i2f-springboot-ai-mcp-client](./i2f-springboot/i2f-springboot-ai-mcp-client/readme.md)
 
