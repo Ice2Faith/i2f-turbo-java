@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -35,6 +36,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "database_query", description = "提供数据库数据的查询能力，限制只读的查询，不能更新"))
 @ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DefaultDatasourceProvider.class)

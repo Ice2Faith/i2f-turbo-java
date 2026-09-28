@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -27,6 +28,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/9/10 19:57
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = CommandTools.TOOL_INTENT_VALUE, description = CommandTools.TOOL_INTENT_DESCRIPTION))
 @ConditionalOnExpression("${ai.tools.powershell.enable:false}")
 @Conditional(PowershellTools.WindowsFormCondition.class)

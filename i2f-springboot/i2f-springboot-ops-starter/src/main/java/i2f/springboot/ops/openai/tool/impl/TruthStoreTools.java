@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -23,6 +24,7 @@ import java.util.concurrent.ScheduledExecutorService;
  * @date 2026/7/17 9:32
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "truth", description = "提供基于会话级别的关键事实内容读写能力"))
 @ConditionalOnExpression("${ai.tools.truth.enable:true}")
 @Component

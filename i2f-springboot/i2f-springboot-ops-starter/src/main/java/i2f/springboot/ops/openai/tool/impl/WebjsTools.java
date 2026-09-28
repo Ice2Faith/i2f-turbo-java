@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -18,6 +19,7 @@ import java.util.List;
  * @date 2026/9/14 19:59
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "webjs", description = "提供用户交互UI弹窗、单选框、多选框等"))
 @ConditionalOnExpression("${ai.tools.webjs.enable:true}")
 @Data

@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -19,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2026/8/12 18:51
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "session_record", description = "提供基于session级别的持久化存储读写能力"))
 @ConditionalOnExpression("${ai.tools.session-record.enable:true}")
 @Component

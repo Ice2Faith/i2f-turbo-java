@@ -6,6 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.io.stream.StreamUtil;
 import i2f.os.OsUtil;
 import i2f.resources.ResourceUtil;
@@ -36,6 +37,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2026/8/25 16:41
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "pandoc", description = "提供基于pandoc的文档格式转换能力"))
 @ConditionalOnExpression("${ai.tools.pandoc.enable:false}")
 @Conditional(PandocTools.PandocInstalledCondition.class)

@@ -1,5 +1,6 @@
 package i2f.springboot.ops.dashscope.tool;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -39,6 +40,7 @@ import java.util.Map;
  * @date 2026/9/1 9:02
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "dashscope_t2i", description = "提供基于阿里云的文生图能力"))
 @Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnExpression("${ai.tools.dashscope-t2i.enable:true}")

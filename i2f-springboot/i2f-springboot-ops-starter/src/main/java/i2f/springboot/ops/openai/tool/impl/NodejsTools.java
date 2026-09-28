@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -35,6 +36,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2026/9/10 19:57
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "nodejs", description = "提供执行nodejs脚本的能力"))
 @ConditionalOnExpression("${ai.tools.nodejs.enable:false}")
 @Conditional(NodejsTools.NodejsInstalledCondition.class)

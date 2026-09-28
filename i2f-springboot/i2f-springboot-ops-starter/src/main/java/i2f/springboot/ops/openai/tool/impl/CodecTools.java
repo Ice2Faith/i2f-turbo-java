@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -19,6 +20,7 @@ import java.util.Base64;
  * @date 2026/6/2 14:12
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "codec", description = "提供字符串的编解码，base64/url"))
 @ConditionalOnExpression("${ai.tools.codec.enable:true}")
 @Component

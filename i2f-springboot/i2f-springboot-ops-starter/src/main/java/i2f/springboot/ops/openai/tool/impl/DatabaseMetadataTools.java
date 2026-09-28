@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -33,6 +34,7 @@ import java.util.Map;
  * @date 2026/6/2 11:34
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "database_metadata", description = "提供数据库元数据查询能力、获取数据源、数据库类型、表结构等"))
 @ConditionalOnClass(DataSource.class)
 @AutoConfigureAfter(DefaultDatasourceProvider.class)

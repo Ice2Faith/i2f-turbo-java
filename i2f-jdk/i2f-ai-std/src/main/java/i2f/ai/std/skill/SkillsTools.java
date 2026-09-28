@@ -1,5 +1,6 @@
 package i2f.ai.std.skill;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/3/23 14:11
  * @desc
  */
+@McpServerExpose
 @Data
 @NoArgsConstructor
 @Tools(tags = {

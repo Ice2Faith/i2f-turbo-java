@@ -5,6 +5,7 @@ import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
 import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
 import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -14,10 +15,12 @@ import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.spring.web.rest.SpringWebRestClient;
 import i2f.springboot.ops.openai.data.OpenAiCompletionDto;
-import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
+import i2f.springboot.ops.openai.util.OpenAiOptionsUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Component;
@@ -31,10 +34,17 @@ import java.util.*;
  * @date 2026/6/17 14:06
  * @desc
  */
+@McpServerExpose
 @ConditionalOnExpression("${ai.tools.a2a.enable:true}")
 @Component
 @Tools
+@Data
+@NoArgsConstructor
 public class AgentTools {
+
+    @Autowired
+    private OpenAiOpsProperties openAiOpsProperties;
+
     private RestTemplate restTemplate = createRestTemplate();
 
     private RestTemplate createRestTemplate() {
@@ -44,7 +54,7 @@ public class AgentTools {
                 .build();
     }
 
-    public String generate(OpenAiMeta meta, OpenAiCompletionDto completion) {
+    public String generate(OpenAiOpsProperties.OpenAiOptions endpoint, OpenAiCompletionDto completion) {
         // 强制关闭流式输出
         completion.setStream(null);
         completion.setStream_options(null);
@@ -53,8 +63,8 @@ public class AgentTools {
                 .set(u -> u::setRestClient, new SpringWebRestClient().toMutator()
                         .set(u -> u::setRestTemplate, restTemplate)
                         .done())
-                .set(u -> u::setBaseUrl, meta.getBaseUrl())
-                .set(u -> u::setApiKey, meta.getApiKey())
+                .set(u -> u::setBaseUrl, endpoint.getBaseUrl())
+                .set(u -> u::setApiKey, endpoint.getApiKey())
                 .set(u -> u::setModel, completion.getModel())
                 .done();
 
@@ -112,14 +122,18 @@ public class AgentTools {
                 "}";
 
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
+        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultEndpoint(req, openAiOpsProperties);
+        if (endpoint == null || !endpoint.isEnable()) {
+            throw new IllegalStateException("not openai endpoint config!");
+        }
 
         OpenAiCompletionDto completion = new OpenAiCompletionDto();
-        completion.setModel(req.getCompletion().getModel());
+        completion.setModel(endpoint.getModel());
 
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
         completion.getMessages().add(new OpenAiUserMessage("<sql_input>" + sql + "</sql_input>"));
-        return generate(req.getMeta(), completion);
+        return generate(endpoint, completion);
     }
 
     @Data
@@ -185,14 +199,18 @@ public class AgentTools {
         }
 
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
+        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultEndpoint(req, openAiOpsProperties);
+        if (endpoint == null || !endpoint.isEnable()) {
+            throw new IllegalStateException("not openai endpoint config!");
+        }
 
         OpenAiCompletionDto completion = new OpenAiCompletionDto();
-        completion.setModel(req.getCompletion().getModel());
+        completion.setModel(endpoint.getModel());
 
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
         completion.getMessages().add(new OpenAiUserMessage(question));
-        String resp = generate(req.getMeta(), completion);
+        String resp = generate(endpoint, completion);
         String[] arr = resp.split("\n");
         Set<String> result = new LinkedHashSet<>();
         for (String item : arr) {

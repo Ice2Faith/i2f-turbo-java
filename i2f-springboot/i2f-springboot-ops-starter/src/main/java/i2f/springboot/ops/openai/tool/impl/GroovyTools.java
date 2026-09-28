@@ -1,6 +1,7 @@
 package i2f.springboot.ops.openai.tool.impl;
 
 import groovy.lang.GroovyShell;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -29,6 +30,7 @@ import java.util.Map;
  * @date 2026/8/30 21:06
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "groovy", description = "提供基于groovy的脚本运行能力"))
 @ConditionalOnExpression("${ai.tools.groovy.enable:false}")
 @ConditionalOnClass({

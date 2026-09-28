@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -16,6 +17,7 @@ import java.security.SecureRandom;
  * @date 2026/6/1 19:13
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "random", description = "提供随机数相关的能力"))
 @ConditionalOnExpression("${ai.tools.random.enable:true}")
 @Component

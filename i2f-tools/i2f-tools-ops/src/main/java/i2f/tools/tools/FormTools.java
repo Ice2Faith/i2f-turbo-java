@@ -9,6 +9,7 @@ import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.form.dialog.DialogBoxes;
 import i2f.form.dialog.checkbox.CheckboxResult;
 import i2f.form.dialog.radio.RadioResult;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.os.OsUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  * @date 2026/8/29 14:35
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "form", description = "提供用户交互弹窗、单选框、多选框等"))
 @ConditionalOnExpression("${ai.tools.form.enable:false}")
 @Conditional(FormTools.WindowsFormCondition.class)

@@ -16,6 +16,19 @@ public class OpenAiOpsProperties {
 
     protected VisionOptions vision = new VisionOptions();
 
+    protected OpenAiOptions defaultEndpoint = new OpenAiOptions();
+
+    protected OpenAiOptions dashscopeEndpoint = new OpenAiOptions();
+
+    @Data
+    @NoArgsConstructor
+    public static class OpenAiOptions {
+        protected boolean enable;
+        protected String model;
+        protected String baseUrl;
+        protected String apiKey;
+    }
+
     @Data
     @NoArgsConstructor
     public static class VisionOptions {

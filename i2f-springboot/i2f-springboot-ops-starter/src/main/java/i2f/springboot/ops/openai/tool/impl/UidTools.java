@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.Tools;
@@ -16,6 +17,7 @@ import java.util.UUID;
  * @date 2026/6/1 19:13
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "uid", description = "提供唯一ID的生成能力"))
 @ConditionalOnExpression("${ai.tools.uid.enable:true}")
 @Component

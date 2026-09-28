@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -25,6 +26,7 @@ import java.util.UUID;
  * @date 2026/6/22 16:55
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "web_download", description = "提供网络地址文件的下载能力"))
 @ConditionalOnExpression("${ai.tools.web-download.enable:true}")
 @Component

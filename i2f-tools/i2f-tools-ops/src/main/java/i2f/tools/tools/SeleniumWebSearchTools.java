@@ -6,6 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.browser.std.search.data.SearchContext;
 import i2f.browser.std.search.data.SearchResult;
 import i2f.extension.browser.selenium.search.BaiduKaifaSearch;
@@ -29,6 +30,7 @@ import org.springframework.util.ClassUtils;
  * @date 2026/6/30 10:37
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "selenium", description = "提供基于selenium的网页搜索能力"))
 @ConditionalOnExpression("${ai.tools.selenium-web-search.enable:false}")
 @Conditional(SeleniumWebSearchTools.WindowsSeleniumCondition.class)

@@ -3,6 +3,7 @@ package i2f.springboot.ops.openai.tool.impl;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
 import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
  * @date 2026/7/5 17:27
  * @desc
  */
+@McpServerExpose(false)
 @Tools(tags = {
         AiTags.MCP_VALUE
 })

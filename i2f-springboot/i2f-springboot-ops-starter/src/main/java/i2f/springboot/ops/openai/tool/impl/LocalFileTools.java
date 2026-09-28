@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -24,6 +25,7 @@ import java.util.*;
  * @date 2026/6/2 11:34
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "file", description = "提供本地文件系统的操作能力"))
 @ConditionalOnExpression("${ai.tools.file.enable:true}")
 @Data

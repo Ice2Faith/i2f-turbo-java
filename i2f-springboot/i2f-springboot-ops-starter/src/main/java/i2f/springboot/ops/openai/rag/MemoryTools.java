@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.rag;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.rag.BucketRagEmbeddingStore;
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingModel;
@@ -24,6 +25,7 @@ import java.util.*;
  * @date 2026/3/25 15:09
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "memory", description = "基于向量检索的长期记忆功能"))
 @Data
 @NoArgsConstructor

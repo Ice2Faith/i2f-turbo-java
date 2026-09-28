@@ -6,6 +6,7 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.tools.yi.GanZhiDate;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/10 15:42
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "gan_zhi", description = "提供根据标准世界时间获取生辰八字的能力"))
 @ConditionalOnExpression("${ai.tools.gan-zhi.enable:true}")
 @Component

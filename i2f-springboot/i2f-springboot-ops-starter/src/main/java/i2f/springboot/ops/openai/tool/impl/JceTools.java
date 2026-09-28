@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -17,6 +18,7 @@ import java.security.MessageDigest;
  * @date 2026/6/2 14:13
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "jce", description = "提供基于jce的digest能力"))
 @ConditionalOnExpression("${ai.tools.jce.enable:true}")
 @Component

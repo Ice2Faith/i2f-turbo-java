@@ -1,5 +1,6 @@
 package i2f.ai.std.rag;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.rag.data.RagSearchResultItem;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
@@ -17,6 +18,7 @@ import java.util.List;
  * @date 2026/3/25 15:09
  * @desc
  */
+@McpServerExpose
 @Data
 @NoArgsConstructor
 @Tools(tags = {

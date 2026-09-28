@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.rag.RagFileReader;
 import i2f.ai.std.rag.impl.*;
 import i2f.ai.std.tags.AiTags;
@@ -39,6 +40,7 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/7/15 15:51
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "tmp_file", description = "提供针对上传的临时文件的读写能力"))
 @ConditionalOnExpression("${ai.tools.tmp-file.enable:true}")
 @Data

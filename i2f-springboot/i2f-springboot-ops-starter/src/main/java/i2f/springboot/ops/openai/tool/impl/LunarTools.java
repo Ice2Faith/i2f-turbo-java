@@ -3,6 +3,7 @@ package i2f.springboot.ops.openai.tool.impl;
 import com.nlf.calendar.EightChar;
 import com.nlf.calendar.Lunar;
 import com.nlf.calendar.Solar;
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -23,6 +24,7 @@ import java.util.Map;
  * @date 2026/6/8 20:08
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "lunar", description = "提供给定日期的农历、八字、纳音、五行等信息"))
 @ConditionalOnClass(Lunar.class)
 @ConditionalOnExpression("${ai.tools.lunar.enable:true}")

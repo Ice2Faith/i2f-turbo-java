@@ -1,5 +1,6 @@
 package i2f.springboot.ops.dashscope.tool;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
@@ -45,6 +46,7 @@ import java.util.Map;
  * @date 2026/9/1 9:02
  * @desc
  */
+@McpServerExpose(false)
 @ToolIntent(items = @ToolIntentItem(value = "kling_t2v", description = "提供基于可灵（快手）的文生视频能力"))
 @Conditional(DashScopeOpsController.DashScopeCondition.class)
 @ConditionalOnExpression("${ai.tools.kling-t2v.enable:true}")

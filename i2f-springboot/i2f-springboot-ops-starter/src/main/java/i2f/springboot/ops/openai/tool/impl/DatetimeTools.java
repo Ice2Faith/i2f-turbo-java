@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
@@ -18,6 +19,7 @@ import java.time.format.DateTimeFormatter;
  * @date 2026/6/1 19:13
  * @desc
  */
+@McpServerExpose
 @ToolIntent(items = @ToolIntentItem(value = "datetime", description = "提供日期时间的获取、判断、当前时间、天数、闰年等"))
 @ConditionalOnExpression("${ai.tools.datetime.enable:true}")
 @Component
