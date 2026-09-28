@@ -1195,11 +1195,11 @@ public class ObjectConvertor {
         return dateFormaterMap.get(patten);
     }
 
-    public synchronized static String formatDate(String patten, Date date) {
+    public static synchronized String formatDate(String patten, Date date) {
         return getSimpleFormatter(patten).format(date);
     }
 
-    public synchronized static Date parseDate(String patten, String date) throws ParseException {
+    public static synchronized Date parseDate(String patten, String date) throws ParseException {
         return getSimpleFormatter(patten).parse(date);
     }
 

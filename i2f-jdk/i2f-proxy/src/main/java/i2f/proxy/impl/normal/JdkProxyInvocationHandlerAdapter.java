@@ -22,7 +22,7 @@ public class JdkProxyInvocationHandlerAdapter<T> implements InvocationHandler {
     }
 
     @Override
-    final public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         IInvokable invokable = new JdkMethod(method);
         return handler.invoke(instance, invokable, args);
     }

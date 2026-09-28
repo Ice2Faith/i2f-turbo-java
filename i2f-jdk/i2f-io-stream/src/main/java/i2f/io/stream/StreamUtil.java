@@ -313,7 +313,7 @@ public class StreamUtil {
     }
 
     public static InputStream localStream(InputStream is, int memLimit) throws IOException {
-        int defaultMaxLimit = 5 * 1024 * 1024;//5MB
+        int defaultMaxLimit = 5 * 1024 * 1024; // 5MB
         if (memLimit < 0) {
             memLimit = defaultMaxLimit;
         }

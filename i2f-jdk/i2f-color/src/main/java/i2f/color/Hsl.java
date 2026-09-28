@@ -58,13 +58,12 @@ public class Hsl {
 
         l = (max + min) / 2.0;
 
-        if (delMax == 0)           //This is a gray, no chroma...
-        {
+        if (delMax == 0) {         //This is a gray, no chroma...
+
             //h = 2.0/3.0;          //Windows下S值为0时，H值始终为160（2/3*240）
             h = 0;                  //HSL results = 0 ÷ 1
             s = 0;
-        } else                        //Chromatic data...
-        {
+        } else {                      //Chromatic data...
             if (l < 0.5) {
                 s = delMax / (max + min);
             } else {
@@ -97,8 +96,8 @@ public class Hsl {
         double h = hsl.h, s = hsl.s, l = hsl.l;
         double r, g, b;
         double var1, var2;
-        if (s == 0)                       //HSL values = 0 ÷ 1
-        {
+        if (s == 0) {                      //HSL values = 0 ÷ 1
+
             r = l * 255.0;                   //RGB results = 0 ÷ 255
             g = l * 255.0;
             b = l * 255.0;

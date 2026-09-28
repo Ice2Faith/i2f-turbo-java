@@ -11,6 +11,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>i2f-build-tools</module>
         <module>i2f-jdk</module>
         <module>i2f-jdk-ext</module>
         <module>i2f-extension</module>
@@ -112,6 +113,14 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- ############################################################ -->
+
+            <dependency>
+                <groupId>i2f.turbo</groupId>
+                <artifactId>i2f-build-tools</artifactId>
+                <version>${i2f.version}</version>
             </dependency>
 
             <!-- ############################################################ -->
@@ -1676,6 +1685,14 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>versions-maven-plugin</artifactId>
             </plugin>
+            <!--<plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    &lt;!&ndash; 父工程 packaging=pom，skip=true；子模块 packaging=jar，skip=false &ndash;&gt;
+                    <skip>${project.packaging == 'pom'}</skip>
+                </configuration>
+            </plugin>-->
         </plugins>
 
         <pluginManagement>
@@ -1800,9 +1817,9 @@
                             <!-- 去除maven描述信息 -->
                             <!--                            <addMavenDescriptor>false</addMavenDescriptor>-->
                             <manifestEntries>
-                                <Maven-Group>${pom.groupId}</Maven-Group>
-                                <Maven-Artifact>${pom.artifactId}</Maven-Artifact>
-                                <Maven-Version>${pom.version}</Maven-Version>
+                                <Maven-Group>${project.groupId}</Maven-Group>
+                                <Maven-Artifact>${project.artifactId}</Maven-Artifact>
+                                <Maven-Version>${project.version}</Maven-Version>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
 
                                 <Root-Maven-Group>${root.maven.group}</Root-Maven-Group>
@@ -1862,9 +1879,9 @@
                                 <!--                                <Main-Class>i2f.test.TestMain</Main-Class>-->
                                 <Class-Path>. ./resources/</Class-Path>
 
-                                <Maven-Group>${pom.groupId}</Maven-Group>
-                                <Maven-Artifact>${pom.artifactId}</Maven-Artifact>
-                                <Maven-Version>${pom.version}</Maven-Version>
+                                <Maven-Group>${project.groupId}</Maven-Group>
+                                <Maven-Artifact>${project.artifactId}</Maven-Artifact>
+                                <Maven-Version>${project.version}</Maven-Version>
                                 <Build-Time>${maven.build.timestamp}</Build-Time>
 
                                 <Root-Maven-Group>${root.maven.group}</Root-Maven-Group>
@@ -1911,7 +1928,7 @@
                             <ignoreVersions>
                                 <ignoreVersion>
                                     <type>regex</type>
-                                    <version>.*-(alpha|beta|rc|snapshot|BETA|ALPHA|Alpha|Snapshot|RC).*</version>
+                                    <version>(?i).*-(alpha|beta|rc|snapshot|android).*</version>
                                 </ignoreVersion>
                             </ignoreVersions>
                         </ruleSet>
@@ -1923,9 +1940,17 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>3.6.0</version>
+                    <!-- 关键：通过依赖引入 build-tools，使规则文件进入 classpath -->
+                    <dependencies>
+                        <dependency>
+                            <groupId>i2f.turbo</groupId>
+                            <artifactId>i2f-build-tools</artifactId>
+                            <version>${i2f.version}</version>
+                        </dependency>
+                    </dependencies>
                     <configuration>
-                        <!-- 直接引用内置规则，无需额外文件 -->
-                        <configLocation>google_checks.xml</configLocation>
+                        <!-- 不带路径时，插件会从 classpath 中查找，正好找到 build-tools 模块 resources 下的文件 -->
+                        <configLocation>idea_checks.xml</configLocation>
                         <encoding>UTF-8</encoding>
                         <consoleOutput>true</consoleOutput>
                         <failOnViolation>true</failOnViolation>

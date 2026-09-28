@@ -1424,8 +1424,8 @@ public class Bql<H extends Bql<H>> {
                 TRIM_COMMA_LIST,
                 condColumnName(link, alias, column) + $keywords(" in ("),
                 ")",
-                col -> Bql.$_().
-                        $for(col, null, ",", itemFilter,
+                col -> Bql.$_()
+                        .$for(col, null, ",", itemFilter,
                                 (i, v) -> Bql.$_(placeholder, v)
                         )
         );
@@ -1445,8 +1445,8 @@ public class Bql<H extends Bql<H>> {
                 TRIM_COMMA_LIST,
                 condColumnName(link, alias, column) + $keywords(" not in ("),
                 ")",
-                col -> Bql.$_().
-                        $for(col, null, ",", itemFilter,
+                col -> Bql.$_()
+                        .$for(col, null, ",", itemFilter,
                                 (i, v) -> Bql.$_(placeholder, v)
                         )
         );

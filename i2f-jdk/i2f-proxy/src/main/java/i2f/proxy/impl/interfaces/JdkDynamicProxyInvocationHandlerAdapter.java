@@ -20,7 +20,7 @@ public class JdkDynamicProxyInvocationHandlerAdapter implements InvocationHandle
     }
 
     @Override
-    final public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public final Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         IInvokable invokable = new JdkMethod(method);
         return handler.invoke(proxy, invokable, args);
     }

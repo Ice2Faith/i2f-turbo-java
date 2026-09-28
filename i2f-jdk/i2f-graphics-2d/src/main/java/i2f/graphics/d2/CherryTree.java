@@ -170,9 +170,9 @@ public class CherryTree {
             drawBole(level, sumLevel, startEnd, ndirect, startLen);
 
             double rate = level * 1.0 / sumLevel;
-//            if (Calc.rand() % 100 < (1.0 - rate) * 30){
-//                continue;
-//            }
+            // if (Calc.rand() % 100 < (1.0 - rate) * 30){
+            //     continue;
+            // }
             Point endPoint = D2Calc.directionMove(startEnd, startLen, ndirect);
             double nlen = nextLen(startLen);
             drawTreeNext(level - 1, sumLevel, endPoint, nlen, ndirect);

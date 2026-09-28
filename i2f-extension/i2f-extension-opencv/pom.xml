@@ -38,7 +38,7 @@
             <artifactId>opencv</artifactId>
             <version>4.3.0</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/src/main/resources/lib/opencv-430.jar</systemPath>
+            <systemPath>${project.basedir}/src/main/resources/lib/opencv-430.jar</systemPath>
         </dependency>
 
     </dependencies>

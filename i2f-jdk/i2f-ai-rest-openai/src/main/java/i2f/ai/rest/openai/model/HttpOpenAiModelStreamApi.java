@@ -193,8 +193,8 @@ public class HttpOpenAiModelStreamApi implements BaseMutator<HttpOpenAiModelStre
                                 }
                             })
                             .set(u -> u::setData, reqMap)
-                            .done()
-                    , response -> {
+                            .done(),
+                     response -> {
                         try (BufferedReader reader = new BufferedReader(new InputStreamReader(response.getInputStream(), StandardCharsets.UTF_8))) {
                             String line = null;
                             while ((line = reader.readLine()) != null) {

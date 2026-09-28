@@ -10,7 +10,9 @@ import java.util.ArrayList;
  * @date 2022/5/25 13:43
  * @desc 这个类必须是抽象的，使用时直接抽象实例化一个本对象子类，通过getType方法获取类型即可
  * 示例：
- * Class type=new TypeToken<Integer>(){}.getType();
+ * <code>
+ *     Class type=new TypeToken&lt;Integer&gt;(){}.getType();
+ * </code>
  * 得到的type即为java.lang.Integer
  * 另外，在反射时，也可以根据具体的Field类型，得到泛型的类型
  * 这样就可以在泛型反射时，能够正确实例化类型

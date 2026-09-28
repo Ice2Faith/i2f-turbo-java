@@ -161,11 +161,15 @@ public class Reference<E> {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Reference<?> reference = (Reference<?>) o;
-        return Objects.equals(value, reference.value) &&
-                state == reference.state;
+        return Objects.equals(value, reference.value)
+                && state == reference.state;
     }
 
     @Override
@@ -175,9 +179,9 @@ public class Reference<E> {
 
     @Override
     public String toString() {
-        return "Reference{" +
-                "value=" + value +
-                ", state=" + state +
-                '}';
+        return "Reference{"
+                + "value=" + value
+                + ", state=" + state
+                + '}';
     }
 }

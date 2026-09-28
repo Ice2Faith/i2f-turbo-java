@@ -39,7 +39,7 @@
             <artifactId>aspose-words</artifactId>
             <version>15.8.0-jdk16</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/aspose-words-15.8.0-jdk16.jar</systemPath>
+            <systemPath>${project.basedir}/lib/aspose-words-15.8.0-jdk16.jar</systemPath>
         </dependency>
 
         <!-- word转pdf,需要使用com组件，只能在windows使用，或必须使用windows远程主机转换 -->
@@ -63,7 +63,7 @@
             <artifactId>aspose-cells</artifactId>
             <version>8.5.2-jdk16</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/aspose-cells-8.5.2-jdk16.jar</systemPath>
+            <systemPath>${project.basedir}/lib/aspose-cells-8.5.2-jdk16.jar</systemPath>
         </dependency>
 
         <!-- excel转tiff时需要依赖imageio -->
@@ -72,7 +72,7 @@
             <artifactId>imageio</artifactId>
             <version>1.1</version>
             <scope>system</scope>
-            <systemPath>${pom.basedir}/lib/jai_imageio-1.1.jar</systemPath>
+            <systemPath>${project.basedir}/lib/jai_imageio-1.1.jar</systemPath>
         </dependency>
 
         <dependency>

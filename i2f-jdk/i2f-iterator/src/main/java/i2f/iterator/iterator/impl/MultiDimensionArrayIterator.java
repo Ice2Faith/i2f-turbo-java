@@ -43,10 +43,10 @@ public class MultiDimensionArrayIterator<T> implements Iterator<T> {
 
         @Override
         public String toString() {
-            return "ArrayRouter{" +
-                    "elem=" + elem +
-                    ", trace=" + trace +
-                    '}';
+            return "ArrayRouter{"
+                    + "elem=" + elem
+                    + ", trace=" + trace
+                    + '}';
         }
     }
 

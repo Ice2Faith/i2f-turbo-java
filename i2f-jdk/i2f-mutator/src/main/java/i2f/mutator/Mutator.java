@@ -17,10 +17,14 @@ import java.util.function.*;
  * @desc 对象修改器，用于流式修改任意对象
  * 用法示例
  * 任意类实现接口
- * public class RestHttpResponse<T> implements BaseMutator<RestHttpResponse<T>> {
+ * <pre>
+ * public class RestHttpResponse&lt;T&gt; implements BaseMutator&lt;RestHttpResponse&lt;T&gt;&gt; {
  * }
+ * </pre>
+ *
  * ----------------------------------
- * return new RestHttpResponse<T>().mutate() // 通过 BaseMutator 提供的默认方法转为 mutator
+ * <pre>
+ * return new RestHttpResponse&lt;T&gt;().mutate() // 通过 BaseMutator 提供的默认方法转为 mutator
  * .set(u->u::setStatusCode,resp.getStatusCode()) // 通过实例引用进行设置值
  * .set(RestHttpResponse::setBody,obj) // 通过类引用进行设置值
  * .with(u->u::statusMessage,resp.getStatusMessage()) // with 适用于链式调用，返回源对象的情况
@@ -29,6 +33,7 @@ import java.util.function.*;
  * .with(u->u::json) // 调用实体类的无参有返回值方法
  * .apply(HttpRequest::json) // 也可以通过类名方式调用无参方法
  * .done();
+ * </pre>
  */
 public class Mutator<T> {
     protected T target;
