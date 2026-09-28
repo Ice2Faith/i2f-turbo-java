@@ -1,3 +1,4 @@
+i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration
 i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration

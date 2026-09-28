@@ -1,6 +1,5 @@
 package i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
 import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolCallParam;
 import i2f.ai.rest.mcp.official.v2024.data.result.JsonRpcToolListItem;
@@ -10,14 +9,14 @@ import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerDiscoverResult;
 import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcServerInfo;
 import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolCallResultV2026;
 import i2f.ai.rest.mcp.official.v2026.data.result.JsonRpcToolListResultV2026;
-import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.mcp.server.McpServerProvider;
+import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
-import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
-import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
@@ -72,11 +71,8 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
 
     protected OfficialMcpServerV2026Properties properties;
 
-    protected IContext context;
-    protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
-    protected IProxyInvocationHandler invocationHandler;
-    protected IJsonSerializer jsonSerializer = new JacksonJsonSerializer(new ObjectMapper());
-
+    protected McpServerProvider mcpServerProvider;
+    protected IJsonSerializer jsonSerializer;
     protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
 
     @PostMapping(OfficialMcpConstantsV2026.URL_PATH_MCP)
@@ -239,10 +235,10 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
     }
 
     protected JsonRpcResponseV2026<?> listTools(ServerJsonRpcRequestV2026 request) {
-        Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
+        List<ToolDefinition> definitionList = mcpServerProvider.getTools();
 
         List<JsonRpcToolListItem> tools = new ArrayList<>();
-        for (ToolRawDefinition definition : definitionMap.values()) {
+        for (ToolDefinition definition : definitionList) {
             JsonRpcToolListItem item = new JsonRpcToolListItem();
             item.setName(definition.getName());
             item.setDescription(definition.getDescription());
@@ -273,17 +269,27 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
             return JsonRpcResponseV2026.error(request.getId(), OfficialMcpConstantsV2026.CODE_INVALID_PARAMS, "missing tools/call params.name!");
         }
 
-        Map<String, Object> arguments = params.getArguments();
+        Map<String, Object> argumentsMap = params.getArguments();
 
-        Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
-        ToolRawDefinition rawTool = definitionMap.get(toolName);
-        if (rawTool == null) {
+        boolean existsTool = false;
+        List<ToolDefinition> definitionList = mcpServerProvider.getTools();
+        for (ToolDefinition item : definitionList) {
+            if (Objects.equals(item.getName(), toolName)) {
+                existsTool = true;
+                break;
+            }
+        }
+        if (!existsTool) {
             // 工具不存在属于业务层结果，按规范以 isError=true 承载而非 JSON-RPC error
             return JsonRpcResponseV2026.success(request.getId(), JsonRpcToolCallResultV2026.error("un-support tool call request, tool not found: " + toolName).withMeta(serverInfoMeta()));
         }
 
         try {
-            Object ret = ToolRawHelper.invokeTool(rawTool, arguments, invocationHandler);
+            ToolBaseCallRequest callRequest = new ToolBaseCallRequest();
+            callRequest.setId(request.getId());
+            callRequest.setName(params.getName());
+            callRequest.setArguments(jsonSerializer.serialize(argumentsMap));
+            Object ret = mcpServerProvider.callTool(callRequest);
             return JsonRpcResponseV2026.success(request.getId(), JsonRpcToolCallResultV2026.success(toText(ret)).withMeta(serverInfoMeta()));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);

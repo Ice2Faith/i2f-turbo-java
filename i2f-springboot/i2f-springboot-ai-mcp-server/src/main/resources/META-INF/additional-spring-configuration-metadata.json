@@ -1,6 +1,11 @@
 {
   "groups": [
     {
+      "name": "i2f.springboot.ai.mcp.server.provider",
+      "type": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration"
+    },
+    {
       "name": "i2f.springboot.ai.mcp.server.simple.netty",
       "type": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration"
@@ -22,6 +27,13 @@
     }
   ],
   "properties": [
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider",
+      "type": "java.lang.Boolean",
+      "description": "enable ai mcp server provider.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "defaultValue": true
+    },
     {
       "name": "i2f.springboot.ai.mcp.server.simple.netty.enable",
       "type": "java.lang.Boolean",

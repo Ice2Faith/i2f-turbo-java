@@ -3,6 +3,12 @@ i2f:
     ai:
       mcp:
         server:
+          provider:
+            enable: true
+            default-expose: true
+            rules:
+              - pattern: webjs_*
+                expose: false
           # simple mcp server implements privacy protocol mcp (with hmac signature verify)
           simple:
             enable: true

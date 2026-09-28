@@ -1,19 +1,21 @@
 package i2f.springboot.ai.mcp.server.official.v2026.stream.springweb;
 
-import i2f.proxy.std.IProxyInvocationHandler;
-import i2f.spring.core.SpringContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.mcp.server.McpServerProvider;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.auth.impl.StaticStreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.impl.SpringHttpStreamMcpV2026Controller;
+import i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.bind.annotation.RestController;
@@ -33,6 +35,7 @@ import java.util.List;
  */
 @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.enable:true}")
 @ConditionalOnClass(RestController.class)
+@AutoConfigureAfter(McpServerProviderAutoConfiguration.class)
 @EnableConfigurationProperties({
         OfficialMcpServerV2026Properties.class
 })
@@ -43,6 +46,9 @@ public class StreamSpringWebMcpServerV2026AutoConfiguration {
 
     @Autowired
     private OfficialMcpServerV2026Properties officialMcpServerV2026Properties;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @ConditionalOnMissingBean(StreamMcpServerAuthFilter.class)
     @Bean
@@ -62,13 +68,12 @@ public class StreamSpringWebMcpServerV2026AutoConfiguration {
     @ConditionalOnMissingBean(SpringHttpStreamMcpV2026Controller.class)
     @Bean
     public SpringHttpStreamMcpV2026Controller springHttpStreamMcpV2026Controller(
-            @Autowired ApplicationContext applicationContext,
-            @Autowired(required = false) IProxyInvocationHandler invocationHandler,
+            @Autowired McpServerProvider mcpServerProvider,
             @Autowired(required = false) StreamMcpServerAuthFilter streamMcpServerAuthFilter) {
         return new SpringHttpStreamMcpV2026Controller().toMutator()
                 .set(u -> u::setProperties, officialMcpServerV2026Properties)
-                .set(u -> u::setContext, new SpringContext(applicationContext))
-                .set(u -> u::setInvocationHandler, invocationHandler)
+                .set(u -> u::setMcpServerProvider, mcpServerProvider)
+                .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(objectMapper))
                 .set(u -> u::setStreamMcpServerAuthFilter, streamMcpServerAuthFilter)
                 .done();
     }

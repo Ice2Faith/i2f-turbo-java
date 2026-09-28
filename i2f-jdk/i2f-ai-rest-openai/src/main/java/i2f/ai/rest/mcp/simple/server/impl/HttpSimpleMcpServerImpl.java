@@ -5,19 +5,13 @@ import i2f.ai.rest.mcp.simple.data.McpCallPayloadDto;
 import i2f.ai.rest.mcp.simple.server.HttpSimpleMcpServer;
 import i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpAppItem;
 import i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpRequest;
+import i2f.ai.std.mcp.server.McpServerProvider;
 import i2f.ai.std.tool.ToolBaseCallRequest;
-import i2f.ai.std.tool.ToolRawDefinition;
-import i2f.ai.std.tool.ToolRawHelper;
 import i2f.ai.std.tool.definition.ToolDefinition;
-import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.cache.std.expire.IExpireCache;
-import i2f.context.std.IContext;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
-import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.resp.ApiResp;
-import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +19,8 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
@@ -37,19 +32,14 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator<HttpSimpleMcpServerImpl> {
-    protected IContext context;
     protected long expireWindowMinutes = 30;
     protected IExpireCache<String, Object> expireCache;
-    protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
-    protected IJsonSerializer jsonSerializer = new Json2Serializer();
-    protected IProxyInvocationHandler invocationHandler;
+    protected McpServerProvider mcpServerProvider;
     protected CopyOnWriteArrayList<HttpSimpleMcpAppItem> appList = new CopyOnWriteArrayList<>();
     protected String hmacName = HttpSimpleMcpConstants.DEFAULT_HMAC_NAME;
 
     public List<ToolDefinition> listTools() {
-        Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
-        Collection<ToolRawDefinition> values = definitionMap.values();
-        return new ArrayList<>(values);
+        return mcpServerProvider.getTools();
     }
 
     public void assertValidMcpRequest(HttpSimpleMcpRequest request) {
@@ -147,21 +137,8 @@ public class HttpSimpleMcpServerImpl implements HttpSimpleMcpServer, BaseMutator
     public ApiResp<?> callTool(ToolBaseCallRequest request, HttpSimpleMcpRequest mcpRequest) {
         try {
             assertValidMcpRequest(mcpRequest);
-            List<ToolDefinition> tools = listTools();
-            for (ToolDefinition tool : tools) {
-                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
-                if (rawTool == null) {
-                    continue;
-                }
-                if (tool.getName().equals(request.getName())) {
-                    IJsonSerializer jsonSerializer = getJsonSerializer();
-                    IProxyInvocationHandler invocationHandler = getInvocationHandler();
-                    Map<String, Object> parameterMap = jsonSerializer.deserializeAsMap(request.getArguments());
-                    Object obj = ToolRawHelper.invokeTool(rawTool, parameterMap, invocationHandler);
-                    return ApiResp.success(obj);
-                }
-            }
-            throw new IllegalStateException("un-support tool call request!");
+            Object obj = mcpServerProvider.callTool(request);
+            return ApiResp.success(obj);
         } catch (Throwable e) {
             e.printStackTrace();
             return ApiResp.error(e.getMessage());

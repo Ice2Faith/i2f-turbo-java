@@ -1,17 +1,16 @@
 package i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.mcp.official.v2024.consts.OfficialMcpConstants;
 import i2f.ai.rest.mcp.official.v2024.data.JsonRpcResponse;
 import i2f.ai.rest.mcp.official.v2024.data.result.*;
-import i2f.ai.std.tool.ToolRawDefinition;
+import i2f.ai.std.mcp.server.McpServerProvider;
+import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolRawHelper;
+import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.context.std.IContext;
-import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
-import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
@@ -47,11 +46,8 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
 
     protected OfficialMcpServerProperties properties;
 
-    protected IContext context;
-    protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
-    protected IProxyInvocationHandler invocationHandler;
-    protected IJsonSerializer jsonSerializer = new JacksonJsonSerializer(new ObjectMapper());
-
+    protected McpServerProvider mcpServerProvider;
+    protected IJsonSerializer jsonSerializer;
     protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
 
     @PostMapping(OfficialMcpConstants.URL_PATH_MCP)
@@ -128,10 +124,9 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
     }
 
     protected JsonRpcResponse<?> listTools(ServerJsonRpcRequest request) {
-        Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
-
+        List<ToolDefinition> definitionList = mcpServerProvider.getTools();
         List<JsonRpcToolListItem> tools = new ArrayList<>();
-        for (ToolRawDefinition definition : definitionMap.values()) {
+        for (ToolDefinition definition : definitionList) {
             JsonRpcToolListItem item = new JsonRpcToolListItem();
             item.setName(definition.getName());
             item.setDescription(definition.getDescription());
@@ -158,16 +153,26 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
             return JsonRpcResponse.error(request.getId(), OfficialMcpConstants.CODE_INVALID_PARAMS, "missing tools/call params.name!");
         }
 
-        Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
-        ToolRawDefinition rawTool = definitionMap.get(toolName);
-        if (rawTool == null) {
+        boolean existsTool = false;
+        List<ToolDefinition> definitionList = mcpServerProvider.getTools();
+        for (ToolDefinition item : definitionList) {
+            if (Objects.equals(item.getName(), toolName)) {
+                existsTool = true;
+                break;
+            }
+        }
+        if (!existsTool) {
             return JsonRpcResponse.success(request.getId(), JsonRpcToolCallResult.error("un-support tool call request, tool not found: " + toolName));
         }
 
         Map<String, Object> argumentsMap = params.getArguments();
 
         try {
-            Object ret = ToolRawHelper.invokeTool(rawTool, argumentsMap, invocationHandler);
+            ToolBaseCallRequest callRequest = new ToolBaseCallRequest();
+            callRequest.setId(request.getId());
+            callRequest.setName(params.getName());
+            callRequest.setArguments(jsonSerializer.serialize(argumentsMap));
+            Object ret = mcpServerProvider.callTool(callRequest);
             return JsonRpcResponse.success(request.getId(), JsonRpcToolCallResult.success(toText(ret)));
         } catch (Throwable e) {
             log.error(e.getMessage(), e);
