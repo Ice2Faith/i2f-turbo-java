@@ -29,4 +29,25 @@ public class OpenAiOptionsUtil {
         }
         return null;
     }
+
+    public static OpenAiOpsProperties.OpenAiOptions getOrDefaultDashScopeEndpoint(OpenAiOperateDto req, OpenAiOpsProperties properties) {
+        if (req != null) {
+            OpenAiOpsProperties.OpenAiOptions ret = new OpenAiOpsProperties.OpenAiOptions();
+            ret.setEnable(true);
+            ret.setModel(req.getCompletion().getModel());
+            ret.setBaseUrl(req.getMeta().getBaseUrl());
+            ret.setApiKey(req.getMeta().getApiKey());
+            return ret;
+        }
+        if (properties != null && properties.getDashscopeEndpoint() != null) {
+            OpenAiOpsProperties.OpenAiOptions endpoint = properties.getDashscopeEndpoint();
+            OpenAiOpsProperties.OpenAiOptions ret = new OpenAiOpsProperties.OpenAiOptions();
+            ret.setEnable(endpoint.isEnable());
+            ret.setModel(endpoint.getModel());
+            ret.setBaseUrl(endpoint.getBaseUrl());
+            ret.setApiKey(endpoint.getApiKey());
+            return ret;
+        }
+        return null;
+    }
 }

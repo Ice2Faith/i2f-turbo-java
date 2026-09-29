@@ -100,9 +100,9 @@ public class DashScopeImageWanText2ImageTools {
             modelName = DEFAULT_MODEL;
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
-        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultEndpoint(req, openAiOpsProperties);
+        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultDashScopeEndpoint(req, openAiOpsProperties);
         if (endpoint == null || !endpoint.isEnable()) {
-            throw new IllegalStateException("not openai endpoint config!");
+            throw new IllegalStateException("not dashscope openai endpoint config!");
         }
 
         String baseUrl = endpoint.getBaseUrl();
