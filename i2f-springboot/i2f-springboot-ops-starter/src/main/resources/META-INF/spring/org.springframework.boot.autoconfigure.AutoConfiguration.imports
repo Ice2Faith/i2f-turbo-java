@@ -28,6 +28,7 @@ i2f.springboot.ops.elasticsearch.helper.ElasticSearchOpsHelper
 i2f.springboot.ops.elasticsearch.controller.ElasticSearchOpsController
 i2f.springboot.ops.xproc4j.controller.XProc4jOpsController
 i2f.springboot.ops.xproc4j.helper.XProc4jHelper
+i2f.springboot.ops.openai.tool.impl.UrlSigner
 i2f.springboot.ops.openai.skill.SkillAutoConfiguration
 i2f.springboot.ops.openai.skill.GroovySkillScriptRunner
 i2f.springboot.ops.openai.rag.RagAutoConfiguration
@@ -57,6 +58,7 @@ i2f.springboot.ops.openai.tool.impl.OpsMcpServerAdditionalToolProvider
 i2f.springboot.ops.openai.controller.OpenAiOpsController
 i2f.springboot.ops.openai.controller.QwenTtsOpsController
 i2f.springboot.ops.openai.async.AsyncTaskDispatcher
+i2f.springboot.ops.openai.async.AsyncTaskHelper
 i2f.springboot.ops.openai.controller.ServerSpeakTtsOpsController
 i2f.springboot.ops.openai.tts.cmd.TermuxTtsSpeaker
 i2f.springboot.ops.dashscope.controller.DashScopeOpsController
@@ -79,4 +81,5 @@ i2f.springboot.ops.dashscope.tool.DashScopeVideoHappyHorseText2VideoTools
 i2f.springboot.ops.dashscope.tool.DashScopeVideoKlingText2VideoTools
 i2f.springboot.ops.dashscope.tool.DashScopeVideoPixVerseText2VideoTools
 i2f.springboot.ops.dashscope.tool.DashScopeVideoViduText2VideoTools
+i2f.springboot.ops.dashscope.tool.DashScopeOpsMcpServerAdditionalToolProvider
 
