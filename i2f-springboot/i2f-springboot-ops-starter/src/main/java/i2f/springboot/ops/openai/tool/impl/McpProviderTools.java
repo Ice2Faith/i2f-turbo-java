@@ -167,7 +167,7 @@ public class McpProviderTools {
             @ToolParam(value = "regex", description = "the regex for search , use java style, for example \"file|read|write\" or \"(?i)command\"")
             String regex) {
         Map<String, Object> ret = new HashMap<>();
-        List<ToolDefinition> tools = gatewayManager.getTools();
+        List<ToolDefinition> tools = gatewayManager.listTools();
         Pattern pattern = Pattern.compile(regex);
 
         List<McpCategoryItem> items = new ArrayList<>();
@@ -204,7 +204,7 @@ public class McpProviderTools {
         if (toolNames == null) {
             toolNames = new ArrayList<>();
         }
-        List<ToolDefinition> managerTools = gatewayManager.getTools();
+        List<ToolDefinition> managerTools = gatewayManager.listTools();
 
         List<ToolDefinition> tools = new ArrayList<>();
         for (ToolDefinition managerTool : managerTools) {

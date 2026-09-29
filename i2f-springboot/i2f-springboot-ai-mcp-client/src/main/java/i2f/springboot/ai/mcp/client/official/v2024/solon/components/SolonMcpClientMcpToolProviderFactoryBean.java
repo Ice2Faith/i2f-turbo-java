@@ -65,7 +65,7 @@ public class SolonMcpClientMcpToolProviderFactoryBean implements FactoryBean<Mcp
         if (initial != null && initial) {
             new Thread(() -> {
                 try {
-                    List<ToolDefinition> tools = provider.getTools();
+                    List<ToolDefinition> tools = provider.listTools();
                     log.info("initial solon mcp client [" + config.getName() + "] load tools count: " + tools.size());
                 } catch (Exception e) {
                     log.warn("initial solon mcp client [" + config.getName() + "] warring: " + e.getMessage(), e);

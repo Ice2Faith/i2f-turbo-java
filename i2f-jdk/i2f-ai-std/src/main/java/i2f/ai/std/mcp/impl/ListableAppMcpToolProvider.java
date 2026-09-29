@@ -39,7 +39,7 @@ public class ListableAppMcpToolProvider extends AbstractAppMcpToolProvider imple
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         return new ArrayList<>(tools);
     }
 }

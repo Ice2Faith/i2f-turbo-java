@@ -25,7 +25,7 @@ public abstract class AbstractAppMcpToolProvider implements McpToolProvider {
 
     @Override
     public boolean support(ToolBaseCallRequest request) {
-        List<ToolDefinition> tools = getTools();
+        List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
             if (rawTool == null) {
@@ -40,7 +40,7 @@ public abstract class AbstractAppMcpToolProvider implements McpToolProvider {
 
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
-        List<ToolDefinition> tools = getTools();
+        List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(tool);
             if (rawTool == null) {

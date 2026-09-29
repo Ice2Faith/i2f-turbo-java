@@ -55,7 +55,7 @@ public class SolonMcpToolProvider implements McpToolProvider {
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         if (hasCache.get() && System.currentTimeMillis() < expireTs.get()) {
             return new ArrayList<>(cache);
         }
@@ -106,7 +106,7 @@ public class SolonMcpToolProvider implements McpToolProvider {
 
     @Override
     public boolean support(ToolBaseCallRequest request) {
-        for (ToolDefinition tool : getTools()) {
+        for (ToolDefinition tool : listTools()) {
             if (request.getName().equals(tool.getName())) {
                 return true;
             }

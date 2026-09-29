@@ -24,7 +24,7 @@ public abstract class AbstractAppToolManager implements ToolManager {
 
     @Override
     public boolean support(ToolBaseCallRequest request) {
-        List<ToolDefinition> tools = getTools();
+        List<ToolDefinition> tools = listTools();
         String name = request.getName();
         for (ToolDefinition tool : tools) {
             if (!(tool instanceof ToolRawDefinition)) {
@@ -39,7 +39,7 @@ public abstract class AbstractAppToolManager implements ToolManager {
 
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
-        List<ToolDefinition> tools = getTools();
+        List<ToolDefinition> tools = listTools();
         String name = request.getName();
         for (ToolDefinition tool : tools) {
             if (!(tool instanceof ToolRawDefinition)) {

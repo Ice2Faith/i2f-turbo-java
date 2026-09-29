@@ -50,7 +50,7 @@ public class StreamMcpClientV2026McpToolProviderFactoryBean implements FactoryBe
         if (initial != null && initial) {
             new Thread(() -> {
                 try {
-                    List<ToolDefinition> tools = provider.getTools();
+                    List<ToolDefinition> tools = provider.listTools();
                     log.info("initial stream mcp client [" + config.getName() + "] load tools count: " + tools.size());
                 } catch (Exception e) {
                     log.warn("initial stream mcp client [" + config.getName() + "] warring: " + e.getMessage(), e);

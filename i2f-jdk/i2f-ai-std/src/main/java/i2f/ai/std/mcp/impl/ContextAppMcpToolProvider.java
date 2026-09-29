@@ -44,7 +44,7 @@ public class ContextAppMcpToolProvider extends AbstractAppMcpToolProvider implem
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
         return new ArrayList<>(definitionMap.values());
     }

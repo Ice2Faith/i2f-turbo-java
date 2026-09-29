@@ -351,7 +351,7 @@ public class OpenAiOpsController implements IOpsProvider {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             Set<String> tags = new TreeSet<>();
             if (toolManager != null) {
-                List<ToolDefinition> tools = toolManager.getTools();
+                List<ToolDefinition> tools = toolManager.listTools();
                 if (tools != null) {
                     for (ToolDefinition tool : tools) {
                         Set<String> next = tool.getTags();
@@ -695,7 +695,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         echoProgress.apply("工具注入中...");
 
                         if (toolManager != null) {
-                            List<ToolDefinition> tools = toolManager.getTools();
+                            List<ToolDefinition> tools = toolManager.listTools();
                             if (tools != null) {
                                 tools = filterRequestTools(req, tools);
                                 if (completion.getTools() == null) {
@@ -749,7 +749,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                                     Map<String, ToolDefinition> definitionMap = new HashMap<>();
                                     if (toolManager != null) {
-                                        List<ToolDefinition> tools = toolManager.getTools();
+                                        List<ToolDefinition> tools = toolManager.listTools();
                                         tools = filterRequestTools(req, tools);
                                         for (ToolDefinition tool : tools) {
                                             definitionMap.put(tool.getName(), tool);

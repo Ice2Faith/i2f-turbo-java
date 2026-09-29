@@ -116,7 +116,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         if (hasCache.get() && System.currentTimeMillis() < expireTs.get()) {
             return new ArrayList<>(cache);
         }
@@ -153,7 +153,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
 
     @Override
     public boolean support(ToolBaseCallRequest request) {
-        List<ToolDefinition> tools = getTools();
+        List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             if (tool.getName().equals(request.getName())) {
                 return true;

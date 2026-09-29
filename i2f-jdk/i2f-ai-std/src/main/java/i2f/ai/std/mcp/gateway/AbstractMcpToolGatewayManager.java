@@ -43,7 +43,7 @@ public abstract class AbstractMcpToolGatewayManager implements ToolManager {
         List<ToolDefinition> ret = new ArrayList<>();
         try {
             String prefix = mcpProvider.getName();
-            List<ToolDefinition> tools = mcpProvider.getTools();
+            List<ToolDefinition> tools = mcpProvider.listTools();
             for (ToolDefinition tool : tools) {
                 ret.add(new McpNameDelegateToolDefinition(wrapPrefixName(prefix, tool.getName()), tool));
             }
@@ -55,7 +55,7 @@ public abstract class AbstractMcpToolGatewayManager implements ToolManager {
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         List<ToolDefinition> ret = new ArrayList<>();
         List<McpToolProvider> mcpProviders = getMcpProviders();
         for (McpToolProvider mcpProvider : mcpProviders) {

@@ -29,7 +29,7 @@ public class ContextAppToolManager extends AbstractAppToolManager implements Bas
     protected IProxyInvocationHandler invocationHandler;
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         Map<String, ToolRawDefinition> definitionMap = ToolRawHelper.parseTools(annotationResolver, context);
         List<ToolDefinition> ret = new ArrayList<>(definitionMap.values());
         return ret;

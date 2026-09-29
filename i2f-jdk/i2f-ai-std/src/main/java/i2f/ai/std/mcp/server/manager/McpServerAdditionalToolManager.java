@@ -35,10 +35,10 @@ public class McpServerAdditionalToolManager implements ToolManager {
     }
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         List<ToolDefinition> ret = new ArrayList<>();
         for (ToolManagerContract manager : toolManagers()) {
-            ret.addAll(manager.getTools());
+            ret.addAll(manager.listTools());
         }
         return ret;
     }

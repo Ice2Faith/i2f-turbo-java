@@ -12,7 +12,8 @@ import java.util.List;
  * 而应该使用具体的子类，此类只是为了作为公共接口约束存在
  */
 public interface ToolManagerContract {
-    List<ToolDefinition> getTools();
+    // 防止使用getTools,这种getter,容易在lombok等环境与字段冲突，导致开发因疏忽导致的意外事件
+    List<ToolDefinition> listTools();
 
     boolean support(ToolBaseCallRequest request);
 

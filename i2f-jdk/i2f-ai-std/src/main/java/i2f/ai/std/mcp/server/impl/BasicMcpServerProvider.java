@@ -25,7 +25,7 @@ public class BasicMcpServerProvider implements McpServerProvider {
 
     @Override
     public List<ToolDefinition> getTools() {
-        List<ToolDefinition> tools = toolManager.getTools();
+        List<ToolDefinition> tools = toolManager.listTools();
         if (exposer == null) {
             return tools;
         }

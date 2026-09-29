@@ -24,7 +24,7 @@ public class ListableAppToolManager extends AbstractAppToolManager implements Ba
     protected IProxyInvocationHandler invocationHandler;
 
     @Override
-    public List<ToolDefinition> getTools() {
+    public List<ToolDefinition> listTools() {
         return new CopyOnWriteArrayList<>(tools);
     }
 
