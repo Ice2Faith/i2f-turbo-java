@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "mcp_2024": {
+      "type": "http",
+      "url": "http://localhost:8080/v2024/mcp",
+      "headers": {
+        "Authorization": "Bearer ik-xxx"
+      }
+    },
+    "mcp_2026": {
+      "type": "http",
+      "url": "http://localhost:8080/v2026/mcp",
+      "headers": {
+        "Authorization": "Bearer ik-xxx"
+      }
+    }
+  }
+}
+
