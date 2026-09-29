@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.async;
 
+import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.springboot.ops.openai.tool.impl.UrlSigner;
 import i2f.url.FormUrlEncodedEncoder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +31,8 @@ public class AsyncTaskHelper {
 
     public String signTask(AsyncTaskItem item) {
         String parameters = FormUrlEncodedEncoder.toForm(item.getTaskParameters());
-        String url = PROTOCOL + "://" + item.getTaskId() + "/" + item.getType() + "/" + item.getResultType() + "?" + parameters;
+        parameters = HexStringByteCodec.INSTANCE.encode(parameters.getBytes(StandardCharsets.UTF_8));
+        String url = PROTOCOL + "://" + item.getTaskId() + "/" + item.getType() + "/" + item.getResultType() + "/" + parameters;
 
         return urlSigner.signedUrl(url);
     }
@@ -46,21 +49,18 @@ public class AsyncTaskHelper {
         if (!PROTOCOL.equals(protocol)) {
             throw new IllegalArgumentException("bad protocol, only support `" + PROTOCOL + "`");
         }
-        arr = path.split("\\?", 2);
-        path = arr[0];
-        String parameters = "";
-        if (arr.length > 1) {
-            parameters = arr[1];
-        }
+
         arr = path.split("/");
-        if (arr.length != 3) {
+        if (arr.length != 4) {
             throw new IllegalArgumentException("bad url structure");
         }
         ret.setTaskId(arr[0]);
         ret.setType(arr[1]);
         ret.setResultType(arr[2]);
         ret.setTaskParameters(new HashMap<>());
+        String parameters = arr[3];
         if (parameters != null && !parameters.isEmpty()) {
+            parameters = new String(HexStringByteCodec.INSTANCE.decode(parameters), StandardCharsets.UTF_8);
             Map<String, Object> map = FormUrlEncodedEncoder.ofFormMapTree(parameters);
             if (map != null) {
                 ret.setTaskParameters(map);
