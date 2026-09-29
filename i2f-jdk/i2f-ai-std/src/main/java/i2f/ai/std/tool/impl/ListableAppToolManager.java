@@ -8,6 +8,7 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -25,7 +26,7 @@ public class ListableAppToolManager extends AbstractAppToolManager implements Ba
 
     @Override
     public List<ToolDefinition> listTools() {
-        return new CopyOnWriteArrayList<>(tools);
+        return new ArrayList<>(tools);
     }
 
 }
