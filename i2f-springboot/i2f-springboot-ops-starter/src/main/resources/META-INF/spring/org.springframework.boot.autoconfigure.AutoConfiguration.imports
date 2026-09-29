@@ -53,6 +53,7 @@ i2f.springboot.ops.openai.tool.impl.WebDownloadTools
 i2f.springboot.ops.openai.tool.impl.LunarTools
 i2f.springboot.ops.openai.tool.impl.a2a.AgentTools
 i2f.springboot.ops.openai.tool.SpringContextToolAutoConfiguration
+i2f.springboot.ops.openai.tool.impl.OpsMcpServerAdditionalToolProvider
 i2f.springboot.ops.openai.controller.OpenAiOpsController
 i2f.springboot.ops.openai.controller.QwenTtsOpsController
 i2f.springboot.ops.openai.async.AsyncTaskDispatcher

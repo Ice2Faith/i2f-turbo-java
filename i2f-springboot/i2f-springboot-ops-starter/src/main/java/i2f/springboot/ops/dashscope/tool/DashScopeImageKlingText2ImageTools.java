@@ -21,7 +21,9 @@ import i2f.springboot.ops.openai.async.AsyncTaskMessage;
 import i2f.springboot.ops.openai.async.AsyncTaskResolver;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
+import i2f.springboot.ops.openai.util.OpenAiOptionsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -62,6 +64,9 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     public static final String DEFAULT_MODEL = "kling/kling-v3-omni-image-generation";
+
+    @Autowired
+    private OpenAiOpsProperties openAiOpsProperties;
 
     @Autowired(required = false)
     private DashScopeOpsImageKlingText2ImageController imageKlingText2ImageController;
@@ -106,8 +111,12 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
             modelName = DEFAULT_MODEL;
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
-        OpenAiMeta meta = req.getMeta();
-        String baseUrl = meta.getBaseUrl();
+        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultEndpoint(req, openAiOpsProperties);
+        if (endpoint == null || !endpoint.isEnable()) {
+            throw new IllegalStateException("not openai endpoint config!");
+        }
+
+        String baseUrl = endpoint.getBaseUrl();
         if (!baseUrl.contains("aliyuncs.com")) {
             throw new IllegalArgumentException("this tool only support run in aliyun provided model.");
         }
@@ -122,7 +131,7 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
                 DashScopeUploadOperateDto dto = new DashScopeUploadOperateDto();
                 dto.setModelName(modelName);
                 DashScopeMeta dashScopeMeta = new DashScopeMeta();
-                dashScopeMeta.setApiKey(meta.getApiKey());
+                dashScopeMeta.setApiKey(endpoint.getApiKey());
                 dto.setMeta(dashScopeMeta);
                 reference_image_url = tmpFileController.uploadFile(dto, file);
             }
@@ -162,7 +171,7 @@ public class DashScopeImageKlingText2ImageTools implements AsyncTaskResolver {
 
 
         DashScopeMeta dashScopeMeta = new DashScopeMeta();
-        dashScopeMeta.setApiKey(meta.getApiKey());
+        dashScopeMeta.setApiKey(endpoint.getApiKey());
         dto.setMeta(dashScopeMeta);
         String taskId = imageKlingText2ImageController.imageKling(dto);
 

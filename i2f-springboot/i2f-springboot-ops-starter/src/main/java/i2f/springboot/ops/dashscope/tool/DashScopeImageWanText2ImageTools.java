@@ -16,7 +16,9 @@ import i2f.springboot.ops.dashscope.data.DashScopeMeta;
 import i2f.springboot.ops.dashscope.data.DashScopeUploadOperateDto;
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
+import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;
+import i2f.springboot.ops.openai.util.OpenAiOptionsUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -54,6 +56,9 @@ public class DashScopeImageWanText2ImageTools {
     private static DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss-SSS");
 
     public static final String DEFAULT_MODEL = "qwen-image-2.0-pro";
+
+    @Autowired
+    private OpenAiOpsProperties openAiOpsProperties;
 
     @Autowired(required = false)
     private DashScopeOpsImageWanText2ImageController imageWanText2ImageController;
@@ -95,8 +100,12 @@ public class DashScopeImageWanText2ImageTools {
             modelName = DEFAULT_MODEL;
         }
         OpenAiOperateDto req = ToolCallContextHolder.get("req");
-        OpenAiMeta meta = req.getMeta();
-        String baseUrl = meta.getBaseUrl();
+        OpenAiOpsProperties.OpenAiOptions endpoint = OpenAiOptionsUtil.getOrDefaultEndpoint(req, openAiOpsProperties);
+        if (endpoint == null || !endpoint.isEnable()) {
+            throw new IllegalStateException("not openai endpoint config!");
+        }
+
+        String baseUrl = endpoint.getBaseUrl();
         if (!baseUrl.contains("aliyuncs.com")) {
             throw new IllegalArgumentException("this tool only support run in aliyun provided model.");
         }
@@ -111,7 +120,7 @@ public class DashScopeImageWanText2ImageTools {
                 DashScopeUploadOperateDto dto = new DashScopeUploadOperateDto();
                 dto.setModelName(modelName);
                 DashScopeMeta dashScopeMeta = new DashScopeMeta();
-                dashScopeMeta.setApiKey(meta.getApiKey());
+                dashScopeMeta.setApiKey(endpoint.getApiKey());
                 dto.setMeta(dashScopeMeta);
                 reference_image_url = tmpFileController.uploadFile(dto, file);
             }
@@ -129,7 +138,7 @@ public class DashScopeImageWanText2ImageTools {
         dto.setWatermark(false);
         dto.setModelName(modelName);
         DashScopeMeta dashScopeMeta = new DashScopeMeta();
-        dashScopeMeta.setApiKey(meta.getApiKey());
+        dashScopeMeta.setApiKey(endpoint.getApiKey());
         dto.setMeta(dashScopeMeta);
         Map<String, Object> resp = imageWanText2ImageController.imageText2Image(dto);
 
