@@ -143,6 +143,7 @@ public class SkillsHelper {
         builder.append("\n");
         builder.append("## 概览综述").append("\n");
         builder.append("- 总共").append(skillDefinitions.size()).append("个技能").append("\n");
+        builder.append("- 下面仅例举其中部分技能列表").append("\n");
 
         builder.append("\n");
         builder.append("## 技能(skill)定义列表").append("\n");
