@@ -50,25 +50,25 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
     @Autowired
     private AsyncTaskHelper asyncTaskHelper;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeImageKlingText2ImageTools dashScopeImageKlingText2ImageTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeImageViduText2ImageTools dashScopeImageViduText2ImageTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeImageWanText2ImageTools dashScopeImageWanText2ImageTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeVideoHappyHorseText2VideoTools dashScopeVideoHappyHorseText2VideoTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeVideoKlingText2VideoTools dashScopeVideoKlingText2VideoTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeVideoPixVerseText2VideoTools dashScopeVideoPixVerseText2VideoTools;
 
-    @Autowired
+    @Autowired(required = false)
     private DashScopeVideoViduText2VideoTools dashScopeVideoViduText2VideoTools;
 
 
@@ -135,6 +135,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeImageKlingText2ImageTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeImageKlingText2ImageTools.text_to_image_kling(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();
@@ -169,6 +172,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeImageViduText2ImageTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeImageViduText2ImageTools.text_to_image_vidu(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();
@@ -203,6 +209,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeImageWanText2ImageTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         TmpFileTools.FileAttachMessage task = dashScopeImageWanText2ImageTools.text_to_image_wan(content, portrait_mode, reference_image_url);
 
 
@@ -230,6 +239,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeVideoHappyHorseText2VideoTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeVideoHappyHorseText2VideoTools.text_to_video_happy_horse(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();
@@ -264,6 +276,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeVideoKlingText2VideoTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeVideoKlingText2VideoTools.text_to_video_kling(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();
@@ -298,6 +313,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeVideoPixVerseText2VideoTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeVideoPixVerseText2VideoTools.text_to_video_pixverse(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();
@@ -332,6 +350,9 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             @ToolParam(value = "reference_image_url", description = "the reference image url, cloud be null means not reference image, for example \"http://xxx/a.png\" or \"upload://xxx/1.jpg\"")
             String reference_image_url
     ) throws Exception {
+        if (dashScopeVideoViduText2VideoTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
         AsyncTaskMessage task = dashScopeVideoViduText2VideoTools.text_to_video_vidu(content, portrait_mode, reference_image_url);
 
         List<String> urls = new ArrayList<>();

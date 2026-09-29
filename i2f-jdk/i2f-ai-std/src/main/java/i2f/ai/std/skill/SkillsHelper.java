@@ -102,6 +102,10 @@ public class SkillsHelper {
         return ret;
     }
 
+    public static String convertSkillDefinitionsAsSystemPrompt(Map<String, SkillDefinition> skillDefinitions) {
+        return convertSkillDefinitionsAsSystemPrompt(skillDefinitions.values());
+    }
+
     public static String convertSkillDefinitionsAsSystemPrompt(Collection<SkillDefinition> skillDefinitions) {
         if (skillDefinitions == null || skillDefinitions.isEmpty()) {
             return "";

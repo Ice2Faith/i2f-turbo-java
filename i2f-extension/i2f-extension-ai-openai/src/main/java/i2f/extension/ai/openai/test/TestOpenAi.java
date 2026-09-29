@@ -37,7 +37,7 @@ public class TestOpenAi {
         provider.setContext(context);
 
         Map<String, SkillDefinition> skillMap = SkillsHelper.scanFileSystemSkills();
-        String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillMap);
+        String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillMap.values());
         provider.setSystem(system);
 
         ChatAi chatAi = provider.getChatAi();
