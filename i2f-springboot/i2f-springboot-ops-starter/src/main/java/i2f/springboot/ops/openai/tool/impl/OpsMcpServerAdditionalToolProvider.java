@@ -81,6 +81,10 @@ public class OpsMcpServerAdditionalToolProvider implements McpServerAdditionalTo
             ret.setInvocationHandler(null);
             Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(null, this);
             ret.getTools().addAll(map.values());
+            for (ToolRawDefinition tool : ret.getTools()) {
+                tool.setName("ops." + tool.getName());
+                tool.getJsonSchema().setName(tool.getName());
+            }
 
             holder = ret;
             return holder;
