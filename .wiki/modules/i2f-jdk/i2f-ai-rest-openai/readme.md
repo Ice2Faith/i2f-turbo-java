@@ -76,24 +76,24 @@ flowchart TD
 
 ### 包结构
 
-| 包                                            | 职责                   | 关键类                                                                                                                                                                   |
-|----------------------------------------------|----------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `i2f.ai.rest.openai.model`                   | 对话模型实现与消息转换          | `HttpOpenAiAiModel`、`HttpOpenAiModelStreamApi`、`OpenAiMessageHelper`                                                                                                  |
-| `i2f.ai.rest.openai.model.data`              | OpenAI 请求/响应体 DTO    | `OpenAiCompletionReqDto`/`RespDto`、`OpenAi*Message`、`OpenAiToolCall`、`OpenAiConsts`                                                                                   |
-| `i2f.ai.rest.openai.model.data.chunk`        | 流式分片 DTO             | `OpenAiCompletionChunkRespDto`、`OpenAiCompletionChoiceChunk`                                                                                                          |
-| `i2f.ai.rest.openai.metadata.model`          | 模型元数据接口              | `HttpOpenAiModelsApi` + `OpenAiModelsRespDto`/`Item`                                                                                                                  |
-| `i2f.ai.rest.openai.rag`                     | 向量化实现                | `HttpOpenAiRagEmbeddingModel` + `HttpOpenAiEmbeddingReqDto`/`RespDto`                                                                                                 |
-| `i2f.ai.rest.openai.rag.rerank`              | 重排序实现                | `HttpOpenAiRagRerankModel` + `HttpOpenAiRerankReqDto`/`RespDto`                                                                                                       |
-| `i2f.ai.rest.mcp.simple`                     | Simple MCP 协议常量与载荷   | `HttpSimpleMcpConstants`、`McpCallPayloadDto`                                                                                                                          |
-| `i2f.ai.rest.mcp.simple.client`              | MCP 客户端（工具消费方）       | `HttpSimpleMcpClientToolProvider` + `SimpleMcpToolListRespDto`                                                                                                        |
-| `i2f.ai.rest.mcp.simple.server`              | MCP 服务端（工具提供方）       | `HttpSimpleMcpServer`、`HttpSimpleMcpServerImpl`（仅验签，工具枚举/调用委托 `i2f-ai-std` 的 `mcp.server.McpServerProvider`）、`HttpSimpleMcpRequest`/`AppItem`                         |
-| `i2f.ai.rest.mcp.official`                   | 官方 MCP 共享 `toMap` 契约 | `IJsonRpcDto`（`toMap()`，信封与结果模型统一实现，供序列化时摊平/剔空）                                                                                                                       |
-| `i2f.ai.rest.mcp.official.v2024.consts`      | 2024-11-05 有状态协议常量   | `OfficialMcpConstants`（`URL_BASE_PATH=/v2024`、`/mcp`、protocolVersion、initialize/tools 方法名、`Mcp-Session-Id`、-32600~-32603）                                             |
-| `i2f.ai.rest.mcp.official.v2024.data`        | JSON-RPC 2.0 信封      | `JsonRpcRequest<T>`、`JsonRpcResponse<T>`（`implements IJsonRpcDto`，`success`/`error` 工厂 + `toMap`）、`JsonRpcError`                                                      |
-| `i2f.ai.rest.mcp.official.v2024.data.result` | 有状态结果模型              | `JsonRpcInitialResult`、`JsonRpcToolListResult`/`Item`、`JsonRpcToolCallParam`（`IJsonRpcDto`）/`JsonRpcToolCallResult`                                                   |
-| `i2f.ai.rest.mcp.official.v2026.consts`      | 2026-07-28 无状态协议常量   | `OfficialMcpConstantsV2026`（`/v2026`、`server/discover`、`MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name`、`_meta` 键、`resultType`/`cacheScope`、协议保留码 -32020/-32021/-32022） |
-| `i2f.ai.rest.mcp.official.v2026.data`        | 无状态信封                | `JsonRpcResponseV2026<T>`、`JsonRpcErrorV2026`（含 `data` 字段），均 `implements IJsonRpcDto`                                                                                 |
-| `i2f.ai.rest.mcp.official.v2026.data.result` | 无状态结果模型              | `JsonRpcServerDiscoverResult`、`JsonRpcServerInfo`、`JsonRpcToolListResultV2026`、`JsonRpcToolCallResultV2026`                                                           |
+| 包                                            | 职责                   | 关键类                                                                                                                                                                                                                |
+|----------------------------------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `i2f.ai.rest.openai.model`                   | 对话模型实现与消息转换          | `HttpOpenAiAiModel`、`HttpOpenAiModelStreamApi`、`OpenAiMessageHelper`                                                                                                                                               |
+| `i2f.ai.rest.openai.model.data`              | OpenAI 请求/响应体 DTO    | `OpenAiCompletionReqDto`/`RespDto`、`OpenAi*Message`、`OpenAiToolCall`/`Function`、`OpenAiCompletionChoice`/`Usage`、多模态内容族 `OpenAiRichUserMessage`/`OpenAiUserContent`(Text/ImageUrl)/`OpenAiImageUrl`、`OpenAiConsts` |
+| `i2f.ai.rest.openai.model.data.chunk`        | 流式分片 DTO             | `OpenAiCompletionChunkRespDto`、`OpenAiCompletionChoiceChunk`                                                                                                                                                       |
+| `i2f.ai.rest.openai.metadata.model`          | 模型元数据接口              | `HttpOpenAiModelsApi` + `OpenAiModelsRespDto`/`Item`                                                                                                                                                               |
+| `i2f.ai.rest.openai.rag`                     | 向量化实现                | `HttpOpenAiRagEmbeddingModel` + `HttpOpenAiEmbeddingReqDto`/`RespDto`                                                                                                                                              |
+| `i2f.ai.rest.openai.rag.rerank`              | 重排序实现                | `HttpOpenAiRagRerankModel` + `HttpOpenAiRerankReqDto`/`RespDto`                                                                                                                                                    |
+| `i2f.ai.rest.mcp.simple`                     | Simple MCP 协议常量与载荷   | `HttpSimpleMcpConstants`、`McpCallPayloadDto`                                                                                                                                                                       |
+| `i2f.ai.rest.mcp.simple.client`              | MCP 客户端（工具消费方）       | `HttpSimpleMcpClientToolProvider` + `SimpleMcpToolListRespDto`                                                                                                                                                     |
+| `i2f.ai.rest.mcp.simple.server`              | MCP 服务端（工具提供方）       | `HttpSimpleMcpServer`、`HttpSimpleMcpServerImpl`（仅验签，工具枚举/调用委托 `i2f-ai-std` 的 `mcp.server.McpServerProvider`）、`HttpSimpleMcpRequest`/`AppItem`                                                                      |
+| `i2f.ai.rest.mcp.official`                   | 官方 MCP 共享 `toMap` 契约 | `IJsonRpcDto`（`toMap()`，信封与结果模型统一实现，供序列化时摊平/剔空）                                                                                                                                                                    |
+| `i2f.ai.rest.mcp.official.v2024.consts`      | 2024-11-05 有状态协议常量   | `OfficialMcpConstants`（`URL_BASE_PATH=/v2024`、`/mcp`、protocolVersion、initialize/tools 方法名、`Mcp-Session-Id`、-32600~-32603）                                                                                          |
+| `i2f.ai.rest.mcp.official.v2024.data`        | JSON-RPC 2.0 信封      | `JsonRpcRequest<T>`、`JsonRpcResponse<T>`（`implements IJsonRpcDto`，`success`/`error` 工厂 + `toMap`）、`JsonRpcError`                                                                                                   |
+| `i2f.ai.rest.mcp.official.v2024.data.result` | 有状态结果模型              | `JsonRpcInitialResult`、`JsonRpcToolListResult`/`Item`、`JsonRpcToolCallParam`（`IJsonRpcDto`）/`JsonRpcToolCallResult`                                                                                                |
+| `i2f.ai.rest.mcp.official.v2026.consts`      | 2026-07-28 无状态协议常量   | `OfficialMcpConstantsV2026`（`/v2026`、`server/discover`、`MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name`、`_meta` 键、`resultType`/`cacheScope`、协议保留码 -32020/-32021/-32022）                                              |
+| `i2f.ai.rest.mcp.official.v2026.data`        | 无状态信封                | `JsonRpcResponseV2026<T>`、`JsonRpcErrorV2026`（含 `data` 字段），均 `implements IJsonRpcDto`                                                                                                                              |
+| `i2f.ai.rest.mcp.official.v2026.data.result` | 无状态结果模型              | `JsonRpcServerDiscoverResult`、`JsonRpcServerInfo`、`JsonRpcToolListResultV2026`、`JsonRpcToolCallResultV2026`                                                                                                        |
 
 ### 核心设计点
 
@@ -109,6 +109,10 @@ flowchart TD
 - 响应侧 `reasoning_content`（深度思考内容）→ `AssistantMessage.thinking`
 - 依据是否存在 `tool_calls` 回填 `FinishReason`（`TOOL_CALL` / `STOP`），并把原始 DTO 存入 `rawMessage`/`rawRequest` 便于回溯
 - `fromOpenAiAssistantMessage` 对 `OpenAiAssistantMessage`（发送态）与 `OpenAiAssistantMessageRespDto`（响应态）两种入参做了重载
+- **多模态边界**：`toOpenAiUserMessage` 仅取 `UserMessage.getText()` 产出纯文本 `OpenAiUserMessage`
+  ，不消费图片；带图的 `OpenAiRichUserMessage`（`content: List<OpenAiUserContent>` = `OpenAiUserContentText` + `OpenAiUserContentImageUrl{image_url:OpenAiImageUrl}`，`type=image_url`
+  ）是**原生 DTO 层**能力，需调用方自行构造并经 `completion(OpenAiCompletionReqDto)` 直发，不走 `toOpenAiMessages`
+  自动映射（`i2f-ai-std` 的 `UserMessage` 尚无多模态字段可映射）。
 
 **4. SSE 流式分片重组算法**
 `HttpOpenAiModelStreamApi` 不走 REST 客户端，而用 `HttpUrlConnectProcessor` 直接读输入流：强制 `stream=true` + `stream_options.include_usage=true`，逐行解析 `data:` 前缀（`[DONE]` 终止），把每个分片增量合并回一个完整的 `OpenAiCompletionRespDto`：
@@ -279,7 +283,8 @@ McpToolProvider remote = HttpSimpleMcpClientToolProvider.builder()
 - **OpenAI 协议兼容**：对话、Embedding、Rerank、Models 四类端点，`baseUrl` 可切换到 OpenAI/Ollama/One-API/SiliconFlow 等任意兼容服务。
 - **零第三方 SDK**：完全基于 `i2f-network`（`HttpURLConnection`/REST）+ `i2f-serialize`（`Json2Serializer`），无官方 SDK 依赖。
 - **实现 `i2f-ai-std` 契约**：`AiModel`/`RagEmbeddingModel`/`RagRerankModel`/`McpToolProvider`，可无缝注入 `AiAgent` 与 `@AiService`。
-- **消息双向多态映射**：统一处理 4 类角色、`tool_calls`、深度思考 `reasoning_content`、原始报文回填。
+- **消息双向多态映射**：统一处理 4 类角色、`tool_calls`、深度思考 `reasoning_content`、原始报文回填；原生 DTO
+  层另有 `OpenAiRichUserMessage` 多模态图文内容（`image_url`），须经 `completion` 直发、不参与自动转换。
 - **协议坑规避**：反射剥离空字段满足 OpenAI 严格校验；SSE 分片按 index 增量合并含 usage 累加。
 - **自研 Simple MCP 网关**：HMAC-SHA256 签名 + 时间窗 + nonce 防重放 + 工具列表 TTL 缓存 + 上下文透传，客户端/服务端成对提供，跨
   Web 框架解耦；服务端验签后委托 `i2f-ai-std` 的 `mcp.server.McpServerProvider` 统一做工具暴露与调用，与官方 MCP
@@ -312,3 +317,7 @@ McpToolProvider remote = HttpSimpleMcpClientToolProvider.builder()
 13. **服务端强依赖 `mcpServerProvider` 非空**：`listTools()`/`callTool()` 均直接解引用 `mcpServerProvider`，未做 null
     防护；若装配时遗漏 `setMcpServerProvider` 会在首次请求抛 NPE（并被 catch 转为 `ApiResp.error`
     ，错误信息不指向根因）。旧版内聚的 `IContext`+`ToolRawHelper` 路径已移除，升级时需同步迁移注入方式。
+14. **多模态 DTO 与自动转换脱节**：`OpenAiRichUserMessage`/`OpenAiUserContent*`/`OpenAiImageUrl` 已具备 `image_url`
+    图文结构，但 `OpenAiMessageHelper` 的 `toOpenAiUserMessage` 只映射文本、`fromOpenAi*` 亦不回读多模态内容；经 `
+    AiAgent`/`@AiService` 走标准 `AiRequest` 时无法传图，只有直接构造原生 `OpenAiCompletionReqDto`
+    调 `completion` 才生效——易被误认为「全链路支持多模态」，且 `i2f-ai-std` 侧缺少可映射的多模态消息字段。

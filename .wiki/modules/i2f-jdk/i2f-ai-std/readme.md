@@ -70,11 +70,11 @@ flowchart TD
 | `agent`         | `AiAgent`（Re-Act 引擎）、`AiAgentContext`（运行配置与 `InheritableThreadLocal` 上下文）、`AiAgentResponse`                                                                                                                                                                                                                                                                 |
 | `tool`          | `@Tool/@ToolParam` 注解、`ToolRawHelper`（解析/调用）、`schema`（`JsonSchema`/`JsonSchemaAnnotationResolver`/`FunctionJsonSchema`）、`definition`、`impl`（App 工具管理器）、`intent`（工具意图）、`ToolCallContextHolder`（线程态）                                                                                                                                                          |
 | `rag`           | `RagWorker`（编排 embed+store+similar+rerank）、`RagEmbeddingModel`/`RagEmbeddingStore`/`RagVector`、`RagTextSplitter`、`RagFileReader`（文本/Pandoc/Markitdown/EasyOCR/PDF-OCR）、`RagHelper`、`rerank`                                                                                                                                                                 |
-| `skill`         | `SkillDefinition`、`SkillsHelper`（扫描 `./skills` 与解析 SKILL.md、生成技能系统提示词、安全资源路径）、`SkillsTools`（`get_skill_document`/`get_skill_resource`/`run_skill_script`）                                                                                                                                                                                                   |
+| `skill`         | `SkillDefinition`、`SkillsHelper`（扫描 `./skills` 与解析 SKILL.md、生成技能系统提示词、安全资源路径）、`SkillsTools`（`get_skill_document`/`get_skill_resource`/`run_skill_script`）、`SkillScriptRunner`（按脚本后缀可插拔的执行器契约，`SkillsTools` 从上下文 `getBeans` 依 `suffix()` 分派）                                                                                                                 |
 | `mcp`           | `McpToolProvider` 契约；`gateway`（`AbstractMcpToolGatewayManager` 按 `provider.tool` 前缀路由，**消费侧**聚合外部 MCP 工具）；`impl`（App 级 provider）；`server`（**生产侧**把本应用 `ToolManager` 的工具开放为 MCP 工具：`McpServerProvider`/`McpServerExposer`/`@McpServerExpose`/`BasicMcpServerProvider`/`BasicMcpServerExposer`/`rule.McpServerExposeRule`/`manager.McpAdditionalToolManager`） |
 | `memory`        | `AiChatMemory`（按 `conversationId` 存取）、`InMemoryAiChatMemory`                                                                                                                                                                                                                                                                                                |
 | `service`       | `annotations`（`@AiService/@AiAgents/@AiSystem/@AiUser/@AiTools/@AiSkills/@AiParam`）、`proxy`（`AiServiceDynamicProxyHandler`、`AiServices`）、`test` 示例                                                                                                                                                                                                          |
-| `tags`          | `AiTags` 枚举（只读/可写/敏感/联网/成本等标签）与 `AiTagValues`                                                                                                                                                                                                                                                                                                               |
+| `tags`          | `AiTags` 枚举（只读/可写/敏感/联网/成本等标签）与 `AiTagValues`；`AiTagRule{pattern,tags}` + `AiTagRuleHelper.resolveTags`（以 `AntMatcher(".")` 按工具名模式批量赋标签，供下游为远程 MCP 工具追加本地标签）                                                                                                                                                                                                |
 
 ### 核心设计点
 
@@ -131,12 +131,20 @@ flowchart TD
 
 **4. 标签化过滤链（tag-based filtering）**
 
-`AiAgentContext` 维护 `toolTagsFilterChain`/`skillTagsFilterChain`（`List<Predicate<Set<String>>>`），`AiAgent` 在装配阶段对工具/技能按标签集求交过滤，`hasAnyTagsFilter` 提供「需求标签任一命中」语义，实现「同一 Agent 面向不同角色/环境暴露不同工具集」。
+`AiAgentContext` 维护 `toolTagsFilterChain`/`skillTagsFilterChain`（`List<Predicate<Set<String>>>`），`AiAgent`
+在装配阶段对工具/技能按标签集求交过滤，`hasAnyTagsFilter` 提供「需求标签任一命中」语义，实现「同一 Agent
+面向不同角色/环境暴露不同工具集」。标签的「赋值」侧由 `AiTagRuleHelper.resolveTags(toolName, rules)`
+承担：`AiTagRule{pattern,tags}` 以 `AntMatcher(".")`
+按工具名模式批量映射标签，本身不在本模块消费，而是供下游（如 `i2f-springboot-ai-mcp-client`）在 `getTools` 时给远程 MCP
+工具追加本地标签，再汇入上述过滤链——即「按名打标签 → 按标签过滤」两段式。
 
 **5. RAG 与 Skill 的可插拔策略**
 
 - RAG：`RagWorker` 编排 `RagEmbeddingModel`（向量化）+ `RagEmbeddingStore`（存储/相似度，含 `InMemoryRagEmbeddingStore`、`BucketRagEmbeddingStore`）+ 可选 `RagRerankModel`；文档入口 `RagHelper.loadDocuments` 递归目录，`RagFileReader` 策略族覆盖文本、Pandoc、Markitdown、EasyOCR、PDF-OCR，`SimpleRecursiveRagTextSplitter` 递归切分。RAG 既可被动注入（`enableRag`）也可作为工具供模型主动检索（`enableRagAct`）。
-- Skill：`SkillsHelper.scanFileSystemSkills` 启动时扫描 `./skills/*/SKILL.md`（支持 `SKILL.md/skill.md/index.md/README.md`），解析 `name/description/tags/version/author` front-matter；运行时通过 `SkillsTools` 的三个受控工具按需读取文档/资源/执行脚本，并以 `safeSkillResourcePath` 做目录穿越防护。
+- Skill：`SkillsHelper.scanFileSystemSkills` 启动时扫描 `./skills/*/SKILL.md`（支持 `SKILL.md/skill.md/index.md/README.md`
+  ），解析 `name/description/tags/version/author` front-matter；运行时通过 `SkillsTools`
+  的三个受控工具按需读取文档/资源/执行脚本，并以 `safeSkillResourcePath` 做目录穿越防护；`run_skill_script`
+  不硬编码解释器，而是按脚本后缀从上下文 `getBeans(SkillScriptRunner.class)` 中匹配 `suffix()` 命中的可插拔执行器委托运行。
 
 **6. MCP 网关的前缀路由（`AbstractMcpToolGatewayManager`）**
 
@@ -194,11 +202,11 @@ flowchart TD
 | 工具解析与调用         | `ToolRawHelper` + `@Tool`/`@ToolParam`                                                   | 反射转 JSON Schema、参数智能转换、拦截式调用                                             |
 | 声明式服务           | `@AiService` + `AiServices.create()`                                                     | 接口方法→Agent 调用，default 方法即工具                                              |
 | 检索增强 RAG        | `RagWorker` + `RagHelper`                                                                | 向量化、存储、相似检索、rerank、多格式文档加载                                               |
-| 技能系统            | `SkillsHelper` + `SkillsTools`                                                           | 文件系统技能扫描、技能文档/资源/脚本三工具                                                   |
+| 技能系统            | `SkillsHelper` + `SkillsTools` + `SkillScriptRunner`                                     | 文件系统技能扫描、技能文档/资源/脚本三工具、按后缀可插拔脚本执行器                                       |
 | MCP 工具网关（消费侧）   | `McpToolProvider` + `AbstractMcpToolGatewayManager`                                      | 前缀路由聚合多来源外部工具                                                            |
 | MCP 服务端暴露（生产侧）  | `McpServerProvider` + `BasicMcpServerProvider` / `McpServerExposer` / `@McpServerExpose` | 按规则→注解→默认三级策略把本应用工具选择性开放为 MCP 工具                                         |
 | 对话记忆            | `AiChatMemory`（`InMemoryAiChatMemory`）                                                   | 按 `conversationId` 存取消息                                                  |
-| 安全/边界标签         | `AiTags`                                                                                 | 只读/可写/敏感/联网/成本等，配合过滤链                                                    |
+| 安全/边界标签         | `AiTags` + `AiTagRule`/`AiTagRuleHelper`                                                 | 只读/可写/敏感/联网/成本等标签，配合过滤链；按工具名 ant 模式批量赋标签（供下游为远程工具打标签）                    |
 
 ## 模块主要使用方法
 

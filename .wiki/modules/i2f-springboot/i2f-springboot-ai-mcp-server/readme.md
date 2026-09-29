@@ -291,6 +291,10 @@ i2f:
 
 三套栈可同时开启，路径互不冲突。
 
+> 模块另附标准 MCP 客户端配置样例 `resources/sample/mcp-server.json`：以通用 `mcpServers`
+> 结构（`type: http` + `url` + `Authorization: Bearer` 头）演示第三方 MCP 客户端如何接入本服务端的 `/v2024/mcp`
+> 与 `/v2026/mcp` 两端点——仅覆盖官方两栈（simple 私有协议需配套 `i2f-springboot-ai-mcp-client`，非标准 `mcpServers` 格式）。
+
 ### 5. 可选增强与 Bean 覆盖
 
 - **nonce 防重放**（simple）：提供任意 `IExpireCache<String,Object>` Bean 后，验签通过即写入 nonce（TTL 为窗口 2 倍），重复拒绝。
