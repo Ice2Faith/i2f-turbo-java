@@ -13,6 +13,7 @@ import i2f.springboot.ai.mcp.server.provider.properties.McpServerProviderPropert
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -27,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.provider.enable:true}")
 @Configuration
+@AutoConfigureOrder(6000)
 @EnableConfigurationProperties(McpServerProviderProperties.class)
 @Slf4j
 @Data
@@ -41,6 +43,7 @@ public class McpServerProviderAutoConfiguration {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.provider.manager.enable:true}")
     @ConditionalOnMissingBean(ToolManager.class)
     @Bean
     public ToolManager toolManager() {
@@ -51,6 +54,7 @@ public class McpServerProviderAutoConfiguration {
         return ret;
     }
 
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.provider.exposer.enable:true}")
     @ConditionalOnMissingBean(McpServerExposer.class)
     @Bean
     public McpServerExposer mcpServerExposer() {
@@ -60,6 +64,7 @@ public class McpServerProviderAutoConfiguration {
         return ret;
     }
 
+    @ConditionalOnExpression("${i2f.springboot.ai.mcp.server.provider.provider.enable:true}")
     @ConditionalOnMissingBean(McpServerProvider.class)
     @Bean
     public McpServerProvider mcpServerProvider(@Autowired ToolManager toolManager,
