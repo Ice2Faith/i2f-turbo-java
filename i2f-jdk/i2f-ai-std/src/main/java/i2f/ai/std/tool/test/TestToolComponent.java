@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Ice2Faith
@@ -42,7 +43,11 @@ public class TestToolComponent {
     }, description = "模拟复杂入参对象")
     public String mock(@ToolParam(description = "城市名，例如：北京") TestSchemaPojo pojo,
                        List<String> citys,
-                       Date time) {
+                       Date time,
+                       Map<String, Object> map,
+                       Map<String, Integer> imap,
+                       Map<String, String> smap,
+                       Map<String, TestSchemaPojo> pmap) {
         return "";
     }
 }

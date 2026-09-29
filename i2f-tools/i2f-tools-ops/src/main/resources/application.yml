@@ -18,6 +18,9 @@ ai:
       enable: false
     playwright-web-search:
       enable: false
+    database:
+      update:
+        enable: false
     command:
       enable: false
     powershell:

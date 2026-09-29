@@ -66,7 +66,7 @@ public class OpsMcpServerAdditionalToolProvider implements McpServerAdditionalTo
             ret.setJsonSerializer(new JacksonJsonSerializer(objectMapper));
             ret.setInvocationHandler(null);
             Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(null, this);
-            ret.listTools().addAll(map.values());
+            ret.getTools().addAll(map.values());
 
             holder = ret;
             return holder;

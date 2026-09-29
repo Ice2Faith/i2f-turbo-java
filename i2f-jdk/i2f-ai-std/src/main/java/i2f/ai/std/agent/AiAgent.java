@@ -375,7 +375,7 @@ public class AiAgent implements BaseMutator<AiAgent> {
     }
 
     private void injectSkillsPromptAndTools(Map<String, SkillDefinition> skillsMap, List<AiMessage> messageList, Map<String, ToolRawDefinition> toolMap) {
-        String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsMap);
+        String system = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsMap.values());
         messageList.add(0, new SystemMessage(system));
 
         Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(jsonSchemaAnnotationResolver, new SkillsTools());

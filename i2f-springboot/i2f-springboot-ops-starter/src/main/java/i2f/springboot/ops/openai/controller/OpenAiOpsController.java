@@ -34,7 +34,6 @@ import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
-import i2f.springboot.ops.openai.skill.SkillAutoConfiguration;
 import i2f.springboot.ops.openai.tool.impl.*;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import i2f.web.servlet.ServletFileUtil;
@@ -113,6 +112,9 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private ToolManager toolManager;
+
+    @Autowired(required = false)
+    private SkillsTools skillsTools;
 
     @Autowired(required = false)
     private McpProviderTools mcpProviderTools;
@@ -669,7 +671,7 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (req.isEnableSkills() && needInjectSystemPrompt) {
-                        String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(SkillAutoConfiguration.skillDefinitionMap);
+                        String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsTools.getSkillDefinitions());
                         if (content != null && !content.isEmpty()) {
                             OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                             completion.getMessages().add(0, system);

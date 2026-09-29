@@ -4,10 +4,7 @@ import i2f.ai.std.tool.schema.data.FunctionJsonSchema;
 import i2f.typeof.TypeOf;
 import i2f.typeof.token.TypeToken;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
+import java.lang.reflect.*;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -180,14 +177,14 @@ public class JsonSchema {
     }
 
     public static Map<String, Object> getTypeSchemaInfo(JsonSchemaAnnotationResolver resolver, Parameter parameter) {
-        return getTypeSchemaInfo(resolver, parameter.getType(), () -> TypeToken.getGenericsParameterType(parameter));
+        return getTypeSchemaInfo(resolver, parameter.getType(), () -> TypeToken.getGenericsParameterTypes(parameter));
     }
 
     public static Map<String, Object> getTypeSchemaInfo(JsonSchemaAnnotationResolver resolver, Field field) {
-        return getTypeSchemaInfo(resolver, field.getType(), () -> TypeToken.getGenericsFieldType(field));
+        return getTypeSchemaInfo(resolver, field.getType(), () -> TypeToken.getGenericsFieldTypes(field));
     }
 
-    public static Map<String, Object> getTypeSchemaInfo(JsonSchemaAnnotationResolver resolver, Class<?> type, Supplier<Class<?>> collectionElementTypeSupplier) {
+    public static Map<String, Object> getTypeSchemaInfo(JsonSchemaAnnotationResolver resolver, Class<?> type, Supplier<Type[]> collectionElementTypeSupplier) {
         if (resolver == null) {
             resolver = JsonSchemaAnnotationResolver.INSTANCE;
         }
@@ -218,13 +215,40 @@ public class JsonSchema {
                 Map<String, Object> next = getTypeJsonSchema(resolver, componentType);
                 pair.put(SchemaField.ITEMS, next);
             } else if (TypeOf.typeOf(type, Collection.class)) {
-                Class<?> elementType = collectionElementTypeSupplier.get();
-                Map<String, Object> next = getTypeJsonSchema(resolver, elementType);
+                Type[] elementTypes = collectionElementTypeSupplier.get();
+                Class<?> elementType = TypeToken.rawType(elementTypes[0]);
+                Map<String, Object> next = getTypeSchemaInfo(resolver, elementType, () -> TypeToken.getGenericsTypes(elementTypes[0]));
                 pair.put(SchemaField.ITEMS, next);
             }
         } else if (SchemaType.OBJECT.equals(schemaType)) {
-            Map<String, Object> next = getTypeJsonSchema(resolver, type);
-            pair.put(SchemaField.PROPERTIES, next);
+            if (TypeOf.typeOf(type, Map.class)) {
+                // Map，在 JsonSchema 中，键都是string类型，只对值进行约束
+                // 因此，只考虑处理值的类型
+                Type[] elementTypes = collectionElementTypeSupplier.get();
+                Class<?> elementType = TypeToken.rawType(elementTypes[1]);
+                String valueSchemaType = convertAsJsonSchemaType(type);
+
+                if (SchemaType.OBJECT.equals(valueSchemaType)) {
+                    // 如果值也是 object 类型，那么需要考虑是否是 Object.class 允许任意值的情况
+                    if (Object.class.equals(elementType)) {
+                        // 值类型是 Object.class , 则允许所有值
+                        pair.put(SchemaField.ADDITIONAL_PROPERTIES, true);
+                    } else {
+                        // 否则是一个明确的子类型，进行递归解析即可
+                        Map<String, Object> next = getTypeSchemaInfo(resolver, elementType, () -> TypeToken.getGenericsTypes(elementTypes[1]));
+                        pair.put(SchemaField.ADDITIONAL_PROPERTIES, next);
+                    }
+                } else {
+                    // 不是 object 类型，那么就是明确的类型，明确递归解析即可
+                    Map<String, Object> next = getTypeSchemaInfo(resolver, elementType, () -> TypeToken.getGenericsTypes(elementTypes[1]));
+                    pair.put(SchemaField.ADDITIONAL_PROPERTIES, next);
+                }
+
+            } else {
+                // 不是map，直接递归解析即可
+                Map<String, Object> next = getTypeJsonSchema(resolver, type);
+                pair.put(SchemaField.PROPERTIES, next);
+            }
         }
         return pair;
     }

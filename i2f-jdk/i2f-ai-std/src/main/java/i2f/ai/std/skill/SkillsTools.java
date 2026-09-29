@@ -14,10 +14,11 @@ import lombok.NoArgsConstructor;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author Ice2Faith
@@ -31,14 +32,78 @@ import java.util.concurrent.TimeUnit;
         AiTags.SKILL_VALUE
 })
 public class SkillsTools {
+    public static final String SKILL_SEARCH = "skill_search";
+    public static final String GET_SKILL_DOCUMENT = "get_skill_document";
+    public static final String GET_SKILL_RESOURCE = "get_skill_resource";
+    public static final String RUN_SKILL_SCRIPT = "run_skill_script";
 
     protected volatile IContext context;
+    protected volatile Supplier<Map<String, SkillDefinition>> skillDefinitionSupplier;
 
-    public SkillsTools(IContext context) {
-        this.context = context;
+    @Data
+    @NoArgsConstructor
+    public static class CategoryItem {
+        protected String name;
+        protected String description;
     }
 
-    @Tool(
+    public List<SkillDefinition> getSkillDefinitions() {
+        List<SkillDefinition> ret = new ArrayList<>();
+        if (skillDefinitionSupplier != null) {
+            ret.addAll(skillDefinitionSupplier.get().values());
+        }
+        return ret;
+    }
+
+    @Tool(value = SKILL_SEARCH,
+            tags = {
+                    AiTags.AUTO_VALUE,
+                    AiTags.READONLY_VALUE,
+            },
+            description = "检索技能(skill)通过名称或描述")
+    public Map<String, Object> skill_search(@ToolParam(description = "search regex pattern(java style, allow prefix, such `(?i) to ignore case`, implements by `Matcher.find()`), cloud be null or empty means got all, for example: `(?i)pandoc|markitdown`")
+                                            String pattern) throws Exception {
+        List<SkillDefinition> definitions = getSkillDefinitions();
+        Map<String, Object> ret = new HashMap<>();
+
+        List<CategoryItem> list = new ArrayList<>();
+        if (pattern == null || pattern.isEmpty()) {
+            for (SkillDefinition definition : definitions) {
+                CategoryItem item = new CategoryItem();
+                item.setName(definition.getName());
+                item.setDescription(definition.getDescription());
+                list.add(item);
+            }
+        } else {
+            Pattern compile = Pattern.compile(pattern);
+            for (SkillDefinition definition : definitions) {
+                Matcher matcher = compile.matcher(definition.getName());
+                if (matcher.find()) {
+                    CategoryItem item = new CategoryItem();
+                    item.setName(definition.getName());
+                    item.setDescription(definition.getDescription());
+                    list.add(item);
+                    continue;
+                }
+
+                matcher = compile.matcher(definition.getDescription());
+                if (matcher.find()) {
+                    CategoryItem item = new CategoryItem();
+                    item.setName(definition.getName());
+                    item.setDescription(definition.getDescription());
+                    list.add(item);
+                    continue;
+                }
+            }
+        }
+
+        ret.put("skills", list);
+        ret.put("summary", "matched " + definitions.size() + ", total " + definitions.size());
+        ret.put("hint", "not matched wanted skills, maybe change `pattern` retry, or empty pattern to got all skills.");
+        return ret;
+    }
+
+    @Tool(value = GET_SKILL_DOCUMENT,
             tags = {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE,
@@ -68,7 +133,7 @@ public class SkillsTools {
         return text;
     }
 
-    @Tool(
+    @Tool(value = GET_SKILL_RESOURCE,
             tags = {
                     AiTags.AUTO_VALUE,
                     AiTags.READONLY_VALUE,
@@ -96,7 +161,7 @@ public class SkillsTools {
         return StreamUtil.readString(url);
     }
 
-    @Tool(
+    @Tool(value = RUN_SKILL_SCRIPT,
             tags = {
                     AiTags.EXECUTABLE_VALUE,
                     AiTags.HUMAN_VALUE,

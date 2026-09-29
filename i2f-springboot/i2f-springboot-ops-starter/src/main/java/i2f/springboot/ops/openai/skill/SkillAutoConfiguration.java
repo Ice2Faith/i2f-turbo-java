@@ -38,7 +38,10 @@ public class SkillAutoConfiguration implements ApplicationRunner {
     @ConditionalOnExpression("${ai.skills.tool.enable:true}")
     @Bean
     public SkillsTools skillsTools(@Autowired ApplicationContext applicationContext) {
-        return new SkillsTools(new SpringContext(applicationContext));
+        SkillsTools ret = new SkillsTools();
+        ret.setContext(new SpringContext(applicationContext));
+        ret.setSkillDefinitionSupplier(() -> skillDefinitionMap);
+        return ret;
     }
 
     @Override

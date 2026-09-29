@@ -102,41 +102,62 @@ public class SkillsHelper {
         return ret;
     }
 
-    public static String convertSkillDefinitionsAsSystemPrompt(Map<String, SkillDefinition> skillMap) {
-        if (skillMap == null || skillMap.isEmpty()) {
+    public static String convertSkillDefinitionsAsSystemPrompt(Collection<SkillDefinition> skillDefinitions) {
+        if (skillDefinitions == null || skillDefinitions.isEmpty()) {
             return "";
         }
         StringBuilder builder = new StringBuilder();
 
-        builder.append(
-                "# 技能系统\n" +
-                        "\n" +
-                        "- 技能系统，你具有一系列的技能，根据需要使用合适的技能帮助完成目标\n" +
-                        "- 技能包含基础的技能文档，以及可能包含的技能资源、技能脚本\n" +
-                        "- 当你需要使用某个技能时，需要使用 `get_skill_document` 工具先获取技能的文档\n" +
-                        "- 技能文档会指导你如何使用这个技能完成目标\n" +
-                        "- 技能文档中，可能还会提及到技能附加的资源或者脚本\n" +
-                        "- 如果需要阅读这些附加的资源或者脚本，需要使用 `get_skill_resource` 工具获取内容进行阅读\n" +
-                        "- 如果技能中需要执行技能中的脚本，需要使用 `run_skill_script` 工具进行运行脚本\n" +
-                        "\n" +
-                        "## 使用规范\n" +
-                        "\n" +
-                        "- 技能(skill)是一个独立的体系，只能使用 `get_skill_document`/ `get_skill_resource`/  `run_skill_script` 三个工具进行交互\n" +
-                        "- 技能是基于工具(tool)实现的，不要把技能与工具进行混淆\n" +
-                        "- 其他工具不能够与技能进行交互，因为设计上不支持\n" +
-                        "- 每个技能是互相隔离的，因此三个工具调用时，都需要带上技能名称\n" +
-                        "- 每个技能都是特殊设计的，因此是严谨的，只有技能文档中提及的资源或者脚本才是真实存在的，没有提及是不存在的\n" +
-                        "- 因此，不要猜测、假设任何技能中存在某些资源或者脚本，应该严格遵守文档内容" +
-                        ""
-        ).append("\n");
+        // language=markdown
+        String prompt = "# 技能系统\n" +
+                "\n" +
+                "- 技能系统，你具有一系列的技能，根据需要使用合适的技能帮助完成目标\n" +
+                "- 技能包含基础的技能文档，以及可能包含的技能资源、技能脚本\n" +
+                "- 当你需要使用某个技能时，需要使用 `{{get_skill_document}}` 工具先获取技能的文档\n" +
+                "- 技能文档会指导你如何使用这个技能完成目标\n" +
+                "- 技能文档中，可能还会提及到技能附加的资源或者脚本\n" +
+                "- 如果需要阅读这些附加的资源或者脚本，需要使用 `{{get_skill_resource}}` 工具获取内容进行阅读\n" +
+                "- 如果技能中需要执行技能中的脚本，需要使用 `{{run_skill_script}}` 工具进行运行脚本\n" +
+                "- 更多技能检索，需要使用 `{{skill_search}}` 工具进行查找技能\n" +
+                "\n" +
+                "## 使用规范\n" +
+                "\n" +
+                "- 技能(skill)是一个独立的体系，只能使用 `{{get_skill_document}}`/ `{{get_skill_resource}}`/  `{{run_skill_script}}` 三个工具进行交互\n" +
+                "- 更多技能可能不在下方的技能定义列表中，可以通过 `{{skill_search}}` 工具检索技能\n" +
+                "- 技能是基于工具(tool)实现的，不要把技能与工具进行混淆\n" +
+                "- 其他工具不能够与技能进行交互，因为设计上不支持\n" +
+                "- 每个技能是互相隔离的，因此三个工具调用时，都需要带上技能名称\n" +
+                "- 每个技能都是特殊设计的，因此是严谨的，只有技能文档中提及的资源或者脚本才是真实存在的，没有提及是不存在的\n" +
+                "- 因此，不要猜测、假设任何技能中存在某些资源或者脚本，应该严格遵守文档内容" +
+                "";
+        prompt = prompt.replace("{{get_skill_document}}", SkillsTools.GET_SKILL_DOCUMENT)
+                .replace("{{get_skill_resource}}", SkillsTools.GET_SKILL_RESOURCE)
+                .replace("{{run_skill_script}}", SkillsTools.RUN_SKILL_SCRIPT)
+                .replace("{{skill_search}}", SkillsTools.SKILL_SEARCH);
+        builder.append(prompt).append("\n");
 
+        builder.append("\n");
+        builder.append("## 概览综述").append("\n");
+        builder.append("- 总共").append(skillDefinitions.size()).append("个技能").append("\n");
+
+        builder.append("\n");
         builder.append("## 技能(skill)定义列表").append("\n");
-        for (Map.Entry<String, SkillDefinition> entry : skillMap.entrySet()) {
-            SkillDefinition definition = entry.getValue();
+        int count = 0;
+        int maxCount = 3;
+        for (SkillDefinition definition : skillDefinitions) {
             builder.append("### ").append("技能名称：").append(definition.getName()).append("\n")
                     .append("- ").append("技能描述：").append(definition.getDescription()).append("\n")
                     .append("\n");
+
+            count++;
+            if (count >= maxCount) {
+                break;
+            }
         }
+
+
+
+
 
         return builder.toString();
     }
