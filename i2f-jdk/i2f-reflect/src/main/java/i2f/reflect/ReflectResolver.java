@@ -274,6 +274,18 @@ public class ReflectResolver {
 
     protected static final LruMap<String, Class<?>> CACHE_LOAD_CLASS = new LruMap<>(2048);
 
+    public static boolean presentClasses(String... classes) {
+        for (String className : classes) {
+            if (className == null || className.isEmpty()) {
+                continue;
+            }
+            if (loadClass(className) == null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static Class<?> loadClass(String className) {
         if (className == null) {
             return null;
@@ -310,10 +322,9 @@ public class ReflectResolver {
             return String.class;
         }
         List<String> prefixes = new ArrayList<>(Arrays.asList(LOAD_CLASS_PREFIXES));
-        Class<?> clazz = null;
         for (String prefix : prefixes) {
             try {
-                clazz = loadClass0(prefix + className);
+                Class<?> clazz = loadClass0(prefix + className);
                 if (clazz != null) {
                     return clazz;
                 }
@@ -321,7 +332,7 @@ public class ReflectResolver {
 
             }
         }
-        return clazz;
+        return loadClass0(className);
     }
 
     public static Class<?> loadClass0(String className) {

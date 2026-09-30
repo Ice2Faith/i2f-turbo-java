@@ -8,8 +8,10 @@ import i2f.ai.std.rag.impl.*;
 import i2f.extension.ai.rag.sqlite.SqliteBucketRagMemoryStore;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.document.pdf.PdfConvertUtil;
+import i2f.extension.embedding.BgeSmallZhOnnxRagEmbeddingModel;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.io.file.FileUtil;
+import i2f.reflect.ReflectResolver;
 import i2f.spring.web.rest.SpringWebRestClient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +47,20 @@ public class RagAutoConfiguration {
     @ConditionalOnMissingBean(RagEmbeddingModel.class)
     @Bean
     public RagEmbeddingModel ragEmbeddingModel() {
+        if (properties.getBaseUrl() == null || properties.getBaseUrl().isEmpty()) {
+            if (ReflectResolver.presentClasses("ai.onnxruntime.OrtSession",
+                    "ai.djl.huggingface.tokenizers.HuggingFaceTokenizer"
+            )
+            ) {
+                log.warn("rag embedding model using process-in bge-small-zh model.");
+                BgeSmallZhOnnxRagEmbeddingModel ret = new BgeSmallZhOnnxRagEmbeddingModel();
+                RagEmbedding embedding = ret.embed("hello");
+                int dimension = embedding.getVector().dimension();
+                log.warn("rag embedding model using process-in bge-small-zh model demension reset to : " + dimension);
+                properties.setDimension(dimension);
+                return ret;
+            }
+        }
         return new HttpOpenAiRagEmbeddingModel().toMutator()
                 .set(u -> u::setRestClient, new SpringWebRestClient(new RestTemplate()))
                 .set(u -> u::setBaseUrl, properties.getBaseUrl())
