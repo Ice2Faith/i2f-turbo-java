@@ -339,7 +339,49 @@ public class ReflectResolver {
         if (className == null) {
             return null;
         }
+        // Ljava/lang/String;
+        if (className.startsWith("L")
+                && className.endsWith(";")) {
+            className = className.substring(1, className.length() - 1);
+        }
+        // java/lang/String.class
+        className = className.replace("/", ".");
+        if (className.endsWith(".class")) {
+            className = className.substring(0, className.length() - ".class".length());
+        }
+        if (className.startsWith(".")) {
+            className = className.substring(1);
+        }
+        if (className.endsWith(".")) {
+            className = className.substring(0, className.length() - 1);
+        }
+        // 这里处理数组
+        int arrayDeep = 0;
+        // [java.lang.String
+        while (className.startsWith("[")) {
+            className = className.substring(1);
+            arrayDeep += 1;
+        }
+        // java.lang.String[]
+        while (className.endsWith("[]")) {
+            className = className.substring(className.length() - 2);
+            arrayDeep += 1;
+        }
+
+        Map<String, Class<?>> smaliMap = new HashMap<>();
+        smaliMap.put("I", int.class);
+        smaliMap.put("B", byte.class);
+        smaliMap.put("Z", boolean.class);
+        smaliMap.put("F", float.class);
+        smaliMap.put("D", double.class);
+        smaliMap.put("J", long.class);
+        smaliMap.put("C", char.class);
+        smaliMap.put("S", short.class);
+
         Class<?> clazz = null;
+        if (clazz == null) {
+            clazz = smaliMap.get(className);
+        }
         if (clazz == null) {
             try {
                 ClassLoader classLoader = getClassLoader();
@@ -351,6 +393,13 @@ public class ReflectResolver {
             try {
                 clazz = Class.forName(className);
             } catch (Throwable e) {
+            }
+        }
+        // 处理数组类型
+        if (arrayDeep > 0 && clazz != null) {
+            for (int i = 0; i < arrayDeep; i++) {
+                Object arr = Array.newInstance(clazz, 0);
+                clazz = arr.getClass();
             }
         }
         return clazz;
