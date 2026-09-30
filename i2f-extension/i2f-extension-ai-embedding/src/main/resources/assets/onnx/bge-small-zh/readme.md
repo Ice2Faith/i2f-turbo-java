@@ -19,3 +19,8 @@
 ./assets/onnx/bge-small-zh/bge-small-zh.onnx
 ./assets/onnx/bge-small-zh/tokenizer.json
 ```
+
+- or, direct add this maven lib to your project
+- also can be run
+- `langchain4j-embeddings-bge-small-zh`
+

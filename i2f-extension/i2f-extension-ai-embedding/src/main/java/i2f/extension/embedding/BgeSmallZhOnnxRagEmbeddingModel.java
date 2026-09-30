@@ -28,7 +28,16 @@ public class BgeSmallZhOnnxRagEmbeddingModel extends OnnxRagEmbeddingModel {
                 return new FileInputStream(file);
             }
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            return loader.getResourceAsStream("/" + resourceName);
+            InputStream ret = loader.getResourceAsStream("/" + resourceName);
+            if(ret==null){
+                // not found, try use lanchain4j path
+                int idx=resourceName.lastIndexOf("/");
+                if(idx>=0){
+                    resourceName=resourceName.substring(idx+1);
+                }
+                ret=loader.getResourceAsStream("/"+resourceName);
+            }
+            return ret;
         } catch (IOException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
