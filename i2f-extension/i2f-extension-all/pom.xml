@@ -26,6 +26,10 @@
         </dependency>
         <dependency>
             <groupId>i2f.turbo</groupId>
+            <artifactId>i2f-extension-ai-embedding</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-ai-langchain4j8</artifactId>
         </dependency>
         <dependency>
