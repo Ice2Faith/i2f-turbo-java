@@ -31,6 +31,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.xproc4j.helper.XProc4jHelper,\
     i2f.springboot.ops.openai.tool.impl.UrlSigner,\
     i2f.springboot.ops.openai.skill.SkillAutoConfiguration,\
+    i2f.springboot.ops.openai.tool.impl.SkillManageTools,
     i2f.springboot.ops.openai.skill.GroovySkillScriptRunner,\
     i2f.springboot.ops.openai.rag.RagAutoConfiguration,\
     i2f.springboot.ops.openai.rag.RagDataSourceCollector,\
