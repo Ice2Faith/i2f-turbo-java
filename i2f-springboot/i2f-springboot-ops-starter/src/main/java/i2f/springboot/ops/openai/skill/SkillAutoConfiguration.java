@@ -14,11 +14,13 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * @author Ice2Faith
@@ -31,16 +33,26 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 public class SkillAutoConfiguration implements ApplicationRunner {
 
-    public static final ConcurrentHashMap<String, SkillDefinition> skillDefinitionMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, SkillDefinition> skillDefinitionMap = new ConcurrentHashMap<>();
+    private static final ReentrantReadWriteLock lock=new ReentrantReadWriteLock();
 
     protected static final ScheduledExecutorService pool = Executors.newScheduledThreadPool(2);
+
+    public static Map<String,SkillDefinition> getSkillDefinitionMap(){
+        lock.readLock().lock();
+        try {
+            return new HashMap<>(skillDefinitionMap);
+        }finally {
+            lock.readLock().unlock();
+        }
+    }
 
     @ConditionalOnExpression("${ai.skills.tool.enable:true}")
     @Bean
     public SkillsTools skillsTools(@Autowired ApplicationContext applicationContext) {
         SkillsTools ret = new SkillsTools();
         ret.setContext(new SpringContext(applicationContext));
-        ret.setSkillDefinitionSupplier(() -> skillDefinitionMap);
+        ret.setSkillDefinitionSupplier(() -> getSkillDefinitionMap());
         return ret;
     }
 
@@ -55,6 +67,12 @@ public class SkillAutoConfiguration implements ApplicationRunner {
 
     public void refreshSkillDefinitions() {
         Map<String, SkillDefinition> map = SkillsHelper.scanFileSystemSkills();
-        skillDefinitionMap.putAll(map);
+        lock.writeLock().lock();
+        try {
+            skillDefinitionMap.clear();
+            skillDefinitionMap.putAll(map);
+        }finally {
+            lock.writeLock().unlock();
+        }
     }
 }
