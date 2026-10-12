@@ -507,7 +507,6 @@
                         :autosize="{ minRows: 2, maxRows: 6 }"
                         placeholder="输入消息，Ctrl+Enter 快速发送"
                         @keydown.ctrl.enter.native="sendMessage"
-                        :disabled="currentSession?.sending"
                         resize="none"
                 ></el-input>
                 <div class="input-actions">
@@ -596,7 +595,8 @@
                         <span @contextmenu.prevent="onContextMenuMoreSendOptions"
                               style="display:inline-block;min-width: 88px;">
                             <el-button type="primary" size="small" @click="sendInterjectMessage"
-                                       v-if="currentSession?.sending && form.inputText && form.inputText.trim() && !form.interject">
+                                       v-if="currentSession?.sending && !form.interject"
+                                       :disabled="!form.inputText || !form.inputText.trim()">
                                 插话 <i class="el-icon-s-promotion"></i>
                             </el-button>
                             <el-button type="primary" size="small" @click="sendMessage"
@@ -2749,6 +2749,12 @@
                 this.form.interject=item;
             },
             async sendMessage() {
+                if(this.currentSession?.sending && !this.form.interject){
+                    this.sendInterjectMessage()
+                    if(this.form.interject && this.form.interject.type) {
+                        return
+                    }
+                }
                 let sid = this.metas.activeSessionId;
                 let session = this.findSession(sid)
                 let messages = this.getActiveMessages();
@@ -3496,6 +3502,12 @@
                             this.continueAfterSummaryHistory()
                             return;
                         }
+                    }
+
+                    if(this.form.interject && this.form.interject.type){
+                        this.directSendMessage({
+                            sessionId: options.sessionId
+                        })
                     }
 
                 } catch (e) {
