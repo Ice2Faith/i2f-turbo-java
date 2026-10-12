@@ -20,6 +20,8 @@ public class OpenAiOperateDto {
     protected OpenAiMeta meta;
     protected OpenAiCompletionVo completion;
     protected List<OpenAiToolApprovalDto> toolApprovalList;
+    // 插话
+    protected OpenAiMessageVo interject;
     protected boolean encryptOutput = false;
     protected boolean enableTools = false;
     protected boolean enableSkills = false;

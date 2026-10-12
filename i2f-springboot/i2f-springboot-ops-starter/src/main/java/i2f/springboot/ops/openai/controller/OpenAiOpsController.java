@@ -907,6 +907,30 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
+                    // 插话，需要再安全边界上，也就是保证，tool_calls+tool连续完整，这样的周期之后进行插话
+                    // 方便引导模型的走向
+                    if (req.getInterject() != null
+                            && req.getInterject().getType() != null
+                            && !req.getInterject().getType().isEmpty()) {
+                        OpenAiMessageVo item = req.getInterject();
+                        if (OpenAiConsts.USER.equals(item.getType())) {
+                            injectMsg = item;
+                            OpenAiMessage user = item.getUser();
+
+                            user = convertOpenAiUserMessage(item, req, hasAttachFiles);
+                            completion.getMessages().add(user);
+                        } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
+                            injectMsg = item;
+                            completion.getMessages().add(item.getSystem());
+                        } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
+                            injectMsg = item;
+                            completion.getMessages().add(item.getAssistant());
+                        } else if (OpenAiConsts.TOOL.equals(item.getType())) {
+                            injectMsg = item;
+                            completion.getMessages().add(item.getTool());
+                        }
+                    }
+
                     // 回显给前端，工具调用可能变更了内容，事实
                     if (req.isEnableTruth()) {
                         // 事实内容注入

@@ -595,7 +595,12 @@
                         </el-popover>
                         <span @contextmenu.prevent="onContextMenuMoreSendOptions"
                               style="display:inline-block;min-width: 88px;">
+                            <el-button type="primary" size="small" @click="sendInterjectMessage"
+                                       v-if="currentSession?.sending && form.inputText && form.inputText.trim() && !form.interject">
+                                插话 <i class="el-icon-s-promotion"></i>
+                            </el-button>
                             <el-button type="primary" size="small" @click="sendMessage"
+                                       v-else
                                        :loading="currentSession?.sending"
                                        :disabled="!form.inputText || !form.inputText.trim()">
                                 发送 <i class="el-icon-s-promotion"></i>
@@ -2036,6 +2041,7 @@
                         useQwenTts: false,
                         useServerSpeakTts: false,
                         toolApprovalList: [],
+                        interject: null, // 插话
                         enableLruTools: true,
                         lruToolMaxSize: 20,
                         lruToolNames: [],
@@ -2707,19 +2713,11 @@
             renderMessageMarkdown(msg, idx) {
                 return this.renderMarkdown(this.extraMessageContent(msg, idx) || '[未收到任何内容]')
             },
-            async sendMessage() {
+            createSendMessage(){
                 let text = (this.form.inputText || '').trim();
                 if (!text) {
-                    return;
+                    return null;
                 }
-
-                let sid = this.metas.activeSessionId;
-                let session = this.findSession(sid)
-                let messages = this.getActiveMessages();
-
-                // 按钮触发的发送，需要重置action
-                session.lastOptions = null;
-
                 // 追加用户消息，构建 API 请求消息列表
                 let item = {
                     type: this.form.messageType,
@@ -2740,9 +2738,30 @@
                 if (this.form.messageType == 'assistant') {
                     item[this.form.messageType].reasoning_content = '';
                 }
+                this.form.inputText = '';
+                return item
+            },
+            sendInterjectMessage(){
+                let item=this.createSendMessage()
+                if(!item){
+                    return
+                }
+                this.form.interject=item;
+            },
+            async sendMessage() {
+                let sid = this.metas.activeSessionId;
+                let session = this.findSession(sid)
+                let messages = this.getActiveMessages();
+
+                // 按钮触发的发送，需要重置action
+                session.lastOptions = null;
+
+                let item=this.createSendMessage()
+                if(!item){
+                    return
+                }
 
                 messages.push(item);
-                this.form.inputText = '';
 
                 if (item.type == 'user') {
                     this.directSendMessage({
@@ -3304,6 +3323,13 @@
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
                     req.sessionRecordsMap = session.sessionRecordsMap;
                     req.webjsToolResults=this.form.webjsToolResults;
+                    // 插话
+                    if(this.form.interject
+                        && this.form.interject.type) {
+                        req.interject = this.form.interject;
+                        this.form.interject = null;
+                        insertBeforeLast(messages,req.interject)
+                    }
                     req = this.transferSend(req);
 
                     this.$responsing = true;
