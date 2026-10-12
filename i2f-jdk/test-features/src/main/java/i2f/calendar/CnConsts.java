@@ -72,19 +72,7 @@ public class CnConsts {
 
     public static final String[] BA_GUA_XIANG_ZHENG_MAPPING = {"积极、有利", "和谐、变通、顺利", "沉静、深度、变化", "稳定、坚固、守旧", "稳定、沉静、包容", "充满冲击、激动", "充满活力、热情", "和谐、亲和、共融"};
 
-    public static void main(String[] args) {
-        String str = printWuXingGuanXi();
-        System.out.println(str);
 
-        str = printGanZhiGuanXi();
-        System.out.println(str);
-
-        str = printBaGuaGuanXi();
-        System.out.println(str);
-
-        str = printShiChenGuanXi();
-        System.out.println(str);
-    }
 
     public static String printWuXingGuanXi() {
         StringBuilder builder = new StringBuilder();

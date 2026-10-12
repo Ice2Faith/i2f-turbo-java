@@ -171,34 +171,6 @@ public class Base64 {
         return decode(str, BASE64_URL_MAPPING);
     }
 
-    public static void main(String[] args) throws IOException {
-        String raw = "";
-        for (int i = 0; i < 10; i++) {
-            raw += (char) ('0' + i);
-            System.out.println("-------------");
-            System.out.println(raw);
-            String b64 = encode(raw.getBytes());
-            System.out.println(b64);
-            b64 = b64.replaceAll("=", "");
-            String dec = new String(decode(b64));
-            System.out.println(dec);
-            System.out.println(raw.equals(dec));
 
-            ByteArrayInputStream bis = new ByteArrayInputStream(raw.getBytes());
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            encode(bis, bos);
-            bis.close();
-            bos.close();
-            System.out.println(new String(bos.toByteArray()));
-            bis = new ByteArrayInputStream(bos.toByteArray());
-            bos = new ByteArrayOutputStream();
-            decode(bis, bos);
-            bis.close();
-            bos.close();
-            dec = new String(bos.toByteArray());
-            System.out.println(raw.equals(dec));
-        }
-
-    }
 
 }

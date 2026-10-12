@@ -36,14 +36,7 @@ public class CherryTree {
         tree.drawTree(12, startPoint, line.direction(), line.length());
     }
 
-    public static void main(String[] args) {
-        D2Frame frame = new D2Frame(1080, 720);
 
-        frame.setVisible(true);
-
-        drawCallback(frame);
-
-    }
 
     public interface OnStepListener {
         void onStep(BufferedImage img);
