@@ -1,9 +1,11 @@
 package i2f.springboot.dynamic.datasource.autoconfiguration;
 
 import i2f.springboot.dynamic.datasource.core.DataSourceInitializer;
+import i2f.springboot.dynamic.datasource.core.DataSourcePostWrapper;
 import i2f.springboot.dynamic.datasource.core.DynamicDataSource;
 import i2f.springboot.dynamic.datasource.core.DynamicDataSourceContextHolder;
 import i2f.springboot.dynamic.datasource.initializer.DefaultDataSourceInitializerConfiguration;
+import i2f.springboot.dynamic.datasource.wrapper.DefaultDataSourcePostWrapperAutoConfiguration;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +44,8 @@ import java.util.*;
 @AutoConfigureOrder(-1)
 @AutoConfigureAfter({
         DynamicDataSourceProperty.class,
-        DefaultDataSourceInitializerConfiguration.class
+        DefaultDataSourceInitializerConfiguration.class,
+        DefaultDataSourcePostWrapperAutoConfiguration.class
 })
 public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationContextAware {
 
@@ -79,6 +82,12 @@ public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationCon
 
         Map<String, DataSourceInitializer> initializerMap = context.getBeansOfType(DataSourceInitializer.class);
 
+        DataSourcePostWrapper dataSourcePostWrapper = null;
+        try {
+            dataSourcePostWrapper = context.getBean(DataSourcePostWrapper.class);
+        } catch (BeansException e) {
+            // ignore
+        }
 
         for (Map.Entry<String, DataSourceMeta> entry : datasource.entrySet()) {
             log.info("datasource construct...");
@@ -86,6 +95,11 @@ public class DynamicDataSourceConfig implements BeanFactoryAware, ApplicationCon
             String dataSourceId = DynamicDataSourceContextHolder.realDataSourceTypeName(entry.getKey());
             DataSource dataSource = configDataSource(initializerMap, dataSourceId, entry.getValue());
             log.info("datasource registry:" + dataSourceId);
+            // 后置处理包装数据源，例如进行seata数据源的包装
+            if (dataSourcePostWrapper != null) {
+                dataSource = dataSourcePostWrapper.wrap(dataSourceId, dataSource);
+                log.info("datasource post-wrapper:" + dataSourceId + " by " + dataSourcePostWrapper.getClass());
+            }
             /*bean工厂注册每个数据源bean*/
             listableBeanFactory.registerSingleton(dataSourceId, dataSource);
             dataSourceMap.put(dataSourceId, dataSource);
