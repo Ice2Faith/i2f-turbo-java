@@ -505,7 +505,7 @@
                         type="textarea"
                         v-model="form.inputText"
                         :autosize="{ minRows: 2, maxRows: 6 }"
-                        placeholder="输入消息，Ctrl+Enter 快速发送"
+                        :placeholder="(form.interject && form.interject.type ? '等待插话中...' : '')+'输入消息，Ctrl+Enter 快速发送'"
                         @keydown.ctrl.enter.native="sendMessage"
                         resize="none"
                 ></el-input>
