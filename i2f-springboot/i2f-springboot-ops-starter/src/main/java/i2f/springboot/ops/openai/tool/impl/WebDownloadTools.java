@@ -46,16 +46,21 @@ public class WebDownloadTools {
             tags = {
                     AiTags.WRITABLE_VALUE,
                     AiTags.HUMAN_VALUE
-            }, description = "download a url content to file"
+            }, description = "download a url content to file, will on save to {savePath}/{extractName}-{uuid}.{suffix}"
     )
     public String download_url_to_file(
             @ToolParam(value = "url", description = "the url, for example 'https://sample.com/download/a.png'")
             String url,
             @ToolParam(value = "savePath", description = "the save path, cloud be null means rootPath, for example 'user' or '/home'")
-            String savePath
+            String savePath,
+            @ToolParam(value = "fileName", description = "the file name, cloud be null or empty means auto detect by url, for example '' or 'hello.txt'")
+            String fileName
     ) throws Exception {
         if (savePath == null) {
             savePath = "";
+        }
+        if (fileName == null) {
+            fileName = "";
         }
         URL href = new URL(url);
         String path = href.getPath();
@@ -70,11 +75,14 @@ public class WebDownloadTools {
 
         String suffix = "";
         String name = path;
+        if (fileName != null && !fileName.isEmpty()) {
+            name = fileName;
+        }
         String uid = UUID.randomUUID().toString().replace("-", "");
         idx = name.lastIndexOf(".");
         if (idx >= 0) {
-            name = name.substring(0, idx);
             suffix = name.substring(idx);
+            name = name.substring(0, idx);
         }
 
         if (localFileTools == null) {

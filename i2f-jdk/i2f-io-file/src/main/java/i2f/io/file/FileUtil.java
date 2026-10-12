@@ -392,7 +392,6 @@ public class FileUtil {
             File[] files = srcFile.listFiles();
             for (File item : files) {
                 File newFile = new File(dstFile, item.getName());
-                useDir(newFile);
                 copy(newFile, item, filter);
             }
         }
@@ -409,25 +408,17 @@ public class FileUtil {
         if (!file.exists()) {
             return;
         }
-        if (file.isFile()) {
+        if (file.isDirectory()) {
+            File[] subFiles = file.listFiles();
+            for (File item : subFiles) {
+                delete(item, filter);
+            }
             if (checkWhenFilter(file, filter)) {
                 file.delete();
             }
         }
-        if (file.isDirectory()) {
-            File[] subFiles = file.listFiles();
-            for (File item : subFiles) {
-                if (item.isFile()) {
-                    if (checkWhenFilter(item, filter)) {
-                        item.delete();
-                    }
-                } else if (item.isDirectory()) {
-                    delete(item, filter);
-                }
-            }
-            if (checkWhenFilter(file, filter)) {
-                file.delete();
-            }
+        if (checkWhenFilter(file, filter)) {
+            file.delete();
         }
     }
 
