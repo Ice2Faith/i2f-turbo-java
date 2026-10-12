@@ -64,6 +64,8 @@ public class FileToolUtils {
             ret.put("canExecute", file.canExecute());
             ret.put("canRead", file.canRead());
             ret.put("canWrite", file.canWrite());
+            long mtime = file.lastModified();
+            ret.put("lastModifiedTimeInMillSeconds", mtime);
         }
         return ret;
     }

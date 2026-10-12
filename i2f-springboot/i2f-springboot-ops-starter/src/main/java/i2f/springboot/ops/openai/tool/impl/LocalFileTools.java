@@ -16,9 +16,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author Ice2Faith
@@ -99,6 +101,42 @@ public class LocalFileTools {
 
     @Tool(
             tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "list files in path.\n" + PATH_PROMPT
+    )
+    public Map<String, Object> file_list(@ToolParam(value = "path", description = "list path, cloud be null means from root, e.g. / or /user")
+                                         String path,
+                                         @ToolParam(value = "regex", description = "match regex, java regex style(support '(?i)' prefix ignore case), cloud be null or empty means returns all, rule is `Matcher.find()`")
+                                         String regex) {
+        File file = getFile(path);
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("path", FileToolUtils.getFileStat(file, getRootFile()));
+
+        List<Map<String, Object>> results = new ArrayList<>();
+
+        Pattern pattern = null;
+        if (regex != null && !regex.isEmpty()) {
+            pattern = Pattern.compile(regex);
+        }
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File item : files) {
+                    if (pattern == null || pattern.matcher(item.getName()).find()) {
+                        results.add(FileToolUtils.getFileStat(item, getRootFile()));
+                    }
+                }
+            }
+        }
+
+        ret.put("results", results);
+
+        return ret;
+    }
+
+    @Tool(
+            tags = {
                     AiTags.WRITABLE_VALUE
             },
             description = "make directory.\n" + PATH_PROMPT
@@ -111,6 +149,39 @@ public class LocalFileTools {
         }
         return true;
     }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "move file or directory.\n" + PATH_PROMPT
+    )
+    public boolean file_move(@ToolParam(value = "srcPath", description = "source path, e.g. /user or /user/a/b ")
+                             String srcPath,
+                             @ToolParam(value = "dstPath", description = "target path, e.g. /user or /user/a/b ")
+                             String dstPath) {
+        File srcFile = getFile(srcPath);
+        File dstFile = getFile(dstPath);
+        FileUtil.move(dstFile, srcFile);
+        return true;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "copy file or directory.\n" + PATH_PROMPT
+    )
+    public boolean file_copy(@ToolParam(value = "srcPath", description = "source path, e.g. /user or /user/a/b ")
+                             String srcPath,
+                             @ToolParam(value = "dstPath", description = "target path, e.g. /user or /user/a/b ")
+                             String dstPath) {
+        File srcFile = getFile(srcPath);
+        File dstFile = getFile(dstPath);
+        FileUtil.copy(dstFile, srcFile);
+        return true;
+    }
+
 
     @Tool(
             tags = {
@@ -305,6 +376,46 @@ public class LocalFileTools {
         File file = getFile(path);
         FileUtil.moveToTrash(file);
         return true;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.READONLY_VALUE
+            },
+            description = "get file hash.\n" + PATH_PROMPT
+    )
+    public Map<String, Object> file_hash(@ToolParam(value = "path", description = "delete path, e.g. /user or /user/a/b ")
+                                         String path,
+                                         @ToolParam(value = "algo", description = "hash algorithm name in JCE, cloud be null means MD5 ")
+                                         String algo) throws Exception {
+        File file = getFile(path);
+        if (algo == null || algo.isEmpty()) {
+            algo = "MD5";
+        }
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("file", path);
+        ret.put("algo", algo);
+        ret.put("exists", file.exists());
+        if (file.exists()) {
+            ret.put("sizeInBytes", file.length());
+            byte[] buff = new byte[1024];
+            int len = 0;
+            MessageDigest digest = MessageDigest.getInstance(algo);
+            try (InputStream is = new FileInputStream(file)) {
+                while ((len = is.read(buff)) != -1) {
+                    digest.update(buff, 0, len);
+                }
+            }
+            byte[] ret = digest.digest();
+            StringBuilder builder = new StringBuilder();
+            for (byte bt : ret) {
+                builder.append(String.format("%02x", (int) (bt & 0x0ff)));
+            }
+            String hex = builder.toString();
+
+            ret.put("hexHash", hex);
+        }
+        return ret;
     }
 
     public void backupFile(File saveFile) throws IOException {
