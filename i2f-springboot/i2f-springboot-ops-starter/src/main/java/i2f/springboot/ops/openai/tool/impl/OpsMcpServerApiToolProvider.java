@@ -1,14 +1,18 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.mcp.server.manager.McpServerAdditionalToolProvider;
 import i2f.ai.std.tags.AiTags;
-import i2f.ai.std.tool.ToolCallContextHolder;
+import i2f.ai.std.tool.*;
 import i2f.ai.std.tool.annotations.Tool;
+import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.ai.std.tool.impl.ListableAppToolManager;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.lru.LruMap;
 import i2f.net.NetworkUtil;
 import i2f.net.http.data.HttpHeaders;
 import i2f.web.servlet.ServletFileUtil;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.core.env.Environment;
@@ -21,9 +25,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Ice2Faith
@@ -36,12 +42,67 @@ import java.util.concurrent.TimeUnit;
 @Data
 @NoArgsConstructor
 @Component
-public class OpsMcpServerApiToolProvider {
+public class OpsMcpServerApiToolProvider  implements McpServerAdditionalToolProvider {
     public static final String API_ROOT_PATH = "/mcp/api";
     public static final String API_TOKEN_HEADER = "X-MCP-TOKEN";
 
     @Autowired
     private Environment environment;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired(required = false)
+    private TmpFileTools tmpFileTools;
+
+    @Autowired(required = false)
+    private LocalFileTools localFileTools;
+
+    @Getter(AccessLevel.NONE)
+    @Setter(AccessLevel.NONE)
+    private volatile ToolManager holder;
+    private final ReentrantLock lock = new ReentrantLock();
+
+    public ToolManager getHolderManager() {
+        if (holder != null) {
+            return holder;
+        }
+        lock.lock();
+        try {
+            if (holder != null) {
+                return holder;
+            }
+            ListableAppToolManager ret = new ListableAppToolManager();
+            ret.setJsonSerializer(new JacksonJsonSerializer(objectMapper));
+            ret.setInvocationHandler(null);
+            Map<String, ToolRawDefinition> map = ToolRawHelper.parseTools(null, this);
+            ret.getTools().addAll(map.values());
+            for (ToolRawDefinition tool : ret.getTools()) {
+                tool.setName("ops." + tool.getName());
+                tool.getJsonSchema().setName(tool.getName());
+            }
+
+            holder = ret;
+            return holder;
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    @Override
+    public List<ToolDefinition> listTools() {
+        return getHolderManager().listTools();
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return getHolderManager().support(request);
+    }
+
+    @Override
+    public Object callTool(ToolBaseCallRequest request) throws Throwable {
+        return getHolderManager().callTool(request);
+    }
 
     public static final String GET_SERVER_GUIDE = "get_server_guide";
 
@@ -194,12 +255,6 @@ public class OpsMcpServerApiToolProvider {
         apiTokenCache.put(token, System.currentTimeMillis() + tokenExpireTsDuration);
         return true;
     }
-
-    @Autowired(required = false)
-    private TmpFileTools tmpFileTools;
-
-    @Autowired(required = false)
-    private LocalFileTools localFileTools;
 
     public static final String FILE_UPLOAD_PATH = "/file/upload";
 

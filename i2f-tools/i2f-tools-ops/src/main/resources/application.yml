@@ -93,6 +93,8 @@ i2f:
           # expose tools as mcp tools
           provider:
             enable: true
+            manager:
+              enable: false
             default-expose: true
             rules:
               - pattern: "**.webjs_*"
