@@ -42,7 +42,7 @@ import java.util.concurrent.locks.ReentrantLock;
 @Data
 @NoArgsConstructor
 @Component
-public class OpsMcpServerApiToolProvider  implements McpServerAdditionalToolProvider {
+public class OpsMcpServerApiToolProvider implements McpServerAdditionalToolProvider {
     public static final String API_ROOT_PATH = "/mcp/api";
     public static final String API_TOKEN_HEADER = "X-MCP-TOKEN";
 
@@ -194,18 +194,20 @@ public class OpsMcpServerApiToolProvider  implements McpServerAdditionalToolProv
             String host = httpHeaders.getFirstHeader("host");
             if (host != null && !host.isEmpty()) {
                 domain = host;
-                if(NetworkUtil.isLocalHost(host)){
+                if (NetworkUtil.isLocalHost(host)) {
                     /*language=markdown*/
-                    guide+="## 本机 MCP 服务\n" +
+                    guide += "## 本机 MCP 服务\n" +
                             "\n" +
                             "- 当前 MCP 服务与你是同一台机器\n" +
-                            "- 因此，可以不使用上传下载 API 端点进行文件交互";
-                }else{
+                            "- 因此，可以不使用上传下载 API 端点进行文件交互\n" +
+                            "- 直接使用文件操作类工具即可";
+                } else {
                     /*language=markdown*/
-                    guide+="## 远程 MCP 服务\n" +
+                    guide += "## 远程 MCP 服务\n" +
                             "\n" +
                             "- 当前 MCP 服务与你不是同一台机器\n" +
-                            "- 因此，如果要进行文件交互，必须通过 API 端点进行交互";
+                            "- 因此，如果要进行文件交互，必须通过 API 端点进行交互\n" +
+                            "- 文件操作类工具是相对本MCP服务器的";
                 }
             }
         }
