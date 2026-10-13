@@ -12,6 +12,7 @@ import i2f.net.http.data.HttpHeaders;
 import i2f.resp.ApiResp;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.springboot.ai.mcp.server.provider.McpServerRequestContextUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +39,9 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
 
     @GetMapping(HttpSimpleMcpConstants.URL_PATH_GET_TOOLS)
     public ApiResp<?> getTools(HttpServletRequest request) {
+        // 填充请求上下文
+        McpServerRequestContextUtil.fillToolContext(request);
+
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
         mcpRequest.setPayloadDto(null);
@@ -57,8 +61,11 @@ public class SpringHttpSimpleMcpController implements BaseMutator<SpringHttpSimp
     }
 
     @GetMapping(HttpSimpleMcpConstants.URL_PATH_CALL_TOOL)
-    public ApiResp<?> getTools(HttpServletRequest request,
+    public ApiResp<?> callTool(HttpServletRequest request,
                                @RequestBody McpCallPayloadDto payloadDto) {
+        // 填充请求上下文
+        McpServerRequestContextUtil.fillToolContext(request);
+
         HttpSimpleMcpRequest mcpRequest = new HttpSimpleMcpRequest();
         mcpRequest.setHeaders(new HttpHeaders());
         mcpRequest.setPayloadDto(payloadDto);

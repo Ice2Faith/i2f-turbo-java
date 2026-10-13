@@ -23,6 +23,7 @@ import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.MvcJsonRpcResponse;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.ServerJsonRpcRequestV2026;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties;
+import i2f.springboot.ai.mcp.server.provider.McpServerRequestContextUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -92,6 +93,9 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
     public MvcJsonRpcResponse<JsonRpcResponseV2026<?>> mcp(ServerJsonRpcRequestV2026 payload,
                                                            HttpServletRequest request) {
         try {
+            // 填充请求上下文
+            McpServerRequestContextUtil.fillToolContext(request);
+
             // 如果配置了身份验证器，则进行验证身份
             if (streamMcpServerAuthFilter != null) {
                 HttpHeaders filterHeaders = HttpHeaders.create();

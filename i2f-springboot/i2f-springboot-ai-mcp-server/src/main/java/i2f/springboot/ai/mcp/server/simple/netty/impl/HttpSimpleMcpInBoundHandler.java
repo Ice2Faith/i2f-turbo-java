@@ -12,6 +12,7 @@ import i2f.net.http.data.HttpHeaders;
 import i2f.resp.ApiResp;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.springboot.ai.mcp.server.provider.McpServerRequestContextUtil;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -36,6 +37,8 @@ public class HttpSimpleMcpInBoundHandler extends SimpleChannelInboundHandler<Ful
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
+        McpServerRequestContextUtil.fillToolContext(ctx,request);
+
         // 1. 获取请求的 URI 和 Method
         String uri = request.uri();
         HttpMethod method = request.method();

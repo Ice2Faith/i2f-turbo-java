@@ -16,6 +16,7 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.data.ServerJsonRpcRequest;
 import i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties;
+import i2f.springboot.ai.mcp.server.provider.McpServerRequestContextUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -63,6 +64,9 @@ public class SpringHttpStreamMcpController implements BaseMutator<SpringHttpStre
                                   HttpServletRequest request,
                                   HttpServletResponse response) {
         try {
+            // 填充请求上下文
+            McpServerRequestContextUtil.fillToolContext(request);
+
             // 如果配置了身份验证器，则进行验证身份
             if (streamMcpServerAuthFilter != null) {
                 HttpHeaders filterHeaders = HttpHeaders.create();
