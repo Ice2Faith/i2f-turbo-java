@@ -159,7 +159,7 @@ public class LocalFileTools {
     public boolean file_move(@ToolParam(value = "srcPath", description = "source path, e.g. /user or /user/a/b ")
                              String srcPath,
                              @ToolParam(value = "dstPath", description = "target path, e.g. /user or /user/a/b ")
-                             String dstPath) {
+                             String dstPath) throws IOException {
         File srcFile = getFile(srcPath);
         File dstFile = getFile(dstPath);
         FileUtil.move(dstFile, srcFile);
@@ -175,7 +175,7 @@ public class LocalFileTools {
     public boolean file_copy(@ToolParam(value = "srcPath", description = "source path, e.g. /user or /user/a/b ")
                              String srcPath,
                              @ToolParam(value = "dstPath", description = "target path, e.g. /user or /user/a/b ")
-                             String dstPath) {
+                             String dstPath) throws IOException {
         File srcFile = getFile(srcPath);
         File dstFile = getFile(dstPath);
         FileUtil.copy(dstFile, srcFile);
@@ -406,9 +406,9 @@ public class LocalFileTools {
                     digest.update(buff, 0, len);
                 }
             }
-            byte[] ret = digest.digest();
+            byte[] arr = digest.digest();
             StringBuilder builder = new StringBuilder();
-            for (byte bt : ret) {
+            for (byte bt : arr) {
                 builder.append(String.format("%02x", (int) (bt & 0x0ff)));
             }
             String hex = builder.toString();

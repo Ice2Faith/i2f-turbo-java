@@ -364,8 +364,36 @@ public class FileUtil {
     }
 
     public static void move(File dstFile, File srcFile) throws IOException {
-        copy(dstFile, srcFile, null);
+        move(dstFile, srcFile, null);
         delete(srcFile, null);
+    }
+
+    public static void move(File dstFile, File srcFile, Predicate<File> filter) throws IOException {
+        if (srcFile == null || dstFile == null) {
+            return;
+        }
+        if (!srcFile.exists()) {
+            return;
+        }
+        if (srcFile.isFile()) {
+            if (checkWhenFilter(srcFile, filter)) {
+                useParentDir(dstFile);
+                if (!srcFile.renameTo(dstFile) || !dstFile.exists()) {
+                    InputStream is = new FileInputStream(srcFile);
+                    OutputStream os = new FileOutputStream(dstFile);
+                    StreamUtil.streamCopy(is, os, true);
+                    srcFile.delete();
+                }
+            }
+        } else if (srcFile.isDirectory()) {
+            useDir(dstFile);
+            File[] files = srcFile.listFiles();
+            for (File item : files) {
+                File newFile = new File(dstFile, item.getName());
+                move(newFile, item, filter);
+            }
+            srcFile.delete();
+        }
     }
 
     public static void copy(File dstFile, File srcFile) throws IOException {
@@ -382,13 +410,12 @@ public class FileUtil {
         if (srcFile.isFile()) {
             if (checkWhenFilter(srcFile, filter)) {
                 useParentDir(dstFile);
-                if (!srcFile.renameTo(dstFile) || !dstFile.exists()) {
-                    InputStream is = new FileInputStream(srcFile);
-                    OutputStream os = new FileOutputStream(dstFile);
-                    StreamUtil.streamCopy(is, os, true);
-                }
+                InputStream is = new FileInputStream(srcFile);
+                OutputStream os = new FileOutputStream(dstFile);
+                StreamUtil.streamCopy(is, os, true);
             }
         } else if (srcFile.isDirectory()) {
+            useDir(dstFile);
             File[] files = srcFile.listFiles();
             for (File item : files) {
                 File newFile = new File(dstFile, item.getName());
