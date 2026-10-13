@@ -32,8 +32,10 @@ function createStoreDataMixin() {
                     })
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
-                    obj.metas.cert = '';
-                    obj.form.meta.apiKey = '';
+                    if(!isIntranetPage()) {
+                        obj.metas.cert = '';
+                        obj.form.meta.apiKey = '';
+                    }
                     let content = JSON.stringify(obj);
                     localStorage.setItem(this.getDataKey(), content);
                 } catch (e) {

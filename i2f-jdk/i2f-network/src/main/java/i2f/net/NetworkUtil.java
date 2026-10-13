@@ -4,10 +4,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Collectors;
 
 /**
  * @author Ice2Faith
@@ -177,5 +179,170 @@ public class NetworkUtil {
                 .thenComparing(IpEntry::isIpv6)
         );
         return ret;
+    }
+
+    /**
+     * 判断是否是内网网段的IPV4地址
+     *
+     * @param ip 地址
+     * @return
+     */
+    public static boolean isPrivateIpv4(String ip) {
+        if (ip == null || ip.isEmpty()) {
+            return false;
+        }
+        String[] arr = ip.split("\\.");
+        List<Integer> parts = Arrays.stream(arr)
+                .map(v -> {
+                    try {
+                        return Integer.parseInt(v);
+                    } catch (Exception e) {
+                    }
+                    return null;
+                }).collect(Collectors.toList());
+        if (parts.size() != 4 && parts.stream().anyMatch(v -> v == null || v < 0 || v > 255)) {
+            return false;
+        }
+        int a = parts.get(0);
+        int b = parts.get(1);
+
+
+        // 10.0.0.0/8
+        if (a == 10) {
+            return true;
+        }
+
+        // 172.16.0.0/12
+        if (a == 172 && b >= 16 && b <= 31) {
+            return true;
+        }
+
+        // 192.168.0.0/16
+        if (a == 192 && b == 168) {
+            return true;
+        }
+
+        // 127.0.0.0/8
+        if (a == 127) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * 判断是否内内网地址
+     *
+     * @param hostname
+     * @return
+     */
+    public static boolean isIntranetHost(String hostname) {
+        if (hostname == null || hostname.isEmpty()) {
+            return false;
+        }
+        // localhost / 127.0.0.1
+        if (Objects.equals(hostname, "localhost")
+                || Objects.equals(hostname, "127.0.0.1")
+                || Objects.equals(hostname, "[::1]")) {
+            return true;
+        }
+
+        // IPv6 形式
+        if (hostname.startsWith("[")
+                && hostname.endsWith("]")) {
+            String ip = hostname.substring(1, hostname.length() - 1);
+            if (ip.equals("::1")) {
+                return true;
+            }
+            if (ip.startsWith("fe80:")) {
+                return true;
+            } // 链路本地
+            if (ip.startsWith("fc") || ip.startsWith("fd")) {
+                return true;
+            } // ULA
+            return false;
+        }
+
+        // 普通 IPv4
+        if (hostname.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$")) {
+            return isPrivateIpv4(hostname);
+        }
+
+        // 本机地址
+        if (isLocalHost(hostname)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected static CopyOnWriteArrayList<String> localHostNameList = new CopyOnWriteArrayList<>();
+    protected static AtomicLong localHostNameExpireTs = new AtomicLong(0);
+    protected static ReentrantLock lock = new ReentrantLock();
+
+    /**
+     * 获取本机的所有主机名或地址
+     *
+     * @return
+     */
+    public static List<String> getLocalHostNames() {
+        if (System.currentTimeMillis() < localHostNameExpireTs.get()) {
+            return new ArrayList<>(localHostNameList);
+        }
+        lock.lock();
+        try {
+            List<String> list = new ArrayList<>();
+            try {
+                Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+                while (networkInterfaces.hasMoreElements()) {
+                    NetworkInterface networkInterface = networkInterfaces.nextElement();
+                    try {
+                        Enumeration<InetAddress> inetAddresses = networkInterface.getInetAddresses();
+                        while (inetAddresses.hasMoreElements()) {
+                            InetAddress inetAddress = inetAddresses.nextElement();
+                            list.add(inetAddress.getCanonicalHostName());
+                            list.add(inetAddress.getHostName());
+                            list.add(inetAddress.getHostAddress());
+                        }
+                    } catch (Exception e) {
+                        // ignore
+                    }
+                }
+            } catch (Exception e) {
+                // ignore
+            }
+            localHostNameList.clear();
+            localHostNameList.addAll(list);
+            localHostNameExpireTs.set(System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(3));
+        } finally {
+            lock.unlock();
+        }
+        return new ArrayList<>(localHostNameList);
+    }
+
+    /**
+     * 判断是否是本机
+     *
+     * @param hostname
+     * @return
+     */
+    public static boolean isLocalHost(String hostname) {
+        if (hostname == null || hostname.isEmpty()) {
+            return false;
+        }
+        List<String> localHostNames = getLocalHostNames();
+        boolean ret = localHostNames.contains(hostname);
+        if (ret) {
+            return true;
+        }
+        try {
+            // 通过主机名，获取 IP 判断是否是本机的 IP
+            InetAddress address = InetAddress.getByName(hostname);
+            String ip = address.getHostAddress();
+            return localHostNames.contains(ip);
+        } catch (UnknownHostException e) {
+            // ignore
+        }
+        return false;
     }
 }

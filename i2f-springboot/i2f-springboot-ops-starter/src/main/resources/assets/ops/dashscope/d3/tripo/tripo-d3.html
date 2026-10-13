@@ -10,6 +10,7 @@
     <title>Ops - Tripo 3D</title>
     <link rel="icon" type="image/png" href="../../../favicon.png">
     <script src="../../../lib/vue/vue-2.js"></script>
+    <script src="../../common/js/IpUtils.js"></script>
     <script src="../../../lib/moment/moment-2.24.0.js"></script>
     <script src="../../../lib/element-ui/element-ui-2.15.10.js"></script>
     <link rel="stylesheet" href="../../../lib/element-ui/element-ui-2.15.10.css"/>
@@ -418,8 +419,10 @@
                     })
                     let json = JSON.stringify(data);
                     let obj = JSON.parse(json);
-                    obj.metas.cert = '';
-                    obj.form.meta.apiKey = '';
+                    if(!isIntranetPage()) {
+                        obj.metas.cert = '';
+                        obj.form.meta.apiKey = '';
+                    }
                     let content = JSON.stringify(obj);
                     localStorage.setItem('ops:dashscope:d3:tripo-3d:data', content);
                 } catch (e) {
