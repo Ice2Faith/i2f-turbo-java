@@ -145,7 +145,7 @@ public class OpsMcpServerApiToolProvider implements McpServerAdditionalToolProvi
                 "\n" +
                 "- 按以下顺序进行探测确认\n" +
                 "    - 本文档返回的接入点\n" +
-                "    - 读取客户端 MCP 服务配置\n" +
+                "    - 主机的其他可用网卡的地址\n" +
                 "    - netstat 查客户端进程的连接表\n" +
                 "    - 调 net_info 枚举网卡后逐候选探测\n" +
                 "    - 询问用户：'你配置这个 MCP 时用的 URL 的 host:port 是什么?'\n" +
@@ -200,7 +200,7 @@ public class OpsMcpServerApiToolProvider implements McpServerAdditionalToolProvi
                             "\n" +
                             "- 当前 MCP 服务与你是同一台机器\n" +
                             "- 因此，可以不使用上传下载 API 端点进行文件交互\n" +
-                            "- 直接使用文件操作类工具即可";
+                            "- 直接使用文件操作类工具即可（注意工作区不同）";
                 } else {
                     /*language=markdown*/
                     guide += "## 远程 MCP 服务\n" +
