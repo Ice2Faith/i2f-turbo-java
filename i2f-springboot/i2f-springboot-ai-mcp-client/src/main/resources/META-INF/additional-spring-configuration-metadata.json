@@ -19,6 +19,11 @@
       "name": "i2f.springboot.ai.mcp.client.official.v2026.stream",
       "type": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator",
+      "type": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration"
     }
   ],
   "properties": [
@@ -48,6 +53,13 @@
       "type": "java.lang.Boolean",
       "description": "enable ai stream mcp client.",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai mcp client creator.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration",
       "defaultValue": true
     }
   ],

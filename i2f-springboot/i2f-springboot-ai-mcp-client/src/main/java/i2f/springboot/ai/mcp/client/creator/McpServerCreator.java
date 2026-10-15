@@ -1,8 +1,5 @@
 package i2f.springboot.ai.mcp.client.creator;
 
-import data.McpServerItemProperties;
-import data.McpServerMetaProperties;
-import data.McpServerProperties;
 import i2f.ai.rest.mcp.simple.client.HttpSimpleMcpClientToolProvider;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.io.stream.StreamUtil;
@@ -10,7 +7,13 @@ import i2f.match.regex.RegexUtil;
 import i2f.net.http.data.HttpHeaders;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties;
+import i2f.springboot.ai.mcp.client.creator.data.McpServerMetaProperties;
+import i2f.springboot.ai.mcp.client.creator.data.McpServerProperties;
+import i2f.springboot.ai.mcp.client.official.v2024.stdio.StdioMcpClient;
+import i2f.springboot.ai.mcp.client.official.v2024.stdio.provider.StdioJsonRpcMcpClientToolProvider;
 import i2f.springboot.ai.mcp.client.official.v2024.stream.provider.StreamJsonRpcMcpClientToolProvider;
+import i2f.springboot.ai.mcp.client.official.v2026.stdio.provider.StdioJsonRpcMcpClientV2026ToolProvider;
 import i2f.springboot.ai.mcp.client.official.v2026.stream.provider.StreamJsonRpcMcpClientV2026ToolProvider;
 
 import java.io.File;

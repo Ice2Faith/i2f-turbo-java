@@ -1,4 +1,4 @@
-package i2f.springboot.ai.mcp.client.official.v2024.data;
+package i2f.springboot.ai.mcp.client.creator.data;
 
 import i2f.ai.std.tags.AiTagRule;
 import lombok.Data;

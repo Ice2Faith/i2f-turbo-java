@@ -1,6 +1,6 @@
 package i2f.springboot.ai.mcp.client.official.v2024.stdio;
 
-import com.newland.bi3.os.OsUtil;
+import i2f.os.OsUtil;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.serialize.str.json.impl.Json2Serializer;
 
