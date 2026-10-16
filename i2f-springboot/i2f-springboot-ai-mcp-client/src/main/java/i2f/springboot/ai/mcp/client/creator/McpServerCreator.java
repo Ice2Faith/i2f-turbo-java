@@ -30,6 +30,27 @@ import java.util.Map;
  * @desc
  */
 public class McpServerCreator {
+    public void logInfo(String message, Throwable e) {
+        System.out.println("[INFO ]" + message);
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    public void logWarn(String message, Throwable e) {
+        System.out.println("[WARN ]" + message);
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
+    public void logError(String message, Throwable e) {
+        System.err.println("[ERROR]" + message);
+        if (e != null) {
+            e.printStackTrace();
+        }
+    }
+
     public IJsonSerializer jsonSerializer() {
         return new Json2Serializer();
     }
@@ -96,10 +117,12 @@ public class McpServerCreator {
             try {
                 McpToolProvider provider = create(entry.getKey(), value);
                 if (provider != null) {
+                    logWarn("mcp provider [" + entry.getKey() + "] cannot created, jump!", null);
                     ret.add(provider);
                 }
             } catch (Exception e) {
                 // ignore
+                logWarn("mcp provider [" + entry.getKey() + "] cannot created, jump!", e);
             }
         }
         return ret;
@@ -108,31 +131,37 @@ public class McpServerCreator {
     public McpToolProvider create(String name, McpServerItemProperties properties) {
         McpServerItemProperties.Type type = properties.getType();
         if (type == null) {
+            logWarn("mcp provider [" + name + "] missing `type`, jump!", null);
             return null;
         }
         boolean disabled = properties.isDisabled();
         if (disabled) {
+            logWarn("mcp provider [" + name + "] has disabled, jump!", null);
             return null;
         }
         if (type == McpServerItemProperties.Type.stdio) {
             String command = properties.getCommand();
             if (command == null || command.isEmpty()) {
+                logWarn("mcp provider [" + name + "] is `stdio` but not setting `command`, jump!", null);
                 return null;
             }
             return createStdio(name, properties);
         } else if (type == McpServerItemProperties.Type.http) {
             String url = properties.getUrl();
             if (url == null || url.isEmpty()) {
+                logWarn("mcp provider [" + name + "] is `http` but not setting `url`, jump!", null);
                 return null;
             }
             return createHttp(name, properties);
         } else if (type == McpServerItemProperties.Type.simple) {
             String url = properties.getUrl();
             if (url == null || url.isEmpty()) {
+                logWarn("mcp provider [" + name + "] is `http` but not setting `url`, jump!", null);
                 return null;
             }
             return createSimple(name, properties);
         }
+        logWarn("mcp provider [" + name + "] is a un-support `type`, jump!", null);
         return null;
     }
 
@@ -194,6 +223,7 @@ public class McpServerCreator {
             return provider;
         } catch (Exception e) {
             // ignore
+            logWarn("mcp provider [" + name + "] try v2026 mcp protocol failure!", e);
         }
         if (stdioClient != null) {
             stdioClient.close();
@@ -220,8 +250,9 @@ public class McpServerCreator {
             // verify
             provider.listTools();
             return provider;
-        } catch (IOException ex) {
+        } catch (IOException e) {
             // ignore
+            logWarn("mcp provider [" + name + "] try v2024 mcp protocol failure!", e);
         }
         return null;
     }
@@ -269,42 +300,49 @@ public class McpServerCreator {
             return provider;
         } catch (Exception e) {
             // ignore
+            logWarn("mcp provider [" + name + "] try v2026 mcp protocol failure!", e);
         }
         return null;
     }
 
     public McpToolProvider createHttpV2024(String name, McpServerItemProperties properties) {
-        StreamJsonRpcMcpClientToolProvider provider = new StreamJsonRpcMcpClientToolProvider();
-        provider.setName(name);
-        if (properties.getName() != null && !properties.getName().isEmpty()) {
-            provider.setName(processVariable(properties.getName()));
-        }
-        provider.setDescription(processVariable(properties.getDescription()));
-        provider.setJsonSerializer(jsonSerializer());
-        McpServerMetaProperties meta = properties.getMeta();
-        if (meta != null) {
-            provider.setTagRules(meta.getTagRules());
-        }
-        provider.setBaseUrl(processVariable(properties.getUrl()));
-        provider.setHeaders(HttpHeaders.create().apply(h -> {
-            Map<String, Object> headers = properties.getHeaders();
-            if (headers != null) {
-                for (Map.Entry<String, Object> entry : headers.entrySet()) {
-                    String key = entry.getKey();
-                    if (key == null || key.isEmpty()) {
-                        continue;
-                    }
-                    Object value = entry.getValue();
-                    if (value == null) {
-                        value = "";
-                    }
-                    h.add(processVariable(key), processVariable(String.valueOf(value)));
-                }
+        try {
+            StreamJsonRpcMcpClientToolProvider provider = new StreamJsonRpcMcpClientToolProvider();
+            provider.setName(name);
+            if (properties.getName() != null && !properties.getName().isEmpty()) {
+                provider.setName(processVariable(properties.getName()));
             }
-        }));
-        // verify
-        provider.listTools();
-        return provider;
+            provider.setDescription(processVariable(properties.getDescription()));
+            provider.setJsonSerializer(jsonSerializer());
+            McpServerMetaProperties meta = properties.getMeta();
+            if (meta != null) {
+                provider.setTagRules(meta.getTagRules());
+            }
+            provider.setBaseUrl(processVariable(properties.getUrl()));
+            provider.setHeaders(HttpHeaders.create().apply(h -> {
+                Map<String, Object> headers = properties.getHeaders();
+                if (headers != null) {
+                    for (Map.Entry<String, Object> entry : headers.entrySet()) {
+                        String key = entry.getKey();
+                        if (key == null || key.isEmpty()) {
+                            continue;
+                        }
+                        Object value = entry.getValue();
+                        if (value == null) {
+                            value = "";
+                        }
+                        h.add(processVariable(key), processVariable(String.valueOf(value)));
+                    }
+                }
+            }));
+            // verify
+            provider.listTools();
+            return provider;
+        } catch (Exception e) {
+            // ignore
+            logWarn("mcp provider [" + name + "] try v2024 mcp protocol failure!", e);
+        }
+        return null;
     }
 
     public McpToolProvider createHttp(String name, McpServerItemProperties properties) {

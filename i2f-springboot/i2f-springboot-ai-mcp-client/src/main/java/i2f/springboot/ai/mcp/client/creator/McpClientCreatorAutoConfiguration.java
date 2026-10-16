@@ -3,9 +3,10 @@ package i2f.springboot.ai.mcp.client.creator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
+import i2f.resources.ResourceUtil;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.springboot.ai.mcp.client.creator.components.McpClientCreatorMcpToolProviderFactoryBean;
-import i2f.springboot.ai.mcp.client.creator.data.McpServerProperties ;
+import i2f.springboot.ai.mcp.client.creator.data.McpServerProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -21,6 +22,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -36,7 +41,45 @@ import java.util.List;
 @Slf4j
 @Data
 public class McpClientCreatorAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+    public static final String MCP_JSON_PATH = "mcp/mcp.json";
     protected ApplicationContext applicationContext;
+
+    public static McpServerProperties readMcpJson() throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+
+        File file = new File("./" + MCP_JSON_PATH);
+        if (file.exists()) {
+            McpServerProperties ret = mapper.readValue(file, McpServerProperties.class);
+            if (ret != null) {
+                if (ret.getMcpServers() != null && !ret.getMcpServers().isEmpty()) {
+                    return ret;
+                }
+                if (ret.getServers() != null && !ret.getServers().isEmpty()) {
+                    return ret;
+                }
+            }
+        }
+        if (!file.exists()) {
+            file.getParentFile().mkdirs();
+            McpServerProperties prop = new McpServerProperties();
+            prop.setMcpServers(new HashMap<>());
+            mapper.writeValue(file, prop);
+        }
+
+        InputStream is = ResourceUtil.getClasspathResourceAsStream(MCP_JSON_PATH);
+        if (is != null) {
+            McpServerProperties ret = mapper.readValue(is, McpServerProperties.class);
+            if (ret != null) {
+                if (ret.getMcpServers() != null && !ret.getMcpServers().isEmpty()) {
+                    return ret;
+                }
+                if (ret.getServers() != null && !ret.getServers().isEmpty()) {
+                    return ret;
+                }
+            }
+        }
+        return null;
+    }
 
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
@@ -57,7 +100,54 @@ public class McpClientCreatorAutoConfiguration implements ApplicationContextAwar
                     }
                     return super.variableReplacer(variable);
                 }
+
+                @Override
+                public void logInfo(String message, Throwable e) {
+                    if (e != null) {
+                        log.info(message, e);
+                    } else {
+                        log.info(message);
+                    }
+                }
+
+                @Override
+                public void logWarn(String message, Throwable e) {
+                    if (e != null) {
+                        log.warn(message, e);
+                    } else {
+                        log.warn(message);
+                    }
+                }
+
+                @Override
+                public void logError(String message, Throwable e) {
+                    if (e != null) {
+                        log.error(message, e);
+                    } else {
+                        log.error(message);
+                    }
+                }
             };
+            try {
+                McpServerProperties jsonProp = readMcpJson();
+                if (jsonProp != null) {
+                    if (jsonProp.getMcpServers() != null) {
+                        if (proxyProperties.getMcpServers() == null) {
+                            proxyProperties.setMcpServers(new HashMap<>());
+                        }
+                        proxyProperties.getMcpServers().putAll(jsonProp.getMcpServers());
+                    }
+                    if (jsonProp.getServers() != null) {
+                        if (proxyProperties.getServers() == null) {
+                            proxyProperties.setServers(new HashMap<>());
+                        }
+                        proxyProperties.getServers().putAll(jsonProp.getServers());
+                    }
+                }
+            } catch (Exception e) {
+                // ignore
+                log.warn("read `" + MCP_JSON_PATH + "` failure, jump!");
+            }
             List<McpToolProvider> providers = creator.create(proxyProperties);
             for (McpToolProvider provider : providers) {
                 String name = provider.getName();
