@@ -3,6 +3,7 @@ package i2f.turbo.idea.plugin.jdbc.procedure.reference;
 import com.intellij.lang.ASTNode;
 import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.*;
@@ -38,10 +39,19 @@ public class XmlTagReference extends PsiReferenceBase<XmlTag> implements PsiPoly
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
-                    ApplicationUtil.tryRunReadAction(() -> {
-                        scanXmlTagRefImpl();
-                        return null;
-                    });
+                    // 队列为空时不必获取读锁：tryRunReadAction 在写操作期间拿不到锁会抛
+                    // CannotRunReadActionException，原实现每秒无条件触发一次。
+                    if (!xmlTagRefImplQueue.isEmpty()) {
+                        ApplicationUtil.tryRunReadAction(() -> {
+                            scanXmlTagRefImpl();
+                            return null;
+                        });
+                    }
+                } catch (ProcessCanceledException e) {
+                    // 控制流异常：CannotRunReadActionException 是 ProcessCanceledException 的子类，
+                    // 拿不到读锁或任务被取消都属于正常工作状态。
+                    // 记录它们会让平台生成完整异常栈（Logger#ensureNotControlFlow），
+                    // 在高频轮询里等于持续制造对象与日志 I/O。
                 } catch (Throwable e) {
                     log.warn(e.getMessage(), e);
                 }

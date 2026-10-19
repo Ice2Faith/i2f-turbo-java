@@ -5,6 +5,7 @@ import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.lang.Language;
 import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
@@ -121,10 +122,15 @@ public class CompletionHelper {
         Thread thread = new Thread(() -> {
             while (true) {
                 try {
-                    ApplicationUtil.tryRunReadAction(() -> {
-                        scanXmlFileFunctions();
-                        return null;
-                    });
+                    // 队列为空时不必获取读锁，理由同 XmlTagReference。
+                    if (!xmlFileFunctionsQueue.isEmpty()) {
+                        ApplicationUtil.tryRunReadAction(() -> {
+                            scanXmlFileFunctions();
+                            return null;
+                        });
+                    }
+                } catch (ProcessCanceledException e) {
+                    // 控制流异常，属于正常状态，不记录日志。
                 } catch (Throwable e) {
                     log.warn(e.getMessage(), e);
                 }

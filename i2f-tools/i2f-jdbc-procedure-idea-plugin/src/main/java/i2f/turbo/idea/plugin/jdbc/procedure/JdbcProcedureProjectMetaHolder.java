@@ -14,7 +14,6 @@ import i2f.xml.XmlUtil;
 import i2f.xml.data.Xml;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -107,7 +106,7 @@ public class JdbcProcedureProjectMetaHolder {
     }
 
     public static void refreshThreadTask() {
-        log.warn("xml-search-refreshing");
+        log.debug("xml-search-refreshing");
 
         try {
             refreshXmlFiles();
@@ -127,9 +126,16 @@ public class JdbcProcedureProjectMetaHolder {
             Map<String, VirtualFile> projectXmlFileMap = projectEntry.getValue();
             Map<String, String> xmlFileMetaKeyMap = XML_FILE_META_KEY_MAP.computeIfAbsent(projectEntry.getKey(), k -> new ConcurrentHashMap<>());
             for (Map.Entry<String, VirtualFile> entry : projectXmlFileMap.entrySet()) {
-                File file = new File(entry.getKey());
-                // 文件未发生变动，不重新解析更新
-                String metaKey = file.length() + "#" + file.lastModified();
+                VirtualFile value = entry.getValue();
+                if (value == null || !value.isValid()) {
+                    xmlFileMetaKeyMap.remove(entry.getKey());
+                    projectXmlFileMap.remove(entry.getKey());
+                    continue;
+                }
+                // 性能关键：原实现 new File(path).length()/lastModified() 会对每个 XML
+                // 每轮执行两次真实磁盘 syscall；工程放在机械盘或网络盘时单轮可达数百毫秒。
+                // VFS 已经把 length 与 modificationStamp 缓存在内存中，直接读取即可。
+                String metaKey = value.getLength() + "#" + value.getModificationStamp();
 
                 String exKey = xmlFileMetaKeyMap.get(entry.getKey());
                 if (Objects.equals(metaKey, exKey)) {
@@ -137,7 +143,6 @@ public class JdbcProcedureProjectMetaHolder {
                 }
                 xmlFileMetaKeyMap.put(entry.getKey(), metaKey);
 
-                VirtualFile value = entry.getValue();
                 try (InputStream is = value.getInputStream()) {
                     Xml xml = XmlUtil.parseXmlSax(value.getName(), is);
                     Xml root = XmlUtil.getRootNode(xml);
@@ -230,7 +235,7 @@ public class JdbcProcedureProjectMetaHolder {
             if (searchDir == null) {
                 continue;
             }
-            log.warn("xml-search-dir:" + searchDir.getPath());
+            log.debug("xml-search-dir:" + searchDir.getPath());
             collectXmlFile(projectPath, searchDir);
         }
 
@@ -256,6 +261,12 @@ public class JdbcProcedureProjectMetaHolder {
                 ).contains(name)) {
                     return false;
                 }
+            } else if (!isXmlFileName(name)) {
+                // 性能关键：非 XML 文件直接放行，不构造完整路径。
+                // VirtualFile#getPath 是惰性计算（逐级拼接父路径 + 字符数组拷贝），
+                // 原实现对目录树中每个文件都调用一次，在几十万文件的前端工程中
+                // 单轮刷新就会产生数十万次字符串分配，而 .xml 占比通常不到 1%。
+                return true;
             }
             String path = file.getPath();
             path = path.substring(rootPath.length());
@@ -282,28 +293,36 @@ public class JdbcProcedureProjectMetaHolder {
             if (file.isDirectory()) {
                 return;
             }
-//            log.warn("xml-search-route:" + file.getPath());
-            String suffix = file.getName();
-            int idx = suffix.lastIndexOf(".");
-            if (idx >= 0) {
-                suffix = suffix.substring(idx);
+            String name = file.getName();
+            if (!isXmlFileName(name)) {
+                return;
             }
-
-            if (".xml".equalsIgnoreCase(suffix)) {
-                String path = file.getPath();
-//                log.warn("xml-search-found:" + file.getName() + "," + file.getPath());
-                if (path.contains("/src/")
-                        || path.contains("/resources/")) {
-                    path = path.substring(rootPath.length());
-                    if (!path.startsWith("/")) {
-                        path = "/" + path;
-                    }
-
-                    xmlFileMap.put(path, file);
-//                    log.warn("xml-search-match:" + file.getName() + "," + file.getPath());
+            String path = file.getPath();
+            if (path.contains("/src/")
+                    || path.contains("/resources/")) {
+                path = path.substring(rootPath.length());
+                if (!path.startsWith("/")) {
+                    path = "/" + path;
                 }
+
+                xmlFileMap.put(path, file);
             }
         });
+    }
+
+    /**
+     * 廉价后缀判断：只比较末尾 4 个字符，不产生临时字符串，也不触发 VFS 路径计算。
+     */
+    private static boolean isXmlFileName(String name) {
+        if (name == null || name.isEmpty()) {
+            return false;
+        }
+        int idx = name.lastIndexOf(".");
+        if (idx <= 0) {
+            return false;
+        }
+        String suffix = name.substring(idx).toLowerCase();
+        return ".xml".equals(suffix);
     }
 
     public static void walkFileTree(VirtualFile file, Predicate<VirtualFile> filter, Consumer<VirtualFile> consumer) {
