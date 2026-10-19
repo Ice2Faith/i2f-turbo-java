@@ -20,10 +20,27 @@ import java.util.stream.Collectors;
 public class ProjectInjectConfig {
 
     protected static final LruMap<String, Map.Entry<Long, List<LanguageInjectItem>>> CACHE_INJECT_CONFIG = new LruMap<>(30);
+    /**
+     * 按 type 再缓存一层：注入器会对「每一个 XML 属性值 / YAML 标量 / JSON 字符串」
+     * 调用本方法，原来的 1.2s TTL + 每次 stream 过滤会产生大量重复 I/O 与临时对象。
+     */
+    protected static final LruMap<String, Map.Entry<Long, List<LanguageInjectItem>>> CACHE_INJECT_CONFIG_TYPE = new LruMap<>(60);
+    protected static final long CACHE_TTL_MS = 30_000L;
 
     public static List<LanguageInjectItem> getProjectInjectConfigForType(Project project, String type) {
-        List<LanguageInjectItem> list = getProjectInjectConfig(project);
-        return list.stream().filter(e -> e.getType().equalsIgnoreCase(type)).collect(Collectors.toList());
+        if (type == null) {
+            return new ArrayList<>();
+        }
+        String key = project.getProjectFilePath() + "#" + type;
+        Map.Entry<Long, List<LanguageInjectItem>> cached = CACHE_INJECT_CONFIG_TYPE.get(key);
+        if (cached != null && cached.getKey() >= System.currentTimeMillis()) {
+            return cached.getValue();
+        }
+        List<LanguageInjectItem> list = getProjectInjectConfig(project).stream()
+                .filter(e -> type.equalsIgnoreCase(e.getType()))
+                .collect(Collectors.toList());
+        CACHE_INJECT_CONFIG_TYPE.put(key, new AbstractMap.SimpleEntry<>(System.currentTimeMillis() + CACHE_TTL_MS, list));
+        return list;
     }
 
     public static List<LanguageInjectItem> getProjectInjectConfig(Project project) {
@@ -33,7 +50,7 @@ public class ProjectInjectConfig {
             return new ArrayList<>(entry.getValue());
         }
         List<LanguageInjectItem> ret = getProjectInjectConfigDirect(projectFilePath);
-        CACHE_INJECT_CONFIG.put(projectFilePath, new AbstractMap.SimpleEntry<>(System.currentTimeMillis() + 1200, new ArrayList<>(ret)));
+        CACHE_INJECT_CONFIG.put(projectFilePath, new AbstractMap.SimpleEntry<>(System.currentTimeMillis() + CACHE_TTL_MS, new ArrayList<>(ret)));
         return ret;
     }
 

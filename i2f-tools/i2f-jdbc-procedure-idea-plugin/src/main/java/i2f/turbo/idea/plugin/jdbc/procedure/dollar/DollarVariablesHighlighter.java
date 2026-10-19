@@ -30,6 +30,15 @@ public class DollarVariablesHighlighter implements DocumentListener {
     private final Editor editor;
     private List<RangeHighlighter> highlighters = new ArrayList<>();
 
+    /**
+     * 超过该长度的文档不做逐字符正则扫描（大文件在 EDT 上扫描会直接造成卡顿）
+     */
+    private static final int MAX_DOC_LENGTH = 1_000_000;
+    /**
+     * 单个编辑器最多保留的高亮数量，避免 MarkupModel 膨胀
+     */
+    private static final int MAX_HIGHLIGHTS = 2_000;
+
     public DollarVariablesHighlighter(@NotNull Editor editor) {
         this.editor = editor;
         init();
@@ -60,8 +69,17 @@ public class DollarVariablesHighlighter implements DocumentListener {
     private void applyAllHighlights() {
         MarkupModel markupModel = editor.getMarkupModel();
         String text = editor.getDocument().getText();
+        // 快速失败：绝大多数文件根本不包含 $ 或 #，没必要跑正则
+        if (text.length() > MAX_DOC_LENGTH
+                || (text.indexOf('$') < 0 && text.indexOf('#') < 0)) {
+            return;
+        }
         List<RegexMatchItem> list = RegexUtil.regexFinds(text, "([$#](\\!)?\\{[^\\}]*\\})|([$][a-zA-Z0-9_]+)");
+        int added = 0;
         for (RegexMatchItem item : list) {
+            if (added >= MAX_HIGHLIGHTS) {
+                break;
+            }
 //            log.warn("dollar-vars:"+item.matchStr+"["+item.idxStart+","+item.idxEnd+"]");
             TextAttributesKey key = DefaultLanguageHighlighterColors.NUMBER;
 //            if(item.matchStr.startsWith("$")){
@@ -81,6 +99,7 @@ public class DollarVariablesHighlighter implements DocumentListener {
                     HighlighterTargetArea.EXACT_RANGE
             );
             highlighters.add(highlighter);
+            added++;
 
         }
     }

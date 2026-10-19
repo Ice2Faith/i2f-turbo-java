@@ -42,9 +42,11 @@ import java.util.stream.Collectors;
 public class JdbcProcedureXmlCompletionContributor extends CompletionContributor {
     public static final Logger log = Logger.getInstance(JdbcProcedureXmlCompletionContributor.class);
 
-    {
-        JdbcProcedureProjectMetaHolder.refreshThreadTask();
-    }
+    // 注意：这里原来有一个实例初始化块，会调用 JdbcProcedureProjectMetaHolder.refreshThreadTask()。
+    // 该构造器会在 EDT 上被调用，而 refreshThreadTask() 是「全工程 VFS 遍历 + 全 XML 解析」的
+    // 同步操作，等于每次注册补全贡献器都卡一次 UI。
+    // 刷新线程的真正入口是 JdbcProcedureProjectMetaHolder 的 static { startRefreshThread(); }，
+    // 已由 AtomicBoolean 保证只启动一次，因此删除此块不改变功能。
 
     @Override
     public void fillCompletionVariants(@NotNull CompletionParameters parameters, @NotNull CompletionResultSet result) {

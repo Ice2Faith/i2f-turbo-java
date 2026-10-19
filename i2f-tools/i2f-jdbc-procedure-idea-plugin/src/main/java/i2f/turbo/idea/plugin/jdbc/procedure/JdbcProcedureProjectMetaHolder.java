@@ -210,7 +210,16 @@ public class JdbcProcedureProjectMetaHolder {
     }
 
     public static String getProjectPath(Project project) {
-        return project.getProjectFilePath();
+        String path = project.getProjectFilePath();
+        if (path == null || path.isEmpty()) {
+            // 非 .ipr 工程 / 尚未初始化时可能为 null，
+            // 作为 ConcurrentHashMap 的 key 会直接 NPE。
+            path = project.getBasePath();
+        }
+        if (path == null || path.isEmpty()) {
+            path = project.getName();
+        }
+        return path;
     }
 
 
