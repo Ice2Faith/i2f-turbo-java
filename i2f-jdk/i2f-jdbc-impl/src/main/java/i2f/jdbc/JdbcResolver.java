@@ -1127,19 +1127,19 @@ public class JdbcResolver {
         Map<Integer, NamingOutputParameter> namingMap = new LinkedHashMap<>();
 
         try (CallableStatement stat = namingCallableStatement(conn, sql, args, namingMap)) {
-            int rsIdx = -1;
+            int rsIdx = 1;
             boolean ok = stat.execute();
             Map<String, Object> ret = new LinkedHashMap<>();
-            ret.put(String.valueOf(rsIdx), ok);
+            ret.put("_rs_" + rsIdx, ok);
             for (Map.Entry<Integer, NamingOutputParameter> entry : namingMap.entrySet()) {
                 Object val = stat.getObject(entry.getKey());
                 ret.put(entry.getValue().getName(), val);
             }
             while (stat.getMoreResults()) {
-                rsIdx--;
+                rsIdx++;
                 try (ResultSet rs = stat.getResultSet()) {
                     QueryResult result = parseResultSet(rs);
-                    ret.put(String.valueOf(rsIdx), result);
+                    ret.put("_rs_" + rsIdx, result);
                 }
             }
             stat.close();
@@ -1164,9 +1164,17 @@ public class JdbcResolver {
                         setStatementObject(stat, i, parameter.getValue());
                     }
                     if (parameter.getType() != null) {
-                        stat.registerOutParameter(i, parameter.getType());
+                        try {
+                            stat.registerOutParameter(i, parameter.getType());
+                        } catch (SQLFeatureNotSupportedException e) {
+                            stat.registerOutParameter(i, parameter.getType().getVendorTypeNumber());
+                        }
                     } else {
-                        stat.registerOutParameter(i, parameter.getSqlType());
+                        try {
+                            stat.registerOutParameter(i, parameter.getSqlType());
+                        } catch (SQLFeatureNotSupportedException e) {
+                            stat.registerOutParameter(i, JDBCType.valueOf(parameter.getSqlType()));
+                        }
                     }
                     context.put(i, parameter);
                 } else {

@@ -134,6 +134,7 @@ public interface TagConsts {
     String SQL_TRANSACTIONAL = "sql-transactional";
 
     String SQL_RUNNER = "sql-runner";
+    String SQL_CALL = "sql-call";
 
     String CONTEXT_CONVERT_METHOD_CLASS = "context-convert-method-class";
     String CONTEXT_INVOKE_METHOD_CLASS = "context-invoke-method-class";

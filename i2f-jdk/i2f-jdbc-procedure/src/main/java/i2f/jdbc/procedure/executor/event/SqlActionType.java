@@ -15,5 +15,6 @@ public enum SqlActionType {
     TRANS_BEGIN,
     TRANS_COMMIT,
     TRANS_ROLLBACK,
-    TRANS_NONE
+    TRANS_NONE,
+    CALL
 }

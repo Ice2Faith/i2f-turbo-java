@@ -86,6 +86,7 @@
         <!ATTLIST lang-set radix CDATA #IMPLIED>
         <!ATTLIST lang-set pattern CDATA #IMPLIED>
         <!ATTLIST lang-set result CDATA #IMPLIED>
+        <!ATTLIST lang-set _lang CDATA #IMPLIED>
 
         <!ATTLIST lang-set value.int CDATA #IMPLIED>
         <!ATTLIST lang-set value.double #IMPLIED>
@@ -951,6 +952,15 @@
 
         <!ATTLIST sql-update datasource.visit CDATA #IMPLIED>
         <!ATTLIST sql-update datasource.visit.string CDATA #IMPLIED>
+
+        <!ELEMENT sql-call (ANY|EMPTY)>
+        <!ATTLIST sql-call refid CDATA #IMPLIED>
+        <!ATTLIST sql-call result CDATA #IMPLIED>
+        <!ATTLIST sql-call datasource CDATA #IMPLIED>
+
+        <!ATTLIST sql-call refid.visit CDATA #IMPLIED>
+        <!ATTLIST sql-call datasource.visit CDATA #IMPLIED>
+        <!ATTLIST sql-call datasource.visit.string CDATA #IMPLIED>
 
         <!ELEMENT sql-script (EMPTY|sql-dialect*
                 |#PCDATA|where|if*|foreach*|trim*|set|choose*|include*

@@ -1335,6 +1335,35 @@ eval-ts使用TinyScript引擎进行处理
     </script-segment>
 
     <!--
+    表示调用存储过程
+    使用refid表示存储过程名称
+    使用datasource表示使用的数据源
+    使用result接收出参
+    使用.out修饰符表示是出参，用来标记出参进行提取
+    如果出参.out修饰了，同时也要求是入参，则同时添加.in修饰符
+    -->
+    <sql-call refid=""
+              result=""
+              datasource=""
+              IN_SUM_MONTH=""
+              OUT_CODE.int.out=""
+              OUT_MSG.string.out="">
+    </sql-call>
+    <script-segment id="demo">
+        <!--
+        举例对照
+        call SP_TEST(IN V_SUM_MONTH,OUT IN V_CODE,OUT V_MSG)
+         -->
+        <sql-call refid=""
+                  result=""
+                  IN_SUM_MONTH="V_SUM_MONTH"
+                  OUT_CODE.int.out.in="V_CODE"
+                  OUT_MSG.string.out="V_MSG">
+        </sql-call>
+    </script-segment>
+
+
+    <!--
     表示JDBC的事务控制，begin表示开始事务。commit表示提交事务，rollback表示回滚事务,none表示不开启事务
     isolation以string访问，支持Connection.TRANSACTION_xxx的数字值，或者xxx的字符值，不区分大小写
      -->

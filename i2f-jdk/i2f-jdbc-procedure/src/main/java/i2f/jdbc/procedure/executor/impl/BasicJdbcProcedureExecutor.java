@@ -249,6 +249,7 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         ret.add(new SqlTransNoneNode());
         ret.add(new SqlTransRollbackNode());
         ret.add(new SqlUpdateNode());
+        ret.add(new SqlCallNode());
         ret.add(new TextNode());
 
         afterInitExecutorNodes(ret);
@@ -2265,6 +2266,45 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
             reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
         }
     }
+
+
+    @Override
+    public Map<String,Object> sqlCall(String datasource, BindSql bql, Map<String, Object> params) {
+        long bts = SystemClock.currentTimeMillis();
+        BindSql execBql = null;
+        int effectCount = 0;
+        Throwable ex = null;
+        try {
+            Map.Entry<Connection, String> connEntry = getConnectionEntry(datasource, params);
+            Connection conn = connEntry.getKey();
+            datasource = connEntry.getValue();
+
+            fillDatabaseDialectType(params, conn);
+            if (isDebug()) {
+                logger().logDebug("sql-call:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql);
+            }
+            execBql = bql;
+            Map<String, Object> map = JdbcResolver.callNaming(conn, bql);
+            effectCount = -1;
+            if (isDebug()) {
+                logger().logDebug("sql-call:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] " + " \n\tbql:\n" + bql + "\nresult:" + map.size());
+            }
+            afterSqlActionHook(conn, datasource, SqlActionType.CALL, execBql);
+            return map;
+        } catch (Exception e) {
+            ex = e;
+            if (e instanceof SignalException) {
+                throw (SignalException) e;
+            } else {
+                throw new ThrowSignalException(execBql != null ? (e.getMessage() + "\nwith datasource=" + datasource + "\n" + execBql) : e.getMessage(), e);
+            }
+        } finally {
+            long ets = SystemClock.currentTimeMillis();
+            long useTs = ets - bts;
+            reportExecSql(datasource, effectCount, useTs, execBql, ex, params);
+        }
+    }
+
 
     @Override
     public BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params) {
