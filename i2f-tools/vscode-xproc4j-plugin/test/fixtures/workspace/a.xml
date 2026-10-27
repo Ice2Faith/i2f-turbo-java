@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<procedure id="A" datasource="main">
+    <script-segment id="S" who="x">SELECT 1</script-segment>
+    <procedure-call refid="B"/>
+    <procedure-call refid="A"/>
+</procedure>

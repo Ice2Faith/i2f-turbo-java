@@ -1,0 +1,45 @@
+{
+  "algorithm": "sha256",
+  "files": [
+    {
+      "path": "AttrConsts.java",
+      "size": 2666,
+      "sha256": "c5ed9899baf358478da34f2d7749ba494684ecc95b8e6deca1122cd44e260265"
+    },
+    {
+      "path": "FeatureConsts.java",
+      "size": 2898,
+      "sha256": "146d2c9e9f7ca5e5a07d6af404a8b1e238912daa0668fb13fb5f1e7a919d5ad1"
+    },
+    {
+      "path": "ParamsConsts.java",
+      "size": 3066,
+      "sha256": "de29e0a9a742c193a92f121a3326e326f9ab9d2d985d8cd19c5e55b556f68a2f"
+    },
+    {
+      "path": "TagConsts.java",
+      "size": 4556,
+      "sha256": "d2512e0754aa89124eed6e8cecc76aeade04cbb17ed7600de7e90419544ca582"
+    },
+    {
+      "path": "XProc4j.xml",
+      "size": 45025,
+      "sha256": "9a2281aa93ad01c1114fec5a7202a51ce02ef20fb10acda8d41a27c4521c7c69"
+    },
+    {
+      "path": "procedure.dtd",
+      "size": 62840,
+      "sha256": "535fdc5bf4221093856c1de34135b7e38cc3b3475a65ef55021d10d3ab929acf"
+    },
+    {
+      "path": "procedure.xml",
+      "size": 92570,
+      "sha256": "441367ab41e9b1a2b368f063c3c73b44f6c3d1e269a271d52f41eccde401a409"
+    },
+    {
+      "path": "procedure.xml.ft",
+      "size": 158,
+      "sha256": "afdea9620bfb8ca1faa2f3dc51f49fdffc2346de75e9c257576ee830d2176359"
+    }
+  ]
+}

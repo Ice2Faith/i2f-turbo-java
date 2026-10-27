@@ -1,0 +1,56 @@
+XProc4J VS Code Extension
+Copyright (C) 2026 Ice2Faith
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, version 3 of the License only.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+The complete license text is provided in LICENSE (GPL-3.0-only).
+
+-------------------------------------------------------------------------------
+Upstream attribution
+-------------------------------------------------------------------------------
+
+This project ports editing capabilities of the IntelliJ IDEA plugin
+`i2f-jdbc-procedure-idea-plugin` from the `i2f-turbo-java` project
+(author: Ice2Faith), which is distributed under GPL-3.0.
+
+The following files under tools/sources/ are copied from the upstream project
+and retain the upstream GPL-3.0 terms:
+
+  - AttrConsts.java
+  - FeatureConsts.java
+  - ParamsConsts.java
+  - TagConsts.java
+  - XProc4j.xml
+  - procedure.dtd
+  - procedure.xml
+  - procedure.xml.ft
+
+Generated artifacts in metadata/, syntaxes/, snippets/ and src/generated/ are
+derived from these sources by the scripts under tools/.
+
+The upstream Java sources and templates are kept for reproducibility and are
+not included in the packaged VSIX. The VSIX contains only generated syntax,
+snippets, metadata embedded in the extension bundle, and this attribution.
+
+-------------------------------------------------------------------------------
+Third-party test fixtures
+-------------------------------------------------------------------------------
+
+TextMate grammars under test/grammar/vendor/ originate from VS Code and their
+respective grammar projects. They are used only by the test harness and are not
+included in the packaged VSIX. Copyright and license for those grammars remain
+with their respective authors.
+
+-------------------------------------------------------------------------------
+Trademarks
+-------------------------------------------------------------------------------
+
+IntelliJ IDEA is a trademark of JetBrains s.r.o. Visual Studio Code is a
+trademark of Microsoft Corporation. This project is not affiliated with or
+endorsed by JetBrains or Microsoft.

@@ -1,0 +1,11 @@
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="${NAME}"
+>
+    <!--
+
+    @author ${USER}
+    @date ${DATE} ${TIME}
+    -->
+
+</procedure>

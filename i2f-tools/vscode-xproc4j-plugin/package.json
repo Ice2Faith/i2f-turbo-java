@@ -1,0 +1,283 @@
+{
+  "name": "xproc4j",
+  "displayName": "XProc4J",
+  "description": "XProc4J XML 语法高亮、语言注入、补全、refid 导航与代码片段",
+  "version": "0.1.0",
+  "publisher": "ice2faith",
+  "license": "GPL-3.0-only",
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "extensionKind": [
+    "workspace"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": true,
+      "description": "只读取工作区 XML 做索引与补全，不执行内容、不联网；写文件仅限用户显式执行新建命令。"
+    },
+    "virtualWorkspaces": {
+      "supported": "limited",
+      "description": "语法、补全与导航可用；工程索引依赖 workspace.findFiles，虚拟文件系统可能不可用。"
+    }
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "xproc4j",
+    "xml",
+    "procedure",
+    "sql",
+    "i2f"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onLanguage:xml",
+    "onCommand:xproc4j.createProcedureFile",
+    "onCommand:xproc4j.rebuildIndex",
+    "onCommand:xproc4j.showOutput"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "xproc4j.createProcedureFile",
+        "title": "XProc4J: 新建 Procedure 文件",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "xproc4j.rebuildIndex",
+        "title": "XProc4J: 重建工程索引",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "xproc4j.showOutput",
+        "title": "XProc4J: 显示输出"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "xproc4j.createProcedureFile",
+          "when": "explorerResourceIsFolder",
+          "group": "navigation@90"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "xproc4j.rebuildIndex",
+          "when": "workspaceFolderCount > 0"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "XProc4J",
+      "properties": {
+        "xproc4j.enable": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用 XProc4J 语义功能（语法注入不受此开关控制）。"
+        },
+        "xproc4j.index.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用工作区 XProc4J 索引。"
+        },
+        "xproc4j.projectScan.include": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/*.xml"
+          ],
+          "description": "参与索引的文件匹配。"
+        },
+        "xproc4j.projectScan.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/target/**",
+            "**/build/**",
+            "**/out/**",
+            "**/dist/**",
+            "**/logs/**"
+          ],
+          "description": "索引排除的目录/文件。"
+        },
+        "xproc4j.projectScan.maxFiles": {
+          "type": "number",
+          "default": 20000,
+          "minimum": 1,
+          "maximum": 100000,
+          "description": "索引文件数量上限。"
+        },
+        "xproc4j.completion.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用 XProc4J 补全。"
+        },
+        "xproc4j.completion.sqlKeywords": {
+          "type": "boolean",
+          "default": true,
+          "description": "在 SQL 注入区域补全 SQL 关键字。"
+        },
+        "xproc4j.completion.builtinVariables": {
+          "type": "boolean",
+          "default": true,
+          "description": "补全框架内置变量。"
+        },
+        "xproc4j.refid.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用 refid 定义跳转与引用查找。"
+        },
+        "xproc4j.symbols.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用大纲与面包屑。"
+        },
+        "xproc4j.folding.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "启用 XProc4J 折叠范围。"
+        },
+        "xproc4j.blockBackground.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "为 SQL 正文显示浅黄色、为 lang-eval* 正文显示浅绿色整行背景，便于识别嵌入块类型。"
+        },
+        "xproc4j.attributeValueBackground.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "为 XML 属性值（a=\"b\" 中的 b，不含引号）显示更浅的绿色背景。"
+        },
+        "xproc4j.evalKeywordHighlight.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "将 lang-eval* 正文中的 Java、JavaScript 与 SQL99 关键字显示为 dodgerblue（#1E90FF），便于区分语句结构。"
+        },
+        "xproc4j.evalLiteralHighlight.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "将 lang-eval* 正文中的数值字面量显示为蓝色、字符串字面量显示为绿色（Light 下 #1565C0/#2E7D32，Dark 下 #90CAF9/#81C784），与块背景保持区分度。"
+        },
+        "xproc4j.variableHighlight.extensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "uniqueItems": true,
+          "default": [
+            "xml",
+            "yaml",
+            "yml",
+            "java"
+          ],
+          "description": "在这些文件后缀中高亮 ${x}、$!{x}、#{x}、#!{x} 与 $name 变量（支持写 xml、.xml 或 *.xml）。xml 仍要求 procedure 根节点；空数组关闭变量高亮。"
+        },
+        "xproc4j.maxDocumentSizeKB": {
+          "type": "number",
+          "default": 2048,
+          "minimum": 1,
+          "maximum": 102400,
+          "description": "超过此大小的文档跳过语义分析（语法高亮仍生效）。"
+        },
+        "xproc4j.trace.server": {
+          "type": "string",
+          "enum": [
+            "off",
+            "messages",
+            "verbose"
+          ],
+          "default": "off",
+          "description": "预留日志级别；本扩展不使用 LSP。"
+        }
+      }
+    },
+    "grammars": [
+      {
+        "scopeName": "xproc4j.injection",
+        "path": "./syntaxes/xproc4j.injection.tmLanguage.json",
+        "injectTo": [
+          "text.xml"
+        ],
+        "embeddedLanguages": {
+          "meta.embedded.block.sql.xproc4j": "sql",
+          "meta.embedded.block.java.xproc4j": "java",
+          "meta.embedded.block.javascript.xproc4j": "javascript",
+          "meta.embedded.block.json.xproc4j": "json",
+          "meta.embedded.block.yaml.xproc4j": "yaml",
+          "meta.embedded.block.shell.xproc4j": "shellscript",
+          "meta.embedded.block.css.xproc4j": "css",
+          "meta.embedded.block.markdown.xproc4j": "markdown",
+          "meta.embedded.block.typescript.xproc4j": "typescript",
+          "meta.embedded.block.xml.xproc4j": "xml"
+        }
+      }
+    ],
+    "semanticTokenScopes": [
+      {
+        "language": "xml",
+        "scopes": {
+          "variable": [
+            "support.variable.xproc4j"
+          ],
+          "variable.xprocEmptyPlaceholder": [
+            "invalid.illegal.xproc4j"
+          ],
+          "xprocRefid": [
+            "entity.name.reference.xproc4j"
+          ]
+        }
+      }
+    ],
+    "snippets": [
+      {
+        "language": "xml",
+        "path": "./snippets/xproc4j.code-snippets"
+      }
+    ]
+  },
+  "scripts": {
+    "clean": "node tools/lib/fs-utils.mjs clean",
+    "gen": "npm run gen:metadata && npm run gen:grammar && npm run gen:snippets && npm run gen:module",
+    "gen:metadata": "node tools/extract-metadata.mjs",
+    "gen:grammar": "node tools/generate-grammar.mjs",
+    "gen:snippets": "node tools/convert-snippets.mjs",
+    "gen:module": "node tools/generate-metadata-module.mjs",
+    "gen:check": "node tools/check-generated.mjs",
+    "source:update": "node tools/source-checksums.mjs --update",
+    "source:check": "node tools/source-checksums.mjs",
+    "check": "npm run typecheck && npm run lint && npm run test:unit && npm run test:grammar && npm run gen:check",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "test:unit": "vitest run --config vitest.config.ts test/unit",
+    "test:grammar": "vitest run --config vitest.config.ts test/grammar",
+    "test:integration": "npm run build && node test/integration/runTest.mjs",
+    "test": "npm run test:unit && npm run test:grammar",
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "npm run gen && npm run check && npm run build && vsce package --no-dependencies --allow-missing-repository --out dist/vscode-xproc4j-0.1.0.vsix && node tools/write-checksum.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/vscode": "~1.90.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "@vscode/test-electron": "^2.4.0",
+    "@vscode/vsce": "^3.0.0",
+    "esbuild": "^0.23.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.0",
+    "vscode-oniguruma": "^1.7.0",
+    "vscode-textmate": "^9.0.0"
+  }
+}

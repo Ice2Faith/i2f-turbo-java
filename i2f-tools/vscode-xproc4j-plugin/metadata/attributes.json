@@ -1,0 +1,1316 @@
+{
+  "version": 1,
+  "attributes": [
+    {
+      "name": "_lang",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-render",
+        "lang-set",
+        "lang-string"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "accept-batch",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-cursor"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg0",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg1",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg2",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg3",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg4",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg5",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg6",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg7",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg8",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "arg9",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "current-time-millis",
+        "date-now",
+        "double",
+        "eval",
+        "eval-java",
+        "eval-ts",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "null",
+        "render",
+        "snow-uid",
+        "string",
+        "uuid"
+      ],
+      "tags": [
+        "lang-invoke",
+        "lang-string-join"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "await",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "test"
+      ],
+      "tags": [
+        "lang-async",
+        "lang-async-all",
+        "lang-shell",
+        "lang-thread-pool-shutdown"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "batch-size",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-cursor"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "before-truncate",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "begin",
+      "type": "CDATA",
+      "features": [
+        "int"
+      ],
+      "tags": [
+        "lang-fori"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "cause",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-throw"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "charset",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-file-read-text",
+        "lang-file-write-text"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "class",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "context-convert-method-class",
+        "context-invoke-method-class",
+        "context-load-package"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "close",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "foreach"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "collection",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "foreach",
+        "lang-foreach"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "commit-size",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "content",
+      "type": "CDATA",
+      "features": [
+        "render",
+        "string",
+        "text-body"
+      ],
+      "tags": [
+        "lang-file-write-text"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "count",
+      "type": "CDATA",
+      "features": [
+        "eval",
+        "eval-ts",
+        "int",
+        "visit"
+      ],
+      "tags": [
+        "lang-latch",
+        "lang-retry",
+        "lang-thread-pool"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "databases",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "dialect",
+        "dialect-when",
+        "sql-dialect"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "datasource",
+      "type": "CDATA",
+      "features": [
+        "render",
+        "string",
+        "visit"
+      ],
+      "tags": [
+        "etl-extra",
+        "etl-load",
+        "lang-do-while",
+        "lang-if",
+        "lang-when",
+        "lang-while",
+        "sql-call",
+        "sql-query-columns",
+        "sql-query-list",
+        "sql-query-object",
+        "sql-query-row",
+        "sql-runner",
+        "sql-script",
+        "sql-trans-begin",
+        "sql-trans-commit",
+        "sql-trans-none",
+        "sql-trans-rollback",
+        "sql-update"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "datasources",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-scope",
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "delay",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-async",
+        "lang-retry"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "e",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-catch",
+        "log-debug",
+        "log-error",
+        "log-info",
+        "log-warn"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "enclose",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-fori"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "end",
+      "type": "CDATA",
+      "features": [
+        "int"
+      ],
+      "tags": [
+        "lang-fori"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "envp",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-shell"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "event-type",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "event-publish",
+        "event-send"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "exclude",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-transform"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "external",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-transform"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "file",
+      "type": "CDATA",
+      "features": [
+        "string"
+      ],
+      "tags": [
+        "lang-file-delete",
+        "lang-file-exists",
+        "lang-file-list",
+        "lang-file-mkdirs",
+        "lang-file-read-text",
+        "lang-file-tree",
+        "lang-file-write-text"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "first",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-do-while",
+        "lang-foreach",
+        "lang-fori",
+        "lang-while"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "force",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-thread-pool-shutdown"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "full-send",
+      "type": "CDATA",
+      "features": [
+        "boolean"
+      ],
+      "tags": [
+        "sql-runner"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "id",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "procedure",
+        "script-segment"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "include",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-transform"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "incr",
+      "type": "CDATA",
+      "features": [
+        "int"
+      ],
+      "tags": [
+        "lang-fori",
+        "lang-retry"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "index",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-do-while",
+        "lang-foreach",
+        "lang-fori",
+        "lang-while"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "isolation",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-trans-begin",
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "item",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "foreach",
+        "lang-foreach",
+        "lang-fori",
+        "sql-cursor",
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "jdbc-type",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-transform"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "jump-error",
+      "type": "CDATA",
+      "features": [
+        "boolean"
+      ],
+      "tags": [
+        "sql-runner"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "limit",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-query-list"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "limited",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-query-object",
+        "sql-query-row"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "max-delay",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-retry"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "method",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-invoke"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "name",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "bind",
+        "lang-latch-await",
+        "lang-latch-down",
+        "lang-listener"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "no-rollback-for",
+      "type": "CDATA",
+      "features": [
+        "cause-first",
+        "cause-last",
+        "cause-raw",
+        "cause-root"
+      ],
+      "tags": [
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "offset",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-query-list"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "open",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "foreach"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "package",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "context-load-package"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "params",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "function-call",
+        "procedure-call"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "params-share",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "function-call",
+        "lang-listener",
+        "procedure-call"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "pattern",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-format",
+        "lang-format-date",
+        "lang-return",
+        "lang-set"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "pool",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-thread-pool-shutdown",
+        "lang-thread-pool-submit"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "prefix",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "trim"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "prefixOverrides",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "trim"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "propagation",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "radix",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-return",
+        "lang-set"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "read-batch-size",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "read-only",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "refid",
+      "type": "CDATA",
+      "features": [
+        "visit"
+      ],
+      "tags": [
+        "function-call",
+        "include",
+        "procedure-call",
+        "script-include",
+        "sql-call"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "result",
+      "type": "CDATA",
+      "features": [
+        "align",
+        "body-text",
+        "body-xml",
+        "boolean",
+        "byte",
+        "char",
+        "class",
+        "current-time-millis",
+        "date",
+        "date-now",
+        "double",
+        "eval",
+        "eval-funic",
+        "eval-java",
+        "eval-js",
+        "eval-tinyscript",
+        "eval-ts",
+        "float",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "not",
+        "null",
+        "render",
+        "short",
+        "snow-uid",
+        "string",
+        "test",
+        "trim",
+        "uuid",
+        "visit"
+      ],
+      "tags": [
+        "function-call",
+        "java-call",
+        "lang-ai",
+        "lang-eval",
+        "lang-eval-funic",
+        "lang-eval-groovy",
+        "lang-eval-java",
+        "lang-eval-javascript",
+        "lang-eval-js",
+        "lang-eval-tinyscript",
+        "lang-eval-ts",
+        "lang-file-exists",
+        "lang-file-list",
+        "lang-file-read-text",
+        "lang-file-tree",
+        "lang-format",
+        "lang-format-date",
+        "lang-invoke",
+        "lang-latch",
+        "lang-lock",
+        "lang-new-params",
+        "lang-render",
+        "lang-retry",
+        "lang-set",
+        "lang-shell",
+        "lang-string",
+        "lang-string-join",
+        "lang-thread-pool",
+        "lang-thread-pool-shutdown",
+        "lang-thread-pool-submit",
+        "procedure-call",
+        "sql-call",
+        "sql-query-columns",
+        "sql-query-list",
+        "sql-query-object",
+        "sql-query-row",
+        "sql-runner",
+        "sql-script",
+        "sql-update"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "result-type",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-query-list",
+        "sql-query-object",
+        "sql-query-row"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "role",
+      "type": "CDATA",
+      "features": [
+        "render",
+        "string",
+        "visit"
+      ],
+      "tags": [
+        "lang-ai"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "rollback-for",
+      "type": "CDATA",
+      "features": [
+        "cause-first",
+        "cause-last",
+        "cause-raw",
+        "cause-root"
+      ],
+      "tags": [
+        "sql-transactional"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "run-as-file",
+      "type": "CDATA",
+      "features": [
+        "boolean"
+      ],
+      "tags": [
+        "lang-shell"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "script",
+      "type": "CDATA",
+      "features": [
+        "body-text",
+        "string",
+        "visit"
+      ],
+      "tags": [
+        "lang-shell",
+        "sql-dialect",
+        "sql-query-columns",
+        "sql-query-list",
+        "sql-query-object",
+        "sql-query-row",
+        "sql-runner",
+        "sql-update"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "separator",
+      "type": "CDATA",
+      "features": [
+        "string"
+      ],
+      "tags": [
+        "foreach",
+        "lang-string-join",
+        "sql-runner"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "source",
+      "type": "CDATA",
+      "features": [
+        "date-now",
+        "eval",
+        "eval-java",
+        "int",
+        "render",
+        "string",
+        "test",
+        "visit"
+      ],
+      "tags": [
+        "etl-transform"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "suffix",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "trim"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "suffixOverrides",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "trim"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "sync",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "table",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-extra",
+        "etl-load"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "tag",
+      "type": "CDATA",
+      "features": [
+        "string"
+      ],
+      "tags": [
+        "debugger",
+        "lang-printf",
+        "lang-println"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "target",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "etl-transform",
+        "java-call",
+        "lang-invoke",
+        "lang-listener",
+        "lang-synchronized"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "test",
+      "type": "CDATA",
+      "features": [
+        "boolean",
+        "dialect",
+        "eval-ts",
+        "visit"
+      ],
+      "tags": [
+        "debugger",
+        "if",
+        "lang-catch",
+        "lang-do-while",
+        "lang-if",
+        "lang-lock",
+        "lang-when",
+        "lang-while",
+        "when"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "time-unit",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-async",
+        "lang-latch-await",
+        "lang-retry",
+        "lang-shell",
+        "lang-sleep",
+        "lang-thread-pool-shutdown"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "timeout",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-latch-await",
+        "lang-shell",
+        "lang-sleep",
+        "lang-thread-pool-shutdown"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "type",
+      "type": "CDATA",
+      "features": [
+        "cause-first",
+        "cause-last",
+        "cause-raw",
+        "cause-root",
+        "string",
+        "visit"
+      ],
+      "tags": [
+        "etl-transform",
+        "lang-ai",
+        "lang-catch",
+        "lang-listener",
+        "lang-lock",
+        "lang-retry",
+        "lang-thread-pool",
+        "lang-throw"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "use-cursor",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-cursor",
+        "sql-etl"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "value",
+      "type": "CDATA",
+      "features": [
+        "align",
+        "body-text",
+        "body-xml",
+        "boolean",
+        "byte",
+        "char",
+        "class",
+        "current-time-millis",
+        "date",
+        "date-now",
+        "double",
+        "eval",
+        "eval-funic",
+        "eval-java",
+        "eval-js",
+        "eval-tinyscript",
+        "eval-ts",
+        "float",
+        "int",
+        "is-empty",
+        "is-not-empty",
+        "is-not-null",
+        "is-null",
+        "long",
+        "not",
+        "null",
+        "render",
+        "short",
+        "snow-uid",
+        "string",
+        "test",
+        "trim",
+        "uuid",
+        "visit"
+      ],
+      "tags": [
+        "bind",
+        "lang-ai",
+        "lang-eval",
+        "lang-format",
+        "lang-format-date",
+        "lang-lock",
+        "lang-printf",
+        "lang-return",
+        "lang-set",
+        "lang-throw",
+        "log-debug",
+        "log-error",
+        "log-info",
+        "log-warn"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "workdir",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "lang-shell"
+      ],
+      "source": "dtd"
+    },
+    {
+      "name": "write-batch-size",
+      "type": "CDATA",
+      "features": [],
+      "tags": [
+        "sql-etl"
+      ],
+      "source": "dtd"
+    }
+  ]
+}

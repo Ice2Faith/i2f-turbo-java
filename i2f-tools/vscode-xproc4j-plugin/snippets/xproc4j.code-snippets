@@ -1,0 +1,900 @@
+{
+  "<cdata": {
+    "prefix": "<cdata",
+    "body": [
+      "<![CDATA[",
+      "   $0",
+      "]]>"
+    ],
+    "description": "XProc4J <cdata",
+    "scope": "xml"
+  },
+  "<context-convert-method-class": {
+    "prefix": "<context-convert-method-class",
+    "body": [
+      "<context-convert-method-class class=\"${1}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <context-convert-method-class",
+    "scope": "xml"
+  },
+  "<context-invoke-method-class": {
+    "prefix": "<context-invoke-method-class",
+    "body": [
+      "<context-invoke-method-class class=\"${1}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <context-invoke-method-class",
+    "scope": "xml"
+  },
+  "<context-load-package": {
+    "prefix": "<context-load-package",
+    "body": [
+      "<context-load-package package=\"${1}\" class=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <context-load-package",
+    "scope": "xml"
+  },
+  "<debugger": {
+    "prefix": "<debugger",
+    "body": [
+      "<debugger tag=\"${1:$TM_FILENAME:$TM_LINE_NUMBER}\" test=\"${2:true}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <debugger",
+    "scope": "xml"
+  },
+  "<etl-after": {
+    "prefix": "<etl-after",
+    "body": [
+      "<etl-after>",
+      "    $0",
+      "</etl-after>"
+    ],
+    "description": "XProc4J <etl-after",
+    "scope": "xml"
+  },
+  "<etl-before": {
+    "prefix": "<etl-before",
+    "body": [
+      "<etl-before>",
+      "    $0",
+      "</etl-before>"
+    ],
+    "description": "XProc4J <etl-before",
+    "scope": "xml"
+  },
+  "<etl-extra": {
+    "prefix": "<etl-extra",
+    "body": [
+      "<etl-extra datasource=\"${1:oracle}\" table=\"${2:sys_user}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <etl-extra",
+    "scope": "xml"
+  },
+  "<etl-load": {
+    "prefix": "<etl-load",
+    "body": [
+      "<etl-load datasource=\"${1}\" table=\"${2:sys_user}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <etl-load",
+    "scope": "xml"
+  },
+  "<etl-transform": {
+    "prefix": "<etl-transform",
+    "body": [
+      "<etl-transform source${1}=\"${2}\" target=\"${3}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <etl-transform",
+    "scope": "xml"
+  },
+  "<event-publish": {
+    "prefix": "<event-publish",
+    "body": [
+      "<event-publish event-type=\"${1:log}\" ${2}/>",
+      "$0"
+    ],
+    "description": "XProc4J <event-publish",
+    "scope": "xml"
+  },
+  "<event-send": {
+    "prefix": "<event-send",
+    "body": [
+      "<event-send event-type=\"${1:log}\" ${2}/>",
+      "$0"
+    ],
+    "description": "XProc4J <event-send",
+    "scope": "xml"
+  },
+  "<function-call": {
+    "prefix": "<function-call",
+    "body": [
+      "<function-call refid=\"${1}\" result=\"${2}\" ${3:params_share=\\\\\"true\\\\\"}",
+      "    ${4:params=\\\\\"callParams\\\\\"} ${5}/>",
+      "$0"
+    ],
+    "description": "XProc4J <function-call",
+    "scope": "xml"
+  },
+  "<java-call": {
+    "prefix": "<java-call",
+    "body": [
+      "<java-call result=\"${1}\" target=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <java-call",
+    "scope": "xml"
+  },
+  "<lang-ai": {
+    "prefix": "<lang-ai",
+    "body": [
+      "<lang-ai result${1}=\"${2}\" type=\"${3:openai}\" value${4:.render}=\"${5}\" role${6:.string}=\"${7}\">",
+      "    $0",
+      "</lang-ai>"
+    ],
+    "description": "XProc4J <lang-ai",
+    "scope": "xml"
+  },
+  "<lang-async": {
+    "prefix": "<lang-async",
+    "body": [
+      "<lang-async ${1:await=\\\\\"false\\\\\"} ${2:delay=\\\\\"0\\\\\"} ${3:time-unit=\\\\\"SECONDS\\\\\"}>",
+      "    $0",
+      "</lang-async>"
+    ],
+    "description": "XProc4J <lang-async",
+    "scope": "xml"
+  },
+  "<lang-async-all": {
+    "prefix": "<lang-async-all",
+    "body": [
+      "<lang-async-all ${1:await=\\\\\"true\\\\\"}>",
+      "    <lang-body>",
+      "        $0",
+      "    </lang-body>",
+      "</lang-async-all>"
+    ],
+    "description": "XProc4J <lang-async-all",
+    "scope": "xml"
+  },
+  "<lang-break": {
+    "prefix": "<lang-break",
+    "body": [
+      "<lang-break/>$0"
+    ],
+    "description": "XProc4J <lang-break",
+    "scope": "xml"
+  },
+  "<lang-catch": {
+    "prefix": "<lang-catch",
+    "body": [
+      "<lang-catch type=\"${1:RuntimeException}\" e=\"${2:e}\">",
+      "    $0",
+      "</lang-catch>"
+    ],
+    "description": "XProc4J <lang-catch",
+    "scope": "xml"
+  },
+  "<lang-choose": {
+    "prefix": "<lang-choose",
+    "body": [
+      "<lang-choose>",
+      "    <lang-when test${1}=\"${2:true}\">",
+      "        $0",
+      "    </lang-when>",
+      "    <lang-otherwise>",
+      "",
+      "    </lang-otherwise>",
+      "</lang-choose>"
+    ],
+    "description": "XProc4J <lang-choose",
+    "scope": "xml"
+  },
+  "<lang-continue": {
+    "prefix": "<lang-continue",
+    "body": [
+      "<lang-continue/>$0"
+    ],
+    "description": "XProc4J <lang-continue",
+    "scope": "xml"
+  },
+  "<lang-do-while": {
+    "prefix": "<lang-do-while",
+    "body": [
+      "<lang-do-while test${1}=\"${2}\">",
+      "    $0",
+      "</lang-do-while>"
+    ],
+    "description": "XProc4J <lang-do-while",
+    "scope": "xml"
+  },
+  "<lang-eval": {
+    "prefix": "<lang-eval",
+    "body": [
+      "<lang-eval result=\"${1}\" ${2:value=\\\\\"\\\\\"}>",
+      "    ${3}",
+      "</lang-eval>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-eval",
+    "scope": "xml"
+  },
+  "<lang-eval-groovy": {
+    "prefix": "<lang-eval-groovy",
+    "body": [
+      "<lang-eval-groovy result=\"${1}\">",
+      "    $0",
+      "</lang-eval-groovy>"
+    ],
+    "description": "XProc4J <lang-eval-groovy",
+    "scope": "xml"
+  },
+  "<lang-eval-java": {
+    "prefix": "<lang-eval-java",
+    "body": [
+      "<lang-eval-java result=\"${1}\">",
+      "    $0",
+      "    return null;",
+      "</lang-eval-java>"
+    ],
+    "description": "XProc4J <lang-eval-java",
+    "scope": "xml"
+  },
+  "<lang-eval-javascript": {
+    "prefix": "<lang-eval-javascript",
+    "body": [
+      "<lang-eval-javascript result=\"${1}\">",
+      "    $0",
+      "</lang-eval-javascript>"
+    ],
+    "description": "XProc4J <lang-eval-javascript",
+    "scope": "xml"
+  },
+  "<lang-eval-js": {
+    "prefix": "<lang-eval-js",
+    "body": [
+      "<lang-eval-js result=\"${1}\">",
+      "    $0",
+      "</lang-eval-js>"
+    ],
+    "description": "XProc4J <lang-eval-js",
+    "scope": "xml"
+  },
+  "<lang-eval-tinyscript": {
+    "prefix": "<lang-eval-tinyscript",
+    "body": [
+      "<lang-eval-tinyscript result=\"${1}\">",
+      "    $0",
+      "</lang-eval-tinyscript>"
+    ],
+    "description": "XProc4J <lang-eval-tinyscript",
+    "scope": "xml"
+  },
+  "<lang-eval-ts": {
+    "prefix": "<lang-eval-ts",
+    "body": [
+      "<lang-eval-ts result=\"${1}\">",
+      "    $0",
+      "</lang-eval-ts>"
+    ],
+    "description": "XProc4J <lang-eval-ts",
+    "scope": "xml"
+  },
+  "<lang-file-delete": {
+    "prefix": "<lang-file-delete",
+    "body": [
+      "<lang-file-delete file${1}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-delete",
+    "scope": "xml"
+  },
+  "<lang-file-exists": {
+    "prefix": "<lang-file-exists",
+    "body": [
+      "<lang-file-exists result${1}=\"${2:v_result}\" file${3}=\"${4}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-exists",
+    "scope": "xml"
+  },
+  "<lang-file-list": {
+    "prefix": "<lang-file-list",
+    "body": [
+      "<lang-file-list result${1}=\"${2:v_files}\" file${3}=\"${4}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-list",
+    "scope": "xml"
+  },
+  "<lang-file-mkdirs": {
+    "prefix": "<lang-file-mkdirs",
+    "body": [
+      "<lang-file-mkdirs file${1}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-mkdirs",
+    "scope": "xml"
+  },
+  "<lang-file-read-text": {
+    "prefix": "<lang-file-read-text",
+    "body": [
+      "<lang-file-read-text result${1}=\"${2:v_text}\" file${3}=\"${4}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-read-text",
+    "scope": "xml"
+  },
+  "<lang-file-tree": {
+    "prefix": "<lang-file-tree",
+    "body": [
+      "<lang-file-tree result${1}=\"${2:v_files}\" file${3}=\"${4}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-tree",
+    "scope": "xml"
+  },
+  "<lang-file-write-text": {
+    "prefix": "<lang-file-write-text",
+    "body": [
+      "<lang-file-write-text content${1}=\"${2:v_text}\" file${3}=\"${4:v_file}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-file-write-text",
+    "scope": "xml"
+  },
+  "<lang-finally": {
+    "prefix": "<lang-finally",
+    "body": [
+      " <lang-finally>",
+      "    $0",
+      "</lang-finally>"
+    ],
+    "description": "XProc4J <lang-finally",
+    "scope": "xml"
+  },
+  "<lang-foreach": {
+    "prefix": "<lang-foreach",
+    "body": [
+      "<lang-foreach collection=\"${1:list}\" item=\"${2:item}\">",
+      "    $0",
+      "</lang-foreach>"
+    ],
+    "description": "XProc4J <lang-foreach",
+    "scope": "xml"
+  },
+  "<lang-fori": {
+    "prefix": "<lang-fori",
+    "body": [
+      "<lang-fori item=\"${1:item}\" begin.int=\"${2:0}\" end.int=\"${3:10}\" incr.int=\"${4:1}\">",
+      "    $0",
+      "</lang-fori>"
+    ],
+    "description": "XProc4J <lang-fori",
+    "scope": "xml"
+  },
+  "<lang-format": {
+    "prefix": "<lang-format",
+    "body": [
+      "<lang-format result=\"${1}\" value${2}=\"\" pattern=\"${3:%s}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-format",
+    "scope": "xml"
+  },
+  "<lang-format-date": {
+    "prefix": "<lang-format-date",
+    "body": [
+      "<lang-format-date result=\"${1}\" value${2}=\"${3}\" pattern=\"${4:yyyy-MM-dd HH:mm:ss}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-format-date",
+    "scope": "xml"
+  },
+  "<lang-if": {
+    "prefix": "<lang-if",
+    "body": [
+      "<lang-if test${1}=\"${2:true}\">",
+      "    $0",
+      "</lang-if>"
+    ],
+    "description": "XProc4J <lang-if",
+    "scope": "xml"
+  },
+  "<lang-invoke": {
+    "prefix": "<lang-invoke",
+    "body": [
+      "<lang-invoke result=\"${1}\" ${2:target=\\\\\"\\\\\"} method=\"${3:replace}\" arg0=\"${4}\" ${5}/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-invoke",
+    "scope": "xml"
+  },
+  "<lang-java-body": {
+    "prefix": "<lang-java-body",
+    "body": [
+      "<lang-java-body>",
+      "    $0",
+      "</lang-java-body>"
+    ],
+    "description": "XProc4J <lang-java-body",
+    "scope": "xml"
+  },
+  "<lang-java-import": {
+    "prefix": "<lang-java-import",
+    "body": [
+      "<lang-java-import>",
+      "    $0",
+      "</lang-java-import>"
+    ],
+    "description": "XProc4J <lang-java-import",
+    "scope": "xml"
+  },
+  "<lang-java-member": {
+    "prefix": "<lang-java-member",
+    "body": [
+      "<lang-java-member>",
+      "    $0",
+      "</lang-java-member>"
+    ],
+    "description": "XProc4J <lang-java-member",
+    "scope": "xml"
+  },
+  "<lang-latch": {
+    "prefix": "<lang-latch",
+    "body": [
+      "<lang-latch result=\"${1}\" count${2}=\"${3:1}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-latch",
+    "scope": "xml"
+  },
+  "<lang-latch-await": {
+    "prefix": "<lang-latch-await",
+    "body": [
+      "<lang-latch-await name=\"${1:v_latch}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-latch-await",
+    "scope": "xml"
+  },
+  "<lang-latch-down": {
+    "prefix": "<lang-latch-down",
+    "body": [
+      "<lang-latch-down name=\"${1:v_latch}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-latch-down",
+    "scope": "xml"
+  },
+  "<lang-listener": {
+    "prefix": "<lang-listener",
+    "body": [
+      "<lang-listener name=\"${1}\" type=\"${2}\" target=\"${3:event}\">",
+      "    $0    ",
+      "</lang-listener>"
+    ],
+    "description": "XProc4J <lang-listener",
+    "scope": "xml"
+  },
+  "<lang-lock": {
+    "prefix": "<lang-lock",
+    "body": [
+      "<lang-lock type=\"${1:jvm}\" value${2:.render}=\"${3}\">",
+      "     $0",
+      "</lang-lock>"
+    ],
+    "description": "XProc4J <lang-lock",
+    "scope": "xml"
+  },
+  "<lang-new-params": {
+    "prefix": "<lang-new-params",
+    "body": [
+      "<lang-new-params result=\"${1:callParams}\" ${2}/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-new-params",
+    "scope": "xml"
+  },
+  "<lang-otherwise": {
+    "prefix": "<lang-otherwise",
+    "body": [
+      "<lang-otherwise>",
+      "    $0",
+      "</lang-otherwise>"
+    ],
+    "description": "XProc4J <lang-otherwise",
+    "scope": "xml"
+  },
+  "<lang-printf": {
+    "prefix": "<lang-printf",
+    "body": [
+      "<lang-printf value${1:.string}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-printf",
+    "scope": "xml"
+  },
+  "<lang-println": {
+    "prefix": "<lang-println",
+    "body": [
+      "<lang-println tag=\"${1:$TM_FILENAME:$TM_LINE_NUMBER}\" ${2}/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-println",
+    "scope": "xml"
+  },
+  "<lang-render": {
+    "prefix": "<lang-render",
+    "body": [
+      "<lang-render result${1}=\"${2}\" _lang=\"${3:vtl}\">",
+      "    ${4}",
+      "</lang-render>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-render",
+    "scope": "xml"
+  },
+  "<lang-retry": {
+    "prefix": "<lang-retry",
+    "body": [
+      "<lang-retry count${1:.int}=\"${2:3}\" delay=\"${3:1}\" incr=\"${4:1.2}\" time-unit=\"${5:SECONDS}\">",
+      "      $0 ",
+      "</lang-retry>"
+    ],
+    "description": "XProc4J <lang-retry",
+    "scope": "xml"
+  },
+  "<lang-return": {
+    "prefix": "<lang-return",
+    "body": [
+      "<lang-return ${1:value=\\\\\"\\\\\"}/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-return",
+    "scope": "xml"
+  },
+  "<lang-set": {
+    "prefix": "<lang-set",
+    "body": [
+      "<lang-set result${1}=\"${2}\" value${3}=\"${4:callParams.}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-set",
+    "scope": "xml"
+  },
+  "<lang-shell": {
+    "prefix": "<lang-shell",
+    "body": [
+      "<lang-shell result${1}=\"${2:v_result}\" script${3:.string}=\"${4}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-shell",
+    "scope": "xml"
+  },
+  "<lang-sleep": {
+    "prefix": "<lang-sleep",
+    "body": [
+      "<lang-sleep timeout=\"${1:1}\" time-unit=\"${2:SECONDS}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-sleep",
+    "scope": "xml"
+  },
+  "<lang-string": {
+    "prefix": "<lang-string",
+    "body": [
+      "<lang-string result${1}=\"${2}\" _lang=\"${3:shell}\">",
+      "    ${4}",
+      "</lang-string>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-string",
+    "scope": "xml"
+  },
+  "<lang-string-join": {
+    "prefix": "<lang-string-join",
+    "body": [
+      "<lang-string-join result=\"${1}\" ${2:separator=\\\\\",\\\\\"} arg0=\"${3}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-string-join",
+    "scope": "xml"
+  },
+  "<lang-synchronized": {
+    "prefix": "<lang-synchronized",
+    "body": [
+      "<lang-synchronized target=\"${1:global}\">",
+      "    $0",
+      "</lang-synchronized>"
+    ],
+    "description": "XProc4J <lang-synchronized",
+    "scope": "xml"
+  },
+  "<lang-thread-pool": {
+    "prefix": "<lang-thread-pool",
+    "body": [
+      "<lang-thread-pool result=\"${1:V_POOL}\" count${2}=\"${3:10}\" type=\"${4:forkjoin}\"/>"
+    ],
+    "description": "XProc4J <lang-thread-pool",
+    "scope": "xml"
+  },
+  "<lang-thread-pool-shutdown": {
+    "prefix": "<lang-thread-pool-shutdown",
+    "body": [
+      "<lang-thread-pool-shutdown pool=\"${1:V_POOL}\" await=\"${2:true}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-thread-pool-shutdown",
+    "scope": "xml"
+  },
+  "<lang-thread-pool-submit": {
+    "prefix": "<lang-thread-pool-submit",
+    "body": [
+      "<lang-thread-pool-submit pool=\"${1:V_POOL}\" ${2}>",
+      "    $0",
+      "</lang-thread-pool-submit>"
+    ],
+    "description": "XProc4J <lang-thread-pool-submit",
+    "scope": "xml"
+  },
+  "<lang-throw": {
+    "prefix": "<lang-throw",
+    "body": [
+      "<lang-throw type=\"${1:RuntimeException}\" value=\"${2:error at $TM_FILENAME:$TM_LINE_NUMBER}\" ${3:cause=\\\\\"e\\\\\"}/>",
+      "$0"
+    ],
+    "description": "XProc4J <lang-throw",
+    "scope": "xml"
+  },
+  "<lang-try": {
+    "prefix": "<lang-try",
+    "body": [
+      "<lang-try>",
+      "    <lang-body>",
+      "        $0",
+      "    </lang-body>",
+      "    <lang-catch type=\"${2:RuntimeException}\" e=\"${3:e}\">",
+      "",
+      "    </lang-catch>",
+      "    <lang-finally>",
+      "",
+      "    </lang-finally>",
+      "</lang-try>"
+    ],
+    "description": "XProc4J <lang-try",
+    "scope": "xml"
+  },
+  "<lang-when": {
+    "prefix": "<lang-when",
+    "body": [
+      "<lang-when test${1}=\"${2:true}\">",
+      "    $0",
+      "</lang-when>"
+    ],
+    "description": "XProc4J <lang-when",
+    "scope": "xml"
+  },
+  "<lang-while": {
+    "prefix": "<lang-while",
+    "body": [
+      "<lang-while test=\"${1:false}\">",
+      "    $0",
+      "</lang-while>"
+    ],
+    "description": "XProc4J <lang-while",
+    "scope": "xml"
+  },
+  "<log-debug": {
+    "prefix": "<log-debug",
+    "body": [
+      "<log-debug value${1:.render}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <log-debug",
+    "scope": "xml"
+  },
+  "<log-error": {
+    "prefix": "<log-error",
+    "body": [
+      "<log-error value${1:.render}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <log-error",
+    "scope": "xml"
+  },
+  "<log-info": {
+    "prefix": "<log-info",
+    "body": [
+      "<log-info value${1:.render}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <log-info",
+    "scope": "xml"
+  },
+  "<log-warn": {
+    "prefix": "<log-warn",
+    "body": [
+      "<log-warn value${1:.render}=\"${2}\"/>",
+      "$0"
+    ],
+    "description": "XProc4J <log-warn",
+    "scope": "xml"
+  },
+  "<procedure": {
+    "prefix": "<procedure",
+    "body": [
+      "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
+      "<!DOCTYPE procedure SYSTEM \"procedure.dtd\">",
+      "",
+      "<procedure id=\"${1:procedure}\">",
+      "    <!--",
+      "",
+      "    @author ${2}",
+      "    @date $CURRENT_YEAR-$CURRENT_MONTH-$CURRENT_DATE",
+      "    @time $CURRENT_HOUR:$CURRENT_MINUTE:$CURRENT_SECOND",
+      "    -->",
+      "",
+      "    $0",
+      "</procedure>"
+    ],
+    "description": "XProc4J <procedure",
+    "scope": "xml"
+  },
+  "<procedure-call": {
+    "prefix": "<procedure-call",
+    "body": [
+      "<procedure-call refid=\"${1}\" ",
+      "    result=\"${2:callParams}\"",
+      "    ${3}/>",
+      "$0"
+    ],
+    "description": "XProc4J <procedure-call",
+    "scope": "xml"
+  },
+  "<script-include": {
+    "prefix": "<script-include",
+    "body": [
+      "<script-include refid=\"${1:script}\" ",
+      "    ${2}/>",
+      "$0"
+    ],
+    "description": "XProc4J <script-include",
+    "scope": "xml"
+  },
+  "<script-segment": {
+    "prefix": "<script-segment",
+    "body": [
+      "<script-segment id=\"${1:script}\" ",
+      "    ${2}>",
+      "    $0",
+      "</script-segment>"
+    ],
+    "description": "XProc4J <script-segment",
+    "scope": "xml"
+  },
+  "<sql-cursor": {
+    "prefix": "<sql-cursor",
+    "body": [
+      "<sql-cursor item=\"${1:item}\">",
+      "    <sql-query-list>",
+      "        ${2}",
+      "    </sql-query-list>",
+      "    <lang-body>",
+      "        $0",
+      "    </lang-body>",
+      "</sql-cursor>",
+      ""
+    ],
+    "description": "XProc4J <sql-cursor",
+    "scope": "xml"
+  },
+  "<sql-dialect": {
+    "prefix": "<sql-dialect",
+    "body": [
+      "<sql-dialect databases=\"${1:mysql,mariadb}\">",
+      "    $0",
+      "</sql-dialect>"
+    ],
+    "description": "XProc4J <sql-dialect",
+    "scope": "xml"
+  },
+  "<sql-etl": {
+    "prefix": "<sql-etl",
+    "body": [
+      "<sql-etl>",
+      "    <sql-query-list datasource=\"${1:oracle}\">",
+      "        $0",
+      "    </sql-query-list>",
+      "    <etl-load datasource=\"${3:mysql}\" table=\"${4:sys_user}\"/>",
+      "</sql-etl>"
+    ],
+    "description": "XProc4J <sql-etl",
+    "scope": "xml"
+  },
+  "<sql-query-list": {
+    "prefix": "<sql-query-list",
+    "body": [
+      "<sql-query-list result=\"${1}\">",
+      "    $0",
+      "</sql-query-list>"
+    ],
+    "description": "XProc4J <sql-query-list",
+    "scope": "xml"
+  },
+  "<sql-query-object": {
+    "prefix": "<sql-query-object",
+    "body": [
+      "<sql-query-object result=\"${1}\">",
+      "    $0",
+      "</sql-query-object>"
+    ],
+    "description": "XProc4J <sql-query-object",
+    "scope": "xml"
+  },
+  "<sql-query-row": {
+    "prefix": "<sql-query-row",
+    "body": [
+      "<sql-query-row result=\"${1}\">",
+      "    $0",
+      "</sql-query-row>"
+    ],
+    "description": "XProc4J <sql-query-row",
+    "scope": "xml"
+  },
+  "<sql-runner": {
+    "prefix": "<sql-runner",
+    "body": [
+      "<sql-runner ${1:jump-error=\\\\\"false\\\\\"}>",
+      "    $0",
+      "</sql-runner>"
+    ],
+    "description": "XProc4J <sql-runner",
+    "scope": "xml"
+  },
+  "<sql-scope": {
+    "prefix": "<sql-scope",
+    "body": [
+      "<sql-scope datasources=\"${1}\">",
+      "    $0",
+      "</sql-scope>"
+    ],
+    "description": "XProc4J <sql-scope",
+    "scope": "xml"
+  },
+  "<sql-script": {
+    "prefix": "<sql-script",
+    "body": [
+      "<sql-script result=\"${1:v_sql}\">",
+      "    $0",
+      "</sql-script>"
+    ],
+    "description": "XProc4J <sql-script",
+    "scope": "xml"
+  },
+  "<sql-transactional": {
+    "prefix": "<sql-transactional",
+    "body": [
+      "<sql-transactional datasources${1}=\"${2:all}\"",
+      "                       rollback-for=\"RuntimeException\">",
+      "    $0",
+      "</sql-transactional>"
+    ],
+    "description": "XProc4J <sql-transactional",
+    "scope": "xml"
+  },
+  "<sql-update": {
+    "prefix": "<sql-update",
+    "body": [
+      "<sql-update result=\"${1}\">",
+      "    $0",
+      "</sql-update>"
+    ],
+    "description": "XProc4J <sql-update",
+    "scope": "xml"
+  }
+}

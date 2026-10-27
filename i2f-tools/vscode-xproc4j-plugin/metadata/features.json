@@ -1,0 +1,295 @@
+{
+  "version": 1,
+  "features": [
+    {
+      "name": "in",
+      "group": "annotation",
+      "description": ""
+    },
+    {
+      "name": "out",
+      "group": "annotation",
+      "description": ""
+    },
+    {
+      "name": "int",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "double",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "float",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "string",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "long",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "short",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "char",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "byte",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "boolean",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "null",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "date",
+      "group": "type",
+      "description": ""
+    },
+    {
+      "name": "render",
+      "group": "string",
+      "description": ""
+    },
+    {
+      "name": "trim",
+      "group": "string",
+      "description": ""
+    },
+    {
+      "name": "align",
+      "group": "string",
+      "description": ""
+    },
+    {
+      "name": "body-text",
+      "group": "string",
+      "description": ""
+    },
+    {
+      "name": "body-xml",
+      "group": "string",
+      "description": ""
+    },
+    {
+      "name": "location-file",
+      "group": "location",
+      "description": ""
+    },
+    {
+      "name": "location-line",
+      "group": "location",
+      "description": ""
+    },
+    {
+      "name": "location-tag",
+      "group": "location",
+      "description": ""
+    },
+    {
+      "name": "location",
+      "group": "location",
+      "description": ""
+    },
+    {
+      "name": "spacing-left",
+      "group": "spacing",
+      "description": ""
+    },
+    {
+      "name": "spacing-right",
+      "group": "spacing",
+      "description": ""
+    },
+    {
+      "name": "spacing",
+      "group": "spacing",
+      "description": ""
+    },
+    {
+      "name": "lower",
+      "group": "transform",
+      "description": ""
+    },
+    {
+      "name": "upper",
+      "group": "transform",
+      "description": ""
+    },
+    {
+      "name": "hashcode",
+      "group": "transform",
+      "description": ""
+    },
+    {
+      "name": "visit",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "eval",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "test",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "context",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "executor",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "node",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "eval-java",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "eval-js",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "eval-tinyscript",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "eval-ts",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "eval-groovy",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "eval-funic",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "class",
+      "group": "language",
+      "description": ""
+    },
+    {
+      "name": "not",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "dialect",
+      "group": "process",
+      "description": ""
+    },
+    {
+      "name": "is-null",
+      "group": "predicate",
+      "description": ""
+    },
+    {
+      "name": "is-not-null",
+      "group": "predicate",
+      "description": ""
+    },
+    {
+      "name": "is-empty",
+      "group": "predicate",
+      "description": ""
+    },
+    {
+      "name": "is-not-empty",
+      "group": "predicate",
+      "description": ""
+    },
+    {
+      "name": "date-now",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "uuid",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "current-time-millis",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "snow-uid",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "new-map",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "new-list",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "new-set",
+      "group": "value",
+      "description": ""
+    },
+    {
+      "name": "cause-first",
+      "group": "exception",
+      "description": ""
+    },
+    {
+      "name": "cause-last",
+      "group": "exception",
+      "description": ""
+    },
+    {
+      "name": "cause-raw",
+      "group": "exception",
+      "description": ""
+    },
+    {
+      "name": "cause-root",
+      "group": "exception",
+      "description": ""
+    }
+  ]
+}

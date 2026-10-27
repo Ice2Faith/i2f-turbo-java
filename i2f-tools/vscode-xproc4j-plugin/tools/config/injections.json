@@ -1,0 +1,116 @@
+{
+  "body": [
+    {
+      "id": "sql",
+      "tags": [
+        "sql-query-list",
+        "sql-query-row",
+        "sql-query-object",
+        "sql-query-columns",
+        "sql-update",
+        "sql-dialect",
+        "sql-script"
+      ],
+      "contentName": "meta.embedded.block.sql.xproc4j",
+      "scope": "source.sql",
+      "languageId": "sql",
+      "variables": true,
+      "dynamicSql": true
+    },
+    {
+      "id": "java",
+      "tags": ["lang-eval-java", "lang-java-import", "lang-java-member", "lang-java-body"],
+      "contentName": "meta.embedded.block.java.xproc4j",
+      "scope": "source.java",
+      "languageId": "java",
+      "variables": true,
+      "childTags": ["lang-java-import", "lang-java-member", "lang-java-body"]
+    },
+    {
+      "id": "javascript",
+      "tags": ["lang-eval-javascript", "lang-eval-js"],
+      "contentName": "meta.embedded.block.javascript.xproc4j",
+      "scope": "source.js",
+      "languageId": "javascript",
+      "variables": true
+    },
+    {
+      "id": "groovy",
+      "tags": ["lang-eval-groovy"],
+      "contentName": "meta.embedded.block.groovy.xproc4j",
+      "scope": "source.groovy",
+      "variables": true
+    },
+    {
+      "id": "shell",
+      "tags": ["lang-shell"],
+      "contentName": "meta.embedded.block.shell.xproc4j",
+      "scope": "source.shell",
+      "languageId": "shellscript",
+      "variables": true
+    },
+    {
+      "id": "vars-only",
+      "tags": ["lang-string", "lang-render"],
+      "contentName": "meta.embedded.block.variables.xproc4j",
+      "variables": true
+    },
+    {
+      "id": "dsl-vars-only",
+      "tags": ["lang-eval", "lang-eval-ts", "lang-eval-tinyscript", "lang-eval-funic"],
+      "contentName": "meta.embedded.block.variables.xproc4j",
+      "variables": true
+    }
+  ],
+  "langDynamic": {
+    "tags": ["lang-string", "lang-render"],
+    "values": {
+      "sql": { "scope": "source.sql", "contentName": "meta.embedded.block.sql.xproc4j", "languageId": "sql" },
+      "java": { "scope": "source.java", "contentName": "meta.embedded.block.java.xproc4j", "languageId": "java" },
+      "javascript": { "scope": "source.js", "contentName": "meta.embedded.block.javascript.xproc4j", "languageId": "javascript" },
+      "js": { "scope": "source.js", "contentName": "meta.embedded.block.javascript.xproc4j", "languageId": "javascript" },
+      "json": { "scope": "source.json", "contentName": "meta.embedded.block.json.xproc4j", "languageId": "json" },
+      "xml": { "scope": "text.xml", "contentName": "meta.embedded.block.xml.xproc4j", "languageId": "xml" },
+      "yaml": { "scope": "source.yaml", "contentName": "meta.embedded.block.yaml.xproc4j", "languageId": "yaml" },
+      "shell": { "scope": "source.shell", "contentName": "meta.embedded.block.shell.xproc4j", "languageId": "shellscript" },
+      "bash": { "scope": "source.shell", "contentName": "meta.embedded.block.shell.xproc4j", "languageId": "shellscript" },
+      "css": { "scope": "source.css", "contentName": "meta.embedded.block.css.xproc4j", "languageId": "css" },
+      "sass": { "scope": "source.css", "contentName": "meta.embedded.block.css.xproc4j", "languageId": "css" },
+      "markdown": { "scope": "text.html.markdown", "contentName": "meta.embedded.block.markdown.xproc4j", "languageId": "markdown" },
+      "md": { "scope": "text.html.markdown", "contentName": "meta.embedded.block.markdown.xproc4j", "languageId": "markdown" },
+      "regex": { "scope": "source.regexp", "contentName": "meta.embedded.block.regexp.xproc4j" },
+      "regexp": { "scope": "source.regexp", "contentName": "meta.embedded.block.regexp.xproc4j" },
+      "groovy": { "scope": "source.groovy", "contentName": "meta.embedded.block.groovy.xproc4j" },
+      "vtl": { "scope": "text.html.velocity", "contentName": "meta.embedded.block.velocity.xproc4j" },
+      "velocity": { "scope": "text.html.velocity", "contentName": "meta.embedded.block.velocity.xproc4j" },
+      "freemarker": { "scope": "text.html.ftl", "contentName": "meta.embedded.block.freemarker.xproc4j" },
+      "thymeleaf": { "scope": "text.html.thymeleaf", "contentName": "meta.embedded.block.thymeleaf.xproc4j" },
+      "spel": { "scope": "source.spel", "contentName": "meta.embedded.block.spel.xproc4j" },
+      "el": { "scope": "source.el", "contentName": "meta.embedded.block.el.xproc4j" },
+      "expr": { "scope": "source.el", "contentName": "meta.embedded.block.el.xproc4j" },
+      "typescript": { "scope": "source.ts", "contentName": "meta.embedded.block.typescript.xproc4j", "languageId": "typescript" }
+    }
+  },
+  "attribute": [
+    { "suffix": "eval-java", "scope": "source.java", "contentName": "meta.embedded.attribute.java.xproc4j" },
+    { "suffix": "eval-js", "scope": "source.js", "contentName": "meta.embedded.attribute.javascript.xproc4j" },
+    { "suffix": "eval-groovy", "scope": "source.groovy", "contentName": "meta.embedded.attribute.groovy.xproc4j" }
+  ],
+  "excludedBodyTags": [
+    "lang-body",
+    "lang-catch",
+    "lang-finally",
+    "script-segment",
+    "lang-synchronized",
+    "lang-async",
+    "sql-scope",
+    "sql-cursor",
+    "sql-etl",
+    "sql-transactional",
+    "lang-eval",
+    "lang-eval-ts",
+    "lang-eval-tinyscript",
+    "lang-eval-funic"
+  ],
+  "varsOnlyBodyTags": ["lang-eval", "lang-eval-ts", "lang-eval-tinyscript", "lang-eval-funic"]
+}

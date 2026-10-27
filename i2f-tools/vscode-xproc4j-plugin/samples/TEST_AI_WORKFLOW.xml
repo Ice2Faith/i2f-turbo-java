@@ -1,0 +1,35 @@
+<!DOCTYPE procedure SYSTEM "procedure.dtd">
+
+<procedure id="TEST_AI_WORKFLOW"
+>
+    <!--
+
+    @author Ice2Faith
+    @date 2026/3/19 9:43
+    -->
+
+    <lang-eval-ts>
+        V_NOW=to_char(now());
+    </lang-eval-ts>
+
+    <lang-ai result="V_DATE" type="dashscope" value.body-text.render="">
+        将这个日期提取为 yyyy-MM-dd HH:mm:ss 格式
+        日期为：$!{V_NOW}
+        注意，仅保留规定格式的内容，不要有任何其他额外信息
+    </lang-ai>
+
+    <log-info value.visit="V_DATE"/>
+
+    <lang-ai result="V_MSG" type="dashscope" value.body-text.render="" role.string="你是一个传统命理大师，现在根据用户提供的公历日期，先给出对应的农历日期，然后给出其对应的八字，最后对这个八字进行简单的说明主要信息">
+        公历日期为：$!{V_DATE}
+    </lang-ai>
+
+    <log-info value.visit="V_MSG"/>
+
+    <lang-ai result="V_MSG" type="dashscope" value.body-text.render="" role.string="你熟悉古今中外的历史，现在根据提供的公历日期，介绍历史上的这天（也就是不同年份的同月同日）发生了哪些事">
+        公历日期为：$!{V_DATE}
+    </lang-ai>
+
+    <log-info value.visit="V_MSG"/>
+
+</procedure>

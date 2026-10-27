@@ -1,0 +1,13 @@
+{
+  "sqlKeywords": [
+    "SELECT", "FROM", "WHERE", "JOIN", "LEFT", "RIGHT", "INNER", "OUTER", "ON",
+    "GROUP", "BY", "ORDER", "HAVING", "LIMIT", "OFFSET", "INSERT", "INTO", "VALUES",
+    "UPDATE", "SET", "DELETE", "CREATE", "TABLE", "ALTER", "DROP", "INDEX", "VIEW",
+    "UNION", "ALL", "DISTINCT", "AS", "AND", "OR", "NOT", "NULL", "IS", "IN", "EXISTS",
+    "BETWEEN", "LIKE", "CASE", "WHEN", "THEN", "ELSE", "END", "COUNT", "SUM", "AVG",
+    "MIN", "MAX", "COALESCE", "CAST", "WITH", "RECURSIVE", "BEGIN", "COMMIT", "ROLLBACK"
+  ],
+  "sqlFunctions": [
+    "COUNT", "SUM", "AVG", "MIN", "MAX", "COALESCE", "CAST", "CONCAT", "SUBSTR", "LENGTH", "NOW", "DATE_FORMAT"
+  ]
+}
