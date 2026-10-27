@@ -1,7 +1,6 @@
 package i2f.sm.crypto.util;
 
 import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.codec.bytes.raw.HexStringByteCodec;
 
 /**
  * @author Ice2Faith
@@ -14,14 +13,14 @@ public class CipUtils {
      * 16 进制串转字节数组
      */
     public static byte[] hexToArray(String str) {
-        return HexStringByteCodec.INSTANCE.decode(str);
+        return HexUtils.hexToArray(str);
     }
 
     /**
      * 字节数组转 16 进制串
      */
     public static String arrayToHex(byte[] arr) {
-        return HexStringByteCodec.INSTANCE.encode(arr).toLowerCase();
+        return HexUtils.arrayToHex(arr);
     }
 
     /**

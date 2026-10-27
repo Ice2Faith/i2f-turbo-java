@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,30 +27,36 @@ public class Sm2Cipher {
     }
 
 
-    protected static volatile KeyPair boostKeyPair = Utils.generateKeyPairHex();
+    /**
+     * 点池容量，点池只用于摊薄 k*G 的计算耗时
+     * 池中每个点都是独立随机生成的 k，取用一次即丢弃，不会重复使用
+     */
+    protected static final int POINT_POOL_SIZE = 128;
+    protected static final Queue<Point> POINT_POOL = new ConcurrentLinkedQueue<>();
 
     static {
+        // 后台预生成点，取点时优先从池中取，池空则同步生成
         Thread thread = new Thread(() -> {
-            try {
-                KeyPair pair = Utils.generateKeyPairHex();
-                if (pair != null) {
-                    boostKeyPair = pair;
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    if (POINT_POOL.size() < POINT_POOL_SIZE) {
+                        POINT_POOL.offer(generatePoint());
+                        continue;
+                    }
+                    TimeUnit.MILLISECONDS.sleep(20);
+                } catch (Throwable e) {
+                    // 预生成失败不影响使用，取点时同步生成即可
+                    try {
+                        TimeUnit.MILLISECONDS.sleep(20);
+                    } catch (InterruptedException ignore) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
-            } catch (Throwable e) {
-                System.err.println(e);
-            }
-            try {
-                TimeUnit.SECONDS.sleep(15);
-            } catch (Exception e) {
             }
         });
         thread.setDaemon(true);
-        thread.setName("boost-sm2-key-gen");
+        thread.setName("boost-sm2-point-gen");
         thread.start();
-    }
-
-    protected static KeyPair getBoostKeyPair() {
-        return boostKeyPair;
     }
 
     public static String doEncrypt(String msg, String publicKey, CipherMode cipherMode) {
@@ -64,13 +72,15 @@ public class Sm2Cipher {
         if (cipherMode == null) {
             cipherMode = CipherMode.C1C3C2;
         }
+        // 下方会对 msg 就地异或成 c2，这里复制一份，避免污染调用方的数组
+        msg = Arrays.copyOf(msg, msg.length);
         EcPointFp publicKey = Utils.getGlobalCurve().decodePointHex(publicKeyHex); // 先将公钥转成点
 
-        KeyPair keypair = getBoostKeyPair();
-        BigInteger k = new BigInteger(keypair.privateKey, 16); // 随机数 k
+        Point point = getPoint();
+        BigInteger k = point.getK(); // 随机数 k
 
         // c1 = k * G
-        String c1 = keypair.publicKey;
+        String c1 = point.getPublicKey();
         if (c1.length() > 128) {
             c1 = c1.substring(c1.length() - 128);
         }
@@ -251,7 +261,8 @@ public class Sm2Cipher {
         }
 
         BigInteger dA = new BigInteger(privateKey, 16);
-        BigInteger e = new BigInteger(hashHex, 16);
+        // 消息为空时，js 中 new BigInteger('', 16) 为 0
+        BigInteger e = hashHex.isEmpty() ? BigInteger.ZERO : new BigInteger(hashHex, 16);
 
         // k
         BigInteger k = null;
@@ -330,7 +341,8 @@ public class Sm2Cipher {
         EcPointFp G = Utils.EC_PARAM.getG();
 
         EcPointFp PA = curve.decodePointHex(publicKey);
-        BigInteger e = new BigInteger(hashHex, 16);
+        // 消息为空时，js 中 new BigInteger('', 16) 为 0
+        BigInteger e = hashHex.isEmpty() ? BigInteger.ZERO : new BigInteger(hashHex, 16);
 
         // t = (r + s) mod n
         BigInteger t = r.add(s).mod(n);
@@ -382,9 +394,10 @@ public class Sm2Cipher {
 
         int entl = userId.length() * 4;
 
+        // entl 为大端序 2 字节：| entl >> 8 | entl & 0xff |
         byte[] tmp = new byte[2 + data.length];
-        tmp[0] = (byte) (entl & 0x00ff);
-        tmp[1] = (byte) (entl >> 8 & 0x00ff);
+        tmp[0] = (byte) (entl >> 8 & 0x00ff);
+        tmp[1] = (byte) (entl & 0x00ff);
         System.arraycopy(data, 0, tmp, 2, data.length);
         data = tmp;
 
@@ -418,13 +431,23 @@ public class Sm2Cipher {
 
     /**
      * 获取椭圆曲线点
+     * <p>
+     * 优先取预生成的点池，池空则同步生成；每个点只取用一次，与 js 每次 generateKeyPairHex 的行为一致
      */
     public static Point getPoint() {
-        EcCurveFp curve = Utils.EC_PARAM.getCurve();
-        KeyPair keypair = getBoostKeyPair();
-        EcPointFp PA = curve.decodePointHex(keypair.publicKey);
+        Point point = POINT_POOL.poll();
+        return point != null ? point : generatePoint();
+    }
 
-        BigInteger k = new BigInteger(keypair.privateKey, 16);
+    /**
+     * 生成一个新的椭圆曲线点，k 每次都是独立随机的
+     */
+    protected static Point generatePoint() {
+        KeyPair keypair = Utils.generateKeyPairHex();
+        EcCurveFp curve = Utils.EC_PARAM.getCurve();
+        EcPointFp PA = curve.decodePointHex(keypair.getPublicKey());
+
+        BigInteger k = new BigInteger(keypair.getPrivateKey(), 16);
         BigInteger x1 = PA.getX().toBigInteger();
 
         Point ret = new Point();
