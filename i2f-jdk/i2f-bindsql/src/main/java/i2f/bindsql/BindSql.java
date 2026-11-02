@@ -91,6 +91,38 @@ public class BindSql {
         return this;
     }
 
+    public BindSql setArgsArray(Object[] args){
+        if(args==null){
+            return this;
+        }
+        this.args=new ArrayList<>(Arrays.asList(args));
+        return this;
+    }
+
+    public Object[] getArgsArray(){
+        if(args==null){
+            return new Object[0];
+        }
+        return args.toArray();
+    }
+
+    public boolean isEmpty(){
+        return sql==null || sql.isEmpty();
+    }
+
+    public boolean isBlank(){
+        if(isEmpty()){
+            return true;
+        }
+        for (int i = 0; i < sql.length(); i++) {
+            char ch=sql.charAt(i);
+            if(!Character.isWhitespace(ch)){
+                return false;
+            }
+        }
+        return true;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -238,23 +270,66 @@ public class BindSql {
     }
 
     // 动态部分
+    public <T> BindSql vars(T... arr) {
+        return vars(Arrays.asList(arr).iterator());
+    }
 
     public <T> BindSql vars(Iterable<T> iterable) {
-        return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","), BindSql.of("("), BindSql.of(")"));
+        return vars(iterable.iterator());
+    }
+    public <T> BindSql vars(Iterator<T> iterable) {
+        return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","),
+                BindSql.of("("), BindSql.of(")"));
+    }
+
+    public <T> BindSql varsJoin(T... arr) {
+        return varsJoin(Arrays.asList(arr).iterator());
+    }
+
+    public <T> BindSql varsJoin(Iterable<T> iterable) {
+        return varsJoin(iterable.iterator());
+    }
+    public <T> BindSql varsJoin(Iterator<T> iterable) {
+        return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","), null,null);
+    }
+
+    public <T> BindSql foreach(T[] iterable, BiFunction<BindSql, T, BindSql> consumer) {
+        return foreach(Arrays.asList(iterable).iterator(), consumer, null, null, null);
     }
 
     public <T> BindSql foreach(Iterable<T> iterable, BiFunction<BindSql, T, BindSql> consumer) {
+        return foreach(iterable.iterator(), consumer, null, null, null);
+    }
+
+    public <T> BindSql foreach(Iterator<T> iterable, BiFunction<BindSql, T, BindSql> consumer) {
         return foreach(iterable, consumer, null, null, null);
     }
 
+    public <T> BindSql foreach(T[] iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator) {
+        return foreach(Arrays.asList(iterable).iterator(), consumer, separator, null, null);
+    }
+
     public <T> BindSql foreach(Iterable<T> iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator) {
+        return foreach(iterable.iterator(), consumer, separator, null, null);
+    }
+
+    public <T> BindSql foreach(Iterator<T> iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator) {
         return foreach(iterable, consumer, separator, null, null);
     }
 
+    public <T> BindSql foreach(T[] iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator, BindSql open, BindSql close) {
+        return foreach(Arrays.asList(iterable).iterator(), consumer, separator, open, close);
+    }
+
     public <T> BindSql foreach(Iterable<T> iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator, BindSql open, BindSql close) {
+        return foreach(iterable.iterator(), consumer, separator, open, close);
+    }
+
+    public <T> BindSql foreach(Iterator<T> iterable, BiFunction<BindSql, T, BindSql> consumer, BindSql separator, BindSql open, BindSql close) {
         BindSql ret = BindSql.of();
         boolean isFirst = true;
-        for (T item : iterable) {
+        while (iterable.hasNext()) {
+            T item = iterable.next();
             if (!isFirst) {
                 if (separator != null) {
                     ret = ret.concat(separator);
@@ -372,12 +447,12 @@ public class BindSql {
             return new ChooseBranchBuilder();
         }
 
-        public ChooseBranchBuilder add(Supplier<Boolean> predicate, Function<BindSql, BindSql> consumer) {
+        public ChooseBranchBuilder when(Supplier<Boolean> predicate, Function<BindSql, BindSql> consumer) {
             list.add(ChooseBranch.of(predicate, consumer));
             return this;
         }
 
-        public ChooseBranchBuilder add(Function<BindSql, BindSql> consumer) {
+        public ChooseBranchBuilder otherwise(Function<BindSql, BindSql> consumer) {
             list.add(ChooseBranch.of(consumer));
             return this;
         }
@@ -478,6 +553,14 @@ public class BindSql {
     }
 
     public <T> BindSql in(Iterable<T> iterable) {
+        return in().space().vars(iterable);
+    }
+
+    public <T> BindSql in(T... iterable) {
+        return in().space().vars(iterable);
+    }
+
+    public <T> BindSql in(Iterator<T> iterable) {
         return in().space().vars(iterable);
     }
 
@@ -860,7 +943,7 @@ public class BindSql {
     }
 
     public String toMergeSql() {
-        return toMergeSql(BindSql::defaultMergeSqlValueConvertor);
+        return toMergeSql(DefaultMergeSqlValueConvertor.DEFAULT);
     }
 
     public static final Pattern PATTERN_MERGE = Pattern.compile("('[^']*')" + // 字符串，保持不变
@@ -889,7 +972,12 @@ public class BindSql {
                     || group.startsWith("/*")) {
                 builder.append(group);
             } else {
-                builder.append(valueConvertor.apply(this.args.get(valueIdx++)));
+                if(valueIdx<this.args.size()) {
+                    builder.append(valueConvertor.apply(this.args.get(valueIdx++)));
+                }else{
+                    // 参数不足替换失败
+                    builder.append("?");
+                }
             }
             lastIdx = end;
         }
@@ -899,34 +987,97 @@ public class BindSql {
         return builder.toString();
     }
 
-    public static final DateTimeFormatter FMT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-    public static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    public static final DateTimeFormatter FMT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
-    public static final ThreadLocal<SimpleDateFormat> FMT_S_DATE = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+    public static class DefaultMergeSqlValueConvertor implements Function<Object,String> {
+        public static final DefaultMergeSqlValueConvertor DEFAULT =new DefaultMergeSqlValueConvertor();
+        public static final DateTimeFormatter FMT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        public static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        public static final DateTimeFormatter FMT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
+        public static final ThreadLocal<SimpleDateFormat> FMT_S_DATE = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
 
-    public static String defaultMergeSqlValueConvertor(Object value) {
-        if (value == null) {
+        @Override
+        public String apply(Object value) {
+            if (value == null) {
+                return onNull();
+            }
+            if (value instanceof Number) {
+                return onNumber((Number) value);
+            }
+            if (value instanceof CharSequence) {
+                return onCharSequence((CharSequence) value);
+            }
+            if (value instanceof Date) {
+                return onDate((Date)value);
+            }
+            if (value instanceof LocalDateTime) {
+                return onLocalDateTime((LocalDateTime) value);
+            }
+            if (value instanceof LocalDate) {
+                return onLocalDate((LocalDate) value);
+            }
+            if (value instanceof LocalTime) {
+                return onLocalTime((LocalTime) value);
+            }
+            return onObject(value);
+        }
+
+        public String onNull(){
             return "null";
         }
-        if (value instanceof Number) {
+
+        public String onNumber(Number value){
             return String.valueOf(value);
         }
-        if (value instanceof CharSequence) {
+
+        public String onCharSequence(CharSequence value){
             return escapeSqlString(String.valueOf(value));
         }
-        if (value instanceof Date) {
-            return escapeSqlString(FMT_S_DATE.get().format((Date) value));
+
+        public String onDate(Date value){
+            return escapeSqlString(FMT_S_DATE.get().format(value));
         }
-        if (value instanceof LocalDateTime) {
-            return escapeSqlString(FMT_DATE_TIME.format((LocalDateTime) value));
+
+        public String onLocalDateTime(LocalDateTime value){
+            return escapeSqlString(FMT_DATE_TIME.format( value));
         }
-        if (value instanceof LocalDate) {
-            return escapeSqlString(FMT_DATE.format((LocalDate) value));
+
+        public String onLocalDate(LocalDate value){
+            return escapeSqlString(FMT_DATE.format( value));
         }
-        if (value instanceof LocalTime) {
-            return escapeSqlString(FMT_TIME.format((LocalTime) value));
+
+        public String onLocalTime(LocalTime value){
+            return escapeSqlString(FMT_TIME.format( value));
         }
-        return escapeSqlString(String.valueOf(value));
+
+        public String onObject(Object value){
+            return escapeSqlString(String.valueOf(value));
+        }
+    }
+
+    public static class OracleMergeSqlValueConvertor extends DefaultMergeSqlValueConvertor{
+        public static final OracleMergeSqlValueConvertor ORACLE=new OracleMergeSqlValueConvertor();
+        @Override
+        public String onDate(Date value) {
+            return "to_date("+escapeSqlString(FMT_S_DATE.get().format( value))+",'yyyy-mm-dd hh24:mi:ss')";
+        }
+
+        @Override
+        public String onLocalDateTime(LocalDateTime value) {
+            return "to_date("+escapeSqlString(FMT_DATE_TIME.format( value))+",'yyyy-mm-dd hh24:mi:ss')";
+        }
+
+        @Override
+        public String onLocalDate(LocalDate value) {
+            return "to_date("+escapeSqlString(FMT_DATE.format( value))+",'yyyy-mm-dd')";
+        }
+
+        @Override
+        public String onLocalTime(LocalTime value) {
+            return "to_date("+escapeSqlString(FMT_TIME.format( value))+",'hh24:mi:ss')";
+        }
+    }
+
+    public String toOracleMergeSql() {
+        return toMergeSql(OracleMergeSqlValueConvertor.ORACLE);
     }
 
 }
