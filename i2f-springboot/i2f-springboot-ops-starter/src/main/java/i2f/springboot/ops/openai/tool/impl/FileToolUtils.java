@@ -1,5 +1,6 @@
 package i2f.springboot.ops.openai.tool.impl;
 
+import i2f.color.Rgba;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
 import i2f.match.impl.AntMatcher;
@@ -7,6 +8,8 @@ import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexMatchItem;
 import i2f.springboot.ops.util.HumanUtil;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -66,6 +69,25 @@ public class FileToolUtils {
             ret.put("canWrite", file.canWrite());
             long mtime = file.lastModified();
             ret.put("lastModifiedTimeInMillSeconds", mtime);
+            try{
+                BufferedImage img = ImageIO.read(file);
+                if(img!=null){
+                    ret.put("isImageFile",true);
+                    ret.put("imageWidth",img.getWidth());
+                    ret.put("imageHeight",img.getHeight());
+
+                    int rgb = img.getRGB(0, 0);
+                    Rgba argb = Rgba.argb(rgb);
+                    ret.put("posLeftTopArgb",argb.getA()+","+argb.getR()+","+argb.getG()+","+argb.getB());
+
+                    rgb=img.getRGB(img.getWidth()/2,img.getHeight()/2);
+                    argb = Rgba.argb(rgb);
+                    ret.put("posCenterArgb",argb.getA()+","+argb.getR()+","+argb.getG()+","+argb.getB());
+                }
+                img=null;
+            }catch(Exception e){
+                // ignore
+            }
         }
         return ret;
     }

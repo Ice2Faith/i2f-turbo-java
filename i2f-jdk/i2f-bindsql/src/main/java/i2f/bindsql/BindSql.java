@@ -1,9 +1,13 @@
 package i2f.bindsql;
 
+import i2f.lambda.core.Lambda;
+import i2f.lambda.core.func.IGetter;
+import i2f.text.StringUtils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Field;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,7 +26,57 @@ import java.util.regex.Pattern;
  */
 public class BindSql {
 
+    public static void main(String[] args) {
+        /*language=sql*/
+        BindSql add = BindSql.of()
+                .select(s -> s
+                        .add("a.*")
+                        .add("/* ? */ ,' ? '' ?'  -- ? \n  as text")
+                )
+                .from().add("sys_user ").add("a")
+                .where(q ->
+                        q.and(s -> s.add("a.user_id").eq(1001))
+                                .and(s -> s.add("a.status ").in(Arrays.asList(1, 2, 3)))
+                                .choose(e -> e
+                                        .when(
+                                                () -> false,
+                                                s -> s.and(v -> v.add("a.nick_name").like("123"))
+                                        )
+                                        .otherwise(
+                                                s -> s.and(v -> v.add("a.user_name").eq("admin"))
+                                        )
+                                )
+                );
 
+
+        /*language=sql*/
+        BindSql bql = BindSql.of("select a.* from sys_user a")
+                .where(q -> q
+                        .andEq("a.user_id", 1)
+                        .andEq(c -> c.get(BindSql::getSql), 2)
+                        .andEq(c -> c.get(BindSql::getType), 3)
+                        .andEq(c -> c.get("a.age"), 4)
+                        .andEq(c -> c.get(BindSql::getType), 5)
+                        .andEq(c -> c.get("a", BindSql::getArgs), 6)
+                );
+        System.out.println(bql.pretty().toOracleMergeSql());
+        System.out.println("++++++++++++++++++++");
+        System.out.println(add);
+        System.out.println("======================");
+
+        String sql = add.toMergeSql();
+        System.out.println(sql);
+        System.out.println("======================");
+
+        sql = trimCommentSql(sql);
+        System.out.println(sql);
+        System.out.println("======================");
+
+        sql = prettySql(sql);
+        System.out.println(sql);
+        System.out.println("======================");
+
+    }
 
     public static enum Type {
         UNSET(0),
@@ -91,32 +145,32 @@ public class BindSql {
         return this;
     }
 
-    public BindSql setArgsArray(Object[] args){
-        if(args==null){
+    public BindSql setArgsArray(Object[] args) {
+        if (args == null) {
             return this;
         }
-        this.args=new ArrayList<>(Arrays.asList(args));
+        this.args = new ArrayList<>(Arrays.asList(args));
         return this;
     }
 
-    public Object[] getArgsArray(){
-        if(args==null){
+    public Object[] getArgsArray() {
+        if (args == null) {
             return new Object[0];
         }
         return args.toArray();
     }
 
-    public boolean isEmpty(){
-        return sql==null || sql.isEmpty();
+    public boolean isEmpty() {
+        return sql == null || sql.isEmpty();
     }
 
-    public boolean isBlank(){
-        if(isEmpty()){
+    public boolean isBlank() {
+        if (isEmpty()) {
             return true;
         }
         for (int i = 0; i < sql.length(); i++) {
-            char ch=sql.charAt(i);
-            if(!Character.isWhitespace(ch)){
+            char ch = sql.charAt(i);
+            if (!Character.isWhitespace(ch)) {
                 return false;
             }
         }
@@ -277,6 +331,7 @@ public class BindSql {
     public <T> BindSql vars(Iterable<T> iterable) {
         return vars(iterable.iterator());
     }
+
     public <T> BindSql vars(Iterator<T> iterable) {
         return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","),
                 BindSql.of("("), BindSql.of(")"));
@@ -289,8 +344,9 @@ public class BindSql {
     public <T> BindSql varsJoin(Iterable<T> iterable) {
         return varsJoin(iterable.iterator());
     }
+
     public <T> BindSql varsJoin(Iterator<T> iterable) {
-        return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","), null,null);
+        return foreach(iterable, (s, v) -> s.add("?", v), BindSql.of(","), null, null);
     }
 
     public <T> BindSql foreach(T[] iterable, BiFunction<BindSql, T, BindSql> consumer) {
@@ -356,7 +412,7 @@ public class BindSql {
 
     public <T> BindSql when(T value, Predicate<T> predicate, BiFunction<BindSql, T, BindSql> consumer) {
         if (predicate == null) {
-            predicate = BindSql::isEmpty;
+            predicate = BindSql::validateValue;
         }
         if (predicate.test(value)) {
             BindSql sql = consumer.apply(BindSql.of(), value);
@@ -487,9 +543,12 @@ public class BindSql {
         return this;
     }
 
-    public static boolean isEmpty(Object obj) {
+    public static boolean validateValue(Object obj) {
         if (obj == null) {
             return false;
+        }
+        if (obj instanceof Boolean) {
+            return (boolean) obj;
         }
         if (obj instanceof String) {
             String s = (String) obj;
@@ -509,6 +568,14 @@ public class BindSql {
         }
         if (obj.getClass().isArray()) {
             return Array.getLength(obj) > 0;
+        }
+        if (obj instanceof Iterator) {
+            Iterator<?> i = (Iterator<?>) obj;
+            return i.hasNext();
+        }
+        if (obj instanceof Enumeration) {
+            Enumeration<?> e = (Enumeration<?>) obj;
+            return e.hasMoreElements();
         }
         return true;
     }
@@ -545,7 +612,7 @@ public class BindSql {
     }
 
     public BindSql or(Function<BindSql, BindSql> consumer) {
-        return and().concat(consumer);
+        return or().concat(consumer);
     }
 
     public BindSql in() {
@@ -740,7 +807,7 @@ public class BindSql {
     }
 
     public BindSql set() {
-        return add(BindSql.of("not"));
+        return add(BindSql.of("set"));
     }
 
     public BindSql set(Function<BindSql, BindSql> consumer) {
@@ -841,6 +908,227 @@ public class BindSql {
     public BindSql references() {
         return add(BindSql.of("references"));
     }
+
+    // 动态条件部分
+
+    public BindSql andEq(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).eq(v));
+    }
+
+    public BindSql andEq(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).eq(v));
+    }
+
+    public BindSql andNeq(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).neq(v));
+    }
+
+    public BindSql andNeq(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).neq(v));
+    }
+
+    public BindSql andGt(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).gt(v));
+    }
+
+    public BindSql andGt(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).gt(v));
+    }
+
+    public BindSql andLt(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).lt(v));
+    }
+
+    public BindSql andLt(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).lt(v));
+    }
+
+    public BindSql andGte(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).gte(v));
+    }
+
+    public BindSql andGte(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).gte(v));
+    }
+
+    public BindSql andLte(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).lte(v));
+    }
+
+    public BindSql andLte(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).lte(v));
+    }
+
+    public BindSql andBetween(String column, Object left, Object right) {
+        boolean vl = validateValue(left);
+        boolean vr = validateValue(right);
+        if (vl && vr) {
+            return and().add(column).between(left, right);
+        } else if (vl) {
+            return and().add(column).gte(left);
+        } else if (vr) {
+            return and().add(column).lte(right);
+        }
+        return this;
+    }
+
+    public BindSql andBetween(Function<ColumnNameProvider, String> column, Object left, Object right) {
+        boolean vl = validateValue(left);
+        boolean vr = validateValue(right);
+        if (vl && vr) {
+            return and().add(column.apply(ColumnNameProvider.INSTANCE)).between(left, right);
+        } else if (vl) {
+            return and().add(column.apply(ColumnNameProvider.INSTANCE)).gte(left);
+        } else if (vr) {
+            return and().add(column.apply(ColumnNameProvider.INSTANCE)).lte(right);
+        }
+        return this;
+    }
+
+    public BindSql andIsNull(String column) {
+        return and().add(column).isNull();
+    }
+
+    public BindSql andIsNull(Function<ColumnNameProvider, String> column) {
+        return and().add(column.apply(ColumnNameProvider.INSTANCE)).isNull();
+    }
+
+    public BindSql andIsNotNull(String column) {
+        return and().add(column).isNotNull();
+    }
+
+    public BindSql andIsNotNull(Function<ColumnNameProvider, String> column) {
+        return and().add(column.apply(ColumnNameProvider.INSTANCE)).isNotNull();
+    }
+
+    public BindSql andLike(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).like(v));
+    }
+
+    public BindSql andLike(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).like(v));
+    }
+
+    public BindSql andNotLike(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).not().like(v));
+    }
+
+    public BindSql andNotLike(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).not().like(v));
+    }
+
+    public BindSql andStartsWith(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).startsWith(v));
+    }
+
+    public BindSql andStartsWith(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).startsWith(v));
+    }
+
+    public BindSql andEndsWith(String column, Object value) {
+        return when(value, (q, v) -> q.and().add(column).endsWith(v));
+    }
+
+    public BindSql andEndsWith(Function<ColumnNameProvider, String> column, Object value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).endsWith(v));
+    }
+
+    public <E> BindSql andIn(String column, Iterator<E> value) {
+        return when(value, (q, v) -> q.and().add(column).in(v));
+    }
+
+    public <E> BindSql andIn(Function<ColumnNameProvider, String> column, Iterator<E> value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).in(v));
+    }
+
+    public <E> BindSql andIn(String column, Iterable<E> value) {
+        return when(value, (q, v) -> q.and().add(column).in(v));
+    }
+
+    public <E> BindSql andIn(Function<ColumnNameProvider, String> column, Iterable<E> value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).in(v));
+    }
+
+    public <E> BindSql andIn(String column, E... value) {
+        return when(value, (q, v) -> q.and().add(column).in(v));
+    }
+
+    public <E> BindSql andIn(Function<ColumnNameProvider, String> column, E... value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).in(v));
+    }
+
+    public <E> BindSql andNotIn(String column, Iterator<E> value) {
+        return when(value, (q, v) -> q.and().add(column).not().in(v));
+    }
+
+    public <E> BindSql andNotIn(Function<ColumnNameProvider, String> column, Iterator<E> value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).not().in(v));
+    }
+
+    public <E> BindSql andNotIn(String column, Iterable<E> value) {
+        return when(value, (q, v) -> q.and().add(column).not().in(v));
+    }
+
+    public <E> BindSql andNotIn(Function<ColumnNameProvider, String> column, Iterable<E> value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).not().in(v));
+    }
+
+    public <E> BindSql andNotIn(String column, E... value) {
+        return when(value, (q, v) -> q.and().add(column).not().in(v));
+    }
+
+    public <E> BindSql andNotIn(Function<ColumnNameProvider, String> column, E... value) {
+        return when(value, (q, v) -> q.and().add(column.apply(ColumnNameProvider.INSTANCE)).not().in(v));
+    }
+
+
+    public static class ColumnNameProvider {
+        public static final ColumnNameProvider INSTANCE = new ColumnNameProvider();
+
+        public String get(String name) {
+            return name;
+        }
+
+        public <R, V> String get(IGetter<R, V> getter) {
+            return column(getter);
+        }
+
+        public String get(String alias, String name) {
+            if (alias != null && !alias.isEmpty()) {
+                if (alias.endsWith(".")) {
+                    return alias + name;
+                }
+                return alias + "." + name;
+            }
+            return name;
+        }
+
+        public <R, V> String get(String alias, IGetter<R, V> getter) {
+            return get(alias, column(getter));
+        }
+
+        public String get(String alias, Field field) {
+            return get(alias, column(field));
+        }
+
+        public String get(Field field) {
+            return get(column(field));
+        }
+
+        public static <R, T> String column(IGetter<R, T> getter) {
+            Field field = Lambda.getField(getter);
+            if (field == null) {
+                throw new IllegalArgumentException("cannot resolve column from getter");
+            }
+            return column(field);
+        }
+
+        public static String column(Field field) {
+            return StringUtils.toSnake(field.getName());
+        }
+
+    }
+
 
     // 其他拓展
 
@@ -972,9 +1260,9 @@ public class BindSql {
                     || group.startsWith("/*")) {
                 builder.append(group);
             } else {
-                if(valueIdx<this.args.size()) {
+                if (valueIdx < this.args.size()) {
                     builder.append(valueConvertor.apply(this.args.get(valueIdx++)));
-                }else{
+                } else {
                     // 参数不足替换失败
                     builder.append("?");
                 }
@@ -987,8 +1275,8 @@ public class BindSql {
         return builder.toString();
     }
 
-    public static class DefaultMergeSqlValueConvertor implements Function<Object,String> {
-        public static final DefaultMergeSqlValueConvertor DEFAULT =new DefaultMergeSqlValueConvertor();
+    public static class DefaultMergeSqlValueConvertor implements Function<Object, String> {
+        public static final DefaultMergeSqlValueConvertor DEFAULT = new DefaultMergeSqlValueConvertor();
         public static final DateTimeFormatter FMT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         public static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         public static final DateTimeFormatter FMT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -1006,7 +1294,7 @@ public class BindSql {
                 return onCharSequence((CharSequence) value);
             }
             if (value instanceof Date) {
-                return onDate((Date)value);
+                return onDate((Date) value);
             }
             if (value instanceof LocalDateTime) {
                 return onLocalDateTime((LocalDateTime) value);
@@ -1020,59 +1308,60 @@ public class BindSql {
             return onObject(value);
         }
 
-        public String onNull(){
+        public String onNull() {
             return "null";
         }
 
-        public String onNumber(Number value){
+        public String onNumber(Number value) {
             return String.valueOf(value);
         }
 
-        public String onCharSequence(CharSequence value){
+        public String onCharSequence(CharSequence value) {
             return escapeSqlString(String.valueOf(value));
         }
 
-        public String onDate(Date value){
+        public String onDate(Date value) {
             return escapeSqlString(FMT_S_DATE.get().format(value));
         }
 
-        public String onLocalDateTime(LocalDateTime value){
-            return escapeSqlString(FMT_DATE_TIME.format( value));
+        public String onLocalDateTime(LocalDateTime value) {
+            return escapeSqlString(FMT_DATE_TIME.format(value));
         }
 
-        public String onLocalDate(LocalDate value){
-            return escapeSqlString(FMT_DATE.format( value));
+        public String onLocalDate(LocalDate value) {
+            return escapeSqlString(FMT_DATE.format(value));
         }
 
-        public String onLocalTime(LocalTime value){
-            return escapeSqlString(FMT_TIME.format( value));
+        public String onLocalTime(LocalTime value) {
+            return escapeSqlString(FMT_TIME.format(value));
         }
 
-        public String onObject(Object value){
+        public String onObject(Object value) {
             return escapeSqlString(String.valueOf(value));
         }
     }
 
-    public static class OracleMergeSqlValueConvertor extends DefaultMergeSqlValueConvertor{
-        public static final OracleMergeSqlValueConvertor ORACLE=new OracleMergeSqlValueConvertor();
+    public static class OracleMergeSqlValueConvertor extends DefaultMergeSqlValueConvertor {
+        public static final OracleMergeSqlValueConvertor ORACLE = new OracleMergeSqlValueConvertor();
+
         @Override
         public String onDate(Date value) {
-            return "to_date("+escapeSqlString(FMT_S_DATE.get().format( value))+",'yyyy-mm-dd hh24:mi:ss')";
+            return "to_date(" + escapeSqlString(FMT_S_DATE.get().format(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
         }
 
         @Override
         public String onLocalDateTime(LocalDateTime value) {
-            return "to_date("+escapeSqlString(FMT_DATE_TIME.format( value))+",'yyyy-mm-dd hh24:mi:ss')";
+            return "to_date(" + escapeSqlString(FMT_DATE_TIME.format(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
         }
 
         @Override
         public String onLocalDate(LocalDate value) {
-            return "to_date("+escapeSqlString(FMT_DATE.format( value))+",'yyyy-mm-dd')";
+            return "to_date(" + escapeSqlString(FMT_DATE.format(value)) + ",'yyyy-mm-dd')";
         }
 
         @Override
         public String onLocalTime(LocalTime value) {
-            return "to_date("+escapeSqlString(FMT_TIME.format( value))+",'hh24:mi:ss')";
+            return "to_date(" + escapeSqlString(FMT_TIME.format(value)) + ",'hh24:mi:ss')";
         }
     }
 
