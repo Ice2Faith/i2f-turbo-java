@@ -8,6 +8,7 @@ import i2f.ai.rest.mcp.official.v2024.data.result.*;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tags.AiTagRule;
 import i2f.ai.std.tags.AiTagRuleHelper;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
@@ -167,67 +168,100 @@ public class StreamJsonRpcMcpClientToolProvider implements McpToolProvider, Clos
         }
     }
 
-    @Override
-    public boolean support(ToolBaseCallRequest request) {
+    public ToolDefinition getRequestToolDefinition(ToolBaseCallRequest request) {
         List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             if (tool.getName().equals(request.getName())) {
-                return true;
+                return tool;
             }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return null != getRequestToolDefinition(request);
     }
 
     @Override
     public Object callTool(ToolBaseCallRequest callRequest) throws Throwable {
-        initial();
-        // 【Map 结构示例】tools/call 请求参数
-        // {
-        //   "name": "get_weather",
-        //   "arguments": { "city": "Beijing" }
-        // }
-        JsonRpcToolCallParam params = new JsonRpcToolCallParam();
-        params.setName(callRequest.getName());
-        params.setArguments(jsonSerializer.deserializeAsMap(callRequest.getArguments())); // 直接透传 Map
-
-        RestHttpRequest request = new RestHttpRequest();
-        request.setUrl(getEndpointUrl());
-        request.setMethod(HttpMethodConstants.POST);
-        request.setHeaders(HttpHeaders.create().add(OfficialMcpConstants.HEADER_MCP_SESSION_ID, mcpSessionId));
-        if (headers != null) {
-            request.getHeaders().addAll(headers);
+        ToolDefinition tool = getRequestToolDefinition(callRequest);
+        Set<String> tags = tool == null ? null : tool.getTags();
+        int tryCount = 1;
+        double sleepTs = 300;
+        if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {
+            tryCount = 3;
         }
-        request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params));
-        RestHttpResponse<JsonRpcResponse<JsonRpcToolCallResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {
-        });
+        Throwable lex = null;
 
-        // 【Map 结构示例】tools/call 响应
-        // {
-        //   "jsonrpc": "2.0",
-        //   "id": 3,
-        //   "result": {
-        //     "content": [
-        //       { "type": "text", "text": "Beijing is 25°C and sunny." }
-        //     ],
-        //     "isError": false
-        //   }
-        // }
-        JsonRpcResponse<JsonRpcToolCallResult> body = rest.getBody();
+        while (tryCount > 0) {
+            try {
+                initial();
+                // 【Map 结构示例】tools/call 请求参数
+                // {
+                //   "name": "get_weather",
+                //   "arguments": { "city": "Beijing" }
+                // }
+                JsonRpcToolCallParam params = new JsonRpcToolCallParam();
+                params.setName(callRequest.getName());
+                params.setArguments(jsonSerializer.deserializeAsMap(callRequest.getArguments())); // 直接透传 Map
 
-        JsonRpcError error = body.getError();
-        if (error != null) {
-            Integer code = error.getCode();
-            if (code != null) {
-                throw new IllegalStateException("mcp server response call tool error, " + error.getCode() + ": " + error.getMessage());
+                RestHttpRequest request = new RestHttpRequest();
+                request.setUrl(getEndpointUrl());
+                request.setMethod(HttpMethodConstants.POST);
+                request.setHeaders(HttpHeaders.create().add(OfficialMcpConstants.HEADER_MCP_SESSION_ID, mcpSessionId));
+                if (headers != null) {
+                    request.getHeaders().addAll(headers);
+                }
+                request.setBody(wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params));
+                RestHttpResponse<JsonRpcResponse<JsonRpcToolCallResult>> rest = restClient.rest(request, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {
+                });
+
+                // 【Map 结构示例】tools/call 响应
+                // {
+                //   "jsonrpc": "2.0",
+                //   "id": 3,
+                //   "result": {
+                //     "content": [
+                //       { "type": "text", "text": "Beijing is 25°C and sunny." }
+                //     ],
+                //     "isError": false
+                //   }
+                // }
+                JsonRpcResponse<JsonRpcToolCallResult> body = rest.getBody();
+
+                JsonRpcError error = body.getError();
+                if (error != null) {
+                    Integer code = error.getCode();
+                    if (code != null) {
+                        throw new IllegalStateException("mcp server response call tool error, " + error.getCode() + ": " + error.getMessage());
+                    }
+                }
+
+                JsonRpcToolCallResult result = body.getResult();
+                if (result.isError()) {
+                    throw new IllegalStateException("invoke mcp tool error, cause reason is: ");
+                }
+                List<Map<String, Object>> contentList = result.getContent();
+                return contentList;
+            } catch (Throwable e) {
+                lex = e;
             }
+            tryCount--;
+            if (tryCount <= 0) {
+                break;
+            }
+            try {
+                Thread.sleep((long) sleepTs);
+            } catch (Exception e) {
+                // ignore
+            }
+            sleepTs += 1200;
         }
-
-        JsonRpcToolCallResult result = body.getResult();
-        if (result.isError()) {
-            throw new IllegalStateException("invoke mcp tool error, cause reason is: ");
+        if (lex != null) {
+            throw lex;
         }
-        List<Map<String, Object>> contentList = result.getContent();
-        return contentList;
+        throw new IllegalStateException("un-support tool call request!");
     }
 
     public String getEndpointUrl() {

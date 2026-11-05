@@ -3,6 +3,7 @@ package i2f.springboot.ai.mcp.client.official.v2024.solon.provider;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tags.AiTagRule;
 import i2f.ai.std.tags.AiTagRuleHelper;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
@@ -104,40 +105,74 @@ public class SolonMcpToolProvider implements McpToolProvider {
         }
     }
 
-    @Override
-    public boolean support(ToolBaseCallRequest request) {
-        for (ToolDefinition tool : listTools()) {
-            if (request.getName().equals(tool.getName())) {
-                return true;
+    public ToolDefinition getRequestToolDefinition(ToolBaseCallRequest request) {
+        List<ToolDefinition> tools = listTools();
+        for (ToolDefinition tool : tools) {
+            if (tool.getName().equals(request.getName())) {
+                return tool;
             }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return null != getRequestToolDefinition(request);
     }
 
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
-        String json = request.getArguments();
-        Map<String, Object> args = jsonSerializer.deserializeAsMap(json);
-        ToolResult toolResult = mcpClient.callTool(request.getName(), args);
-        boolean error = toolResult.isError();
-        if (error) {
-            throw new IllegalStateException("call tool error, remote server internal error or parameters wrong!");
+        ToolDefinition tool = getRequestToolDefinition(request);
+        Set<String> tags = tool == null ? null : tool.getTags();
+        int tryCount = 1;
+        double sleepTs = 300;
+        if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {
+            tryCount = 3;
         }
-        if (toolResult.isMultiModal()) {
-            List<Map<String, Object>> ret = new ArrayList<>();
-            List<ContentBlock> blocks = toolResult.getBlocks();
-            for (ContentBlock block : blocks) {
-                String mimeType = block.getMimeType();
-                String content = block.getContent();
+        Throwable lex = null;
 
-                Map<String, Object> item = new HashMap<>();
-                item.put("mimeType", mimeType);
-                item.put("content", content);
-                ret.add(item);
+        while (tryCount > 0) {
+            try {
+                String json = request.getArguments();
+                Map<String, Object> args = jsonSerializer.deserializeAsMap(json);
+                ToolResult toolResult = mcpClient.callTool(request.getName(), args);
+                boolean error = toolResult.isError();
+                if (error) {
+                    throw new IllegalStateException("call tool error, remote server internal error or parameters wrong!");
+                }
+                if (toolResult.isMultiModal()) {
+                    List<Map<String, Object>> ret = new ArrayList<>();
+                    List<ContentBlock> blocks = toolResult.getBlocks();
+                    for (ContentBlock block : blocks) {
+                        String mimeType = block.getMimeType();
+                        String content = block.getContent();
+
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("mimeType", mimeType);
+                        item.put("content", content);
+                        ret.add(item);
+                    }
+                    return ret;
+                }
+                String result = toolResult.getContent();
+                return result;
+            } catch (Throwable e) {
+                lex = e;
             }
-            return ret;
+            tryCount--;
+            if (tryCount <= 0) {
+                break;
+            }
+            try {
+                Thread.sleep((long) sleepTs);
+            } catch (Exception e) {
+                // ignore
+            }
+            sleepTs += 1200;
         }
-        String result = toolResult.getContent();
-        return result;
+        if (lex != null) {
+            throw lex;
+        }
+        throw new IllegalStateException("un-support tool call request!");
     }
 }

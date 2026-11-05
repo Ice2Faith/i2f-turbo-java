@@ -1,5 +1,6 @@
 package i2f.ai.std.tool.impl;
 
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolManager;
 import i2f.ai.std.tool.ToolRawDefinition;
@@ -10,6 +11,7 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -46,11 +48,38 @@ public abstract class AbstractAppToolManager implements ToolManager {
                 continue;
             }
             if (tool.getName().equals(name)) {
-                ToolRawDefinition rawTool = (ToolRawDefinition) tool;
-                IJsonSerializer jsonSerializer = getJsonSerializer();
-                IProxyInvocationHandler invocationHandler = getInvocationHandler();
-                Map<String, Object> parameterMap = jsonSerializer.deserializeAsMap(request.getArguments());
-                return ToolRawHelper.invokeTool(rawTool, parameterMap, invocationHandler);
+                Set<String> tags = tool.getTags();
+                int tryCount=1;
+                double sleepTs=300;
+                if(tags!=null && tags.contains(AiTags.RETRYABLE_VALUE)){
+                    tryCount=3;
+                }
+                Throwable lex=null;
+
+                while(tryCount>0) {
+                    try {
+                        ToolRawDefinition rawTool = (ToolRawDefinition) tool;
+                        IJsonSerializer jsonSerializer = getJsonSerializer();
+                        IProxyInvocationHandler invocationHandler = getInvocationHandler();
+                        Map<String, Object> parameterMap = jsonSerializer.deserializeAsMap(request.getArguments());
+                        return ToolRawHelper.invokeTool(rawTool, parameterMap, invocationHandler);
+                    }catch (Throwable e){
+                        lex=e;
+                    }
+                    tryCount--;
+                    if(tryCount<=0){
+                        break;
+                    }
+                    try{
+                        Thread.sleep((long)sleepTs);
+                    }catch(Exception e){
+                        // ignore
+                    }
+                    sleepTs+=1200;
+                }
+                if(lex!=null){
+                    throw lex;
+                }
             }
         }
         throw new IllegalStateException("un-support tool call request!");

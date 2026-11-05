@@ -4,6 +4,7 @@ import i2f.ai.rest.mcp.simple.HttpSimpleMcpConstants;
 import i2f.ai.rest.mcp.simple.client.data.SimpleMcpToolListRespDto;
 import i2f.ai.rest.mcp.simple.data.McpCallPayloadDto;
 import i2f.ai.std.mcp.McpToolProvider;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.definition.ToolDefinition;
@@ -151,50 +152,83 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
         }
     }
 
-    @Override
-    public boolean support(ToolBaseCallRequest request) {
+    public ToolDefinition getRequestToolDefinition(ToolBaseCallRequest request) {
         List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             if (tool.getName().equals(request.getName())) {
-                return true;
+                return tool;
             }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return null != getRequestToolDefinition(request);
     }
 
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
-        try {
-            ToolBaseCallRequest reqBody = new ToolBaseCallRequest().toMutator()
-                    .set(e -> e::setId, request.getId())
-                    .set(e -> e::setName, request.getName())
-                    .set(e -> e::setArguments, request.getArguments())
-                    .done();
-            String content = jsonSerializer.serialize(reqBody);
-            McpCallPayloadDto payloadDto = new McpCallPayloadDto();
-            payloadDto.setContent(content);
-            Map<String, Object> contextMap = ToolCallContextHolder.copyOf();
-            String context = jsonSerializer.serialize(contextMap);
-            payloadDto.setContext(context);
-
-            RestHttpResponse<ApiResp> resp = restClient.rest(new RestHttpRequest().toMutator()
-                    .set(u -> u::setUrl, mergeUrl(baseUrl, HttpSimpleMcpConstants.URL_PATH_CALL_TOOL))
-                    .set(u -> u::setMethod, HttpMethodConstants.POST)
-                    .set(u -> u::setHeaders, HttpHeaders.create()
-                            .apply(headers -> applyHeader(headers, payloadDto))
-                    )
-                    .set(u -> u::setBody, payloadDto)
-                    .done(), ApiResp.class);
-            ApiResp<?> dto = resp.getBody();
-            if (dto.getCode() != ApiCode.SUCCESS) {
-                throw new IllegalStateException("call tools error: " + dto.getMsg());
-            }
-            return dto.getData();
-        } catch (Exception e) {
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            throw new IllegalStateException(e.getMessage(), e);
+        ToolDefinition tool = getRequestToolDefinition(request);
+        Set<String> tags = tool==null?null:tool.getTags();
+        int tryCount = 1;
+        double sleepTs = 300;
+        if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {
+            tryCount = 3;
         }
+        Throwable lex = null;
+
+        while (tryCount > 0) {
+            try {
+                try {
+                    ToolBaseCallRequest reqBody = new ToolBaseCallRequest().toMutator()
+                            .set(e -> e::setId, request.getId())
+                            .set(e -> e::setName, request.getName())
+                            .set(e -> e::setArguments, request.getArguments())
+                            .done();
+                    String content = jsonSerializer.serialize(reqBody);
+                    McpCallPayloadDto payloadDto = new McpCallPayloadDto();
+                    payloadDto.setContent(content);
+                    Map<String, Object> contextMap = ToolCallContextHolder.copyOf();
+                    String context = jsonSerializer.serialize(contextMap);
+                    payloadDto.setContext(context);
+
+                    RestHttpResponse<ApiResp> resp = restClient.rest(new RestHttpRequest().toMutator()
+                            .set(u -> u::setUrl, mergeUrl(baseUrl, HttpSimpleMcpConstants.URL_PATH_CALL_TOOL))
+                            .set(u -> u::setMethod, HttpMethodConstants.POST)
+                            .set(u -> u::setHeaders, HttpHeaders.create()
+                                    .apply(headers -> applyHeader(headers, payloadDto))
+                            )
+                            .set(u -> u::setBody, payloadDto)
+                            .done(), ApiResp.class);
+                    ApiResp<?> dto = resp.getBody();
+                    if (dto.getCode() != ApiCode.SUCCESS) {
+                        throw new IllegalStateException("call tools error: " + dto.getMsg());
+                    }
+                    return dto.getData();
+                } catch (Exception e) {
+                    if (e instanceof RuntimeException) {
+                        throw (RuntimeException) e;
+                    }
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            } catch (Throwable e) {
+                lex = e;
+            }
+            tryCount--;
+            if (tryCount <= 0) {
+                break;
+            }
+            try {
+                Thread.sleep((long) sleepTs);
+            } catch (Exception e) {
+                // ignore
+            }
+            sleepTs += 1200;
+        }
+        if (lex != null) {
+            throw lex;
+        }
+        throw new IllegalStateException("un-support tool call request!");
     }
 }

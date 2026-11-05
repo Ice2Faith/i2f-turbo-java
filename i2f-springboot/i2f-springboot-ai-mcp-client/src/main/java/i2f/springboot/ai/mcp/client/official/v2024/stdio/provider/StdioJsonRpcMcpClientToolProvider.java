@@ -8,6 +8,7 @@ import i2f.ai.rest.mcp.official.v2024.data.result.*;
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.tags.AiTagRule;
 import i2f.ai.std.tags.AiTagRuleHelper;
+import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.ai.std.tool.definition.impl.DefaultToolDefinition;
@@ -155,71 +156,104 @@ public class StdioJsonRpcMcpClientToolProvider implements McpToolProvider, Close
         }
     }
 
-    @Override
-    public boolean support(ToolBaseCallRequest request) {
+    public ToolDefinition getRequestToolDefinition(ToolBaseCallRequest request) {
         List<ToolDefinition> tools = listTools();
         for (ToolDefinition tool : tools) {
             if (tool.getName().equals(request.getName())) {
-                return true;
+                return tool;
             }
         }
-        return false;
+        return null;
+    }
+
+    @Override
+    public boolean support(ToolBaseCallRequest request) {
+        return null != getRequestToolDefinition(request);
     }
 
     @Override
     public Object callTool(ToolBaseCallRequest callRequest) throws Throwable {
-        initial();
-        // 【Map 结构示例】tools/call 请求参数
-        // {
-        //   "name": "get_weather",
-        //   "arguments": { "city": "Beijing" }
-        // }
-        JsonRpcToolCallParam params = new JsonRpcToolCallParam();
-        params.setName(callRequest.getName());
-        params.setArguments(jsonSerializer.deserializeAsMap(callRequest.getArguments())); // 直接透传 Map
-
-        JsonRpcRequest<JsonRpcToolCallParam> request = wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params);
-        CompletableFuture<Object> send = stdioClient.send(request.getId(), request);
-        Object obj = send.get();
-        JsonRpcResponse<JsonRpcToolCallResult> rest = RichConverter.convert(obj, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {
-        });
-
-        // 【Map 结构示例】tools/call 响应
-        // {
-        //   "jsonrpc": "2.0",
-        //   "id": 3,
-        //   "result": {
-        //     "content": [
-        //       { "type": "text", "text": "Beijing is 25°C and sunny." }
-        //     ],
-        //     "isError": false
-        //   }
-        // }
-        JsonRpcResponse<JsonRpcToolCallResult> body = rest;
-
-        JsonRpcError error = body.getError();
-        if (error != null) {
-            Integer code = error.getCode();
-            if (code != null) {
-                throw new IllegalStateException("mcp server response call tool error, " + error.getCode() + ": " + error.getMessage());
-            }
+        ToolDefinition tool = getRequestToolDefinition(callRequest);
+        Set<String> tags = tool == null ? null : tool.getTags();
+        int tryCount = 1;
+        double sleepTs = 300;
+        if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {
+            tryCount = 3;
         }
+        Throwable lex = null;
 
-        JsonRpcToolCallResult result = body.getResult();
-        List<Map<String, Object>> contentList = result.getContent();
+        while (tryCount > 0) {
+            try {
+                initial();
+                // 【Map 结构示例】tools/call 请求参数
+                // {
+                //   "name": "get_weather",
+                //   "arguments": { "city": "Beijing" }
+                // }
+                JsonRpcToolCallParam params = new JsonRpcToolCallParam();
+                params.setName(callRequest.getName());
+                params.setArguments(jsonSerializer.deserializeAsMap(callRequest.getArguments())); // 直接透传 Map
 
-        if (result.isError()) {
-            String reason = "";
-            if (contentList != null && !contentList.isEmpty()) {
-                Map<String, Object> map = contentList.get(0);
-                if (map.containsKey("text")) {
-                    reason = String.valueOf(map.get("text"));
+                JsonRpcRequest<JsonRpcToolCallParam> request = wrapJsonRpcHttpBody(OfficialMcpConstants.METHOD_TOOLS_CALL, params);
+                CompletableFuture<Object> send = stdioClient.send(request.getId(), request);
+                Object obj = send.get();
+                JsonRpcResponse<JsonRpcToolCallResult> rest = RichConverter.convert(obj, new TypeToken<JsonRpcResponse<JsonRpcToolCallResult>>() {
+                });
+
+                // 【Map 结构示例】tools/call 响应
+                // {
+                //   "jsonrpc": "2.0",
+                //   "id": 3,
+                //   "result": {
+                //     "content": [
+                //       { "type": "text", "text": "Beijing is 25°C and sunny." }
+                //     ],
+                //     "isError": false
+                //   }
+                // }
+                JsonRpcResponse<JsonRpcToolCallResult> body = rest;
+
+                JsonRpcError error = body.getError();
+                if (error != null) {
+                    Integer code = error.getCode();
+                    if (code != null) {
+                        throw new IllegalStateException("mcp server response call tool error, " + error.getCode() + ": " + error.getMessage());
+                    }
                 }
-            }
-            throw new IllegalStateException("invoke mcp tool error, cause reason is: " + reason);
-        }
 
-        return contentList;
+                JsonRpcToolCallResult result = body.getResult();
+                List<Map<String, Object>> contentList = result.getContent();
+
+                if (result.isError()) {
+                    String reason = "";
+                    if (contentList != null && !contentList.isEmpty()) {
+                        Map<String, Object> map = contentList.get(0);
+                        if (map.containsKey("text")) {
+                            reason = String.valueOf(map.get("text"));
+                        }
+                    }
+                    throw new IllegalStateException("invoke mcp tool error, cause reason is: " + reason);
+                }
+
+                return contentList;
+            } catch (Throwable e) {
+                lex = e;
+            }
+            tryCount--;
+            if (tryCount <= 0) {
+                break;
+            }
+            try {
+                Thread.sleep((long) sleepTs);
+            } catch (Exception e) {
+                // ignore
+            }
+            sleepTs += 1200;
+        }
+        if (lex != null) {
+            throw lex;
+        }
+        throw new IllegalStateException("un-support tool call request!");
     }
 
 
