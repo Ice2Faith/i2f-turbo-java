@@ -2,6 +2,7 @@ package i2f.springboot.ops.openai.tool.impl;
 
 import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
+import i2f.ai.std.tool.ToolCallContextHolder;
 import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
@@ -9,6 +10,7 @@ import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.io.file.FileUtil;
 import i2f.io.stream.StreamUtil;
+import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,8 +52,22 @@ public class LocalFileTools {
     @Value("${ai.tools.file.backup-file:true}")
     protected boolean backupFile = true;
 
+    @Value("${ai.tools.file.allow-change-full-access:false}")
+    protected boolean allowChangeFullAccess = false;
+
     @Value("${ai.tools.file.full-access:false}")
     protected boolean fullAccess = false;
+
+
+    public boolean currentFullAccess(){
+        if(allowChangeFullAccess) {
+            OpenAiOperateDto req = (OpenAiOperateDto) ToolCallContextHolder.get("req");
+            if (req != null) {
+                return req.isEnableFullAccess();
+            }
+        }
+        return fullAccess;
+    }
 
     @Tool(
             tags = {
@@ -82,7 +98,7 @@ public class LocalFileTools {
         startFile = FileToolUtils.normalizeFile(startFile);
 
         List<Map<String, Object>> list = FileToolUtils.searchFiles(startFile, pattern, maxDeep, startFile);
-        if (fullAccess) {
+        if (currentFullAccess()) {
             for (Map<String, Object> map : list) {
                 try {
                     String file = (String) map.get("file");
@@ -462,7 +478,7 @@ public class LocalFileTools {
             startPath = new File(getRootFile(), startPath).getAbsolutePath();
         }
 
-        if (fullAccess) {
+        if (currentFullAccess()) {
             rootFile = null;
         }
 

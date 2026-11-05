@@ -331,8 +331,9 @@ i2f:
 - 循环运行中的用户输入一律进入会话维度插话队列 `session.interjects`，不再直接发起请求（避免两个 ReAct 循环并行交错）
 - 插话只在安全临界点投递：前端构建请求时取出队首插话放入 `req.interject`，后端 `appendInterjectMessage` 在 `tool_calls` 与 `tool` 成对完整、且工具回传的附加消息插入完成之后，把插话追加为本轮最后一条消息；不在安全边界（最后一条是待响应的 `assistant(tool_calls)`）则跳过，由下一轮继续携带
 - 插话显示与其他回显消息一致，统一由后端在真正插入的时机回显：后端用 `canAppendInterject` 校验后调用 `echoInterjectMessage` 发送 `echo_interject`（回显原始内容，早于 `convertOpenAiUserMessage` 追加附件清单），前端收到后按 `insertBeforeLast` 插入到助手占位之前，保证 LLM 的答复消息始终是最后一条；本轮结束仍未回显（异常/中断/不在安全边界）则退回队首，同一条连续 3 次未投递才丢弃
-- 本轮结束后统一在 `finally` 中通过 `drainSessionContinues` 串行调度下一轮（工具续跑优先，其次插话投递）
-- 自动/手动会话总结同样纳入单飞调度：指令消息先落历史，再通过 `requestSessionContinue` 排队（`action=summary-history`），已排队总结不会被普通续跑覆盖，避免总结与工具续跑竞态
+- 本轮结束后统一在 `finally` 中通过 `drainSessionContinues` 串行调度下一轮（会话总结优先，其次普通续跑，最后插话投递）
+- 自动/手动会话总结同样纳入单飞调度：指令消息先落历史，再通过 `requestSessionContinue` 排队（`action=summary-history`）；续跑队列按 action 类型分槽存储（`summary-history` / `continue`），不同类型互不覆盖，调度优先级为「会话总结 > 普通续跑 > 插话投递」
+- 会话总结独占一轮：总结指令所在轮次及其后的工具续跑轮（`session.lastOptions.action=summary-history`）不投递插话，插话留在队列由下一轮投递；后端同时通过 `req.action`（`OpenAiOperateDto.action`）二次把关，命中 `ACTION_SUMMARY_HISTORY` 时不插入、不回显插话，避免一轮内同时携带总结指令与插话导致总结内容被干扰
 - 需要用户交互（工具授权/表单）或异常/中断时挂起，不自动续跑；页面刷新后重置 `sending` 等运行时状态，避免会话被视为运行中
 - 交互提示：输入框上方悬浮 `pending-interject-bar`，展示队首插话预览与排队数，并支持「撤回本条到输入框继续编辑」（回填时剔除发送时间前缀并自动聚焦输入框）与「丢弃本条」；窄屏（`max-width: 768px`）下收紧边距字号并隐藏文案只留图标
 

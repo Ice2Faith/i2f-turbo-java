@@ -1117,12 +1117,19 @@ public class OpenAiOpsController implements IOpsProvider {
                     // 此时 tool_calls 与 tool 消息已经成对完整，工具回传的附加消息也已经插入
                     // 插话作为本轮最后一条消息追加，用于引导模型接下来的走向
                     OpenAiMessageVo interject = req.getInterject();
-                    if (canAppendInterject(completion.getMessages(), interject)) {
-                        // 先回显再插入：convert 会重写 user.content（追加附件清单），
-                        // 先回显原始内容才能保证前端显示的插话清洁
-                        echoInterjectMessage(emitter, req, interject);
+                    if (OpsOpenAiConsts.ACTION_SUMMARY_HISTORY.equals(req.getAction())) {
+                        // 会话总结轮次独占：插话等其他消息搁置到下一轮，避免总结内容被干扰
+                        if (interject != null) {
+                            log.info("interject postpone, current round is summary-history, wait for next round.");
+                        }
+                    } else {
+                        if (canAppendInterject(completion.getMessages(), interject)) {
+                            // 先回显再插入：convert 会重写 user.content（追加附件清单），
+                            // 先回显原始内容才能保证前端显示的插话清洁
+                            echoInterjectMessage(emitter, req, interject);
+                        }
+                        appendInterjectMessage(completion.getMessages(), interject, req, hasAttachFiles);
                     }
-                    appendInterjectMessage(completion.getMessages(), interject, req, hasAttachFiles);
 
                     if (!asyncTaskMessages.isEmpty()) {
                         List<AsyncTaskItem> asyncTasks = new ArrayList<>();

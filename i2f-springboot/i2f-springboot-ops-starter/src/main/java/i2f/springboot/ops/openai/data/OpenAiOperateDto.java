@@ -22,6 +22,8 @@ public class OpenAiOperateDto {
     protected List<OpenAiToolApprovalDto> toolApprovalList;
     // 插话
     protected OpenAiMessageVo interject;
+    // 本轮请求的动作类型，用于区分轮次语义（例如 summary-history 会话总结轮独占一轮，不插入插话）
+    protected String action;
     protected boolean encryptOutput = false;
     protected boolean enableTools = false;
     protected boolean enableSkills = false;
@@ -29,6 +31,7 @@ public class OpenAiOperateDto {
     protected boolean enableLruTools = false;
     protected boolean enableEchoRequestPayload = false;
     protected boolean enableMergedSystemMsg = false;
+    protected boolean enableFullAccess=false;
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
     protected boolean enableToolRecommendByIntentRecognize;

@@ -1189,6 +1189,26 @@
                     </el-popover>
                 </el-col>
                 <el-col :span="12">
+                    <el-checkbox v-model="form.enableFullAccess">
+                        完全访问
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            完全访问，允许工具完全方位非工作区外的文件。<br/>
+                            如果开启，模型将会能够允许访问非工作区外的文件。<br/>
+                            因此，建议仅在需要的时候开启此功能。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
                     <el-checkbox v-model="form.enableMergedSystemMsg">
                         系统重排
                     </el-checkbox>
@@ -1947,7 +1967,7 @@
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
                         uploadLoading: false,
                         uploadList: [],
-                        maxHistoryCount: 30,
+                        maxHistoryCount: 35,
                         enableTruncOverflowHistory: true,
                         enableAutoSummary: false,
                         showConfig: false, // AI配置
@@ -2094,6 +2114,7 @@
                         enableSkills: true,
                         enableRags: false,
                         enableUserSendTime: false,
+                        enableFullAccess: false,
                         enableAutoTts: false,
                         useQwenTts: false,
                         useServerSpeakTts: false,
@@ -2928,7 +2949,7 @@
                 let ret=this._sessionRuntimeMap[sessionId]
                 if (!ret) {
                     ret={
-                        pendingContinue: null, // 等待安全边界执行的续跑请求
+                        pendingContinues: {}, // 按 action 类型分槽的续跑请求（summary-history/continue），不同类型互不覆盖
                         drainTimer: null,      // 续跑调度定时器
                         pendingInterjectEcho: null, // 本轮已投递、等待后端回显的插话
                         interjectRetryItem: null,   // 最近一次未投递成功的插话，用于限制重试次数
@@ -2939,6 +2960,7 @@
                 return ret
             },
             // 请求续跑：当前会话有请求在飞时排队，等本轮结束后再执行，保证串行
+            // 按 action 类型分槽存储（summary-history 会话总结、continue 普通续跑），不同类型互不覆盖
             requestSessionContinue(sessionId, options){
                 let session = this.findSession(sessionId)
                 if (!session) {
@@ -2946,30 +2968,38 @@
                 }
                 options = options || {}
                 options.sessionId = session.sessionId
+                let action = options.action || 'continue'
                 let runtime = this.getSessionRuntime(session.sessionId)
-                // 已排队会话总结时，普通续跑不得覆盖，否则会丢失总结动作导致重复触发总结
-                let prevContinue = runtime.pendingContinue
-                if (prevContinue && prevContinue.action == 'summary-history' && !options.action) {
-                    return
-                }
-                runtime.pendingContinue = options
+                runtime.pendingContinues[action] = options
                 if (!this.isSessionRunning(session)) {
                     this.drainSessionContinues(session)
                 }
             },
-            // 单飞调度：一次只调度一个续跑请求，工具续跑优先，其次插话投递
+            // 单飞调度：一次只调度一个续跑请求
+            // 优先级：会话总结 > 普通续跑（工具调用/继续） > 插话投递
+            // 会话总结独占一轮，插话与其他续跑排在它之后，避免一轮内同时携带总结指令和其它消息
             drainSessionContinues(session){
                 if (!session || this.isSessionRunning(session)) {
                     return
                 }
                 let runtime = this.getSessionRuntime(session.sessionId)
                 let nextOptions = null
-                if (runtime.pendingContinue) {
-                    nextOptions = runtime.pendingContinue
-                    runtime.pendingContinue = null
+                if (runtime.pendingContinues['summary-history']) {
+                    nextOptions = runtime.pendingContinues['summary-history']
+                    delete runtime.pendingContinues['summary-history']
+                } else if (runtime.pendingContinues['continue']) {
+                    nextOptions = runtime.pendingContinues['continue']
+                    delete runtime.pendingContinues['continue']
                 } else if (this.peekInterject(session)) {
                     // 有排队插话：发起一轮请求，在安全临界点投递插话
                     nextOptions = {sessionId: session.sessionId}
+                } else {
+                    // 兜底：取出任意剩余槽位，避免新增的 action 类型永远不被调度
+                    let keys = Object.keys(runtime.pendingContinues)
+                    if (keys.length > 0) {
+                        nextOptions = runtime.pendingContinues[keys[0]]
+                        delete runtime.pendingContinues[keys[0]]
+                    }
                 }
                 if (!nextOptions) {
                     return
@@ -3613,6 +3643,7 @@
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
                     req.enableMergedSystemMsg = this.form.enableMergedSystemMsg;
                     req.enableTruth = this.form.enableTruth;
+                    req.enableFullAccess=this.form.enableFullAccess;
                     req.truthContent = truthContent;
                     req.enableVisionImage=this.form.enableVisionImage;
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
@@ -3621,7 +3652,13 @@
                     // 插话：只在此安全临界点投递
                     // 后端会在工具调用（tool_calls+tool）完整结束之后，把插话作为本轮最后一条消息插入
                     // 本地不直接插入显示，而是等后端在真正插入的时机回显（echo_interject）
-                    let interject = this.takeNextInterject(session);
+                    // 会话总结独占一轮：总结指令所在轮次以及其后的工具续跑轮都不投递插话，
+                    // 插话留在队列中由下一轮投递，保证总结内容不被其他消息干扰
+                    let roundAction = options.action || (session.lastOptions && session.lastOptions.action) || '';
+                    req.action = roundAction;
+                    let interject = roundAction == 'summary-history'
+                        ? null
+                        : this.takeNextInterject(session);
                     if (interject) {
                         req.interject = interject;
                         // 记录待回显的插话，本轮结束时仍未回显则退回队列，避免静默丢失
