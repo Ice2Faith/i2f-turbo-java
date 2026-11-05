@@ -40,4 +40,6 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
     String ECHO_ASYNC_TASKS = "echo_async_tasks";
 
     String ECHO_PROGRESS = "echo_progress";
+
+    String ECHO_INTERJECT = "echo_interject";
 }

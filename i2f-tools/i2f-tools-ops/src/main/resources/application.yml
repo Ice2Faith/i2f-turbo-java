@@ -53,6 +53,8 @@ ai:
       enable: false
     vidu-t2v:
       enable: false
+    qwen_tts:
+      enable: true
   rags:
     enable: false
     embedding:
@@ -85,7 +87,7 @@ i2f:
       dashscope:
         enable: true
       secure:
-#         cert:
+    #         cert:
 
     ai:
       mcp:

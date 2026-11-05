@@ -502,11 +502,36 @@
 
             <!-- 底部输入区 -->
             <div class="input-area">
+                <!-- 悬浮待插话提示：有排队插话时展示队首内容，可撤回或丢弃 -->
+                <div class="pending-interject-bar"
+                     v-if="currentPendingInterjectCount > 0"
+                     :title="pendingInterjectText">
+                    <el-tooltip effect="dark" placement="top"
+                                content="待插话消息会在当前请求的工具调用完成后的安全边界自动投递，不会打断正在进行的 ReAct 循环">
+                        <span class="pending-interject-bar__label">
+                            <i class="el-icon-chat-dot-square"></i>
+                            <span class="pending-interject-bar__label-text">待插话</span>
+                        </span>
+                    </el-tooltip>
+                    <span class="pending-interject-bar__text">{{ pendingInterjectPreview }}</span>
+                    <span class="pending-interject-bar__count" v-if="currentPendingInterjectCount > 1">
+                        +{{ currentPendingInterjectCount - 1 }} 条
+                    </span>
+                    <span class="pending-interject-bar__actions">
+                        <el-tooltip effect="dark" placement="top" content="撤回本条到输入框继续编辑">
+                            <i class="el-icon-refresh-left" @click.stop="recallPendingInterject"></i>
+                        </el-tooltip>
+                        <el-tooltip effect="dark" placement="top" content="丢弃本条插话">
+                            <i class="el-icon-circle-close" @click.stop="removePendingInterject"></i>
+                        </el-tooltip>
+                    </span>
+                </div>
                 <el-input
+                        ref="inputTextarea"
                         type="textarea"
                         v-model="form.inputText"
                         :autosize="{ minRows: 2, maxRows: 6 }"
-                        :placeholder="(form.interject && form.interject.type ? '等待插话中...' : '')+'输入消息，Ctrl+Enter 快速发送'"
+                        :placeholder="(currentPendingInterjectCount > 0 ? '插话排队中['+currentPendingInterjectCount+']，安全边界投递... ' : '')+'输入消息，Ctrl+Enter 快速发送'"
                         @keydown.ctrl.enter.native="sendMessage"
                         resize="none"
                 ></el-input>
@@ -596,13 +621,14 @@
                         <span @contextmenu.prevent="onContextMenuMoreSendOptions"
                               style="display:inline-block;min-width: 88px;">
                             <el-button type="primary" size="small" @click="sendInterjectMessage"
-                                       v-if="currentSession?.sending && !form.interject"
+                                       v-if="currentSessionSending"
                                        :disabled="!form.inputText || !form.inputText.trim()">
-                                插话 <i class="el-icon-s-promotion"></i>
+                                插话{{currentPendingInterjectCount > 0 ? '('+currentPendingInterjectCount+')' : ''}}
+                                <i class="el-icon-s-promotion"></i>
                             </el-button>
                             <el-button type="primary" size="small" @click="sendMessage"
                                        v-else
-                                       :loading="currentSession?.sending"
+                                       :loading="currentSessionSending"
                                        :disabled="!form.inputText || !form.inputText.trim()">
                                 发送 <i class="el-icon-s-promotion"></i>
                             </el-button>
@@ -1791,6 +1817,36 @@
                 let session = this.metas.sessionList.filter(e => e.sessionId == sid)[0]
                 return session;
             },
+            currentSessionSending() {
+                let session = this.currentSession;
+                return !!(session && session.sending);
+            },
+            currentPendingInterjectCount() {
+                let session = this.currentSession;
+                if (session && session.interjects) {
+                    return session.interjects.length;
+                }
+                return 0;
+            },
+            // 队首待插话消息，用于输入框上方的悬浮提示
+            pendingInterject() {
+                return this.peekInterject(this.currentSession);
+            },
+            pendingInterjectText() {
+                let item = this.pendingInterject;
+                if (!item) {
+                    return '';
+                }
+                let msg = item[item.type] || {};
+                return msg.content || '';
+            },
+            pendingInterjectPreview() {
+                let text = (this.pendingInterjectText || '').replace(/\s+/g, ' ').trim();
+                if (!text) {
+                    return '[空内容]';
+                }
+                return text.length > 80 ? text.substring(0, 80) + '...' : text;
+            },
             currentSessionTotalUsages() {
                 let ret = {
                     prompt_tokens: -1,
@@ -2042,7 +2098,7 @@
                         useQwenTts: false,
                         useServerSpeakTts: false,
                         toolApprovalList: [],
-                        interject: null, // 插话
+                        // 插话队列按会话维护，见 session.interjects
                         enableLruTools: true,
                         lruToolMaxSize: 20,
                         lruToolNames: [],
@@ -2081,6 +2137,15 @@
                 } else if (!this.metas.activeSessionId) {
                     this.metas.activeSessionId = this.metas.sessionList[0].sessionId;
                 }
+                // 页面刷新后不存在进行中的请求，重置运行状态，避免会话被视为运行中而一直排队
+                this.metas.sessionList.forEach(item => {
+                    item.sending = false;
+                    item.streamingStarted = false;
+                    item.abortController = null;
+                    if (!item.interjects) {
+                        this.$set(item, 'interjects', []);
+                    }
+                });
                 this.$nextTick(() => this.scrollToBottom());
             },
             initMessageEditor() {
@@ -2289,6 +2354,7 @@
                     sending: false,
                     streamingStarted: false,
                     abortController: null,
+                    interjects: [], // 待投递的插话队列，只在安全临界点投递
                 }
                 this.metas.sessionList.unshift(item);
                 this.$set(this.metas.historyMessageMap, sessionId, []);
@@ -2742,22 +2808,201 @@
                 this.form.inputText = '';
                 return item
             },
+            // ---- 会话单飞调度 ----
+            // 同一会话同一时刻只允许一个请求在飞（一次只有一个 ReAct 循环）
+            // 循环运行中的所有用户输入，统一作为插话入队，只在安全临界点（tool_calls+tool 完整之后）投递
             sendInterjectMessage(){
-                let item=this.createSendMessage()
-                if(!item){
+                // 统一入口：运行中则入队插话，未运行则作为普通发送
+                this.sendMessage()
+            },
+            enqueueInterjectMessage(){
+                let session = this.currentSession;
+                if (!session) {
                     return
                 }
-                this.form.interject=item;
+                let item=this.createSendMessage()
+                if(!item || !item.type){
+                    return
+                }
+                this.ensureInterjectQueue(session).push(item);
+                this.$message.info('插话已排队，将在当前工具调用完成后的安全边界投递')
+                this.$nextTick(() => this.scrollToBottom())
             },
-            async sendMessage() {
-                if(this.currentSession?.sending && !this.form.interject){
-                    this.sendInterjectMessage()
-                    if(this.form.interject && this.form.interject.type) {
-                        return
+            ensureInterjectQueue(session){
+                if (!session) {
+                    return []
+                }
+                if (!session.interjects) {
+                    this.$set(session, 'interjects', [])
+                }
+                return session.interjects
+            },
+            // 查看插话队列头部（不消费）
+            peekInterject(session){
+                if (!session || !session.interjects || session.interjects.length==0) {
+                    return null
+                }
+                for (let i = 0; i < session.interjects.length; i++) {
+                    let item=session.interjects[i]
+                    if (item && item.type) {
+                        return item
                     }
                 }
-                let sid = this.metas.activeSessionId;
-                let session = this.findSession(sid)
+                return null
+            },
+            // 取出插话队列头部（消费），只允许在请求构建的安全临界点调用
+            takeNextInterject(session){
+                let queue=this.ensureInterjectQueue(session)
+                while (queue.length > 0) {
+                    let item=queue.shift()
+                    if (item && item.type) {
+                        return item
+                    }
+                }
+                return null
+            },
+            // 丢弃队首待插话
+            removePendingInterject(){
+                let session = this.currentSession;
+                if (!session) {
+                    return
+                }
+                if (!this.takeNextInterject(session)) {
+                    return
+                }
+                this.$message.info('已丢弃待插话消息')
+            },
+            // 撤回队首待插话到输入框，便于继续修改后再发送
+            recallPendingInterject(){
+                let session = this.currentSession;
+                if (!session) {
+                    return
+                }
+                let item = this.takeNextInterject(session)
+                if (!item) {
+                    return
+                }
+                let msg = item[item.type] || {};
+                // 去掉发送时附加的时间前缀，再次发送时会重新生成
+                let content = this.stripUserSendTime(msg.content || '');
+                let inputText = this.form.inputText || '';
+                if (inputText.trim()) {
+                    this.form.inputText = inputText + '\n' + content;
+                } else {
+                    this.form.inputText = content;
+                }
+                if (item.attachFiles && item.attachFiles.length > 0) {
+                    this.form.attachFiles = [...item.attachFiles, ...this.form.attachFiles];
+                }
+                if (item.type && this.form.messageType != item.type) {
+                    this.form.messageType = item.type;
+                }
+                // 回填之后聚焦输入框，用户可以直接继续编辑
+                this.$nextTick(() => {
+                    let editor = this.$refs.inputTextarea;
+                    if (editor && editor.focus) {
+                        editor.focus();
+                    }
+                })
+                this.$message.info('待插话已撤回输入框，可继续编辑后发送')
+            },
+            // 去掉用户消息上的发送时间前缀，避免撤回重发时重复叠加
+            stripUserSendTime(text){
+                if (!text || text.indexOf('- [send time]') != 0) {
+                    return text || ''
+                }
+                let arr = text.split('---', 2);
+                if (arr.length == 2) {
+                    return arr[1].replace(/^\s+/, '');
+                }
+                return text;
+            },
+            isSessionRunning(session){
+                return !!(session && session.sending)
+            },
+            // 会话运行时的瞬态状态，不存入 data，避免被持久化到本地存储后误触发续跑
+            getSessionRuntime(sessionId){
+                if (!this._sessionRuntimeMap) {
+                    this._sessionRuntimeMap = {}
+                }
+                let ret=this._sessionRuntimeMap[sessionId]
+                if (!ret) {
+                    ret={
+                        pendingContinue: null, // 等待安全边界执行的续跑请求
+                        drainTimer: null,      // 续跑调度定时器
+                        pendingInterjectEcho: null, // 本轮已投递、等待后端回显的插话
+                        interjectRetryItem: null,   // 最近一次未投递成功的插话，用于限制重试次数
+                        interjectRetryCount: 0      // 同一条插话连续未投递的次数
+                    }
+                    this._sessionRuntimeMap[sessionId]=ret
+                }
+                return ret
+            },
+            // 请求续跑：当前会话有请求在飞时排队，等本轮结束后再执行，保证串行
+            requestSessionContinue(sessionId, options){
+                let session = this.findSession(sessionId)
+                if (!session) {
+                    return
+                }
+                options = options || {}
+                options.sessionId = session.sessionId
+                let runtime = this.getSessionRuntime(session.sessionId)
+                // 已排队会话总结时，普通续跑不得覆盖，否则会丢失总结动作导致重复触发总结
+                let prevContinue = runtime.pendingContinue
+                if (prevContinue && prevContinue.action == 'summary-history' && !options.action) {
+                    return
+                }
+                runtime.pendingContinue = options
+                if (!this.isSessionRunning(session)) {
+                    this.drainSessionContinues(session)
+                }
+            },
+            // 单飞调度：一次只调度一个续跑请求，工具续跑优先，其次插话投递
+            drainSessionContinues(session){
+                if (!session || this.isSessionRunning(session)) {
+                    return
+                }
+                let runtime = this.getSessionRuntime(session.sessionId)
+                let nextOptions = null
+                if (runtime.pendingContinue) {
+                    nextOptions = runtime.pendingContinue
+                    runtime.pendingContinue = null
+                } else if (this.peekInterject(session)) {
+                    // 有排队插话：发起一轮请求，在安全临界点投递插话
+                    nextOptions = {sessionId: session.sessionId}
+                }
+                if (!nextOptions) {
+                    return
+                }
+                if (runtime.drainTimer) {
+                    clearTimeout(runtime.drainTimer)
+                }
+                runtime.drainTimer = setTimeout(() => {
+                    runtime.drainTimer = null
+                    // 会话可能已经被删除，此时不再续跑，避免误发送到其它会话
+                    let target = this.metas.sessionList.filter(e => e.sessionId == nextOptions.sessionId)[0]
+                    if (!target) {
+                        return
+                    }
+                    this.directSendMessage(nextOptions)
+                }, 0)
+            },
+            async sendMessage() {
+                let session = this.currentSession;
+                if (!session) {
+                    this.getActiveMessages();
+                    session = this.currentSession;
+                }
+                if (!session) {
+                    return
+                }
+
+                // 会话循环运行中，所有输入统一按插话处理，杜绝并行请求
+                if (this.isSessionRunning(session)) {
+                    this.enqueueInterjectMessage()
+                    return
+                }
+
                 let messages = this.getActiveMessages();
 
                 // 按钮触发的发送，需要重置action
@@ -2772,7 +3017,7 @@
 
                 if (item.type == 'user') {
                     this.directSendMessage({
-                        sessionId: sid
+                        sessionId: session.sessionId
                     });
                 } else {
                     this.form.messageType = 'user';
@@ -2780,7 +3025,7 @@
                     this.$confirm('非用户消息，是否需要发送请求到模型？', '提示', {type: 'warning'})
                         .then(() => {
                             this.directSendMessage({
-                                sessionId: sid
+                                sessionId: session.sessionId
                             })
                         }).catch(() => {
                         this.$message.info('请求未发送，你可以继续编辑')
@@ -2810,6 +3055,7 @@
                 return messages;
             },
             // ---- 发送消息（支持 SSE 流式输出 + 打字机效果）----
+            // 单飞：同一会话同一时刻只允许一个请求在飞，其它请求（工具续跑/插话投递）一律排队到本轮结束之后
             async directSendMessage(options={}) {
                 if(!options){
                     options={}
@@ -2818,11 +3064,36 @@
                     this.getActiveMessages();
                     options.sessionId=this.metas.activeSessionId;
                 }
-                let messages = this.findSessionMessages();
+                let session = this.findSession(options.sessionId);
+                if (!session) {
+                    this.$message.error('没有找到对应的会话，操作失败')
+                    return
+                }
+                options.sessionId=session.sessionId;
+
+                // 已有请求在飞，转为排队续跑，禁止并行
+                if (this.isSessionRunning(session)) {
+                    this.requestSessionContinue(session.sessionId, options)
+                    return
+                }
+
+                // 本次真实请求即将启动，取消已排队的续跑调度（排队插话会在本轮请求构建时一并消费）
+                let runtime = this.getSessionRuntime(session.sessionId);
+                if (runtime.drainTimer) {
+                    clearTimeout(runtime.drainTimer);
+                    runtime.drainTimer = null;
+                }
+
+                let messages = this.findSessionMessages(session.sessionId);
                 if (messages.length == 0) {
                     this.$message.error('没有任何历史消息，操作失败')
                     return
                 }
+
+                // 需要等待用户交互（工具授权/表单）时挂起，不自动续跑，避免空转
+                let suspended = false;
+                // 本轮是否异常结束（异常/中断时不自动续跑，排队插话等待下次发送）
+                let interrupted = false;
 
                 // 未进行授权就中断的情况，继续进入授权环节
                 if (this.form.toolApprovalList.length > 0
@@ -2836,9 +3107,9 @@
                 }
 
                 // 用第一条用户消息作为会话标题
-                let session = this.findSession(options.sessionId);
-                options.sessionId=session.sessionId;
-                if (session && (!session.title || session.title === '新对话')) {
+                // 会话总结指令不作为标题，避免被当成会话内容
+                if (session && (!session.title || session.title === '新对话')
+                    && options.action != 'summary-history') {
                     let lastMsg = messages[messages.length - 1];
                     let text = lastMsg[lastMsg.type].content;
                     if (text.startsWith('- [send time]')) {
@@ -2980,11 +3251,13 @@
                     && options.action != 'summary-history') {
                     let lastOptions = session.lastOptions || {};
                     let checkCount = this.metas.maxHistoryCount - 1;
+                    // 使用会话维度计数，避免续跑的是非活跃会话时读取到其它会话的数据
                     if (checkCount >= 1
-                        && this.currentHistoryCount >= checkCount
+                        && this.countHistoryMessages(session.sessionId) >= checkCount
                         && lastOptions.action != 'summary-history') {
                         this.$message.warning('自动会话总结触发...')
-                        this.directSummarySessionHistory(true);
+                        // 会话总结与插话一样，统一走会话单飞调度，排队到本轮结束后执行
+                        this.requestAutoSummary(session);
                         return;
                     }
                 }
@@ -3143,6 +3416,21 @@
                             json.hidden = false;
                             insertBeforeLast(messages, json);
                             // messages.push(json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_interject') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            // 插话由后端在真正插入的时机回显，这里按插话自身的类型插入到助手占位之前
+                            // 依然使用 insertBeforeLast，保证 LLM 的答复消息始终是最后一条
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            // 后端已确认插话进入本轮消息，清除待回显标记
+                            runtime.pendingInterjectEcho = null;
+                            runtime.interjectRetryItem = null;
+                            runtime.interjectRetryCount = 0;
+                            _this.$nextTick(() => _this.scrollToBottom());
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_dynamic_tool') {
@@ -3330,12 +3618,14 @@
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
                     req.sessionRecordsMap = session.sessionRecordsMap;
                     req.webjsToolResults=this.form.webjsToolResults;
-                    // 插话
-                    if(this.form.interject
-                        && this.form.interject.type) {
-                        req.interject = this.form.interject;
-                        this.form.interject = null;
-                        insertBeforeLast(messages,req.interject)
+                    // 插话：只在此安全临界点投递
+                    // 后端会在工具调用（tool_calls+tool）完整结束之后，把插话作为本轮最后一条消息插入
+                    // 本地不直接插入显示，而是等后端在真正插入的时机回显（echo_interject）
+                    let interject = this.takeNextInterject(session);
+                    if (interject) {
+                        req.interject = interject;
+                        // 记录待回显的插话，本轮结束时仍未回显则退回队列，避免静默丢失
+                        runtime.pendingInterjectEcho = interject;
                     }
                     req = this.transferSend(req);
 
@@ -3432,8 +3722,11 @@
                             this.dialog.toolApproval.resolved = false;
                             // 弹窗确认工具是否需要允许执行
                             this.dialog.toolApproval.show = true;
+                            // 等待用户授权，插话继续排队，不自动续跑
+                            suspended = true;
                         } else {
-                            this.directSendMessage({
+                            // 工具自动授权，本轮结束之后串行续跑下一轮 ReAct
+                            this.requestSessionContinue(options.sessionId, {
                                 sessionId: options.sessionId
                             })
                         }
@@ -3500,18 +3793,15 @@
                         // 这时候，就需要触发继续循环
                         // 否则就停在了总结这里，需要手动继续
                         if (options.needContinue || lastOptions.needContinue) {
-                            this.continueAfterSummaryHistory()
+                            this.continueAfterSummaryHistory(session)
                             return;
                         }
                     }
 
-                    if(this.form.interject && this.form.interject.type){
-                        this.directSendMessage({
-                            sessionId: options.sessionId
-                        })
-                    }
+                    // 插话投递由 finally 中的单飞调度统一处理，避免与本次请求并行
 
                 } catch (e) {
+                    interrupted = true;
                     let errMsg = '请求失败';
                     if (e.response && e.response.data) {
                         let d = e.response.data;
@@ -3527,7 +3817,34 @@
                     this.$responsing = false;
                     session.sending = false;
                     session.streamingStarted = false;
+                    // 插话未收到后端回显（本轮异常/中断或者后端判定不在安全边界），退回队列避免静默丢失
+                    if (runtime.pendingInterjectEcho) {
+                        let pendingInterject = runtime.pendingInterjectEcho;
+                        runtime.pendingInterjectEcho = null;
+                        if (interrupted) {
+                            // 异常/中断：后端未处理该插话，直接回到队首等待下次投递
+                            this.ensureInterjectQueue(session).unshift(pendingInterject);
+                        } else {
+                            // 正常结束却未回显：限制同一条插话的重试次数，避免反复空转
+                            let retry = runtime.interjectRetryItem === pendingInterject
+                                ? (runtime.interjectRetryCount || 0) + 1 : 1;
+                            runtime.interjectRetryItem = pendingInterject;
+                            runtime.interjectRetryCount = retry;
+                            if (retry > 2) {
+                                runtime.interjectRetryItem = null;
+                                runtime.interjectRetryCount = 0;
+                                this.$message.error('插话多次未能投递，已丢弃')
+                            } else {
+                                this.ensureInterjectQueue(session).unshift(pendingInterject);
+                                this.$message.warning('插话未能在本轮投递，已重新排队')
+                            }
+                        }
+                    }
                     this.$nextTick(() => this.scrollToBottom());
+                    // 本轮结束后串行调度下一轮（工具续跑 / 插话投递），保证不会并发出第二个 ReAct 循环
+                    if (!interrupted && !suspended) {
+                        this.drainSessionContinues(session);
+                    }
                 }
             },
             toggleAllToolApprovalChecked() {
@@ -3643,8 +3960,9 @@
                     }).catch(() => {
                 });
             },
-            directSummarySessionHistory(needContinue = false) {
-                let item = {
+            // 构建会话总结指令消息（自动总结与手动总结共用）
+            createSummaryHistoryMessage(needContinue = false) {
+                return {
                     type: 'user',
                     hidden: false,
                     user: {
@@ -3656,25 +3974,83 @@
                             'Response with before user question language.'
                     }
                 }
-                let messages = this.getActiveMessages();
-                messages.push(item);
-                this.directSendMessage({
+            },
+            // 会话维度统计参与模型的历史消息条数，避免续跑非活跃会话时读错会话
+            countHistoryMessages(sessionId) {
+                let messages = this.metas.historyMessageMap[sessionId] || [];
+                let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                let ret = 0;
+                messages.forEach(e => {
+                    if (stdRoleTypeList.includes(e.type)) {
+                        ret++;
+                    }
+                })
+                return ret;
+            },
+            // 会话总结指令入历史，避免重复触发时叠加多条相同指令
+            pushSessionSummaryMessage(session, needContinue) {
+                if (!session) {
+                    return
+                }
+                let messages = this.findSessionMessages(session.sessionId);
+                let last = messages[messages.length - 1];
+                if (last && last.type == 'user' && last.user
+                    && (last.user.content || '').indexOf('Summarize all previous conversations') == 0) {
+                    return
+                }
+                messages.push(this.createSummaryHistoryMessage(needContinue));
+            },
+            // 自动会话总结：与插话一致，统一走会话单飞调度，排队到当前轮次结束之后串行执行
+            requestAutoSummary(session) {
+                if (!session) {
+                    return
+                }
+                this.pushSessionSummaryMessage(session, true);
+                this.requestSessionContinue(session.sessionId, {
+                    sessionId: session.sessionId,
                     action: 'summary-history',
-                    needContinue: needContinue
+                    needContinue: true
                 })
             },
-            continueAfterSummaryHistory() {
-                let item = {
+            directSummarySessionHistory(needContinue = false) {
+                let session = this.currentSession;
+                if (!session) {
+                    return
+                }
+                this.pushSessionSummaryMessage(session, needContinue);
+                let options = {
+                    sessionId: session.sessionId,
+                    action: 'summary-history',
+                    needContinue: needContinue
+                }
+                // 会话正在回复中，排队到本轮结束之后串行执行，避免并行请求
+                if (this.isSessionRunning(session)) {
+                    this.$message.info('当前会话正在回复，会话总结已排队，将在本轮结束后执行')
+                    this.requestSessionContinue(session.sessionId, options)
+                    return
+                }
+                this.directSendMessage(options)
+            },
+            continueAfterSummaryHistory(session) {
+                let target = session || this.currentSession;
+                if (!target) {
+                    return
+                }
+                this.findSessionMessages(target.sessionId).push({
                     type: 'user',
                     hidden: false,
                     user: {
                         role: 'user',
                         content: 'continue'
                     }
+                });
+                let options = {sessionId: target.sessionId}
+                // 保证单飞：会话仍在回复中则排队，不做并行请求
+                if (this.isSessionRunning(target)) {
+                    this.requestSessionContinue(target.sessionId, options)
+                    return
                 }
-                let messages = this.getActiveMessages();
-                messages.push(item);
-                this.directSendMessage()
+                this.directSendMessage(options)
             },
             onTts(msg) {
                 let content = msg[msg.type].content;

@@ -324,6 +324,18 @@ i2f:
 **技能系统**: `SkillAutoConfiguration` 自动扫描文件系统技能定义，30
 秒刷新，通过 `ai.skills.enable` / `ai.skills.tool.enable` 配置开关。
 
+**ReAct 循环与插话（安全临界点）**:
+
+- 一次 `/stream` 请求 = 一次 LLM 往返：服务端在本轮返回前完成 `tool_calls` 执行并追加 `tool` 响应，前端收到 `tool_calls` 后再发起下一轮，形成 ReAct 循环
+- 前端严格「单飞」：同一会话同一时刻只允许一个请求在飞，`session.sending` 即单飞锁，多个续跑请求统一排队后串行执行
+- 循环运行中的用户输入一律进入会话维度插话队列 `session.interjects`，不再直接发起请求（避免两个 ReAct 循环并行交错）
+- 插话只在安全临界点投递：前端构建请求时取出队首插话放入 `req.interject`，后端 `appendInterjectMessage` 在 `tool_calls` 与 `tool` 成对完整、且工具回传的附加消息插入完成之后，把插话追加为本轮最后一条消息；不在安全边界（最后一条是待响应的 `assistant(tool_calls)`）则跳过，由下一轮继续携带
+- 插话显示与其他回显消息一致，统一由后端在真正插入的时机回显：后端用 `canAppendInterject` 校验后调用 `echoInterjectMessage` 发送 `echo_interject`（回显原始内容，早于 `convertOpenAiUserMessage` 追加附件清单），前端收到后按 `insertBeforeLast` 插入到助手占位之前，保证 LLM 的答复消息始终是最后一条；本轮结束仍未回显（异常/中断/不在安全边界）则退回队首，同一条连续 3 次未投递才丢弃
+- 本轮结束后统一在 `finally` 中通过 `drainSessionContinues` 串行调度下一轮（工具续跑优先，其次插话投递）
+- 自动/手动会话总结同样纳入单飞调度：指令消息先落历史，再通过 `requestSessionContinue` 排队（`action=summary-history`），已排队总结不会被普通续跑覆盖，避免总结与工具续跑竞态
+- 需要用户交互（工具授权/表单）或异常/中断时挂起，不自动续跑；页面刷新后重置 `sending` 等运行时状态，避免会话被视为运行中
+- 交互提示：输入框上方悬浮 `pending-interject-bar`，展示队首插话预览与排队数，并支持「撤回本条到输入框继续编辑」（回填时剔除发送时间前缀并自动聚焦输入框）与「丢弃本条」；窄屏（`max-width: 768px`）下收紧边距字号并隐藏文案只留图标
+
 ### 13. DashScope 通义千问 AI 工具
 
 - **路径**: `/ops/dashscope/`

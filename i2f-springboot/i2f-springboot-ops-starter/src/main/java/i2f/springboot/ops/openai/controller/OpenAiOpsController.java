@@ -477,6 +477,128 @@ public class OpenAiOpsController implements IOpsProvider {
         return user;
     }
 
+    /**
+     * 判断当前请求消息列表是否处于可以插入插话的安全临界点
+     * <p>
+     * 安全临界点：tool_calls 与 tool 消息成对完整之后，也就是最后一条消息不能是等待工具响应的 assistant(tool_calls)，
+     * 否则会造成请求报文非法（assistant.tool_calls 缺少对应的 tool 响应）
+     *
+     * @param messages 当前的请求消息列表
+     * @return true 表示可以插入
+     */
+    public boolean isInterjectSafeBoundary(List<OpenAiMessage> messages) {
+        if (messages == null || messages.isEmpty()) {
+            return true;
+        }
+        OpenAiMessage lastMsg = messages.get(messages.size() - 1);
+        if (lastMsg instanceof OpenAiAssistantMessage) {
+            List<OpenAiToolCall> calls = ((OpenAiAssistantMessage) lastMsg).getTool_calls();
+            return calls == null || calls.isEmpty();
+        }
+        return true;
+    }
+
+    /**
+     * 判断插话是否可以插入当前请求消息列表
+     * <p>
+     * 除了安全临界点之外，还要求插话的类型受支持且消息体不为空，
+     * 只有可以插入时才回显给前端，避免前端显示了实际并未参与本轮请求的消息
+     *
+     * @param messages 当前的请求消息列表
+     * @param item     插话消息
+     * @return true 表示可以插入
+     */
+    public boolean canAppendInterject(List<OpenAiMessage> messages, OpenAiMessageVo item) {
+        if (messages == null || item == null || item.getType() == null || item.getType().isEmpty()) {
+            return false;
+        }
+        boolean supported = false;
+        if (OpenAiConsts.USER.equals(item.getType())) {
+            supported = item.getUser() != null;
+        } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
+            supported = item.getSystem() != null;
+        } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
+            supported = item.getAssistant() != null;
+        } else if (OpenAiConsts.TOOL.equals(item.getType())) {
+            supported = item.getTool() != null;
+        }
+        return supported && isInterjectSafeBoundary(messages);
+    }
+
+    /**
+     * 回显插话消息
+     * <p>
+     * 由服务端在真正插入插话的时机发送，前端收到 type 为 ECHO_INTERJECT 的消息后，
+     * 按插话自身的类型插入到助手占位消息之前，保证 LLM 的答复消息始终是最后一条
+     * 注意：必须在 convertOpenAiUserMessage 之前回显原始内容，附件清单由后端转换时拼接，前端不需要显示
+     *
+     * @param emitter 当前请求的 SSE 输出
+     * @param req     本次请求上下文，用于判断是否需要加密输出
+     * @param item    即将插入的插话消息，为未被转换的原始内容
+     */
+    public void echoInterjectMessage(SseEmitter emitter, OpenAiOperateDto req, OpenAiMessageVo item) {
+        if (emitter == null || req == null || item == null) {
+            return;
+        }
+        try {
+            String echoJson = objectMapper.writeValueAsString(item);
+            OpsSecureReturn<?> resp = null;
+            if (req.isEncryptOutput()) {
+                resp = transfer.success(echoJson);
+            } else {
+                resp = OpsSecureReturn.success(echoJson);
+            }
+            resp.withAttr("type", OpsOpenAiConsts.ECHO_INTERJECT);
+            String respJson = objectMapper.writeValueAsString(resp);
+            emitter.send(respJson);
+        } catch (Exception e) {
+            log.warn(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * 在安全临界点插入插话消息
+     * <p>
+     * 安全临界点：tool_calls 与 tool 消息成对完整之后，也就是最后一条消息不能是等待工具响应的 assistant(tool_calls)
+     * 否则会造成请求报文非法（assistant.tool_calls 缺少对应的 tool 响应），
+     * 此时放弃本次插入，由下一轮请求继续携带该插话
+     *
+     * @param messages       当前的请求消息列表，插话成功之后追加在其末尾
+     * @param item           插话消息，为 null 或者 type 为空时直接忽略
+     * @param req            本次请求上下文，用户消息转换（附件编码）时使用
+     * @param hasAttachFiles 是否携带附件，用户消息转换时回填
+     * @return true 表示插话已插入；false 表示不在安全边界或者消息类型不支持，未插入
+     * @throws Exception 用户消息转换（图片编码等）异常
+     */
+    public boolean appendInterjectMessage(List<OpenAiMessage> messages, OpenAiMessageVo item,
+                                          OpenAiOperateDto req, AtomicBoolean hasAttachFiles) throws Exception {
+        if (messages == null || item == null || item.getType() == null || item.getType().isEmpty()) {
+            return false;
+        }
+        if (!isInterjectSafeBoundary(messages)) {
+            log.warn("interject skip, last message is assistant with tool_calls, wait for tool response.");
+            return false;
+        }
+
+        OpenAiMessage appendMsg;
+        if (OpenAiConsts.USER.equals(item.getType())) {
+            appendMsg = convertOpenAiUserMessage(item, req, hasAttachFiles);
+        } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
+            appendMsg = item.getSystem();
+        } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
+            appendMsg = item.getAssistant();
+        } else if (OpenAiConsts.TOOL.equals(item.getType())) {
+            appendMsg = item.getTool();
+        } else {
+            return false;
+        }
+        if (appendMsg == null) {
+            return false;
+        }
+        messages.add(appendMsg);
+        return true;
+    }
+
     @FunctionalInterface
     public interface ExFunction<R, T> {
         R apply(T t) throws Exception;
@@ -907,29 +1029,8 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
-                    // 插话，需要再安全边界上，也就是保证，tool_calls+tool连续完整，这样的周期之后进行插话
-                    // 方便引导模型的走向
-                    if (req.getInterject() != null
-                            && req.getInterject().getType() != null
-                            && !req.getInterject().getType().isEmpty()) {
-                        OpenAiMessageVo item = req.getInterject();
-                        if (OpenAiConsts.USER.equals(item.getType())) {
-                            injectMsg = item;
-                            OpenAiMessage user = item.getUser();
-
-                            user = convertOpenAiUserMessage(item, req, hasAttachFiles);
-                            completion.getMessages().add(user);
-                        } else if (OpenAiConsts.SYSTEM.equals(item.getType())) {
-                            injectMsg = item;
-                            completion.getMessages().add(item.getSystem());
-                        } else if (OpenAiConsts.ASSISTANT.equals(item.getType())) {
-                            injectMsg = item;
-                            completion.getMessages().add(item.getAssistant());
-                        } else if (OpenAiConsts.TOOL.equals(item.getType())) {
-                            injectMsg = item;
-                            completion.getMessages().add(item.getTool());
-                        }
-                    }
+                    // 插话不在这一步插入，必须等到本轮所有工具调用以及工具产生的附加消息都插入完成之后
+                    // 也就是下面工具回传文件、异步任务等消息的处理之后的安全临界点，见 appendInterjectMessage
 
                     // 回显给前端，工具调用可能变更了内容，事实
                     if (req.isEnableTruth()) {
@@ -1011,6 +1112,17 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
 
                     }
+
+                    // 插话：安全临界点插入
+                    // 此时 tool_calls 与 tool 消息已经成对完整，工具回传的附加消息也已经插入
+                    // 插话作为本轮最后一条消息追加，用于引导模型接下来的走向
+                    OpenAiMessageVo interject = req.getInterject();
+                    if (canAppendInterject(completion.getMessages(), interject)) {
+                        // 先回显再插入：convert 会重写 user.content（追加附件清单），
+                        // 先回显原始内容才能保证前端显示的插话清洁
+                        echoInterjectMessage(emitter, req, interject);
+                    }
+                    appendInterjectMessage(completion.getMessages(), interject, req, hasAttachFiles);
 
                     if (!asyncTaskMessages.isEmpty()) {
                         List<AsyncTaskItem> asyncTasks = new ArrayList<>();
