@@ -301,6 +301,14 @@ public class TmpFileTools {
     }
 
     public String getRealFileNameByUrl(String fileUrl) {
+        UploadTmpFileMetadata meta = getFileMetadataByUrl(fileUrl);
+        if(meta==null){
+            return null;
+        }
+        return meta.getFileName();
+    }
+
+    public UploadTmpFileMetadata getFileMetadataByUrl(String fileUrl){
         if (fileUrl == null || fileUrl.isEmpty()) {
             throw new IllegalArgumentException("fileUrl required.");
         }
@@ -322,11 +330,10 @@ public class TmpFileTools {
                     return null;
                 }
                 String json = StreamUtil.readString(metaFile);
-                Map<String, Object> map = (Map<String, Object>) jsonSerializer.deserialize(json);
-                Object ret = map.get("fileName");
-                return ret == null ? null : String.valueOf(ret);
+                UploadTmpFileMetadata map = (UploadTmpFileMetadata) jsonSerializer.deserialize(json,UploadTmpFileMetadata.class);
+                return map;
             } catch (Exception e) {
-
+                e.printStackTrace();
             }
         }
         return null;

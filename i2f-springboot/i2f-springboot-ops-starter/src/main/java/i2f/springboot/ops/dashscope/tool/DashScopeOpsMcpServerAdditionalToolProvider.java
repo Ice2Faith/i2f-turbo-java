@@ -71,6 +71,8 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
     @Autowired(required = false)
     private DashScopeVideoViduText2VideoTools dashScopeVideoViduText2VideoTools;
 
+    @Autowired(required = false)
+    private DashScopeQwenTtsTools dashScopeQwenTtsTools;
 
     @Getter(AccessLevel.NONE)
     @Setter(AccessLevel.NONE)
@@ -354,6 +356,39 @@ public class DashScopeOpsMcpServerAdditionalToolProvider implements McpServerAdd
             throw new IllegalStateException("current state not enable this feature!");
         }
         AsyncTaskMessage task = dashScopeVideoViduText2VideoTools.text_to_video_vidu(content, portrait_mode, reference_image_url);
+
+        List<String> urls = new ArrayList<>();
+        List<AsyncTaskItem> list = task.getList();
+        for (AsyncTaskItem item : list) {
+            String url = asyncTaskHelper.signTask(item);
+            urls.add(url);
+        }
+
+
+        Map<String, Object> ret = new HashMap<>();
+        ret.put("taskUrls", urls);
+        ret.put("hint", "this is an async task, need use tool `" + OpsMcpServerAdditionalToolProvider.QUERY_ASYNC_TASK_STATUS_BY_URL + "` to query task status");
+
+        return ret;
+    }
+
+    @Tool(
+            tags = {
+                    AiTags.HIGH_COST_VALUE,
+                    AiTags.SLOW_EXEC_VALUE,
+                    AiTags.PUBLIC_NET_VALUE,
+                    AiTags.WRITABLE_VALUE
+            },
+            description = "text to voice, output mp3 audio file, Note: support chinese text content."
+    )
+    public Map<String, Object> text_to_audio_qwen(
+            @ToolParam(value = "content", description = "the content, support markdown format")
+            String content
+    ) throws Exception {
+        if (dashScopeQwenTtsTools == null) {
+            throw new IllegalStateException("current state not enable this feature!");
+        }
+        AsyncTaskMessage task = dashScopeQwenTtsTools.text_to_audio_qwen(content);
 
         List<String> urls = new ArrayList<>();
         List<AsyncTaskItem> list = task.getList();
