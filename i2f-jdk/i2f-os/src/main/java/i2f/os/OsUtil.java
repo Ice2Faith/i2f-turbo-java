@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -82,7 +83,12 @@ public class OsUtil {
 
             Process process = runtime.exec(cmd, envp, dir);
             String stdout = getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
-            return CommandResult.of(process, stdout);
+            CommandResult ret = CommandResult.of(process, stdout);
+
+            ret.setCommandLine(cmd);
+            File workdir=dir!=null?dir:new File(".");
+            ret.setWorkdir(new File(workdir.getAbsolutePath()).getAbsolutePath());
+            return ret;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -123,7 +129,13 @@ public class OsUtil {
 
             Process process = runtime.exec(cmdArr, envp, dir);
             String stdout = getProcessStdout(requireOutput, waitForMillsSeconds, process, charset);
-            return CommandResult.of(process, stdout);
+
+            CommandResult ret = CommandResult.of(process, stdout);
+
+            ret.setCommandArray(Arrays.asList(cmdArr));
+            File workdir=dir!=null?dir:new File(".");
+            ret.setWorkdir(new File(workdir.getAbsolutePath()).getAbsolutePath());
+            return ret;
         } catch (Exception e) {
             throw new IllegalStateException(e.getMessage(), e);
         }

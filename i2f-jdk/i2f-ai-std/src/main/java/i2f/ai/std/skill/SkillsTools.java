@@ -232,6 +232,13 @@ public class SkillsTools {
             commandArr.add("perl");
         } else if (".js".equals(suffix)) {
             commandArr.add("node");
+        } else if (".ps1".equals(suffix)) {
+            commandArr.add("powershell.exe");
+            commandArr.add("-NoProfile");            // 不加载用户配置文件，可加快启动速度
+            commandArr.add("-NonInteractive");       // 非交互模式，适合后台调用
+            commandArr.add("-ExecutionPolicy");
+            commandArr.add("Bypass"); // 临时绕过执行策略限制
+            commandArr.add("-File");
         } else if (OsUtil.isWindows()) {
             commandArr.add("cmd");
             commandArr.add("/c");
@@ -241,11 +248,13 @@ public class SkillsTools {
         commandArr.add(scriptFile.getName());
         commandArr.addAll(commandArguments);
 
-        return OsUtil.execCmdForResult(true, TimeUnit.MINUTES.toSeconds(3),
+
+        CommandResult result = OsUtil.execCmdForResult(true, TimeUnit.MINUTES.toSeconds(3),
                 commandArr.toArray(new String[0]),
                 null,
                 new File(scriptFile.getAbsolutePath()).getParentFile(),
                 OsUtil.getCmdCharset());
+        return result;
     }
 
 

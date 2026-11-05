@@ -3,6 +3,8 @@ package i2f.os.data;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 /**
  * @author Ice2Faith
  * @date 2026/9/10 20:55
@@ -14,6 +16,10 @@ public class CommandResult {
     protected int exitCode;
     protected boolean executeTimeout;
     protected String stdout;
+
+    protected String commandLine;
+    protected List<String> commandArray;
+    protected String workdir;
 
     public static CommandResult of(Process process, String stdout) {
         CommandResult ret = new CommandResult();
