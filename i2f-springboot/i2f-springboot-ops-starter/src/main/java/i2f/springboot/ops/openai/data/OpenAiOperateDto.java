@@ -32,6 +32,7 @@ public class OpenAiOperateDto {
     protected boolean enableEchoRequestPayload = false;
     protected boolean enableMergedSystemMsg = false;
     protected boolean enableFullAccess=false;
+    protected boolean enableAgentsMarkdown=false;
     protected boolean enableRecycleToolMessage=false;
     protected Integer recycleToolLastKeepCount =10;
     protected Integer recycleToolMessageMinLength=512;

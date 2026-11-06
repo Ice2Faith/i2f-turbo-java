@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
+import i2f.ai.std.prompts.AgentsPrompt;
 import i2f.ai.std.rag.RagTools;
 import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.skill.SkillsHelper;
@@ -692,6 +693,10 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
+                    // Note: 系统消息动态注入，因为使用的是add(0,)方式，形成了先插入的排在后面
+                    // 因此，就要利用好KvCache,保证相对稳定的内容使用排在前面
+                    // 最大化的利用好LLM的KvCache能力
+
                     // 通过系统注入提示词，强化回话记忆
                     if(req.isEnableTools()
                             && req.getSessionRecordsMap()!=null
@@ -727,6 +732,32 @@ public class OpenAiOpsController implements IOpsProvider {
                                 resp = OpsSecureReturn.success(defTruthMsg);
                             }
                             resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
+                        }
+                    }
+
+                    if(req.isEnableAgentsMarkdown() && needInjectSystemPrompt){
+                        String content = AgentsPrompt.getAgentsMarkdown();
+                        if(content!=null){
+                            content=content.trim();
+                        }
+                        if(content!=null && !content.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
+
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
+                            dto.setEcho_loop_engineering(system);
+
+                            String defSkillMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
                             String respJson = objectMapper.writeValueAsString(resp);
                             emitter.send(respJson);
                         }

@@ -1313,6 +1313,27 @@
                     </el-popover>
                 </el-col>
                 <el-col :span="12">
+                    <el-checkbox v-model="form.enableAgentsMarkdown">
+                        AGENTS.md
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="480"
+                            trigger="click">
+                        <p>
+                            AGENTS.md，是否将系统运行目录下(或类路径下)的 AGENTS.md 注入到系统提示词中。<br/>
+                            特别注意，文件名大小写，不太建议太长的内容。<br/>
+                            如果开启，将会把整个文件内容作为系统提示词注入到上下文中。<br/>
+                            因此，你可以通过此方式定义一些基础的行为逻辑或者角色设定。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
                     <el-checkbox v-model="form.enableEchoRequestPayload">
                         回显请求
                     </el-checkbox>
@@ -2203,6 +2224,7 @@
                         enableMemories: false,
                         memoryBucket: '',
                         enableLoopEngineering: false,
+                        enableAgentsMarkdown: false,
                         enableRecycleToolMessage: false,
                         recycleToolLastKeepCount: 10,
                         recycleToolMessageMinLength: 512,
@@ -3722,6 +3744,7 @@
                     req.truthContent = truthContent;
                     req.enableVisionImage=this.form.enableVisionImage;
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
+                    req.enableAgentsMarkdown=this.form.enableAgentsMarkdown;
                     req.sessionRecordsMap = session.sessionRecordsMap;
                     req.webjsToolResults=this.form.webjsToolResults;
                     // 插话：只在此安全临界点投递
