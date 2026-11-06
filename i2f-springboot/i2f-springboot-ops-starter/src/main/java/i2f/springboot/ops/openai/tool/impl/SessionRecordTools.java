@@ -8,6 +8,8 @@ import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
+import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
 
@@ -48,8 +50,32 @@ public class SessionRecordTools {
         exposeTools = Collections.unmodifiableSet(names);
     }
 
+    protected static IJsonSerializer jsonSerializer = new Json2Serializer();
+
     public static Set<String> toolNames() {
         return new HashSet<>(exposeTools);
+    }
+
+    public static String getSystemPrompt(Map<String,String> map){
+        if(map==null || map.isEmpty()){
+            return null;
+        }
+        Set<String> recordTypes = map.keySet();
+        Set<String> types=new TreeSet<>(recordTypes);
+        /*language=markdown*/
+        String ret= "# session record guide\n" +
+                "\n" +
+                "- [Note]Use tool `{{session_record_read}}` to fetch details if you need.\n" +
+                "- Available Types:\n" +
+                "\n" +
+                "```\n" +
+                "{{session_types}}\n" +
+                "```";
+
+        ret=ret.replace("{{session_record_read}}",SESSION_RECORD_READ);
+        ret=ret.replace("{{session_types}}",jsonSerializer.serialize(types));
+
+        return ret;
     }
 
     public static Map<String, String> replaceAllInContextHolder(Map<String, String> map) {

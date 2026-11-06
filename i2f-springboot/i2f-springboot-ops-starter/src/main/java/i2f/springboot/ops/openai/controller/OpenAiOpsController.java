@@ -692,6 +692,17 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
+                    // 通过系统注入提示词，强化回话记忆
+                    if(req.isEnableTools()
+                            && req.getSessionRecordsMap()!=null
+                            && !req.getSessionRecordsMap().isEmpty()){
+                        String content = SessionRecordTools.getSystemPrompt(req.getSessionRecordsMap());
+                        if(content!=null && !content.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
+                        }
+                    }
+
                     // 注入到提示词，事实
                     if (req.isEnableTruth()) {
                         // 事实内容注入
@@ -1414,7 +1425,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     // 合并重排system消息，用于在一些严格的模型要求下，要求system消息只有一条，且只能在第一条的情况
                     if (req.isEnableMergedSystemMsg()) {
-                        echoProgress.apply("重拍系统消息中...");
+                        echoProgress.apply("重排系统消息中...");
 
                         List<OpenAiMessage> messages = completion.getMessages();
                         completion.setMessages(new ArrayList<>());
@@ -1436,6 +1447,41 @@ public class OpenAiOpsController implements IOpsProvider {
                                     .collect(Collectors.joining("\n\n"));
                             OpenAiSystemMessage sys = new OpenAiSystemMessage(mergedSystem);
                             completion.getMessages().add(0, sys);
+                        }
+                    }
+
+                    // 回收较久之前的Tool消息内容，减少输入Token量，因为早起的工具调用结果，对接下来的推理影响已经不大了
+                    // 仅保留已被回收，提示如有需要，重新执行工具即可
+                    if(req.isEnableRecycleToolMessage()){
+                        int toolCount=0;
+
+                        int recycleToolAssistantCount=req.getRecycleToolLastKeepCount()==null?5:req.getRecycleToolLastKeepCount();
+                        if(recycleToolAssistantCount<=0){
+                            recycleToolAssistantCount=5;
+                        }
+                        int recycleToolMessageMinLength=req.getRecycleToolMessageMinLength()==null?512:req.getRecycleToolMessageMinLength();
+                        if(recycleToolMessageMinLength<=0){
+                            recycleToolMessageMinLength=512;
+                        }
+                        int size = completion.getMessages().size();
+
+                        for (int i = size-1; i >=0; i--) {
+                            OpenAiMessage msg = completion.getMessages().get(i);
+                            if(msg instanceof OpenAiToolMessage){
+                                toolCount++;
+                            }
+
+                            if(toolCount>recycleToolAssistantCount){
+                                if(msg instanceof OpenAiToolMessage){
+                                    if(toolCount>=recycleToolAssistantCount){
+                                        OpenAiToolMessage toolMsg=(OpenAiToolMessage)msg;
+                                        String content = toolMsg.getContent();
+                                        if(content.length()>recycleToolMessageMinLength) {
+                                            toolMsg.setContent("[recycled] tool result recycled; re-call if needed.");
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 

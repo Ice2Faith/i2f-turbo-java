@@ -861,6 +861,69 @@
         <el-card shadow="never">
             <el-row :gutter="20">
                 <el-col :span="12">
+                    <el-checkbox v-model="form.enableRecycleToolMessage">
+                        回收工具消息
+                    </el-checkbox>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            trigger="click">
+                        <p>
+                            回收工具消息，历史上的工具消息内容，常常都已经使用过了，模型可能根本不关注了，白白浪费输入Token。<br/>
+                            工作原理是，将工具调用的结果替换为一个简短的占位符，从而减少输入的Token的大小。<br/>
+                            当模型需要重新查看时，模型可以选择重新调用工具重新获取。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    保留工具结果个数：
+                    <el-input-number v-model="form.recycleToolLastKeepCount"
+                                     :disabled="!form.enableRecycleToolMessage"
+                                     size="mini" :min="3"
+                                     :max="9999"></el-input-number>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            trigger="click">
+                        <p>
+                            保留消息个数，在进行工具结果回收的时候，需要保留的最后多少次工具结果。<br/>
+                            目的是选择一个合适的大小，使得既不占用大量的输入上下文，也不至于被快速回收引发反复调用开销。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+                <el-col :span="12">
+                    回收结果最小长度：
+                    <el-input-number v-model="form.recycleToolMessageMinLength"
+                                     :disabled="!form.enableRecycleToolMessage"
+                                     size="mini" :min="50"
+                                     :max="99999"></el-input-number>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            trigger="click">
+                        <p>
+                            回收长度阈值，在进行工具结果回收的时候，长度大于多少的工具结果应该被回收。<br/>
+                            目的是工具结果较短时，回收实际上没有什么意义，甚至占位符可能还比原来的消息结果还长。<br/>
+                        </p>
+                        <i slot="reference"
+                           class="el-icon-question"
+                           style="line-height: 30px;">
+                        </i>
+                    </el-popover>
+                </el-col>
+            </el-row>
+        </el-card>
+        <el-card shadow="never">
+            <el-row :gutter="20">
+                <el-col :span="12">
                     <el-button :disabled="!(currentMessages && currentMessages.length>0)"
                                type="success"
                                size="small"
@@ -2140,6 +2203,9 @@
                         enableMemories: false,
                         memoryBucket: '',
                         enableLoopEngineering: false,
+                        enableRecycleToolMessage: false,
+                        recycleToolLastKeepCount: 10,
+                        recycleToolMessageMinLength: 512,
                         webjsToolResults:[
                             /*{
                                 tool_call_id: '',
@@ -3647,6 +3713,9 @@
                     req.lruToolMaxSize = this.form.lruToolMaxSize;
                     req.enableToolRecommendByIntentRecognize=this.form.enableToolRecommendByIntentRecognize;
                     req.enableEchoRequestPayload = this.form.enableEchoRequestPayload;
+                    req.enableRecycleToolMessage=this.form.enableRecycleToolMessage;
+                    req.recycleToolLastKeepCount=this.form.recycleToolLastKeepCount;
+                    req.recycleToolMessageMinLength=this.form.recycleToolMessageMinLength;
                     req.enableMergedSystemMsg = this.form.enableMergedSystemMsg;
                     req.enableTruth = this.form.enableTruth;
                     req.enableFullAccess=this.form.enableFullAccess;
