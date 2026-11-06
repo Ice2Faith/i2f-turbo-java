@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author Ice2Faith
@@ -32,9 +33,41 @@ public class BasicMcpServerExposer implements McpServerExposer {
         String name = tool.getName();
         if (rules != null) {
             for (McpServerExposeRule rule : rules) {
+                // 先根据 tag 排除，再根据 tag 纳入，最后按照更加严谨的表达式匹配
+                // 可以配合使用，优先级 表达式 > include ? exclude
+                List<String> excludeTags = rule.getExcludeTags();
+                if (excludeTags != null && !excludeTags.isEmpty()) {
+                    Set<String> tags = tool.getTags();
+                    if (tags != null && !tags.isEmpty()) {
+                        for (String includeTag : excludeTags) {
+                            if (tags.contains(includeTag)) {
+                                ret = rule.isExpose();
+                            }
+                        }
+                    }
+                }
+
+                List<String> includeTags = rule.getIncludeTags();
+                if (includeTags != null && !includeTags.isEmpty()) {
+                    Set<String> tags = tool.getTags();
+                    if (tags != null && !tags.isEmpty()) {
+                        for (String includeTag : includeTags) {
+                            if (tags.contains(includeTag)) {
+                                ret = rule.isExpose();
+                            }
+                        }
+                    }
+                }
+
                 String pattern = rule.getPattern();
-                if (pattern == null || matcher.matches(name, pattern)) {
-                    ret = rule.isExpose();
+                if (pattern != null && !pattern.isEmpty()) {
+                    if( matcher.matches(name, pattern)) {
+                        ret = rule.isExpose();
+                    }
+                }
+
+                if(ret!=null){
+                    break;
                 }
             }
         }

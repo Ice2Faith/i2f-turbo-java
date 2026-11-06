@@ -10,6 +10,14 @@ i2f:
             rules:
               - pattern: webjs_*
                 expose: false
+              - exclude-tags:
+                  - human
+                  - high_cost
+                expose: false
+              - include-tags:
+                  - auto
+                  - math
+                expose: true
           # simple mcp server implements privacy protocol mcp (with hmac signature verify)
           simple:
             enable: true
