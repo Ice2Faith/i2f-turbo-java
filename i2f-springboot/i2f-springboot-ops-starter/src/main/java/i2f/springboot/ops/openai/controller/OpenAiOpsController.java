@@ -733,6 +733,27 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
 
+                    if (req.isEnableLoopEngineering() && needInjectSystemPrompt) {
+                        String content = LoopEngineeringTools.convertSystemPrompt();
+                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                        completion.getMessages().add(0, system);
+
+                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                        dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
+                        dto.setEcho_loop_engineering(system);
+
+                        String defSkillMsg = objectMapper.writeValueAsString(dto);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(defSkillMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(defSkillMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+                    }
+
                     if (req.isEnableTruth() && needInjectSystemPrompt) {
                         // 事实系统使用方式
                         String content = TruthStoreTools.convertSystemPrompt();
@@ -758,25 +779,27 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     }
 
-                    if (req.isEnableLoopEngineering() && needInjectSystemPrompt) {
-                        String content = LoopEngineeringTools.convertSystemPrompt();
-                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
-                        completion.getMessages().add(0, system);
+                    if (req.isEnableSkills() && needInjectSystemPrompt) {
+                        String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsTools.getSkillDefinitions());
+                        if (content != null && !content.isEmpty()) {
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
 
-                        OpenAiMessageVo dto = new OpenAiMessageVo();
-                        dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
-                        dto.setEcho_loop_engineering(system);
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_SKILL);
+                            dto.setEcho_skill(system);
 
-                        String defSkillMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
+                            String defSkillMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defSkillMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defSkillMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
                         }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
                     }
 
                     if (req.isEnableTools()
@@ -801,29 +824,6 @@ public class OpenAiOpsController implements IOpsProvider {
                         resp.withAttr("type", OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
-                    }
-
-                    if (req.isEnableSkills() && needInjectSystemPrompt) {
-                        String content = SkillsHelper.convertSkillDefinitionsAsSystemPrompt(skillsTools.getSkillDefinitions());
-                        if (content != null && !content.isEmpty()) {
-                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
-                            completion.getMessages().add(0, system);
-
-                            OpenAiMessageVo dto = new OpenAiMessageVo();
-                            dto.setType(OpsOpenAiConsts.ECHO_SKILL);
-                            dto.setEcho_skill(system);
-
-                            String defSkillMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
-                        }
                     }
 
                     if (req.isEnableTools()) {

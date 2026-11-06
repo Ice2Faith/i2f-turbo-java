@@ -14,7 +14,7 @@ public class LoopEngineeringTools {
 
     public static String convertSystemPrompt() {
         /*language=markdown*/
-        String ret = "# 工程化用户需求解决方案指南\n" +
+        String ret = "# 工程化规范化系统解决方案实施指南\n" +
                 "\n" +
                 "- 使用工程化思想，指导完成用户需求的工程化实施步骤及解决方案指南\n" +
                 "- 【重要】要求严格按照工作流程执行\n" +
