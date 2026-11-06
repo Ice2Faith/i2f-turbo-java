@@ -32,6 +32,16 @@ http://localhost:8080/ops/
     - AI的技能目录
     - 可以参考现有的模式，编写自己的技能
     - 或者下载网络上的技能，添加到其中
+- tools
+    - AI的基于groovy脚本的工具拓展
+    - 实现动态自动注册工具，热更新工具
+    - 实现，可以参考 [EchoTool.groovy.sample](tools/EchoTool.groovy.sample)
+    - 只要将这样的groovy放到运行目录下的 tools 文件夹即可
+    - 注意，文件名必须为 `.groovy` 结尾
+    - 必须有类名，不要发生类名冲突，注入的属性需要setter方法，具有无参构造
+    - 没15秒进行自动注册热更新
+    - 前提是启用这个配置 `ai.tools.groovy-dynamic-tools.enable`
+    - 运行使用 `@Autowired`,`@Resource`,`@Value` 等注入变量
 
 # 拓展OpenAI的角色设定
 

@@ -1,0 +1,47 @@
+import i2f.ai.std.tags.AiTags
+import i2f.ai.std.tool.annotations.Tool
+import i2f.ai.std.tool.annotations.ToolParam
+import i2f.ai.std.tool.annotations.Tools
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationContext
+import org.springframework.core.env.Environment
+import org.springframework.stereotype.Component
+
+@Component
+@Tools(tags = [
+        AiTags.CODEC_VALUE
+])
+public class EchoTool {
+    @Autowired
+    private Environment environment;
+
+    @Autowired
+    private ApplicationContext applicationContext;
+
+    @Tool(
+            tags = [
+                    AiTags.AUTO_VALUE
+            ],
+            description = "echo content"
+    )
+    String echo(@ToolParam(value = "text", description = "the text")
+                        String text) {
+        return text;
+    }
+
+    Environment getEnvironment() {
+        return environment
+    }
+
+    void setEnvironment(Environment environment) {
+        this.environment = environment
+    }
+
+    ApplicationContext getApplicationContext() {
+        return applicationContext
+    }
+
+    void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext
+    }
+}
