@@ -1,0 +1,237 @@
+// 包名，目的是 隔离业务域，同一个包下面的全局变量和函数可以允许互相访问
+
+package rules;
+
+// 导入类，和Java一样
+import i2f.extension.drools.test.Order;
+import i2f.extension.drools.test.Customer;
+
+///////////////////////////////////////////////////
+// 基础语法
+
+rule "grammar_base" // 规则名称
+    // 这里可以指定一些规则的属性，起到一些特殊场景的控制作用
+when // 条件部分，如果没有，那就是默认 true ，无条件触发
+    // 格式，变量名：匹配类型表达式
+    // 变量名可以没有，如果then部分不使用这个变量的话
+    // 类型里面的条件也可以不写，表示匹配任意的一个这样的类型即可
+    $order: Order(amount >=0 && amount<100)
+    // 也可以添加其他的这样的判定表达式，就表示同时满足才行
+then // 执行部分，当满足此规则的 when 时，触发什么动作
+    $order.setScore(0);
+    System.out.println("trigger rule grammar_base");
+end
+
+////////////////////////////////////////////////////
+// 比较运算符
+// >,<,>=,<=,==,!= 都是常见的
+// contains,not contains 用于判断集合中是否包含指定对象
+// memberOf,not memberOf 用于是否是一个集合的成员
+// matches,not matches 用于进行正则匹配
+
+rule "grammar_contains"
+when
+    $order: Order(amount >=0 && amount<100)
+    $customer: Customer(orders contains $order)
+then
+    $order.setScore(0);
+    System.out.println("trigger rule grammar_contains");
+end
+
+
+rule "grammar_matches"
+when
+    $customer: Customer(name matches "J.*")
+then
+    System.out.println("trigger rule grammar_matches");
+end
+
+//////////////////////////////////////////////////////
+// 事实更新，用于触发其他规则的执行
+// 相当于再出发一次 fireAllRules
+// insert 插入一个事实，因此会引发其他规则的执行
+// update 更新一个事实对象，使得其他规则能够触发
+// retract 移除一个事实对象，这样，低优先级的规则可能因为缺少事实对象，就不会被执行
+// 正因为如此，可能会导致死循环，所以，需要结合后面的属性部分，约束只能执行一次
+
+rule "grammar_insert"
+when
+    eval(true)
+then
+    Customer customer=new Customer();
+    customer.setName("Lili");
+    insert(customer); // 会触发其他的执行
+    System.out.println("trigger rule grammar_insert");
+end
+
+
+rule "grammar_insert_effect"
+    no-loop true // 这里使用属性，约束不要重复执行，避免死循环
+when
+    $customer: Customer(name matches "L.*")
+then
+    System.out.println("trigger rule grammar_insert_effect");
+end
+
+
+rule "grammar_update"
+    salience 1
+when
+    $customer: Customer(name matches "J.*")
+then
+    $customer.setName("Lili");
+    update($customer); // 重新出发执行
+    System.out.println("trigger rule grammar_update");
+end
+
+// 默认情况下，规则执行的优先级就是定义的顺序
+// 可以通过属性指定执行的优先级，从而配合 retract 使用
+// 从而阻断其他规则的触发
+rule "grammar_retract"
+    salience 2 // 优先级越大，执行优先级越高
+when
+    $customer: Customer(name matches "J.*")
+then
+    retract($customer); // 重新出发执行
+    System.out.println("trigger rule grammar_retract");
+end
+
+//////////////////////////////////////////////////////
+// 属性部分
+// salience 指定规则运行优先级
+// dialect "" 规则的语言类型，支持Java和mvel
+// enabled 是否启用规则
+// date-effective "" 规则开始生效的时间，按日算，默认格式 dd-MM-yyyy
+// date-expires "" 规则失效的时间，按日算，默认格式 dd-MM-yyyy
+// activation-group "" 激活分组，相同分组中只能有一个规则触发
+// agenda-group "" 议程分组，只有获得焦点的规则才可能触发
+// timer 定时器，允许规则定时执行
+// auto-focus 自动获取议程的焦点
+// no-loop 防止死循环
+
+rule "grammar_salience"
+    salience 0 // 默认优先级，就是0，值越大优先级越高越先触发执行
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_salience");
+end
+
+
+rule "grammar_no_loop"
+    no-loop true // 避免规则重复执行，仅执行一次
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_no_loop");
+end
+
+
+rule "grammar_date_effetive"
+    date-effective "2026-01-01" // 这里，默认格式是 dd-MM-yyyy
+    date-expires "2026-01-31" // 国内常用 yyyy-MM-dd,需要调用方设置系统属性配合
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_date_effetive");
+end
+
+
+rule "grammar_enabled"
+    enabled false // 默认都是启用的，可选择关闭
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_enabled");
+end
+
+
+rule "grammar_activation_group"
+    activation-group "radio_group" // 就是相当于是一个 radio_group,只会选择其中一个执行
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_activation_group");
+end
+
+
+rule "grammar_agenda_group"
+    agenda-group "simple" // 如果规则触发时，没有添加对应议程的焦点，规则将不会执行
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_agenda_group");
+end
+
+
+rule "grammar_auto_agenda_group"
+    agenda-group "auto_agenda"
+    auto-focus // 也可以使用自动焦点，自动添加到议程中，而不用调用触发规则时添加议程
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_auto_agenda_group");
+end
+
+
+rule "grammar_timer_interval"
+    timer(5s,2s) // 5秒之后触发，没2秒执行一次
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_timer_interval");
+end
+
+
+rule "grammar_timer_cron"
+    timer(cron:0/1 * * * * ?) // 每秒执行一次
+when
+    $order: Order(amount<100)
+then
+    System.out.println("trigger rule grammar_timer_cron");
+end
+
+//////////////////////////////////////////////////////
+// global 全局变量，注入Java变量，Bean等，服务类，工具类等，跨规则使用
+
+// 申明一个全局变量，需要结合Java端注入全局变量
+global java.util.List<Order> g_orders;
+
+rule "grammar_global"
+when
+    $order: Order(amount<100)
+then
+    g_orders.add($order);
+    System.out.println("trigger rule grammar_global");
+end
+
+//////////////////////////////////////////////////////
+// query 查询，用于查询工作内存中的事实对象的集合
+// 当规则中涉及到使用insert/update/retract等时，很有用
+// 或者由业务制定目标对象集合
+
+query "grammar_query"
+    $order: Order(amount<100)
+end
+
+// 带参数查询
+query "grammar_query_args"(int maxAmount)
+    $order: Order(amount<maxAmount)
+end
+
+//////////////////////////////////////////////////////
+// function 包函数，可以在同一个包中使用
+
+function int add(int a,int b){
+    return a+b;
+}
+
+rule "grammar_function"
+when
+    $order: Order(amount<100)
+then
+    int score=add($order.getAmount(),10);
+    $order.setScore(score);
+    System.out.println("trigger rule grammar_function");
+end
+

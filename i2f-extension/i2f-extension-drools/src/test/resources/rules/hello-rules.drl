@@ -1,0 +1,23 @@
+package rules;
+
+import i2f.extension.drools.test.Order;
+
+// 积分规则，按照消费金额计算
+
+// 小于100，0积分
+rule "hello_lt_100"
+when
+    $order: Order(amount<100)
+then
+    $order.setScore(0);
+    System.out.println("trigger rule hello_lt_100");
+end
+
+// 100-200,10积分
+rule "hello_btw_100_200"
+when
+    $order: Order(amount>=100 && amount<200)
+then
+    $order.setScore(10);
+    System.out.println("trigger rule hello_btw_100_200");
+end
