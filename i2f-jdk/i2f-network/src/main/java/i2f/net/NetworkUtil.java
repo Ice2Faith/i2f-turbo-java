@@ -240,12 +240,6 @@ public class NetworkUtil {
         if (hostname == null || hostname.isEmpty()) {
             return false;
         }
-        // localhost / 127.0.0.1
-        if (Objects.equals(hostname, "localhost")
-                || Objects.equals(hostname, "127.0.0.1")
-                || Objects.equals(hostname, "[::1]")) {
-            return true;
-        }
 
         // IPv6 形式
         if (hostname.startsWith("[")
@@ -330,6 +324,14 @@ public class NetworkUtil {
         if (hostname == null || hostname.isEmpty()) {
             return false;
         }
+
+        // localhost / 127.0.0.1
+        if (Objects.equals(hostname, "localhost")
+                || Objects.equals(hostname, "127.0.0.1")
+                || Objects.equals(hostname, "[::1]")) {
+            return true;
+        }
+
         List<String> localHostNames = getLocalHostNames();
         boolean ret = localHostNames.contains(hostname);
         if (ret) {
