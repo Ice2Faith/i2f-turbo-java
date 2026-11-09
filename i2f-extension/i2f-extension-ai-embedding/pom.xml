@@ -64,6 +64,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>**/*.onnx</exclude>
+                </excludes>
             </resource>
             <resource>
                 <directory>src/main/java</directory>
@@ -85,9 +88,6 @@
                     <include>**/*.vm</include>
                     <include>**/*.db</include>
                 </includes>
-                <excludes>
-                    <exclude>**/*.onnx</exclude>
-                </excludes>
             </resource>
         </resources>
     </build>
