@@ -608,15 +608,18 @@ public class OpenAiOpsController implements IOpsProvider {
     public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
 
     @PostMapping("/stream")
-    public SseEmitter stream(@RequestBody OpsSecureDto reqDto) throws Exception {
+    public SseEmitter stream(@RequestBody OpsSecureDto reqDto,
+                             HttpServletRequest request) throws Exception {
         SseEmitter emitter = new SseEmitter(TimeUnit.MINUTES.toMillis(5));
         AtomicReference<OpenAiOperateDto> reqRef = new AtomicReference<>();
         AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
         CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
         CopyOnWriteArrayList<AsyncTaskMessage> asyncTaskMessages = new CopyOnWriteArrayList<>();
+
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
+            HttpServletToolContextUtil.fillToolContext(request);
             ToolCallContextHolder.put("req", req);
 
             ExFunction<Object, String> echoProgress = (content) -> {
@@ -643,8 +646,10 @@ public class OpenAiOpsController implements IOpsProvider {
             Map<String, CopyOnWriteArrayList<ToolDefinition>> allToolsMap = new ConcurrentHashMap<>();
 
             CompletableFuture.runAsync(() -> {
+                HttpServletToolContextUtil.fillToolContext(request);
                 ToolCallContextHolder.put("req", req);
                 ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
+
                 try {
                     echoProgress.apply("转换消息中...");
 
@@ -940,6 +945,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                             lruToolNames.add(0, name);
                                         }
                                         Runnable toolTask = () -> {
+                                            HttpServletToolContextUtil.fillToolContext(request);
                                             ToolCallContextHolder.put("req", req);
                                             ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
                                             try {
@@ -1062,6 +1068,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
 
                                     latch.await();
+                                    HttpServletToolContextUtil.fillToolContext(request);
                                     ToolCallContextHolder.put("req", req);
                                     ToolCallContextHolder.put(SessionRecordTools.TOOL_CONTEXT_KEY, sessionRecordsMap);
 
