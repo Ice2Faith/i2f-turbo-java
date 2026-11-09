@@ -95,7 +95,7 @@ public class RagTools implements BaseMutator<RagTools> {
                                         String documentId,
                                         @ToolParam(value = "separateNoStart", description = "document separate start no, for example 0 or 1")
                                         Integer separateNoStart,
-                                        @ToolParam(value = "separateNoStart", description = "document separate end no, for example 3 or 5")
+                                        @ToolParam(value = "separateNoEnd", description = "document separate end no, for example 3 or 5")
                                         Integer separateNoEnd) {
         RagDocumentsStore documentsStore = worker.getDocumentsStore();
         if (documentsStore == null) {
