@@ -340,8 +340,27 @@ public class NetworkUtil {
         try {
             // 通过主机名，获取 IP 判断是否是本机的 IP
             InetAddress address = InetAddress.getByName(hostname);
+
+            // 检查是否是"任意本地地址" (如 0.0.0.0) 或 "回环地址" (如 127.0.0.1, ::1)
+            if (address.isAnyLocalAddress()
+                    || address.isLoopbackAddress()) {
+                return true;
+            }
+
             String ip = address.getHostAddress();
-            return localHostNames.contains(ip);
+            if(localHostNames.contains(ip)){
+                return true;
+            }
+
+            // 检查该地址是否绑定在本机的任何一个网络接口上
+            try {
+                NetworkInterface networkInterface = NetworkInterface.getByInetAddress(address);
+                if (networkInterface != null) {
+                    return true;
+                }
+            } catch (SocketException e) {
+                // ignore
+            }
         } catch (UnknownHostException e) {
             // ignore
         }
