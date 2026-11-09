@@ -1,5 +1,6 @@
 package i2f.ai.std.rag;
 
+import i2f.ai.std.rag.data.RagDocument;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.SimpleRecursiveRagTextSplitter;
 import i2f.ai.std.rag.impl.TextFileRagFileReader;
@@ -71,6 +72,17 @@ public class RagHelper {
             if (text.trim().isEmpty()) {
                 return;
             }
+            String documentName = path.getName();
+            int documentIndex = 0;
+            RagDocumentsStore documentsStore = worker.getDocumentsStore();
+            if (documentsStore != null) {
+                // 删除旧版本文档
+                List<String> ids = documentsStore.getDocumentAllIds(documentName);
+                if (ids != null && !ids.isEmpty()) {
+                    worker.getStore().removeAll(ids);
+                    documentsStore.removeDocuments(documentName);
+                }
+            }
             List<String> list = options.getSplitter().split(text);
             if (options.getStoreBatchSize() > 0) {
                 List<String> once = new ArrayList<>();
@@ -85,6 +97,21 @@ public class RagHelper {
                                 options.getListener().accept(item);
                             }
                         }
+                        if (documentsStore != null) {
+                            // 保存文档上下文关联关系
+                            List<RagDocument> documents = new ArrayList<>();
+                            for (RagEmbedding item : embeddings) {
+                                RagDocument doc = new RagDocument();
+                                doc.setId(item.getId());
+                                doc.setDocumentId(documentName);
+                                doc.setSeparateNo(documentIndex++);
+                                doc.setContent(item.getContent());
+
+                                documents.add(doc);
+                            }
+
+                            documentsStore.saveAll(documents);
+                        }
                         once.clear();
                         count = 0;
                     }
@@ -96,6 +123,21 @@ public class RagHelper {
                             options.getListener().accept(item);
                         }
                     }
+                    if (documentsStore != null) {
+                        // 保存文档上下文关联关系
+                        List<RagDocument> documents = new ArrayList<>();
+                        for (RagEmbedding item : embeddings) {
+                            RagDocument doc = new RagDocument();
+                            doc.setId(item.getId());
+                            doc.setDocumentId(documentName);
+                            doc.setSeparateNo(documentIndex++);
+                            doc.setContent(item.getContent());
+
+                            documents.add(doc);
+                        }
+
+                        documentsStore.saveAll(documents);
+                    }
                     once.clear();
                     count = 0;
                 }
@@ -105,6 +147,21 @@ public class RagHelper {
                     for (RagEmbedding item : embeddings) {
                         options.getListener().accept(item);
                     }
+                }
+                if (documentsStore != null) {
+                    // 保存文档上下文关联关系
+                    List<RagDocument> documents = new ArrayList<>();
+                    for (RagEmbedding item : embeddings) {
+                        RagDocument doc = new RagDocument();
+                        doc.setId(item.getId());
+                        doc.setDocumentId(documentName);
+                        doc.setSeparateNo(documentIndex++);
+                        doc.setContent(item.getContent());
+
+                        documents.add(doc);
+                    }
+
+                    documentsStore.saveAll(documents);
                 }
             }
 

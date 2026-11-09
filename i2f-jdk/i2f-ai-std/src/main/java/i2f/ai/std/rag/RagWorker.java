@@ -23,6 +23,7 @@ public class RagWorker implements BaseMutator<RagWorker> {
     protected RagEmbeddingModel model;
     protected RagEmbeddingStore store;
     protected RagRerankModel rerankModel;
+    protected RagDocumentsStore documentsStore;
 
     public RagWorker(RagEmbeddingModel model, RagEmbeddingStore store) {
         this.model = model;

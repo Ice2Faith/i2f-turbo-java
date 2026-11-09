@@ -6,6 +6,7 @@ import i2f.ai.std.rag.*;
 import i2f.ai.std.rag.data.RagLoadDocumentsOptions;
 import i2f.ai.std.rag.impl.*;
 import i2f.extension.ai.rag.sqlite.SqliteBucketRagMemoryStore;
+import i2f.extension.ai.rag.sqlite.SqliteRagDocumentsStore;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.extension.document.pdf.PdfConvertUtil;
 import i2f.extension.embedding.BgeSmallZhOnnxRagEmbeddingModel;
@@ -79,14 +80,24 @@ public class RagAutoConfiguration {
                 .done();
     }
 
+    @ConditionalOnExpression("${ai.rags.docs-store.enable:true}")
+    @ConditionalOnMissingBean(RagDocumentsStore.class)
+    @Bean
+    public RagDocumentsStore ragDocumentsStore() {
+        return new SqliteRagDocumentsStore().toMutator()
+                .done();
+    }
+
     @ConditionalOnExpression("${ai.rags.worker.enable:true}")
     @ConditionalOnMissingBean(RagWorker.class)
     @Bean
     public RagWorker ragWorker(@Autowired RagEmbeddingModel ragEmbeddingModel,
-                               @Autowired RagEmbeddingStore ragEmbeddingStore) {
+                               @Autowired RagEmbeddingStore ragEmbeddingStore,
+                               @Autowired(required = false) RagDocumentsStore ragDocumentsStore) {
         RagWorker ret = new RagWorker().toMutator()
                 .set(u -> u::setModel, ragEmbeddingModel)
                 .set(u -> u::setStore, ragEmbeddingStore)
+                .set(u -> u::setDocumentsStore, ragDocumentsStore)
                 .done();
         new Thread(() -> {
             try {
@@ -109,6 +120,10 @@ public class RagAutoConfiguration {
         File dir = new File(properties.getDocsPath());
         if (!dir.exists()) {
             dir.mkdirs();
+            return;
+        }
+        File[] files = dir.listFiles();
+        if (files == null || files.length == 0) {
             return;
         }
         RagHelper.loadDocuments(dir,

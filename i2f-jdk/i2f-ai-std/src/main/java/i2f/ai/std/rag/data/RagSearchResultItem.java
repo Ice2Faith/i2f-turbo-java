@@ -15,4 +15,6 @@ public class RagSearchResultItem implements BaseMutator<RagSearchResultItem> {
     protected String id;
     protected int rank;
     protected String content;
+    protected String documentId;
+    protected int separateNo;
 }
