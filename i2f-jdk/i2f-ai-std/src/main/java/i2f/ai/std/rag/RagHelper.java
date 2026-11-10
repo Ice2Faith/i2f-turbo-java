@@ -21,13 +21,14 @@ public class RagHelper {
 
     public static void loadDocuments(RagWorker worker,
                                      RagTextSplitter splitter) throws IOException {
-        loadDocuments(new File(DEFAULT_RAG_DIR), worker, new RagLoadDocumentsOptions().toMutator()
+        loadDocuments(new File(DEFAULT_RAG_DIR), null, worker, new RagLoadDocumentsOptions().toMutator()
                 .set(p -> p::setSplitter, splitter)
                 .done());
     }
 
 
     public static void loadDocuments(File path,
+                                     String parentPath,
                                      RagWorker worker,
                                      RagLoadDocumentsOptions options) throws IOException {
         if (path == null) {
@@ -72,7 +73,10 @@ public class RagHelper {
             if (text.trim().isEmpty()) {
                 return;
             }
-            String documentName = path.getName();
+            if (parentPath == null) {
+                parentPath = "";
+            }
+            String documentName = parentPath + path.getName();
             int documentIndex = 0;
             RagDocumentsStore documentsStore = worker.getDocumentsStore();
             if (documentsStore != null) {
@@ -171,7 +175,8 @@ public class RagHelper {
             File[] files = path.listFiles();
             if (files != null) {
                 for (File file : files) {
-                    loadDocuments(file, worker, options);
+                    String nextParent = parentPath + "/" + path.getName();
+                    loadDocuments(file, nextParent, worker, options);
                 }
             }
         }
