@@ -60,7 +60,7 @@ public class SqliteVecUtils {
                 libDir.mkdirs();
             }
 
-            if (saveFile.exists() && saveFile.isFile()) {
+            if (saveFile.isFile()) {
                 return;
             }
 
