@@ -126,7 +126,7 @@ public class RagAutoConfiguration {
         if (files == null || files.length == 0) {
             return;
         }
-        RagHelper.loadDocuments(dir,
+        RagHelper.loadDocuments(dir, null,
                 worker,
                 new RagLoadDocumentsOptions().toMutator()
                         .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter().toMutator()
