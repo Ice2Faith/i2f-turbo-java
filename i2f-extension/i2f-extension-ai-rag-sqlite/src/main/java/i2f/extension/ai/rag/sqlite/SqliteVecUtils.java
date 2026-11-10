@@ -49,6 +49,7 @@ public class SqliteVecUtils {
     }
 
     public static void releaseLib() {
+        InputStream is = null;
         try {
             String libFilePath = getLibFilePath();
             File saveFile = new File(libFilePath);
@@ -62,9 +63,19 @@ public class SqliteVecUtils {
 
             String os = OsUtil.getOsFamily();
             String arch = OsUtil.getArchFamily();
-            InputStream is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + os + "/" + arch + "/" + saveFile.getName());
             if (is == null) {
-                is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + arch + "/" + saveFile.getName());
+                try {
+                    is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + os + "/" + arch + "/" + saveFile.getName());
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+            if (is == null) {
+                try {
+                    is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + arch + "/" + saveFile.getName());
+                } catch (IOException e) {
+                    // ignore
+                }
             }
             if (is == null) {
                 is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + saveFile.getName());
