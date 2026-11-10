@@ -9,7 +9,6 @@ import i2f.std.consts.StdConst;
 import org.sqlite.SQLiteConfig;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -59,6 +58,10 @@ public class SqliteVecUtils {
             libDir = new File(libDir.getAbsolutePath());
             if (!libDir.exists()) {
                 libDir.mkdirs();
+            }
+
+            if (saveFile.exists() && saveFile.isFile()) {
+                return;
             }
 
             String os = OsUtil.getOsFamily();
