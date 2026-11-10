@@ -66,14 +66,14 @@ public class SqliteVecUtils {
             if (is == null) {
                 try {
                     is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + os + "/" + arch + "/" + saveFile.getName());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
             if (is == null) {
                 try {
                     is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + arch + "/" + saveFile.getName());
-                } catch (IOException e) {
+                } catch (Exception e) {
                     // ignore
                 }
             }
@@ -81,7 +81,7 @@ public class SqliteVecUtils {
                 is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + saveFile.getName());
             }
             StreamUtil.writeBytes(is, saveFile);
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
