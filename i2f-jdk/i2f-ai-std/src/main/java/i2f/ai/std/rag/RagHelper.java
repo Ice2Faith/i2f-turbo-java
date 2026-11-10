@@ -37,6 +37,12 @@ public class RagHelper {
         if (!path.exists()) {
             return;
         }
+        if (parentPath == null) {
+            parentPath = "";
+        }
+        if (parentPath.endsWith("/")) {
+            parentPath = parentPath.substring(0, parentPath.length() - 1);
+        }
         if (options == null) {
             options = new RagLoadDocumentsOptions().toMutator()
                     .set(u -> u::setSplitter, new SimpleRecursiveRagTextSplitter())
@@ -73,10 +79,7 @@ public class RagHelper {
             if (text.trim().isEmpty()) {
                 return;
             }
-            if (parentPath == null) {
-                parentPath = "";
-            }
-            String documentName = parentPath + path.getName();
+            String documentName = parentPath + "/" + path.getName();
             int documentIndex = 0;
             RagDocumentsStore documentsStore = worker.getDocumentsStore();
             if (documentsStore != null) {
