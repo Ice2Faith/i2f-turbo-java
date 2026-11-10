@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -197,5 +198,64 @@ public class OsUtil {
             return true;
         }
         return false;
+    }
+
+    /**
+     * os.name 归一化：android / linux / windows / macos
+     */
+    public static String getOsFamily() {
+        String os = System.getProperty("os.name", "").trim().toLowerCase();
+        String vm = System.getProperty("java.vm.name", "").toLowerCase();
+        if (vm.contains("dalvik")
+                || System.getenv("ANDROID_ROOT") != null
+                || System.getenv("ANDROID_DATA") != null) {
+            return "android";
+        }
+        if (os.contains("win")) {
+            return "windows";
+        }
+        if (os.contains("mac")
+                || os.contains("darwin")) {
+            return "macos";
+        }
+        if (os.contains("linux")) {
+            return "linux";
+        }
+        return os.replaceAll("[^a-z0-9]+", "");
+    }
+
+    /**
+     * os.arch 归一化：arm64 / x86_64 / x86 / arm / riscv64 / ppc64le / s390x
+     */
+    public static String getArchFamily() {
+        String arch = System.getProperty("os.arch", "").trim().toLowerCase();
+        if (arch.equals("aarch64")
+                || arch.equals("arm64")
+                || arch.equals("armv8")
+                || arch.equals("armv8a")
+                || arch.equals("arm64-v8a")) {
+            return "arm64";
+        }
+        if (arch.equals("amd64")
+                || arch.equals("x86_64")
+                || arch.equals("x64")
+                || arch.equals("x86-64")) {
+            return "x86_64";
+        }
+        if (arch.equals("x86")
+                || arch.equals("i386")
+                || arch.equals("i486")
+                || arch.equals("i586")
+                || arch.equals("i686")
+                || arch.equals("ia32")) {
+            return "x86";
+        }
+        if (arch.startsWith("arm")) {
+            return "arm";
+        }
+        if (arch.startsWith("riscv")) {
+            return "riscv64";
+        }
+        return arch.replaceAll("[^a-z0-9]+", "");
     }
 }

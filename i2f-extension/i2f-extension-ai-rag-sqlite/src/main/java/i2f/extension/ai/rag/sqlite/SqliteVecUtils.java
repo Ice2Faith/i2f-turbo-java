@@ -3,6 +3,7 @@ package i2f.extension.ai.rag.sqlite;
 import i2f.bindsql.BindSql;
 import i2f.io.stream.StreamUtil;
 import i2f.jdbc.JdbcResolver;
+import i2f.os.OsUtil;
 import i2f.resources.ResourceUtil;
 import i2f.std.consts.StdConst;
 import org.sqlite.SQLiteConfig;
@@ -59,7 +60,15 @@ public class SqliteVecUtils {
                 libDir.mkdirs();
             }
 
-            InputStream is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + saveFile.getName());
+            String os = OsUtil.getOsFamily();
+            String arch = OsUtil.getArchFamily();
+            InputStream is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + os + "/" + arch + "/" + saveFile.getName());
+            if (is == null) {
+                is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + arch + "/" + saveFile.getName());
+            }
+            if (is == null) {
+                is = ResourceUtil.getClasspathResourceAsStream("/assets/sqlite-vec/" + saveFile.getName());
+            }
             StreamUtil.writeBytes(is, saveFile);
         } catch (IOException e) {
             e.printStackTrace();
