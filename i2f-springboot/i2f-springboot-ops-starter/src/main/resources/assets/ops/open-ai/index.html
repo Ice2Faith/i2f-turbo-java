@@ -2893,7 +2893,16 @@
                 return msg[msg.type].content
             },
             renderMessageMarkdown(msg, idx) {
-                return this.renderMarkdown(this.extraMessageContent(msg, idx) || '[未收到任何内容]')
+                let text = this.extraMessageContent(msg, idx);
+                if (!text || text == '') {
+                    if (msg[msg.type].tool_calls && msg[msg.type].tool_calls.length > 0) {
+                        text = '[工具调用请求]';
+                    }
+                }
+                if (!text || text == '') {
+                    text = '[未收到任何内容]';
+                }
+                return this.renderMarkdown(text)
             },
             createSendMessage(){
                 let text = (this.form.inputText || '').trim();
