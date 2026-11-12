@@ -298,14 +298,14 @@
                  @contextmenu="onContextMenuMessageListPanel">
                 <span class="scroll-top-mark" style="width:0;height:0;opacity: 0;"></span>
 
-                <div v-if="!currentMessages || currentMessages.length===0" class="empty-tip">
+                <div v-if="!currentAllMessages || currentAllMessages.length===0" class="empty-tip">
                     <i class="el-icon-chat-dot-round"></i>
                     <p>发送消息，开始对话</p>
                 </div>
 
-                <div v-for="(msg, idx) in currentMessages"
+                <div v-for="(msg, idx) in currentAllMessages"
                      :key="idx">
-                    <el-divider v-if="!msg.hidden && (idx>1 && currentMessages[idx-1].hidden)">
+                    <el-divider v-if="!msg.hidden && (idx>1 && currentAllMessages[idx-1].hidden)">
                         截断会话历史线
                     </el-divider>
 
@@ -335,9 +335,9 @@
                                 <div v-if="msg.type==='assistant' && msg[msg.type].reasoning_content"
                                      class="thinking-content"
                                      :class="{
-                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1
+                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentAllMessages.length-1
                                             }"
-                                     :style="idx==currentMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
+                                     :style="idx==currentAllMessages.length-1 && currentSession?.streamingStarted && !msg[msg.type].content ? 'max-height: unset;' : ''"
                                      v-html="renderMarkdown('- thinking ...\n'+msg[msg.type].reasoning_content)">
 
                                 </div>
@@ -345,7 +345,7 @@
 
                             <div class="message-content"
                                  :class="{
-                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentMessages.length-1,
+                                            'streaming-cursor': currentSession?.streamingStarted && msg.type==='assistant' && idx===currentAllMessages.length-1,
                                             'tool-message-content':  msg.type.indexOf('tool') >=0 || msg.type.indexOf('echo') >=0
                                             }"
                                  v-html="renderMessageMarkdown(msg,idx)">
@@ -451,23 +451,23 @@
                                 </el-popover>
                                 <span class="hover-show-child">
                                     <el-tooltip effect="dark" content="移除消息" placement="top-start">
-                                        <i @click="removeSelectMessage(idx)" style="color:#ff4444;font-size: 14px;"
+                                        <i @click="removeSelectMessage(msg)" style="color:#ff4444;font-size: 14px;"
                                             class="el-icon-circle-close "></i>
                                     </el-tooltip>
                                     <el-tooltip effect="dark" content="编辑消息" placement="top-start">
-                                        <i @click="editSelectMessage(idx)" style="color: #4850fd;font-size: 14px;"
+                                        <i @click="editSelectMessage(msg)" style="color: #4850fd;font-size: 14px;"
                                            class="el-icon-edit"></i>
                                     </el-tooltip>
                                     <el-tooltip effect="dark" content="重做消息" placement="top-start">
-                                        <i @click="redoSelectMessage(idx)" style="color: #3cdc3c;font-size: 14px;"
+                                        <i @click="redoSelectMessage(msg)" style="color: #3cdc3c;font-size: 14px;"
                                            class="el-icon-refresh"></i>
                                     </el-tooltip>
                                     <el-tooltip effect="dark" content="复制内容" placement="top-start">
-                                        <i @click="copySelectMessage(idx)" style="color: #4ba4ec;font-size: 14px;"
+                                        <i @click="copySelectMessage(msg)" style="color: #4ba4ec;font-size: 14px;"
                                            class="el-icon-copy-document"></i>
                                     </el-tooltip>
                                     <el-tooltip effect="dark" content="编辑数据" placement="top-start">
-                                        <i @click="editDataSelectMessage(idx)"
+                                        <i @click="editDataSelectMessage(msg)"
                                            style="color: #4ba4ec;font-size: 14px;"
                                            class="el-icon-brush"></i>
                                     </el-tooltip>
@@ -653,16 +653,16 @@
                             width="200"
                             trigger="hover">
                         <p>
-                            session total tokens:<br/>
-                            prompt: {{currentSessionTotalUsages.prompt_tokens}}<br/>
-                            completion: {{currentSessionTotalUsages.completion_tokens}}<br/>
-                            total: {{currentSessionTotalUsages.total_tokens}}<br/>
+                            总计 Tokens:<br/>
+                            输入: {{currentSessionTotalUsages.prompt_tokens}}<br/>
+                            输出: {{currentSessionTotalUsages.completion_tokens}}<br/>
+                            总计: {{currentSessionTotalUsages.total_tokens}}<br/>
                         </p>
                         <span slot="reference" v-if="currentSessionTotalUsages">
                             total: [
-                                    {{currentSessionTotalUsages.prompt_tokens}} /
-                                    {{currentSessionTotalUsages.completion_tokens}} /
-                                    {{currentSessionTotalUsages.total_tokens}}
+                                    {{tokensValue(currentSessionTotalUsages.prompt_tokens)}} /
+                                    {{tokensValue(currentSessionTotalUsages.completion_tokens)}} /
+                                    {{tokensValue(currentSessionTotalUsages.total_tokens)}}
                             ]
                         </span>
                     </el-popover>
@@ -673,22 +673,34 @@
                             width="200"
                             trigger="hover">
                         <p>
-                            session visible tokens:<br/>
-                            prompt: {{currentSessionVisibleUsages.prompt_tokens}}<br/>
-                            completion: {{currentSessionVisibleUsages.completion_tokens}}<br/>
-                            total: {{currentSessionVisibleUsages.total_tokens}}<br/>
+                            可见区 Tokens:<br/>
+                            输入: {{currentSessionVisibleUsages.prompt_tokens}}<br/>
+                            输出: {{currentSessionVisibleUsages.completion_tokens}}<br/>
+                            总计: {{currentSessionVisibleUsages.total_tokens}}<br/>
                         </p>
                         <span slot="reference" v-if="currentSessionVisibleUsages">
                             visible: [
-                                {{currentSessionVisibleUsages.prompt_tokens}} /
-                                {{currentSessionVisibleUsages.completion_tokens}} /
-                                {{currentSessionVisibleUsages.total_tokens}}
+                                {{tokensValue(currentSessionVisibleUsages.prompt_tokens)}} /
+                                {{tokensValue(currentSessionVisibleUsages.completion_tokens)}} /
+                                {{tokensValue(currentSessionVisibleUsages.total_tokens)}}
                             ]
                         </span>
                     </el-popover>
-                    <span>
-                        会话次数：{{currentHistoryCount}}/{{metas.maxHistoryCount}}
-                    </span>
+                    <el-popover
+                            placement="top-start"
+                            title="说明"
+                            width="200"
+                            trigger="hover">
+                        <p>
+                            会话次数:<br/>
+                            当前: {{currentHistoryCount}}<br/>
+                            最大: {{metas.maxHistoryCount}}<br/>
+                            总共: {{currentAllHistoryCount}}<br/>
+                        </p>
+                        <span slot="reference">
+                            会话：{{currentHistoryCount}}/{{metas.maxHistoryCount}}/{{currentAllHistoryCount}}
+                        </span>
+                    </el-popover>
                 </div>
             </div>
         </div>
@@ -1909,6 +1921,35 @@
             }
         },
         computed: {
+            currentAllMessages() {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return [];
+                }
+                let summaryList = this.metas.summaryMessageMap[sid] || [];
+                let currentList = this.metas.historyMessageMap[sid] || [];
+                let ret = []
+                for (let i = 0; i < summaryList.length; i++) {
+                    let item = summaryList[i];
+                    ret.push({
+                        ...item,
+                        hidden: true,
+                        sourceType: 'summary',
+                        sourceIndex: i,
+                        sourceSessionId: sid,
+                    })
+                }
+                for (let i = 0; i < currentList.length; i++) {
+                    let item = currentList[i];
+                    ret.push({
+                        ...item,
+                        sourceType: 'history',
+                        sourceIndex: i,
+                        sourceSessionId: sid,
+                    })
+                }
+                return ret;
+            },
             currentMessages() {
                 let sid = this.metas.activeSessionId;
                 if (!sid) {
@@ -1981,6 +2022,17 @@
                 })
                 return ret;
             },
+            currentAllHistoryCount() {
+                let ret = 0;
+                let stdRoleTypeList = this.stdRoleList.map(e => e.value);
+                let list = this.currentAllMessages;
+                list.forEach(e => {
+                    if (stdRoleTypeList.includes(e.type)) {
+                        ret++;
+                    }
+                })
+                return ret;
+            },
             currentHistoryCount() {
                 let ret = 0;
                 let stdRoleTypeList = this.stdRoleList.map(e => e.value);
@@ -2049,6 +2101,7 @@
                         activeSessionId: null, // 当前活跃的会话ID
                         sessionList: [],        // 会话列表 [{sessionId, title}]
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
+                        summaryMessageMap: {},  // key=sessionId, value=[{role,content}]
                         uploadLoading: false,
                         uploadList: [],
                         maxHistoryCount: 50,
@@ -2139,7 +2192,9 @@
                             text: '',
                             lang: 'markdown',
                             saveLoading: false,
-                            messageIndex: 0
+                            messageIndex: 0,
+                            messageSid: '',
+                            messageType: 'history',
                         },
                         fileViewer: {
                             show: false,
@@ -2239,6 +2294,12 @@
                     }
                 }
             },
+            tokensValue(number) {
+                if (!number) {
+                    return number
+                }
+                return (number / 10000.0).toFixed(2) + 'w'
+            },
             getDataKey() {
                 return 'ops:open-ai-chat:data'
             },
@@ -2285,11 +2346,15 @@
                     return;
                 }
                 if (this.dialog.messageEditor.type == 'edit-message') {
-                    let sid = this.metas.activeSessionId;
+                    let sid = this.dialog.messageEditor.messageSid;
                     if (!sid) {
                         return
                     }
+
                     let list = this.metas.historyMessageMap[sid]
+                    if (this.dialog.messageEditor.messageType == 'summary') {
+                        list = this.metas.summaryMessageMap[sid]
+                    }
                     if (!list) {
                         return
                     }
@@ -2301,13 +2366,13 @@
                     let item = list[index];
                     item[item.type].content = content;
                 } else if (this.dialog.messageEditor.type == 'edit-data-message') {
-                    let sid = this.metas.activeSessionId;
+                    let sid = this.dialog.messageEditor.messageSid;
                     if (!sid) {
                         return
                     }
                     let list = this.metas.historyMessageMap[sid]
-                    if (!list) {
-                        return
+                    if (this.dialog.messageEditor.messageType == 'summary') {
+                        list = this.metas.summaryMessageMap[sid]
                     }
 
                     let index = this.dialog.messageEditor.messageIndex;
@@ -2468,6 +2533,7 @@
                         total_tokens: -1
                     },
                     sessionRecordsMap: {},
+                    recycleMap: {},
                     sending: false,
                     streamingStarted: false,
                     abortController: null,
@@ -2475,6 +2541,7 @@
                 }
                 this.metas.sessionList.unshift(item);
                 this.$set(this.metas.historyMessageMap, sessionId, []);
+                this.$set(this.metas.summaryMessageMap, sessionId, []);
                 this.metas.activeSessionId = sessionId;
                 this.$nextTick(() => this.scrollToBottom());
                 return item;
@@ -2506,6 +2573,7 @@
                             this.metas.sessionList.splice(idx, 1);
                         }
                         this.$delete(this.metas.historyMessageMap, sessionId);
+                        this.$delete(this.metas.summaryMessageMap, sessionId);
                         if (this.metas.activeSessionId === sessionId) {
                             if (this.metas.sessionList.length > 0) {
                                 this.metas.activeSessionId = this.metas.sessionList[0].sessionId;
@@ -2534,6 +2602,7 @@
                                 }
                             } else {
                                 this.$set(this.metas.historyMessageMap, e.sessionId, []);
+                                this.$set(this.metas.summaryMessageMap, e.sessionId, []);
                             }
                         })
                         this.metas.sessionList = resultList;
@@ -2547,6 +2616,13 @@
                     }).catch(() => {
                 });
             },
+            clearSummaryHistoryMessages() {
+                let sid = this.metas.activeSessionId;
+                if (!sid) {
+                    return;
+                }
+                this.$set(this.metas.summaryMessageMap, sid, []);
+            },
             clearCurrentSession() {
                 let sid = this.metas.activeSessionId;
                 if (!sid) {
@@ -2555,6 +2631,7 @@
                 this.$confirm('确认清空当前会话的所有消息？', '提示', {type: 'warning'})
                     .then(() => {
                         this.$set(this.metas.historyMessageMap, sid, []);
+                        this.$set(this.metas.summaryMessageMap, sid, []);
                         let session = this.currentSession;
                         if (session) {
                             session.title = '新对话';
@@ -2582,6 +2659,7 @@
                 let sid = this.metas.activeSessionId;
                 if (!this.metas.historyMessageMap[sid]) {
                     this.$set(this.metas.historyMessageMap, sid, []);
+                    this.$set(this.metas.summaryMessageMap, sid, []);
                 }
                 let messages = this.metas.historyMessageMap[sid];
                 return messages;
@@ -2597,6 +2675,9 @@
                     }
                     return;
                 }
+
+                this.clearSummaryHistoryMessages()
+
                 let messages = this.getActiveMessages();
                 let list = [...messages]
                 messages.splice(0, messages.length);
@@ -2811,7 +2892,7 @@
                             label: `导出历史`,
                             icon: 'el-icon-download',
                             onClick: () => {
-                                let list = this.currentMessages;
+                                let list = this.currentAllMessages;
                                 let text = JSON.stringify(list, null, '    ');
 
                                 this.dialog.messageEditor.type = 'view';
@@ -3185,6 +3266,7 @@
                 }
                 if (!this.metas.historyMessageMap[sessionId]) {
                     this.$set(this.metas.historyMessageMap, sessionId, []);
+                    this.$set(this.metas.summaryMessageMap, sessionId, []);
                 }
                 let messages = this.metas.historyMessageMap[sessionId];
                 return messages;
@@ -3656,6 +3738,10 @@
                             session.sessionRecordsMap = json || {};
                             return;
                         }
+                        if (resp.attrs && resp.attrs.type == 'echo_recycle_map') {
+                            session.recycleMap = json || {};
+                            return;
+                        }
                         if (resp.attrs && resp.attrs.type == 'echo_progress') {
                             assistantMsg.progress = json || '';
                             return;
@@ -3765,6 +3851,7 @@
                     req.enableLoopEngineering = this.form.enableLoopEngineering;
                     req.enableAgentsMarkdown=this.form.enableAgentsMarkdown;
                     req.sessionRecordsMap = session.sessionRecordsMap;
+                    req.recycleMap = session.recycleMap;
                     req.webjsToolResults=this.form.webjsToolResults;
                     // 插话：只在此安全临界点投递
                     // 后端会在工具调用（tool_calls+tool）完整结束之后，把插话作为本轮最后一条消息插入
@@ -3910,6 +3997,12 @@
                     if (options.action == 'summary-history'
                         || lastOptions.action == 'summary-history') {
                         let oldList = [...messages]
+
+                        // 备份归档被压缩的历史消息
+                        let summaryList = this.metas.summaryMessageMap[session.sessionId] || [];
+                        summaryList = [...summaryList, ...oldList];
+                        this.$set(this.metas.summaryMessageMap, session.sessionId, summaryList);
+
                         messages.splice(0, messages.length);
 
                         // 第一条用户消息以及之前的消息保留，一般就是system消息+第一条user消息
@@ -3939,6 +4032,17 @@
                                 break;
                             }
 
+                        }
+
+                        // 最后一条用户消息保留
+                        for (let i = oldList.length - 1; i >= 0; i--) {
+                            let item = oldList[i];
+                            if (item.type == 'user' && item.control != 'summary') {
+                                if (firstUserIndex != i) {
+                                    messages.push(item);
+                                }
+                                break;
+                            }
                         }
 
                         messages.push(assistantMsg);
@@ -4020,44 +4124,78 @@
                 this.dialog.toolApproval.show = false;
                 this.directSendMessage()
             },
-            removeSelectMessage(index) {
-                let sid = this.metas.activeSessionId;
+            removeSelectMessage(msg) {
+                let sid = msg.sourceSessionId;
                 if (!sid) {
                     return
                 }
-                let list = this.metas.historyMessageMap[sid]
+                let index = msg.sourceIndex;
+
+                let sourceMap = this.metas.historyMessageMap;
+                if (msg.sourceType == 'summary') {
+                    sourceMap = this.metas.summaryMessageMap;
+                }
+                let list = sourceMap[sid]
                 if (!list) {
                     return
                 }
                 list.splice(index, 1)
-                this.$set(this.metas.historyMessageMap, sid, list)
+                this.$set(sourceMap, sid, list)
             },
-            redoSelectMessage(index) {
-                let sid = this.metas.activeSessionId;
+            redoSelectMessage(msg) {
+                let sid = msg.sourceSessionId;
                 if (!sid) {
                     return
                 }
-                let list = this.metas.historyMessageMap[sid]
-                if (!list) {
-                    return
+                let index = msg.sourceIndex;
+                if (msg.sourceType == 'summary') {
+                    let list = this.metas.summaryMessageMap[sid]
+                    if (!list) {
+                        return
+                    }
+                    this.$confirm('确认重做该消息，后续消息将会被删除？', '提示', {type: 'warning'})
+                        .then(() => {
+                            list.splice(index + 1, list.length - index)
+                            this.$set(this.metas.summaryMessageMap, sid, [])
+                            this.$set(this.metas.historyMessageMap, sid, list)
+
+
+                            let session = this.findSession(sid);
+                            // 按钮触发的发送，需要重置action
+                            session.lastOptions = null;
+                            this.directSendMessage()
+                        }).catch(() => {
+                    });
+                } else {
+                    let list = this.metas.historyMessageMap[sid]
+                    if (!list) {
+                        return
+                    }
+                    this.$confirm('确认重做该消息，后续消息将会被删除？', '提示', {type: 'warning'})
+                        .then(() => {
+                            list.splice(index + 1, list.length - index)
+                            this.$set(this.metas.historyMessageMap, sid, list)
+                            let session = this.findSession(sid);
+                            // 按钮触发的发送，需要重置action
+                            session.lastOptions = null;
+                            this.directSendMessage()
+                        }).catch(() => {
+                    });
                 }
-                this.$confirm('确认重做该消息，后续消息将会被删除？', '提示', {type: 'warning'})
-                    .then(() => {
-                        list.splice(index + 1, list.length - index)
-                        this.$set(this.metas.historyMessageMap, sid, list)
-                        let session = this.findSession(sid);
-                        // 按钮触发的发送，需要重置action
-                        session.lastOptions = null;
-                        this.directSendMessage()
-                    }).catch(() => {
-                });
             },
-            copySelectMessage(index) {
-                let sid = this.metas.activeSessionId;
+            copySelectMessage(msg) {
+                let sid = msg.sourceSessionId;
                 if (!sid) {
                     return
                 }
-                let list = this.metas.historyMessageMap[sid]
+                let index = msg.sourceIndex;
+
+                let sourceMap = this.metas.historyMessageMap;
+                if (msg.sourceType == 'summary') {
+                    sourceMap = this.metas.summaryMessageMap;
+                }
+
+                let list = sourceMap[sid]
                 if (!list) {
                     return
                 }
@@ -4065,12 +4203,19 @@
                 let content = item[item.type].content;
                 copy2clipboard(content);
             },
-            editDataSelectMessage(index) {
-                let sid = this.metas.activeSessionId;
+            editDataSelectMessage(msg) {
+                let sid = msg.sourceSessionId;
                 if (!sid) {
                     return
                 }
-                let list = this.metas.historyMessageMap[sid]
+                let index = msg.sourceIndex;
+
+                let sourceMap = this.metas.historyMessageMap;
+                if (msg.sourceType == 'summary') {
+                    sourceMap = this.metas.summaryMessageMap;
+                }
+
+                let list = sourceMap[sid]
                 if (!list) {
                     return
                 }
@@ -4079,6 +4224,8 @@
 
                 this.dialog.messageEditor.type = 'edit-data-message';
                 this.dialog.messageEditor.messageIndex = index;
+                this.dialog.messageEditor.messageSid = sid;
+                this.dialog.messageEditor.messageType = msg.sourceType;
                 this.dialog.messageEditor.text = content;
                 this.dialog.messageEditor.lang = 'javascript';
                 this.dialog.messageEditor.show = true;
@@ -4086,12 +4233,19 @@
                     this.initMessageEditor();
                 }, 200)
             },
-            editSelectMessage(index) {
-                let sid = this.metas.activeSessionId;
+            editSelectMessage(msg) {
+                let sid = msg.sourceSessionId;
                 if (!sid) {
                     return
                 }
-                let list = this.metas.historyMessageMap[sid]
+                let index = msg.sourceIndex;
+
+                let sourceMap = this.metas.historyMessageMap;
+                if (msg.sourceType == 'summary') {
+                    sourceMap = this.metas.summaryMessageMap;
+                }
+
+                let list = sourceMap[sid]
                 if (!list) {
                     return
                 }
@@ -4100,6 +4254,8 @@
 
                 this.dialog.messageEditor.type = 'edit-message';
                 this.dialog.messageEditor.messageIndex = index;
+                this.dialog.messageEditor.messageSid = sid;
+                this.dialog.messageEditor.messageType = msg.sourceType;
                 this.dialog.messageEditor.text = content;
                 this.dialog.messageEditor.lang = 'markdown';
                 this.dialog.messageEditor.show = true;
@@ -4119,6 +4275,7 @@
                 return {
                     type: 'user',
                     hidden: false,
+                    control: 'summary',
                     user: {
                         role: 'user',
                         content: 'Summarize all previous conversations, keep it brief, accurate, and to the point. ' +

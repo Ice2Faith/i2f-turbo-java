@@ -56,6 +56,7 @@ public class OpenAiOperateDto {
 
     protected boolean enableLoopEngineering = false;
     protected Map<String, String> sessionRecordsMap = new HashMap<>();
+    protected Map<String, String> recycleMap = new HashMap<>();
 
     protected List<AsyncTaskItem> asyncTasks;
 

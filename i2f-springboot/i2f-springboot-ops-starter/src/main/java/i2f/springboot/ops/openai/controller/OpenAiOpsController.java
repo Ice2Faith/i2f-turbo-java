@@ -62,6 +62,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -628,12 +629,26 @@ public class OpenAiOpsController implements IOpsProvider {
         AtomicBoolean hasAttachFiles = new AtomicBoolean(false);
         CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
         CopyOnWriteArrayList<AsyncTaskMessage> asyncTaskMessages = new CopyOnWriteArrayList<>();
-
+        ConcurrentHashMap<String, String> recycleMap = new ConcurrentHashMap<>();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
             HttpServletToolContextUtil.fillToolContext(request);
             ToolCallContextHolder.put("req", req);
+            if (req.getRecycleMap() != null) {
+                for (Map.Entry<String, String> entry : req.getRecycleMap().entrySet()) {
+                    String key = entry.getKey();
+                    if (key == null) {
+                        continue;
+                    }
+                    String value = entry.getValue();
+                    if (value == null) {
+                        continue;
+                    }
+                    recycleMap.put(key, value);
+                }
+            }
+            req.setRecycleMap(recycleMap);
 
             ExFunction<Object, String> echoProgress = (content) -> {
                 String emitContent = objectMapper.writeValueAsString(content);
@@ -1461,6 +1476,14 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
+                            if (req.isEnableRecycleToolMessage()) {
+                                Set<String> checkNames = RecycleTools.toolNames();
+                                for (String checkName : checkNames) {
+                                    if (name.contains(checkName)) {
+                                        return true;
+                                    }
+                                }
+                            }
                             if (req.isEnableLoopEngineering()) {
                                 Set<String> checkNames = LoopEngineeringTools.toolNames();
                                 for (String checkName : checkNames) {
@@ -1539,11 +1562,40 @@ public class OpenAiOpsController implements IOpsProvider {
 
                             if(toolCount>recycleToolAssistantCount){
                                 if(msg instanceof OpenAiToolMessage){
-                                    if(toolCount>=recycleToolAssistantCount){
-                                        OpenAiToolMessage toolMsg=(OpenAiToolMessage)msg;
-                                        String content = toolMsg.getContent();
-                                        if(content.length()>recycleToolMessageMinLength) {
-                                            toolMsg.setContent("[recycled] tool result recycled; re-call if needed.");
+                                    OpenAiToolMessage toolMsg = (OpenAiToolMessage) msg;
+                                    String content = toolMsg.getContent();
+                                    if (content.length() > recycleToolMessageMinLength) {
+                                        String rep = (String) RecycleTools.recycleArguments(content, recycleToolMessageMinLength, recycleMap);
+                                        toolMsg.setContent(rep);
+                                        //String rep = "[recycled] tool result recycled; re-call if needed.";
+                                        //if(rep.length()<content.length()) {
+                                        //
+                                        //    toolMsg.setContent(rep);
+                                        //}
+                                    }
+                                }
+                                if (msg instanceof OpenAiAssistantMessage) {
+                                    OpenAiAssistantMessage assMsg = (OpenAiAssistantMessage) msg;
+                                    List<OpenAiToolCall> calls = assMsg.getTool_calls();
+                                    if (calls != null && !calls.isEmpty()) {
+                                        for (OpenAiToolCall call : calls) {
+                                            OpenAiToolCallFunction func = call.getFunction();
+                                            if (func == null) {
+                                                continue;
+                                            }
+                                            String arguments = func.getArguments();
+                                            if (arguments != null && arguments.length() > recycleToolMessageMinLength) {
+                                                try {
+                                                    Map<String, Object> argsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
+                                                    });
+                                                    RecycleTools.recycleArguments(argsMap, recycleToolMessageMinLength, recycleMap);
+                                                    arguments = objectMapper.writeValueAsString(argsMap);
+                                                    func.setArguments(arguments);
+                                                } catch (Exception e) {
+                                                    log.warn("recycle tool call arguments error: " + e.getMessage(), e);
+                                                }
+                                            }
+
                                         }
                                     }
                                 }
@@ -1560,6 +1612,19 @@ public class OpenAiOpsController implements IOpsProvider {
                             resp = OpsSecureReturn.success(emitSessionRecordsMsg);
                         }
                         resp.withAttr("type", OpsOpenAiConsts.ECHO_SESSION_RECORDS_MAP);
+                        String respJson = objectMapper.writeValueAsString(resp);
+                        emitter.send(respJson);
+                    }
+
+                    if (!recycleMap.isEmpty()) {
+                        String emitRecycleMapMsg = objectMapper.writeValueAsString(recycleMap);
+                        OpsSecureReturn<?> resp = null;
+                        if (req.isEncryptOutput()) {
+                            resp = transfer.success(emitRecycleMapMsg);
+                        } else {
+                            resp = OpsSecureReturn.success(emitRecycleMapMsg);
+                        }
+                        resp.withAttr("type", OpsOpenAiConsts.ECHO_RECYCLE_MAP);
                         String respJson = objectMapper.writeValueAsString(resp);
                         emitter.send(respJson);
                     }
