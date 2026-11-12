@@ -107,9 +107,13 @@ public class OpenAiOpsController implements IOpsProvider {
 
     private RestTemplate restTemplate = createRestTemplate();
 
-    private ExecutorService pool = Executors.newWorkStealingPool(Math.min(Math.max(Runtime.getRuntime().availableProcessors() * 4 + 2, 16), 512));
+    private ExecutorService pool = createPool(Runtime.getRuntime().availableProcessors() * 2 + 2,
+            Runtime.getRuntime().availableProcessors() * 4 + 2,
+            16);
 
-    private ExecutorService toolPool = Executors.newWorkStealingPool(Math.min(Math.max(Runtime.getRuntime().availableProcessors() * 4 + 2, 16), 512));
+    private ExecutorService toolPool = createPool(Runtime.getRuntime().availableProcessors() * 2 + 2,
+            Runtime.getRuntime().availableProcessors() * 4 + 2,
+            512);
 
     @Autowired(required = false)
     private ToolManager toolManager;
@@ -139,6 +143,15 @@ public class OpenAiOpsController implements IOpsProvider {
                 .setConnectTimeout(Duration.ofSeconds(30))
                 .setReadTimeout(Duration.ofMinutes(5))
                 .build();
+    }
+
+    public static ExecutorService createPool(int coreSize, int maxSize, int queueSize) {
+        return new ThreadPoolExecutor(coreSize, maxSize,
+                60L,
+                TimeUnit.SECONDS,
+                new ArrayBlockingQueue<>(queueSize),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     @Override
@@ -710,6 +723,21 @@ public class OpenAiOpsController implements IOpsProvider {
                         if(content!=null && !content.isEmpty()) {
                             OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                             completion.getMessages().add(0, system);
+
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                            dto.setEcho_system_inject(system);
+
+                            String defTruthMsg = objectMapper.writeValueAsString(dto);
+                            OpsSecureReturn<?> resp = null;
+                            if (req.isEncryptOutput()) {
+                                resp = transfer.success(defTruthMsg);
+                            } else {
+                                resp = OpsSecureReturn.success(defTruthMsg);
+                            }
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                            String respJson = objectMapper.writeValueAsString(resp);
+                            emitter.send(respJson);
                         }
                     }
 
@@ -752,8 +780,8 @@ public class OpenAiOpsController implements IOpsProvider {
                             completion.getMessages().add(0, system);
 
                             OpenAiMessageVo dto = new OpenAiMessageVo();
-                            dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
-                            dto.setEcho_loop_engineering(system);
+                            dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                            dto.setEcho_system_inject(system);
 
                             String defSkillMsg = objectMapper.writeValueAsString(dto);
                             OpsSecureReturn<?> resp = null;
@@ -762,7 +790,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             } else {
                                 resp = OpsSecureReturn.success(defSkillMsg);
                             }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
+                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                             String respJson = objectMapper.writeValueAsString(resp);
                             emitter.send(respJson);
                         }

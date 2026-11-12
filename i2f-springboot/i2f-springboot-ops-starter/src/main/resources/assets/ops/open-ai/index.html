@@ -2051,9 +2051,9 @@
                         historyMessageMap: {},  // key=sessionId, value=[{role,content}]
                         uploadLoading: false,
                         uploadList: [],
-                        maxHistoryCount: 35,
+                        maxHistoryCount: 50,
                         enableTruncOverflowHistory: true,
-                        enableAutoSummary: false,
+                        enableAutoSummary: true,
                         showConfig: false, // AI配置
                         showSidebar: true, // 左侧会话列表是否展开
                         showMoreActions: false, // 更多选项
@@ -2101,11 +2101,12 @@
                             {label: '技能注入', value: 'echo_skill', std: false},
                             {label: '动态工具', value: 'echo_dynamic_tool', std: false},
                             {label: '循环工程', value: 'echo_loop_engineering', std: false},
+                            {label: '系统注入', value: 'echo_system_inject', std: false},
                             {label: '事实注入', value: 'echo_truth_prompt', std: false},
                             {label: '事实内容', value: 'echo_truth_content', std: false},
                             {label: '事实同步', value: 'echo_truth_sync', std: false},
                             {label: '工具意图推荐', value: 'echo_tool_intent_recommend', std: false},
-                            {label: '工具输出文件', value: 'echo_attach_files', std: false}
+                            {label: '工具输出文件', value: 'echo_attach_files', std: false},
                         ],
                         enableCustomDisplay: true,
                         hiddenMessageTypes: [
@@ -2114,6 +2115,7 @@
                             'echo_skill',
                             'echo_dynamic_tool',
                             'echo_loop_engineering',
+                            'echo_system_inject',
                             'echo_truth_prompt',
                             'echo_truth_content',
                             'echo_truth_sync',
@@ -2225,8 +2227,8 @@
                         memoryBucket: '',
                         enableLoopEngineering: false,
                         enableAgentsMarkdown: false,
-                        enableRecycleToolMessage: false,
-                        recycleToolLastKeepCount: 10,
+                        enableRecycleToolMessage: true,
+                        recycleToolLastKeepCount: 20,
                         recycleToolMessageMinLength: 512,
                         webjsToolResults:[
                             /*{
@@ -3575,6 +3577,14 @@
                             return;
                         }
                         if (resp.attrs && resp.attrs.type == 'echo_loop_engineering') {
+                            if (!session.streamingStarted) {
+                                session.streamingStarted = true;
+                            }
+                            json.hidden = false;
+                            insertBeforeLast(messages, json);
+                            return;
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_system_inject') {
                             if (!session.streamingStarted) {
                                 session.streamingStarted = true;
                             }

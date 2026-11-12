@@ -498,7 +498,7 @@ html, body {
 /* ===== 悬浮待插话提示（输入框上方） ===== */
 .pending-interject-bar {
     position: absolute;
-    top: -17px;
+    top: -24px;
     left: 20px;
     right: 20px;
     z-index: 20;
@@ -506,8 +506,8 @@ html, body {
     align-items: center;
     gap: 6px;
     padding: 3px 10px;
-    font-size: 12px;
-    line-height: 20px;
+    font-size: 16px;
+    line-height: 26px;
     color: #606266;
     background: #fff8e6;
     border: 1px solid #f2d08a;
@@ -940,13 +940,13 @@ html, body {
 
     /* 悬浮待插话提示：窄屏收紧边距与字体，并隐藏文案只保留图标，避免挤占预览区 */
     .pending-interject-bar {
-        top: -15px;
+        top: -18px;
         left: 10px;
         right: 10px;
         gap: 4px;
         padding: 2px 8px;
-        font-size: 11px;
-        line-height: 18px;
+        font-size: 15px;
+        line-height: 22px;
     }
 
     .pending-interject-bar__label-text {

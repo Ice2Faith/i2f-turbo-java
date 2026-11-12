@@ -43,6 +43,8 @@ public interface OpsOpenAiConsts extends OpenAiConsts {
 
     String ECHO_INTERJECT = "echo_interject";
 
+    String ECHO_SYSTEM_INJECT = "echo_system_inject";
+
     // 动作类型：会话总结轮次，该轮独占，插话等其他消息搁置到下一轮
     String ACTION_SUMMARY_HISTORY = "summary-history";
 }
