@@ -490,6 +490,7 @@ html, body {
     background: #eee;
     max-height: 42px;
     overflow: hidden;
+    zoom: 0.9;
 }
 
 .thinking-content:hover {
@@ -950,6 +951,22 @@ html, body {
 
     .input-status-bar {
         zoom: 0.8;
+    }
+
+    .tool-approval-card {
+        zoom: 0.75;
+    }
+
+    .thinking-content {
+        zoom: 0.75;
+    }
+
+    .message-content {
+        zoom: 0.85;
+    }
+
+    .input-actions {
+        zoom: 0.85;
     }
 
     /* 悬浮待插话提示：窄屏收紧边距与字体，并隐藏文案只保留图标，避免挤占预览区 */
