@@ -20,13 +20,33 @@ html, body {
 }
 
 .sidebar, .chat-container, .input-area {
-    background-image: radial-gradient(ellipse 900px 500px at 85% -5%, rgba(11, 114, 133, .10), transparent 60%),
-    radial-gradient(ellipse 700px 420px at -10% 30%, rgba(232, 89, 12, .07), transparent 60%),
+    background-image: radial-gradient(ellipse 900px 500px at 55% 15%, rgba(11, 114, 133, .10), transparent 80%),
+    radial-gradient(ellipse 700px 420px at 10% 50%, rgba(232, 89, 12, .07), transparent 80%),
     repeating-linear-gradient(0deg, rgba(21, 42, 66, .045) 0 1px, transparent 1px 26px),
     repeating-linear-gradient(90deg, rgba(21, 42, 66, .045) 0 1px, transparent 1px 26px),
     repeating-linear-gradient(0deg, rgba(21, 42, 66, .028) 0 1px, transparent 1px 130px),
     repeating-linear-gradient(90deg, rgba(21, 42, 66, .028) 0 1px, transparent 1px 130px);
     background-attachment: fixed;
+    background-size: 220%;
+    animation: aniHtml 12s infinite;
+}
+
+@keyframes aniHtml {
+    0% {
+        background-position: 0% 50%;
+    }
+    25% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 30% 50%;
+    }
+    50% {
+        background-position: 30% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
 }
 
 /* ===== 顶部配置栏 ===== */
