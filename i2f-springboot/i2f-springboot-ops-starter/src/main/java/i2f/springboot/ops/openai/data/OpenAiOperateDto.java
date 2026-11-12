@@ -33,9 +33,17 @@ public class OpenAiOperateDto {
     protected boolean enableMergedSystemMsg = false;
     protected boolean enableFullAccess=false;
     protected boolean enableAgentsMarkdown=false;
+
+    // 回收工具结果
     protected boolean enableRecycleToolMessage=false;
-    protected Integer recycleToolLastKeepCount =10;
+    protected Integer recycleToolMessageLastKeepCount = 10;
     protected Integer recycleToolMessageMinLength=512;
+
+    // 回收工具参数
+    protected boolean enableRecycleToolArgument = false;
+    protected Integer recycleToolArgumentLastKeepCount = 10;
+    protected Integer recycleToolArgumentMinLength = 512;
+    ;
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
     protected boolean enableToolRecommendByIntentRecognize;

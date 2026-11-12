@@ -67,7 +67,7 @@ public class RecycleTools {
                 String refKey = PROTOCOL + UUID.randomUUID().toString().replace("-", "");
 
                 String content = String.valueOf(arguments);
-                String rep = "[recycled] tool content recycled; use url '" + refKey + "' on tool `" + REF_CONTENT + "` to got origin content if you need!";
+                String rep = "[recycled] content(" + content.length() + " chars) has recycled; use '" + refKey + "' by tool `" + REF_CONTENT + "` to got it if need!";
                 if (rep.length() < content.length()) {
                     recycleMap.put(refKey, content);
                     return rep;

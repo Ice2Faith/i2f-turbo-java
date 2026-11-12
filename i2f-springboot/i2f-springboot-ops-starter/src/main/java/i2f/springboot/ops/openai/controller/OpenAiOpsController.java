@@ -62,7 +62,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
-import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -1476,7 +1475,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     }
                                 }
                             }
-                            if (req.isEnableRecycleToolMessage()) {
+                            if (req.isEnableRecycleToolMessage() || req.isEnableRecycleToolArgument()) {
                                 Set<String> checkNames = RecycleTools.toolNames();
                                 for (String checkName : checkNames) {
                                     if (name.contains(checkName)) {
@@ -1541,17 +1540,27 @@ public class OpenAiOpsController implements IOpsProvider {
 
                     // 回收较久之前的Tool消息内容，减少输入Token量，因为早起的工具调用结果，对接下来的推理影响已经不大了
                     // 仅保留已被回收，提示如有需要，重新执行工具即可
-                    if(req.isEnableRecycleToolMessage()){
+                    if (req.isEnableRecycleToolMessage() || req.isEnableRecycleToolArgument()) {
                         int toolCount=0;
 
-                        int recycleToolAssistantCount=req.getRecycleToolLastKeepCount()==null?5:req.getRecycleToolLastKeepCount();
-                        if(recycleToolAssistantCount<=0){
-                            recycleToolAssistantCount=5;
+                        int recycleToolMessageLastKeepCount = req.getRecycleToolMessageLastKeepCount() == null ? 10 : req.getRecycleToolMessageLastKeepCount();
+                        if (recycleToolMessageLastKeepCount <= 0) {
+                            recycleToolMessageLastKeepCount = 10;
                         }
                         int recycleToolMessageMinLength=req.getRecycleToolMessageMinLength()==null?512:req.getRecycleToolMessageMinLength();
                         if(recycleToolMessageMinLength<=0){
                             recycleToolMessageMinLength=512;
                         }
+
+                        int recycleToolArgumentLastKeepCount = req.getRecycleToolArgumentLastKeepCount() == null ? 10 : req.getRecycleToolArgumentLastKeepCount();
+                        if (recycleToolArgumentLastKeepCount <= 0) {
+                            recycleToolArgumentLastKeepCount = 10;
+                        }
+                        int recycleToolArgumentMinLength = req.getRecycleToolArgumentMinLength() == null ? 512 : req.getRecycleToolArgumentMinLength();
+                        if (recycleToolArgumentMinLength <= 0) {
+                            recycleToolArgumentMinLength = 512;
+                        }
+
                         int size = completion.getMessages().size();
 
                         for (int i = size-1; i >=0; i--) {
@@ -1560,7 +1569,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                 toolCount++;
                             }
 
-                            if(toolCount>recycleToolAssistantCount){
+                            if (toolCount > recycleToolMessageLastKeepCount) {
                                 if(msg instanceof OpenAiToolMessage){
                                     OpenAiToolMessage toolMsg = (OpenAiToolMessage) msg;
                                     String content = toolMsg.getContent();
@@ -1574,6 +1583,9 @@ public class OpenAiOpsController implements IOpsProvider {
                                         //}
                                     }
                                 }
+                            }
+
+                            if (toolCount > recycleToolArgumentLastKeepCount) {
                                 if (msg instanceof OpenAiAssistantMessage) {
                                     OpenAiAssistantMessage assMsg = (OpenAiAssistantMessage) msg;
                                     List<OpenAiToolCall> calls = assMsg.getTool_calls();
@@ -1584,11 +1596,11 @@ public class OpenAiOpsController implements IOpsProvider {
                                                 continue;
                                             }
                                             String arguments = func.getArguments();
-                                            if (arguments != null && arguments.length() > recycleToolMessageMinLength) {
+                                            if (arguments != null && arguments.length() > recycleToolArgumentMinLength) {
                                                 try {
                                                     Map<String, Object> argsMap = objectMapper.readValue(arguments, new TypeReference<Map<String, Object>>() {
                                                     });
-                                                    RecycleTools.recycleArguments(argsMap, recycleToolMessageMinLength, recycleMap);
+                                                    RecycleTools.recycleArguments(argsMap, recycleToolArgumentMinLength, recycleMap);
                                                     arguments = objectMapper.writeValueAsString(argsMap);
                                                     func.setArguments(arguments);
                                                 } catch (Exception e) {
