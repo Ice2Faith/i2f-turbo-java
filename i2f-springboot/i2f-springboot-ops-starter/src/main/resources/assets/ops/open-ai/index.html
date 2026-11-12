@@ -2726,7 +2726,11 @@
             scrollToBottom() {
                 let el = this.$refs.messageList;
                 if (el) {
-                    el.scrollTop = el.scrollHeight;
+                    const {scrollTop, clientHeight, scrollHeight} = el;
+                    const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+                    if (distanceFromBottom < 200) {
+                        el.scrollTop = el.scrollHeight;
+                    }
                 }
             },
             getActiveMessages() {
