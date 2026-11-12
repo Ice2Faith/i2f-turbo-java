@@ -19,6 +19,16 @@ html, body {
     overflow: hidden;
 }
 
+.sidebar, .chat-container, .input-area {
+    background-image: radial-gradient(ellipse 900px 500px at 85% -5%, rgba(11, 114, 133, .10), transparent 60%),
+    radial-gradient(ellipse 700px 420px at -10% 30%, rgba(232, 89, 12, .07), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(21, 42, 66, .045) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(90deg, rgba(21, 42, 66, .045) 0 1px, transparent 1px 26px),
+    repeating-linear-gradient(0deg, rgba(21, 42, 66, .028) 0 1px, transparent 1px 130px),
+    repeating-linear-gradient(90deg, rgba(21, 42, 66, .028) 0 1px, transparent 1px 130px);
+    background-attachment: fixed;
+}
+
 /* ===== 顶部配置栏 ===== */
 .top-config-bar {
     background: #fff;
@@ -75,7 +85,7 @@ html, body {
 /* ===== 左侧侧边栏 ===== */
 .sidebar {
     width: 220px;
-    background: #fff;
+    background-color: #fff;
     border-right: 1px solid #e4e7ed;
     display: flex;
     flex-direction: column;
@@ -151,7 +161,7 @@ html, body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: #f5f7fa;
+    background-color: #f5f7fa;
 }
 
 .message-list {
@@ -490,7 +500,7 @@ html, body {
 .input-area {
     position: relative;
     padding: 12px 20px;
-    background: #fff;
+    background-color: #fff;
     border-top: 1px solid #e4e7ed;
     flex-shrink: 0;
 }
@@ -936,6 +946,10 @@ html, body {
         width: 280px;
         max-width: 85vw;
         box-shadow: 4px 0 16px rgba(0, 0, 0, 0.18);
+    }
+
+    .input-status-bar {
+        zoom: 0.8;
     }
 
     /* 悬浮待插话提示：窄屏收紧边距与字体，并隐藏文案只保留图标，避免挤占预览区 */
