@@ -2728,7 +2728,7 @@
                 if (el) {
                     const {scrollTop, clientHeight, scrollHeight} = el;
                     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-                    if (distanceFromBottom < 200) {
+                    if (distanceFromBottom < Math.min(clientHeight, window.innerHeight) / 2) {
                         el.scrollTop = el.scrollHeight;
                     }
                 }
