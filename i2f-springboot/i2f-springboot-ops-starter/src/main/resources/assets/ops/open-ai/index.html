@@ -437,16 +437,16 @@
                                         trigger="hover">
                                     <p>
                                         tokens:<br/>
-                                        prompt: {{msg.usage.prompt_tokens}}<br/>
-                                        completion: {{msg.usage.completion_tokens}}<br/>
-                                        total: {{msg.usage.total_tokens}}<br/>
+                                        输入: {{msg.usage.prompt_tokens}}<br/>
+                                        输出: {{msg.usage.completion_tokens}}<br/>
+                                        总计: {{msg.usage.total_tokens}}<br/>
                                     </p>
                                     <span slot="reference"
                                           v-if="msg.usage && msg.usage.total_tokens>=0">
                                         tokens:
-                                        {{msg.usage.prompt_tokens}} /
-                                        {{msg.usage.completion_tokens}} /
-                                        {{msg.usage.total_tokens}}
+                                        {{tokensValue(msg.usage.prompt_tokens)}} /
+                                        {{tokensValue(msg.usage.completion_tokens)}} /
+                                        {{tokensValue(msg.usage.total_tokens)}}
                                     </span>
                                 </el-popover>
                                 <span class="hover-show-child">
@@ -2705,6 +2705,14 @@
                         let session = this.currentSession;
                         if (session) {
                             session.title = '新对话';
+                            session.usage = {
+                                prompt_tokens: -1,
+                                completion_tokens: -1,
+                                total_tokens: -1
+                            }
+                            session.sessionRecordsMap = {}
+                            session.recycleMap = {}
+                            session.interjects = []
                         }
                     }).catch(() => {
                 });
