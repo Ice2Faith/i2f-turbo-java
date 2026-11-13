@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.prompts.AgentsPrompt;
-import i2f.ai.std.rag.RagTools;
-import i2f.ai.std.rag.RagWorker;
+import i2f.ai.std.rag.*;
+import i2f.ai.std.rag.impl.InMemoryRagEmbeddingStore;
+import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
 import i2f.ai.std.skill.SkillsTools;
 import i2f.ai.std.tool.ToolCallContextHolder;
@@ -35,6 +36,7 @@ import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.rag.MemoryTools;
+import i2f.springboot.ops.openai.rag.RagEmbeddingCache;
 import i2f.springboot.ops.openai.tool.impl.*;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
 import i2f.web.servlet.ServletFileUtil;
@@ -104,6 +106,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     @Autowired(required = false)
     private RagWorker worker;
+
+    private RagEmbeddingCache skillsEmbeddingCache = new RagEmbeddingCache("skills").run();
 
     private RestTemplate restTemplate = createRestTemplate();
 
@@ -618,6 +622,11 @@ public class OpenAiOpsController implements IOpsProvider {
         R apply(T t) throws Exception;
     }
 
+    @FunctionalInterface
+    public interface ExBiFunction<R, T, E> {
+        R apply(T t, E e) throws Exception;
+    }
+
     public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
 
     @PostMapping("/stream")
@@ -649,18 +658,22 @@ public class OpenAiOpsController implements IOpsProvider {
             }
             req.setRecycleMap(recycleMap);
 
-            ExFunction<Object, String> echoProgress = (content) -> {
-                String emitContent = objectMapper.writeValueAsString(content);
+            ExBiFunction<String, Object, String> echoJsonMessage = (obj, type) -> {
+                String emitText = objectMapper.writeValueAsString(obj);
                 OpsSecureReturn<?> resp = null;
                 if (req.isEncryptOutput()) {
-                    resp = transfer.success(emitContent);
+                    resp = transfer.success(emitText);
                 } else {
-                    resp = OpsSecureReturn.success(emitContent);
+                    resp = OpsSecureReturn.success(emitText);
                 }
-                resp.withAttr("type", OpsOpenAiConsts.ECHO_PROGRESS);
+                resp.withAttr("type", type);
                 String respJson = objectMapper.writeValueAsString(resp);
                 emitter.send(respJson);
                 return null;
+            };
+
+            ExFunction<Object, String> echoProgress = (content) -> {
+                return echoJsonMessage.apply(content, OpsOpenAiConsts.ECHO_PROGRESS);
             };
 
             echoProgress.apply("请求处理中...");
@@ -742,16 +755,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                             dto.setEcho_system_inject(system);
 
-                            String defTruthMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defTruthMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defTruthMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                         }
                     }
 
@@ -771,16 +775,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             dto.setType(OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
                             dto.setEcho_truth_content(system);
 
-                            String defTruthMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defTruthMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defTruthMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TRUTH_CONTENT);
                         }
                     }
 
@@ -797,16 +792,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                             dto.setEcho_system_inject(system);
 
-                            String defSkillMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                         }
                     }
 
@@ -820,16 +806,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         dto.setType(OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
                         dto.setEcho_loop_engineering(system);
 
-                        String defSkillMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_LOOP_ENGINEERING);
                     }
 
                     if (req.isEnableTruth() && needInjectSystemPrompt) {
@@ -843,18 +820,76 @@ public class OpenAiOpsController implements IOpsProvider {
                             dto.setType(OpsOpenAiConsts.ECHO_TRUTH_PROMPT);
                             dto.setEcho_truth_prompt(system);
 
-                            String defSkillMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_PROMPT);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TRUTH_PROMPT);
                         }
 
+                    }
+
+                    // 技能推荐系统
+                    if (req.isEnableSkills()
+                            && req.isEnableToolRecommendByIntentRecognize()
+                            && worker != null
+                            && worker.getModel() != null) {
+                        String userMsgContent = null;
+                        if (completion.getMessages() != null && !completion.getMessages().isEmpty()) {
+                            OpenAiMessage msg = completion.getMessages().get(completion.getMessages().size() - 1);
+                            if (msg instanceof OpenAiUserMessage
+                                    || msg instanceof OpenAiRichUserMessage) {
+                                userMsgContent = msg.content();
+                            }
+                        }
+                        String cmpUserMsgContent = userMsgContent;
+                        if (cmpUserMsgContent != null) {
+                            cmpUserMsgContent = cmpUserMsgContent.trim();
+                        }
+                        boolean hasAssitantMsg = false;
+                        for (OpenAiMessage msg : completion.getMessages()) {
+                            if (msg instanceof OpenAiAssistantMessage) {
+                                hasAssitantMsg = true;
+                            }
+                        }
+                        boolean needIntentRecognize = hasAssitantMsg ? (random.nextDouble() < 0.3) : true;
+
+                        if (needIntentRecognize
+                                && cmpUserMsgContent != null
+                                && !cmpUserMsgContent.isEmpty()) {
+                            RagEmbeddingModel model = worker.getModel();
+                            InMemoryRagEmbeddingStore store = new InMemoryRagEmbeddingStore();
+
+                            List<SkillDefinition> skillList = skillsTools.getSkillDefinitions();
+
+                            Map<String, SkillDefinition> embeddingSkillMap = new LinkedHashMap<>();
+
+                            for (SkillDefinition def : skillList) {
+                                RagEmbedding embedding = skillsEmbeddingCache.embed(model, def.getDescription());
+                                embeddingSkillMap.put(embedding.getId(), def);
+                                store.store(embedding);
+                            }
+
+                            RagEmbedding question = model.embed(cmpUserMsgContent);
+
+                            List<RagEmbedding> list = store.similar(question, 3);
+
+                            StringBuilder builder = new StringBuilder();
+                            builder.append("# 技能推荐\n");
+                            builder.append("\n");
+                            for (RagEmbedding embedding : list) {
+                                SkillDefinition definition = embeddingSkillMap.get(embedding.getId());
+                                builder.append("## ").append(definition.getName()).append("\n")
+                                        .append("- ").append(definition.getDescription()).append("\n")
+                                        .append("\n");
+                            }
+
+                            String content = builder.toString();
+                            OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                            completion.getMessages().add(0, system);
+
+                            OpenAiMessageVo dto = new OpenAiMessageVo();
+                            dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                            dto.setEcho_system_inject(system);
+
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                        }
                     }
 
                     if (req.isEnableSkills() && needInjectSystemPrompt) {
@@ -867,16 +902,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             dto.setType(OpsOpenAiConsts.ECHO_SKILL);
                             dto.setEcho_skill(system);
 
-                            String defSkillMsg = objectMapper.writeValueAsString(dto);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_SKILL);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_SKILL);
                         }
                     }
 
@@ -892,16 +918,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         dto.setType(OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
                         dto.setEcho_dynamic_tool(system);
 
-                        String defSkillMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_DYNAMIC_TOOL);
                     }
 
                     if (req.isEnableTools()) {
@@ -933,16 +950,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                             dto.setBindMethod(rawTool.getBindMethod().getName());
                                         }
                                     }
-                                    String defToolMsg = objectMapper.writeValueAsString(dto);
-                                    OpsSecureReturn<?> resp = null;
-                                    if (req.isEncryptOutput()) {
-                                        resp = transfer.success(defToolMsg);
-                                    } else {
-                                        resp = OpsSecureReturn.success(defToolMsg);
-                                    }
-                                    resp.withAttr("type", OpsOpenAiConsts.DEFINITION_TOOL);
-                                    String respJson = objectMapper.writeValueAsString(resp);
-                                    emitter.send(respJson);
+
+                                    echoJsonMessage.apply(dto, OpsOpenAiConsts.DEFINITION_TOOL);
 
                                     completion.getTools().add(new OpenAiToolsDefinition(tool.getJsonSchema()));
                                 }
@@ -1070,32 +1079,16 @@ public class OpenAiOpsController implements IOpsProvider {
                                                             .set(u -> u::setType, OpsOpenAiConsts.ECHO_TOOL)
                                                             .set(u -> u::setEcho_tool, toolEchoMsg)
                                                             .done();
-                                                    String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
-                                                    OpsSecureReturn<?> resp = null;
-                                                    if (req.isEncryptOutput()) {
-                                                        resp = transfer.success(emitToolMsg);
-                                                    } else {
-                                                        resp = OpsSecureReturn.success(emitToolMsg);
-                                                    }
-                                                    resp.withAttr("type", OpsOpenAiConsts.ECHO_TOOL);
-                                                    String respJson = objectMapper.writeValueAsString(resp);
-                                                    emitter.send(respJson);
+
+                                                    echoJsonMessage.apply(toolEchoVo, OpsOpenAiConsts.ECHO_TOOL);
                                                 }
                                                 if (toolMsg != null) {
                                                     OpenAiMessageVo toolEchoVo = new OpenAiMessageVo().toMutator()
                                                             .set(u -> u::setType, OpenAiConsts.TOOL)
                                                             .set(u -> u::setTool, toolMsg)
                                                             .done();
-                                                    String emitToolMsg = objectMapper.writeValueAsString(toolEchoVo);
-                                                    OpsSecureReturn<?> resp = null;
-                                                    if (req.isEncryptOutput()) {
-                                                        resp = transfer.success(emitToolMsg);
-                                                    } else {
-                                                        resp = OpsSecureReturn.success(emitToolMsg);
-                                                    }
-                                                    resp.withAttr("type", OpenAiConsts.TOOL);
-                                                    String respJson = objectMapper.writeValueAsString(resp);
-                                                    emitter.send(respJson);
+
+                                                    echoJsonMessage.apply(toolEchoVo, OpsOpenAiConsts.TOOL);
                                                 }
 
                                                 messages.add(toolMsg);
@@ -1133,16 +1126,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         dto.setType(OpsOpenAiConsts.ECHO_TRUTH_SYNC);
                         dto.setEcho_truth_sync(system);
 
-                        String defTruthMsg = objectMapper.writeValueAsString(dto);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defTruthMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defTruthMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_TRUTH_SYNC);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TRUTH_SYNC);
                     }
 
                     if (!toolFileMessages.isEmpty()) {
@@ -1167,16 +1151,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     .done();
 
                             // 这里echo回前端
-                            String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.ECHO_ATTACH_FILES);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(toolUserMsg, OpsOpenAiConsts.ECHO_ATTACH_FILES);
                         }
 
                         if (!sendToLLmAttachFiles.isEmpty()) {
@@ -1187,16 +1162,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     .done();
 
                             // 这里先echo回前端，再添加，因为下面convert会重写原始的user.content,为了保持前端显示清洁，这里就要提前echo
-                            String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
-                            OpsSecureReturn<?> resp = null;
-                            if (req.isEncryptOutput()) {
-                                resp = transfer.success(defSkillMsg);
-                            } else {
-                                resp = OpsSecureReturn.success(defSkillMsg);
-                            }
-                            resp.withAttr("type", OpsOpenAiConsts.USER);
-                            String respJson = objectMapper.writeValueAsString(resp);
-                            emitter.send(respJson);
+                            echoJsonMessage.apply(toolUserMsg, OpsOpenAiConsts.USER);
 
                             OpenAiMessage user = convertOpenAiUserMessage(toolUserMsg, req, hasAttachFiles);
                             completion.getMessages().add(user);
@@ -1237,16 +1203,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                 .done();
 
                         // 这里echo回前端
-                        String defSkillMsg = objectMapper.writeValueAsString(toolUserMsg);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(defSkillMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(defSkillMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_ASYNC_TASKS);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(toolUserMsg, OpsOpenAiConsts.ECHO_ASYNC_TASKS);
                     }
 
                     if (req.isEnableTools()
@@ -1366,31 +1323,13 @@ public class OpenAiOpsController implements IOpsProvider {
                                     dto.setType(OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
                                     dto.setEcho_tool_intent_recommend(system);
 
-                                    String defTruthMsg = objectMapper.writeValueAsString(dto);
-                                    OpsSecureReturn<?> resp = null;
-                                    if (req.isEncryptOutput()) {
-                                        resp = transfer.success(defTruthMsg);
-                                    } else {
-                                        resp = OpsSecureReturn.success(defTruthMsg);
-                                    }
-                                    resp.withAttr("type", OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
-                                    String respJson = objectMapper.writeValueAsString(resp);
-                                    emitter.send(respJson);
+                                    echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
                                 }
 
                                 if (intentResult != null) {
                                     OpenAiCompletionUsage intentUsage = intentResult.getUsage();
                                     if (intentUsage != null) {
-                                        String emitIntentUsage = objectMapper.writeValueAsString(intentUsage);
-                                        OpsSecureReturn<?> resp = null;
-                                        if (req.isEncryptOutput()) {
-                                            resp = transfer.success(emitIntentUsage);
-                                        } else {
-                                            resp = OpsSecureReturn.success(emitIntentUsage);
-                                        }
-                                        resp.withAttr("type", OpsOpenAiConsts.ECHO_USAGE);
-                                        String respJson = objectMapper.writeValueAsString(resp);
-                                        emitter.send(respJson);
+                                        echoJsonMessage.apply(intentUsage, OpsOpenAiConsts.ECHO_USAGE);
                                     }
                                 }
 
@@ -1436,16 +1375,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             unqToolNames.removeLast();
                         }
 
-                        String emitToolMsg = objectMapper.writeValueAsString(unqToolNames);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(emitToolMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(emitToolMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_LRU_TOOLS);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(unqToolNames, OpsOpenAiConsts.ECHO_LRU_TOOLS);
 
                         // 固定加载的工具
                         tools.stream().filter(e -> {
@@ -1632,42 +1562,15 @@ public class OpenAiOpsController implements IOpsProvider {
                     }
 
                     if (sessionRecordsMap != null) {
-                        String emitSessionRecordsMsg = objectMapper.writeValueAsString(sessionRecordsMap);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(emitSessionRecordsMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(emitSessionRecordsMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_SESSION_RECORDS_MAP);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(sessionRecordsMap, OpsOpenAiConsts.ECHO_SESSION_RECORDS_MAP);
                     }
 
                     if (!recycleMap.isEmpty()) {
-                        String emitRecycleMapMsg = objectMapper.writeValueAsString(recycleMap);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(emitRecycleMapMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(emitRecycleMapMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_RECYCLE_MAP);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(recycleMap, OpsOpenAiConsts.ECHO_RECYCLE_MAP);
                     }
 
                     if (req.isEnableEchoRequestPayload()) {
-                        String emitPayloadMsg = objectMapper.writeValueAsString(completion);
-                        OpsSecureReturn<?> resp = null;
-                        if (req.isEncryptOutput()) {
-                            resp = transfer.success(emitPayloadMsg);
-                        } else {
-                            resp = OpsSecureReturn.success(emitPayloadMsg);
-                        }
-                        resp.withAttr("type", OpsOpenAiConsts.ECHO_REQUEST_PAYLOAD);
-                        String respJson = objectMapper.writeValueAsString(resp);
-                        emitter.send(respJson);
+                        echoJsonMessage.apply(completion, OpsOpenAiConsts.ECHO_REQUEST_PAYLOAD);
                     }
 
                     echoProgress.apply("模型推理中...");
