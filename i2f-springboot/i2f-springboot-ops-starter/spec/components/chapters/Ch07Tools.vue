@@ -46,13 +46,29 @@
             </tr>
         </SpecTable>
       <BodyText size="12.5px">※ 条件装配：随 <code>ai.skills.enable</code> / <code>ai.rags.enable</code> / <code>ai.rags.memory.enable</code>
-        / <code>ai.tools.session-record.enable</code> / <code>ai.tools.groovy.enable</code> / <code>ai.tools.skill-manage.enable</code>
+        / <code>ai.tools.session-record.enable</code> / <code>ai.tools.recycle.enable</code> / <code>ai.tools.groovy.enable</code>
+        / <code>ai.tools.skill-manage.enable</code>
         / <code>ai.mcp-server.api.enable</code> 开关注入；<code>LoopEngineeringTools</code> 不是 @Tool
         Bean，而是静态提示词提供者（由请求字段 <code>enableLoopEngineering</code> 控制注入）；脚本类装配策略：Webjs
         默认开启，PowerShell（仅 Windows）/ Node.js / Python 默认关闭且需探测到可用运行环境——详见下文与第 13 章。
       </BodyText>
 
-        <PanelTitle title="BS 架构下的工具委托链 — 执行环境解耦" />
+      <Callout color="#c92a2a" title="ref_content — 让「上下文回收」可逆的那个工具">
+        <p><code>RecycleTools</code> 只有一件武器：<code>ref_content(ref)</code>。它的输入是回收时生成的 <code>ref://{uuid}</code>
+          占位符，输出是从 <code>ToolCallContextHolder.get("req").getRecycleMap()</code> 里取回的<b>原始内容</b>（附
+          <code>hints</code> 说明取回成功 / 缺失）。配套的静态方法 <code>recycleArguments(arguments, minLength,
+            recycleMap)</code>
+          递归遍历 Map / List / 数组 / 字符串：命中超长字符串时生成 <code>ref://{uuid}</code> 并写入
+          <code>recycleMap</code>，
+          <b>仅当占位符确实比原文短</b>才替换——短内容不回收，避免占位符反而更长。该类标注
+          <code>@McpServerExpose(false)</code>
+          不对外暴露为 MCP 工具，且通过静态扫描 <code>@Tool</code> 方法名生成 <code>toolNames()</code>；Controller 在
+          <code>enableRecycleToolMessage</code> / <code>enableRecycleToolArgument</code>
+          开启时据此把它<b>强制纳入本轮工具列表</b>，
+          保证「被回收的内容永远有取回通道」。</p>
+      </Callout>
+
+      <PanelTitle title="BS 架构下的工具委托链 — 执行环境解耦" />
         <BodyText size="13.5px">并非所有工具都该在服务端执行：有一类工具的本质是<b>向浏览器用户提问</b>——单选、多选表单等，真正的执行环境在浏览器。框架为此设计了一条<b>工具委托（Tool Delegation）链</b>：服务端只做<b>声明式占位</b>，浏览器化身「第二执行后端」完成实际执行，两端以 <code>tool_call_id</code> 精确对号，<b>模型全程无感知</b>。</BodyText>
         <DiagramPanel src="assets/diagrams/ch07-webjs-delegate.svg" caption="BS 工具委托链 — 服务端占位声明 → 浏览器拦截执行 → 服务端消费回填" />
         <StepList>
@@ -208,6 +224,7 @@
                   ['<code>RagTools</code> ※', '<code>rag_search / rag_nearby</code>', '知识库相似度检索 + 命中文档的邻近分片回溯', '<span class="tag t-t">RAG</span>'],
                     ['<code>MemoryTools</code> ※', '<code>memory_search / save / delete</code>', '用户级记忆检索 / 保存 / 删除', '<span class="tag t-t">RAG</span>'],
                     ['<code>SessionRecordTools</code> ※', '<code>session_record_read / session_record_update</code>', '循环工程会话记录读写（request / plan / checklist / agent）', '<span class="tag t-g">AUTO</span>'],
+                  ['<code>RecycleTools</code> ※', '<code>ref_content</code>', '上下文回收搭档：取回被 <code>ref://</code> 占位化的工具结果 / 参数原文（回收期间强制加入工具列表）', '<span class="tag t-g">AUTO</span>'],
                   ['<code>LoopEngineeringTools</code> ※', '静态提示词（非 @Tool）', '注入五步工程化工作流提示词（进度恢复 → 需求 → 方案 → 待办 → 实施），由 <code>enableLoopEngineering</code> 控制', '<span class="tag t-g">AUTO</span>'],
                     ['<code>GroovyTools</code> ※', '<code>groovy_run_script</code>', 'Groovy 脚本动态执行（GroovyShell）', '<span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span><span class="tag t-t">SCRIPT</span>'],
                     ['<code>WebjsTools</code>', '<code>webjs_form_radio / webjs_form_checkbox</code>', 'BS 工具委托：浏览器弹窗收集人类输入，结果经 <code>webjsToolResults</code> 回传（默认开启）', '<span class="tag t-g">AUTO</span><span class="tag t-b">WEBJS</span>'],

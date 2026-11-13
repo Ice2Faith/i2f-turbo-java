@@ -61,6 +61,25 @@
           RAG 与记忆。</p>
       </Callout>
 
+      <Callout color="#e8590c" title="向量缓存复用 — 同一段文本只付一次 embedding 费用">
+        <p><code>RagEmbeddingCache</code> 是「按需向量化 + 本地持久」的一层薄封装：内部 <code>LruMap&lt;String,
+          RagEmbedding&gt;</code>
+          以<b>原文文本</b>为键（默认容量 8192），<code>embed(model, text)</code> 命中即返回、未命中才调用模型并回填；<code>run()</code>
+          启动时先 <code>load()</code> 历史缓存，再拉起守护线程 <code>embedding-cache-flusher</code> 每 30 秒 <code>store()</code>
+          落盘到
+          <code>runtime-tmp/embedding-cache/{type}.json</code>。目前技能语义推荐以 <code>type = "skills"</code>
+          复用它——技能描述长期稳定，
+          缓存收益极高；进程重启后向量直接复用，不必重新计费。</p>
+      </Callout>
+
+      <Callout color="#2b8a3e" title="余弦相似度归一化 — [-1, 1] 且不出现 NaN">
+        <p><code>RagVector.cosineSimilar</code> 在点积归一化之后补了两道护栏：结果若为 <code>NaN</code>（零向量 /
+          浮点异常）直接归零；否则
+          <code>Math.max(-1.0, Math.min(1.0, ret))</code> 收敛到 <code>[-1, 1]</code> 区间。这让上层的排序与阈值判断（TopN
+          召回、技能推荐、
+          记忆检索）在异常向量与浮点误差下依然稳定——<b>坏向量不会污染整轮排序</b>。</p>
+      </Callout>
+
       <PanelTitle title="记忆系统 Memory — 跨会话的用户级长期记忆" />
         <BodyText size="13.5px">RAG 知识库解决的是<b>组织级文档检索</b>，而记忆系统（<code>MemoryTools</code>）解决的是<b>用户级个性化记忆</b>：模型在对话中主动将用户偏好、个人信息、历史结论等保存为向量记忆，后续会话经语义检索召回——让 AI 真正「认识」用户。记忆以 <b>Bucket 桶</b>隔离：默认 <code>public</code> 桶全局共享，请求经 <code>memoryBucket</code> 字段指定用户专属桶，检索时同时覆盖公共桶与用户桶。</BodyText>
 
@@ -118,6 +137,7 @@
                   ['调度器', '<code>RagWorker</code>', 'load 入库 / similar 检索的统一入口，可挂载原文存储'],
                     ['切分器', '<code>SimpleRecursiveRagTextSplitter</code>', '最大分段长度 + 重叠率，递归切分长文'],
                   ['工具', '<code>RagTools</code>', '<code>rag_search</code> 语义检索（默认 topN=3）+ <code>rag_nearby</code> 按分片区间取回原文'],
+                  ['向量缓存', '<code>RagEmbeddingCache</code>', '按原文键缓存 <code>RagEmbedding</code>（LruMap 8192），每 30 秒落盘 <code>runtime-tmp/embedding-cache/{type}.json</code>，重启免重算'],
                     ['读取器', '<code>ListableRagFileReader</code>', 'Markitdown（Office）· EasyOCR（图片 / PDF-OCR）· Pandoc（文档转换）按开关组合']
                 ],
               ragToolRows: [

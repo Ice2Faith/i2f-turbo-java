@@ -50,7 +50,39 @@
             <p><code>SkillAutoConfiguration</code> 实现 <code>ApplicationRunner</code>：启动即全量扫描 <code>SkillsHelper.scanFileSystemSkills()</code>，随后以 <b>30 秒</b>为周期 <code>scheduleWithFixedDelay</code> 增量刷新到 <code>skillDefinitionMap</code>。新增技能无需重启应用——把目录放进 <code>skills/</code>，半分钟内 LLM 即可发现并使用。</p>
         </Callout>
 
-        <Callout color="#0b7285" title="技能 vs 工具 vs MCP">
+      <PanelTitle title="技能语义推荐 — 用向量检索把「对的技能」摆到模型眼前"/>
+      <BodyText size="13.5px">技能声明提示词只给出<b>名字 + 一句描述</b>，技能一多，模型在长清单里挑不准。为此 Ops 层叠加了一层
+        <b>RAG 语义推荐</b>：把用户这条消息与全部技能描述做向量相似度比对，只把最相关的 <b>top3</b> 技能以「# 技能推荐」系统消息插到
+        <code>messages[0]</code>，让模型带着「本轮大概该看哪几个技能」的提示进入推理，再自行决定是否
+        <code>get_skill_document</code> 读全文。
+      </BodyText>
+      <StepList>
+        <Step title="触发条件与概率">
+          <p>需同时满足 <code>enableSkills</code>、<code>enableToolRecommendByIntentRecognize</code>，且容器中存在 <code>RagWorker</code>
+            与可用的
+            <code>RagEmbeddingModel</code>。首轮（历史中没有 assistant 消息）<b>必定推荐</b>；多轮之后按 <b>30% 概率</b>重算，避免每轮都消耗一次
+            embedding 计费。</p>
+        </Step>
+        <Step title="描述向量化与缓存">
+          <p>逐个技能取 <code>SkillDefinition.getDescription()</code> 交给 <code>RagEmbeddingCache("skills")</code>：内存
+            <code>LruMap</code>
+            按<b>原文</b>命中即复用，未命中才真正调用模型；缓存每 30 秒落盘到 <code>runtime-tmp/embedding-cache/skills.json</code>，重启后直接热启动，无需重新向量化全部技能。
+          </p>
+        </Step>
+        <Step title="内存向量库与 top3 召回">
+          <p>每轮用临时 <code>InMemoryRagEmbeddingStore</code> 装载技能向量（技能数量有限，内存检索足够快），以用户消息的向量做
+            <code>similar(question, 3)</code>——由于 <code>RagVector</code> 的余弦相似度已被收敛到 <code>[-1, 1]</code>，排序稳定、不会出现
+            <code>NaN</code> 污染。</p>
+        </Step>
+        <Step title="注入与回显">
+          <p>命中结果拼成 <code># 技能推荐 / ## 技能名 / - 描述</code> 的 Markdown 系统消息，以 <code>add(0, ...)</code>
+            插入队首，并经
+            <code>echo_system_inject</code> 回显（前端默认归入隐藏类型）。与「技能声明提示词」（<code>echo_skill</code>）叠加时，模型既知道
+            <b>有哪些技能</b>，也大致知道<b>这轮该看哪几个</b>。</p>
+        </Step>
+      </StepList>
+
+      <Callout color="#0b7285" title="技能 vs 工具 vs MCP">
             <p><b>工具</b>：原子能力单元，如 <code>sql_query_datasource</code>、<code>store_truth</code>。由 <code>@Tool</code> 注解定义，应用启动时注册。</p>
             <p><b>技能</b>：领域知识包 = 提示词 + 工具 + 资源。由 <code>SKILL.md</code> 定义，30 秒热扫描，按需激活。</p>
             <p><b>MCP 工具</b>：外部服务提供的动态能力，由 MCP 协议发现并加载，LRU 策略淘汰。详见第 10 章。</p>
@@ -95,7 +127,9 @@
             SpecTable: '../md/SpecTable.vue',
             TwoCol: '../md/TwoCol.vue',
             CodeBlock: '../md/CodeBlock.vue',
-            TagBadge: '../md/TagBadge.vue'
+          TagBadge: '../md/TagBadge.vue',
+          StepList: '../md/StepList.vue',
+          Step: '../md/Step.vue'
         },
         data: function () {
             return {

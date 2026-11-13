@@ -6,7 +6,7 @@
 
         <TwoCol>
             <template slot="left">
-              <PanelTitle title="子系统包结构（66 个 Java 文件）"/>
+              <PanelTitle title="子系统包结构（68 个 Java 文件）"/>
                 <PkgTree v-html="pkgTreeHtml"></PkgTree>
             </template>
             <template slot="right">

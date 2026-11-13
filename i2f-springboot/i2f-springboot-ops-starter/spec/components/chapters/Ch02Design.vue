@@ -59,7 +59,7 @@
                     ['9', '<b>技能系统</b>', 'Skill-based Agent', '基于文档的可插拔技能（第 08 章）'],
                     ['10', '<b>事实注入</b>', 'Truth Injection / Memory', '三级记忆架构：Truth 会话级 + Memory 用户级 + RAG 系统级（第 09 / 12 章）'],
                     ['11', '<b>提示词工程</b>', 'Prompt Engineering', '角色系统与动态提示词注入策略'],
-                    ['12', '<b>上下文工程</b>', 'Context Window Management', '上下文窗口管理与压缩（截断/总结/LRU）'],
+                  ['12', '<b>上下文工程</b>', 'Context Window Management', '上下文窗口管理与压缩（截断/总结/LRU/工具结果与参数回收）'],
                     ['13', '<b>胖客户端</b>', 'Fat Client Architecture', '状态驱动的胖客户端架构（第 14 章）'],
                     ['14', '<b>流式输出</b>', 'SSE Streaming', 'Server-Sent Events 逐 Token 实时输出（第 04 章）'],
                     ['15', '<b>标签化权限</b>', 'Tool Tags &amp; Auto-Approval', '标签化权限与自动审批策略（第 07 章）']

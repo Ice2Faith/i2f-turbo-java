@@ -92,6 +92,7 @@
                     ['<code>ai.rags.memory.enable</code>', '<code>MemoryTools</code>', '记忆三件套工具（search / save / delete）'],
                   ['<code>ai.rags.datasource.enable</code>', '<code>RagDataSourceCollector</code>', '数据源自动采集入库'],
                     ['<code>ai.tools.session-record.enable</code>', '<code>SessionRecordTools</code>', '循环工程会话记录读写工具'],
+                  ['<code>ai.tools.recycle.enable</code>', '<code>RecycleTools</code>', '上下文回收取回工具 <code>ref_content</code>（<b>默认开启</b>，不对外暴露 MCP）'],
                   ['<code>ai.tools.database.update.enable</code>', '<code>DatabaseUpdateTools</code>', '数据库改数据 / 多段脚本（<b>默认关闭</b>，需 DatasourceProvider 且 HITL 审批）'],
                   ['<code>ai.tools.url-signer.sign-salt</code>', '<code>UrlSigner</code>', '签名 URL（<code>task://{sign}@...</code>）盐值，默认 <code>abc123def456</code>'],
                     ['<code>ai.tools.groovy.enable</code>', '<code>GroovyTools</code>', 'Groovy 脚本执行工具（<b>默认关闭</b>，需 Groovy 依赖）'],

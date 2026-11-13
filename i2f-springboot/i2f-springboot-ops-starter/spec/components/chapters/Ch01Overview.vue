@@ -17,7 +17,8 @@
                 </Card>
                 <Card color="#0b7285" idx="B" title="工具调用" tagline="Function Calling">
                   <p>26 个内置工具类（含 2 个 MCP 服务桥接提供者）经 <code>@Tool</code> 注解自动生成 JSON Schema
-                    注入对话；工具契约并行执行，HITL 人工审批把关危险操作，支持浏览器端工具委托、异步任务与失败重试。</p>
+                    注入对话；工具契约并行执行，HITL 人工审批把关危险操作，支持浏览器端工具委托、异步任务与失败重试；
+                    长循环中历史工具结果 / 调用参数可回收为 <code>ref://</code> 占位符，按需再取回以压缩输入 Token。</p>
                 </Card>
                 <Card color="#2b8a3e" idx="C" title="技能系统" tagline="Skills">
                     <p>基于文件系统的 <code>SKILL.md</code> 技能定义，30 秒热扫描；技能提示词与技能工具按需注入，支持脚本执行与资源读取。</p>
