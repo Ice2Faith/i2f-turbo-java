@@ -118,6 +118,13 @@ public class RagVector implements BaseMutator<RagVector> {
         return cosineSimilar(this, v2);
     }
 
+    /**
+     * 余弦相似度计算，返回值 [-1,1]
+     *
+     * @param v1
+     * @param v2
+     * @return
+     */
     public static double cosineSimilar(RagVector v1, RagVector v2) {
         double n1 = v1.norm();
         double n2 = v2.norm();
@@ -125,7 +132,12 @@ public class RagVector implements BaseMutator<RagVector> {
             return 0;
         }
         double dot = v1.dot(v2);
-        return dot / (n1 * n2);
+        double ret = dot / (n1 * n2);
+
+        if (Double.isNaN(ret)) {
+            return 0.0;
+        }
+        return Math.max(-1.0, Math.min(1.0, ret));
     }
 
     public static double dot(RagVector v1, RagVector v2) {
