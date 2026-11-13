@@ -54,10 +54,12 @@ intellij {
     plugins.set(listOf(
         /* Plugin Dependencies */
         "com.intellij.java",
+        // database 属于 Ultimate 订阅功能，这里仅作为编译期依赖；运行时在 plugin.xml 中是可选依赖
         "com.intellij.database",
         "org.intellij.intelliLang",
+        // .properties 语言支持（免费捆绑插件），此前依赖 velocity 传递引入，避免隐式依赖
+        "com.intellij.properties",
 //        "com.intellij.modules.xml",
-        "com.intellij.velocity",
         "org.jetbrains.plugins.yaml",
     )
     )

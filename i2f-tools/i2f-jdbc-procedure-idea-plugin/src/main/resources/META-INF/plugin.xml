@@ -29,13 +29,17 @@
     </change-notes>
 
     <!-- Product and plugin compatibility requirements.
-         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html -->
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html
+         注意：com.intellij.database（Database Tools and SQL）、com.intellij.velocity（VTL）都属于
+         Ultimate 订阅功能。自 2025.3 Unified 发行版起，没有订阅时这些捆绑插件会被禁用；
+         若声明为强制依赖，整个插件也会被禁用并提示「需要 Ultimate 订阅」。
+         因此 database 声明为可选依赖（缺失时仅 SQL 补全/参数注入退化），VTL 仅按语言 ID 使用，无需依赖。 -->
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.modules.lang</depends>
     <depends>com.intellij.java</depends>
-    <depends>com.intellij.database</depends>
+    <depends optional="true" config-file="xproc4j-database.xml">com.intellij.database</depends>
+    <depends>com.intellij.properties</depends>
     <depends>com.intellij.modules.xml</depends>
-    <depends>com.intellij.velocity</depends>
     <depends>org.jetbrains.plugins.yaml</depends>
 
     <!-- Extension points defined by the plugin.
@@ -79,10 +83,7 @@
                 order="first"
                 implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
 
-        <completion.contributor
-                language="SQL"
-                order="first"
-                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+        <!-- SQL 语言的补全注册在 xproc4j-database.xml 中，仅 database 插件可用时加载 -->
 
         <completion.contributor
                 language="any"

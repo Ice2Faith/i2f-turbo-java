@@ -13,10 +13,6 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.xml.XmlAttribute;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.psi.xml.XmlTokenType;
-import com.intellij.sql.psi.SqlBinaryExpression;
-import com.intellij.sql.psi.SqlIdentifier;
-import com.intellij.sql.psi.SqlParameter;
-import com.intellij.sql.psi.SqlTokenType;
 import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.ParamsConsts;
 import i2f.jdbc.procedure.consts.TagConsts;
@@ -25,6 +21,7 @@ import i2f.jdbc.procedure.node.base.Propagation;
 import i2f.turbo.idea.plugin.funic.grammar.psi.FunicTypes;
 import i2f.turbo.idea.plugin.funic.lang.psi.FunicTokenType;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
+import i2f.turbo.idea.plugin.jdbc.procedure.sql.SqlPsiSupport;
 import i2f.turbo.idea.plugin.tinyscript.grammar.psi.TinyScriptTypes;
 import i2f.turbo.idea.plugin.tinyscript.lang.psi.TinyScriptTokenType;
 import org.jetbrains.annotations.NotNull;
@@ -74,47 +71,10 @@ public class JdbcProcedureXmlCompletionContributor extends CompletionContributor
 
 //        log.warn("xml-elem:" + type.getClass()+", "+position.getText());
 
-        if (type instanceof SqlTokenType) {
-            SqlTokenType tokenType = (SqlTokenType) type;
-            String name = tokenType.getDebugName();
-//            log.warn("xml-sql-state: completionType=" + parameters.getCompletionType()
-//                    +", invocationCount="+parameters.getInvocationCount()
-//                    +", autoPopup="+parameters.isAutoPopup()
-//                    +", extendCompletion="+parameters.isExtendedCompletion()
-//                    +", isStopped="+result.isStopped());
-//            log.warn("xml-sql-param:" + tokenType.getDebugName() + "," + type.getClass() + ", [" + position.getText()+"]");
-            if ("SQL_IDENT".equalsIgnoreCase(name)) {
-                PsiElement parent = position.getParent();
-//                log.warn("xml-sql-parent:" +  parent.getClass() + ", " + parent.getText());
-                if (parent instanceof SqlParameter) {
-                    // 控制遍历频率，避免CPU过高
-                    Set<String> completions = CompletionHelper.getXmlFileVariablesFast(position);
-//                    log.warn("xml-sql-param-completions:" + completions);
-                    if (completions != null && !completions.isEmpty()) {
-                        boolean withPrefix = false;
-                        PsiElement pparent = parent.getParent();
-                        if (pparent != null) {
-                            if (pparent instanceof SqlIdentifier) {
-                                withPrefix = true;
-                            }
-                            if (pparent instanceof SqlBinaryExpression) {
-                                withPrefix = false;
-                            }
-                        }
-                        for (String attr : completions) {
-                            result.addElement(LookupElementBuilder.create(attr).withIcon(XProc4jConsts.ICON));
-                            if (withPrefix) {
-                                result.addElement(LookupElementBuilder.create("${" + attr).withIcon(XProc4jConsts.ICON));
-                                result.addElement(LookupElementBuilder.create("#{" + attr).withIcon(XProc4jConsts.ICON));
-                                result.addElement(LookupElementBuilder.create("$!{" + attr).withIcon(XProc4jConsts.ICON));
-                                result.addElement(LookupElementBuilder.create("#!{" + attr).withIcon(XProc4jConsts.ICON));
-                            }
-                        }
-                        result.stopHere();
-                        return;
-                    }
-                }
-            }
+        // SQL 分支交给 SqlPsiSupport 隔离：database 插件（Ultimate 订阅功能）不可用时自动跳过。
+        // 本类不能直接引用 com.intellij.sql.*，否则无该插件时会 NoClassDefFoundError 拖垮插件加载
+        if (SqlPsiSupport.tryComplete(parameters, position, result)) {
+            return;
         }
         if (type instanceof TinyScriptTokenType) {
             TinyScriptTokenType tokenType = (TinyScriptTokenType) type;

@@ -42,7 +42,11 @@ public class ProjectLanguageTemplateMultiHostInjector implements MultiHostInject
     public @NotNull List<? extends Class<? extends PsiElement>> elementsToInjectIn() {
         List<Class<? extends PsiElement>> ret = new ArrayList<>();
         for (IProjectInjectHandler<?> handler : handlers) {
-            ret.add(handler.supportType());
+            Class<? extends PsiElement> supportType = handler.supportType();
+            if (supportType == null) {
+                continue;
+            }
+            ret.add(supportType);
         }
         return ret;
     }

@@ -5,11 +5,11 @@ import com.intellij.lang.injection.MultiHostRegistrar;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiClass;
+import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
 import com.intellij.psi.PsiMethod;
 import com.intellij.psi.xml.XmlFile;
 import com.intellij.psi.xml.XmlTag;
-import com.intellij.sql.psi.SqlParameter;
 import i2f.extension.velocity.VelocityGenerator;
 import i2f.match.impl.SimpleMatcher;
 import i2f.text.StringUtils;
@@ -23,6 +23,7 @@ import i2f.turbo.idea.plugin.inject.handlers.IProjectInjectHandler;
 import i2f.turbo.idea.plugin.inject.metadata.JavaMetadataResolver;
 import i2f.turbo.idea.plugin.inject.metadata.XmlMetadataResolver;
 import i2f.turbo.idea.plugin.jdbc.procedure.completion.CompletionHelper;
+import i2f.turbo.idea.plugin.jdbc.procedure.sql.SqlPsiSupport;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,14 +36,21 @@ import java.util.concurrent.atomic.AtomicReference;
  * @date 2026/4/17 14:14
  * @desc
  */
-public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlParameter> {
+public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<PsiElement> {
+    /**
+     * database 插件（Ultimate 订阅功能）不可用时返回 null，本 handler 会被整体跳过。
+     * 注意这里不能写 SqlParameter.class 字面量，否则会静态链接 com.intellij.sql.psi.SqlParameter，
+     * 在无该插件时导致 NoClassDefFoundError 拖垮插件加载。
+     */
     @Override
-    public Class<SqlParameter> supportType() {
-        return SqlParameter.class;
+    @SuppressWarnings("unchecked")
+    public Class<PsiElement> supportType() {
+        Class<? extends PsiElement> type = SqlPsiSupport.sqlParameterType();
+        return type == null ? null : (Class<PsiElement>) type;
     }
 
     @Override
-    protected void doInjectInner(MultiHostRegistrar registrar, SqlParameter sqlParameter) {
+    protected void doInjectInner(MultiHostRegistrar registrar, PsiElement sqlParameter) {
 
         XmlTag tag = CompletionHelper.getParentElement(sqlParameter, XmlTag.class);
         if (tag == null) {
@@ -176,6 +184,9 @@ public class XmlTextSqlParameterInjectHandler extends IProjectInjectHandler<SqlP
                 idx = text.lastIndexOf("}");
                 if (idx >= 0) {
                     endIndex = endIndex - (text.substring(idx).length());
+                }
+                if (!(sqlParameter instanceof PsiLanguageInjectionHost)) {
+                    return;
                 }
                 registrar.startInjecting(targetLang)
                         .addPlace(prefix,

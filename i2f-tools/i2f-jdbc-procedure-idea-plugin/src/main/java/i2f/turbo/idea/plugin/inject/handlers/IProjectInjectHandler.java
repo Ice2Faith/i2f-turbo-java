@@ -10,11 +10,17 @@ import com.intellij.psi.PsiElement;
  * @desc
  */
 public abstract class IProjectInjectHandler<T extends PsiElement> {
+    /**
+     * 支持注入的元素类型。返回 null 表示当前环境不支持（例如依赖的插件不可用），该 handler 会被整体跳过。
+     */
     public abstract Class<T> supportType();
 
     public void inject(MultiHostRegistrar registrar, PsiElement context) {
-        Class<? extends PsiElement> clazz = context.getClass();
         Class<T> supportType = supportType();
+        if (supportType == null) {
+            return;
+        }
+        Class<? extends PsiElement> clazz = context.getClass();
         if (!supportType.equals(clazz) && !supportType.isAssignableFrom(clazz)) {
             return;
         }

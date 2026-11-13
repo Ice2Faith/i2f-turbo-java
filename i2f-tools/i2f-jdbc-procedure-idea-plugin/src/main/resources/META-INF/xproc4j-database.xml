@@ -1,0 +1,15 @@
+<!--
+    database（Database Tools and SQL）可用时才会加载的扩展配置。
+
+    该插件属于 Ultimate 订阅功能，自 2025.3 Unified 发行版起，没有订阅时捆绑的 database 插件会被禁用，
+    此时本文件不会被加载，插件本体仍可正常使用，只是 SQL 相关能力退化。
+-->
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- SQL 注入片段内的 ${} / #{} 变量补全 -->
+        <completion.contributor
+                language="SQL"
+                order="first"
+                implementationClass="i2f.turbo.idea.plugin.jdbc.procedure.JdbcProcedureXmlCompletionContributor"/>
+    </extensions>
+</idea-plugin>
