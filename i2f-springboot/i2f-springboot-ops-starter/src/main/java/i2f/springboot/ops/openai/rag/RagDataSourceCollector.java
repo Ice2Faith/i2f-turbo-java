@@ -1,8 +1,10 @@
 package i2f.springboot.ops.openai.rag;
 
 import i2f.ai.std.rag.BucketRagEmbeddingStore;
+import i2f.ai.std.rag.RagDocumentsStore;
 import i2f.ai.std.rag.RagEmbeddingStore;
 import i2f.extension.ai.rag.sqlite.SqliteBucketRagMemoryStore;
+import i2f.extension.ai.rag.sqlite.SqliteRagDocumentsStore;
 import i2f.extension.ai.rag.sqlite.SqliteRagEmbeddingStore;
 import i2f.jdbc.datasource.impl.DirectConnectionDatasource;
 import i2f.springboot.ops.datasource.provider.DatasourceCollector;
@@ -52,6 +54,19 @@ public class RagDataSourceCollector implements DatasourceCollector, ApplicationC
                 if (store instanceof SqliteBucketRagMemoryStore) {
                     SqliteBucketRagMemoryStore item = (SqliteBucketRagMemoryStore) store;
                     String dsName = "ragBucket_" + entry.getKey();
+                    ret.put(dsName, new DirectConnectionDatasource(item::getConnection));
+                }
+            }
+        } catch (Exception e) {
+            // ignore error
+        }
+        try {
+            Map<String, RagDocumentsStore> map = applicationContext.getBeansOfType(RagDocumentsStore.class);
+            for (Map.Entry<String, RagDocumentsStore> entry : map.entrySet()) {
+                RagDocumentsStore store = entry.getValue();
+                if (store instanceof SqliteRagDocumentsStore) {
+                    SqliteRagDocumentsStore item = (SqliteRagDocumentsStore) store;
+                    String dsName = "ragDocs_" + entry.getKey();
                     ret.put(dsName, new DirectConnectionDatasource(item::getConnection));
                 }
             }
