@@ -29,4 +29,12 @@ public class OpenAiCompletionRespDto implements BaseMutator<OpenAiCompletionResp
         OpenAiCompletionChoice choice = choices.get(0);
         return choice.getMessage();
     }
+
+    public String getFirstMessageContent() {
+        OpenAiAssistantMessageRespDto msg = getFirstMessage();
+        if (msg == null) {
+            return "";
+        }
+        return msg.getContent();
+    }
 }

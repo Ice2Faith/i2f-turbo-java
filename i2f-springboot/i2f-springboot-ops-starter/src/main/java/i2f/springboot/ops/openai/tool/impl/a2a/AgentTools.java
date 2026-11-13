@@ -1,10 +1,7 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
 import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
-import i2f.ai.rest.openai.model.data.OpenAiAssistantMessageRespDto;
-import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
-import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
-import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
+import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;
@@ -54,7 +51,7 @@ public class AgentTools {
                 .build();
     }
 
-    public String generate(OpenAiOpsProperties.OpenAiOptions endpoint, OpenAiCompletionDto completion) {
+    public OpenAiCompletionRespDto generate(OpenAiOpsProperties.OpenAiOptions endpoint, OpenAiCompletionDto completion) {
         // 强制关闭流式输出
         completion.setStream(null);
         completion.setStream_options(null);
@@ -68,12 +65,7 @@ public class AgentTools {
                 .set(u -> u::setModel, completion.getModel())
                 .done();
 
-        OpenAiCompletionRespDto resp = aiModel.completion(completion);
-        OpenAiAssistantMessageRespDto msg = resp.getFirstMessage();
-        if (msg == null) {
-            return "";
-        }
-        return msg.getContent();
+        return aiModel.completion(completion);
     }
 
     @ToolIntent(items = @ToolIntentItem(value = "sql_safe", description = "SQL语句安全性校验"))
@@ -133,7 +125,7 @@ public class AgentTools {
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
         completion.getMessages().add(new OpenAiUserMessage("<sql_input>" + sql + "</sql_input>"));
-        return generate(endpoint, completion);
+        return generate(endpoint, completion).getFirstMessageContent();
     }
 
     @Data
@@ -150,6 +142,7 @@ public class AgentTools {
         protected String rawResult;
         protected Set<String> result;
         protected String content;
+        protected OpenAiCompletionUsage usage;
     }
 
     public IntentResult intent_recognize(String question, List<IntentItem> intents) {
@@ -210,7 +203,8 @@ public class AgentTools {
         completion.setMessages(new ArrayList<>());
         completion.getMessages().add(new OpenAiSystemMessage(system));
         completion.getMessages().add(new OpenAiUserMessage(question));
-        String resp = generate(endpoint, completion);
+        OpenAiCompletionRespDto respDto = generate(endpoint, completion);
+        String resp = respDto.getFirstMessageContent();
         String[] arr = resp.split("\n");
         Set<String> result = new LinkedHashSet<>();
         for (String item : arr) {
@@ -229,6 +223,7 @@ public class AgentTools {
         ret.setPrompt(system);
         ret.setRawResult(resp);
         ret.setResult(result);
+        ret.setUsage(respDto.getUsage());
         return ret;
     }
 }

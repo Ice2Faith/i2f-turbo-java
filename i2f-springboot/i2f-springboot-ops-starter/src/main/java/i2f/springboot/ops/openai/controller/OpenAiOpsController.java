@@ -1378,6 +1378,22 @@ public class OpenAiOpsController implements IOpsProvider {
                                     emitter.send(respJson);
                                 }
 
+                                if (intentResult != null) {
+                                    OpenAiCompletionUsage intentUsage = intentResult.getUsage();
+                                    if (intentUsage != null) {
+                                        String emitIntentUsage = objectMapper.writeValueAsString(intentUsage);
+                                        OpsSecureReturn<?> resp = null;
+                                        if (req.isEncryptOutput()) {
+                                            resp = transfer.success(emitIntentUsage);
+                                        } else {
+                                            resp = OpsSecureReturn.success(emitIntentUsage);
+                                        }
+                                        resp.withAttr("type", OpsOpenAiConsts.ECHO_USAGE);
+                                        String respJson = objectMapper.writeValueAsString(resp);
+                                        emitter.send(respJson);
+                                    }
+                                }
+
                                 Set<String> labels = intentResult.getResult();
 
                                 if (!labels.isEmpty()) {

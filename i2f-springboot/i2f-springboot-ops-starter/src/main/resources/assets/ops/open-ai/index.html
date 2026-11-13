@@ -3828,16 +3828,39 @@
                             assistantMsg.progress = json || '';
                             return;
                         }
+                        let incrUsage = function (usage) {
+                            if (!usage || !usage.prompt_tokens) {
+                                return
+                            }
+                            if (!assistantMsg.usage) {
+                                assistantMsg.usage = {
+                                    prompt_tokens: 0,
+                                    completion_tokens: 0,
+                                    total_tokens: 0
+                                };
+                            }
+                            try {
+                                assistantMsg.usage.prompt_tokens += usage.prompt_tokens;
+                                assistantMsg.usage.completion_tokens += usage.completion_tokens;
+                                assistantMsg.usage.total_tokens += usage.total_tokens;
+                            } catch (e) {
+                            }
+                            try {
+                                _this.currentSessionTotalUsages.prompt_tokens += usage.prompt_tokens;
+                                _this.currentSessionTotalUsages.completion_tokens += usage.completion_tokens;
+                                _this.currentSessionTotalUsages.total_tokens += usage.total_tokens;
+                            } catch (e) {
+                            }
+                        }
+                        if (resp.attrs && resp.attrs.type == 'echo_usage') {
+                            let usage = json || {};
+                            incrUsage(usage)
+                            return;
+                        }
 
                         if (json.usage) {
                             // usage={"prompt_tokens":10,"completion_tokens":12,"total_tokens":22}
-                            assistantMsg.usage = json.usage
-                            try {
-                                _this.currentSessionTotalUsages.prompt_tokens += json.usage.prompt_tokens;
-                                _this.currentSessionTotalUsages.completion_tokens += json.usage.completion_tokens;
-                                _this.currentSessionTotalUsages.total_tokens += json.usage.total_tokens;
-                            } catch (e) {
-                            }
+                            incrUsage(json.usage)
                         }
 
                         let delta = json.choices && json.choices[0] && json.choices[0].delta;
