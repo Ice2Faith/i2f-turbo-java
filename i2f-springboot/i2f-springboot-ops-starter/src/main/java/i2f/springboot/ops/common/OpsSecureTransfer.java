@@ -1,11 +1,10 @@
 package i2f.springboot.ops.common;
 
-
-import com.antherd.smcrypto.sm2.Sm2;
-import com.antherd.smcrypto.sm3.Sm3;
-import com.antherd.smcrypto.sm4.Sm4;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.sm.crypto.sm2.Sm2;
+import i2f.sm.crypto.sm3.Sm3;
+import i2f.sm.crypto.sm4.Sm4;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

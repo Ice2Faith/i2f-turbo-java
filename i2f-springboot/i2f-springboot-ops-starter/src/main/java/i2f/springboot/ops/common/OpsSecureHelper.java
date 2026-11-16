@@ -1,9 +1,8 @@
 package i2f.springboot.ops.common;
 
-
-import com.antherd.smcrypto.sm2.Keypair;
-import com.antherd.smcrypto.sm2.Sm2;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.sm.crypto.sm2.KeyPair;
+import i2f.sm.crypto.sm2.Sm2;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,8 @@ public class OpsSecureHelper {
     }
 
     public OpsSecureCertPair generateCertPair() throws Exception {
-        Keypair serverPair = Sm2.generateKeyPairHex();
-        Keypair clientPair = Sm2.generateKeyPairHex();
+        KeyPair serverPair = Sm2.generateKeyPairHex();
+        KeyPair clientPair = Sm2.generateKeyPairHex();
         clientPair = serverPair;
         OpsSecureKeyPair serverKeyPair = new OpsSecureKeyPair(clientPair.getPublicKey(), serverPair.getPrivateKey());
         OpsSecureKeyPair clientKeyPair = new OpsSecureKeyPair(serverKeyPair.getPublicKey(), clientPair.getPrivateKey());

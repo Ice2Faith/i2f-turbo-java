@@ -629,6 +629,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
 
+    public static final String EMBEDDING_PREFIX_DESCRIPTION = "Represent the tool (skill) description for semantic matching in AI agent development. ";
+    public static final String EMBEDDING_PREFIX_QUESTION = "Represent the user request for tool and skill recommendation in AI agent development. ";
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto,
                              HttpServletRequest request) throws Exception {
@@ -638,6 +640,7 @@ public class OpenAiOpsController implements IOpsProvider {
         CopyOnWriteArrayList<TmpFileTools.FileAttachMessage> toolFileMessages = new CopyOnWriteArrayList<>();
         CopyOnWriteArrayList<AsyncTaskMessage> asyncTaskMessages = new CopyOnWriteArrayList<>();
         ConcurrentHashMap<String, String> recycleMap = new ConcurrentHashMap<>();
+        RagEmbeddingCache requestEmbeddingCache = new RagEmbeddingCache("request");
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
@@ -830,6 +833,8 @@ public class OpenAiOpsController implements IOpsProvider {
                             && req.isEnableToolRecommendByIntentRecognize()
                             && worker != null
                             && worker.getModel() != null) {
+                        echoProgress.apply("技能推荐中...");
+
                         String userMsgContent = null;
                         if (completion.getMessages() != null && !completion.getMessages().isEmpty()) {
                             OpenAiMessage msg = completion.getMessages().get(completion.getMessages().size() - 1);
@@ -861,12 +866,14 @@ public class OpenAiOpsController implements IOpsProvider {
                             Map<String, SkillDefinition> embeddingSkillMap = new LinkedHashMap<>();
 
                             for (SkillDefinition def : skillList) {
-                                RagEmbedding embedding = skillsEmbeddingCache.embed(model, def.getDescription());
+                                String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getDescription();
+                                RagEmbedding embedding = skillsEmbeddingCache.embed(model, embedText);
                                 embeddingSkillMap.put(embedding.getId(), def);
                                 store.store(embedding);
                             }
 
-                            RagEmbedding question = model.embed(cmpUserMsgContent);
+                            String embedQuestion = EMBEDDING_PREFIX_QUESTION + cmpUserMsgContent;
+                            RagEmbedding question = requestEmbeddingCache.embed(model, embedQuestion);
 
                             List<RagEmbedding> list = store.similar(question, 3);
 
@@ -1237,6 +1244,7 @@ public class OpenAiOpsController implements IOpsProvider {
                         List<OpenAiToolsDefinition> tools = completion.getTools();
 
                         if (req.isEnableToolRecommendByIntentRecognize()) {
+                            echoProgress.apply("工具意图识别推荐中...");
                             // 这里可以通过意图识别，进行变更 unqToolNames 列表，实现工具只能推荐
                             String userMsgContent = null;
                             if (completion.getMessages() != null && !completion.getMessages().isEmpty()) {
@@ -1261,81 +1269,138 @@ public class OpenAiOpsController implements IOpsProvider {
                             if (cmpUserMsgContent != null && !cmpUserMsgContent.isEmpty()
                                     && !TOOL_RETURNS_FILE_CONTENT.equals(cmpUserMsgContent)
                                     && needIntentRecognize) {
-                                echoProgress.apply("工具意图识别推荐中...");
+                                Set<String> recommandToolNames = new LinkedHashSet<>();
 
-                                Map<String, Set<String>> labelToolNameMap = new LinkedHashMap<>();
+                                // 使用 embedding 相似度推荐工具
+                                if (worker != null
+                                        && worker.getModel() != null) {
+                                    RagEmbeddingModel model = worker.getModel();
+                                    InMemoryRagEmbeddingStore store = new InMemoryRagEmbeddingStore();
 
-                                List<AgentTools.IntentItem> intentItems = new ArrayList<>();
-                                for (OpenAiToolsDefinition e : tools) {
-                                    boolean resolved = false;
-                                    CopyOnWriteArrayList<ToolDefinition> definitions = allToolsMap.get(e.getFunction().getName());
-                                    if (definitions != null && !definitions.isEmpty()) {
-                                        for (ToolDefinition definition : definitions) {
-                                            ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(definition);
-                                            if (rawTool == null) {
-                                                continue;
-                                            }
-                                            Method bindMethod = rawTool.getBindMethod();
-                                            if (bindMethod == null) {
-                                                continue;
-                                            }
-                                            Map<String, IToolIntent> parse = ToolIntentHelper.parse(bindMethod);
-                                            for (Map.Entry<String, IToolIntent> entry : parse.entrySet()) {
-                                                AgentTools.IntentItem item = new AgentTools.IntentItem();
+                                    List<ToolDefinition> toolList = toolManager.listTools();
 
-                                                item.setLabel(entry.getKey());
-                                                item.setDescription(entry.getValue().description());
-                                                intentItems.add(item);
-                                                labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
-                                                        .add(e.getFunction().getName());
-                                                resolved = true;
-                                            }
-                                        }
+                                    Map<String, ToolDefinition> embeddingToolMap = new LinkedHashMap<>();
+
+                                    for (ToolDefinition def : toolList) {
+                                        String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getDescription();
+                                        RagEmbedding embedding = skillsEmbeddingCache.embed(model, embedText);
+                                        embeddingToolMap.put(embedding.getId(), def);
+                                        store.store(embedding);
                                     }
-                                    if (!resolved) {
-                                        AgentTools.IntentItem item = new AgentTools.IntentItem();
 
-                                        item.setLabel(e.getFunction().getName());
-                                        item.setDescription(e.getFunction().getName());
-                                        intentItems.add(item);
-                                        labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
-                                                .add(e.getFunction().getName());
-                                        resolved = true;
+                                    String embedQuestion = EMBEDDING_PREFIX_QUESTION + cmpUserMsgContent;
+                                    RagEmbedding question = requestEmbeddingCache.embed(model, embedQuestion);
+
+                                    List<RagEmbedding> list = store.similar(question, 5);
+
+                                    StringBuilder builder = new StringBuilder();
+                                    builder.append("# 工具推荐\n");
+                                    builder.append("\n");
+                                    for (RagEmbedding embedding : list) {
+                                        ToolDefinition definition = embeddingToolMap.get(embedding.getId());
+                                        recommandToolNames.add(definition.getName());
+                                        builder.append("## ").append(definition.getName()).append("\n")
+                                                .append("- ").append(definition.getDescription()).append("\n")
+                                                .append("\n");
                                     }
-                                }
 
-                                AgentTools agentTools = this.agentTools;
-                                if (agentTools == null) {
-                                    agentTools = new AgentTools();
-                                }
-                                AgentTools.IntentResult intentResult = agentTools.intent_recognize(userMsgContent, intentItems);
-
-                                if (intentResult != null) {
-                                    // 工具意图推荐
-                                    String content = "" + intentResult.getPrompt() + "\n\n"
-                                            + "# raw result \n\n"
-                                            + intentResult.getRawResult() + "\n\n"
-                                            + "# final result \n\n"
-                                            + intentResult.getResult();
+                                    String content = builder.toString();
                                     OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+                                    // 不需要注入，只需要回显即可
+                                    //completion.getMessages().add(0, system);
 
                                     OpenAiMessageVo dto = new OpenAiMessageVo();
-                                    dto.setType(OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
-                                    dto.setEcho_tool_intent_recommend(system);
+                                    dto.setType(OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
+                                    dto.setEcho_system_inject(system);
 
-                                    echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
+                                    echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_SYSTEM_INJECT);
                                 }
 
-                                if (intentResult != null) {
-                                    OpenAiCompletionUsage intentUsage = intentResult.getUsage();
-                                    if (intentUsage != null) {
-                                        echoJsonMessage.apply(intentUsage, OpsOpenAiConsts.ECHO_USAGE);
+                                // 使用 intent 意图分类推荐工具
+                                if (true) {
+                                    Map<String, Set<String>> labelToolNameMap = new LinkedHashMap<>();
+
+                                    List<AgentTools.IntentItem> intentItems = new ArrayList<>();
+                                    for (OpenAiToolsDefinition e : tools) {
+                                        boolean resolved = false;
+                                        CopyOnWriteArrayList<ToolDefinition> definitions = allToolsMap.get(e.getFunction().getName());
+                                        if (definitions != null && !definitions.isEmpty()) {
+                                            for (ToolDefinition definition : definitions) {
+                                                ToolRawDefinition rawTool = ToolRawHelper.extractRawDefinition(definition);
+                                                if (rawTool == null) {
+                                                    continue;
+                                                }
+                                                Method bindMethod = rawTool.getBindMethod();
+                                                if (bindMethod == null) {
+                                                    continue;
+                                                }
+                                                Map<String, IToolIntent> parse = ToolIntentHelper.parse(bindMethod);
+                                                for (Map.Entry<String, IToolIntent> entry : parse.entrySet()) {
+                                                    AgentTools.IntentItem item = new AgentTools.IntentItem();
+
+                                                    item.setLabel(entry.getKey());
+                                                    item.setDescription(entry.getValue().description());
+                                                    intentItems.add(item);
+                                                    labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
+                                                            .add(e.getFunction().getName());
+                                                    resolved = true;
+                                                }
+                                            }
+                                        }
+                                        if (!resolved) {
+                                            AgentTools.IntentItem item = new AgentTools.IntentItem();
+
+                                            item.setLabel(e.getFunction().getName());
+                                            item.setDescription(e.getFunction().getName());
+                                            intentItems.add(item);
+                                            labelToolNameMap.computeIfAbsent(item.getLabel(), k -> new LinkedHashSet<>())
+                                                    .add(e.getFunction().getName());
+                                            resolved = true;
+                                        }
                                     }
+
+                                    AgentTools agentTools = this.agentTools;
+                                    if (agentTools == null) {
+                                        agentTools = new AgentTools();
+                                    }
+                                    AgentTools.IntentResult intentResult = agentTools.intent_recognize(userMsgContent, intentItems);
+
+                                    if (intentResult != null) {
+                                        // 工具意图推荐
+                                        String content = "" + intentResult.getPrompt() + "\n\n"
+                                                + "# raw result \n\n"
+                                                + intentResult.getRawResult() + "\n\n"
+                                                + "# final result \n\n"
+                                                + intentResult.getResult();
+                                        OpenAiSystemMessage system = new OpenAiSystemMessage(content);
+
+                                        OpenAiMessageVo dto = new OpenAiMessageVo();
+                                        dto.setType(OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
+                                        dto.setEcho_tool_intent_recommend(system);
+
+                                        echoJsonMessage.apply(dto, OpsOpenAiConsts.ECHO_TOOL_INTENT_RECOMMEND);
+                                    }
+
+                                    if (intentResult != null) {
+                                        OpenAiCompletionUsage intentUsage = intentResult.getUsage();
+                                        if (intentUsage != null) {
+                                            echoJsonMessage.apply(intentUsage, OpsOpenAiConsts.ECHO_USAGE);
+                                        }
+
+                                        Set<String> labels = intentResult.getResult();
+
+                                        for (String label : labels) {
+                                            Set<String> names = labelToolNameMap.get(label);
+                                            if (names != null) {
+                                                recommandToolNames.addAll(names);
+                                            }
+                                        }
+
+                                    }
+
                                 }
 
-                                Set<String> labels = intentResult.getResult();
-
-                                if (!labels.isEmpty()) {
+                                if (recommandToolNames.isEmpty()) {
                                     // 保留个数
                                     int headSize = (int) (keepSize * 0.25);
                                     headSize = Math.max(headSize, 3);
@@ -1345,15 +1410,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                         removeList.add(unqToolNames.removeLast());
                                     }
 
-                                    // 先添加推荐的
-                                    List<String> labelToolList = new ArrayList<>();
-                                    for (String label : labels) {
-                                        Set<String> names = labelToolNameMap.get(label);
-                                        if (names != null) {
-                                            labelToolList.addAll(names);
-                                        }
-                                    }
-                                    for (String name : labelToolList) {
+                                    // 添加推荐
+                                    for (String name : recommandToolNames) {
                                         if (!unqToolNames.contains(name)) {
                                             unqToolNames.add(name);
                                         }
@@ -1365,7 +1423,6 @@ public class OpenAiOpsController implements IOpsProvider {
                                             unqToolNames.add(removeName);
                                         }
                                     }
-
                                 }
                             }
                         }
