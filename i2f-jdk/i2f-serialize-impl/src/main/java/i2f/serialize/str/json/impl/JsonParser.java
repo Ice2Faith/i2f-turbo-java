@@ -1,407 +1,376 @@
 package i2f.serialize.str.json.impl;
 
-import i2f.match.regex.RegexPattens;
-
 import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Function;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- * @author Ice2Faith
- * @date 2024/6/3 15:23
- * @desc
+ * Single-pass recursive descent JSON parser, JDK8 only, no third-party dependencies.
+ *
+ * <p>Lenient syntax: {@code //} line comments, {@code /* *}{@code /} block comments and
+ * trailing commas in objects/arrays are accepted.</p>
+ *
+ * <p>Retains object key order (LinkedHashMap). Numbers map to Integer or Long for
+ * integral values, Double when a fraction/exponent is present, and fall back to
+ * BigInteger / BigDecimal when the value does not fit.</p>
  */
-public class JsonParser {
+public final class JsonParser {
 
-    public static List<String> splitTokens(String str, Function<String, String> filter) {
-        AtomicInteger idx = new AtomicInteger(0);
-        List<String> tokens = new ArrayList<>();
-        while (true) {
-            String part = nextBlock(str, idx);
-            if (part == null) {
-                break;
-            }
-            if (filter != null) {
-                part = filter.apply(part);
-            }
-            if (part != null) {
-                tokens.add(part);
-            }
-        }
-        return tokens;
+    private static final char[] TRUE = "true".toCharArray();
+    private static final char[] FALSE = "false".toCharArray();
+    private static final char[] NULL = "null".toCharArray();
+
+    private final char[] src;
+    private final int end;
+    private int pos;
+
+    private JsonParser(char[] src, int off, int len) {
+        this.src = src;
+        this.pos = off;
+        this.end = off + len;
     }
 
     public static Object parse(String json) {
-        return parseNext(json, "");
+        if (json == null) {
+            return null;
+        }
+        return parse(json.toCharArray(), 0, json.length());
     }
 
-    public static Object parseNext(String json, String parentKey) {
-        List<String> tokens = splitTokens(json, part -> {
-            String trim = part.trim();
-            if (trim.isEmpty()) {
+    public static Object parse(char[] json, int off, int len) {
+        JsonParser parser = new JsonParser(json, off, len);
+        parser.skipWhitespaceAndComments();
+        Object value = parser.readValue();
+        parser.skipWhitespaceAndComments();
+        if (parser.pos != parser.end) {
+            throw parser.error("unexpected trailing characters");
+        }
+        return value;
+    }
+
+    private Object readValue() {
+        if (pos >= end) {
+            throw error("unexpected end of input");
+        }
+        char c = src[pos];
+        switch (c) {
+            case '{':
+                return readObject();
+            case '[':
+                return readArray();
+            case '"':
+                return readString();
+            case 't':
+                expectLiteral(TRUE);
+                return Boolean.TRUE;
+            case 'f':
+                expectLiteral(FALSE);
+                return Boolean.FALSE;
+            case 'n':
+                expectLiteral(NULL);
                 return null;
+            default:
+                if (c == '-' || (c >= '0' && c <= '9')) {
+                    return readNumber();
+                }
+                throw error("unexpected character '" + c + "'");
+        }
+    }
+
+    private Map<String, Object> readObject() {
+        pos++;
+        Map<String, Object> map = new LinkedHashMap<String, Object>();
+        skipWhitespaceAndComments();
+        if (pos < end && src[pos] == '}') {
+            pos++;
+            return map;
+        }
+        while (true) {
+            skipWhitespaceAndComments();
+            if (pos >= end || src[pos] != '"') {
+                throw error("expected string key in object");
             }
-            if (trim.startsWith("//") || trim.startsWith("/*")) {
-                return null;
+            String key = readString();
+            skipWhitespaceAndComments();
+            if (pos >= end || src[pos] != ':') {
+                throw error("expected ':' after object key");
             }
-            return trim;
-        });
-        String bestJson = null;
-        for (String token : tokens) {
-            if (token != null) {
-                bestJson = token;
+            pos++;
+            skipWhitespaceAndComments();
+            map.put(key, readValue());
+            skipWhitespaceAndComments();
+            if (pos >= end) {
+                throw error("unterminated object");
+            }
+            char c = src[pos++];
+            if (c == '}') {
+                return map;
+            }
+            if (c != ',') {
+                throw error("expected ',' or '}' in object");
+            }
+            skipWhitespaceAndComments();
+            if (pos < end && src[pos] == '}') {
+                pos++;
+                return map;
+            }
+        }
+    }
+
+    private List<Object> readArray() {
+        pos++;
+        List<Object> list = new ArrayList<Object>();
+        skipWhitespaceAndComments();
+        if (pos < end && src[pos] == ']') {
+            pos++;
+            return list;
+        }
+        while (true) {
+            skipWhitespaceAndComments();
+            list.add(readValue());
+            skipWhitespaceAndComments();
+            if (pos >= end) {
+                throw error("unterminated array");
+            }
+            char c = src[pos++];
+            if (c == ']') {
+                return list;
+            }
+            if (c != ',') {
+                throw error("expected ',' or ']' in array");
+            }
+            skipWhitespaceAndComments();
+            if (pos < end && src[pos] == ']') {
+                pos++;
+                return list;
+            }
+        }
+    }
+
+    private String readString() {
+        pos++;
+        int start = pos;
+        while (pos < end) {
+            char c = src[pos];
+            if (c == '"') {
+                String value = new String(src, start, pos - start);
+                pos++;
+                return value;
+            }
+            if (c == '\\') {
                 break;
             }
+            pos++;
+        }
+        if (pos >= end) {
+            throw error("unterminated string");
         }
 
-        if (bestJson == null) {
-            throw new IllegalArgumentException("non-json content found!");
-        }
-
-        // 先处理简单类型
-        if (bestJson != null) {
-            String v = bestJson;
-            if (v.startsWith("{") || v.startsWith("[")) {
-                // no nothing, process after
-            } else if (v.startsWith("\"") || v.startsWith("'")) {
-                Object val = unescape(v);
-                return val;
-            } else if (v.matches(RegexPattens.INTEGER_NUMBER_REGEX)) {
-                long val = Long.parseLong(v);
-                return val;
-            } else if (v.matches(RegexPattens.DOUBLE_NUMBER_REGEX)) {
-                Object val = Double.parseDouble(v);
-                return val;
-            } else if ("true".equals(v)) {
-                return true;
-            } else if ("false".equals(v)) {
-                return false;
-            } else if ("null".equals(v)) {
-                return null;
-            } else {
-                try {
-                    BigDecimal num = new BigDecimal(v);
-                    double dv = num.doubleValue();
-                    if (Double.isInfinite(dv)) {
-                        return num;
-                    } else {
-                        return dv;
-                    }
-                } catch (Exception e) {
-                    throw new IllegalArgumentException("un-support parse value: " + v + " of path: " + parentKey + " content: " + v);
-                }
+        StringBuilder sb = new StringBuilder(pos - start + 16);
+        sb.append(src, start, pos - start);
+        while (pos < end) {
+            char c = src[pos++];
+            if (c == '"') {
+                return sb.toString();
             }
-        }
-
-        // 开始处理复杂类型
-        String prefix = bestJson.substring(0, 1);
-        String innerText = bestJson.substring(1, bestJson.length() - 1);
-
-        tokens = splitTokens(innerText, part -> {
-            String trim = part.trim();
-            if (trim.isEmpty()) {
-                return null;
+            if (c != '\\') {
+                sb.append(c);
+                continue;
             }
-            if (trim.startsWith("//") || trim.startsWith("/*")) {
-                return null;
+            if (pos >= end) {
+                throw error("unterminated escape sequence");
             }
-            return trim;
-        });
-
-        if ("{".equals(prefix)) {
-            Map<String, Object> ret = new LinkedHashMap<>();
-
-            List<String> flags = new ArrayList<>();
-            for (String token : tokens) {
-                char ch = token.charAt(0);
-                if (ch == '[' || ch == '{' || ch == '(') {
-                    flags.add(token);
-                } else if (ch == '"' || ch == '\'') {
-                    flags.add(token);
-                } else {
-                    String item = token;
-                    if (item.startsWith(":")) {
-                        flags.add(":");
-                        item = item.substring(1);
-                    }
-                    if (item.endsWith(",")) {
-                        item = item.substring(0, item.length() - 1);
-                        if (!item.isEmpty()) {
-                            flags.add(item);
-                        }
-                        flags.add(",");
-                    } else {
-                        if (!item.isEmpty()) {
-                            flags.add(item);
-                        }
-                    }
-                }
-            }
-
-            Map<String, String> kvs = new LinkedHashMap<>();
-            String key = null;
-            int i = 0;
-            for (String token : flags) {
-                if (i % 4 == 0) {
-                    key = token;
-                }
-                if (i % 4 == 2) {
-                    String val = token;
-                    kvs.put(key, val);
-                }
-                i++;
-            }
-
-            for (Map.Entry<String, String> entry : kvs.entrySet()) {
-                String k = unescape(entry.getKey());
-                String v = entry.getValue();
-                Object val = parseNext(v, parentKey + "." + k);
-                ret.put(k, val);
-            }
-
-            return ret;
-        } else if ("[".equals(prefix)) {
-            List<Object> ret = new ArrayList<>();
-
-            List<String> flags = new ArrayList<>();
-            for (String token : tokens) {
-                char ch = token.charAt(0);
-                if (ch == '[' || ch == '{' || ch == '(') {
-                    flags.add(token);
-                } else if (ch == '"' || ch == '\'') {
-                    flags.add(token);
-                } else {
-                    String item = token;
-                    if (item.startsWith(",")) {
-                        flags.add(",");
-                        item = item.substring(1);
-                    }
-                    if (item.endsWith(",")) {
-                        item = item.substring(0, item.length() - 1);
-                        if (!item.isEmpty()) {
-                            String[] arr = item.split(",");
-                            for (int i = 0; i < arr.length; i++) {
-                                if (i > 0) {
-                                    flags.add(",");
-                                }
-                                flags.add(arr[i]);
-                            }
-                        }
-                        flags.add(",");
-                    } else {
-                        if (!item.isEmpty()) {
-                            String[] arr = item.split(",");
-                            for (int i = 0; i < arr.length; i++) {
-                                if (i > 0) {
-                                    flags.add(",");
-                                }
-                                flags.add(arr[i]);
-                            }
-                        }
-                    }
-                }
-            }
-
-            List<String> elems = new ArrayList<>();
-            int i = 0;
-            for (String flag : flags) {
-                if (i % 2 == 0) {
-                    elems.add(flag);
-                }
-                i++;
-            }
-
-            i = 0;
-            for (String elem : elems) {
-                String v = elem;
-                Object val = parseNext(v, parentKey + "[" + i + "]");
-                ret.add(val);
-                i++;
-            }
-
-            return ret;
-        }
-
-        return null;
-    }
-
-    public static String unescape(String str) {
-        if (str == null) {
-            return null;
-        }
-        String item = str;
-        if (str.startsWith("\"") || str.startsWith("'")) {
-            item = str.substring(1, str.length() - 1);
-        }
-        item = item.replaceAll("\\\\\\\\", "\\\\");
-        item = item.replaceAll("\\\\n", "\n");
-        item = item.replaceAll("\\\\r", "\r");
-        item = item.replaceAll("\\\\t", "\t");
-        item = item.replaceAll("\\\\\"", "\"");
-        item = item.replaceAll("\\\\'", "'");
-        return item;
-    }
-
-    public static String nextBlock(String str, AtomicInteger index) {
-        if (index.get() >= str.length()) {
-            return null;
-        }
-        char ch = str.charAt(index.get());
-        if (ch == '"') {
-            Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
-            Matcher matcher = pattern.matcher(str);
-            if (matcher.find(index.get())) {
-                MatchResult result = matcher.toMatchResult();
-                int start = result.start();
-                int end = result.end();
-                String part = str.substring(start, end);
-                index.set(end);
-                return part;
-            }
-        } else if (ch == '\'') {
-            Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
-            Matcher matcher = pattern.matcher(str);
-            if (matcher.find(index.get())) {
-                MatchResult result = matcher.toMatchResult();
-                int start = result.start();
-                int end = result.end();
-                String part = str.substring(start, end);
-                index.set(end);
-                return part;
-            }
-        } else if (ch == '{') {
-            String part = nextEnclose(str, index, '{', '}');
-            return part;
-        } else if (ch == '[') {
-            String part = nextEnclose(str, index, '[', ']');
-            return part;
-        } else if (ch == '(') {
-            String part = nextEnclose(str, index, '(', ')');
-            return part;
-        } else if (ch == '/') {
-            if (index.get() + 1 < str.length()) {
-                char nch = str.charAt(index.get() + 1);
-                if (nch == '/') {
-                    Pattern pattern = RegexPattens.SINGLE_LINE_COMMENT_PATTERN;
-                    Matcher matcher = pattern.matcher(str);
-                    if (matcher.find(index.get())) {
-                        MatchResult result = matcher.toMatchResult();
-                        int start = result.start();
-                        int end = result.end();
-                        String part = str.substring(start, end);
-                        index.set(end);
-                        return part;
-                    } else {
-                        index.incrementAndGet();
-                        return ch + "";
-                    }
-                } else if (nch == '*') {
-                    Pattern pattern = RegexPattens.MULTI_LINE_COMMENT_PATTERN;
-                    Matcher matcher = pattern.matcher(str);
-                    if (matcher.find(index.get())) {
-                        MatchResult result = matcher.toMatchResult();
-                        int start = result.start();
-                        int end = result.end();
-                        String part = str.substring(start, end);
-                        index.set(end);
-                        return part;
-                    }
-                }
-            }
-        } else if (ch == ' ' || ch == '\t' || ch == '\n') {
-            StringBuilder builder = new StringBuilder();
-            int i = index.get();
-            while (i < str.length()) {
-                ch = str.charAt(i);
-                if (ch == ' ' || ch == '\t' || ch == '\n') {
-                    builder.append(ch);
-                } else {
+            char esc = src[pos++];
+            switch (esc) {
+                case '"':
+                    sb.append('"');
                     break;
-                }
-                i++;
+                case '\\':
+                    sb.append('\\');
+                    break;
+                case '/':
+                    sb.append('/');
+                    break;
+                case 'b':
+                    sb.append('\b');
+                    break;
+                case 'f':
+                    sb.append('\f');
+                    break;
+                case 'n':
+                    sb.append('\n');
+                    break;
+                case 'r':
+                    sb.append('\r');
+                    break;
+                case 't':
+                    sb.append('\t');
+                    break;
+                case 'u':
+                    if (pos + 4 > end) {
+                        throw error("truncated unicode escape");
+                    }
+                    sb.append((char) readHex4());
+                    break;
+                default:
+                    throw error("invalid escape '\\" + esc + "'");
             }
-            index.set(i);
-            String part = builder.toString();
-            return part;
         }
-
-        StringBuilder builder = new StringBuilder();
-        int i = index.get();
-        while (i < str.length()) {
-            ch = str.charAt(i);
-            if (ch == ' ' || ch == '\t' || ch == '\n') {
-                break;
-            }
-            if (ch == ';') {
-                break;
-            }
-            if (ch == '"' || ch == '\'' || ch == '{' || ch == '[' || ch == '(') {
-                break;
-            }
-            builder.append(ch);
-            i++;
-
-        }
-        if (ch == ';') {
-            builder.append(ch);
-            i++;
-        }
-        index.set(i);
-        String part = builder.toString();
-        return part;
-
+        throw error("unterminated string");
     }
 
-    public static String nextEnclose(String expression, AtomicInteger index, char left, char right) {
-        Stack<Character> stack = new Stack<>();
-        String ret = "";
-        while (index.get() < expression.length()) {
-            char ch = expression.charAt(index.get());
-            if (ch == left) {
-                stack.push(ch);
-            } else if (ch == right) {
-                if (stack.isEmpty()) {
-                    return "";
-                }
-                stack.pop();
-                if (stack.isEmpty()) {
-                    ret += ch;
-                    index.incrementAndGet();
-                    return ret;
-                }
-            } else if (ch == '"') {
-                Pattern pattern = RegexPattens.QUOTE_STRING_PATTERN;
-                Matcher matcher = pattern.matcher(expression);
-                if (matcher.find(index.get())) {
-                    MatchResult result = matcher.toMatchResult();
-                    int start = result.start();
-                    int end = result.end();
-                    String part = expression.substring(start, end);
-                    index.set(end);
-                    ret += part;
-                    continue;
-                }
-            } else if (ch == '\'') {
-                Pattern pattern = RegexPattens.SINGLE_QUOTE_STRING_PATTERN;
-                Matcher matcher = pattern.matcher(expression);
-                if (matcher.find(index.get())) {
-                    MatchResult result = matcher.toMatchResult();
-                    int start = result.start();
-                    int end = result.end();
-                    String part = expression.substring(start, end);
-                    index.set(end);
-                    ret += part;
-                    continue;
-                }
+    private int readHex4() {
+        int value = 0;
+        for (int i = 0; i < 4; i++) {
+            char c = src[pos++];
+            int digit;
+            if (c >= '0' && c <= '9') {
+                digit = c - '0';
+            } else if (c >= 'a' && c <= 'f') {
+                digit = c - 'a' + 10;
+            } else if (c >= 'A' && c <= 'F') {
+                digit = c - 'A' + 10;
+            } else {
+                throw error("invalid hex digit '" + c + "' in unicode escape");
             }
-            ret += ch;
-            index.incrementAndGet();
-
+            value = (value << 4) | digit;
         }
-        return "";
+        return value;
+    }
+
+    private Object readNumber() {
+        int start = pos;
+        boolean negative = false;
+        if (src[pos] == '-') {
+            negative = true;
+            pos++;
+        }
+        int digitsStart = pos;
+        while (pos < end && src[pos] >= '0' && src[pos] <= '9') {
+            pos++;
+        }
+        if (pos == digitsStart) {
+            throw error("expected digit");
+        }
+        boolean decimal = false;
+        if (pos < end && src[pos] == '.') {
+            decimal = true;
+            pos++;
+            int fracStart = pos;
+            while (pos < end && src[pos] >= '0' && src[pos] <= '9') {
+                pos++;
+            }
+            if (pos == fracStart) {
+                throw error("expected digit after decimal point");
+            }
+        }
+        if (pos < end && (src[pos] == 'e' || src[pos] == 'E')) {
+            decimal = true;
+            pos++;
+            if (pos < end && (src[pos] == '+' || src[pos] == '-')) {
+                pos++;
+            }
+            int expStart = pos;
+            while (pos < end && src[pos] >= '0' && src[pos] <= '9') {
+                pos++;
+            }
+            if (pos == expStart) {
+                throw error("expected digit in exponent");
+            }
+        }
+
+        int len = pos - start;
+        if (decimal) {
+            double value = Double.parseDouble(new String(src, start, len));
+            if (Double.isInfinite(value)) {
+                return new BigDecimal(new String(src, start, len));
+            }
+            return Double.valueOf(value);
+        }
+
+        long value = 0;
+        boolean overflow = false;
+        for (int i = digitsStart; i < pos; i++) {
+            int digit = src[i] - '0';
+            if (value < (Long.MIN_VALUE + digit) / 10) {
+                overflow = true;
+                break;
+            }
+            value = value * 10 - digit;
+        }
+        if (overflow) {
+            return new BigInteger(new String(src, start, len));
+        }
+        if (!negative) {
+            if (value == Long.MIN_VALUE) {
+                return new BigInteger(new String(src, start, len));
+            }
+            value = -value;
+        }
+        if (value >= Integer.MIN_VALUE && value <= Integer.MAX_VALUE) {
+            return Integer.valueOf((int) value);
+        }
+        return Long.valueOf(value);
+    }
+
+    private void expectLiteral(char[] literal) {
+        if (pos + literal.length > end) {
+            throw error("unexpected end of input");
+        }
+        for (int i = 0; i < literal.length; i++) {
+            if (src[pos + i] != literal[i]) {
+                throw error("invalid literal");
+            }
+        }
+        pos += literal.length;
+    }
+
+    private void skipWhitespaceAndComments() {
+        while (pos < end) {
+            char c = src[pos];
+            if (c == ' ' || c == '\n' || c == '\r' || c == '\t') {
+                pos++;
+                continue;
+            }
+            if (c != '/' || pos + 1 >= end) {
+                return;
+            }
+            char next = src[pos + 1];
+            if (next == '/') {
+                pos += 2;
+                while (pos < end && src[pos] != '\n') {
+                    pos++;
+                }
+            } else if (next == '*') {
+                int close = pos + 2;
+                while (close + 1 < end && !(src[close] == '*' && src[close + 1] == '/')) {
+                    close++;
+                }
+                if (close + 1 >= end) {
+                    pos = close;
+                    throw error("unterminated block comment");
+                }
+                pos = close + 2;
+            } else {
+                return;
+            }
+        }
+    }
+
+    private IllegalArgumentException error(String message) {
+        int line = 1;
+        int column = 1;
+        for (int i = 0; i < pos && i < end; i++) {
+            if (src[i] == '\n') {
+                line++;
+                column = 1;
+            } else {
+                column++;
+            }
+        }
+        return new IllegalArgumentException("JSON parse error at line " + line + ", column " + column + ": " + message);
     }
 }

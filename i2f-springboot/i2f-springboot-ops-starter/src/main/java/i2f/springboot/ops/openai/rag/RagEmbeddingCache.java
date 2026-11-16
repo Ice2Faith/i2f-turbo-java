@@ -7,6 +7,7 @@ import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import i2f.serialize.std.str.json.IJsonSerializer;
 import i2f.extension.jackson.serializer.JacksonJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.std.consts.StdConst;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class RagEmbeddingCache {
     protected final String type;
     protected final File saveFile;
     protected final LruMap<String, RagEmbedding> cache = new LruMap<>(8192);
-    protected IJsonSerializer jsonSerializer = new JacksonJsonSerializer(new ObjectMapper());
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public RagEmbeddingCache(String type) {
         this.type = type;
