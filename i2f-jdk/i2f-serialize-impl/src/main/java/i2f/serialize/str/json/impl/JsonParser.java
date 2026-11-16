@@ -10,8 +10,9 @@ import java.util.Map;
 /**
  * Single-pass recursive descent JSON parser, JDK8 only, no third-party dependencies.
  *
- * <p>Lenient syntax: {@code //} line comments, {@code /* *}{@code /} block comments and
- * trailing commas in objects/arrays are accepted.</p>
+ * <p>Lenient syntax: {@code //} line comments, {@code /* *}{@code /} block comments,
+ * trailing commas in objects/arrays, single-quoted strings and unquoted object keys
+ * (Java/JS identifier syntax) are accepted.</p>
  *
  * <p>Retains object key order (LinkedHashMap). Numbers map to Integer or Long for
  * integral values, Double when a fraction/exponent is present, and fall back to
@@ -62,7 +63,8 @@ public final class JsonParser {
             case '[':
                 return readArray();
             case '"':
-                return readString();
+            case '\'':
+                return readString(c);
             case 't':
                 expectLiteral(TRUE);
                 return Boolean.TRUE;
@@ -90,10 +92,10 @@ public final class JsonParser {
         }
         while (true) {
             skipWhitespaceAndComments();
-            if (pos >= end || src[pos] != '"') {
-                throw error("expected string key in object");
+            if (pos >= end) {
+                throw error("expected object key");
             }
-            String key = readString();
+            String key = readKey();
             skipWhitespaceAndComments();
             if (pos >= end || src[pos] != ':') {
                 throw error("expected ':' after object key");
@@ -150,12 +152,40 @@ public final class JsonParser {
         }
     }
 
-    private String readString() {
+    private String readKey() {
+        if (src[pos] == '"' || src[pos] == '\'') {
+            return readString(src[pos]);
+        }
+        int start = pos;
+        int cp = codePointAt(pos);
+        if (!Character.isJavaIdentifierStart(cp)) {
+            throw error("expected object key");
+        }
+        pos += cp > Character.MAX_VALUE ? 2 : 1;
+        while (pos < end) {
+            cp = codePointAt(pos);
+            if (!Character.isJavaIdentifierPart(cp)) {
+                break;
+            }
+            pos += cp > Character.MAX_VALUE ? 2 : 1;
+        }
+        return new String(src, start, pos - start);
+    }
+
+    private int codePointAt(int at) {
+        char c = src[at];
+        if (Character.isHighSurrogate(c) && at + 1 < end && Character.isLowSurrogate(src[at + 1])) {
+            return Character.toCodePoint(c, src[at + 1]);
+        }
+        return c;
+    }
+
+    private String readString(char quote) {
         pos++;
         int start = pos;
         while (pos < end) {
             char c = src[pos];
-            if (c == '"') {
+            if (c == quote) {
                 String value = new String(src, start, pos - start);
                 pos++;
                 return value;
@@ -173,7 +203,7 @@ public final class JsonParser {
         sb.append(src, start, pos - start);
         while (pos < end) {
             char c = src[pos++];
-            if (c == '"') {
+            if (c == quote) {
                 return sb.toString();
             }
             if (c != '\\') {
@@ -186,7 +216,8 @@ public final class JsonParser {
             char esc = src[pos++];
             switch (esc) {
                 case '"':
-                    sb.append('"');
+                case '\'':
+                    sb.append(esc);
                     break;
                 case '\\':
                     sb.append('\\');
