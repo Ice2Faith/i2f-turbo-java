@@ -629,8 +629,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
 
-    public static final String EMBEDDING_PREFIX_DESCRIPTION = "passage: skill:  ";
-    public static final String EMBEDDING_PREFIX_QUESTION = "query: skill: ";
+    public static final String EMBEDDING_PREFIX_DESCRIPTION = "passage: ";
+    public static final String EMBEDDING_PREFIX_QUESTION = "query: ";
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto,
                              HttpServletRequest request) throws Exception {
@@ -1432,8 +1432,6 @@ public class OpenAiOpsController implements IOpsProvider {
                             unqToolNames.removeLast();
                         }
 
-                        echoJsonMessage.apply(unqToolNames, OpsOpenAiConsts.ECHO_LRU_TOOLS);
-
                         // 固定加载的工具
                         tools.stream().filter(e -> {
                             FunctionJsonSchema function = e.getFunction();
@@ -1500,6 +1498,8 @@ public class OpenAiOpsController implements IOpsProvider {
                                 unqToolNames.add(e.getFunction().getName());
                             }
                         });
+
+                        echoJsonMessage.apply(unqToolNames, OpsOpenAiConsts.ECHO_LRU_TOOLS);
 
                         // 真正的工具
                         List<OpenAiToolsDefinition> filteredTools = tools.stream().filter(e -> {
