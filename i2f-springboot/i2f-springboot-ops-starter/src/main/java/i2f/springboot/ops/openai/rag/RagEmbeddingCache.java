@@ -1,11 +1,12 @@
 package i2f.springboot.ops.openai.rag;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.std.rag.RagEmbedding;
 import i2f.ai.std.rag.RagEmbeddingModel;
 import i2f.io.stream.StreamUtil;
 import i2f.lru.LruMap;
 import i2f.serialize.std.str.json.IJsonSerializer;
-import i2f.serialize.str.json.impl.Json2Serializer;
+import i2f.extension.jackson.serializer.JacksonJsonSerializer;
 import i2f.std.consts.StdConst;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class RagEmbeddingCache {
     protected final String type;
     protected final File saveFile;
     protected final LruMap<String, RagEmbedding> cache = new LruMap<>(8192);
-    protected IJsonSerializer jsonSerializer = new Json2Serializer();
+    protected IJsonSerializer jsonSerializer = new JacksonJsonSerializer(new ObjectMapper());
 
     public RagEmbeddingCache(String type) {
         this.type = type;
