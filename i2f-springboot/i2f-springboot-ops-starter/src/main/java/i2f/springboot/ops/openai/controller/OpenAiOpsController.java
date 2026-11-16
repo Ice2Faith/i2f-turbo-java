@@ -629,8 +629,8 @@ public class OpenAiOpsController implements IOpsProvider {
 
     public static String TOOL_RETURNS_FILE_CONTENT = "here is tool returns files";
 
-    public static final String EMBEDDING_PREFIX_DESCRIPTION = "Represent the tool (skill) description for semantic matching in AI agent development. ";
-    public static final String EMBEDDING_PREFIX_QUESTION = "Represent the user request for tool and skill recommendation in AI agent development. ";
+    public static final String EMBEDDING_PREFIX_DESCRIPTION = "passage: skill:  ";
+    public static final String EMBEDDING_PREFIX_QUESTION = "query: skill: ";
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto,
                              HttpServletRequest request) throws Exception {
@@ -866,7 +866,7 @@ public class OpenAiOpsController implements IOpsProvider {
                             Map<String, SkillDefinition> embeddingSkillMap = new LinkedHashMap<>();
 
                             for (SkillDefinition def : skillList) {
-                                String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getDescription();
+                                String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getName() + " | " + def.getDescription();
                                 RagEmbedding embedding = skillsEmbeddingCache.embed(model, embedText);
                                 embeddingSkillMap.put(embedding.getId(), def);
                                 store.store(embedding);
@@ -1282,7 +1282,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                     Map<String, ToolDefinition> embeddingToolMap = new LinkedHashMap<>();
 
                                     for (ToolDefinition def : toolList) {
-                                        String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getDescription();
+                                        String embedText = EMBEDDING_PREFIX_DESCRIPTION + def.getName() + " | " + def.getDescription();
                                         RagEmbedding embedding = skillsEmbeddingCache.embed(model, embedText);
                                         embeddingToolMap.put(embedding.getId(), def);
                                         store.store(embedding);
