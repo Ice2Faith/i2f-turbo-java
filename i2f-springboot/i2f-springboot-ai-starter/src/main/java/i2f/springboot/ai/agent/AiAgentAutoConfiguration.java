@@ -10,7 +10,6 @@ import i2f.serialize.std.str.json.IJsonSerializer;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -45,7 +44,7 @@ public class AiAgentAutoConfiguration implements ApplicationContextAware {
     }
 
     @ConditionalOnExpression("${i2f.springboot.ai.agent.enable:true}")
-    @ConditionalOnClass(AiAgent.class)
+    @ConditionalOnMissingBean(AiAgent.class)
     @Bean
     public AiAgent aiAgent(@Autowired AiModel aiModel,
                            @Autowired IJsonSerializer jsonSerializer,

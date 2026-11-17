@@ -37,6 +37,7 @@ public class AiCommonAutoConfiguration implements ApplicationContextAware {
 
     @ConditionalOnExpression("${i2f.springboot.ai.json-schema-annotation-resolver.enable:true}")
     @ConditionalOnMissingBean(JsonSchemaAnnotationResolver.class)
+    @Bean
     public JsonSchemaAnnotationResolver jsonSchemaAnnotationResolver() {
         return JsonSchemaAnnotationResolver.INSTANCE;
     }

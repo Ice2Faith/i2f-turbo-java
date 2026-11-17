@@ -63,7 +63,7 @@ public class AiServiceProxyInterfaceAutoConfiguration implements ApplicationCont
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             List<String> packages = new ArrayList<>();
             List<String> mapperPackages = aiProxyServiceProperties.getServicePackages();
-            if (mapperPackages != null) {
+            if (mapperPackages != null && !mapperPackages.isEmpty()) {
                 packages.addAll(mapperPackages);
             } else {
                 packages.add("**.ai.**");
