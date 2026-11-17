@@ -15,7 +15,7 @@ import java.io.OutputStream;
  * @desc
  */
 public class HttpJsonRequestBodyHandler implements IOutputStreamHttpRequestBodyHandler {
-    protected IJsonSerializer processor;
+    protected IJsonSerializer processor = new Json2Serializer();
 
     public HttpJsonRequestBodyHandler() {
         processor = new Json2Serializer();

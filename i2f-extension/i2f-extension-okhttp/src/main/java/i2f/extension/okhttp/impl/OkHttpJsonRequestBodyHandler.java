@@ -4,6 +4,7 @@ package i2f.extension.okhttp.impl;
 import i2f.net.http.consts.HttpMethodConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import okhttp3.MediaType;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -17,7 +18,7 @@ import java.io.InputStream;
  * @desc
  */
 public class OkHttpJsonRequestBodyHandler implements IOkHttpHttpRequestBodyHandler {
-    private IJsonSerializer jsonProcessor;
+    private IJsonSerializer jsonProcessor = new Json2Serializer();
 
     public OkHttpJsonRequestBodyHandler(IJsonSerializer jsonProcessor) {
         this.jsonProcessor = jsonProcessor;

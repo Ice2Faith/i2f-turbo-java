@@ -6,6 +6,7 @@ import i2f.extension.netty.tcp.protocol.pkg.NettyPackages;
 import i2f.extension.netty.tcp.rpc.data.NettyRpcReq;
 import i2f.extension.netty.tcp.rpc.data.NettyRpcResp;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.lang.reflect.InvocationTargetException;
@@ -22,7 +23,7 @@ import java.util.function.Function;
  */
 public class RpcServerSocketChannelHandler implements ISocketChannelHandler {
     private Function<Class<?>, Object> beanSupplier;
-    private IJsonSerializer jsonSerializer;
+    private IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public RpcServerSocketChannelHandler(Function<Class<?>, Object> beanSupplier,
                                          IJsonSerializer jsonSerializer) {

@@ -8,6 +8,7 @@ import i2f.context.std.IContext;
 import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +26,7 @@ import java.util.Map;
 public class ContextAppToolManager extends AbstractAppToolManager implements BaseMutator<ContextAppToolManager> {
     protected IContext context;
     protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IProxyInvocationHandler invocationHandler;
 
     @Override

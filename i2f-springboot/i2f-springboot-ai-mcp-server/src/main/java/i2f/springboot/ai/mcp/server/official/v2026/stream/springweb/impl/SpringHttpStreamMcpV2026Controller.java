@@ -19,6 +19,7 @@ import i2f.mutator.BaseMutator;
 import i2f.net.http.data.HttpHeaders;
 import i2f.reflect.RichConverter;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.springboot.ai.mcp.server.official.auth.StreamMcpServerAuthFilter;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.MvcJsonRpcResponse;
 import i2f.springboot.ai.mcp.server.official.v2026.stream.data.ServerJsonRpcRequestV2026;
@@ -73,7 +74,7 @@ public class SpringHttpStreamMcpV2026Controller implements BaseMutator<SpringHtt
     protected OfficialMcpServerV2026Properties properties;
 
     protected McpServerProvider mcpServerProvider;
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected StreamMcpServerAuthFilter streamMcpServerAuthFilter;
 
     @PostMapping(OfficialMcpConstantsV2026.URL_PATH_MCP)

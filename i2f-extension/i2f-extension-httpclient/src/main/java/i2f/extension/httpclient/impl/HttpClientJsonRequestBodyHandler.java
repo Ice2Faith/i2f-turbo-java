@@ -3,6 +3,7 @@ package i2f.extension.httpclient.impl;
 
 import i2f.net.http.data.HttpRequest;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.entity.StringEntity;
 
@@ -15,7 +16,7 @@ import java.io.InputStream;
  * @desc
  */
 public class HttpClientJsonRequestBodyHandler implements IHttpClientHttpRequestBodyHandler {
-    private IJsonSerializer jsonProcessor;
+    private IJsonSerializer jsonProcessor = new Json2Serializer();
 
     public HttpClientJsonRequestBodyHandler(IJsonSerializer jsonProcessor) {
         this.jsonProcessor = jsonProcessor;

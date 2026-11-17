@@ -5,6 +5,7 @@ import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,7 +26,7 @@ public class ListableAppMcpToolProvider extends AbstractAppMcpToolProvider imple
     protected String name = DEFAULT_NAME;
     protected String description = DEFAULT_DESCRIPTION;
     protected final CopyOnWriteArrayList<ToolRawDefinition> tools = new CopyOnWriteArrayList<>();
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IProxyInvocationHandler invocationHandler;
 
     @Override

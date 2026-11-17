@@ -21,6 +21,7 @@ import i2f.ai.std.tool.schema.JsonSchemaAnnotationResolver;
 import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import i2f.typeof.TypeOf;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -43,7 +44,7 @@ public class AiAgent implements BaseMutator<AiAgent> {
     public static final ExecutorService DEFAULT_TOOL_POOL = new ForkJoinPool(Runtime.getRuntime().availableProcessors() * 2);
     protected volatile AiModel model;
     protected volatile RagWorker ragWorker;
-    protected volatile IJsonSerializer jsonSerializer;
+    protected volatile IJsonSerializer jsonSerializer = new Json2Serializer();
     protected JsonSchemaAnnotationResolver jsonSchemaAnnotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
     protected volatile ExecutorService toolExecPool = DEFAULT_TOOL_POOL;
 

@@ -9,6 +9,7 @@ import i2f.extension.netty.tcp.rpc.handler.RpcClientSocketChannelHandler;
 import i2f.extension.netty.tcp.rpc.proxy.JdkRpcProxyHandler;
 import i2f.extension.netty.tcp.tcp.NettyClient;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import io.netty.util.concurrent.DefaultPromise;
 import lombok.Getter;
 
@@ -49,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class NettyRpcClient extends NettyClient {
     private static Map<String, NettyRpcClient> fastClientMap = new ConcurrentHashMap<>();
-    private IJsonSerializer jsonSerializer;
+    private IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public NettyRpcClient(String host, ISocketChannelHandler handler, IJsonSerializer jsonSerializer) {
         super(host, handler);

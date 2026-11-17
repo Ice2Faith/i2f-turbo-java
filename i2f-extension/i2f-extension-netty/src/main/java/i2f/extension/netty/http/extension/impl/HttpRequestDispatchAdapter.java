@@ -8,6 +8,7 @@ import i2f.extension.netty.http.extension.HttpWebResponse;
 import i2f.reflect.ReflectResolver;
 import i2f.resources.ResourcesLoader;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpResponseStatus;
 
@@ -26,7 +27,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @date 2021/8/18
  */
 public class HttpRequestDispatchAdapter extends AbstractHttpRequestHandler {
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public HttpRequestDispatchAdapter(IJsonSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;

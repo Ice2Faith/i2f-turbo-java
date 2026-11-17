@@ -5,6 +5,7 @@ import i2f.extension.netty.tcp.protocol.pkg.NettyPackage;
 import i2f.extension.netty.tcp.protocol.pkg.NettyPackages;
 import i2f.extension.netty.tcp.rpc.data.NettyRpcResp;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Promise;
 import lombok.Getter;
@@ -25,7 +26,7 @@ public class RpcClientSocketChannelHandler implements ISocketChannelHandler {
     private Map<Integer, Promise<NettyRpcResp>> promises = new ConcurrentHashMap<>();
     private AtomicInteger seqId = new AtomicInteger(0);
 
-    private IJsonSerializer jsonSerializer;
+    private IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public RpcClientSocketChannelHandler(IJsonSerializer jsonSerializer) {
         this.jsonSerializer = jsonSerializer;

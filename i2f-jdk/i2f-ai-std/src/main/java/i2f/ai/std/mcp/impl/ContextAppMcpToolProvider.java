@@ -9,6 +9,7 @@ import i2f.context.std.IContext;
 import i2f.mutator.BaseMutator;
 import i2f.proxy.std.IProxyInvocationHandler;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -30,7 +31,7 @@ public class ContextAppMcpToolProvider extends AbstractAppMcpToolProvider implem
     protected String description = DEFAULT_DESCRIPTION;
     protected IContext context = new ListableNamingContext();
     protected JsonSchemaAnnotationResolver annotationResolver = JsonSchemaAnnotationResolver.INSTANCE;
-    protected IJsonSerializer jsonSerializer;
+    protected IJsonSerializer jsonSerializer = new Json2Serializer();
     protected IProxyInvocationHandler invocationHandler;
 
     @Override

@@ -4,6 +4,7 @@ import i2f.extension.netty.tcp.handler.ISocketChannelHandler;
 import i2f.extension.netty.tcp.rpc.handler.RpcServerSocketChannelHandler;
 import i2f.extension.netty.tcp.tcp.NettyServer;
 import i2f.serialize.std.str.json.IJsonSerializer;
+import i2f.serialize.str.json.impl.Json2Serializer;
 
 import java.util.function.Function;
 
@@ -34,7 +35,7 @@ import java.util.function.Function;
  * server.start();
  */
 public class NettyRpcServer extends NettyServer {
-    private IJsonSerializer jsonSerializer;
+    private IJsonSerializer jsonSerializer = new Json2Serializer();
 
     public NettyRpcServer(ISocketChannelHandler handler, IJsonSerializer jsonSerializer) {
         super(handler);
