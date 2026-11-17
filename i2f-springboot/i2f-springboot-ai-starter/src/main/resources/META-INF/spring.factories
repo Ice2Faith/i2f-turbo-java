@@ -2,6 +2,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ai.common.AiCommonAutoConfiguration,\
     i2f.springboot.ai.model.AiModelAutoConfiguration,\
     i2f.springboot.ai.tools.AiToolsAutoConfiguration,\
+    i2f.springboot.ai.tools.GroovyDynamicToolProvider,\
     i2f.springboot.ai.skills.AiSkillsAutoConfiguration,\
     i2f.springboot.ai.rags.AiRagsAutoConfiguration,\
     i2f.springboot.ai.agent.AiAgentAutoConfiguration,\

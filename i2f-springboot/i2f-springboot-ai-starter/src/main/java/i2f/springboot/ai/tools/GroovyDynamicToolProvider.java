@@ -1,4 +1,4 @@
-package i2f.tools.tools;
+package i2f.springboot.ai.tools;
 
 import groovy.lang.GroovyShell;
 import i2f.ai.std.tool.ToolRawDefinition;
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  * @date 2026/11/6 15:32
  * @desc
  */
-@ConditionalOnExpression("${ai.tools.groovy-dynamic-tools.enable:false}")
+@ConditionalOnExpression("${i2f.springboot.ai.tools.groovy-dynamic-tools.enable:true}")
 @ConditionalOnClass({
         GroovyScript.class,
         GroovyShell.class
