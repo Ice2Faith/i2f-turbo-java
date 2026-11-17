@@ -1525,23 +1525,26 @@
 
 ### i2f-springboot-ai-mcp-server
 
-> MCP 服务端 Starter，同模块并列三套协议栈：simple 私有 HMAC（`/mcp/tool/*`，MVC+Netty 双传输）、official.v2024
-> 有状态栈（initialize 握手 + Bearer）、official.v2026 无状态栈（server/discover + 镜像头校验）；三栈统一委托 provider
-> 层 `McpServerProvider` 选择性暴露容器 `@Tool`。
+> MCP 服务端 Starter，同模块并列三套协议栈：simple 私有 HMAC（`/mcp/tool/*`，MVC+Netty 双传输）、
+> official.v2024 有状态栈（initialize 握手 + Bearer）、official.v2026 无状态栈（server/discover + 镜像头校验）；
+> 三栈统一委托 provider 层 `McpServerProvider` 选择性暴露容器 `@Tool`；`ToolManager` 带 MissingBean 并与 ai-starter
+> 定序，共存时让位、工具名带前缀。
 
 - 详细文档：[i2f-springboot-ai-mcp-server](./i2f-springboot/i2f-springboot-ai-mcp-server/readme.md)
 
 ### i2f-springboot-ai-mcp-client
 
-> MCP 客户端 Starter：按 instances 把远程 MCP Server 注册为本地 `McpToolProvider` Bean 供 AI 网关聚合；内置 Simple MCP
-> 私协议（HMAC）、official.v2024 stream 有状态、official.v2024 solon（SDK）、official.v2026 stream 无状态四套客户端，可按
-> tag-rules 追加标签，契约与服务端同源。
+> MCP 客户端 Starter：按 instances 把远程 MCP Server 注册为本地 `McpToolProvider` Bean 供 AI 网关聚合；四套自动装配
+> 客户端（Simple HMAC、v2024 stream 有状态、v2024 solon SDK、v2026 stream 无状态）加两套 stdio 子进程实现（复用
+> `StdioMcpClient`，无自动装配须手工注册），可按 tag-rules 追加标签、命中 `retryable` 时 3 次退避重试。
 
 - 详细文档：[i2f-springboot-ai-mcp-client](./i2f-springboot/i2f-springboot-ai-mcp-client/readme.md)
 
 ### i2f-springboot-ai-starter
 
-> AI 能力 Starter：两级条件自动装配注册 `AiModel`（REST OpenAI / DashScope 二选一）、`IJsonSerializer`、`AiAgent`，并以 `BeanDefinitionRegistryPostProcessor` 扫描 `@AiService` 接口、用 `FactoryBean` + JDK 动态代理实例化为「方法即提示词、参数即上下文、返回值即结构化输出」的声明式 AI 服务，对齐 LangChain4j `@AiService` 范式。
+> AI 能力总装 Starter：三选一注册 `AiModel`、`IJsonSerializer`、`AiAgent`；容器 `@Tools` Bean 收成 `app_context` 工具供应商与
+> MCP 网关，`./tools/*.groovy` 15s 热插拔、`./skills` 30s 热加载、sqlite-vec 向量库装 RAG；`@AiService` 接口扫描代理为声明式
+> AI 服务。
 
 - 详细文档：[i2f-springboot-ai-starter](./i2f-springboot/i2f-springboot-ai-starter/readme.md)
 
@@ -1619,7 +1622,9 @@
 
 ### i2f-springboot-ops-starter
 
-> 一体化运维/开发/AI 控制台全量装载 Starter（组内最大：174 源 + 内嵌 Vue2 SPA、依赖顶端）：挂默认 /ops，涵盖应用自省/SQL 控制台/SSH/Redis/ES + OpenAI 对话与约 25 个 @Tool，出入站经国密 SM2/SM4/SM3 信封。瑕疵含【高危】约 80 个 @Controller 误登记为自动配置、generateCertPair 私钥泄露、/ops/app/eval Groovy RCE。
+> 一体化运维/开发/AI 控制台全量装载 Starter（组内最大：179 源 + 内嵌 Vue2 SPA）：挂默认 /ops，涵盖应用自省/SQL/SSH/Redis/ES +
+> OpenAI 对话与 SSE 流式，RAG/技能/工具装配已下沉 ai-starter；另以三条 MCP provider 加
+> /mcp/api（X-MCP-TOKEN）反暴露工具给智能体。瑕疵含【高危】84 类误登记为自动配置、generateCertPair 私钥泄露、eval RCE、MCP 令牌弱鉴权。
 
 - 详细文档：[i2f-springboot-ops-starter](./i2f-springboot/i2f-springboot-ops-starter/readme.md)
 

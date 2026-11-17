@@ -41,6 +41,13 @@ HTTP/验签/协议边界上互不复用、各自独立装配，但共享一个�
   ）与 `McpServerProvider`（`BasicMcpServerProvider` 组合二者），三个 Bean 均 `@ConditionalOnMissingBean`
   可被应用覆盖；三栈控制器统一注入该 `McpServerProvider`。
 
+  装配顺序为 `@AutoConfigureOrder(6000)` + `@AutoConfigureAfter(name = "i2f.springboot.ai.tools.AiToolsAutoConfiguration")`
+  ——后者以**类名字符串**引用 ai-starter 的自动配置类，未引入 `i2f-springboot-ai-starter` 时该条件从类路径消失，
+  不会因类缺失而报错。其作用是在「应用同时作为 AI Agent 与 MCP Server」时，让 ai-starter 默认装配的工具管理器
+  （`ContextMcpToolGatewayManager`，带 provider 前缀语义）先于本模块注册，本模块的 `ContextAppToolManager`
+  因 `@ConditionalOnMissingBean(ToolManager.class)` 退让；此时 MCP 侧看到的工具名会带 `app_context.`
+  或 `<provider>.` 前缀（前缀由 `AbstractMcpToolGatewayManager.wrapPrefixName` 拼接）。
+
 - **simple 私有协议栈**：内核为 `i2f-ai-rest-openai` 的 `HttpSimpleMcpServerImpl`，带 HMAC-SHA256 验签 + 时间窗 + nonce 防重放 + 上下文透传；REST 路径分离（`GET /mcp/tool/list`、`/mcp/tool/call`），提供 Spring Web MVC（共享宿主端口）与 Netty（独立端口）两条传输。
 - **official.v2024 有状态栈**：对齐官方 MCP 规范（protocolVersion `2024-11-05`，底层 JSON-RPC 2.0），单一 `POST /v2024/mcp` 端点按请求体 `method` 路由 `initialize`/`tools/list`/`tools/call`，`DELETE /v2024/mcp` 为会话终止占位；鉴权为可插拔的 `StreamMcpServerAuthFilter`（内置 Bearer Token 静态实现）。
 - **official.v2026 无状态栈**：对齐官方 `2026-07-28` 无状态规范——无 initialize 握手与会话，方法路由为 `server/discover`/`tools/list`/`tools/call`；协议版本随每个请求经 `MCP-Protocol-Version` 头与 `params._meta` 双通道声明且须一致；`Mcp-Method`/`Mcp-Name` 镜像头须与请求体一致；result 携带必填 `resultType` 与 `_meta.serverInfo`，`tools/list`/`server/discover` 另带 `ttlMs`/`cacheScope` 缓存语义。
@@ -74,14 +81,16 @@ flowchart TD
         C26["SpringHttpStreamMcpV2026Controller (POST /v2026/mcp)"]
     end
     subgraph provider["provider 共享暴露控制层 (新增)"]
-        PV["McpServerProviderAutoConfiguration"]
+        PV["McpServerProviderAutoConfiguration<br/>Order=6000, after AiToolsAutoConfiguration"]
         MSP["McpServerProvider (BasicMcpServerProvider)"]
-        TM["ToolManager (ContextAppToolManager)"]
+        TM["ToolManager (ContextAppToolManager)<br/>MissingBean 退让"]
         EXP["McpServerExposer (rules/defaultExpose)"]
         TOOL["@Tool 工具内核"]
+        ATS["ai-starter ContextMcpToolGatewayManager<br/>(存在时提供 ToolManager)"]
         PV --> MSP
         MSP --> TM --> TOOL
         MSP -. "过滤 getTools" .-> EXP
+        ATS -. "先注册则本层退让" .-> TM
     end
     APP --> SM
     APP --> A24
@@ -94,14 +103,14 @@ flowchart TD
 
 ### 自动装配结构
 
-| 自动配置类                                                                            | 开关（默认值）                                           | 装配产物                                                                                                                                                        | 附加条件                                                                                                                                                    |
-|----------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `provider.McpServerProviderAutoConfiguration`（新增）                                | `...server.provider.enable`（true）                 | `toolManager`（`ContextAppToolManager`）+ `mcpServerExposer`（`BasicMcpServerExposer`）+ `mcpServerProvider`（`BasicMcpServerProvider`）                          | 三个 Bean 各带 `@ConditionalOnMissingBean`；`exposer` 由 `provider.rules`/`default-expose` 驱动；是三栈的共享上游                                                        |
-| `simple.SimpleMcpServerAutoConfiguration`                                        | `...server.simple.enable`（true）                   | `httpSimpleMcpServer`（`HttpSimpleMcpServerImpl`，注入 `mcpServerProvider`）                                                                                     | `@AutoConfigureAfter(McpServerProviderAutoConfiguration)` + Bean 级子开关 `...simple.server.enable`（true）+ `@ConditionalOnMissingBean(HttpSimpleMcpServer)` |
-| `simple.springweb.SimpleSpringWebMcpServerAutoConfiguration`                     | `...simple.springweb.enable`（true）                | `springHttpSimpleMcpController`                                                                                                                             | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter` simple 主配置                                                                                  |
-| `simple.netty.SimpleNettyMcpServerAutoConfiguration`                             | `...simple.netty.enable`（false）                   | `httpSimpleMcpInBoundHandler` + `nettyHttpSimpleMcpServer`                                                                                                  | `@ConditionalOnClass(ServerBootstrap)`、子开关 `...netty.handler.enable`（true）/`...netty.server.enable`（true）                                               |
-| `official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration`      | `...official.v2024.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`）+ `springHttpStreamMcpController`（注入 `mcpServerProvider`）                                     | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`                                                         |
-| `official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration` | `...official.v2026.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`，取 v2026 自身 `bearer-token.*` 配置）+ `springHttpStreamMcpV2026Controller`（注入 `mcpServerProvider`） | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`；过滤器 `@ConditionalOnMissingBean`                         |
+| 自动配置类                                                                            | 开关（默认值）                                           | 装配产物                                                                                                                                                        | 附加条件                                                                                                                                                                                                                                        |
+|----------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `provider.McpServerProviderAutoConfiguration`（新增）                                | `...server.provider.enable`（true）                 | `toolManager`（`ContextAppToolManager`）+ `mcpServerExposer`（`BasicMcpServerExposer`）+ `mcpServerProvider`（`BasicMcpServerProvider`）                          | 三个 Bean 各带 `@ConditionalOnMissingBean`；`exposer` 由 `provider.rules`/`default-expose` 驱动；是三栈的共享上游；类级 `@AutoConfigureOrder(6000)` + `@AutoConfigureAfter(name = "i2f.springboot.ai.tools.AiToolsAutoConfiguration")`（类名引用，缺 ai-starter 时自动失效） |
+| `simple.SimpleMcpServerAutoConfiguration`                                        | `...server.simple.enable`（true）                   | `httpSimpleMcpServer`（`HttpSimpleMcpServerImpl`，注入 `mcpServerProvider`）                                                                                     | `@AutoConfigureAfter(McpServerProviderAutoConfiguration)` + Bean 级子开关 `...simple.server.enable`（true）+ `@ConditionalOnMissingBean(HttpSimpleMcpServer)`                                                                                     |
+| `simple.springweb.SimpleSpringWebMcpServerAutoConfiguration`                     | `...simple.springweb.enable`（true）                | `springHttpSimpleMcpController`                                                                                                                             | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter` simple 主配置                                                                                                                                                                      |
+| `simple.netty.SimpleNettyMcpServerAutoConfiguration`                             | `...simple.netty.enable`（false）                   | `httpSimpleMcpInBoundHandler` + `nettyHttpSimpleMcpServer`                                                                                                  | `@ConditionalOnClass(ServerBootstrap)`、子开关 `...netty.handler.enable`（true）/`...netty.server.enable`（true）                                                                                                                                   |
+| `official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration`      | `...official.v2024.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`）+ `springHttpStreamMcpController`（注入 `mcpServerProvider`）                                     | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`                                                                                                                                             |
+| `official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration` | `...official.v2026.stream.springweb.enable`（true） | `streamMcpServerAuthFilter`（`StaticStreamMcpServerAuthFilter`，取 v2026 自身 `bearer-token.*` 配置）+ `springHttpStreamMcpV2026Controller`（注入 `mcpServerProvider`） | `@ConditionalOnClass(RestController)`、`@AutoConfigureAfter(McpServerProviderAutoConfiguration)`；过滤器 `@ConditionalOnMissingBean`                                                                                                             |
 
 ### 2026 无状态协议请求处理
 
@@ -167,7 +176,15 @@ i2f.springboot.ai.mcp.server
    均以 `StreamMcpServerAuthFilter.verify` 为可插拔鉴权扩展点：两版自动配置各自以 `@ConditionalOnMissingBean`
    装配 `StaticStreamMcpServerAuthFilter`（Bearer Token 白名单取自本版本 `bearer-token.*`
    配置，且已对 `bearerToken`/`allowTokens` 做空值防护）并注入控制器；应用提供自己的过滤器 Bean 即可覆盖内置实现。
-10. **工具暴露选择性控制与调用门控的栈间差异（`provider` 层）**：三栈共享的 `McpServerProvider.getTools()`
+10. **与 ai-starter 共存的装配时序**：`McpServerProviderAutoConfiguration` 以 `@AutoConfigureOrder(6000)` 排在
+    ai-starter 的 `AiToolsAutoConfiguration`（`@AutoConfigureOrder(5000)`）之后（`@AutoConfigureAfter(name = ...)`
+    按类名引用，不引入硬依赖）。ai-starter 自身在同一个配置类里先后声明两个 `ToolManager`：
+    `mcpToolGatewayManager`（`ContextMcpToolGatewayManager`，开关 `tools.mcp.manager.enable`）与
+    `appToolManager`（`ContextAppToolManager`，开关 `tools.app.manager.enable`），二者同样是
+    `@ConditionalOnMissingBean(ToolManager.class)`，**先声明者胜**——因此默认由网关型
+    `ContextMcpToolGatewayManager` 占位，本模块的 `toolManager()` 退让，MCP 工具名带 provider 前缀；
+    仅当 ai-starter 未引入或两级开关均关时，才由 `ContextAppToolManager` 直接扫描容器 `@Tool` Bean（无前缀）。
+11. **工具暴露选择性控制与调用门控的栈间差异（`provider` 层）**：三栈共享的 `McpServerProvider.getTools()`
     会经 `BasicMcpServerExposer` 按 `rules`（Ant 匹配，最后命中胜出）→ `@McpServerExpose`（方法/类）→ `default-expose`
     三级判定过滤，被隐藏的工具不出现在 `tools/list`；但底层 `BasicMcpServerProvider.callTool()` 直接透传 `ToolManager`
     不再复核暴露策略。**由此产生栈间差异**：v2024/v2026 控制器在 `tools/call` 前先以 `getTools()` 计算 `existsTool`
@@ -303,6 +320,16 @@ i2f:
   ）；如需工具反射调用经过代理处理器（日志/鉴权/埋点），须提供自己的 `ToolManager`
   Bean（`@ConditionalOnMissingBean(ToolManager.class)` 会退让）并在其中装配 `invocationHandler`。
 - **自定义鉴权**（v2024/v2026）：提供自己的 `StreamMcpServerAuthFilter` Bean 覆盖内置 Bearer 实现（两栈共用同一接口，`@ConditionalOnMissingBean` 后者优先）。
+- **工具管理器归属（与 ai-starter 共存时）**：本模块的 `ContextAppToolManager` 带
+  `@ConditionalOnMissingBean(ToolManager.class)`，因此 MCP 工具名带不带前缀取决于容器里到底谁提供了 `ToolManager`。
+  若需要「裸工具名」（不带 `app_context.` / `<provider>.` 前缀），任选其一：
+  ① 关闭 ai-starter 的网关型管理器 `i2f.springboot.ai.tools.mcp.manager.enable=false`，让剩下的
+  `ContextAppToolManager`（ai-starter 的 `appToolManager` 或本模块的 `toolManager`）占位；
+  ② 整体关闭 `i2f.springboot.ai.tools.enable=false`，回到仅本模块扫描 `@Tool` 的形态；
+  ③ 自行提供一个 `ToolManager` Bean 接管（两边同时退让）。
+  反之，若希望在 MCP 侧同时看到网关内所有 provider 的工具（带前缀），保持默认即可。
+  注：`i2f.springboot.ai.tools.mcp-gateway.enable` 只控制 AI 侧 `McpProviderTools`（动态发现工具）是否注册，
+  **不改变 `ToolManager` 归属、也不影响前缀**。
 - **Bean 覆盖**：所有自动装配 Bean 均带 `@ConditionalOnMissingBean`，可完全接管。
 
 ### 注意事项
@@ -382,8 +409,9 @@ i2f:
     ，默认装配等价于把容器内全部 `@Tool` 无差别开放为 MCP 工具（除非逐个标注 `@McpServerExpose(false)`）；白名单式（默认关、按
     rules 逐个放开）需显式配置，易被忽略而意外暴露敏感工具。
 18. **调用代理 `IProxyInvocationHandler` 不再自动接线**：旧版各栈自动配置注入并装配 `invocationHandler`
-    ，现 `McpServerProviderAutoConfiguration#toolManager`
-    仅设 `context`+`jsonSerializer`，`ContextAppToolManager.invocationHandler` 恒为 `null`
+    ，现 `McpServerProviderAutoConfiguration#toolManager`（**仅在它自身赢得 `ToolManager` 装配时存在**，
+    与 ai-starter 共存时该 Bean 不创建）仅设 `context`+`jsonSerializer`，`ContextAppToolManager.invocationHandler`
+    恒为 `null`
     ；仅提供 `IProxyInvocationHandler` Bean 已无法让工具反射调用经过它（须自行覆盖 `ToolManager`
     Bean），对依赖该扩展点做统一埋点/鉴权的应用是隐性行为回归。
 
@@ -477,4 +505,10 @@ i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpS
   ——本模块 `provider` 层即据其装配三栈共享的暴露/调用内核。
 - **`i2f-spring-core`**：`SpringContext` 把 Spring 容器适配为 `IContext`，现仅由 `provider` 层的 `ContextAppToolManager`
   用作工具扫描来源（控制器不再直接持有）。
-- **`i2f-springboot-ai-mcp-client`**：对端客户端 Starter（simple provider + stream provider），与本模块配对实现「AI 主控 → 远程工具」；两端 JSON-RPC DTO 各自平行维护，本模块 pom 不依赖 client 模块。
+- **`i2f-springboot-ai-mcp-client`**：对端客户端 Starter（simple provider + stream provider + stdio 手工层），与本模块配对实现「AI
+  主控 → 远程工具」；两端 JSON-RPC DTO 各自平行维护，本模块 pom 不依赖 client 模块。
+- **`i2f-springboot-ai-starter`**（可选共存）：提供 `ToolManager`（`ContextMcpToolGatewayManager`）与 provider 网关。
+  两者共存时由 ai-starter 先注册 `ToolManager`，本模块 `ContextAppToolManager` 经 `@ConditionalOnMissingBean` 退让——
+  此时 MCP 侧工具名带 `app_context.`/`<provider>.` 前缀；本模块仅以
+  `@AutoConfigureAfter(name = "i2f.springboot.ai.tools.AiToolsAutoConfiguration")` 做**类名级**时序约束，
+  pom 中不声明对 ai-starter 的依赖，单独使用不受影响。

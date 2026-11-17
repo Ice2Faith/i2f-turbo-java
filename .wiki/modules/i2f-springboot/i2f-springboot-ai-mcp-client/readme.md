@@ -1,6 +1,14 @@
 # i2f-springboot-ai-mcp-client
 
-> MCP 客户端 Starter —— 按 `instances` 配置将远程 MCP Server 自动注册为本地 `McpToolProvider` Bean，内置四套客户端实现：自研 Simple MCP 私协议（HMAC-SHA256 签名认证，复用上游 `HttpSimpleMcpClientToolProvider`）、**official.v2024 stream** 有状态官方栈（2024-11-05，initialize 握手 + `Mcp-Session-Id` 会话 + tools，信封与结果 DTO 复用上游 `mcp.official.v2024` 共享契约）、**official.v2024 solon** SDK 官方栈（solon-ai-mcp 多通道 STDIO/SSE/STREAMABLE/STREAMABLE_STATELESS）与 **official.v2026 stream** 无状态官方栈（2026-07-28，无 initialize、`server/discover` 发现 + `MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name` 请求头 + `_meta` 参数），支持按 `tag-rules` 为远程工具追加本地标签，供 AI 工具网关聚合为「实例名.工具名」形式的动态工具。
+> MCP 客户端 Starter —— 按 `instances` 配置将远程 MCP Server 自动注册为本地 `McpToolProvider`
+> Bean，内置六种客户端实现（四套配置驱动的自动装配 + 两套 stdio 手工装配）：自研 Simple MCP 私协议（HMAC-SHA256
+> 签名认证，复用上游 `HttpSimpleMcpClientToolProvider`）、**official.v2024 stream** 有状态官方栈（2024-11-05，initialize
+> 握手 + `Mcp-Session-Id` 会话 + tools，信封与结果 DTO 复用上游 `mcp.official.v2024` 共享契约）、**official.v2024 solon** SDK
+> 官方栈（solon-ai-mcp 多通道 STDIO/SSE/STREAMABLE/STREAMABLE_STATELESS）与 **official.v2026 stream** 无状态官方栈（2026-07-28，无
+> initialize、`server/discover` 发现 + `MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name` 请求头 + `_meta` 参数）；另附两套 stdio
+> 子进程实现（`official.v2024.stdio` 走 `initialize` 握手、`official.v2026.stdio` 走 `server/discover`，均经 `StdioMcpClient`
+> 用 `ProcessBuilder` 拉起子进程、以 stdin/stdout 行协议交换 JSON-RPC，**无自动装配、无配置项，需代码手工注册**
+> ），支持按 `tag-rules` 为远程工具追加本地标签，供 AI 工具网关聚合为「实例名.工具名」形式的动态工具。
 
 ## 模块路径
 
@@ -21,17 +29,28 @@
 | org.noear | solon-ai-mcp | provided | true | 3.9.6，solon 模式客户端（`McpClientProvider`、`McpChannel`、`FunctionTool`、`ToolResult`） |
 | io.projectreactor | reactor-core | provided | true | 3.6.9，solon 模式条件类检测（`ContextView`） |
 
-> 注意：源码直接使用的 `JacksonJsonSerializer`（属 `i2f-extension-jackson`）、`HttpProcessorRestClient`/`HttpHeaders`/`RestHttpRequest`/`RestHttpResponse`/`HttpMethodConstants`（属 `i2f-network`）、`Json2Serializer`（属 `i2f-serialize`）、`TypeToken`（属 `i2f-typeof`）、`BaseMutator`（属 `i2f-mutator`）、`RichConverter` 相关序列化能力均未显式声明，实际由 `i2f-ai-rest-openai` / `i2f-spring-web` 传递引入。
+> 注意：源码直接使用的 `JacksonJsonSerializer`
+> （属 `i2f-extension-jackson`）、`HttpProcessorRestClient`/`HttpHeaders`/`RestHttpRequest`/`RestHttpResponse`/`HttpMethodConstants`
+> （属 `i2f-network`）、`Json2Serializer`（属 `i2f-serialize`）、`TypeToken`（属 `i2f-typeof`）、`BaseMutator`
+> （属 `i2f-mutator`）、`RichConverter` 相关序列化能力均未显式声明，实际由 `i2f-ai-rest-openai` / `i2f-spring-web` 传递引入；stdio
+> 实现使用的 `OsUtil`（属 `i2f-os`，仅用于 Windows/Linux 子进程启动失败时的回落判断）同样未显式声明。
 
 ## 模块设计
 
 ### 架构设计
 
-本模块位于 MCP 工具网关体系的「客户端接入层」，把远程 MCP Server 的工具体系接入本地 Spring 容器，整体分为三层：
+本模块位于 MCP 工具网关体系的「客户端接入层」，把远程 MCP Server 的工具体系接入本地 Spring 容器，整体分为三层自动装配链路，外加一个手工接入层：
 
 - **装配层**（`*AutoConfiguration`）：四个自动配置类分别对应 simple / official.v2024.stream / official.v2024.solon / official.v2026.stream 四种客户端，均在 `BeanDefinitionRegistryPostProcessor#postProcessBeanDefinitionRegistry` 阶段读取各自前缀下的 `instances` 配置，为每个启用的实例注册一个 `{name}_McpToolProvider` Bean 定义
 - **工厂层**（`*McpToolProviderFactoryBean`）：每个实例一个 `FactoryBean<McpToolProvider>`，负责把配置项装配为具体协议实现（`lazyInit=true`，首次使用时才创建）；`BeanDefinitionBuilder.genericBeanDefinition(McpToolProvider.class)` 使 `expectType` 为 `McpToolProvider`，从而可被容器按类型检索
 - **协议实现层**（四种客户端）：simple 复用上游 `HttpSimpleMcpClientToolProvider`（自研私协议 + HMAC 签名）；v2024 stream 使用模块内 `StreamJsonRpcMcpClientToolProvider`（标准 JSON-RPC over Streamable HTTP，有状态会话）；v2024 solon 使用 `SolonMcpToolProvider` 封装第三方 `McpClientProvider`；v2026 stream 使用 `StreamJsonRpcMcpClientV2026ToolProvider`（2026-07-28 无状态协议，`server/discover` + 请求头一致性）
+- **手工层**（两套 stdio）：`official.v2024.stdio`（`StdioJsonRpcMcpClientToolProvider`：`initialize`
+  握手 + `tools/list` + `tools/call`
+  ）与 `official.v2026.stdio`（`StdioJsonRpcMcpClientV2026ToolProvider`：`server/discover` + `tools/*`，无 HTTP
+  层故不使用镜像头，仅保留 `_meta` 声明）。两者都依赖 `official.v2024.stdio.StdioMcpClient`：用 `ProcessBuilder`
+  拉起子进程、守护线程 `mcp-stdout-reader` 按行读 stdout、`ConcurrentHashMap<String,CompletableFuture>` 按 JSON-RPC `id`
+  配对响应，Windows/Linux 启动失败时回退 `cmd /c`、`sh -c`。**两者均无 `AutoConfiguration`、无配置属性**，只能代码构造客户端后手工注册
+  Bean
 
 ### 自动装配结构
 
@@ -56,6 +75,14 @@ flowchart TD
     PT --> BEANS
     PN --> BEANS
     PX --> BEANS
+
+    MANUAL["手工层（无自动装配）"]
+    PSD["StdioJsonRpcMcpClientToolProvider<br/>2024-11-05 over stdio"]
+    PSD6["StdioJsonRpcMcpClientV2026ToolProvider<br/>2026-07-28 over stdio"]
+    MANUAL -->|"new StdioMcpClient(cmd)"| PSD
+    MANUAL -->|"new StdioMcpClient(cmd)"| PSD6
+    PSD --> BEANS
+    PSD6 --> BEANS
     BEANS --> GW["AI 工具网关聚合<br/>ContextMcpToolGatewayManager"]
     GW -->|"工具名前缀化 实例名.工具名"| AI["AI 模型工具调用"]
 ```
@@ -70,6 +97,9 @@ flowchart TD
 | `official.v2026.stream.StreamMcpClientV2026AutoConfiguration` | `...client.stream.official.v2026.enable`（true） | `...client.official.v2026.stream` | 无 | `{name}_McpToolProvider`（`StreamJsonRpcMcpClientV2026ToolProvider`） |
 
 > 开关表达式与绑定前缀键路径不一致（`stream.official.v202x` vs `official.v202x.stream`），详见「模块瑕疵或错误」第 1 条。
+>
+> 上表只覆盖四个配置驱动的自动装配模式。stdio 两套（`official.v2024.stdio` / `official.v2026.stdio`）*
+*未登记到 `spring.factories`/`AutoConfiguration.imports`、也没有 properties 类**，需按「模块主要使用方法」第 4 节手工装配。
 
 ### v2024 有状态握手流程
 
@@ -162,6 +192,19 @@ i2f.springboot.ai.mcp.client
                 └── StreamJsonRpcMcpClientV2026ToolProvider  # server/discover + 请求头一致性 + _meta
 ```
 
+stdio 子树（两套均**无 AutoConfiguration / 无 properties**）：
+
+```
+i2f.springboot.ai.mcp.client.official
+├── v2024.stdio                                        # 子进程 stdio 客户端（基础设施，被 v2026 复用）
+│   ├── StdioMcpClient                                 # ProcessBuilder 起子进程 + stdout 读线程 + id→future 配对
+│   └── provider
+│       └── StdioJsonRpcMcpClientToolProvider          # initialize/tools/list/tools/call/close
+└── v2026.stdio
+    └── provider
+        └── StdioJsonRpcMcpClientV2026ToolProvider     # server/discover + tools/*，_meta 声明，无镜像头
+```
+
 ### 关键设计点
 
 1. **统一装配骨架、按实例注册 Bean**：四个自动配置类结构完全一致——`@ConditionalOnExpression` 总开关 → 遍历 `instances` → `name.replace("-", "_")` 规范化 → 注册 `{name}_McpToolProvider`（`GenericBeanDefinition` + `FactoryBean` + `lazyInit=true` + `AUTOWIRE_BY_TYPE`）；`name` 为空或 `enable=false` 的实例被跳过。
@@ -173,33 +216,46 @@ i2f.springboot.ai.mcp.client
 7. **默认客户端与装配客户端分离**：两个 stream Provider 的字段默认值为 `HttpProcessorRestClient` + `Json2Serializer`（JDK 原生、零三方依赖），而模块的 FactoryBean 装配时统一覆盖为 `SpringWebRestClient(new RestTemplate())` + `JacksonJsonSerializer(new ObjectMapper())`；默认值使 Provider 可脱离 Spring 独立复用。
 8. **双注册文件与配置元数据**：同时提供 `META-INF/spring.factories`（Spring Boot 2.6 之前）与 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（Spring Boot 2.7+），各注册 4 个自动配置类；`additional-spring-configuration-metadata.json` 声明 4 组 properties 说明。
 9. **远程工具标签解析**：三种官方模式实例可配置 `tag-rules`，Provider 在 `getTools` 时用 `AiTagRuleHelper.resolveTags` 按规则把本地标签追加到远程 `ToolDefinition`（simple 模式由上游实现、本模块实例配置未提供该字段）。
+10. **按标签重试（`retryable`）**：全部六种实现的 `callTool`（simple 由上游提供，v2024 stream / v2024 stdio / v2024 solon /
+    v2026 stream / v2026 stdio 在模块内）都会先取目标工具的 `tags`，命中 `AiTags.RETRYABLE_VALUE`（`"retryable"`）则把尝试次数从
+    1 提到 3，失败后 `Thread.sleep` 300ms 起、每次增 1200ms
+    退避重试；未命中标签的工具只尝试一次。该标签可由实例的 `tag-rules` 远程注入，也可由服务端在工具定义上声明后经列举传递过来。
+11. **stdio 手工层与它的边界**：stdio 两套 Provider 与 stream 版共享同一套骨架（`ReentrantLock` 双检初始化、5
+    分钟目录缓存、`tag-rules`、`retryable` 重试），差别只在传输：由 `StdioMcpClient` 建一个子进程，请求以 JSON-RPC 单行写入
+    stdin、响应由守护线程从 stdout 按 `id` 回填 `CompletableFuture`；因此 v2026 stdio 不涉及 HTTP 镜像头（无 HTTP
+    层），协议版本只经 `params._meta` 声明。`StdioMcpClient` 位于 `official.v2024.stdio` 包下却被 v2026 复用，属跨版本共用基础设施。
 
 ## 模块目的
 
 1. **远程工具本地化**：把远程 MCP Server 的工具目录注册为本地 `McpToolProvider` Bean，让本地 AI Agent 像使用本地工具一样发现与调用分布式工具。
 2. **与官方协议栈版本对齐**：客户端按 `official.v2024`（有状态）与 `official.v2026`（无状态）拆分包结构，与 `i2f-springboot-ai-mcp-server` 的双版本服务端一一对应，协议常量与 DTO 同源，避免版本语义混用。
 3. **多实例批量接入**：以配置列表方式声明多个远程 MCP 服务（不同地址、认证、命名），每个实例独立注册 Bean、独立缓存与独立会话。
-4. **零侵入自动装配**：四种模式默认开启、无 `instances` 时零副作用；solon 模式通过 `@ConditionalOnClass` 在缺少依赖时自动跳过，应用只需引入依赖并写配置。
+4. **零侵入自动装配**：四种模式默认开启、无 `instances` 时零副作用；solon 模式通过 `@ConditionalOnClass` 在缺少依赖时自动跳过；stdio
+   两套不参与自动装配，不引入即无任何影响，应用只需引入依赖并写配置。
 5. **与 AI 工具网关开箱配合**：注册的 Bean 可被 `i2f-springboot-ops-starter` 的 `ContextMcpToolGatewayManager` 自动聚合，经 `McpProviderTools` 以「动态发现 → 列举 → 搜索 → 加载」流程暴露给 AI 模型。
 
 ## 模块功能
 
-| 功能 | 入口类/方法 | 说明 |
-|------|------------|------|
-| simple 客户端装配 | `SimpleMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `simple.instances` 注册 `{name}_McpToolProvider` |
-| v2024 stream 客户端装配 | `official.v2024.stream.StreamMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `official.v2024.stream.instances` 注册 `{name}_McpToolProvider` |
-| v2024 solon 客户端装配 | `official.v2024.solon.SolonMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `official.v2024.solon.instances` 注册（含 `@ConditionalOnClass` 保护） |
-| v2026 stream 客户端装配 | `official.v2026.stream.StreamMcpClientV2026AutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `official.v2026.stream.instances` 注册 `{name}_McpToolProvider` |
-| simple Provider 构建 | `SimpleMcpClientMcpToolProviderFactoryBean#getObject` | `BaseMutator` 链式装配 `SpringWebRestClient`(RestTemplate) + `JacksonJsonSerializer` + baseUrl/appId/appKey/hmacName |
-| v2024 stream Provider 构建 | `StreamMcpClientMcpToolProviderFactoryBean#getObject` | 装配 baseUrl、headers（bearer-token/自定义）、tagRules、RestClient/Serializer 覆盖与可选预热线程 |
-| v2024 solon Provider 构建 | `SolonMcpClientMcpToolProviderFactoryBean#getObject` | 构建 `McpClientProvider`（channel/url/cacheSeconds=30/headers）并包装为 `SolonMcpToolProvider`；channel 为空时回落 `STREAMABLE` |
-| v2026 stream Provider 构建 | `StreamMcpClientV2026McpToolProviderFactoryBean#getObject` | 同 v2024 stream，目标为 `StreamJsonRpcMcpClientV2026ToolProvider` |
-| 工具目录获取 | 各 Provider `#getTools` | 拉取远程工具目录并转换为 `ToolDefinition`（含 `FunctionJsonSchema` 与 `tag-rules` 解析出的标签），5 分钟缓存 |
-| 工具调用 | 各 Provider `#callTool` | simple：签名 + `POST /mcp/tool/call`；v2024/v2026：JSON-RPC `tools/call`；solon：`mcpClient.callTool` |
-| 工具支持判定 | 各 Provider `#support` | 按工具名匹配本地缓存目录，决定该 Provider 是否处理调用请求 |
-| v2024 会话管理 | `StreamJsonRpcMcpClientToolProvider#initial / close` | `initialize` 握手取 `Mcp-Session-Id`；`close` 发 `DELETE` 并清理会话、标记与缓存 |
-| v2026 发现与请求头 | `StreamJsonRpcMcpClientV2026ToolProvider#initial / fillHeaders / getMeta` | `server/discover` 取 `supportedVersions`；每个请求携带 `MCP-Protocol-Version`、`Mcp-Method`，`tools/call` 额外携带 `Mcp-Name`；body 注入 `_meta` |
-| 上下文透传 | 上游 `HttpSimpleMcpClientToolProvider#callTool` | simple 模式经 `ToolCallContextHolder#copyOf` 上送请求级上下文 |
+| 功能                       | 入口类/方法                                                                                          | 说明                                                                                                                              |
+|--------------------------|-------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| simple 客户端装配             | `SimpleMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry`                            | 遍历 `simple.instances` 注册 `{name}_McpToolProvider`                                                                               |
+| v2024 stream 客户端装配       | `official.v2024.stream.StreamMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry`      | 遍历 `official.v2024.stream.instances` 注册 `{name}_McpToolProvider`                                                                |
+| v2024 solon 客户端装配        | `official.v2024.solon.SolonMcpClientAutoConfiguration#postProcessBeanDefinitionRegistry`        | 遍历 `official.v2024.solon.instances` 注册（含 `@ConditionalOnClass` 保护）                                                              |
+| v2026 stream 客户端装配       | `official.v2026.stream.StreamMcpClientV2026AutoConfiguration#postProcessBeanDefinitionRegistry` | 遍历 `official.v2026.stream.instances` 注册 `{name}_McpToolProvider`                                                                |
+| simple Provider 构建       | `SimpleMcpClientMcpToolProviderFactoryBean#getObject`                                           | `BaseMutator` 链式装配 `SpringWebRestClient`(RestTemplate) + `JacksonJsonSerializer` + baseUrl/appId/appKey/hmacName                |
+| v2024 stream Provider 构建 | `StreamMcpClientMcpToolProviderFactoryBean#getObject`                                           | 装配 baseUrl、headers（bearer-token/自定义）、tagRules、RestClient/Serializer 覆盖与可选预热线程                                                   |
+| v2024 solon Provider 构建  | `SolonMcpClientMcpToolProviderFactoryBean#getObject`                                            | 构建 `McpClientProvider`（channel/url/cacheSeconds=30/headers）并包装为 `SolonMcpToolProvider`；channel 为空时回落 `STREAMABLE`               |
+| v2026 stream Provider 构建 | `StreamMcpClientV2026McpToolProviderFactoryBean#getObject`                                      | 同 v2024 stream，目标为 `StreamJsonRpcMcpClientV2026ToolProvider`                                                                    |
+| 工具目录获取                   | 各 Provider `#getTools`                                                                          | 拉取远程工具目录并转换为 `ToolDefinition`（含 `FunctionJsonSchema` 与 `tag-rules` 解析出的标签），5 分钟缓存                                               |
+| 工具调用                     | 各 Provider `#callTool`                                                                          | simple：签名 + `POST /mcp/tool/call`；v2024/v2026：JSON-RPC `tools/call`；solon：`mcpClient.callTool`                                  |
+| 工具支持判定                   | 各 Provider `#support`                                                                           | 按工具名匹配本地缓存目录，决定该 Provider 是否处理调用请求                                                                                              |
+| stdio 子进程客户端             | `official.v2024.stdio.StdioMcpClient`（`createProcess` / `readLoop` / `send` / `close`）          | `ProcessBuilder` 拉子进程 + stdout 读线程 + `id`→`CompletableFuture` 配对；启动失败回退 `cmd /c`、`sh -c`；`close` 关 stdin + `destroy` 子进程        |
+| v2024 stdio 手工 Provider  | `StdioJsonRpcMcpClientToolProvider`（`initial` / `listTools` / `callTool` / `close`）             | `initialize` → `tools/list` → `tools/call` 行协议；无自动装配                                                                            |
+| v2026 stdio 手工 Provider  | `StdioJsonRpcMcpClientV2026ToolProvider`（`initial` / `listTools` / `callTool` / `close`）        | `server/discover` → `tools/list` → `tools/call`；无镜像头，仅 `_meta`；无自动装配                                                            |
+| 可重试工具重试                  | 各官方 Provider `#callTool`（含 solon / stdio）                                                       | 工具标签含 `AiTags.RETRYABLE_VALUE`（`retryable`）时尝试 3 次，退避 300ms 起每次 +1200ms                                                         |
+| v2024 会话管理               | `StreamJsonRpcMcpClientToolProvider#initial / close`                                            | `initialize` 握手取 `Mcp-Session-Id`；`close` 发 `DELETE` 并清理会话、标记与缓存                                                                |
+| v2026 发现与请求头             | `StreamJsonRpcMcpClientV2026ToolProvider#initial / fillHeaders / getMeta`                       | `server/discover` 取 `supportedVersions`；每个请求携带 `MCP-Protocol-Version`、`Mcp-Method`，`tools/call` 额外携带 `Mcp-Name`；body 注入 `_meta` |
+| 上下文透传                    | 上游 `HttpSimpleMcpClientToolProvider#callTool`                                                   | simple 模式经 `ToolCallContextHolder#copyOf` 上送请求级上下文                                                                              |
 
 ## 模块主要使用方法
 
@@ -287,7 +343,49 @@ ai:
       enable: true
 ```
 
-### 4. 注意事项
+### 4. 手工接入 stdio 子进程 MCP Server（无自动装配）
+
+stdio 两套 Provider 不在自动装配清单内（无 `AutoConfiguration`、无 properties），需构造 `StdioMcpClient` 后挂到 Provider
+上，再自行注册为 `McpToolProvider` Bean：
+
+```java
+@Configuration
+public class MyStdioMcpConfig {
+
+    @Bean(name = "everything_McpToolProvider", destroyMethod = "close")
+    public McpToolProvider everythingStdioProvider() throws IOException {
+        // 命令数组、可选 envp（"K=V" 数组）与工作目录
+        StdioMcpClient stdio = new StdioMcpClient(
+                new String[]{"npx", "-y", "@modelcontextprotocol/server-everything"});
+
+        // 2026-07-28 无状态：server/discover + tools/*
+        StdioJsonRpcMcpClientV2026ToolProvider provider = new StdioJsonRpcMcpClientV2026ToolProvider();
+        provider.setName("everything");
+        provider.setDescription("everything demo server over stdio");
+        provider.setStdioClient(stdio);
+        return provider;
+
+        // 2024-11-05 有状态：换成下面两行
+        // StdioJsonRpcMcpClientToolProvider p = new StdioJsonRpcMcpClientToolProvider();
+        // p.setStdioClient(stdio); return p;
+    }
+}
+```
+
+- **构造期即起子进程**：`new StdioMcpClient(...)` 立即 `ProcessBuilder.start()` 并启动守护线程 `mcp-stdout-reader`
+  ；但 `initialize`/`server/discover` 要等到首次 `listTools()` 或 `callTool()` 才发，所以构造成功不代表对端协议可用。
+- **Bean 名建议沿用约定**：`{实例名}_McpToolProvider`，AI
+  工具网关按类型聚合后工具名为「实例名.工具名」。也可以自行挂 `tag-rules`（`provider.setTagRules(...)`
+  ）来给远程工具注入本地标签，包含 `retryable`。
+- **务必接管 `close()`**：`destroyMethod = "close"`（或实现 `DisposableBean`）会在容器关闭时关 stdin 并 `destroy()` 子进程；注意
+  Provider 的 `close()` 内部仅在已 initialize 时才转发给 `StdioMcpClient`，未开始过通信就不会关子进程。
+- **命令入口兼容**：Windows 下 `npx` 这类 `.cmd` 入口首次启动可能抛 `IOException`，`StdioMcpClient`
+  会自动回退为 `cmd /c <命令>`（Linux/macOS 回退 `sh -c`），无需自行判断平台。
+- **超时与 stderr**：`send()` 返回的 future 在 Provider 内以无参 `get()` 等待，**没有超时**；子进程的 stderr
+  也未被消费（`redirectErrorStream(false)` 且无 stderr 读线程），排障时建议在命令里自行重定向 stderr（见「模块瑕疵或错误」第
+  14/15 条）。
+
+### 5. 注意事项
 
 - **`url` 需写完整端点**：两个 stream Provider 的 `getEndpointUrl` 只判断「是否以 `/mcp` 结尾」并在缺失时追加 `/mcp`（常量 `URL_PATH_MCP` 在 v2024/v2026 均为 `/mcp`）。服务端真实端点是 `/v2024/mcp`、`/v2026/mcp`，因此配置 `http://host:9999` 会被补成 `/mcp`（版本前缀丢失）且因已以 `/mcp` 结尾而不再提示，应显式写全路径。
 - **实例名唯一**：`name` 经 `-` → `_` 规范化后作为 beanName（`{name}_McpToolProvider`），跨模式或同模式内重名会注册同名 Bean 定义；在 Spring Boot 默认禁止 Bean 覆盖的情况下会导致启动失败。
@@ -297,15 +395,23 @@ ai:
 
 ## 模块特性总结
 
-1. **四协议一体、按版本分包**：Simple MCP 私协议、2024-11-05 有状态 JSON-RPC、solon-ai-mcp SDK、2026-07-28 无状态 JSON-RPC 四套客户端共存，官方实现按 `official.v2024` / `official.v2026` 隔离。
+1. **六种实现一体、按版本分包**：Simple MCP 私协议、2024-11-05 有状态 JSON-RPC、solon-ai-mcp SDK、2026-07-28 无状态 JSON-RPC
+   四种 HTTP 实现共存，官方实现按 `official.v2024` / `official.v2026`
+   隔离；另有 `official.v2024.stdio` / `official.v2026.stdio` 两套子进程实现，复用同一 `StdioMcpClient`，供本地可执行 MCP
+   Server 接入（无自动装配，需手工注册）。
 2. **配置驱动的多实例**：一个 `instances` 列表即可接入多个远程 MCP 服务，实例级独立开关（`enable`）与命名。
 3. **懒加载与可选预热**：Bean 默认懒加载，不产生启动期连接开销；`initial=true` 可换取首个工具请求的零等待。
 4. **目录缓存与锁保护**：5 分钟 TTL 缓存 + `ReentrantLock` 双检 + `CopyOnWriteArrayList` 快照返回，兼顾性能与线程安全。
-5. **会话与认证**：v2024 完整实现 `initialize` → `Mcp-Session-Id` → `DELETE` 生命周期；v2026 实现 `server/discover` + `MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name` 镜像头与 `_meta`；simple 实现 HMAC-SHA256 签名；solon 复用 SDK 能力。
+5. **会话与认证**：v2024 完整实现 `initialize` → `Mcp-Session-Id` → `DELETE` 生命周期；v2026
+   实现 `server/discover` + `MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name` 镜像头与 `_meta`；simple 实现 HMAC-SHA256
+   签名；stdio 两套无会话，只做 `id` 配对；solon 复用 SDK 能力。
 6. **上下文透传（simple）**：远程工具调用与本地调用拥有一致的 `ToolCallContextHolder` 访问体验。
-7. **条件装配零副作用**：无配置时四个自动配置类均不注册任何 Bean；solon 模式在缺少 SDK 时自动跳过。
-8. **可脱离 Spring 使用**：Provider 默认使用 `HttpProcessorRestClient` + `Json2Serializer`，可直接 `new` 出来独立调用，容器装配时才覆盖为 Spring Web / Jackson 实现。
-9. **开箱对接 AI 网关**：Bean 类型即契约（`McpToolProvider`），与 `i2f-springboot-ops-starter` 的动态工具发现机制无缝衔接。
+7. **可重试工具自动退避**：工具标签含 `retryable`（`AiTags.RETRYABLE_VALUE`）时六种实现均尝试 3 次、300ms 起每次 +1200ms。
+8. **条件装配零副作用**：无配置时四个自动配置类均不注册任何 Bean；solon 模式在缺少 SDK 时自动跳过。
+9. **可脱离 Spring 使用**：Provider 默认使用 `HttpProcessorRestClient` + `Json2Serializer`；stdio
+   两套默认使用 `Json2Serializer` 且仅依赖 JDK I/O 与 `i2f-os`，可直接 `new` 出来独立调用，容器装配时才覆盖为 Spring Web /
+   Jackson 实现。
+10. **开箱对接 AI 网关**：Bean 类型即契约（`McpToolProvider`），与 `i2f-springboot-ops-starter` 的动态工具发现机制无缝衔接。
 
 ## 模块瑕疵或错误
 
@@ -324,23 +430,33 @@ ai:
 11. **v2026 复用 v2024 信封与条目 DTO**：请求信封 `JsonRpcRequest`、`tools/list` 条目项 `JsonRpcToolListItem`、`tools/call` 参数 `JsonRpcToolCallParam` 均来自 `official.v2024` 包，响应才用 v2026 独有类型，同版本 DTO 边界不统一（跨版本耦合，v2024 契约变更会波及 v2026）。
 12. **配置元数据冗余**：`additional-spring-configuration-metadata.json` 的 `hints` 中 `server.servlet.jsp.class-name`、`server.tomcat.accesslog.encoding` 两条与本模块无关（疑似自 Spring Boot 官方元数据复制），IDE 配置提示存在噪声。
 13. **样例 yml 与元数据存在误导**：样例文件声明的 `official.v202x.stream.enable` 实际不被读取（同第 1 条）；样例中 `url: http://localhost:9999/mcp` 未带版本前缀，与 `i2f-springboot-ai-mcp-server` 的 `/v2024/mcp`、`/v2026/mcp` 端点不匹配，按样例直连本仓库服务端会 404。
+14. **stdio 请求无超时，子进程失联即永久阻塞**：`StdioMcpClient.send()` 返回的 `CompletableFuture` 在 Provider
+    内均以无参 `send.get()` 等待，未设超时；而 `readLoop` 对反序列化失败与 `IOException`
+    均静默吞掉（`catch (Exception ignore)`），子进程退出、输出非 JSON 行或响应 `id` 对不上时，对应 future
+    永不完成，调用线程随之挂死（且 `pending` 表无清理）。
+15. **stdio 子进程 stderr 未消费、退出无回收**：`createProcess` 使用 `redirectErrorStream(false)`
+    但全文未读取 `process.getErrorStream()`，子进程 stderr 写满管道缓冲后会阻塞自身；`readLoop` 读到 EOF
+    也不做清理（不完成/移除 `pending`、不标记失效），属资源与可观测性缺口。两者叠加时表现为「工具调用无报错地卡住」。
 
-## 四套协议对比
+## 六种客户端实现对比
 
-| 维度 | simple | official.v2024 stream | official.v2024 solon | official.v2026 stream |
-|------|--------|----------------------|---------------------|----------------------|
-| 协议 | 自研 Simple MCP 私协议 | 标准 MCP 2024-11-05（有状态） | 标准 MCP（solon-ai-mcp SDK） | 标准 MCP 2026-07-28（无状态） |
-| 实现来源 | 上游 `HttpSimpleMcpClientToolProvider` | 模块内 `StreamJsonRpcMcpClientToolProvider` | `SolonMcpToolProvider` + 第三方 `McpClientProvider` | 模块内 `StreamJsonRpcMcpClientV2026ToolProvider` |
-| 端点 | `GET /mcp/tool/list`、`POST /mcp/tool/call` | `POST`（initialize/tools-list/tools-call）、`DELETE` | 由 SDK 与 channel 决定 | `POST`（server/discover、tools/list、tools/call） |
-| 协议头/会话 | HMAC 签名头 | `Mcp-Session-Id` | SDK 内部管理 | `MCP-Protocol-Version`、`Mcp-Method`、`Mcp-Name`，无会话 |
-| 认证 | HMAC-SHA256 签名 | `bearer-token` / 自定义 `headers` | `bearer-token` / 自定义 `headers` | `bearer-token` / 自定义 `headers` |
-| 上下文透传 | 支持（`ToolCallContextHolder`） | 不支持 | 不支持 | 不支持 |
-| 标签解析（tag-rules） | 不支持 | 支持 | 支持（`tags` 已初始化，同 stream） | 支持 |
-| 目录缓存 | 5 分钟 TTL（上游实现） | 5 分钟 TTL（自建） | 5 分钟 TTL（自建）+ SDK `cacheSeconds(30)` | 5 分钟 TTL（自建） |
-| 预热 | 无（`initial` 未提供） | `initial=true` | `initial=true` | `initial=true` |
-| 关闭 | 上游实现 | `close()` 发 `DELETE` | 未实现 `Closeable` | 未实现 `Closeable` |
-| 额外依赖 | 无 | 无 | `solon-ai-mcp`、`reactor-core` | 无 |
-| 对端 | `i2f-springboot-ai-mcp-server`（simple 栈） | 该服务 `official.v2024` 栈或任意标准 Server | 任意标准 MCP Server | 该服务 `official.v2026` 栈或 2026-07-28 无状态 Server |
+| 维度              | simple                                     | official.v2024 stream                             | official.v2024 solon                         | official.v2026 stream                              | official.v2024 stdio                                   | official.v2026 stdio                                        |
+|-----------------|--------------------------------------------|---------------------------------------------------|----------------------------------------------|----------------------------------------------------|--------------------------------------------------------|-------------------------------------------------------------|
+| 装配方式            | 自动（`instances`）                            | 自动（`instances`）                                   | 自动（`instances`）                              | 自动（`instances`）                                    | **手工**                                                 | **手工**                                                      |
+| 协议              | 自研 Simple MCP 私协议                          | 标准 MCP 2024-11-05（有状态）                            | 标准 MCP（solon-ai-mcp SDK）                     | 标准 MCP 2026-07-28（无状态）                             | 标准 MCP 2024-11-05                                      | 标准 MCP 2026-07-28                                           |
+| 传输              | HTTP                                       | HTTP（Streamable）                                  | 由 channel 决定（stdio/sse/streamable）           | HTTP（Streamable）                                   | 子进程 stdin/stdout                                       | 子进程 stdin/stdout                                            |
+| 实现来源            | 上游 `HttpSimpleMcpClientToolProvider`       | `StreamJsonRpcMcpClientToolProvider`              | `SolonMcpToolProvider` + `McpClientProvider` | `StreamJsonRpcMcpClientV2026ToolProvider`          | `StdioJsonRpcMcpClientToolProvider` + `StdioMcpClient` | `StdioJsonRpcMcpClientV2026ToolProvider` + `StdioMcpClient` |
+| 端点/握手           | `GET /mcp/tool/list`、`POST /mcp/tool/call` | `POST`（initialize/tools-list/tools-call）、`DELETE` | 由 SDK 与 channel 决定                           | `POST`（server/discover、tools/list、tools/call）      | `initialize`/`tools/list`/`tools/call` 行协议             | `server/discover`/`tools/list`/`tools/call` 行协议             |
+| 协议头/会话          | HMAC 签名头                                   | `Mcp-Session-Id`                                  | SDK 内部管理                                     | `MCP-Protocol-Version`/`Mcp-Method`/`Mcp-Name`，无会话 | 无（按 `id` 配对）                                           | 无（无 HTTP 层，仅 `_meta`）                                       |
+| 认证              | HMAC-SHA256 签名                             | `bearer-token` / 自定义 `headers`                    | `bearer-token` / 自定义 `headers`               | `bearer-token` / 自定义 `headers`                     | 进程级（由子进程自身决定）                                          | 进程级                                                         |
+| 上下文透传           | 支持（`ToolCallContextHolder`）                | 不支持                                               | 不支持                                          | 不支持                                                | 不支持                                                    | 不支持                                                         |
+| 标签解析（tag-rules） | 不支持                                        | 支持                                                | 支持                                           | 支持                                                 | 支持                                                     | 支持                                                          |
+| 目录缓存            | 5 分钟 TTL                                   | 5 分钟 TTL                                          | 5 分钟 TTL + SDK `cacheSeconds(30)`            | 5 分钟 TTL                                           | 5 分钟 TTL                                               | 5 分钟 TTL                                                    |
+| `retryable` 重试  | 支持（3 次，上游实现）                               | 支持（3 次）                                           | 支持（3 次）                                      | 支持（3 次）                                            | 支持（3 次）                                                | 支持（3 次）                                                     |
+| 预热              | 无                                          | `initial=true`                                    | `initial=true`                               | `initial=true`                                     | 无配置项                                                   | 无配置项                                                        |
+| 关闭              | 上游实现                                       | `close()` 发 `DELETE`                              | 未实现 `Closeable`                              | 未实现 `Closeable`                                    | `close()` 关 stdin + `destroy` 子进程                      | 同左                                                          |
+| 额外依赖            | 无                                          | 无                                                 | `solon-ai-mcp`、`reactor-core`                | 无                                                  | `i2f-os`（传递）                                           | 同左                                                          |
+| 对端              | 服务端 simple 栈                               | 服务端 `official.v2024` 栈或任意标准 Server                | 任意标准 MCP Server                              | 服务端 `official.v2026` 栈                             | 任意 stdio MCP Server                                    | 任意 2026-07-28 stdio MCP Server                              |
 
 ## 配置属性总览
 
@@ -415,7 +531,12 @@ i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfi
 
 - **`i2f-ai-rest-openai`**：提供 simple 模式的客户端实现 `HttpSimpleMcpClientToolProvider`（含 HMAC 签名与上下文透传逻辑）与常量 `HttpSimpleMcpConstants`；其 `mcp.official.v2024` / `mcp.official.v2026` 共享契约包（常量 + JSON-RPC 信封/结果模型）为三个官方模式提供与服务端同源的协议定义，本模块仅负责装配与参数注入。
 - **`i2f-ai-std`**：提供 `McpToolProvider` 契约、`ToolDefinition`/`DefaultToolDefinition`/`ToolBaseCallRequest`、`FunctionJsonSchema`、`AiTagRule`/`AiTagRuleHelper` 与工具网关抽象（`AbstractMcpToolGatewayManager`、`ContextMcpToolGatewayManager`）。
-- **`i2f-springboot-ai-mcp-server`**：对端模块。simple ↔ 服务端 simple 栈；v2024 stream ↔ 服务端 `official.v2024.stream`（`POST /v2024/mcp`）；v2026 stream ↔ 服务端 `official.v2026.stream`（`POST /v2026/mcp`）。服务端 Spring MVC 模式的 `/mcp/tool/call` 方法不一致缺陷会影响 simple 配套调用。
+- **`i2f-springboot-ai-mcp-server`**：对端模块。simple ↔ 服务端 simple 栈；v2024 stream ↔
+  服务端 `official.v2024.stream`（`POST /v2024/mcp`）；v2026 stream ↔ 服务端 `official.v2026.stream`（`POST /v2026/mcp`）。服务端
+  Spring MVC 模式的 `/mcp/tool/call` 方法不一致缺陷会影响 simple 配套调用；stdio 两套不依赖本服务端，对端是任意本地可执行
+  MCP Server（如 `npx` 拉起的官方示例 Server）。
 - **`i2f-springboot-ops-starter`**：消费方。`SpringContextToolAutoConfiguration` 注册 `ContextMcpToolGatewayManager`（聚合容器内全部 `McpToolProvider`）与 `McpProviderTools`（AI 侧动态工具发现四件套），本模块注册的实例 Bean 由此接入 AI 工具链。
 - **`i2f-tools-ops`**：仓库内唯一显式依赖本模块的宿主应用（`ai.tools.mcp-gateway.enable: true`），通过配置文件接入远程 MCP 服务。
 - **`i2f-springboot-ai-starter`**：未包含本模块，需要 MCP 客户端能力时应单独引入本依赖。
+- **`i2f-os`**：stdio 实现使用的 `OsUtil#isWindows` 仅用于子进程启动失败时的 `cmd /c` / `sh -c` 回落判断，POM
+  未显式声明，属传递依赖（见「模块依赖」注意条）。
