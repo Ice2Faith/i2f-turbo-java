@@ -10,6 +10,7 @@ import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -71,7 +72,9 @@ public class SpringContext implements IWritableNamingContext, ApplicationContext
     @Override
     public <T> List<T> getBeans(Class<T> clazz) {
         Map<String, T> map = applicationContext.getBeansOfType(clazz);
-        return new ArrayList<>(map.values());
+        ArrayList<T> ret = new ArrayList<>(map.values());
+        AnnotationAwareOrderComparator.sort(ret);
+        return ret;
     }
 
     @Override
@@ -81,6 +84,7 @@ public class SpringContext implements IWritableNamingContext, ApplicationContext
         for (String name : names) {
             ret.add(applicationContext.getBean(name));
         }
+        AnnotationAwareOrderComparator.sort(ret);
         return ret;
     }
 
