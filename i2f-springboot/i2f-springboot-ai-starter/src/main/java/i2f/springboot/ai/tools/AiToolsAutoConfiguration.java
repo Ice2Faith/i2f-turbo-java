@@ -10,6 +10,7 @@ import i2f.spring.core.SpringContext;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationContext;
@@ -24,6 +25,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @ConditionalOnExpression("${i2f.springboot.ai.tools.enable:true}")
 @Configuration
+@AutoConfigureOrder(5000)
 @Slf4j
 @Data
 public class AiToolsAutoConfiguration implements ApplicationContextAware {
