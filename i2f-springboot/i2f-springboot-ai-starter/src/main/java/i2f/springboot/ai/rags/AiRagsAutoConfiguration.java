@@ -15,7 +15,9 @@ import i2f.spring.core.SpringContext;
 import i2f.spring.web.rest.SpringWebRestClient;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.pdmodel.PDDocument;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -118,6 +120,9 @@ public class AiRagsAutoConfiguration implements ApplicationContextAware {
     }
 
     @ConditionalOnExpression("${i2f.springboot.ai.rags.reader.pdf-easycor.enable:true}")
+    @ConditionalOnClass({
+            PDDocument.class
+    })
     @Bean
     public PdfEasyOcrCmdRagFileReader pdfEasyOcrCmdRagFileReader() {
         return new PdfEasyOcrCmdRagFileReader(PdfConvertUtil::pdf2images);
