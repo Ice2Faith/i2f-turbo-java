@@ -214,7 +214,10 @@ i2f.springboot.ai.mcp.client.official
 5. **上下文透传（simple 专属）**：复用上游 `HttpSimpleMcpClientToolProvider`，调用工具前用 `ToolCallContextHolder.copyOf()` 取出请求级上下文，与工具参数一起序列化为 `content`/`context` 上送，使远端工具可像本地调用一样访问上下文。
 6. **协议契约复用上游 `mcp.official`**：v2024 的 JSON-RPC 2.0 信封（`JsonRpcRequest`/`JsonRpcResponse`/`JsonRpcError`）、`initialize`/`tools/list`/`tools/call` 结果模型与 `OfficialMcpConstants` 均复用 `i2f-ai-rest-openai` 的 `mcp.official.v2024` 包（与服务端同源）；v2026 复用其 `OfficialMcpConstantsV2026`、`JsonRpcResponseV2026`/`JsonRpcErrorV2026`、`JsonRpcServerDiscoverResult`/`JsonRpcToolListResultV2026`/`JsonRpcToolCallResultV2026`，其中 `tools/list` 条目项与 `tools/call` 参数沿用 v2024 的 `JsonRpcToolListItem`/`JsonRpcToolCallParam`。
 7. **默认客户端与装配客户端分离**：两个 stream Provider 的字段默认值为 `HttpProcessorRestClient` + `Json2Serializer`（JDK 原生、零三方依赖），而模块的 FactoryBean 装配时统一覆盖为 `SpringWebRestClient(new RestTemplate())` + `JacksonJsonSerializer(new ObjectMapper())`；默认值使 Provider 可脱离 Spring 独立复用。
-8. **双注册文件与配置元数据**：同时提供 `META-INF/spring.factories`（Spring Boot 2.6 之前）与 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（Spring Boot 2.7+），各注册 4 个自动配置类；`additional-spring-configuration-metadata.json` 声明 4 组 properties 说明。
+8. **双注册文件与配置元数据**：同时提供 `META-INF/spring.factories`（Spring Boot 2.6
+   之前）与 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（Spring Boot 2.7+），各注册 5
+   个自动配置类（simple / v2024 stream / v2024 solon / v2026 stream /
+   creator）；`additional-spring-configuration-metadata.json` 已按源码全量同步为 7 groups / 67 properties。
 9. **远程工具标签解析**：三种官方模式实例可配置 `tag-rules`，Provider 在 `getTools` 时用 `AiTagRuleHelper.resolveTags` 按规则把本地标签追加到远程 `ToolDefinition`（simple 模式由上游实现、本模块实例配置未提供该字段）。
 10. **按标签重试（`retryable`）**：全部六种实现的 `callTool`（simple 由上游提供，v2024 stream / v2024 stdio / v2024 solon /
     v2026 stream / v2026 stdio 在模块内）都会先取目标工具的 `tags`，命中 `AiTags.RETRYABLE_VALUE`（`"retryable"`）则把尝试次数从
@@ -281,7 +284,7 @@ i2f:
     ai:
       mcp:
         client:
-          # simple mcp client implements privacy protocol mcp
+          # simple mcp client implements privacy protocol mcp (hmac signature)
           simple:
             enable: true
             instances:
@@ -292,40 +295,65 @@ i2f:
                 app-id: xxx
                 app-key: xxx
                 hmac-name: HmacSHA256
+          # 官方 stream 客户端的装配开关不在 official.v2024.stream 下
+          stream:
+            official:
+              v2024:
+                enable: true                    # StreamMcpClientAutoConfiguration
+              v2026:
+                enable: true                    # StreamMcpClientV2026AutoConfiguration
           official:
             v2024:                              # 有状态版本
-              stream:
+              stream:                           # 实例前缀，开关见上方 client.stream.official.v2024.enable
+                instances:
+                  - enable: false
+                    initial: false
+                    name: demo
+                    description: a group utils tool
+                    url: http://localhost:9999/v2024/mcp
+                    bearer-token: xxx
+              solon:                            # 开关与实例同前缀
                 enable: true
                 instances:
                   - enable: false
                     name: demo
                     description: a group utils tool
                     url: http://localhost:9999/v2024/mcp
+                    channel: STREAMABLE        # STDIO / SSE / STREAMABLE / STREAMABLE_STATELESS
                     bearer-token: xxx
-              solon:
-                enable: true
-                instances:
-                  - enable: false
-                    name: demo
-                    description: a group utils tool
-                    url: http://localhost:9999/mcp
-                    channel: streamable         # stdio / sse / streamable / streamable_stateless
-                    bearer-token: xxx
-                    #tag-rules:
-                    #  - pattern: "*web*"
-                    #    tags: ["auto","readonly"]
             v2026:                              # 无状态版本（无 initialize，server/discover + tools/*）
-              stream:
-                enable: true
+              stream:                           # 实例前缀，开关见上方 client.stream.official.v2026.enable
                 instances:
                   - enable: false
                     name: demo
                     description: a group utils tool
                     url: http://localhost:9999/v2026/mcp
                     bearer-token: xxx
+          # 兼容 Claude Desktop mcp.json（另会读取 ./mcp/mcp.json 或 classpath:mcp/mcp.json）
+          creator:
+            enable: true
+            mcp-servers:
+              demo-http:
+                type: http
+                url: http://localhost:9999/v2024/mcp
+                headers:
+                  Authorization: Bearer xxx
+                timeout: 60000
+              demo-simple:
+                type: simple
+                url: http://localhost:8811/
+                app-id: xxx
+                app-key: xxx
+              demo-stdio:
+                type: stdio
+                command: java
+                args: [ -jar, ./agent/i2f-tools-agent.jar ]
 ```
 
-> 样例中的 `enable: true` 写在 `official.v202x.stream.enable` 路径下；当前两个 stream 自动配置类实际读取的是 `client.stream.official.v202x.enable`，该差异见「模块瑕疵或错误」第 1 条。
+> 样例中 `stream.official.v202x.enable` 才是装配开关的真实键（`...client.stream.official.v202x.enable`），而 `instances`
+> 的绑定前缀是 `...client.official.v202x.stream`——两套路径不同名，凭直觉写 `...official.v2024.stream.enable`
+> 会读不到（表达式回落默认 `true`），详见「模块瑕疵或错误」第 1 条。`creator` 除 `mcp-servers` 外还支持 `servers` 别名（兼容
+> Claude Desktop `mcp.json` 的 `mcpServers` 风格）。
 
 ### 3. 在 AI 工具链中使用
 
@@ -336,11 +364,13 @@ i2f:
 3. `load_tools_by_names`：按名加载工具后即可直接调用
 
 ```yaml
-# i2f-tools-ops 等宿主应用启用 MCP 网关的开关
-ai:
-  tools:
-    mcp-gateway:
-      enable: true
+# i2f-tools-ops 等宿主应用启用 MCP 网关的开关（前缀来自 ai-starter，不是裸 ai.）
+i2f:
+  springboot:
+    ai:
+      tools:
+        mcp-gateway:
+          enable: true
 ```
 
 ### 4. 手工接入 stdio 子进程 MCP Server（无自动装配）
@@ -417,7 +447,13 @@ public class MyStdioMcpConfig {
 
 > 注：旧版记录的三处缺陷已修复——① `initial()` 中 `initialized.set(true)` 已从 `finally` 移入 `try`，握手失败不再被误标为已初始化；② 各套缓存过期判定统一为 `System.currentTimeMillis() < expireTs`（存过期时刻），2× TTL 语义偏差消除，默认 TTL 亦调为 5 分钟；③ solon 模式 `getTools` 已补初始化 `tags`（见下第 6 条）。以下问题为本次核对源码后的静态识别，未实证。
 
-1. **两个 stream 模式的 enable 开关键路径与配置前缀不一致（关键）**：`official.v2024.stream.StreamMcpClientAutoConfiguration` 的表达式为 `${i2f.springboot.ai.mcp.client.stream.official.v2024.enable:true}`、v2026 为 `${...client.stream.official.v2026.enable:true}`（`stream` 在 `official` 之前），而绑定前缀、`additional-spring-configuration-metadata.json` 与模块样例 yml 均使用 `...client.official.v202x.stream.enable`。用户按样例/metadata 关闭 stream 模式时表达式读不到该键，回落默认 `true`，开关失效；solon 模式的表达式与元数据一致，仅 stream 两处错位。
+1. **两个 stream 模式的 enable 开关键路径与实例配置前缀不一致（易错点）
+   **：`official.v2024.stream.StreamMcpClientAutoConfiguration`
+   的表达式为 `${i2f.springboot.ai.mcp.client.stream.official.v2024.enable:true}`、v2026
+   为 `${...client.stream.official.v2026.enable:true}`（`stream` 在 `official` 之前），而 `instances`
+   的绑定前缀是 `...client.official.v202x.stream`。`additional-spring-configuration-metadata.json` 与模块样例 yml
+   已按表达式真实键同步（见本条注记），但两套路径仍不同名，用户凭直觉写 `...official.v2024.stream.enable`
+   时表达式读不到该键、回落默认 `true`，表现为「关不掉」；solon 模式的开关与实例同前缀，无此问题。
 2. **端点自动补全会丢失版本前缀**：`URL_PATH_MCP` 在 v2024/v2026 常量中同为 `/mcp`，`getEndpointUrl` 的补全逻辑无法感知服务端的 `/v2024/mcp`、`/v2026/mcp` 真实端点；若配置为 `http://host:9999`（补成 `/mcp`）或 `http://host:9999/v2024`（补成 `/v2024/mcp` 尚可），但配置 `http://host:9999/api` 之类前缀会被错误拼为 `/api/mcp`，缺少可配置的端点路径项。
 3. **v2024 无会话分支仍以 `System.out` 打印调试**：`StreamJsonRpcMcpClientToolProvider#initial()` 在服务端未返回 `Mcp-Session-Id` 时用 `System.out.println` 打印响应头与响应体（`//throw` 被注释掉），属调试遗留，污染标准输出且无日志级别。
 4. **stream 模式工具调用错误消息截断**：v2024 / v2026 的 `callTool` 在 `isError=true` 时均抛 `IllegalStateException("invoke mcp tool error, cause reason is: ")`，未拼接远程 `content` 错误详情，排障困难（solon 模式已改为可读提示）；且 `isError` 判定前未对 `result` 做空指针防护。
@@ -428,8 +464,12 @@ public class MyStdioMcpConfig {
 9. **v2026 发现结果未参与校验**：`StreamJsonRpcMcpClientV2026ToolProvider#initial()` 读取 `supportedVersions` 后仅留 `// TODO` 注释，未与本地 `PROTOCOL_VERSION` 做兼容判断；同方法中 `HttpHeaders headers = rest.getHeaders()` 取值后未使用（响应头中的协议版本/发现信息被丢弃）。
 10. **simple / 两个 stream 模式缺少 Classpath 条件保护**：仅 solon 有 `@ConditionalOnClass(McpClientProvider, ContextView)`，其余三个自动配置在类路径缺少 `RestTemplate`（spring-web）/ Jackson 时无显式条件，只靠懒加载推迟失败点。
 11. **v2026 复用 v2024 信封与条目 DTO**：请求信封 `JsonRpcRequest`、`tools/list` 条目项 `JsonRpcToolListItem`、`tools/call` 参数 `JsonRpcToolCallParam` 均来自 `official.v2024` 包，响应才用 v2026 独有类型，同版本 DTO 边界不统一（跨版本耦合，v2024 契约变更会波及 v2026）。
-12. **配置元数据冗余**：`additional-spring-configuration-metadata.json` 的 `hints` 中 `server.servlet.jsp.class-name`、`server.tomcat.accesslog.encoding` 两条与本模块无关（疑似自 Spring Boot 官方元数据复制），IDE 配置提示存在噪声。
-13. **样例 yml 与元数据存在误导**：样例文件声明的 `official.v202x.stream.enable` 实际不被读取（同第 1 条）；样例中 `url: http://localhost:9999/mcp` 未带版本前缀，与 `i2f-springboot-ai-mcp-server` 的 `/v2024/mcp`、`/v2026/mcp` 端点不匹配，按样例直连本仓库服务端会 404。
+12. **~~配置元数据冗余~~（已修复）**：`additional-spring-configuration-metadata.json` 的 `hints`
+    中 `server.servlet.jsp.class-name`、`server.tomcat.accesslog.encoding` 两条与本模块无关的条目（疑似自 Spring Boot
+    官方元数据复制）已删除。
+13. **~~样例 yml 与元数据存在误导~~（已修复）**：样例文件中的 `official.v202x.stream.enable`
+    已改为真实装配键 `client.stream.official.v202x.enable`，`url` 也已补全为 `/v2024/mcp`、`/v2026/mcp`
+    ，与 `i2f-springboot-ai-mcp-server` 的端点对齐。
 14. **stdio 请求无超时，子进程失联即永久阻塞**：`StdioMcpClient.send()` 返回的 `CompletableFuture` 在 Provider
     内均以无参 `send.get()` 等待，未设超时；而 `readLoop` 对反序列化失败与 `IOException`
     均静默吞掉（`catch (Exception ignore)`），子进程退出、输出非 JSON 行或响应 `id` 对不上时，对应 future
@@ -476,17 +516,17 @@ simple（前缀 `i2f.springboot.ai.mcp.client.simple`）：
 
 official.v2024.stream（前缀 `i2f.springboot.ai.mcp.client.official.v2024.stream`）：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `instances[].enable` | `Boolean` | `null`（视为启用） | 单实例开关 |
-| `instances[].initial` | `Boolean` | `null`（不预热） | 是否启动后后台预拉取工具目录 |
-| `instances[].name` | `String` | 无 | 必填，Bean 名与 AI 工具前缀来源 |
-| `instances[].description` | `String` | 无 | 供应商描述 |
-| `instances[].url` | `String` | 无 | 服务端地址（不以 `/mcp` 结尾时自动追加，建议写全 `/v2024/mcp`） |
-| `instances[].bearer-token` | `String` | 无 | 非空时添加 `Authorization: Bearer {token}` 头 |
-| `instances[].headers` | `Map` | 无 | 附加请求头 |
-| `instances[].tag-rules` | `List<AiTagRule>` | 无 | 按规则为远程工具追加本地标签 |
-| `enable` | `Boolean` | `true` | 模式开关，但表达式实际读取 `...client.stream.official.v2024.enable`（见瑕疵 1） |
+| 属性                         | 类型                | 默认值          | 说明                                                                 |
+|----------------------------|-------------------|--------------|--------------------------------------------------------------------|
+| `instances[].enable`       | `Boolean`         | `null`（视为启用） | 单实例开关                                                              |
+| `instances[].initial`      | `Boolean`         | `null`（不预热）  | 是否启动后后台预拉取工具目录                                                     |
+| `instances[].name`         | `String`          | 无            | 必填，Bean 名与 AI 工具前缀来源                                               |
+| `instances[].description`  | `String`          | 无            | 供应商描述                                                              |
+| `instances[].url`          | `String`          | 无            | 服务端地址（不以 `/mcp` 结尾时自动追加，建议写全 `/v2024/mcp`）                         |
+| `instances[].bearer-token` | `String`          | 无            | 非空时添加 `Authorization: Bearer {token}` 头                            |
+| `instances[].headers`      | `Map`             | 无            | 附加请求头                                                              |
+| `instances[].tag-rules`    | `List<AiTagRule>` | 无            | 按规则为远程工具追加本地标签                                                     |
+| `enable`                   | `Boolean`         | `true`       | 模式开关，表达式读 `...client.stream.official.v2024.enable`（与实例前缀不同名，见瑕疵 1） |
 
 official.v2024.solon（前缀 `i2f.springboot.ai.mcp.client.official.v2024.solon`）：
 
@@ -505,17 +545,17 @@ official.v2024.solon（前缀 `i2f.springboot.ai.mcp.client.official.v2024.solon
 
 official.v2026.stream（前缀 `i2f.springboot.ai.mcp.client.official.v2026.stream`）：
 
-| 属性 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `instances[].enable` | `Boolean` | `null`（视为启用） | 单实例开关 |
-| `instances[].initial` | `Boolean` | `null`（不预热） | 是否启动后后台预拉取工具目录 |
-| `instances[].name` | `String` | 无 | 必填，Bean 名与 AI 工具前缀来源 |
-| `instances[].description` | `String` | 无 | 供应商描述 |
-| `instances[].url` | `String` | 无 | 服务端地址（建议写全 `/v2026/mcp`） |
-| `instances[].bearer-token` | `String` | 无 | 非空时添加 `Authorization: Bearer {token}` 头 |
-| `instances[].headers` | `Map` | 无 | 附加请求头 |
-| `instances[].tag-rules` | `List<AiTagRule>` | 无 | 按规则为远程工具追加本地标签 |
-| `enable` | `Boolean` | `true` | 模式开关，但表达式实际读取 `...client.stream.official.v2026.enable`（见瑕疵 1） |
+| 属性                         | 类型                | 默认值          | 说明                                                                 |
+|----------------------------|-------------------|--------------|--------------------------------------------------------------------|
+| `instances[].enable`       | `Boolean`         | `null`（视为启用） | 单实例开关                                                              |
+| `instances[].initial`      | `Boolean`         | `null`（不预热）  | 是否启动后后台预拉取工具目录                                                     |
+| `instances[].name`         | `String`          | 无            | 必填，Bean 名与 AI 工具前缀来源                                               |
+| `instances[].description`  | `String`          | 无            | 供应商描述                                                              |
+| `instances[].url`          | `String`          | 无            | 服务端地址（建议写全 `/v2026/mcp`）                                           |
+| `instances[].bearer-token` | `String`          | 无            | 非空时添加 `Authorization: Bearer {token}` 头                            |
+| `instances[].headers`      | `Map`             | 无            | 附加请求头                                                              |
+| `instances[].tag-rules`    | `List<AiTagRule>` | 无            | 按规则为远程工具追加本地标签                                                     |
+| `enable`                   | `Boolean`         | `true`       | 模式开关，表达式读 `...client.stream.official.v2026.enable`（与实例前缀不同名，见瑕疵 1） |
 
 ## 自动注册清单
 
@@ -536,7 +576,8 @@ i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfi
   Spring MVC 模式的 `/mcp/tool/call` 方法不一致缺陷会影响 simple 配套调用；stdio 两套不依赖本服务端，对端是任意本地可执行
   MCP Server（如 `npx` 拉起的官方示例 Server）。
 - **`i2f-springboot-ops-starter`**：消费方。`SpringContextToolAutoConfiguration` 注册 `ContextMcpToolGatewayManager`（聚合容器内全部 `McpToolProvider`）与 `McpProviderTools`（AI 侧动态工具发现四件套），本模块注册的实例 Bean 由此接入 AI 工具链。
-- **`i2f-tools-ops`**：仓库内唯一显式依赖本模块的宿主应用（`ai.tools.mcp-gateway.enable: true`），通过配置文件接入远程 MCP 服务。
+- **`i2f-tools-ops`**：仓库内唯一显式依赖本模块的宿主应用（`i2f.springboot.ai.tools.mcp-gateway.enable: true`），通过配置文件接入远程
+  MCP 服务。
 - **`i2f-springboot-ai-starter`**：未包含本模块，需要 MCP 客户端能力时应单独引入本依赖。
 - **`i2f-os`**：stdio 实现使用的 `OsUtil#isWindows` 仅用于子进程启动失败时的 `cmd /c` / `sh -c` 回落判断，POM
   未显式声明，属传递依赖（见「模块依赖」注意条）。

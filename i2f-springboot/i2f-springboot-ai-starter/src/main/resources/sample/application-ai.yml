@@ -2,5 +2,98 @@
 i2f:
   springboot:
     ai:
+      # ai common (json serializer / json schema annotation resolver)
       enable: true
-
+      json-serializer:
+        enable: true
+      json-schema-annotation-resolver:
+        enable: true
+      # ai agent
+      agent:
+        enable: true
+      # ai model, only one AiModel bean is created (first enabled wins)
+      model:
+        enable: true
+        # openai compatible http model (default)
+        rest-openai:
+          enable: true
+          base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+          api-key: xxx
+          model: qwen-plus
+        # dashscope sdk model
+        dashscope:
+          enable: false
+          api-key: xxx
+          model: qwen-plus
+        # official openai sdk model
+        openai:
+          enable: false
+          base-url: https://api.openai.com/v1
+          api-key: xxx
+          model: gpt-4o-mini
+      # rag (retrieval augmented generation)
+      rags:
+        enable: true
+        embedding:
+          enable: true
+          base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+          api-key: xxx
+          model: text-embedding-v3
+          dimension: 1024
+          enable-load-docs: false
+          docs-path: ./rags
+          max-segment-size-in-chars: 512
+          docs-embed-batch-size: -1
+          max-overlap-rate: 0.15
+        store:
+          enable: true
+        docs-store:
+          enable: true
+        worker:
+          enable: true
+        tool:
+          enable: true
+        reader:
+          markitdown:
+            enable: true
+          easycor:
+            enable: true
+          pdf-easycor:
+            enable: true
+          pandoc:
+            enable: true
+        memory:
+          bucket:
+            enable: true
+          enable: true
+      # ai skills
+      skills:
+        enable: true
+        tool:
+          enable: true
+        runner:
+          groovy:
+            enable: true
+      # ai tools
+      tools:
+        enable: true
+        mcp:
+          app:
+            enable: true
+          manager:
+            enable: true
+        app:
+          manager:
+            enable: true
+        mcp-gateway:
+          enable: true
+        groovy-dynamic-tools:
+          enable: true
+      # ai service (@AiService) dynamic proxy
+      proxy:
+        enable: true
+        handler:
+          enable: true
+        service-packages:
+          - demo.ai
+          - demo.service

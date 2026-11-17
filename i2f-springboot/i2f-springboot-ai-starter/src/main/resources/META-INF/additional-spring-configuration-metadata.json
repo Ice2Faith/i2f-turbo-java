@@ -6,6 +6,51 @@
       "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration"
     },
     {
+      "name": "i2f.springboot.ai.agent",
+      "type": "i2f.springboot.ai.agent.AiAgentAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.agent.AiAgentAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.model",
+      "type": "i2f.springboot.ai.model.AiModelAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.model.AiModelAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.model.rest-openai",
+      "type": "i2f.springboot.ai.model.properties.AiModelRestOpenAiProperties",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelRestOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope",
+      "type": "i2f.springboot.ai.model.properties.AiModelDashScopeProperties",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelDashScopeProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.openai",
+      "type": "i2f.springboot.ai.model.properties.AiModelOpenAiProperties",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.rags",
+      "type": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding",
+      "type": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.skills",
+      "type": "i2f.springboot.ai.skills.AiSkillsAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.skills.AiSkillsAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ai.tools",
+      "type": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration"
+    },
+    {
       "name": "i2f.springboot.ai.proxy",
       "type": "i2f.springboot.ai.services.AiServiceProxyInterfaceAutoConfiguration",
       "sourceType": "i2f.springboot.ai.services.AiServiceProxyInterfaceAutoConfiguration"
@@ -15,75 +60,333 @@
     {
       "name": "i2f.springboot.ai.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai.",
-      "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration",
-      "defaultValue": true
-    },
-    {
-      "name": "i2f.springboot.ai.model.dashscope.enable",
-      "type": "java.lang.Boolean",
-      "description": "enable ai dashscope.",
+      "description": "enable ai common auto configuration.",
       "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.json-serializer.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai agent json serializer.",
+      "description": "create the IJsonSerializer bean (JacksonJsonSerializer) when missing.",
       "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.json-schema-annotation-resolver.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai agent json schema annotation resolver.",
+      "description": "create the JsonSchemaAnnotationResolver bean when missing.",
       "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.agent.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai agent.",
-      "sourceType": "i2f.springboot.ai.common.AiCommonAutoConfiguration",
+      "description": "enable ai agent auto configuration and create the AiAgent bean when missing.",
+      "sourceType": "i2f.springboot.ai.agent.AiAgentAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.model.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai model auto configuration.",
+      "sourceType": "i2f.springboot.ai.model.AiModelAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.model.rest-openai.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the AiModel bean by HttpOpenAiAiModel (rest template based), takes effect when no other AiModel bean exists.",
+      "sourceType": "i2f.springboot.ai.model.AiModelAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.model.rest-openai.base-url",
+      "type": "java.lang.String",
+      "description": "openai compatible api base url.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelRestOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.rest-openai.api-key",
+      "type": "java.lang.String",
+      "description": "openai compatible api key.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelRestOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.rest-openai.model",
+      "type": "java.lang.String",
+      "description": "model name, e.g. qwen-plus.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelRestOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the AiModel bean by DashScopeModel, requires dashscope sdk on classpath.",
+      "sourceType": "i2f.springboot.ai.model.AiModelAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope.api-key",
+      "type": "java.lang.String",
+      "description": "dashscope (aliyun bailian) api key.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelDashScopeProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.dashscope.model",
+      "type": "java.lang.String",
+      "description": "dashscope model name, e.g. qwen-plus.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelDashScopeProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.openai.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the AiModel bean by OpenAiModel (official openai sdk), requires openai sdk on classpath.",
+      "sourceType": "i2f.springboot.ai.model.AiModelAutoConfiguration",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ai.model.openai.base-url",
+      "type": "java.lang.String",
+      "description": "openai api base url.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.openai.api-key",
+      "type": "java.lang.String",
+      "description": "openai api key.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.model.openai.model",
+      "type": "java.lang.String",
+      "description": "openai model name.",
+      "sourceType": "i2f.springboot.ai.model.properties.AiModelOpenAiProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai rags (retrieval augmented generation) auto configuration.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the RagEmbeddingModel bean by HttpOpenAiRagEmbeddingModel when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.base-url",
+      "type": "java.lang.String",
+      "description": "embedding api base url (openai compatible).",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.api-key",
+      "type": "java.lang.String",
+      "description": "embedding api key.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.model",
+      "type": "java.lang.String",
+      "description": "embedding model name, e.g. text-embedding-v3.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.dimension",
+      "type": "java.lang.Integer",
+      "description": "vector dimension of the embedding model, used by the sqlite embedding store.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.enable-load-docs",
+      "type": "java.lang.Boolean",
+      "description": "whether to load documents from docs-path on startup.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.docs-path",
+      "type": "java.lang.String",
+      "description": "document directory to load, documents are moved into a sibling rags_history directory after loading.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": "./rags"
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.max-segment-size-in-chars",
+      "type": "java.lang.Integer",
+      "description": "max segment size in chars of the recursive text splitter.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": 512
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.docs-embed-batch-size",
+      "type": "java.lang.Integer",
+      "description": "store batch size when embedding loaded documents, -1 means no limit.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": -1
+    },
+    {
+      "name": "i2f.springboot.ai.rags.embedding.max-overlap-rate",
+      "type": "java.lang.Double",
+      "description": "max overlap rate between adjacent text segments.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsEmbeddingModelProperties",
+      "defaultValue": 0.15
+    },
+    {
+      "name": "i2f.springboot.ai.rags.store.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the RagEmbeddingStore bean (SqliteRagEmbeddingStore) when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.docs-store.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the RagDocumentsStore bean (SqliteRagDocumentsStore) when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.worker.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the RagWorker bean when missing, loads docs asynchronously 3 seconds after creation.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.tool.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the RagTools bean when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.reader.markitdown.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the markitdown command rag file reader bean.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.reader.easycor.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the easyocr command rag file reader bean.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.reader.pdf-easycor.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the pdf (convert to images) + easyocr rag file reader bean, requires pdfbox on classpath.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.reader.pandoc.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the pandoc command rag file reader bean.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.memory.bucket.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the BucketRagEmbeddingStore bean (SqliteBucketRagMemoryStore) when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.rags.memory.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the MemoryTools bean when missing.",
+      "sourceType": "i2f.springboot.ai.rags.AiRagsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.skills.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai skills auto configuration, scans file system skills every 30 seconds.",
+      "sourceType": "i2f.springboot.ai.skills.AiSkillsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.skills.tool.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the SkillsTools bean.",
+      "sourceType": "i2f.springboot.ai.skills.AiSkillsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.skills.runner.groovy.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the groovy skill script runner.",
+      "sourceType": "i2f.springboot.ai.skills.GroovySkillScriptRunner",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ai tools auto configuration.",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.mcp.app.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the ContextAppMcpToolProvider bean when missing.",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.mcp.manager.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the ToolManager bean (ContextMcpToolGatewayManager) when missing.",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.app.manager.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the ToolManager bean (ContextAppToolManager) when missing.",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.mcp-gateway.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the McpProviderTools bean bridging the AbstractMcpToolGatewayManager.",
+      "sourceType": "i2f.springboot.ai.tools.AiToolsAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.tools.groovy-dynamic-tools.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the groovy dynamic tool provider component.",
+      "sourceType": "i2f.springboot.ai.tools.GroovyDynamicToolProvider",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.proxy.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai service.",
+      "description": "enable ai service (@AiService) dynamic proxy auto configuration.",
       "sourceType": "i2f.springboot.ai.services.AiServiceProxyInterfaceAutoConfiguration",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.proxy.handler.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai proxy handler.",
+      "description": "create the AiServiceDynamicProxyHandler bean when missing.",
       "sourceType": "i2f.springboot.ai.services.AiServiceProxyInterfaceAutoConfiguration",
       "defaultValue": true
-    }
-  ],
-  "hints": [
-    {
-      "name": "server.servlet.jsp.class-name",
-      "providers": [
-        {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.servlet.http.HttpServlet"
-          }
-        }
-      ]
     },
     {
-      "name": "server.tomcat.accesslog.encoding",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "java.nio.charset.Charset"
-          }
-        }
-      ]
+      "name": "i2f.springboot.ai.proxy.service-packages",
+      "type": "java.util.List<java.lang.String>",
+      "description": "packages scanned for @AiService interfaces, defaults to **.ai.** and **.service.** when empty.",
+      "sourceType": "i2f.springboot.ai.services.properties.AiProxyServiceProperties"
     }
   ]
 }

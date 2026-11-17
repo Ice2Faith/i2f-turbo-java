@@ -3,7 +3,7 @@ i2f:
     ai:
       mcp:
         client:
-          # simple mcp client implements privacy protocol mcp
+          # simple mcp client implements privacy protocol mcp (hmac signature)
           simple:
             enable: true
             instances:
@@ -14,18 +14,29 @@ i2f:
                 app-id: xxx
                 app-key: xxx
                 hmac-name: HmacSHA256
-          # official mcp client
+          # NOTE: the auto configuration switches of official stream client are
+          # i2f.springboot.ai.mcp.client.stream.official.v2024.enable
+          # i2f.springboot.ai.mcp.client.stream.official.v2026.enable
+          # which are NOT under official.v2024.stream / official.v2026.stream
+          stream:
+            official:
+              v2024:
+                enable: true
+              v2026:
+                enable: true
+          # official mcp client instances
           official:
             # for 2024 stateful version
             v2024:
               # stream mcp client implements official protocol mcp (streamable channel only)
+              # switch: i2f.springboot.ai.mcp.client.stream.official.v2024.enable
               stream:
-                enable: true
                 instances:
                   - enable: false
+                    initial: false
                     name: demo
                     description: a group utils tool
-                    url: http://localhost:9999/mcp
+                    url: http://localhost:9999/v2024/mcp
                     bearer-token: xxx
                     #tag-rules:
                     #  - pattern: "*web*"
@@ -33,14 +44,17 @@ i2f:
                     #headers:
                     #  key: value
               # solon mcp client implements official protocol mcp
+              # switch: i2f.springboot.ai.mcp.client.official.v2024.solon.enable
               solon:
                 enable: true
                 instances:
                   - enable: false
+                    initial: false
                     name: demo
                     description: a group utils tool
-                    url: http://localhost:9999/mcp
-                    channel: streamable
+                    url: http://localhost:9999/v2024/mcp
+                    # STDIO / SSE / STREAMABLE / STREAMABLE_STATELESS
+                    channel: STREAMABLE
                     bearer-token: xxx
                     #tag-rules:
                     #  - pattern: "*web*"
@@ -50,16 +64,42 @@ i2f:
             # for 2026 stateless version (no initialize handshake, tools/list + tools/call only)
             v2026:
               # stream mcp client implements official protocol mcp (streamable channel only)
+              # switch: i2f.springboot.ai.mcp.client.stream.official.v2026.enable
               stream:
-                enable: true
                 instances:
                   - enable: false
                     name: demo
                     description: a group utils tool
-                    url: http://localhost:9999/mcp
+                    url: http://localhost:9999/v2026/mcp
                     bearer-token: xxx
                     #tag-rules:
                     #  - pattern: "*web*"
                     #    tags: ["auto","readonly"]
                     #headers:
                     #  key: value
+          # mcp client creator, compatible with Claude Desktop mcp.json
+          # also reads ./mcp/mcp.json or classpath:mcp/mcp.json when present
+          creator:
+            enable: true
+            mcp-servers:
+              demo-http:
+                type: http
+                url: http://localhost:9999/v2024/mcp
+                headers:
+                  Authorization: Bearer xxx
+                timeout: 60000
+              demo-simple:
+                type: simple
+                url: http://localhost:8811/
+                app-id: xxx
+                app-key: xxx
+                hmac-name: HmacSHA256
+              demo-stdio:
+                type: stdio
+                command: java
+                args:
+                  - -jar
+                  - ./agent/i2f-tools-agent.jar
+                env:
+                  APP_HOME: ./agent
+                cwd: ./

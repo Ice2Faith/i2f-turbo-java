@@ -43,7 +43,7 @@ i2f:
                 enable: true
               server:
                 enable: true
-          # official mcp client
+          # official mcp server
           official:
             # for 2024 stateful version
             v2024:

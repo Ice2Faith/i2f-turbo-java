@@ -2,89 +2,452 @@
   "groups": [
     {
       "name": "i2f.springboot.ai.mcp.client.simple",
-      "type": "i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration"
+      "type": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties"
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream",
+      "name": "i2f.springboot.ai.mcp.client.stream.official.v2024",
       "type": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration"
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon",
-      "type": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream",
+      "type": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties"
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream",
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon",
+      "type": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.stream.official.v2026",
       "type": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration"
     },
     {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream",
+      "type": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties"
+    },
+    {
       "name": "i2f.springboot.ai.mcp.client.creator",
-      "type": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration"
+      "type": "i2f.springboot.ai.mcp.client.creator.data.McpServerProperties",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerProperties"
     }
   ],
   "properties": [
     {
       "name": "i2f.springboot.ai.mcp.client.simple.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai simple mcp client.",
+      "description": "enable simple (private HMAC signed) mcp client support.",
       "sourceType": "i2f.springboot.ai.mcp.client.simple.SimpleMcpClientAutoConfiguration",
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.enable",
+      "name": "i2f.springboot.ai.mcp.client.simple.instances",
+      "type": "java.util.List<i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig>",
+      "description": "simple mcp client instances, a McpToolProvider bean is registered for each instance with non-blank name.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai stream mcp client.",
+      "description": "enable this instance, skipped when false.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].name",
+      "type": "java.lang.String",
+      "description": "instance name, also used as the registered bean name, instance is skipped when blank.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].description",
+      "type": "java.lang.String",
+      "description": "instance description for mcp tool provider.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].base-url",
+      "type": "java.lang.String",
+      "description": "server base url, e.g. http://localhost:8811/ .",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].app-id",
+      "type": "java.lang.String",
+      "description": "caller app id (header X-App-Id).",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].app-key",
+      "type": "java.lang.String",
+      "description": "caller app key used to compute HMAC sign.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.simple.instances[].hmac-name",
+      "type": "java.lang.String",
+      "description": "HMAC algorithm name for app sign.",
+      "sourceType": "i2f.springboot.ai.mcp.client.simple.properties.SimpleMcpClientProperties$InstanceConfig",
+      "defaultValue": "HmacSHA256"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.stream.official.v2024.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable official 2024 stream mcp client auto configuration.",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.StreamMcpClientAutoConfiguration",
       "defaultValue": true
     },
     {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances",
+      "type": "java.util.List<i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig>",
+      "description": "official 2024 stream mcp client instances.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].enable",
+      "type": "java.lang.Boolean",
+      "description": "enable this instance, skipped when false.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].initial",
+      "type": "java.lang.Boolean",
+      "description": "eagerly initialize the client (initialize handshake) instead of lazy connect.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].name",
+      "type": "java.lang.String",
+      "description": "instance name, also used as the registered bean name, instance is skipped when blank.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].description",
+      "type": "java.lang.String",
+      "description": "instance description for mcp tool provider.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].url",
+      "type": "java.lang.String",
+      "description": "streamable http mcp endpoint url, e.g. http://localhost:9999/v2024/mcp .",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].bearer-token",
+      "type": "java.lang.String",
+      "description": "Authorization bearer token sent to the server.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].headers",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "extra http headers sent with every request.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].tag-rules",
+      "type": "java.util.List<i2f.ai.std.tags.AiTagRule>",
+      "description": "tag rules applied to tools of this instance.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.stream.properties.StreamMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].tag-rules[].pattern",
+      "type": "java.lang.String",
+      "description": "ANT style tool name pattern of the tag rule.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.stream.instances[].tag-rules[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "tags added to the tools matched by the pattern.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
       "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai solon mcp client.",
+      "description": "enable official 2024 solon mcp client auto configuration.",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.SolonMcpClientAutoConfiguration",
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.enable",
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances",
+      "type": "java.util.List<i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig>",
+      "description": "official 2024 solon mcp client instances.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai stream mcp client.",
+      "description": "enable this instance, skipped when false.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].initial",
+      "type": "java.lang.Boolean",
+      "description": "eagerly initialize the client instead of lazy connect.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].name",
+      "type": "java.lang.String",
+      "description": "instance name, also used as the registered bean name, instance is skipped when blank.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].description",
+      "type": "java.lang.String",
+      "description": "instance description for mcp tool provider.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].url",
+      "type": "java.lang.String",
+      "description": "mcp endpoint url.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].channel",
+      "type": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$Channel",
+      "description": "solon mcp channel: STDIO, SSE, STREAMABLE, STREAMABLE_STATELESS.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig",
+      "defaultValue": "STREAMABLE"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].bearer-token",
+      "type": "java.lang.String",
+      "description": "Authorization bearer token sent to the server.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].headers",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "extra http headers sent with every request.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].tag-rules",
+      "type": "java.util.List<i2f.ai.std.tags.AiTagRule>",
+      "description": "tag rules applied to tools of this instance.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2024.solon.properties.SolonMcpClientProperties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].tag-rules[].pattern",
+      "type": "java.lang.String",
+      "description": "ANT style tool name pattern of the tag rule.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2024.solon.instances[].tag-rules[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "tags added to the tools matched by the pattern.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.stream.official.v2026.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable official 2026 stateless stream mcp client auto configuration.",
       "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.StreamMcpClientV2026AutoConfiguration",
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.client.creator.enable",
-      "type": "java.lang.Boolean",
-      "description": "enable ai mcp client creator.",
-      "sourceType": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration",
-      "defaultValue": true
-    }
-  ],
-  "hints": [
-    {
-      "name": "server.servlet.jsp.class-name",
-      "providers": [
-        {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.servlet.http.HttpServlet"
-          }
-        }
-      ]
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances",
+      "type": "java.util.List<i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig>",
+      "description": "official 2026 stateless stream mcp client instances.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties"
     },
     {
-      "name": "server.tomcat.accesslog.encoding",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "java.nio.charset.Charset"
-          }
-        }
-      ]
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].enable",
+      "type": "java.lang.Boolean",
+      "description": "enable this instance, skipped when false.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].initial",
+      "type": "java.lang.Boolean",
+      "description": "eagerly initialize the client instead of lazy request.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].name",
+      "type": "java.lang.String",
+      "description": "instance name, also used as the registered bean name, instance is skipped when blank.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].description",
+      "type": "java.lang.String",
+      "description": "instance description for mcp tool provider.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].url",
+      "type": "java.lang.String",
+      "description": "stateless streamable http mcp endpoint url, e.g. http://localhost:9999/v2026/mcp .",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].bearer-token",
+      "type": "java.lang.String",
+      "description": "Authorization bearer token sent to the server.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].headers",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "extra http headers sent with every request.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].tag-rules",
+      "type": "java.util.List<i2f.ai.std.tags.AiTagRule>",
+      "description": "tag rules applied to tools of this instance.",
+      "sourceType": "i2f.springboot.ai.mcp.client.official.v2026.stream.properties.StreamMcpClientV2026Properties$InstanceConfig"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].tag-rules[].pattern",
+      "type": "java.lang.String",
+      "description": "ANT style tool name pattern of the tag rule.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.official.v2026.stream.instances[].tag-rules[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "tags added to the tools matched by the pattern.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable mcp client creator (mcp.json / mcp-servers style configuration).",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.McpClientCreatorAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers",
+      "type": "java.util.Map<java.lang.String,i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties>",
+      "description": "mcp servers declared like Claude Desktop mcp.json, merged over mcp/mcp.json when present.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.type",
+      "type": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties$Type",
+      "description": "server transport type: stdio, http or simple.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.name",
+      "type": "java.lang.String",
+      "description": "custom server name, fallback to the map key.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.description",
+      "type": "java.lang.String",
+      "description": "custom server description.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.timeout",
+      "type": "java.lang.Long",
+      "description": "request timeout in milliseconds, 0 means default.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.disabled",
+      "type": "java.lang.Boolean",
+      "description": "skip this server when true.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.command",
+      "type": "java.lang.String",
+      "description": "stdio type: command to launch the mcp server process.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.args",
+      "type": "java.util.List<java.lang.String>",
+      "description": "stdio type: command arguments.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.env",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "stdio type: extra environment variables of the process.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.cwd",
+      "type": "java.lang.String",
+      "description": "stdio type: working directory of the process.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.url",
+      "type": "java.lang.String",
+      "description": "http/simple type: server endpoint url.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.headers",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "http/simple type: extra http headers.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.app-id",
+      "type": "java.lang.String",
+      "description": "simple type: caller app id.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.app-key",
+      "type": "java.lang.String",
+      "description": "simple type: caller app key used to compute HMAC sign.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.hmac-name",
+      "type": "java.lang.String",
+      "description": "simple type: HMAC algorithm name for app sign.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties",
+      "defaultValue": "HmacSHA256"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.meta.tag-rules",
+      "type": "java.util.List<i2f.ai.std.tags.AiTagRule>",
+      "description": "tag rules applied to tools of this server.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerMetaProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.meta.tag-rules[].pattern",
+      "type": "java.lang.String",
+      "description": "ANT style tool name pattern of the tag rule.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.meta.tag-rules[].tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "tags added to the tools matched by the pattern.",
+      "sourceType": "i2f.ai.std.tags.AiTagRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.mcp-servers.*.meta.properties",
+      "type": "java.util.Map<java.lang.String,java.lang.Object>",
+      "description": "custom metadata properties of this server.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerMetaProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.client.creator.servers",
+      "type": "java.util.Map<java.lang.String,i2f.springboot.ai.mcp.client.creator.data.McpServerItemProperties>",
+      "description": "alias of mcp-servers (for Claude Desktop mcp.json `servers` compatibility), same item structure.",
+      "sourceType": "i2f.springboot.ai.mcp.client.creator.data.McpServerProperties"
     }
   ]
 }

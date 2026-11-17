@@ -162,7 +162,8 @@ flowchart TD
 - **数据库写工具**（`DatabaseUpdateTools`，`ai.tools.database.update.enable:false`
   默认关，`@ConditionalOnClass(DataSource)`+`@ConditionalOnBean(DatasourceProvider)`+`@AutoConfigureAfter(DefaultDatasourceProvider)`）：`sql_update_datasource`
   （单条 DML 返回影响行数）、`sql_script_datasource`（多语句脚本，可配 autoCommit/delimiter/sendFullScript/stopOnError）。
-- **RAG**（`ai.rags.enable:true`，装配已下沉 ai-starter）：HTTP OpenAI embedding + Sqlite 向量存储 + 文档目录后台加载 +
+- **RAG**（`i2f.springboot.ai.rags.enable:true`，装配已下沉 ai-starter）：HTTP OpenAI embedding + Sqlite 向量存储 +
+  文档目录后台加载 +
   分桶记忆；ops 侧保留两件：
   - `RagDataSourceCollector`（`ai.rags.datasource.enable:true`
     ）：把 `SqliteRagEmbeddingStore`/`SqliteBucketRagMemoryStore`/`SqliteRagDocumentsStore`
@@ -203,9 +204,9 @@ i2f:
       base-url: /ops
       secure:
         cert: <base64(JSON) 密钥对>
-      datasource:
-        datasourceMap:
-          test: { driver: com.h2.Driver, url: jdbc:h2:file:../h2/test.h2.db, username: root, password: 123456 }
+      datasource:                          # 绑定前缀 i2f.springboot.ops.datasource
+        datasource-map:                    # 字段 datasourceMap，统一用 kebab-case
+          test: { driver: org.h2.Driver, url: jdbc:h2:file:../h2/test.h2.db, username: root, password: 123456 }
       app: { enable: false }     # 建议显式关闭在线求值面
       ssh: { enable: false }
       open-ai: { enable: true }  # 默认关，开启后 /ops/open-ai/**
@@ -217,8 +218,8 @@ ai:
     recycle: { enable: true }        # ref:// 上下文瘦身
     skill-manage: { enable: true }   # skill_install/uninstall/extract
   rags:
-    enable: true
-    datasource: { enable: true }     # rag_* 数据源反桥
+    datasource: { enable: true }     # rag_* 数据源反桥（对应 ${ai.rags.datasource.enable:true}）
+    # 注意：RAG 自身总开关是 ai-starter 的 i2f.springboot.ai.rags.enable，不在此前缀下
   mcp-server:
     api: { enable: true }            # /mcp/api 通道，默认 true
 ```
@@ -290,10 +291,17 @@ ai:
   立即失效；随后调用 `test()` 再生成一对做一次加解密自测往返（无谓密码学开销）。
 - **【安全面·鉴权外扩】`SshOpsController.cmd`/`execSftpCmd`**：`util.exec(...)` 在目标机执行任意 shell、`runAsFile` 上传 `.sh` 再 `sh -c`（目标机 RCE）；`download`/`head`/`tail` 把请求携带的任意服务器路径直接作为 SFTP 参数（路径穿越面）；`delete` 递归删。均只受 SM 信封 + 可空放行的 hostId 保护。
 - **【安全面·注入】`DatasourceOpsController.doImport`**：`insert into {table} (列...) values (${列})` 中 `table` 取 `req.getTable()` **原样字符串拼接**（`${}` 值走 `BindSql` 参数绑定，但表名/列名未走标识符白名单或转义），存在标识符注入面。
-- **【欠登记·元数据】`additional-spring-configuration-metadata.json` 仅登记 `i2f.springboot.ops.secure.cert` 一个属性**
-  ：数十个 `i2f.springboot.ops.*.enable`、`base-url`、`datasource.datasourceMap.*`、`ai.tools.*`
-  （含新增 `skill-manage`/`recycle`/`database.update`/`qwen_tts`）、`ai.rags.*`、`ai.mcp-server.api.enable` 真实开关**全部零登记
-  **；`hints` 段仍是 `server.servlet.jsp.class-name` / `server.tomcat.accesslog.encoding` 两条从别处拷贝的死条目。
+- **~~【欠登记·元数据】`additional-spring-configuration-metadata.json` 仅登记 `i2f.springboot.ops.secure.cert` 一个属性~~
+  （已修复）**
+  ：现已按源码 `@ConditionalOnExpression`/`@Value`/`@ConfigurationProperties` 全量同步，登记 5 个
+  groups（`i2f.springboot.ops`、
+  `.secure`、`.datasource`、`ai.openai`、`ai.tts.qwen`）与 91 个 properties，覆盖 `base-url`、13 个域级 `enable`、
+  `datasource.datasource-map.*`（kebab-case，字段仍为 `datasourceMap`）、`ai.tools.*` 全部开关与模型参数（含
+  `skill-manage`/`recycle`/`database.update`/`qwen_tts`/`happyhorse-t2v` 等）、`ai.rags.datasource.enable`、
+  `ai.mcp-server.api.enable`、`ai.tts.qwen.*`、`ai.openai.*`
+  ；原两条从别处拷贝的死 `hints`（`server.servlet.jsp.class-name` /
+  `server.tomcat.accesslog.encoding`）已删除。本模块不存在 `ai.rags.enable`（RAG 总开关在 ai-starter
+  的 `i2f.springboot.ai.rags.enable`）。
 - **【一致性】`AppOpsController`/`AppEvalOpsController` 每个端点重复 `if(!canAcceptHostId){ if(isProxyHostId) proxy }` + `assertHostId` 样板**，未抽公共拦截器，漏写风险高；`SpringHolder` 以静态字段持有 context（多上下文/测试串扰风险）；自动配置类/`@Component` 普遍叠加 `@Data`+`@NoArgsConstructor`（暴露 setter、本组通病）。
 
 ### 新增问题（本轮重构引入）

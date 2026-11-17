@@ -40,7 +40,7 @@ http://localhost:8080/ops/
     - 注意，文件名必须为 `.groovy` 结尾
     - 必须有类名，不要发生类名冲突，注入的属性需要setter方法，具有无参构造
     - 没15秒进行自动注册热更新
-    - 前提是启用这个配置 `ai.tools.groovy-dynamic-tools.enable`
+  - 前提是启用这个配置 `i2f.springboot.ai.tools.groovy-dynamic-tools.enable`（ai-starter 前缀）
     - 运行使用 `@Autowired`,`@Resource`,`@Value` 等注入变量
 
 # 拓展OpenAI的角色设定
@@ -74,8 +74,8 @@ skills
 - i2f.springboot.ops.secure.cert
     - ops控制台的通信证书
     - 如果不填，系统启动时会自动生成一对，注意查看运行日志
-- i2f.springboot.ops.datasource.datasourceMap
-    - ops控制台的数据源配置
+- i2f.springboot.ops.datasource.datasource-map
+    - ops控制台的数据源配置（字段名 datasourceMap，配置统一用 kebab-case）
     - 可以在这里配置允许连接的数据源
 - xproc4j.xml-locations
     - xproc4j 框架扫描XML文件的路径

@@ -7,6 +7,7 @@ xproc4j:
   watching-directories: classpath*:procedure/;classpath*:com/
 
 
+# ops-starter 工具开关（前缀 ai.tools；ai-starter 的 mcp-gateway / groovy-dynamic-tools 在下方 i2f.springboot.ai.tools 中）
 ai:
   tools:
     file:
@@ -26,8 +27,6 @@ ai:
       enable: false
     powershell:
       enable: false
-    mcp-gateway:
-      enable: true
     robot:
       enable: false
     pandoc:
@@ -56,28 +55,12 @@ ai:
       enable: false
     qwen_tts:
       enable: true
-    groovy-dynamic-tools:
-      enable: false
-  rags:
-    enable: false
-    embedding:
-      baseUrl: http://localhost:11434/v1
-      apiKey: xxx
-      model: qwen3-embedding:0.6b
-      dimension: 1024
-      enableLoadDocs: false
-      docsPath: ./rags
-      maxSegmentSizeInChars: 512
-      docsEmbedBatchSize: 10
-      maxOverlapRate: 0.15
-      enableMarkitdownDocReader: false
-      enableEasyocrDocReader: false
-      enablePandocDocReader: false
+  # ops-starter: Qwen TTS（前缀 ai.tts.qwen）
   tts:
     qwen:
       enable: false
       url: wss://llm-xxxx.cn-beijing.maas.aliyuncs.com/api-ws/v1/inference
-      apiKey: sk-xxxx
+      api-key: sk-xxxx
       model: qwen-audio-3.0-tts-flash
       voice: longanhuan_v3.6
 
@@ -93,18 +76,25 @@ i2f:
     #         cert:
 
     ai:
+      # ai-starter: 容器工具网关与 groovy 动态工具（前缀 i2f.springboot.ai.tools）
+      tools:
+        mcp-gateway:
+          enable: true
+        groovy-dynamic-tools:
+          enable: false
+      # ai-starter: RAG 总开关与嵌入模型（前缀 i2f.springboot.ai.rags）
       rags:
         enable: false
         embedding:
-          baseUrl: http://localhost:11434/v1
-          apiKey: xxx
+          base-url: http://localhost:11434/v1
+          api-key: xxx
           model: qwen3-embedding:0.6b
           dimension: 1024
-          enableLoadDocs: false
-          docsPath: ./rags
-          maxSegmentSizeInChars: 512
-          docsEmbedBatchSize: 10
-          maxOverlapRate: 0.15
+          enable-load-docs: false
+          docs-path: ./rags
+          max-segment-size-in-chars: 512
+          docs-embed-batch-size: 10
+          max-overlap-rate: 0.15
         reader:
           markitdown:
             enable: true
@@ -153,7 +143,7 @@ i2f:
                 enable: true
               server:
                 enable: true
-          # official mcp client
+          # official mcp server
           official:
             # for 2024 stateful version
             v2024:

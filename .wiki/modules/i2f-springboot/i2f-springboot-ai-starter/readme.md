@@ -221,8 +221,8 @@ i2f.springboot.ai
 ```
 
 资源：`META-INF/spring.factories` 与 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports`（同
-9 项双注册）、`META-INF/additional-spring-configuration-metadata.json`（仅 7 条属性 + 2 条无关
-hints）、`sample/application-ai.yml`（仅 `enable: true`）。
+9 项双注册）、`META-INF/additional-spring-configuration-metadata.json`（11 groups / 49 properties，已按源码全量同步，无死
+hints）、`sample/application-ai.yml`（model/rags/skills/tools/proxy 全套样例）。
 
 ## 模块目的
 
@@ -781,7 +781,8 @@ toolInterceptor((proxy, invokable, args) ->{...}));
 7. **声明式 AI 服务**：接口 + 注解 + 返回类型即完整语义，`default`
    方法可混写工具，参数可注入 `AiAgent`/`AiAgentContext`/`AiRequest`。
 8. **双注册兼容**：`spring.factories` 与 `AutoConfiguration.imports` 同时登记 9 个自动配置类，兼容 Boot 2.6 前后。
-9. **配置自解释**：`@ConfigurationProperties` + `additional-spring-configuration-metadata.json` 提供 IDE 提示（覆盖不全，见瑕疵）。
+9. **配置自解释**：`@ConfigurationProperties` + `additional-spring-configuration-metadata.json` 提供 IDE 提示（已覆盖
+   model/tools/skills/rags/proxy 全部真实键）。
 
 ## 模块瑕疵或错误
 
@@ -791,7 +792,7 @@ toolInterceptor((proxy, invokable, args) ->{...}));
 1. **`i2f.springboot.ai.enable` 不是全局开关**：`AiCommonAutoConfiguration.java:22` 只门控本类（产出 `IJsonSerializer`
    与 `JsonSchemaAnnotationResolver`），其余 8
    个配置类各用自己的前缀（如 `AiModelAutoConfiguration.java:32`、`AiToolsAutoConfiguration.java:27`）。置 `false`
-   后模型、工具、技能、RAG、Agent、`@AiService` 全部照常装配；而 `sample/application-ai.yml` 只写这一项，极易误导。
+   后模型、工具、技能、RAG、Agent、`@AiService` 全部照常装配；`sample/application-ai.yml` 已补充各子系统显式开关，可对照确认此点。
 2. **显式关闭 resolver 开关会让 `AiAgent` 拿到 `null`**：`AiAgentAutoConfiguration.java:40-45`
    与 `AiCommonAutoConfiguration.java:38-43`
    两份同条件副本共用 `i2f.springboot.ai.json-schema-annotation-resolver.enable`
@@ -831,10 +832,12 @@ toolInterceptor((proxy, invokable, args) ->{...}));
     策略自动卸载」，但本模块只把加载结果追加进 `ToolCallContextHolder`（`84-88`、`222-225`），LRU
     与卸载逻辑实际在下游 `i2f-springboot-ops-starter`（`OpenAiOpsController.java:1240`）实现，单用本模块时该机制不存在。
 14. **`@AiService` 无法声明类级系统提示词**：`AiSystem`/`AiUser` 的 `@Target` 仅 `METHOD, PARAMETER`，接口类型上标注无效，只能逐方法重复写。
-15. **配置元数据严重不全且与代码矛盾**：`additional-spring-configuration-metadata.json` 仅登记 7
-    个属性，把 `i2f.springboot.ai.model.dashscope.enable` 默认值标为 `true`（代码 `AiModelAutoConfiguration.java:58`
-    为 `false`）；`tools.*`、`skills.*`、`rags.*`、`proxy.service-packages`
-    全部缺失，另有与本模块无关的 `server.servlet.jsp.*`、`server.tomcat.accesslog.encoding` 噪声 hints。
+15. **~~配置元数据严重不全且与代码矛盾~~（已修复）**：`additional-spring-configuration-metadata.json` 已按源码重写为 11
+    groups / 49 properties，`i2f.springboot.ai.model.dashscope.enable` 默认值已更正为 `false`
+    （与 `AiModelAutoConfiguration.java:58`
+    一致），补齐 `tools.*`（含 `groovy-dynamic-tools.enable`、`mcp-gateway.enable`）、`skills.*`（含 `runner.groovy.enable`）、
+    `rags.*`（含 `embedding` 全字段）、`proxy.service-packages`
+    ，并删除 `server.servlet.jsp.*`、`server.tomcat.accesslog.encoding` 噪声 hints。
 16. **两处类以「组件注解 + 自动配置导入」双重身份存在**：`GroovyDynamicToolProvider`、`GroovySkillScriptRunner`
     既 `@Component` 又列入 `AutoConfiguration.imports`，若宿主扫描包覆盖 `i2f.springboot.ai`，存在重复注册隐患。
 

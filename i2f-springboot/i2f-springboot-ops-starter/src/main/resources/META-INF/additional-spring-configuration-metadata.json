@@ -1,41 +1,652 @@
 {
   "groups": [
     {
+      "name": "i2f.springboot.ops",
+      "type": "i2f.springboot.ops.common.OpsStaticResourceConfiguration",
+      "sourceType": "i2f.springboot.ops.common.OpsStaticResourceConfiguration"
+    },
+    {
       "name": "i2f.springboot.ops.secure",
       "type": "i2f.springboot.ops.common.OpsSecureProperties",
       "sourceType": "i2f.springboot.ops.common.OpsSecureProperties"
+    },
+    {
+      "name": "i2f.springboot.ops.datasource",
+      "type": "i2f.springboot.ops.datasource.configuration.DatasourceAutoConfiguration",
+      "sourceType": "i2f.springboot.ops.datasource.configuration.DatasourceAutoConfiguration"
+    },
+    {
+      "name": "ai.openai",
+      "type": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties"
+    },
+    {
+      "name": "ai.tts.qwen",
+      "type": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties",
+      "sourceType": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties"
     }
   ],
   "properties": [
     {
-      "name": "i2f.springboot.ops.secure.cert",
+      "name": "i2f.springboot.ops.base-url",
       "type": "java.lang.String",
-      "description": "ops secure cert.",
-      "sourceType": "i2f.springboot.ops.common.OpsSecureProperties"
-    }
-  ],
-  "hints": [
-    {
-      "name": "server.servlet.jsp.class-name",
-      "providers": [
-        {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.servlet.http.HttpServlet"
-          }
-        }
-      ]
+      "description": "base url of ops web ui and apis, used as the SpEL base of every ops controller mapping.",
+      "sourceType": "i2f.springboot.ops.common.OpsConsts",
+      "defaultValue": "/ops"
     },
     {
-      "name": "server.tomcat.accesslog.encoding",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "java.nio.charset.Charset"
-          }
-        }
-      ]
+      "name": "i2f.springboot.ops.secure.cert",
+      "type": "java.lang.String",
+      "description": "ops secure transfer cert (key pair) used by the front-end secure channel.",
+      "sourceType": "i2f.springboot.ops.common.OpsSecureProperties"
+    },
+    {
+      "name": "i2f.springboot.ops.app.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable app ops controllers.",
+      "sourceType": "i2f.springboot.ops.app.controller.AppOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.aws-s3.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable aws s3 ops controller.",
+      "sourceType": "i2f.springboot.ops.awss3.controller.AwsS3OpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.dashscope.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable dashscope ops controller, disabled by default.",
+      "sourceType": "i2f.springboot.ops.dashscope.controller.DashScopeOpsController",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ops.elasticsearch.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable elasticsearch ops controller.",
+      "sourceType": "i2f.springboot.ops.elasticsearch.controller.ElasticSearchOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.home.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ops home controller and menu aggregation.",
+      "sourceType": "i2f.springboot.ops.home.OpsHomeController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.host.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable host info ops controller.",
+      "sourceType": "i2f.springboot.ops.host.controller.HostOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.minio.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable minio ops controller.",
+      "sourceType": "i2f.springboot.ops.minio.controller.MinioOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.open-ai.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable openai ops controller, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.controller.OpenAiOpsController",
+      "defaultValue": false
+    },
+    {
+      "name": "i2f.springboot.ops.redis.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable redis ops controller.",
+      "sourceType": "i2f.springboot.ops.redis.controller.RedisOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.ssh.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ssh ops controller.",
+      "sourceType": "i2f.springboot.ops.ssh.controller.SshOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.xproc4j.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable xproc4j ops controller.",
+      "sourceType": "i2f.springboot.ops.xproc4j.controller.XProc4jOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.xxl-job.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable xxl-job ops controller.",
+      "sourceType": "i2f.springboot.ops.xxljob.controller.XxlJobOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable datasource ops controllers (datasource management and metadata).",
+      "sourceType": "i2f.springboot.ops.datasource.controller.DatasourceOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.datasource-map",
+      "type": "java.util.Map<java.lang.String,i2f.springboot.ops.datasource.data.DatasourceItemDto>",
+      "description": "managed datasources exposed by the datasource ops ui.",
+      "sourceType": "i2f.springboot.ops.datasource.configuration.DatasourceAutoConfiguration"
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.datasource-map.*.driver",
+      "type": "java.lang.String",
+      "description": "jdbc driver class name.",
+      "sourceType": "i2f.springboot.ops.datasource.data.DatasourceItemDto"
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.datasource-map.*.url",
+      "type": "java.lang.String",
+      "description": "jdbc url.",
+      "sourceType": "i2f.springboot.ops.datasource.data.DatasourceItemDto"
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.datasource-map.*.username",
+      "type": "java.lang.String",
+      "description": "jdbc username.",
+      "sourceType": "i2f.springboot.ops.datasource.data.DatasourceItemDto"
+    },
+    {
+      "name": "i2f.springboot.ops.datasource.datasource-map.*.password",
+      "type": "java.lang.String",
+      "description": "jdbc password.",
+      "sourceType": "i2f.springboot.ops.datasource.data.DatasourceItemDto"
+    },
+    {
+      "name": "ai.openai.vision.image-max-size-kb",
+      "type": "java.lang.Integer",
+      "description": "max image size in kb when compressing images for vision requests.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$VisionOptions",
+      "defaultValue": 256
+    },
+    {
+      "name": "ai.openai.vision.image-max-dimension",
+      "type": "java.lang.Integer",
+      "description": "max image width/height when compressing images for vision requests.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$VisionOptions",
+      "defaultValue": 960
+    },
+    {
+      "name": "ai.openai.default-endpoint.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether the default openai compatible endpoint is available.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.openai.default-endpoint.model",
+      "type": "java.lang.String",
+      "description": "model name of the default endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.openai.default-endpoint.base-url",
+      "type": "java.lang.String",
+      "description": "base url of the default endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.openai.default-endpoint.api-key",
+      "type": "java.lang.String",
+      "description": "api key of the default endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.openai.dashscope-endpoint.enable",
+      "type": "java.lang.Boolean",
+      "description": "whether the dashscope compatible endpoint is available.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.openai.dashscope-endpoint.model",
+      "type": "java.lang.String",
+      "description": "model name of the dashscope endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.openai.dashscope-endpoint.base-url",
+      "type": "java.lang.String",
+      "description": "base url of the dashscope endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.openai.dashscope-endpoint.api-key",
+      "type": "java.lang.String",
+      "description": "api key of the dashscope endpoint.",
+      "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties$OpenAiOptions"
+    },
+    {
+      "name": "ai.tts.qwen.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable qwen tts ops controller.",
+      "sourceType": "i2f.springboot.ops.openai.controller.QwenTtsOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tts.qwen.url",
+      "type": "java.lang.String",
+      "description": "qwen tts http endpoint url.",
+      "sourceType": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties"
+    },
+    {
+      "name": "ai.tts.qwen.api-key",
+      "type": "java.lang.String",
+      "description": "qwen tts api key.",
+      "sourceType": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties"
+    },
+    {
+      "name": "ai.tts.qwen.model",
+      "type": "java.lang.String",
+      "description": "qwen tts model name.",
+      "sourceType": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties"
+    },
+    {
+      "name": "ai.tts.qwen.voice",
+      "type": "java.lang.String",
+      "description": "qwen tts voice name.",
+      "sourceType": "i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties"
+    },
+    {
+      "name": "ai.tts.server-speak.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable server side speak (local tts) ops controller.",
+      "sourceType": "i2f.springboot.ops.openai.controller.ServerSpeakTtsOpsController",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.rags.datasource.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable rag datasource collector used to bridge datasource metadata into rag.",
+      "sourceType": "i2f.springboot.ops.openai.rag.RagDataSourceCollector",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.mcp-server.api.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the /mcp/api tool provider of ops (file upload/download and ops apis exposed as mcp tools).",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.OpsMcpServerApiToolProvider",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.a2a.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable agent to agent tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.a2a.AgentTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.codec.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable codec tools (encode/decode).",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.CodecTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.command.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable command tools, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.CommandTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.database.metadata.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable database metadata tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatabaseMetadataTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.database.query.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable database query tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.database.query.validator.allow-fallback-simple",
+      "type": "java.lang.Boolean",
+      "description": "allow falling back to the simple regex sql validator when sql parser is unavailable.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.database.query.validator.always-use-simple",
+      "type": "java.lang.Boolean",
+      "description": "always use the simple regex sql validator instead of the sql parser based one.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatabaseQueryTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.database.update.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable database update tools (sql_update_datasource / sql_script_datasource), disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatabaseUpdateTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.datetime.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable datetime tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.DatetimeTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.file.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable local file tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LocalFileTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.file.root-path",
+      "type": "java.lang.String",
+      "description": "root directory of local file tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LocalFileTools",
+      "defaultValue": "./ai-root"
+    },
+    {
+      "name": "ai.tools.file.backup-file",
+      "type": "java.lang.Boolean",
+      "description": "whether to backup files before overwriting.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LocalFileTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.file.allow-change-full-access",
+      "type": "java.lang.Boolean",
+      "description": "whether tools are allowed to switch full-access mode at runtime.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LocalFileTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.file.full-access",
+      "type": "java.lang.Boolean",
+      "description": "whether local file tools can access paths outside root-path.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LocalFileTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.groovy.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable groovy script tools, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.GroovyTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.jce.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable jce crypto tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.JceTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.lunar.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable lunar calendar tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.LunarTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.nodejs.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable nodejs script tools, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.NodejsTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.powershell.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable powershell tools, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.PowershellTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.python.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable python tools, disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.PythonTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.random.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable random tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.RandomTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.recycle.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable recycle bin tools (ref:// content read).",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.RecycleTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.session-record.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable session record tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SessionRecordTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.skill-manage.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable skill manage tools (skill_install / skill_uninstall / skill_extract).",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SkillManageTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.tmp-file.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable tmp file tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.TmpFileTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.tmp-file.root-path",
+      "type": "java.lang.String",
+      "description": "root directory of tmp file tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.TmpFileTools",
+      "defaultValue": "./tmp-files"
+    },
+    {
+      "name": "ai.tools.tmp-file.keep-days",
+      "type": "java.lang.Integer",
+      "description": "how many days tmp files are kept before cleanup.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.TmpFileTools",
+      "defaultValue": 15
+    },
+    {
+      "name": "ai.tools.truth.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable truth store tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.TruthStoreTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.uid.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable uid tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.UidTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.url-signer.sign-salt",
+      "type": "java.lang.String",
+      "description": "salt prefix/suffix of url signature, injected as an empty string when absent (field default is overridden).",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.UrlSigner",
+      "defaultValue": ""
+    },
+    {
+      "name": "ai.tools.web-download.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable web download tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.WebDownloadTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.webjs.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable web javascript tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.WebjsTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.kling-t2i.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable kling text to image tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageKlingText2ImageTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.kling-t2i.model",
+      "type": "java.lang.String",
+      "description": "model name of kling text to image.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageKlingText2ImageTools",
+      "defaultValue": "kling/kling-v3-omni-image-generation"
+    },
+    {
+      "name": "ai.tools.vidu-t2i.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable vidu text to image tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageViduText2ImageTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.vidu-t2i.model",
+      "type": "java.lang.String",
+      "description": "model name of vidu text to image.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageViduText2ImageTools",
+      "defaultValue": "vidu/vidu-image-pro_reference2image"
+    },
+    {
+      "name": "ai.tools.dashscope-t2i.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable wan (dashscope) text to image tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageWanText2ImageTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.dashscope-t2i.model",
+      "type": "java.lang.String",
+      "description": "model name of wan text to image.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeImageWanText2ImageTools",
+      "defaultValue": "qwen-image-2.0-pro"
+    },
+    {
+      "name": "ai.tools.qwen_tts.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable qwen tts tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeQwenTtsTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.qwen_tts.model",
+      "type": "java.lang.String",
+      "description": "model name of qwen tts tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeQwenTtsTools",
+      "defaultValue": "qwen-audio-3.0-tts-plus"
+    },
+    {
+      "name": "ai.tools.qwen_tts.voice",
+      "type": "java.lang.String",
+      "description": "voice name of qwen tts tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeQwenTtsTools",
+      "defaultValue": "longanlingxin"
+    },
+    {
+      "name": "ai.tools.happyhorse-t2v.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable happyhorse text to video tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoHappyHorseText2VideoTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.happyhorse-t2v.model",
+      "type": "java.lang.String",
+      "description": "text to video model name of happyhorse.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoHappyHorseText2VideoTools",
+      "defaultValue": "happyhorse-1.0-t2v"
+    },
+    {
+      "name": "ai.tools.happyhorse-t2v.model-i2v",
+      "type": "java.lang.String",
+      "description": "image to video model name of happyhorse.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoHappyHorseText2VideoTools",
+      "defaultValue": "happyhorse-1.0-i2v"
+    },
+    {
+      "name": "ai.tools.kling-t2v.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable kling text to video tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoKlingText2VideoTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.kling-t2v.model",
+      "type": "java.lang.String",
+      "description": "text to video model name of kling.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoKlingText2VideoTools",
+      "defaultValue": "kling/kling-v3-omni-video-generation"
+    },
+    {
+      "name": "ai.tools.kling-t2v.model-i2v",
+      "type": "java.lang.String",
+      "description": "image to video model name of kling.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoKlingText2VideoTools",
+      "defaultValue": "kling/kling-v3-omni-video-generation"
+    },
+    {
+      "name": "ai.tools.pixverse-t2v.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable pixverse text to video tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoPixVerseText2VideoTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.pixverse-t2v.model",
+      "type": "java.lang.String",
+      "description": "text to video model name of pixverse.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoPixVerseText2VideoTools",
+      "defaultValue": "pixverse/pixverse-v6-t2v"
+    },
+    {
+      "name": "ai.tools.pixverse-t2v.model-i2v",
+      "type": "java.lang.String",
+      "description": "image to video model name of pixverse.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoPixVerseText2VideoTools",
+      "defaultValue": "pixverse/pixverse-v6-it2v"
+    },
+    {
+      "name": "ai.tools.vidu-t2v.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable vidu text to video tools.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoViduText2VideoTools",
+      "defaultValue": true
+    },
+    {
+      "name": "ai.tools.vidu-t2v.model",
+      "type": "java.lang.String",
+      "description": "text to video model name of vidu.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoViduText2VideoTools",
+      "defaultValue": "vidu/viduq3-pro_text2video"
+    },
+    {
+      "name": "ai.tools.vidu-t2v.model-i2v",
+      "type": "java.lang.String",
+      "description": "image to video model name of vidu.",
+      "sourceType": "i2f.springboot.ops.dashscope.tool.DashScopeVideoViduText2VideoTools",
+      "defaultValue": "vidu/viduq3-pro_img2video"
     }
   ]
 }

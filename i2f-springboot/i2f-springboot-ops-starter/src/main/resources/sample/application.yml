@@ -12,10 +12,101 @@ spring:
 i2f:
   springboot:
     ops:
+      # base url of ops web ui and apis, default /ops
+      base-url: /ops
+      # secure transfer key pair cert
+      secure:
+        cert: xxx
+      # ops controllers switch
+      app:
+        enable: true
+      home:
+        enable: true
+      host:
+        enable: true
       datasource:
-        datasourceMap:
+        enable: true
+        # kebab-case of DatasourceAutoConfiguration#datasourceMap
+        datasource-map:
           test:
-            driver: com.h2.Driver
+            driver: org.h2.Driver
             url: jdbc:h2:file:../h2/test.h2.db
             username: root
             password: 123456
+      # dashscope ops ui is disabled by default
+      dashscope:
+        enable: true
+      # openai ops ui is disabled by default
+      open-ai:
+        enable: true
+
+# ai endpoints used by ops openai tools (prefix ai.openai)
+ai:
+  openai:
+    vision:
+      image-max-size-kb: 256
+      image-max-dimension: 960
+    default-endpoint:
+      enable: true
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: xxx
+      model: qwen-plus
+    dashscope-endpoint:
+      enable: true
+      base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+      api-key: xxx
+      model: qwen-vl-max
+  # qwen tts ops ui (prefix ai.tts.qwen)
+  tts:
+    qwen:
+      enable: true
+      url: https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation
+      api-key: xxx
+      model: qwen-audio-3.0-tts-plus
+      voice: longanlingxin
+    server-speak:
+      enable: true
+  # rag datasource bridge
+  rags:
+    datasource:
+      enable: true
+  # ops apis exposed as mcp tools (/mcp/api)
+  mcp-server:
+    api:
+      enable: true
+  # built-in ai tools switch (prefix ai.tools)
+  tools:
+    codec:
+      enable: true
+    database:
+      metadata:
+        enable: true
+      query:
+        enable: true
+      update:
+        enable: false
+    file:
+      enable: true
+      root-path: ./ai-root
+      full-access: false
+    tmp-file:
+      enable: true
+      root-path: ./tmp-files
+      keep-days: 15
+    command:
+      enable: false
+    python:
+      enable: false
+    nodejs:
+      enable: false
+    powershell:
+      enable: false
+    groovy:
+      enable: false
+    url-signer:
+      # injected as empty string when absent
+      sign-salt: xxx
+    qwen_tts:
+      enable: true
+      model: qwen-audio-3.0-tts-plus
+      voice: longanlingxin

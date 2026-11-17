@@ -6,85 +6,286 @@
       "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration"
     },
     {
+      "name": "i2f.springboot.ai.mcp.server.simple",
+      "type": "i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration"
+    },
+    {
       "name": "i2f.springboot.ai.mcp.server.simple.netty",
       "type": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration"
     },
     {
-      "name": "i2f.springboot.ai.proxy",
+      "name": "i2f.springboot.ai.mcp.server.simple.springweb",
       "type": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration"
     },
     {
-      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb",
-      "type": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream",
+      "type": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties"
     },
     {
-      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb",
-      "type": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration",
-      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration"
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream",
+      "type": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties"
     }
   ],
   "properties": [
     {
-      "name": "i2f.springboot.ai.mcp.server.provider",
+      "name": "i2f.springboot.ai.mcp.server.provider.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai mcp server provider.",
+      "description": "enable ai mcp server provider (McpServerProviderAutoConfiguration).",
       "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.default-expose",
+      "type": "java.lang.Boolean",
+      "description": "default expose value of BasicMcpServerExposer when no rules/annotations matched.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.properties.McpServerProviderProperties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.rules",
+      "type": "java.util.List<i2f.ai.std.mcp.server.rule.McpServerExposeRule>",
+      "description": "expose rules (pattern / include-tags / exclude-tags + expose), matched in order, first hit wins.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.properties.McpServerProviderProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.rules[].pattern",
+      "type": "java.lang.String",
+      "description": "ANT style tool name pattern of the expose rule.",
+      "sourceType": "i2f.ai.std.mcp.server.rule.McpServerExposeRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.rules[].include-tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "match tools that contain any of these tags.",
+      "sourceType": "i2f.ai.std.mcp.server.rule.McpServerExposeRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.rules[].exclude-tags",
+      "type": "java.util.List<java.lang.String>",
+      "description": "match tools that contain any of these tags.",
+      "sourceType": "i2f.ai.std.mcp.server.rule.McpServerExposeRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.rules[].expose",
+      "type": "java.lang.Boolean",
+      "description": "expose value applied when the rule matched.",
+      "sourceType": "i2f.ai.std.mcp.server.rule.McpServerExposeRule"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.manager.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the ToolManager bean (ContextAppToolManager) when missing.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.exposer.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the McpServerExposer bean (BasicMcpServerExposer) when missing.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.provider.provider.enable",
+      "type": "java.lang.Boolean",
+      "description": "create the McpServerProvider bean (BasicMcpServerProvider + McpServerAdditionalToolManager) when missing.",
+      "sourceType": "i2f.springboot.ai.mcp.server.provider.McpServerProviderAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable simple (private HMAC signed) mcp server support.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.server.enable",
+      "type": "java.lang.Boolean",
+      "description": "create HttpSimpleMcpServer bean itself, disable to skip it.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.SimpleMcpServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.expire-window-minutes",
+      "type": "java.lang.Long",
+      "description": "request timestamp expire window in minutes for HMAC verify.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.properties.HttpSimpleMcpServerProperties",
+      "defaultValue": 30
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.hmac-name",
+      "type": "java.lang.String",
+      "description": "HMAC algorithm name for app sign verify.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.properties.HttpSimpleMcpServerProperties",
+      "defaultValue": "HmacSHA256"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.app-list",
+      "type": "java.util.List<i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpAppItem>",
+      "description": "allowed caller credentials (app-id / app-key).",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.properties.HttpSimpleMcpServerProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.app-list[].app-id",
+      "type": "java.lang.String",
+      "description": "caller app id (header X-App-Id).",
+      "sourceType": "i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpAppItem"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.app-list[].app-key",
+      "type": "java.lang.String",
+      "description": "caller app key used to compute HMAC sign.",
+      "sourceType": "i2f.ai.rest.mcp.simple.server.data.HttpSimpleMcpAppItem"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.springweb.enable",
+      "type": "java.lang.Boolean",
+      "description": "expose simple protocol on spring web (RestController: /mcp/tool/list, /mcp/tool/call).",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
       "defaultValue": true
     },
     {
       "name": "i2f.springboot.ai.mcp.server.simple.netty.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai mcp server on netty.",
+      "description": "expose simple protocol on a standalone netty port.",
       "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
       "defaultValue": false
     },
     {
-      "name": "i2f.springboot.ai.model.dashscope.enable",
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.port",
+      "type": "java.lang.Integer",
+      "description": "netty listen port for simple protocol.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.properties.NettySimpleMcpServerProperties",
+      "defaultValue": 23745
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.boss-thread",
+      "type": "java.lang.Integer",
+      "description": "netty boss thread count, 0 means default.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.properties.NettySimpleMcpServerProperties",
+      "defaultValue": 4
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.worker-thread",
+      "type": "java.lang.Integer",
+      "description": "netty worker thread count, 0 means default.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.properties.NettySimpleMcpServerProperties",
+      "defaultValue": 0
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.max-content-length",
+      "type": "java.lang.Integer",
+      "description": "netty http max content length in bytes.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.properties.NettySimpleMcpServerProperties",
+      "defaultValue": 65536
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.handler.enable",
       "type": "java.lang.Boolean",
-      "description": "enable ai mcp server on springweb.",
-      "sourceType": "i2f.springboot.ai.mcp.server.simple.springweb.SimpleSpringWebMcpServerAutoConfiguration",
+      "description": "create the netty inbound handler bean.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
       "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.simple.netty.server.enable",
+      "type": "java.lang.Boolean",
+      "description": "create and start the netty server bean.",
+      "sourceType": "i2f.springboot.ai.mcp.server.simple.netty.SimpleNettyMcpServerAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.server-name",
+      "type": "java.lang.String",
+      "description": "serverInfo.name returned by initialize.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties",
+      "defaultValue": "i2f-mcp-server"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.server-version",
+      "type": "java.lang.String",
+      "description": "serverInfo.version returned by initialize.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties",
+      "defaultValue": "1.0.0"
     },
     {
       "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.enable",
       "type": "java.lang.Boolean",
-      "description": "enable official mcp (streamable http) server on springweb.",
+      "description": "expose official mcp 2024 streamable http on spring web (/v2024/mcp).",
       "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.springweb.StreamSpringWebMcpServerAutoConfiguration",
       "defaultValue": true
     },
     {
-      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.enable",
+      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.bearer-token.enable",
       "type": "java.lang.Boolean",
-      "description": "enable official mcp 2026 stateless (streamable http) server on springweb.",
-      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration",
+      "description": "enable Authorization: Bearer token verify for official 2024 endpoint.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties",
       "defaultValue": true
-    }
-  ],
-  "hints": [
-    {
-      "name": "server.servlet.jsp.class-name",
-      "providers": [
-        {
-          "name": "class-reference",
-          "parameters": {
-            "target": "javax.servlet.http.HttpServlet"
-          }
-        }
-      ]
     },
     {
-      "name": "server.tomcat.accesslog.encoding",
-      "providers": [
-        {
-          "name": "handle-as",
-          "parameters": {
-            "target": "java.nio.charset.Charset"
-          }
-        }
-      ]
+      "name": "i2f.springboot.ai.mcp.server.official.v2024.stream.bearer-token.allow-tokens",
+      "type": "java.util.List<java.lang.String>",
+      "description": "allowed bearer tokens for official 2024 endpoint.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2024.stream.properties.OfficialMcpServerProperties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.server-name",
+      "type": "java.lang.String",
+      "description": "serverInfo.name returned by server/discover.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "defaultValue": "i2f-mcp-server"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.server-version",
+      "type": "java.lang.String",
+      "description": "serverInfo.version returned by server/discover.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "defaultValue": "1.0.0"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.instructions",
+      "type": "java.lang.String",
+      "description": "optional natural-language guidance returned by server/discover, omitted when empty.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.enable",
+      "type": "java.lang.Boolean",
+      "description": "expose official mcp 2026 stateless streamable http on spring web (/v2026/mcp).",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.springweb.StreamSpringWebMcpServerV2026AutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.bearer-token.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable Authorization: Bearer token verify for official 2026 endpoint.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.bearer-token.allow-tokens",
+      "type": "java.util.List<java.lang.String>",
+      "description": "allowed bearer tokens for official 2026 endpoint.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties"
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.tool-list.ttl-ms",
+      "type": "java.lang.Long",
+      "description": "ttlMs of CacheableResult for tools/list.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "defaultValue": 300000
+    },
+    {
+      "name": "i2f.springboot.ai.mcp.server.official.v2026.stream.tool-list.cache-scope",
+      "type": "java.lang.String",
+      "description": "cacheScope of CacheableResult for tools/list: public or private.",
+      "sourceType": "i2f.springboot.ai.mcp.server.official.v2026.stream.properties.OfficialMcpServerV2026Properties",
+      "defaultValue": "private"
     }
   ]
 }
