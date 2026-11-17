@@ -347,7 +347,9 @@ i2f:
 3. **~~认证未覆盖工具调用接口（安全）~~（已修复）**：上游 `HttpSimpleMcpServerImpl#callTool` 已在入口补调 `assertValidMcpRequest`，与 `getTools()` 对称；之前 `callTool` 未调用、默认装配下 `/mcp/tool/call` 可被任意请求直接触发工具执行的问题已消除。
 4. **Spring MVC 模式调用端点用 `@GetMapping`**：`SpringHttpSimpleMcpController` 对 `/mcp/tool/call` 用 `@GetMapping` + `@RequestBody`，与 Netty（强制 POST）及配套客户端（POST）不一致，用配套客户端调用会因方法不匹配返回 405；且 GET 携带请求体本身非常规。
 5. **Netty 启动失败静默化**：`nettyHttpSimpleMcpServer` 以守护线程 `server.start()`，端口占用等异常仅 `log.warn`，应用照常启动但 Netty 服务缺失。
-6. **配置元数据文件存在错误项**：`additional-spring-configuration-metadata.json` 中属性 `i2f.springboot.ai.model.dashscope.enable`（描述却为 springweb 开关）与分组 `i2f.springboot.ai.proxy` 疑为笔误（应为 `...simple.springweb.enable`/对应分组）；另含两条与本模块无关的 servlet/tomcat hints，IDE 配置提示可能失真。
+6. **配置元数据文件存在错误项**：`additional-spring-configuration-metadata.json`
+   中属性 `i2f.springboot.ai.model.dashscope.enable`（描述却为 springweb 开关）与分组 `i2f.springboot.ai.services`
+   疑为笔误（应为 `...simple.springweb.enable`/对应分组）；另含两条与本模块无关的 servlet/tomcat hints，IDE 配置提示可能失真。
 7. **次要代码问题**：`SpringHttpSimpleMcpController` 两个处理方法同名 `getTools`（重载，可读性差）；`HttpSimpleMcpInBoundHandler#exceptionCaught`/未知路由/错误方法均以 HTTP 200 + `ApiResp.error` 返回。
 
 ### official.v2024 有状态栈

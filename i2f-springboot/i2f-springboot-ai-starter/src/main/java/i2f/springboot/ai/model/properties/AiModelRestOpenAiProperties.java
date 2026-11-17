@@ -1,4 +1,4 @@
-package i2f.springboot.ai.properties;
+package i2f.springboot.ai.model.properties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.springboot.ai.model.rest-openai")
-public class SpringAiModelRestOpenAiProperties {
+public class AiModelRestOpenAiProperties {
     protected String baseUrl;
     protected String apiKey;
     protected String model;

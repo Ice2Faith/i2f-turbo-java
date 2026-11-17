@@ -1,4 +1,4 @@
-package i2f.springboot.ai.proxy;
+package i2f.springboot.ai.services;
 
 import i2f.ai.std.service.proxy.AiServiceDynamicProxyHandler;
 import i2f.ai.std.service.proxy.AiServices;
@@ -9,7 +9,7 @@ import org.springframework.context.ApplicationContext;
  * @author Ice2Faith
  * @date 2025/7/23 14:04
  */
-public class SpringAiServiceProxyInterfaceFactoryBean<T> implements FactoryBean<T> {
+public class AiServiceProxyInterfaceFactoryBean<T> implements FactoryBean<T> {
     private Class<T> serviceClass;
     private ApplicationContext context;
 

@@ -1,4 +1,4 @@
-package i2f.springboot.ai.properties;
+package i2f.springboot.ai.services.properties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,6 +15,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @ConfigurationProperties(prefix = "i2f.springboot.ai.proxy")
-public class SpringAiProxyServiceProperties {
+public class AiProxyServiceProperties {
     protected List<String> servicePackages = new ArrayList<>();
 }

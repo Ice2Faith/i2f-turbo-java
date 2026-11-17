@@ -1,10 +1,10 @@
-package i2f.springboot.ai.proxy;
+package i2f.springboot.ai.services;
 
 import i2f.ai.std.service.annotations.AiService;
 import i2f.ai.std.service.proxy.AiServiceDynamicProxyHandler;
 import i2f.spring.core.SpringContext;
-import i2f.springboot.ai.autoconfiguration.SpringAiServiceAutoConfiguration;
-import i2f.springboot.ai.properties.SpringAiProxyServiceProperties;
+import i2f.springboot.ai.common.AiCommonAutoConfiguration;
+import i2f.springboot.ai.services.properties.AiProxyServiceProperties;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -35,19 +35,19 @@ import java.util.*;
  * @author Ice2Faith
  * @date 2025/7/23 14:58
  */
-@AutoConfigureAfter(SpringAiServiceAutoConfiguration.class)
+@AutoConfigureAfter(AiCommonAutoConfiguration.class)
 @ConditionalOnExpression("${i2f.springboot.ai.proxy.enable:true}")
 @Configuration
 @Slf4j
 @Data
 @EnableConfigurationProperties({
-        SpringAiProxyServiceProperties.class
+        AiProxyServiceProperties.class
 })
-public class SpringAiServiceProxyInterfaceAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+public class AiServiceProxyInterfaceAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
     private ApplicationContext applicationContext;
 
     @Autowired
-    private SpringAiProxyServiceProperties springAiProxyServiceProperties;
+    private AiProxyServiceProperties aiProxyServiceProperties;
 
 
     @ConditionalOnExpression("${i2f.springboot.ai.proxy.handler.enable:true}")
@@ -62,7 +62,7 @@ public class SpringAiServiceProxyInterfaceAutoConfiguration implements Applicati
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             List<String> packages = new ArrayList<>();
-            List<String> mapperPackages = springAiProxyServiceProperties.getServicePackages();
+            List<String> mapperPackages = aiProxyServiceProperties.getServicePackages();
             if (mapperPackages != null) {
                 packages.addAll(mapperPackages);
             } else {
@@ -116,7 +116,7 @@ public class SpringAiServiceProxyInterfaceAutoConfiguration implements Applicati
                         .getRawBeanDefinition();
                 definition.getPropertyValues().add("serviceClass", clazz);
                 definition.getPropertyValues().add("context", applicationContext);
-                definition.setBeanClass(SpringAiServiceProxyInterfaceFactoryBean.class);
+                definition.setBeanClass(AiServiceProxyInterfaceFactoryBean.class);
                 definition.setAutowireMode(GenericBeanDefinition.AUTOWIRE_BY_TYPE);
                 definition.setLazyInit(true);
                 beanDefinitionRegistry.registerBeanDefinition(beanName, definition);

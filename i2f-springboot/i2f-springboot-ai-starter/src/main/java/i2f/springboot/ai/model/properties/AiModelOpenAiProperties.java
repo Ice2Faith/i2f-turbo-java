@@ -1,4 +1,4 @@
-package i2f.springboot.ai.properties;
+package i2f.springboot.ai.model.properties;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,8 +11,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "i2f.springboot.ai.model.dashscope")
-public class SpringAiModelDashScopeProperties {
+@ConfigurationProperties(prefix = "i2f.springboot.ai.model.openai")
+public class AiModelOpenAiProperties {
+    protected String baseUrl;
     protected String apiKey;
     protected String model;
 }

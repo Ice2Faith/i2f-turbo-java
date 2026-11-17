@@ -50,7 +50,7 @@ flowchart TD
     OPENAI --> AGENT
     JS --> AGENT
 
-    PROXY["SpringAiServiceProxyInterfaceAutoConfiguration<br/>开关 i2f.springboot.ai.proxy.enable 默认 true<br/>BeanDefinitionRegistryPostProcessor"]
+    PROXY["SpringAiServiceProxyInterfaceAutoConfiguration<br/>开关 i2f.springboot.ai.services.enable 默认 true<br/>BeanDefinitionRegistryPostProcessor"]
     PROXY -.->|"扫描 @AiService 接口"| FB["SpringAiServiceProxyInterfaceFactoryBean"]
     FB -->|"AiServices.create"| DP["JDK 动态代理"]
     DP --> H["AiServiceDynamicProxyHandler<br/>包装 SpringContext"]
