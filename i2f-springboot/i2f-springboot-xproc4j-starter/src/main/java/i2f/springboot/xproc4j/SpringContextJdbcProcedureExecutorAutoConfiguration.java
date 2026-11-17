@@ -8,6 +8,7 @@ import i2f.jdbc.procedure.context.JdbcProcedureContext;
 import i2f.jdbc.procedure.context.event.ScriptPreloadEventListener;
 import i2f.jdbc.procedure.context.impl.DefaultJdbcProcedureContext;
 import i2f.jdbc.procedure.context.impl.ProcedureMetaMapGrammarReporterListener;
+import i2f.jdbc.procedure.datasource.DataSourceProvider;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.ContextXProc4jEventHandler;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
@@ -19,6 +20,7 @@ import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.types.class4j.JdbcProcedureJavaCallerMetaProvider;
 import i2f.jdbc.procedure.provider.types.class4j.impl.ContextJdbcProcedureJavaCallerMetaCacheProvider;
 import i2f.jdbc.procedure.provider.types.xml.JdbcProcedureXmlNodeMetaProvider;
+import i2f.jdbc.procedure.provider.types.xml.impl.DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.provider.types.xml.impl.DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider;
 import i2f.jdbc.procedure.registry.JdbcProcedureMetaProviderRegistry;
 import i2f.jdbc.procedure.registry.impl.ContextJdbcProcedureMetaProviderRegistry;
@@ -45,13 +47,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.env.Environment;
 import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 
+import javax.sql.DataSource;
 import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author Ice2Faith
@@ -193,6 +194,34 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         ret.getDirs().addAll(files);
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         ret.getEnableScanWhenWatching().set(false);
+        ret.runOnBackground();
+        return ret;
+    }
+
+
+    @ConditionalOnExpression("${xproc4j.provider.xml-node.datasource.enable:false}")
+    @ConditionalOnMissingBean(DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider.class)
+    @Bean
+    public DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider datasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider(
+            @Autowired DataSource dataSource,
+            @Autowired(required = false) DataSourceProvider dataSourceProvider,
+            @Autowired Environment environment,
+            @Autowired(required = false) XProc4jEventHandler eventHandler
+    ) {
+        String dsName = environment.getProperty("xproc4j.provider.xml-node.datasource.name");
+        Map<String, DataSource> dsMap = dataSourceProvider.getDataSources();
+        if (dsName != null && !dsName.isEmpty()) {
+            DataSource ds = dsMap.get(dsName);
+            if (ds != null) {
+                dataSource = ds;
+            }
+        }
+        log.info(XProc4jConsts.NAME + " config " + DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider.class.getSimpleName() + " ...");
+        DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider ret = new DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider(dataSource);
+        if (eventHandler != null) {
+            ret.setEventHandler(eventHandler);
+        }
+        ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         ret.runOnBackground();
         return ret;
     }
