@@ -1,9 +1,10 @@
-package i2f.springboot.ops.openai.skill;
+package i2f.springboot.ai.skills;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import i2f.ai.std.skill.SkillScriptRunner;
+import i2f.extension.groovy.GroovyScript;
 import i2f.os.data.CommandResult;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,8 +25,11 @@ import java.util.concurrent.TimeUnit;
  * @date 2026/9/15 20:18
  * @desc
  */
-@ConditionalOnExpression("${ai.skills.runner.groovy.enable:true}")
-@ConditionalOnClass(GroovyShell.class)
+@ConditionalOnExpression("${i2f.springboot.ai.skills.runner.groovy.enable:true}")
+@ConditionalOnClass({
+        GroovyScript.class,
+        GroovyShell.class
+})
 @Data
 @NoArgsConstructor
 @Component

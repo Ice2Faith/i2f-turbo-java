@@ -1,6 +1,7 @@
 package i2f.springboot.ai.tools;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
 import i2f.ai.std.mcp.gateway.impl.ContextMcpToolGatewayManager;
 import i2f.ai.std.mcp.impl.ContextAppMcpToolProvider;
 import i2f.ai.std.tool.ToolManager;
@@ -63,6 +64,12 @@ public class AiToolsAutoConfiguration implements ApplicationContextAware {
                 .set(u -> u::setJsonSerializer, new JacksonJsonSerializer(objectMapper))
                 .done();
         return ret;
+    }
+
+    @ConditionalOnExpression("${i2f.springboot.ai.tools.mcp-gateway.enable:true}")
+    @Bean
+    public McpProviderTools mcpProviderTools(@Autowired AbstractMcpToolGatewayManager manager) {
+        return new McpProviderTools(manager);
     }
 
 }

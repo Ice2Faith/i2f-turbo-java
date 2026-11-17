@@ -3,6 +3,7 @@ i2f.springboot.ai.model.AiModelAutoConfiguration
 i2f.springboot.ai.tools.AiToolsAutoConfiguration
 i2f.springboot.ai.tools.GroovyDynamicToolProvider
 i2f.springboot.ai.skills.AiSkillsAutoConfiguration
+i2f.springboot.ai.skills.GroovySkillScriptRunner
 i2f.springboot.ai.rags.AiRagsAutoConfiguration
 i2f.springboot.ai.agent.AiAgentAutoConfiguration
 i2f.springboot.ai.services.AiServiceProxyInterfaceAutoConfiguration

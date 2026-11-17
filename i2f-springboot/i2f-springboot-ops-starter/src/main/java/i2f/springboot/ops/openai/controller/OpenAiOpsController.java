@@ -5,7 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import i2f.ai.rest.openai.model.data.*;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.prompts.AgentsPrompt;
-import i2f.ai.std.rag.*;
+import i2f.ai.std.rag.RagEmbedding;
+import i2f.ai.std.rag.RagEmbeddingModel;
+import i2f.ai.std.rag.RagTools;
+import i2f.ai.std.rag.RagWorker;
 import i2f.ai.std.rag.impl.InMemoryRagEmbeddingStore;
 import i2f.ai.std.skill.SkillDefinition;
 import i2f.ai.std.skill.SkillsHelper;
@@ -23,6 +26,8 @@ import i2f.net.http.consts.HttpHeaderConstants;
 import i2f.net.http.data.HttpRequest;
 import i2f.resp.ApiResp;
 import i2f.spring.web.rest.SpringWebHttpProcessor;
+import i2f.springboot.ai.rags.MemoryTools;
+import i2f.springboot.ai.tools.McpProviderTools;
 import i2f.springboot.ops.app.data.AppOperationDto;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
@@ -35,7 +40,6 @@ import i2f.springboot.ops.openai.data.*;
 import i2f.springboot.ops.openai.data.message.EchoOpenAiToolMessage;
 import i2f.springboot.ops.openai.data.message.OpsOpenAiConsts;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
-import i2f.springboot.ops.openai.rag.MemoryTools;
 import i2f.springboot.ops.openai.rag.RagEmbeddingCache;
 import i2f.springboot.ops.openai.tool.impl.*;
 import i2f.springboot.ops.openai.tool.impl.a2a.AgentTools;
@@ -641,11 +645,13 @@ public class OpenAiOpsController implements IOpsProvider {
         CopyOnWriteArrayList<AsyncTaskMessage> asyncTaskMessages = new CopyOnWriteArrayList<>();
         ConcurrentHashMap<String, String> recycleMap = new ConcurrentHashMap<>();
         RagEmbeddingCache requestEmbeddingCache = new RagEmbeddingCache("request");
+        ToolCallContextHolder.clear();
         try {
             OpenAiOperateDto req = transfer.recv(reqDto, OpenAiOperateDto.class);
             reqRef.set(req);
             HttpServletToolContextUtil.fillToolContext(request);
             ToolCallContextHolder.put("req", req);
+            MemoryTools.setMemoryBucket(req.getMemoryBucket());
             if (req.getRecycleMap() != null) {
                 for (Map.Entry<String, String> entry : req.getRecycleMap().entrySet()) {
                     String key = entry.getKey();
@@ -1231,7 +1237,7 @@ public class OpenAiOpsController implements IOpsProvider {
                                 }
                             }
                         }
-                        List<ToolDefinition> loadedTools = req.getLoadedTools();
+                        List<ToolDefinition> loadedTools = McpProviderTools.getLoadedTools();
                         if (loadedTools != null) {
                             for (ToolDefinition item : loadedTools) {
                                 if (unqToolNames.contains(item.getName())) {

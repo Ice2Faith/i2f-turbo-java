@@ -178,5 +178,11 @@ public class AiRagsAutoConfiguration implements ApplicationContextAware {
                 .done();
     }
 
+    @ConditionalOnExpression("${i2f.springboot.ai.rags.memory.enable:true}")
+    @ConditionalOnMissingBean(MemoryTools.class)
+    public MemoryTools memoryTools(@Autowired RagEmbeddingModel ragEmbeddingModel,
+                                   @Autowired BucketRagEmbeddingStore bucketRagEmbeddingStore) {
+        return new MemoryTools(ragEmbeddingModel, bucketRagEmbeddingStore);
+    }
 
 }

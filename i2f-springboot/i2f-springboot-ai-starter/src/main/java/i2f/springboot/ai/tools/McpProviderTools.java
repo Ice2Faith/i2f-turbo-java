@@ -1,4 +1,4 @@
-package i2f.springboot.ops.openai.tool.impl;
+package i2f.springboot.ai.tools;
 
 import i2f.ai.std.mcp.McpToolProvider;
 import i2f.ai.std.mcp.gateway.AbstractMcpToolGatewayManager;
@@ -10,7 +10,6 @@ import i2f.ai.std.tool.annotations.Tool;
 import i2f.ai.std.tool.annotations.ToolParam;
 import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.definition.ToolDefinition;
-import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -80,6 +79,12 @@ public class McpProviderTools {
 
     public McpProviderTools(AbstractMcpToolGatewayManager gatewayManager) {
         this.gatewayManager = gatewayManager;
+    }
+
+    public static final String CONTEXT_KEY_LOADED_TOOLS = McpToolProvider.class.getName() + ".loaded_tools";
+
+    public static List<ToolDefinition> getLoadedTools() {
+        return ToolCallContextHolder.getOr(CONTEXT_KEY_LOADED_TOOLS, ArrayList::new);
     }
 
     @Data
@@ -215,11 +220,8 @@ public class McpProviderTools {
         }
 
         synchronized (this) {
-            OpenAiOperateDto req = ToolCallContextHolder.get("req");
-            if (req.getLoadedTools() == null) {
-                req.setLoadedTools(new ArrayList<>());
-            }
-            req.getLoadedTools().addAll(tools);
+            List<ToolDefinition> req = getLoadedTools();
+            req.addAll(tools);
         }
 
         List<McpCategoryItem> items = new ArrayList<>();

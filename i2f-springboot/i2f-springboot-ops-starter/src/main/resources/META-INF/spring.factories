@@ -31,8 +31,7 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.xproc4j.helper.XProc4jHelper,\
     i2f.springboot.ops.openai.tool.impl.UrlSigner,\
     i2f.springboot.ops.openai.tool.impl.SkillManageTools,\
-    i2f.springboot.ops.openai.skill.GroovySkillScriptRunner,\
-    i2f.springboot.ops.openai.rag.RagAutoConfiguration,\
+    i2f.springboot.ai.skills.GroovySkillScriptRunner,\
     i2f.springboot.ops.openai.rag.RagDataSourceCollector,\
     i2f.springboot.ops.openai.tool.impl.DatetimeTools,\
     i2f.springboot.ops.openai.tool.impl.RandomTools,\
@@ -54,7 +53,6 @@ org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
     i2f.springboot.ops.openai.tool.impl.WebDownloadTools,\
     i2f.springboot.ops.openai.tool.impl.LunarTools,\
     i2f.springboot.ops.openai.tool.impl.a2a.AgentTools,\
-    i2f.springboot.ops.openai.tool.SpringContextToolAutoConfiguration,\
     i2f.springboot.ops.openai.tool.impl.OpsMcpServerAdditionalToolProvider,\
     i2f.springboot.ops.openai.tool.impl.OpsMcpServerApiToolProvider,\
     i2f.springboot.ops.openai.controller.OpenAiOpsController,\

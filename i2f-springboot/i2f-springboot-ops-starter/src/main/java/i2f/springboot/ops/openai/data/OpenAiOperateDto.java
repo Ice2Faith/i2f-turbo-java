@@ -1,6 +1,5 @@
 package i2f.springboot.ops.openai.data;
 
-import i2f.ai.std.tool.definition.ToolDefinition;
 import i2f.springboot.ops.openai.async.AsyncTaskItem;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,7 +46,6 @@ public class OpenAiOperateDto {
     protected List<String> lruToolNames;
     protected Integer lruToolMaxSize;
     protected boolean enableToolRecommendByIntentRecognize;
-    protected List<ToolDefinition> loadedTools;
 
     protected String md5;
     protected String fileUrl;

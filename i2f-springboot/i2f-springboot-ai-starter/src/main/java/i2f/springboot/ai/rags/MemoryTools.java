@@ -1,4 +1,4 @@
-package i2f.springboot.ops.openai.rag;
+package i2f.springboot.ai.rags;
 
 import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.rag.BucketRagEmbeddingStore;
@@ -13,7 +13,6 @@ import i2f.ai.std.tool.annotations.Tools;
 import i2f.ai.std.tool.intent.ToolIntent;
 import i2f.ai.std.tool.intent.ToolIntentItem;
 import i2f.mutator.BaseMutator;
-import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -66,6 +65,16 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
         this.embeddingStore = embeddingStore;
     }
 
+    public static final String CONTEXT_KEY_MEMORY_BUCKET = MemoryTools.class.getName() + ".memory_bucket";
+
+    public static String getMemoryBucket() {
+        return ToolCallContextHolder.get(CONTEXT_KEY_MEMORY_BUCKET);
+    }
+
+    public static void setMemoryBucket(String bucket) {
+        ToolCallContextHolder.put(CONTEXT_KEY_MEMORY_BUCKET, bucket);
+    }
+
     @Tool(tags = {
             AiTags.READONLY_VALUE
     }, description = "search relative memories from our history conversations(include preferences, hobby, personal info etc.) by similar query. Note: work on user level.")
@@ -77,10 +86,9 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
         if (topN == null) {
             topN = 3;
         }
-        OpenAiOperateDto req = ToolCallContextHolder.get("req");
         List<String> buckets = new ArrayList<>();
         buckets.add(BUCKET_PUBLIC);
-        String bucket = req.getMemoryBucket();
+        String bucket = getMemoryBucket();
         if (bucket != null && !bucket.trim().isEmpty()) {
             buckets.add(bucket.trim());
         }
@@ -104,8 +112,7 @@ public class MemoryTools implements BaseMutator<MemoryTools> {
     }, description = "save an memory content. Rule: make it brief and precise. Note: work on user level.")
     public String memory_save(@ToolParam(value = "text", description = "the content of want save")
                               String text) {
-        OpenAiOperateDto req = ToolCallContextHolder.get("req");
-        String bucket = req.getMemoryBucket();
+        String bucket = getMemoryBucket();
         if (bucket != null) {
             bucket = bucket.trim();
         }
