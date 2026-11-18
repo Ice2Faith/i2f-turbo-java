@@ -22,8 +22,29 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class Sm2Cipher {
     public static enum CipherMode {
-        C1C3C2, // default
-        C1C2C3,
+        C1C3C2(1), // default
+        C1C2C3(0);
+
+        private int mode;
+
+        private CipherMode(int mode) {
+            this.mode = mode;
+        }
+
+        public int mode() {
+            return this.mode;
+        }
+
+        public static CipherMode of(int mode) {
+            CipherMode[] arr = CipherMode.values();
+            for (CipherMode item : arr) {
+                if (item.mode() == mode) {
+                    return item;
+                }
+            }
+            // default
+            return C1C3C2;
+        }
     }
 
 

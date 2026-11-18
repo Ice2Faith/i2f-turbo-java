@@ -21,7 +21,7 @@ import java.security.PublicKey;
  */
 @Data
 public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
-    protected Sm2Cipher.CipherMode cipherMode = Sm2Cipher.CipherMode.C1C2C3;
+    protected Sm2Cipher.CipherMode cipherMode = Sm2Cipher.CipherMode.C1C3C2;
     protected String pubKey;
     protected String priKey;
 
@@ -205,11 +205,11 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
     }
 
     public String encrypt(String data) throws Exception {
-        return Sm2.doEncrypt(data, pubKey);
+        return Sm2.doEncrypt(data, pubKey, cipherMode);
     }
 
     public String decrypt(String data) throws Exception {
-        return Sm2.doDecrypt(data, priKey);
+        return Sm2.doDecrypt(data, priKey, cipherMode);
     }
 
     public String sign(String data) throws Exception {
