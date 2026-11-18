@@ -4,6 +4,8 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
+import i2f.jdbc.procedure.log.JdbcProcedureLogger;
+import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderChangeEvent;
@@ -34,6 +36,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
     protected volatile WatchService watcher;
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
     protected volatile Thread loopThread = null;
+    protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger();
 
     public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(List<String> locations) {
         if (locations == null) {
@@ -147,7 +150,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                 StandardWatchEventKinds.ENTRY_DELETE,
                 StandardWatchEventKinds.ENTRY_MODIFY);
 
-        System.out.println(XProc4jConsts.NAME + " watching directory: " + dir);
+        logger.logDebug(XProc4jConsts.NAME + " watching directory: " + dir);
 
     }
 
@@ -267,13 +270,13 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                 }
             }
             if (needNotifyChange) {
-                System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
+                logger.logDebug(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
             }
             String id = node.getTagAttrMap().get(AttrConsts.ID);
             if (id != null) {
                 ret.put(id, node);
                 if (needNotifyChange) {
-                    System.out.println(XProc4jConsts.NAME + " watching xml-node node:" + id);
+                    logger.logDebug(XProc4jConsts.NAME + " watching xml-node node:" + id);
                 }
                 Map<String, XmlNode> next = new HashMap<>();
                 JdbcProcedureParser.resolveEmbedIdNode(node, next);
@@ -282,7 +285,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                     if (!entry.getKey().equals(id)) {
                         String childId = id + "." + entry.getKey();
                         if (needNotifyChange) {
-                            System.out.println(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
+                            logger.logDebug(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
                         }
                         ret.put(childId, entry.getValue());
                     }

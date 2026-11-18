@@ -93,6 +93,7 @@ import java.util.function.Supplier;
  */
 @Data
 public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalScriptProvider {
+    protected final AtomicBoolean initialized = new AtomicBoolean(false);
     public static transient final LruMap<String, Object> staticLru = new LruMap<>(4096);
     protected transient final LruMap<String, Object> executorLru = new LruMap<>(4096);
 
@@ -126,7 +127,10 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
 
     protected volatile IGrammarReporter grammarReporter = new BasicGrammarReporter();
 
-    {
+    public void initial() {
+        if (initialized.getAndSet(true)) {
+            return;
+        }
         List<ExecutorNode> list = defaultExecutorNodes();
         for (ExecutorNode node : list) {
             registryExecutorNode(node);
@@ -142,6 +146,17 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
         initConstAttrValueOptimizeFeatures();
 
         afterConstructor();
+    }
+
+    {
+        new Thread(() -> {
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(2));
+            } catch (InterruptedException e) {
+                // ignore
+            }
+            initial();
+        }).start();
     }
 
     public BasicJdbcProcedureExecutor() {

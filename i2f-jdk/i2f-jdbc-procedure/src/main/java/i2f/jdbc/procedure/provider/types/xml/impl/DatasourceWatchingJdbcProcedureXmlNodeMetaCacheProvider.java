@@ -7,6 +7,8 @@ import i2f.jdbc.procedure.consts.AttrConsts;
 import i2f.jdbc.procedure.consts.XProc4jConsts;
 import i2f.jdbc.procedure.event.XProc4jEventHandler;
 import i2f.jdbc.procedure.event.impl.DefaultXProc4jEventHandler;
+import i2f.jdbc.procedure.log.JdbcProcedureLogger;
+import i2f.jdbc.procedure.log.impl.DefaultJdbcProcedureLogger;
 import i2f.jdbc.procedure.parser.JdbcProcedureParser;
 import i2f.jdbc.procedure.parser.data.XmlNode;
 import i2f.jdbc.procedure.provider.event.ProcedureMetaProviderChangeEvent;
@@ -36,6 +38,7 @@ public class DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abs
     protected final ConcurrentHashMap<String, XmlNode> nodeMap = new ConcurrentHashMap<>();
     protected volatile XProc4jEventHandler eventHandler = new DefaultXProc4jEventHandler();
     protected volatile Thread loopThread = null;
+    protected volatile JdbcProcedureLogger logger = new DefaultJdbcProcedureLogger();
 
     public DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider(DataSource dataSource) {
         this(dataSource, null);
@@ -206,13 +209,13 @@ public class DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abs
                 }
             }
             if (needNotifyChange) {
-                System.out.println(XProc4jConsts.NAME + " watching xml-node file change parsed:" + info.getFileName());
+                logger.logDebug(XProc4jConsts.NAME + " watching xml-node file change parsed:" + info.getFileName());
             }
             String id = node.getTagAttrMap().get(AttrConsts.ID);
             if (id != null) {
                 ret.put(id, node);
                 if (needNotifyChange) {
-                    System.out.println(XProc4jConsts.NAME + " watching xml-node node:" + id);
+                    logger.logDebug(XProc4jConsts.NAME + " watching xml-node node:" + id);
                 }
                 Map<String, XmlNode> next = new HashMap<>();
                 JdbcProcedureParser.resolveEmbedIdNode(node, next);
@@ -221,7 +224,7 @@ public class DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abs
                     if (!entry.getKey().equals(id)) {
                         String childId = id + "." + entry.getKey();
                         if (needNotifyChange) {
-                            System.out.println(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
+                            logger.logDebug(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
                         }
                         ret.put(childId, entry.getValue());
                     }
