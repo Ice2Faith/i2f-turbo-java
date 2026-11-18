@@ -18,10 +18,13 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.type.ClassMetadata;
@@ -43,12 +46,11 @@ import java.util.*;
 @EnableConfigurationProperties({
         AiProxyServiceProperties.class
 })
-public class AiServiceProxyInterfaceAutoConfiguration implements ApplicationContextAware, BeanDefinitionRegistryPostProcessor {
+public class AiServiceProxyInterfaceAutoConfiguration
+        implements ApplicationContextAware, EnvironmentAware, BeanDefinitionRegistryPostProcessor {
     private ApplicationContext applicationContext;
 
-    @Autowired
-    private AiProxyServiceProperties aiProxyServiceProperties;
-
+    private Environment environment;
 
     @ConditionalOnExpression("${i2f.springboot.ai.proxy.handler.enable:true}")
     @ConditionalOnMissingBean(AiServiceDynamicProxyHandler.class)
@@ -62,6 +64,8 @@ public class AiServiceProxyInterfaceAutoConfiguration implements ApplicationCont
         try {
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             List<String> packages = new ArrayList<>();
+            Binder binder = Binder.get(environment);
+            AiProxyServiceProperties aiProxyServiceProperties = binder.bind(AiProxyServiceProperties.CONFIG_PREFIX, AiProxyServiceProperties.class).get();
             List<String> mapperPackages = aiProxyServiceProperties.getServicePackages();
             if (mapperPackages != null && !mapperPackages.isEmpty()) {
                 packages.addAll(mapperPackages);

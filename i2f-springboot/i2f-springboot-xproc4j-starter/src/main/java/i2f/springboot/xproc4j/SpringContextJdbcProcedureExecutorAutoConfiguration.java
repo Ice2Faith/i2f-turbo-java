@@ -105,6 +105,15 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
+
+    @ConditionalOnMissingBean(JdbcProcedureLogger.class)
+    @Bean
+    public JdbcProcedureLogger jdbcProcedureLogger() {
+        Slf4jJdbcProcedureLogger ret = new Slf4jJdbcProcedureLogger();
+        ret.debug(jdbcProcedureProperties.isDebug());
+        return ret;
+    }
+
     @ConditionalOnExpression("${xproc4j.event-handler.enable:true}")
     @ConditionalOnMissingBean(XProc4jEventHandler.class)
     @Bean
@@ -159,12 +168,17 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
     @ConditionalOnMissingBean(DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider.class)
     @Bean
     public DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider directoryWatchingJdbcProcedureXmlNodeMetaCacheProvider(
-            @Autowired(required = false) XProc4jEventHandler eventHandler
+            @Autowired(required = false) XProc4jEventHandler eventHandler,
+            @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger
     ) {
         log.info(XProc4jConsts.NAME + " config " + DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider.class.getSimpleName() + " ...");
         DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider ret = new DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider();
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
+        }
+        if (jdbcProcedureLogger != null) {
+            ret.setLogger(jdbcProcedureLogger);
+            jdbcProcedureLogger.debug(jdbcProcedureProperties.isDebug());
         }
         String watchingDirectories = jdbcProcedureProperties.getWatchingDirectories();
         if (watchingDirectories == null) {
@@ -206,7 +220,8 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
             @Autowired DataSource dataSource,
             @Autowired(required = false) DataSourceProvider dataSourceProvider,
             @Autowired Environment environment,
-            @Autowired(required = false) XProc4jEventHandler eventHandler
+            @Autowired(required = false) XProc4jEventHandler eventHandler,
+            @Autowired(required = false) JdbcProcedureLogger jdbcProcedureLogger
     ) {
         String dsName = environment.getProperty("xproc4j.provider.xml-node.datasource.name");
         Map<String, DataSource> dsMap = dataSourceProvider.getDataSources();
@@ -220,6 +235,10 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider ret = new DatasourceWatchingJdbcProcedureXmlNodeMetaCacheProvider(dataSource);
         if (eventHandler != null) {
             ret.setEventHandler(eventHandler);
+        }
+        if (jdbcProcedureLogger != null) {
+            ret.setLogger(jdbcProcedureLogger);
+            jdbcProcedureLogger.debug(jdbcProcedureProperties.isDebug());
         }
         ret.startRefreshThread(jdbcProcedureProperties.getRefreshXmlIntervalSeconds());
         ret.runOnBackground();
@@ -272,13 +291,6 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         return ret;
     }
 
-    @ConditionalOnMissingBean(JdbcProcedureLogger.class)
-    @Bean
-    public JdbcProcedureLogger jdbcProcedureLogger() {
-        Slf4jJdbcProcedureLogger ret = new Slf4jJdbcProcedureLogger();
-        ret.debug(jdbcProcedureProperties.isDebug());
-        return ret;
-    }
 
     @ConditionalOnMissingBean(IGrammarReporter.class)
     @Bean
@@ -327,6 +339,7 @@ public class SpringContextJdbcProcedureExecutorAutoConfiguration implements Appl
         ret.setSlowNodeMillsSeconds(jdbcProcedureProperties.getSlowNodeMillsSeconds());
         ret.setSlowProcedureMillsSeconds(jdbcProcedureProperties.getSlowProcedureMillsSeconds());
         ret.debug(jdbcProcedureProperties.isDebug());
+        ret.initial();
         return ret;
     }
 

@@ -74,9 +74,9 @@ public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
             String msg = "near " + location + ", msg: " + supplier.get();
             if (e != null) {
                 JdbcProcedureUtil.purifyStackTrace(e, true);
-                getLogger().info(msg, e);
+                getLogger().debug(msg, e);
             } else {
-                getLogger().info(msg);
+                getLogger().debug(msg);
             }
         }
     }

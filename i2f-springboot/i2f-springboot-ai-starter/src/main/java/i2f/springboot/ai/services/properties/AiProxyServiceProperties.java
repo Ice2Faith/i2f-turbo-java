@@ -14,7 +14,8 @@ import java.util.List;
  */
 @Data
 @NoArgsConstructor
-@ConfigurationProperties(prefix = "i2f.springboot.ai.proxy")
+@ConfigurationProperties(prefix = AiProxyServiceProperties.CONFIG_PREFIX)
 public class AiProxyServiceProperties {
+    public static final String CONFIG_PREFIX = "i2f.springboot.ai.proxy";
     protected List<String> servicePackages = new ArrayList<>();
 }

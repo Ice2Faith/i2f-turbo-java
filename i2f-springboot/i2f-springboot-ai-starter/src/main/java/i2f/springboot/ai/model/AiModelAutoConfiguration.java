@@ -42,7 +42,7 @@ public class AiModelAutoConfiguration {
     @ConditionalOnExpression("${i2f.springboot.ai.model.rest-openai.enable:true}")
     @ConditionalOnMissingBean(AiModel.class)
     @Bean
-    public AiModel aiModel(@Autowired AiModelRestOpenAiProperties aiModelRestOpenAiProperties) {
+    public AiModel restOpenAiModel(@Autowired AiModelRestOpenAiProperties aiModelRestOpenAiProperties) {
         RestTemplate restTemplate = new RestTemplateBuilder()
                 .setConnectTimeout(Duration.ofSeconds(30))
                 .setReadTimeout(Duration.ofMinutes(10))
@@ -62,7 +62,7 @@ public class AiModelAutoConfiguration {
     })
     @ConditionalOnMissingBean(AiModel.class)
     @Bean
-    public AiModel aiModel(@Autowired AiModelDashScopeProperties aiModelDashScopeProperties) {
+    public AiModel dashScopeModel(@Autowired AiModelDashScopeProperties aiModelDashScopeProperties) {
         return new DashScopeModel()
                 .apiKey(aiModelDashScopeProperties.getApiKey())
                 .model(aiModelDashScopeProperties.getModel());
@@ -75,7 +75,7 @@ public class AiModelAutoConfiguration {
     })
     @ConditionalOnMissingBean(AiModel.class)
     @Bean
-    public AiModel aiModel(@Autowired AiModelOpenAiProperties aiModelOpenAiProperties) {
+    public AiModel openAiModel(@Autowired AiModelOpenAiProperties aiModelOpenAiProperties) {
         return OpenAiModel.builder()
                 .baseUrl(aiModelOpenAiProperties.getBaseUrl())
                 .apiKey(aiModelOpenAiProperties.getApiKey())

@@ -151,6 +151,8 @@
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ai-starter</artifactId>
+            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
