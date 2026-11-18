@@ -5,6 +5,7 @@ import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.crypto.std.encrypt.symmetric.key.BytesKey;
 import i2f.sm.crypto.sm4.Sm4;
+import i2f.sm.crypto.util.CipUtils;
 
 import java.security.Key;
 
@@ -23,7 +24,7 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     }
 
     public SmCryptoSm4Encryptor(Key key) {
-        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+        this.key = CipUtils.arrayToHex(key.getEncoded());
     }
 
     public static String genKey() {
@@ -35,28 +36,28 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
     }
 
     public static Key keyOf(String key) {
-        return keyOf(HexStringByteCodec.INSTANCE.decode(key));
+        return keyOf(CipUtils.hexToArray(key));
     }
 
     @Override
     public void setKey(Key key) {
-        this.key = HexStringByteCodec.INSTANCE.encode(key.getEncoded());
+        this.key = CipUtils.arrayToHex(key.getEncoded());
     }
 
     @Override
     public Key getKey() {
-        byte[] bytes = HexStringByteCodec.INSTANCE.decode(key);
+        byte[] bytes = CipUtils.hexToArray(key);
         return keyOf(bytes);
     }
 
     @Override
     public void setKeyBytes(byte[] keyBytes) {
-        this.key = HexStringByteCodec.INSTANCE.encode(keyBytes);
+        this.key = CipUtils.arrayToHex(keyBytes);
     }
 
     @Override
     public byte[] getKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(this.key);
+        return CipUtils.hexToArray(this.key);
     }
 
     @Override
@@ -71,16 +72,16 @@ public class SmCryptoSm4Encryptor implements ISymmetricEncryptor {
 
     @Override
     public byte[] encrypt(byte[] data) throws Exception {
-        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String str = CipUtils.arrayToUtf8(data);
         String enc = Sm4.encrypt(str, this.key);
-        return HexStringByteCodec.INSTANCE.decode(enc);
+        return CipUtils.hexToArray(enc);
     }
 
     @Override
     public byte[] decrypt(byte[] data) throws Exception {
-        String enc = HexStringByteCodec.INSTANCE.encode(data);
+        String enc = CipUtils.arrayToHex(data);
         String str = Sm4.decrypt(enc, this.key);
-        return CharsetStringByteCodec.UTF8.decode(str);
+        return CipUtils.utf8ToArray(str);
     }
 
     public String encrypt(String data) throws Exception {

@@ -9,6 +9,7 @@ import i2f.crypto.std.encrypt.asymmetric.key.BytesPublicKey;
 import i2f.sm.crypto.exception.SmException;
 import i2f.sm.crypto.sm2.Sm2;
 import i2f.sm.crypto.sm2.Sm2Cipher;
+import i2f.sm.crypto.util.CipUtils;
 import lombok.Data;
 
 import java.security.KeyPair;
@@ -40,10 +41,10 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     public SmCryptoSm2Encryptor(KeyPair keyPair) {
         if (keyPair.getPublic() != null) {
-            this.pubKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPublic().getEncoded());
+            this.pubKey = CipUtils.arrayToHex(keyPair.getPublic().getEncoded());
         }
         if (keyPair.getPrivate() != null) {
-            this.priKey = HexStringByteCodec.INSTANCE.encode(keyPair.getPrivate().getEncoded());
+            this.priKey = CipUtils.arrayToHex(keyPair.getPrivate().getEncoded());
         }
     }
 
@@ -59,8 +60,8 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
         try {
             i2f.sm.crypto.sm2.KeyPair keypair = Sm2.generateKeyPairHex();
 
-            return new KeyPair(new BytesPublicKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPublicKey())),
-                    new BytesPrivateKey("sm2", "hex", HexStringByteCodec.INSTANCE.decode(keypair.getPrivateKey())));
+            return new KeyPair(new BytesPublicKey("sm2", "hex", CipUtils.hexToArray(keypair.getPublicKey())),
+                    new BytesPrivateKey("sm2", "hex", CipUtils.hexToArray(keypair.getPrivateKey())));
         } catch (SmException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
@@ -82,53 +83,53 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     @Override
     public void setPublicKey(PublicKey publicKey) {
-        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKey.getEncoded());
+        this.pubKey = CipUtils.arrayToHex(publicKey.getEncoded());
     }
 
     @Override
     public PublicKey getPublicKey() {
-        return publicKeyOf(HexStringByteCodec.INSTANCE.decode(this.pubKey));
+        return publicKeyOf(CipUtils.hexToArray(this.pubKey));
     }
 
     @Override
     public void setPrivateKey(PrivateKey privateKey) {
-        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKey.getEncoded());
+        this.priKey = CipUtils.arrayToHex(privateKey.getEncoded());
     }
 
     @Override
     public PrivateKey getPrivateKey() {
-        return privateKeyOf(HexStringByteCodec.INSTANCE.decode(this.priKey));
+        return privateKeyOf(CipUtils.hexToArray(this.priKey));
     }
 
     @Override
     public void setPublicKeyBytes(byte[] publicKeyBytes) {
-        this.pubKey = HexStringByteCodec.INSTANCE.encode(publicKeyBytes);
+        this.pubKey = CipUtils.arrayToHex(publicKeyBytes);
     }
 
     @Override
     public byte[] getPublicKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(pubKey);
+        return CipUtils.hexToArray(pubKey);
     }
 
     @Override
     public void setPrivateKeyBytes(byte[] privateKeyBytes) {
-        this.priKey = HexStringByteCodec.INSTANCE.encode(privateKeyBytes);
+        this.priKey = CipUtils.arrayToHex(privateKeyBytes);
     }
 
     @Override
     public byte[] getPrivateKeyBytes() {
-        return HexStringByteCodec.INSTANCE.decode(this.priKey);
+        return CipUtils.hexToArray(this.priKey);
     }
 
     @Override
     public void setKeyPair(KeyPair keyPair) {
         PublicKey pub = keyPair.getPublic();
         if (pub != null) {
-            this.pubKey = HexStringByteCodec.INSTANCE.encode(pub.getEncoded());
+            this.pubKey = CipUtils.arrayToHex(pub.getEncoded());
         }
         PrivateKey pri = keyPair.getPrivate();
         if (pri != null) {
-            this.priKey = HexStringByteCodec.INSTANCE.encode(pri.getEncoded());
+            this.priKey = CipUtils.arrayToHex(pri.getEncoded());
         }
     }
 
@@ -137,10 +138,10 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
         PublicKey pub = null;
         PrivateKey pri = null;
         if (this.pubKey != null && !this.pubKey.isEmpty()) {
-            pub = publicKeyOf(HexStringByteCodec.INSTANCE.decode(this.pubKey));
+            pub = publicKeyOf(CipUtils.hexToArray(this.pubKey));
         }
         if (this.priKey != null && !this.priKey.isEmpty()) {
-            pri = privateKeyOf(HexStringByteCodec.INSTANCE.decode(this.priKey));
+            pri = privateKeyOf(CipUtils.hexToArray(this.priKey));
         }
         return new KeyPair(pub, pri);
     }
@@ -178,29 +179,29 @@ public class SmCryptoSm2Encryptor implements IAsymmetricEncryptor {
 
     @Override
     public byte[] encrypt(byte[] data) throws Exception {
-        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String str = CipUtils.arrayToUtf8(data);
         String hex = encrypt(str);
-        return HexStringByteCodec.INSTANCE.decode(hex);
+        return CipUtils.hexToArray(hex);
     }
 
     @Override
     public byte[] decrypt(byte[] data) throws Exception {
-        String hex = HexStringByteCodec.INSTANCE.encode(data);
+        String hex = CipUtils.arrayToHex(data);
         String enc = decrypt(hex);
-        return CharsetStringByteCodec.UTF8.decode(enc);
+        return CipUtils.utf8ToArray(enc);
     }
 
     @Override
     public byte[] sign(byte[] data) throws Exception {
-        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String str = CipUtils.arrayToUtf8(data);
         String sign = sign(str);
-        return HexStringByteCodec.INSTANCE.decode(sign);
+        return CipUtils.hexToArray(sign);
     }
 
     @Override
     public boolean verify(byte[] sign, byte[] data) throws Exception {
-        String signHex = HexStringByteCodec.INSTANCE.encode(data);
-        String str = CharsetStringByteCodec.UTF8.encode(data);
+        String signHex = CipUtils.arrayToHex(data);
+        String str = CipUtils.arrayToUtf8(data);
         return verify(signHex, str);
     }
 

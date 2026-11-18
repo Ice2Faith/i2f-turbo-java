@@ -1,6 +1,5 @@
 package i2f.sm.crypto.sm2;
 
-import i2f.codec.bytes.charset.CharsetStringByteCodec;
 import i2f.sm.crypto.exception.SmException;
 import i2f.sm.crypto.sm2.ec.EcCurveFp;
 import i2f.sm.crypto.sm2.ec.EcFieldElementFp;
@@ -95,7 +94,7 @@ public class Utils {
      * utf8串转16进制串
      */
     public static String utf8ToHex(String input) {
-        byte[] bytes = CharsetStringByteCodec.UTF8.decode(input);
+        byte[] bytes = CipUtils.utf8ToArray(input);
 
         int length = bytes.length;
 
@@ -135,7 +134,7 @@ public class Utils {
                 latin1Chars[i] = bite;
             }
 
-            return CharsetStringByteCodec.UTF8.encode(latin1Chars);
+            return CipUtils.arrayToUtf8(latin1Chars);
         } catch (Exception e) {
             throw new SmException("Malformed UTF-8 data");
         }
