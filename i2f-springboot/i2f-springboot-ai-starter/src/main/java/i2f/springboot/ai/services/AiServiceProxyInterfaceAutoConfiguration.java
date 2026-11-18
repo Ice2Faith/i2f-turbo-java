@@ -65,7 +65,8 @@ public class AiServiceProxyInterfaceAutoConfiguration
             PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
             List<String> packages = new ArrayList<>();
             Binder binder = Binder.get(environment);
-            AiProxyServiceProperties aiProxyServiceProperties = binder.bind(AiProxyServiceProperties.CONFIG_PREFIX, AiProxyServiceProperties.class).get();
+            AiProxyServiceProperties aiProxyServiceProperties = binder.bind(AiProxyServiceProperties.CONFIG_PREFIX, AiProxyServiceProperties.class)
+                    .orElseGet(AiProxyServiceProperties::new);
             List<String> mapperPackages = aiProxyServiceProperties.getServicePackages();
             if (mapperPackages != null && !mapperPackages.isEmpty()) {
                 packages.addAll(mapperPackages);
