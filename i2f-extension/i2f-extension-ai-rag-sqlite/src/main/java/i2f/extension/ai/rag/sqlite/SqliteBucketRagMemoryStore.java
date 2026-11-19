@@ -49,7 +49,7 @@ public class SqliteBucketRagMemoryStore implements BucketRagEmbeddingStore, Base
                 id = UUID.randomUUID().toString().replace("-", "");
             }
             /*language=sql*/
-            JdbcResolver.update(conn, BindSql.of("insert into " + tableName + " (id,content,vector,meta_data,bucket,create_time) values (?,?,?,?,?)",
+            JdbcResolver.update(conn, BindSql.of("insert into " + tableName + " (id,content,vector,meta_data,bucket,create_time) values (?,?,?,?,?,?)",
                     id, embedding.getContent(),
                     jsonSerializer.serialize(embedding.getVector().getArray()),
                     jsonSerializer.serialize(embedding.getMetadata()),
@@ -111,6 +111,7 @@ public class SqliteBucketRagMemoryStore implements BucketRagEmbeddingStore, Base
                         }
                     }
 
+                    item.setContent(str(row.get("bucket")));
                     ret.add(item);
                 }
             }
@@ -168,6 +169,7 @@ public class SqliteBucketRagMemoryStore implements BucketRagEmbeddingStore, Base
                     "   create_time text\n" +
                     ")"));
 
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("create index IF NOT EXISTS idx" + tableName + "_bucket" +
                     " on " + tableName + "(bucket)"));
         }
