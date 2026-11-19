@@ -36,9 +36,9 @@ public class OpsSecureHelper {
     public OpsSecureCertPair generateCertPair() throws Exception {
         KeyPair serverPair = Sm2.generateKeyPairHex();
         KeyPair clientPair = Sm2.generateKeyPairHex();
-        clientPair = serverPair;
+
         OpsSecureKeyPair serverKeyPair = new OpsSecureKeyPair(clientPair.getPublicKey(), serverPair.getPrivateKey());
-        OpsSecureKeyPair clientKeyPair = new OpsSecureKeyPair(serverKeyPair.getPublicKey(), clientPair.getPrivateKey());
+        OpsSecureKeyPair clientKeyPair = new OpsSecureKeyPair(serverPair.getPublicKey(), clientPair.getPrivateKey());
         String serverCert = serializeKeyPair(serverKeyPair);
         String clientCert = serializeKeyPair(clientKeyPair);
         return new OpsSecureCertPair(serverCert, clientCert);
