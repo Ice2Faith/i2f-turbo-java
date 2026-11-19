@@ -35,9 +35,10 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
     @Override
     public List<String> getDocumentAllIds(String documentId) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             QueryResult res = JdbcResolver.query(conn, BindSql.of("select id from " + tableName + " where document_id=?",
                     documentId
-            ));
+            ), -1, String::toLowerCase);
             List<String> ret = new ArrayList<>();
             List<Map<String, Object>> rows = res.getRows();
             if (rows != null && !rows.isEmpty()) {
@@ -57,6 +58,7 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
     @Override
     public void removeDocuments(String documentId) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("delete from " + tableName + " where document_id=?",
                     documentId
             ));
@@ -68,9 +70,12 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
     @Override
     public List<RagDocument> getDocumentsByIds(Collection<String> ids) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             QueryResult res = JdbcResolver.query(conn, BindSql.of("select id,document_id,separate_no,content")
                     .add(" from " + tableName)
-                    .add(" where id ").in(ids)
+                            .add(" where id ").in(ids),
+                    -1,
+                    String::toLowerCase
             );
             List<RagDocument> ret = new ArrayList<>();
             List<Map<String, Object>> rows = res.getRows();
@@ -117,6 +122,7 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
                     return ret;
                 }
             };
+            /*language=sql*/
             JdbcResolver.batchByListableValues(conn, "insert into " + tableName + "(id,document_id,separate_no,content) values(?,?,?,?)",
                     iterator, 30
             );
@@ -128,11 +134,13 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
     @Override
     public List<RagDocument> nearbyDocuments(String documentId, int separateNoStart, int separateNoEnd) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             QueryResult res = JdbcResolver.query(conn, BindSql.of("select id,document_id,separate_no,content")
                     .add(" from " + tableName)
                     .add(" where document_id= ?", documentId)
                     .add(" and separate_no >= ?", separateNoStart)
-                    .add(" and separate_no <= ?", separateNoEnd)
+                            .add(" and separate_no <= ?", separateNoEnd),
+                    -1, String::toLowerCase
             );
             List<RagDocument> ret = new ArrayList<>();
             List<Map<String, Object>> rows = res.getRows();
@@ -194,6 +202,7 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
 
     public void createTable() throws SQLException {
         try (Connection conn = SqliteVecUtils.getConnection(dbFilePath)) {
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("CREATE TABLE IF NOT EXISTS " + tableName + " (\n" +
                     "   id text primary key,\n" +
                     "   document_id text,\n" +

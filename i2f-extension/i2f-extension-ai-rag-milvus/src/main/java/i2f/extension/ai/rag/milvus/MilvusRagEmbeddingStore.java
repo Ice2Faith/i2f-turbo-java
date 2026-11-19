@@ -28,9 +28,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Ice2Faith
@@ -51,6 +53,8 @@ public class MilvusRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<M
     public static final String FIELD_VECTOR = "vector";
     public static final String FIELD_META_DATA = "meta_data";
     public static final String FIELD_CREATE_TIME = "create_time";
+
+    protected final AtomicBoolean initialized = new AtomicBoolean(false);
 
     private MilvusClientV2 client;
     private Gson gson = new Gson();
@@ -82,6 +86,13 @@ public class MilvusRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<M
 
         MilvusClientV2 client = new MilvusClientV2(connectConfig);
         return client;
+    }
+
+    public void init() {
+        if (initialized.getAndSet(true)) {
+            return;
+        }
+        createCollection();
     }
 
     public void createCollection() {
@@ -154,6 +165,7 @@ public class MilvusRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<M
 
     @Override
     public String store(RagEmbedding embedding) {
+        init();
         String id = embedding.getId();
         if (id == null || id.isEmpty()) {
             id = UUID.randomUUID().toString().replace("-", "");
@@ -183,7 +195,7 @@ public class MilvusRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<M
 
     @Override
     public void remove(String id) {
-
+        init();
         DeleteReq req = DeleteReq.builder()
                 .collectionName(collectionName)
                 .ids(Collections.singletonList(id))
@@ -194,6 +206,7 @@ public class MilvusRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<M
 
     @Override
     public List<RagEmbedding> similar(RagVector vector, int topN) {
+        init();
         List<RagEmbedding> ret = new ArrayList<>();
 
         SearchReq searchReq = SearchReq.builder()

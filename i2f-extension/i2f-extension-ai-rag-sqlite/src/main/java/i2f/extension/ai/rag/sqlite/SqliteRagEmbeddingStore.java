@@ -51,6 +51,7 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
             if (id == null || id.isEmpty()) {
                 id = UUID.randomUUID().toString().replace("-", "");
             }
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("insert into " + tableName + " (id,content,vector,meta_data,create_time) values (?,?,?,?,?)",
                     id, embedding.getContent(),
                     jsonSerializer.serialize(embedding.getVector().getArray()),
@@ -66,6 +67,7 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
     @Override
     public void remove(String id) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("delete from " + tableName + " where id=?",
                     id
             ));
@@ -77,13 +79,15 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
     @Override
     public List<RagEmbedding> similar(RagVector vector, int topN) {
         try (Connection conn = getConnection()) {
+            /*language=sql*/
             QueryResult res = JdbcResolver.query(conn,
                     BindSql.of("SELECT id,content,vector,meta_data,create_time,distance FROM " + tableName + " " +
                                     "WHERE vector MATCH ? " +
                                     "ORDER BY distance LIMIT ?",
                             jsonSerializer.serialize(vector.getArray()),
                             topN
-                    )
+                    ),
+                    -1, String::toLowerCase
             );
             List<RagEmbedding> ret = new ArrayList<>();
             List<Map<String, Object>> rows = res.getRows();
@@ -155,6 +159,7 @@ public class SqliteRagEmbeddingStore implements RagEmbeddingStore, BaseMutator<S
     public void createTable() throws SQLException {
         try (Connection conn = SqliteVecUtils.getConnection(dbFilePath)) {
             // 创建 vec0 虚拟表（例如 4 维的 float 向量）
+            /*language=sql*/
             JdbcResolver.update(conn, BindSql.of("CREATE VIRTUAL TABLE IF NOT EXISTS " + tableName + " USING vec0(\n" +
                     "   id text primary key,\n" +
                     "   content text,\n" +
