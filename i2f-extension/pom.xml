@@ -21,6 +21,7 @@
         <module>i2f-extension-ai-langchain4j8</module>
         <module>i2f-extension-ai-openai</module>
         <module>i2f-extension-ai-rag-lucene</module>
+        <module>i2f-extension-ai-rag-milvus</module>
         <module>i2f-extension-ai-rag-sqlite</module>
         <module>i2f-extension-all</module>
         <module>i2f-extension-antlr4</module>
