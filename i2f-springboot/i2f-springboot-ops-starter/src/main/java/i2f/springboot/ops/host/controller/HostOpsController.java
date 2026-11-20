@@ -475,17 +475,23 @@ public class HostOpsController implements IOpsProvider {
             }
             File bashFile = null;
             try {
+                if (OsUtil.isLinux()) {
+                    // ll 别名
+                    cmd = cmd.replaceAll("\\bll\\b", "ls -alh");
+                    // top 命令
+                    cmd = cmd.replaceAll("\\btop\\b", "top -c -b -n 1 -w 500");
+                }
                 String resp = null;
                 if (runAsFile) {
                     String suffix = ".sh";
                     if (OsUtil.isWindows()) {
                         suffix = ".bat";
                     }
-                    bashFile = new File(workdir, "cmd-" + (UUID.randomUUID().toString().replace("-", "")) + suffix);
+                    bashFile = new File(workdir, "cmd_" + (UUID.randomUUID().toString().replace("-", "")) + suffix);
                     try (FileOutputStream fos = new FileOutputStream(bashFile)) {
                         fos.write(cmd.getBytes(OsUtil.getCmdCharset()));
                     }
-                    String[] cmdArr = new String[]{"sh", "-c", bashFile.getName()};
+                    String[] cmdArr = new String[]{"sh", bashFile.getName()};
                     if (OsUtil.isWindows()) {
                         cmdArr = new String[]{"cmd.exe", "/c", bashFile.getName()};
                     }

@@ -2,6 +2,7 @@ package i2f.springboot.ops.ssh.controller;
 
 import com.jcraft.jsch.ChannelSftp;
 import i2f.extension.sftp.basic.SftpUtil;
+import i2f.io.file.FileUtil;
 import i2f.os.OsUtil;
 import i2f.springboot.ops.common.*;
 import i2f.springboot.ops.home.data.OpsHomeMenuDto;
@@ -409,16 +410,21 @@ public class SshOpsController implements IOpsProvider {
                 }
                 File bashFile = null;
                 try {
+                    // ll 别名
+                    cmd = cmd.replaceAll("\\bll\\b", "ls -alh");
+                    // top 命令
+                    cmd = cmd.replaceAll("\\btop\\b", "top -c -b -n 1 -w 500");
+
                     String resp = null;
                     if (runAsFile) {
                         String suffix = ".sh";
-                        bashFile = File.createTempFile("cmd-" + (UUID.randomUUID().toString().replace("-", "")), suffix);
+                        bashFile = File.createTempFile("cmd_" + (UUID.randomUUID().toString().replace("-", "")), suffix);
                         try (FileOutputStream fos = new FileOutputStream(bashFile)) {
                             fos.write(cmd.getBytes(OsUtil.getCmdCharset()));
                         }
                         util.upload(workdir, bashFile.getName(), new FileInputStream(bashFile));
                         util.cd(workdir);
-                        resp = util.exec(true, waitForSeconds * 1000, "sh -c " + bashFile.getName(), workdir, null);
+                        resp = util.exec(true, waitForSeconds * 1000, "sh " + bashFile.getName(), workdir, null);
                     } else {
                         resp = util.exec(true, waitForSeconds * 1000, cmd, workdir, null);
                     }
@@ -483,7 +489,10 @@ public class SshOpsController implements IOpsProvider {
                 }
                 String ret = sftp.lpwd();
                 builder.append(ret).append("\n");
-            } else if ("ls".equals(name)) {
+            } else if ("ls".equals(name) || "ll".equals(name)) {
+                if (cmdArr.size() == 1) {
+                    cmdArr.add(sftp.pwd());
+                }
                 if (cmdArr.size() != 2) {
                     throw new IllegalArgumentException("sftp command: " + name + ", need 1 args (path)");
                 }
@@ -552,6 +561,58 @@ public class SshOpsController implements IOpsProvider {
                     throw new IllegalArgumentException("sftp command: " + name + ", need 2 args (oldpath,newpath)");
                 }
                 sftp.symlink(cmdArr.get(1), cmdArr.get(2));
+            } else if ("get".equals(name)) {
+                if (cmdArr.size() != 2 && cmdArr.size() != 3) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need args (remotePath [localPath])");
+                }
+                String localPath = sftp.lpwd();
+                if (localPath == null || localPath.isEmpty()) {
+                    File sftpTmp = new File(new File("./sftp-tmp").getAbsolutePath());
+                    if (!sftpTmp.exists()) {
+                        sftpTmp.mkdirs();
+                    }
+                    localPath = sftpTmp.getAbsolutePath();
+                    sftp.lcd(localPath);
+                }
+                File localDir = new File(localPath);
+                if (cmdArr.size() == 3) {
+                    localDir = new File(localDir, cmdArr.get(2));
+                }
+                if (!localDir.exists()) {
+                    localDir.mkdirs();
+                }
+                File remoteFile = new File(cmdArr.get(1));
+                File localFile = new File(localDir, remoteFile.getName());
+                InputStream is = sftp.get(cmdArr.get(1));
+                FileUtil.save(is, localFile);
+                builder.append("get ").append(remoteFile.getName()).append(" to local ").append(localFile.getAbsolutePath()).append("\n");
+            } else if ("put".equals(name)) {
+                if (cmdArr.size() != 2 && cmdArr.size() != 3) {
+                    throw new IllegalArgumentException("sftp command: " + name + ", need args (localPath [remotePath])");
+                }
+                String localPath = sftp.lpwd();
+                if (localPath == null || localPath.isEmpty()) {
+                    File sftpTmp = new File(new File("./sftp-tmp").getAbsolutePath());
+                    if (!sftpTmp.exists()) {
+                        sftpTmp.mkdirs();
+                    }
+                    localPath = sftpTmp.getAbsolutePath();
+                    sftp.lcd(localPath);
+                }
+                File localDir = new File(localPath);
+                if (!localDir.exists()) {
+                    localDir.mkdirs();
+                }
+                File localFile = new File(localDir, cmdArr.get(1));
+                if (!localFile.isFile()) {
+                    throw new IllegalArgumentException("local file not found(or not file): " + localFile.getAbsolutePath());
+                }
+                String pwd = sftp.pwd();
+                String remoteFile = pwd + "/" + localFile.getName();
+                try (FileInputStream is = new FileInputStream(localFile)) {
+                    sftp.put(is, remoteFile);
+                }
+                builder.append("put ").append(localFile.getAbsolutePath()).append(" to remote ").append(remoteFile).append("\n");
             } else {
                 throw new IllegalArgumentException("un-resolved sftp command: " + name + ", full args: " + cmdArr);
             }
