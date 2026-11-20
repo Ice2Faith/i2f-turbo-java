@@ -1891,10 +1891,20 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.8.0</version>
                     <configuration>
+                        <!--
+                        产物名由 finalName + assemblyId 组成：xxx-版本-embed.jar
+                         这样 assembly 不会再顶替 maven-jar-plugin 的主 artifact，
+                         install/deploy 安装的主 jar 始终是普通 jar
+                         -->
                         <finalName>${project.artifactId}-${project.version}</finalName>
-                        <appendAssemblyId>false</appendAssemblyId>
+                        <appendAssemblyId>true</appendAssemblyId>
+                        <!--
+                        不把 embed 胖 jar 作为附件安装到仓库，它只是 target 下的独立产物，
+                        由 bash/collect.bat 之类的脚本直接从 target 收集分发
+                         -->
+                        <attach>false</attach>
                         <archive>
                             <manifestEntries>
                                 <!--                                <Main-Class>i2f.test.TestMain</Main-Class>-->
@@ -1919,11 +1929,39 @@
                                 <Java-Source-Version>${java.source.version}</Java-Source-Version>
                                 <Java-Target-Version>${java.target.version}</Java-Target-Version>
                             </manifestEntries>
+                            <addMavenDescriptor>false</addMavenDescriptor>
                         </archive>
-                        <descriptorRefs>
-                            <!--打包时加入依赖-->
+                        <!--<descriptorRefs>
+                            &lt;!&ndash;打包时加入依赖&ndash;&gt;
                             <descriptorRef>jar-with-dependencies</descriptorRef>
-                        </descriptorRefs>
+                        </descriptorRefs>-->
+                        <inlineDescriptors>
+                            <inlineDescriptor>
+                                <id>embed</id>
+                                <formats>
+                                    <format>jar</format>
+                                </formats>
+                                <includeBaseDirectory>false</includeBaseDirectory>
+
+                                <dependencySets>
+                                    <dependencySet>
+                                        <useProjectArtifact>true</useProjectArtifact>
+                                        <unpack>true</unpack>
+                                        <scope>runtime</scope>
+                                        <!--
+                                        全局排除依赖包中的 META-INF/maven
+                                        注意：解包内容的排除必须写在 unpackOptions 中，
+                                        写在 dependencySet 层级的 excludes 只用于过滤依赖 artifact 本身，不会作用于 jar 内部条目
+                                        -->
+                                        <unpackOptions>
+                                            <excludes>
+                                                <exclude>META-INF/maven/**</exclude>
+                                            </excludes>
+                                        </unpackOptions>
+                                    </dependencySet>
+                                </dependencySets>
+                            </inlineDescriptor>
+                        </inlineDescriptors>
                     </configuration>
                     <executions>
                         <execution>
