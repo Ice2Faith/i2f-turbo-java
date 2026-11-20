@@ -88,8 +88,8 @@ public class XxlJobOpsController implements IOpsProvider {
                     List<XxlJobInfoMeta> list = loadMeta(conn);
                     if (list != null && !list.isEmpty()) {
                         metaDatasource.set(datasource);
+                        return list;
                     }
-                    return list;
                 } catch (Exception e) {
                     log.warn("try load xxl-job meta error: " + e.getMessage(), e);
                 }
@@ -101,8 +101,8 @@ public class XxlJobOpsController implements IOpsProvider {
                         List<XxlJobInfoMeta> list = loadMeta(conn);
                         if (list != null && !list.isEmpty()) {
                             metaDatasource.set(key);
+                            return list;
                         }
-                        return list;
                     } catch (Exception e) {
                         log.warn("try load xxl-job meta error: " + e.getMessage(), e);
                     }
