@@ -17,6 +17,15 @@ public abstract class DatabaseTypeResultObjectExtractor implements JdbcResultObj
     @Override
     public boolean support(ResultSetContext rsCtx) throws SQLException {
         Statement stat = rsCtx.getStatement();
+        if (stat == null) {
+            ResultSet rs = rsCtx.getResultSet();
+            if (rs != null) {
+                stat = rs.getStatement();
+            }
+        }
+        if (stat == null) {
+            return support(DatabaseType.ERROR);
+        }
         Connection conn = stat.getConnection();
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         return support(databaseType);

@@ -1827,6 +1827,10 @@ public class JdbcResolver {
         stat.setNull(index, Types.VARCHAR);
     }
 
+    public static QueryResult parseResultSet(ResultSet rs) throws SQLException {
+        return parseResultSet(ResultSetContext.of(rs, rs.getStatement()), -1, null);
+    }
+
     public static QueryResult parseResultSet(ResultSetContext rs) throws SQLException {
         return parseResultSet(rs, -1, null);
     }
@@ -2079,9 +2083,14 @@ public class JdbcResolver {
             if (item == null) {
                 continue;
             }
-            if (item.support(rsCtx)) {
-                extractor = item;
-                break;
+            try {
+                if (item.support(rsCtx)) {
+                    extractor = item;
+                    break;
+                }
+            } catch (Exception e) {
+                // ignore
+                e.printStackTrace();
             }
         }
 
