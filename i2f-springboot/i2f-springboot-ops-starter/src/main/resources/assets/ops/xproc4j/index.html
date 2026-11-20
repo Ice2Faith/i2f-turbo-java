@@ -212,7 +212,7 @@
         </el-row>
     </el-card>
 
-    <el-row>
+    <el-row class="operation-area">
         <el-form inline label-position="left" label-width="120px">
             <el-row>
                 <el-button size="medium" @click="doResetData">重置</el-button>
@@ -264,7 +264,7 @@
     </el-row>
     <el-divider>操作结果</el-divider>
     <el-card shadow="never">
-        <el-form inline label-position="left" label-width="100px">
+        <el-form inline label-position="left" label-width="100px" class="operation-area">
             <el-form-item label="语言类型">
                 <el-select  clearable filterable v-model="metas.resultLang"  placeholder="语言类型" @change="onResultLangChange">
                     <el-option
@@ -1776,6 +1776,10 @@
         }
         .el-message-box{
             max-width: 80vw !important;
+        }
+
+        .operation-area {
+            zoom: 0.8;
         }
     }
 </style>

@@ -77,7 +77,7 @@
 
     <el-card shadow="never">
         <el-row style="width: 100%;">
-            <el-form inline label-position="top" label-width="120px">
+            <el-form inline label-position="top" label-width="120px" class="operation-area">
                 <el-row type="flex">
                     <template v-if="klingWorkMode=='t2v'">
                         <el-col :span="24">
@@ -206,7 +206,7 @@
 
             <el-divider></el-divider>
             <el-form inline label-position="top" label-width="80px">
-                <el-row >
+                <el-row class="operation-area">
                     <el-form-item>
                         <span slot="label">
                             模式
@@ -1010,6 +1010,10 @@
     @media (max-width: 768px) {
         .el-message-box {
             max-width: 80vw !important;
+        }
+
+        .operation-area {
+            zoom: 0.8;
         }
     }
 </style>

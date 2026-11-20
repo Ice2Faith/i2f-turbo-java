@@ -157,7 +157,7 @@
         </el-row>
     </el-card>
 
-    <el-row>
+    <el-row class="operation-area">
         <el-form inline label-position="left" label-width="120px">
             <el-row>
                 <el-button size="medium" @click="doResetData">重置</el-button>
@@ -1221,6 +1221,10 @@
         }
         .el-message-box{
             max-width: 80vw !important;
+        }
+
+        .operation-area {
+            zoom: 0.8;
         }
     }
 </style>

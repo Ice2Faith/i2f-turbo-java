@@ -100,7 +100,7 @@
     </el-card>
 
     <el-row>
-        <el-form inline label-position="left" label-width="80px">
+        <el-form inline label-position="left" label-width="80px" class="operation-area">
             <el-row>
                 <el-button size="medium" @click="doResetData">重置</el-button>
                 <el-divider direction="vertical"></el-divider>
@@ -159,27 +159,29 @@
         </el-form>
     </el-row>
     <el-divider>操作结果</el-divider>
-    <el-select  clearable filterable v-model="metas.resultType" placeholder="结果类型">
-        <el-option
-                v-for="item in metas.resultTypeList"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-        </el-option>
-    </el-select>
-    <el-button type="success" size="medium"
-               @click="onViewText(metas.resultList,'数据集','json')">
-        表格JSON
-    </el-button>
-    <el-button type="warning" size="medium"
-               @click="onViewText(metas.resultColumns,'表头信息','json')">
-        表头JSON
-    </el-button>
-    <el-button type="primary" size="medium"
-               @click="onVisualCharts">
-        可视化图表
-    </el-button>
-    <el-row v-show="metas.resultType=='table'">
+    <el-row class="operation-area">
+        <el-select clearable filterable v-model="metas.resultType" placeholder="结果类型">
+            <el-option
+                    v-for="item in metas.resultTypeList"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+            </el-option>
+        </el-select>
+        <el-button type="success" size="medium"
+                   @click="onViewText(metas.resultList,'数据集','json')">
+            表格JSON
+        </el-button>
+        <el-button type="warning" size="medium"
+                   @click="onViewText(metas.resultColumns,'表头信息','json')">
+            表头JSON
+        </el-button>
+        <el-button type="primary" size="medium"
+                   @click="onVisualCharts">
+            可视化图表
+        </el-button>
+    </el-row>
+    <el-row v-show="metas.resultType=='table'" class="operation-area">
         <el-row style="color: #777;padding-left: 8px;">
             行数：{{metas.resultList.length}}
         </el-row>
@@ -266,7 +268,7 @@
             :visible.sync="drawer.metadata.show"
             direction="rtl"
             size="75%">
-        <el-row type="flex">
+        <el-row type="flex" class="operation-area">
             <el-col :span="8" style="border-right: solid 1px #777;">
                 <el-row style="width: 100%;">
                     <el-row type="flex">
@@ -380,7 +382,7 @@
         <el-row>
             注释：{{dialog.tableInfo.meta.comment}}
         </el-row>
-        <el-row>
+        <el-row class="operation-area">
             <el-button v-loading="dialog.tableInfo.metaLoading"
                        icon="el-icon-refresh" circle
                        @click="doLoadTableInfo">
@@ -390,7 +392,7 @@
             <el-button type="success" size="small" @click="onViewText(dialog.tableInfo.meta.columns.filter(e=>!e.nullable).map(e=>e.name).join(','),'列名')">非空列名</el-button>
 
         </el-row>
-        <el-row>
+        <el-row class="operation-area">
             <el-table border stripe highlight-current-row
                       :key="dialog.tableInfo.metaVueKey"
                       :data="dialog.tableInfo.meta.columns"
@@ -605,7 +607,7 @@
             :title="dialog.visualChart.title"
             :visible.sync="dialog.visualChart.show"
             width="80%">
-        <el-form :inline="true">
+        <el-form :inline="true" class="operation-area">
             <el-form-item label="图表形式">
                 <el-select  clearable filterable v-model="dialog.visualChart.config.type" placeholder="图表形式">
                     <el-option
@@ -2653,6 +2655,10 @@
     @media (max-width: 768px) {
         .el-message-box {
             max-width: 80vw !important;
+        }
+
+        .operation-area {
+            zoom: 0.8;
         }
     }
 </style>

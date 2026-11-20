@@ -102,7 +102,7 @@
         <span class="el-icon-full-screen expand-main-editor__badge" @click="expandMainEditor=!expandMainEditor"></span>
     </el-card>
 
-    <el-row>
+    <el-row class="operation-area">
         <el-form inline label-position="left" label-width="100px">
             <el-row>
                 <el-col :span="16">
@@ -1944,6 +1944,10 @@
     @media (max-width: 768px) {
         .el-message-box {
             max-width: 80vw !important;
+        }
+
+        .operation-area {
+            zoom: 0.8;
         }
     }
 </style>
