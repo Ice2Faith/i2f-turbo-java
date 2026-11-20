@@ -179,8 +179,8 @@ public class DatasourceOpsController implements IOpsProvider {
                 try (OutputStream os = new FileOutputStream(ret)) {
                     for (Map.Entry<String, Connection> entry : connMap.entrySet()) {
                         try (Connection conn = entry.getValue()) {
-                            JdbcResolver.query(conn, new BindSql(sql), (rs -> {
-
+                            JdbcResolver.query(conn, new BindSql(sql), (rsCtx -> {
+                                ResultSet rs = rsCtx.getResultSet();
                                 ResultSetMetaData metaData = rs.getMetaData();
                                 List<QueryColumn> columns = JdbcResolver.parseResultSetColumns(metaData);
                                 List<QueryColumn> parseColumns = new ArrayList<>(columns);
@@ -203,7 +203,7 @@ public class DatasourceOpsController implements IOpsProvider {
                                     @Override
                                     public Map<String, Object> next() {
                                         try {
-                                            Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(parseColumns, rs);
+                                            Map<String, Object> map = JdbcResolver.convertResultSetRowAsMap(parseColumns, rsCtx);
                                             if (connMapCount > 1) {
                                                 map.put(datasourceColumn.getName(), entry.getKey());
                                             }
