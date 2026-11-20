@@ -2,6 +2,7 @@ package i2f.jdbc.extract.impl;
 
 import i2f.database.type.DatabaseType;
 import i2f.jdbc.data.QueryColumn;
+import i2f.jdbc.data.ResultSetContext;
 import i2f.jdbc.extract.DatabaseTypeResultObjectExtractor;
 import i2f.reference.Reference;
 
@@ -23,9 +24,10 @@ public class SqliteResultObjectExtractor extends DatabaseTypeResultObjectExtract
     }
 
     @Override
-    public Reference<Object> extract(ResultSet rs, int columnIndex, QueryColumn column) throws SQLException {
+    public Reference<Object> extract(ResultSetContext rsCtx, int columnIndex, QueryColumn column) throws SQLException {
         int jdbcType = column.getType();
         if (Types.BLOB == jdbcType) {
+            ResultSet rs = rsCtx.getResultSet();
             return Reference.of(rs.getBytes(columnIndex));
         }
         return Reference.nop();

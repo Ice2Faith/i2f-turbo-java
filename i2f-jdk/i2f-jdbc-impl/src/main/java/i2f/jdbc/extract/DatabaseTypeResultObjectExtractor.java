@@ -1,6 +1,7 @@
 package i2f.jdbc.extract;
 
 import i2f.database.type.DatabaseType;
+import i2f.jdbc.data.ResultSetContext;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -14,8 +15,8 @@ import java.sql.Statement;
  */
 public abstract class DatabaseTypeResultObjectExtractor implements JdbcResultObjectExtractor {
     @Override
-    public boolean support(ResultSet rs) throws SQLException {
-        Statement stat = rs.getStatement();
+    public boolean support(ResultSetContext rsCtx) throws SQLException {
+        Statement stat = rsCtx.getStatement();
         Connection conn = stat.getConnection();
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
         return support(databaseType);

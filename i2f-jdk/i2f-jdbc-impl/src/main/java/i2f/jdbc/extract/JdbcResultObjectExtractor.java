@@ -1,6 +1,7 @@
 package i2f.jdbc.extract;
 
 import i2f.jdbc.data.QueryColumn;
+import i2f.jdbc.data.ResultSetContext;
 import i2f.reference.Reference;
 
 import java.sql.ResultSet;
@@ -12,7 +13,7 @@ import java.sql.SQLException;
  * @desc
  */
 public interface JdbcResultObjectExtractor {
-    boolean support(ResultSet rs) throws SQLException;
+    boolean support(ResultSetContext rsCtx) throws SQLException;
 
-    Reference<Object> extract(ResultSet rs, int columnIndex, QueryColumn column) throws SQLException;
+    Reference<Object> extract(ResultSetContext rsCtx, int columnIndex, QueryColumn column) throws SQLException;
 }

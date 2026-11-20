@@ -4,6 +4,7 @@ import i2f.bindsql.BindSql;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.context.impl.DirectJdbcInvokeContextProvider;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.data.ResultSetContext;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
@@ -395,11 +396,11 @@ public class JdbcTemplate {
     }
 
 
-    public <R> R queryHandler(String sql, List<?> args, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
+    public <R> R queryHandler(String sql, List<?> args, SQLFunction<ResultSetContext, R> resultSetHandler) throws SQLException {
         return queryHandler(new BindSql(sql, new ArrayList<>(args)), resultSetHandler);
     }
 
-    public <R> R queryHandler(BindSql bql, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
+    public <R> R queryHandler(BindSql bql, SQLFunction<ResultSetContext, R> resultSetHandler) throws SQLException {
         return contextActionDelegate(bql, (conn, sql) -> {
             R ret = JdbcResolver.query(conn, sql, resultSetHandler);
             return ret;

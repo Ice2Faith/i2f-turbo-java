@@ -1,6 +1,7 @@
 package i2f.jdbc.cursor.impl;
 
 import i2f.jdbc.cursor.JdbcCursor;
+import i2f.jdbc.data.ResultSetContext;
 import i2f.jdbc.std.func.SQLBiFunction;
 import i2f.jdbc.std.func.SQLFunction;
 
@@ -15,28 +16,26 @@ import java.util.concurrent.locks.ReentrantLock;
  * @date 2025/6/25 16:10
  */
 public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
-    protected Statement stat;
-    protected ResultSet rs;
-    protected SQLFunction<ResultSet, CTX> contextInitializer;
-    protected SQLBiFunction<CTX, ResultSet, E> rowConvertor;
+    protected ResultSetContext ctx;
+    protected SQLFunction<ResultSetContext, CTX> contextInitializer;
+    protected SQLBiFunction<CTX, ResultSetContext, E> rowConvertor;
     protected final AtomicReference<AtomicReference<CTX>> contextHolder = new AtomicReference<>();
     protected final AtomicReference<AtomicReference<E>> rowHolder = new AtomicReference<>();
     protected ReentrantLock lock = new ReentrantLock();
 
-    public JdbcCursorImpl(Statement stat, ResultSet rs, SQLBiFunction<CTX, ResultSet, E> rowConvertor, SQLFunction<ResultSet, CTX> contextInitializer) {
-        this.stat = stat;
-        this.rs = rs;
+    public JdbcCursorImpl(ResultSetContext ctx, SQLBiFunction<CTX, ResultSetContext, E> rowConvertor, SQLFunction<ResultSetContext, CTX> contextInitializer) {
+        this.ctx = ctx;
         this.contextInitializer = contextInitializer;
         this.rowConvertor = rowConvertor;
     }
 
 
     public Statement getStatement() {
-        return stat;
+        return ctx.getStatement();
     }
 
     public ResultSet getResultSet() {
-        return rs;
+        return ctx.getResultSet();
     }
 
 
@@ -49,13 +48,15 @@ public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
     public void dispose() throws SQLException {
         lock.lock();
         try {
+            ResultSet rs = ctx.getResultSet();
             if (rs != null && !rs.isClosed()) {
                 rs.close();
-                rs = null;
+                ctx.setResultSet(null);
             }
+            Statement stat = ctx.getStatement();
             if (stat != null && !stat.isClosed()) {
                 stat.close();
-                stat = null;
+                ctx.setStatement(null);
             }
             rowHolder.set(null);
             contextHolder.set(null);
@@ -69,17 +70,18 @@ public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
         if (ref != null) {
             return ref.get();
         }
-        CTX ctx = contextInitializer.apply(rs);
-        contextHolder.set(new AtomicReference<>(ctx));
-        return ctx;
+        CTX ret = contextInitializer.apply(ctx);
+        contextHolder.set(new AtomicReference<>(ret));
+        return ret;
 
     }
 
     protected void fetchNextRow() throws SQLException {
         AtomicReference<E> ref = rowHolder.get();
         if (ref == null) {
+            ResultSet rs = ctx.getResultSet();
             if (rs.next()) {
-                E ret = rowConvertor.apply(getRequiredContext(), rs);
+                E ret = rowConvertor.apply(getRequiredContext(), ctx);
                 rowHolder.set(new AtomicReference<>(ret));
             }
         }
@@ -92,6 +94,7 @@ public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
     public boolean hasRow() throws SQLException {
         lock.lock();
         try {
+            ResultSet rs = ctx.getResultSet();
             if (rs == null) {
                 return false;
             }
@@ -117,6 +120,7 @@ public class JdbcCursorImpl<E, CTX> implements JdbcCursor<E> {
                 rowHolder.set(null);
                 return ref.get();
             }
+            ResultSet rs = ctx.getResultSet();
             if (rs == null) {
                 throw new SQLException("ResultSet has been consumed!");
             }

@@ -80,6 +80,7 @@ public class JdbcResolver {
         RESULT_OBJECT_EXTRACTORS.add(SqliteResultObjectExtractor.INSTANCE);
     }
 
+
     public static Connection getConnection(String driver,
                                            String url) throws SQLException {
         Properties properties = new Properties();
@@ -265,7 +266,7 @@ public class JdbcResolver {
         return query(conn, sql.getSql(), sql.getArgs(), (rs) -> parseResultSet(rs, maxCount, columnNameMapper));
     }
 
-    public static <R> R query(Connection conn, BindSql sql, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
+    public static <R> R query(Connection conn, BindSql sql, SQLFunction<ResultSetContext, R> resultSetHandler) throws SQLException {
         return query(conn, sql.getSql(), sql.getArgs(), resultSetHandler);
     }
 
@@ -281,11 +282,11 @@ public class JdbcResolver {
         return query(conn, sql, args, (rs) -> parseResultSet(rs, maxCount, columnNameMapper));
     }
 
-    public static <R> R query(Connection conn, String sql, List<Object> args, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
+    public static <R> R query(Connection conn, String sql, List<Object> args, SQLFunction<ResultSetContext, R> resultSetHandler) throws SQLException {
         try (PreparedStatement stat = preparedStatement(conn, sql, args)) {
             try (ResultSet rs = stat.executeQuery()) {
                 try {
-                    R ret = resultSetHandler.apply(rs);
+                    R ret = resultSetHandler.apply(ResultSetContext.of(rs, stat));
                     return ret;
                 } finally {
                     if (!rs.isClosed()) {
@@ -321,12 +322,12 @@ public class JdbcResolver {
 
     public static final SQLBiFunction<Connection, String, PreparedStatement> DEFAULT_CURSOR_STATEMENT_BUILDER = JdbcResolver::buildCursorStatement;
 
-    public static final SQLFunction<ResultSet, List<QueryColumn>> DEFAULT_CURSOR_CONTEXT_INITIALIZER = JdbcResolver::parseResultSetColumns;
+    public static final SQLFunction<ResultSetContext, List<QueryColumn>> DEFAULT_CURSOR_CONTEXT_INITIALIZER = JdbcResolver::parseResultSetColumns;
 
-    public static final SQLBiFunction<List<QueryColumn>, ResultSet, Map<String, Object>> DEFAULT_CURSOR_ROW_CONVERTOR = JdbcResolver::convertResultSetRowAsMap;
+    public static final SQLBiFunction<List<QueryColumn>, ResultSetContext, Map<String, Object>> DEFAULT_CURSOR_ROW_CONVERTOR = JdbcResolver::convertResultSetRowAsMap;
 
 
-    public static SQLFunction<ResultSet, List<QueryColumn>> createCursorContextInitializer(Function<String, String> columnNameMapper) {
+    public static SQLFunction<ResultSetContext, List<QueryColumn>> createCursorContextInitializer(Function<String, String> columnNameMapper) {
         if (columnNameMapper == null) {
             return JdbcResolver::parseResultSetColumns;
         }
@@ -396,8 +397,8 @@ public class JdbcResolver {
     }
 
     public static <E, CTX> JdbcCursorImpl<E, CTX> cursor0(Connection conn, String sql, List<Object> args,
-                                                          SQLBiFunction<CTX, ResultSet, E> rowConvertor,
-                                                          SQLFunction<ResultSet, CTX> contextInitializer,
+                                                          SQLBiFunction<CTX, ResultSetContext, E> rowConvertor,
+                                                          SQLFunction<ResultSetContext, CTX> contextInitializer,
                                                           SQLBiFunction<Connection, String, PreparedStatement> statementBuilder) throws SQLException {
         if (statementBuilder == null) {
             statementBuilder = DEFAULT_CURSOR_STATEMENT_BUILDER;
@@ -405,7 +406,7 @@ public class JdbcResolver {
         PreparedStatement stat = statementBuilder.apply(conn, sql);
         fillStatementArgs(stat, args);
         ResultSet rs = stat.executeQuery();
-        return new JdbcCursorImpl<>(stat, rs, rowConvertor, contextInitializer);
+        return new JdbcCursorImpl<>(ResultSetContext.of(rs, stat), rowConvertor, contextInitializer);
     }
 
     public static List<Map<String, Object>> list(Connection conn, BindSql sql) throws SQLException {
@@ -1023,7 +1024,7 @@ public class JdbcResolver {
             while (stat.getMoreResults()) {
                 rsIdx--;
                 try (ResultSet rs = stat.getResultSet()) {
-                    QueryResult result = parseResultSet(rs);
+                    QueryResult result = parseResultSet(ResultSetContext.of(rs, stat));
                     ret.put(rsIdx, result);
                 }
             }
@@ -1138,7 +1139,7 @@ public class JdbcResolver {
             while (stat.getMoreResults()) {
                 rsIdx++;
                 try (ResultSet rs = stat.getResultSet()) {
-                    QueryResult result = parseResultSet(rs);
+                    QueryResult result = parseResultSet(ResultSetContext.of(rs, stat));
                     ret.put("_rs_" + rsIdx, result);
                 }
             }
@@ -1826,15 +1827,15 @@ public class JdbcResolver {
         stat.setNull(index, Types.VARCHAR);
     }
 
-    public static QueryResult parseResultSet(ResultSet rs) throws SQLException {
+    public static QueryResult parseResultSet(ResultSetContext rs) throws SQLException {
         return parseResultSet(rs, -1, null);
     }
 
-    public static QueryResult parseResultSet(ResultSet rs, int maxCount) throws SQLException {
+    public static QueryResult parseResultSet(ResultSetContext rs, int maxCount) throws SQLException {
         return parseResultSet(rs, maxCount, null);
     }
 
-    public static QueryResult parseResultSet(ResultSet rs, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
+    public static QueryResult parseResultSet(ResultSetContext rs, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
         return parseResultSet(rs, maxCount, Map.class,
                 columnNameMapper,
                 (ctx) -> {
@@ -1862,12 +1863,12 @@ public class JdbcResolver {
         }
     }
 
-    public static <T> List<T> parseResultSet(ResultSet rs, int maxCount, Class<T> beanClass,
+    public static <T> List<T> parseResultSet(ResultSetContext rsCtx, int maxCount, Class<T> beanClass,
                                              Function<String, String> columnNameMapper,
                                              BiFunction<List<QueryColumn>, Class<T>, Function<Map<String, Object>, T>> rowConvertorBuilder) throws SQLException {
         boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
         String rowConvertorKey = "rowConvertor";
-        return parseResultSet(rs, maxCount, beanClass,
+        return parseResultSet(rsCtx, maxCount, beanClass,
                 columnNameMapper,
                 (ctx) -> {
                     Function<Map<String, Object>, T> realRowConvertor = isDefaultMapType ? null : rowConvertorBuilder.apply(ctx.getColumns(), beanClass);
@@ -1887,13 +1888,13 @@ public class JdbcResolver {
                 });
     }
 
-    public static <T, R> R parseResultSet(ResultSet rs, int maxCount, Class<T> elemType,
+    public static <T, R> R parseResultSet(ResultSetContext rsCtx, int maxCount, Class<T> elemType,
                                           Function<String, String> columnNameMapper,
                                           Function<ParseResultSetRowContext<T>, R> returnTypeInitializer,
                                           BiConsumer<R, T> rowCollector,
                                           BiFunction<ParseResultSetRowContext<T>, Map<String, Object>, T> rowConvertor) throws SQLException {
+        ResultSet rs = rsCtx.getResultSet();
         try {
-
             ResultSetMetaData metaData = rs.getMetaData();
 
             List<QueryColumn> columns = parseResultSetColumns(metaData, columnNameMapper);
@@ -1911,7 +1912,7 @@ public class JdbcResolver {
                     break;
                 }
 
-                Map<String, Object> map = convertResultSetRowAsMap(columns, rs);
+                Map<String, Object> map = convertResultSetRowAsMap(columns, rsCtx);
                 T elem = rowConvertor.apply(context, map);
                 rowCollector.accept(ret, elem);
 
@@ -1925,7 +1926,6 @@ public class JdbcResolver {
             return ret;
         } finally {
             rs.close();
-
         }
     }
 
@@ -2002,12 +2002,12 @@ public class JdbcResolver {
     }
 
 
-    public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass) throws SQLException {
-        return parseResultSetAsBeanList(rs, beanClass, -1, null);
+    public static <T> List<T> parseResultSetAsBeanList(ResultSetContext rsCtx, Class<T> beanClass) throws SQLException {
+        return parseResultSetAsBeanList(rsCtx, beanClass, -1, null);
     }
 
-    public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass, int maxCount) throws SQLException {
-        return parseResultSetAsBeanList(rs, beanClass, maxCount, null);
+    public static <T> List<T> parseResultSetAsBeanList(ResultSetContext rsCtx, Class<T> beanClass, int maxCount) throws SQLException {
+        return parseResultSetAsBeanList(rsCtx, beanClass, maxCount, null);
     }
 
     public static <T> Function<Map<String, Object>, T> createDefaultRowConvertor(List<QueryColumn> columns, Class<T> beanType) {
@@ -2062,14 +2062,15 @@ public class JdbcResolver {
         return rowConvertor;
     }
 
-    public static <T> List<T> parseResultSetAsBeanList(ResultSet rs, Class<T> beanClass, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
-        return parseResultSet(rs, maxCount, beanClass,
+    public static <T> List<T> parseResultSetAsBeanList(ResultSetContext rsCtx, Class<T> beanClass, int maxCount, Function<String, String> columnNameMapper) throws SQLException {
+        return parseResultSet(rsCtx, maxCount, beanClass,
                 columnNameMapper,
                 JdbcResolver::createDefaultRowConvertor);
     }
 
 
-    public static Map<String, Object> convertResultSetRowAsMap(List<QueryColumn> columns, ResultSet rs) throws SQLException {
+    public static Map<String, Object> convertResultSetRowAsMap(List<QueryColumn> columns, ResultSetContext rsCtx) throws SQLException {
+        ResultSet rs = rsCtx.getResultSet();
         if (columns == null || columns.isEmpty()) {
             columns = parseResultSetColumns(rs);
         }
@@ -2078,7 +2079,7 @@ public class JdbcResolver {
             if (item == null) {
                 continue;
             }
-            if (item.support(rs)) {
+            if (item.support(rsCtx)) {
                 extractor = item;
                 break;
             }
@@ -2091,7 +2092,7 @@ public class JdbcResolver {
             Object val = null;
             boolean resolved = false;
             if (extractor != null) {
-                Reference<Object> ref = extractor.extract(rs, i, col);
+                Reference<Object> ref = extractor.extract(rsCtx, i, col);
                 if (ref != null && ref.isValue()) {
                     val = ref.get();
                     resolved = true;
@@ -2106,7 +2107,7 @@ public class JdbcResolver {
     }
 
 
-    public static <E> SQLBiFunction<List<QueryColumn>, ResultSet, E> createResultSetRowBeanConvertor(Class<E> beanClass) {
+    public static <E> SQLBiFunction<List<QueryColumn>, ResultSetContext, E> createResultSetRowBeanConvertor(Class<E> beanClass) {
         boolean isDefaultMapType = (beanClass == null || TypeOf.typeOf(beanClass, Map.class));
         if (isDefaultMapType) {
             return (columns, rs) -> {
@@ -2124,6 +2125,17 @@ public class JdbcResolver {
                 throw new IllegalStateException(e.getMessage(), e);
             }
         };
+    }
+
+    public static List<QueryColumn> parseResultSetColumns(ResultSetContext rsCtx) throws SQLException {
+        ResultSet rs = rsCtx.getResultSet();
+        return parseResultSetColumns(rs, null);
+    }
+
+    public static List<QueryColumn> parseResultSetColumns(ResultSetContext rsCtx, Function<String, String> columnNameMapper) throws SQLException {
+        ResultSet rs = rsCtx.getResultSet();
+        ResultSetMetaData metaData = rs.getMetaData();
+        return parseResultSetColumns(metaData, columnNameMapper);
     }
 
     public static List<QueryColumn> parseResultSetColumns(ResultSet rs) throws SQLException {
