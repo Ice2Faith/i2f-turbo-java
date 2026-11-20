@@ -86,7 +86,6 @@ import java.util.stream.Collectors;
  */
 @ConditionalOnExpression("${i2f.springboot.ops.open-ai.enable:false}")
 @ConditionalOnClass(RestTemplate.class)
-@EnableConfigurationProperties(OpenAiOpsProperties.class)
 @Slf4j
 @Data
 @NoArgsConstructor
