@@ -3,6 +3,7 @@ package i2f.jdbc.bql;
 import i2f.bql.core.Bql;
 import i2f.jdbc.JdbcResolver;
 import i2f.jdbc.data.QueryResult;
+import i2f.jdbc.data.ResultSetContext;
 import i2f.jdbc.std.context.JdbcInvokeContextProvider;
 import i2f.jdbc.std.func.SQLFunction;
 import i2f.jdbc.template.JdbcTemplate;
@@ -241,7 +242,7 @@ public class BqlTemplate extends JdbcTemplate {
         return queryRaw(bql.$$(), maxCount, columnNameMapper);
     }
 
-    public <R> R queryHandler(Bql<?> bql, SQLFunction<ResultSet, R> resultSetHandler) throws SQLException {
+    public <R> R queryHandler(Bql<?> bql, SQLFunction<ResultSetContext, R> resultSetHandler) throws SQLException {
         return queryHandler(bql.$$(), resultSetHandler);
     }
 
