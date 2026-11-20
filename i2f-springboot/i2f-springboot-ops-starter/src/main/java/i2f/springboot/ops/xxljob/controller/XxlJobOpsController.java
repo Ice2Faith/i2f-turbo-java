@@ -90,6 +90,8 @@ public class XxlJobOpsController implements IOpsProvider {
                         metaDatasource.set(datasource);
                     }
                     return list;
+                } catch (Exception e) {
+                    log.warn("try load xxl-job meta error: " + e.getMessage(), e);
                 }
             } else {
                 for (Map.Entry<String, DataSource> entry : datasourceProvider.getDatasourceMap().entrySet()) {
@@ -101,12 +103,14 @@ public class XxlJobOpsController implements IOpsProvider {
                             metaDatasource.set(key);
                         }
                         return list;
+                    } catch (Exception e) {
+                        log.warn("try load xxl-job meta error: " + e.getMessage(), e);
                     }
                 }
             }
 
         } catch (Exception e) {
-
+            log.warn("try load xxl-job meta error: " + e.getMessage(), e);
         }
         return ret;
     }
