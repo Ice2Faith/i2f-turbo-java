@@ -52,6 +52,7 @@ i2f.springboot.ops.openai.tool.impl.PowershellTools
 i2f.springboot.ops.openai.tool.impl.WebDownloadTools
 i2f.springboot.ops.openai.tool.impl.LunarTools
 i2f.springboot.ops.openai.tool.impl.a2a.AgentTools
+i2f.springboot.ops.openai.tool.impl.SshTools
 i2f.springboot.ops.openai.tool.impl.OpsMcpServerAdditionalToolProvider
 i2f.springboot.ops.openai.tool.impl.OpsMcpServerApiToolProvider
 i2f.springboot.ops.openai.controller.OpenAiOpsController

@@ -546,6 +546,47 @@
       "defaultValue": true
     },
     {
+      "name": "ai.tools.ssh.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable ssh tools (ssh_hosts / ssh_command / ssh_upload / ssh_download), disabled by default.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshTools",
+      "defaultValue": false
+    },
+    {
+      "name": "ai.tools.ssh.default-wait-seconds",
+      "type": "java.lang.Integer",
+      "description": "default wait seconds of ssh_command when the argument is absent.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshToolsProperties",
+      "defaultValue": 120
+    },
+    {
+      "name": "ai.tools.ssh.max-wait-seconds",
+      "type": "java.lang.Integer",
+      "description": "upper limit of wait seconds of ssh_command.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshToolsProperties",
+      "defaultValue": 500
+    },
+    {
+      "name": "ai.tools.ssh.charset",
+      "type": "java.lang.String",
+      "description": "charset of remote command output.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshToolsProperties",
+      "defaultValue": "UTF-8"
+    },
+    {
+      "name": "ai.tools.ssh.max-output-chars",
+      "type": "java.lang.Integer",
+      "description": "max chars of remote command output, excess part is truncated.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshToolsProperties",
+      "defaultValue": 20000
+    },
+    {
+      "name": "ai.tools.ssh.hosts",
+      "type": "java.util.List<i2f.springboot.ops.openai.tool.impl.SshToolsProperties$SshHostOptions>",
+      "description": "named ssh hosts, the `name` of each item is the host name used by the ssh tools.",
+      "sourceType": "i2f.springboot.ops.openai.tool.impl.SshToolsProperties"
+    },
+    {
       "name": "ai.tools.tmp-file.enable",
       "type": "java.lang.Boolean",
       "description": "enable tmp file tools.",

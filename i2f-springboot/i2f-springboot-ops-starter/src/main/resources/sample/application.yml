@@ -119,6 +119,26 @@ ai:
       keep-days: 15
     command:
       enable: false
+    # named ssh hosts, ssh tools take the host name as the first argument
+    ssh:
+      enable: false
+      default-wait-seconds: 120
+      max-wait-seconds: 500
+      charset: UTF-8
+      max-output-chars: 20000
+      hosts:
+        - name: dev
+          enable: true
+          description: dev application server
+          host: 192.168.1.10
+          port: 22
+          username: root
+          password: xxx
+          # private-key: /root/.ssh/id_rsa
+          workdir: /opt/app
+          # extra jsch session config
+          # config:
+          #   StrictHostKeyChecking: "no"
     python:
       enable: false
     nodejs:
