@@ -59,6 +59,9 @@ public class RagEmbeddingCache {
         if (!parentFile.exists()) {
             parentFile.mkdirs();
         }
+        if (!saveFile.isFile()) {
+            return;
+        }
         String json = StreamUtil.readString(saveFile);
         EmbeddingPojo pojo = (EmbeddingPojo) jsonSerializer.deserialize(json, EmbeddingPojo.class);
 
