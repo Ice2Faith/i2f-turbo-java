@@ -2,6 +2,8 @@ package i2f.limit.impl;
 
 import i2f.limit.IKeyedLimiter;
 import i2f.limit.ILimiter;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -12,9 +14,11 @@ import java.util.function.Supplier;
  * @date 2026/9/22 14:40
  * @desc
  */
+@Data
+@NoArgsConstructor
 public class ConcurrentMapKeyedLimiter implements IKeyedLimiter {
     protected final ConcurrentHashMap<String, ILimiter> holder = new ConcurrentHashMap<>();
-    protected final Function<String, ILimiter> producer;
+    protected volatile Function<String, ILimiter> producer;
 
     public ConcurrentMapKeyedLimiter(Function<String, ILimiter> producer) {
         this.producer = producer;
@@ -22,6 +26,11 @@ public class ConcurrentMapKeyedLimiter implements IKeyedLimiter {
 
     public ConcurrentMapKeyedLimiter(Supplier<ILimiter> supplier) {
         this(k -> supplier.get());
+    }
+
+    @Override
+    public ILimiter get(String key, Function<String, ILimiter> producer) {
+        return holder.computeIfAbsent(key, producer);
     }
 
     @Override

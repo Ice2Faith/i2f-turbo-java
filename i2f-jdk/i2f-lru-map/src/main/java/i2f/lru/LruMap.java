@@ -1,16 +1,19 @@
 package i2f.lru;
 
 import i2f.clock.SystemClock;
+import lombok.Getter;
 
 import java.time.Duration;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -21,26 +24,36 @@ import java.util.function.Function;
 public class LruMap<K, V> extends LinkedHashMap<K, V> {
     protected final AtomicInteger maxSize = new AtomicInteger(4096);
     protected final ReentrantLock lock = new ReentrantLock();
+    @Getter
+    protected final ConcurrentHashMap<String, Consumer<Map.Entry<K, V>>> removeListeners = new ConcurrentHashMap<>();
+
+    public LruMap<K, V> mutator(Consumer<LruMap<K, V>> consumer) {
+        consumer.accept(this);
+        return this;
+    }
 
     public LruMap() {
+        super(32, 0.75f, true);
     }
 
     public LruMap(int initialCapacity, float loadFactor, int maxSize) {
-        super(initialCapacity, loadFactor);
+        super(initialCapacity, loadFactor, true);
         this.maxSize.set(maxSize);
     }
 
     public LruMap(int initialCapacity, int maxSize) {
-        super(initialCapacity);
+        super(initialCapacity, 0.75f, true);
         this.maxSize.set(maxSize);
     }
 
     public LruMap(int maxSize) {
+        super(Math.max(maxSize, 32), 0.75f, true);
         this.maxSize.set(maxSize);
     }
 
     public LruMap(Map<? extends K, ? extends V> m, int maxSize) {
-        super(m);
+        super(Math.max(32, m.size()), 0.75f, true);
+        super.putAll(m);
         this.maxSize.set(maxSize);
     }
 
@@ -102,7 +115,14 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
     protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
         lock.lock();
         try {
-            return size() > maxSize.get();
+            boolean ok = size() > maxSize.get();
+            if (ok) {
+                for (Map.Entry<String, Consumer<Map.Entry<K, V>>> entry : removeListeners.entrySet()) {
+                    Consumer<Map.Entry<K, V>> listener = entry.getValue();
+                    listener.accept(eldest);
+                }
+            }
+            return ok;
         } finally {
             lock.unlock();
         }

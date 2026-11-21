@@ -198,9 +198,28 @@ public class ServletContextUtil {
     public static String getContextBaseUrl(HttpServletRequest request) {
         StringBuffer url = request.getRequestURL();
         String contextPath = request.getServletContext().getContextPath();
-        return url.delete(url.length() - request.getRequestURI().length(), url.length()).append(contextPath).toString();
+        url.delete(url.length() - request.getRequestURI().length(), url.length());
+        if (contextPath != null && !contextPath.isEmpty() && !"/".equals(contextPath)) {
+            url.append(contextPath);
+        }
+        return url.toString();
     }
 
+    /**
+     * 获取去除 ContextPath 后的完整请求路径
+     * 例如：ContextPath 为 /myapp，请求为 /myapp/ops/lib/a.js
+     * 返回结果：/ops/lib/a.js
+     */
+    public static String getFullPathWithoutContextPath(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String contextPath = request.getContextPath();
 
+        // 如果 contextPath 不为空，且 requestURI 以它开头，则截取掉
+        if (contextPath != null && !contextPath.isEmpty() && requestURI.startsWith(contextPath)) {
+            return requestURI.substring(contextPath.length());
+        }
+
+        return requestURI;
+    }
 }
 

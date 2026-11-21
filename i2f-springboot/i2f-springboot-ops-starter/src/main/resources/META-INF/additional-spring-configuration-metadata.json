@@ -16,6 +16,11 @@
       "sourceType": "i2f.springboot.ops.datasource.configuration.DatasourceAutoConfiguration"
     },
     {
+      "name": "i2f.springboot.ops.limited",
+      "type": "i2f.springboot.ops.common.limit.OpsLimitProperties",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties"
+    },
+    {
       "name": "ai.openai",
       "type": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties",
       "sourceType": "i2f.springboot.ops.openai.properties.OpenAiOpsProperties"
@@ -160,6 +165,101 @@
       "type": "java.lang.String",
       "description": "jdbc password.",
       "sourceType": "i2f.springboot.ops.datasource.data.DatasourceItemDto"
+    },
+    {
+      "name": "i2f.springboot.ops.limited.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the ops request limited filter (token bucket rate limit on ops apis).",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitedAutoConfiguration",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.limited.filter-url-pattern",
+      "type": "java.lang.String",
+      "description": "url pattern the ops limited filter is registered on, defaults to {i2f.springboot.ops.base-url}/* when blank.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties"
+    },
+    {
+      "name": "i2f.springboot.ops.limited.all-rule.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the global (all requests) rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.limited.all-rule.rate-per-second",
+      "type": "java.lang.Double",
+      "description": "token refill rate (tokens per second) of the global rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 100
+    },
+    {
+      "name": "i2f.springboot.ops.limited.all-rule.capacity",
+      "type": "java.lang.Double",
+      "description": "burst capacity (bucket size) of the global rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 300
+    },
+    {
+      "name": "i2f.springboot.ops.limited.every-ip-rule.lru-max-size",
+      "type": "java.lang.Integer",
+      "description": "max count of cached per client ip limiters (lru capacity), values not greater than 0 keep the filter default.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$EveryIpLimitRule",
+      "defaultValue": 8192
+    },
+    {
+      "name": "i2f.springboot.ops.limited.every-ip-rule.rule.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable the per client ip rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.limited.every-ip-rule.rule.rate-per-second",
+      "type": "java.lang.Double",
+      "description": "token refill rate (tokens per second) of the per ip rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 100
+    },
+    {
+      "name": "i2f.springboot.ops.limited.every-ip-rule.rule.capacity",
+      "type": "java.lang.Double",
+      "description": "burst capacity (bucket size) of the per ip rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 300
+    },
+    {
+      "name": "i2f.springboot.ops.limited.path-rules",
+      "type": "java.util.List<i2f.springboot.ops.common.limit.OpsLimitProperties$PathLimitRule>",
+      "description": "limited rules matched by ANT style request path, applied in declaration order.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties"
+    },
+    {
+      "name": "i2f.springboot.ops.limited.path-rules[].ant-path",
+      "type": "java.lang.String",
+      "description": "ANT style request path pattern of the limited rule, skipped when blank.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$PathLimitRule"
+    },
+    {
+      "name": "i2f.springboot.ops.limited.path-rules[].rule.enable",
+      "type": "java.lang.Boolean",
+      "description": "enable this path rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": true
+    },
+    {
+      "name": "i2f.springboot.ops.limited.path-rules[].rule.rate-per-second",
+      "type": "java.lang.Double",
+      "description": "token refill rate (tokens per second) of this path rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 100
+    },
+    {
+      "name": "i2f.springboot.ops.limited.path-rules[].rule.capacity",
+      "type": "java.lang.Double",
+      "description": "burst capacity (bucket size) of this path rate limit rule.",
+      "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties$LimitRule",
+      "defaultValue": 300
     },
     {
       "name": "ai.openai.vision.image-max-size-kb",

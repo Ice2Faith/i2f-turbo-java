@@ -17,6 +17,30 @@ i2f:
       # secure transfer key pair cert
       secure:
         cert: xxx
+      # ops request limited filter (token bucket), enabled by default
+      limited:
+        # no need to set, defaults to {base-url}/* (e.g. /ops/*) when blank
+        # filter-url-pattern: /ops/*
+        # global (all requests) token bucket rule
+        all-rule:
+          enable: true
+          rate-per-second: 100
+          capacity: 300
+        # per client ip token bucket rule
+        every-ip-rule:
+          # max count of cached per client ip limiters (lru capacity), <=0 keeps the filter default 8192
+          lru-max-size: 8192
+          rule:
+            enable: true
+            rate-per-second: 100
+            capacity: 300
+        # ANT style path rules, matched in declaration order
+        path-rules:
+          - ant-path: /ops/open-ai/*
+            rule:
+              enable: true
+              rate-per-second: 20
+              capacity: 50
       # ops controllers switch
       app:
         enable: true
