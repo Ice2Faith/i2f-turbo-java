@@ -42,7 +42,7 @@
             </tr>
         </SpecTable>
 
-      <PanelTitle title="内置工具清单 — 运行期 27 个 @Tools 类（ops 23 + ai-starter 4）"/>
+      <PanelTitle title="内置工具清单 — 运行期 28 个 @Tools 类（ops 24 + ai-starter 4）"/>
         <SpecTable :headers="['工具类', '代表工具', '能力', '关键标签']">
             <tr v-for="row in toolRows" :key="row[0]">
                 <td v-html="row[0]"></td><td v-html="row[1]"></td><td v-html="row[2]"></td><td v-html="row[3]"></td>
@@ -53,11 +53,25 @@
         （<b>ai-starter 前缀</b>）
         / <code>ai.tools.session-record.enable</code> / <code>ai.tools.recycle.enable</code> / <code>ai.tools.groovy.enable</code>
         / <code>ai.tools.skill-manage.enable</code>
+        / <code>ai.tools.ssh.enable</code>
         / <code>ai.mcp-server.api.enable</code>（<b>ops-starter 旧前缀</b>）开关注入；<code>LoopEngineeringTools</code> 不是
         @Tool
         Bean，而是静态提示词提供者（由请求字段 <code>enableLoopEngineering</code> 控制注入）；脚本类装配策略：Webjs
         默认开启，PowerShell（仅 Windows）/ Node.js / Python 默认关闭且需探测到可用运行环境——详见下文与第 13 章。
       </BodyText>
+
+      <Callout color="#0b7285" title="SshTools — 让模型「选主机」而不是「拼地址」">
+        <p><code>ai.tools.ssh.hosts[]</code> 以 <code>name</code> 为每台主机起名，模型只需传 <code>host</code>
+          名；<code>ssh_hosts</code> 返回启用主机的地址 / 默认工作目录 / 认证方式（<b>不回显密码</b>），并在
+          <code>host</code>
+          缺失或未知时把可用主机名写进 <code>hints</code>。<code>ssh_command</code> 一次调用建一次短会话，按输出末行
+          <code>exit status: N</code> 派生 <code>completed / exitStatus</code>，并将 <code>ll</code> / 交互式
+          <code>top</code>
+          重写为非交互形式；<code>ssh_upload</code> / <code>ssh_download</code> 的本机侧一律经
+          <code>LocalFileTools.getFile()</code> 沙箱（远端路径不限制），下载覆盖前按 <code>ai.tools.file.backup-file</code>
+          备份。四件工具均携带 <code>AUTO</code>/<code>HUMAN</code>/<code>WRITABLE</code> 标签，可经
+          <code>@McpServerExpose</code> 对外暴露。</p>
+      </Callout>
 
       <Callout color="#c92a2a" title="ref_content — 让「上下文回收」可逆的那个工具">
         <p><code>RecycleTools</code> 只有一件武器：<code>ref_content(ref)</code>。它的输入是回收时生成的 <code>ref://{uuid}</code>
@@ -253,6 +267,7 @@
                   ['<code>DatabaseUpdateTools</code>', '<code>sql_update_datasource</code>', 'SQL 变更执行（同样经 AST + 正则双重校验，且需人工审批）', '<span class="tag t-o">WRITABLE</span><span class="tag t-o">HUMAN</span>'],
                     ['<code>DatabaseMetadataTools</code>', '元数据查询', '表结构 / 索引 / 字段信息', '<span class="tag t-g">READONLY</span>'],
                     ['<code>CommandTools</code>', 'shell 执行', '本地命令行执行', '<span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span>'],
+                  ['<code>SshTools</code> ※', '<code>ssh_hosts / ssh_command / ssh_upload / ssh_download</code>', '具名主机 SSH 工具：先查已注册主机，再按 host 名远程执行命令 / 上传 / 下载；本机路径复用 <code>LocalFileTools</code> 沙箱', '<span class="tag t-r">EXECUTABLE</span><span class="tag t-o">HUMAN</span><span class="tag t-g">AUTO</span>'],
                     ['<code>LocalFileTools</code>', '文件读写', '本地文件列举 / 读取 / 写入', '<span class="tag t-o">WRITABLE</span>'],
                     ['<code>TmpFileTools</code>', '临时文件', '上传 / 下载临时文件管理', '<span class="tag t-g">READONLY</span>'],
                     ['<code>TruthStoreTools</code>', '<code>store_truth</code>', '存储关键事实，注入后续对话', '<span class="tag t-o">WRITABLE</span>'],

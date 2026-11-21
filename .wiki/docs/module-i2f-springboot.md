@@ -93,7 +93,7 @@ i2f-springboot 提供 SpringBoot 自动配置 Starter，开箱即用。
 
 | 模块                                 | 说明                                                                                         |
 |------------------------------------|--------------------------------------------------------------------------------------------|
-| `i2f-springboot-ops-starter`       | 运维控制台 Starter（183 Java 文件，13+ 功能模块，国密安全传输 + 入口三级令牌桶限流，详见 [ops-starter.md](ops-starter.md)） |
+| `i2f-springboot-ops-starter`       | 运维控制台 Starter（185 Java 文件，13+ 功能模块，国密安全传输 + 入口三级令牌桶限流，详见 [ops-starter.md](ops-starter.md)） |
 | `i2f-springboot-trace-mdc-starter` | 链路追踪 MDC（全链路 TraceId 传递，10 个自动配置，详见 [trace-mdc.md](trace-mdc.md)）                          |
 | `i2f-springboot-limit-starter`     | 接口限流                                                                                       |
 

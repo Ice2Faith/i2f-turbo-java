@@ -365,20 +365,21 @@ i2f:
 
 **内置 AI 工具（Function Calling）**:
 
-| 工具类                     | 说明                       |
-|-------------------------|--------------------------|
-| `DatetimeTools`         | 日期时间工具                   |
-| `RandomTools`           | 随机数工具                    |
-| `UidTools`              | UID 生成工具                 |
-| `JceTools`              | JCE 加密工具                 |
-| `CodecTools`            | 编解码工具                    |
-| `DatabaseMetadataTools` | 数据库元数据工具                 |
-| `DatabaseQueryTools`    | 数据库查询工具                  |
-| `LocalFileTools`        | 本地文件工具（411 行）            |
-| `CommandTools`          | 命令执行工具                   |
-| `WebDownloadTools`      | 网页下载工具                   |
-| `LunarTools`            | 农历日历工具                   |
-| `AgentTools`            | Agent-to-Agent 工具（126 行） |
+| 工具类                     | 说明                                    |
+|-------------------------|---------------------------------------|
+| `DatetimeTools`         | 日期时间工具                                |
+| `RandomTools`           | 随机数工具                                 |
+| `UidTools`              | UID 生成工具                              |
+| `JceTools`              | JCE 加密工具                              |
+| `CodecTools`            | 编解码工具                                 |
+| `DatabaseMetadataTools` | 数据库元数据工具                              |
+| `DatabaseQueryTools`    | 数据库查询工具                               |
+| `LocalFileTools`        | 本地文件工具（411 行）                         |
+| `CommandTools`          | 命令执行工具                                |
+| `SshTools`              | SSH 具名主机工具（命令 / 上传 / 下载，本机路径复用本地文件沙箱） |
+| `WebDownloadTools`      | 网页下载工具                                |
+| `LunarTools`            | 农历日历工具                                |
+| `AgentTools`            | Agent-to-Agent 工具（126 行）              |
 
 **SQL 安全验证**: `OpsSqlValidator` 接口 + 两种实现（正则 / JSqlParser AST），防止 AI 工具执行危险 SQL。
 
@@ -432,7 +433,7 @@ i2f:
 - 主机标识（`HostIdHelper` / `HostIdProxyHelper`）
 - 数据源（`DatasourceAutoConfiguration` + 3 种 Collector + Provider + Helper + 2 个 Controller）
 - 各功能控制器（Redis / SSH / MinIO / AwsS3 / ElasticSearch / XProc4J / OpenAI / DashScope × 12）
-- AI 工具（`SkillAutoConfiguration` + 12 个 Tools 实现 + `SpringContextToolDefinitionProvider`）
+- AI 工具（24 个 openai 域 `@Tools` 实现 + 8 个 DashScope 多媒体工具 + `SpringContextToolDefinitionProvider`）
 
 ### IOpsProvider 扩展接口
 
@@ -472,7 +473,7 @@ public interface IOpsProvider {
 
 ## 源文件清单
 
-### Java 源码（183 文件）
+### Java 源码（185 文件）
 
 | 包               | 文件数 | 说明                                                  |
 |-----------------|-----|-----------------------------------------------------|
@@ -488,7 +489,7 @@ public interface IOpsProvider {
 | `awss3`         | 2   | AWS S3 管理（1 控制器 + 1 DTO）                            |
 | `xxljob`        | 3   | XXL-JOB 管理（1 控制器 + 2 DTO/Meta）                      |
 | `xproc4j`       | 3   | XProc4J 管理（1 控制器 + 1 Helper + 1 DTO）                |
-| `openai`        | 61  | AI 对话（控制器 + Skill 配置 + Provider + 工具实现 + DTO）       |
+| `openai`        | 63  | AI 对话（控制器 + Skill 配置 + Provider + 工具实现 + DTO）       |
 | `dashscope`     | 36  | DashScope（12 控制器 + 工具实现 + DTO）                      |
 | `util`          | 1   | HumanUtil（人类可读文件大小）                                 |
 
@@ -501,7 +502,7 @@ public interface IOpsProvider {
 5. **多主机代理** — HostId 机制 + `HostIdProxyHelper` 实现跨主机统一管理
 6. **前端内嵌** — 所有前端资源打包在 JAR 内，引入依赖即可使用
 7. **复用项目生态** — 文件系统操作复用 `IFileSystem` 抽象，数据库操作复用 `JdbcResolver`，AI 复用 `i2f-ai-std`
-8. **AI 工具集成** — 12 种内置 Function Calling 工具 + 技能系统 + SQL 安全验证
+8. **AI 工具集成** — 24 个领域 Function Calling 工具 + 8 个 DashScope 多媒体工具 + 技能系统 + SQL 安全验证
 9. **入口限流** — 三层令牌桶（全局 / 每 IP / ANT 路径）+ LRU 上限保护 IP 桶 + 统一 429 出口
 
 ## 相关文档

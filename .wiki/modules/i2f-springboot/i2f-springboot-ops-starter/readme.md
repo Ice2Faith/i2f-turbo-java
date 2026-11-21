@@ -6,7 +6,7 @@
 
 ## 模块概述
 
-i2f-springboot 组中**体量最大、能力最全**的重型一体化运维 / 开发控制台 Starter（183 个 Java 源文件 + 内嵌完整前端
+i2f-springboot 组中**体量最大、能力最全**的重型一体化运维 / 开发控制台 Starter（185 个 Java 源文件 + 内嵌完整前端
 SPA）。它把「应用自省、多数据源 SQL 控制台、SSH/SFTP 文件与命令、Redis、Elasticsearch、MinIO、AWS
 S3、主机文件、xproc4j、xxl-job、DashScope 图/视频/3D 生成、OpenAI 对话 + AI 工具集 + RAG + Groovy 技能 + TTS」等一整套运维与
 AI 能力，连同 Vue2 前端，封装进单个 jar；仅靠把本 Starter 放入 classpath 即**全自动装载**整套控制台（84
@@ -40,7 +40,7 @@ ANT 路径」三层令牌桶判定，任一层取不到令牌即统一 429；每
 | `i2f-mutator`                         | `toMutator().set(...).done()` 装配 DSL（AI/RAG/工具广泛使用）                                                                                                                                                             |
 | `i2f-image-impl`                      | 图像能力（dashscope 图/视控制台）                                                                                                                                                                                          |
 | `i2f-jdk-ext-web`                     | `ServletFileUtil` 附件下载、Web 工具                                                                                                                                                                                   |
-| `i2f-extension-sftp`                  | `SftpUtil`/`ChannelSftp`：SSH 文件管理、exec、隧道式命令                                                                                                                                                                    |
+| `i2f-extension-sftp`                  | `SftpUtil`/`ChannelSftp`：SSH 文件管理、exec、隧道式命令（`SshOpsController` 与 `SshTools` 共用）                                                                                                                                |
 | `i2f-extension-groovy`                | `GroovyScript.eval`：`/ops/app/eval` 在线求值、技能脚本                                                                                                                                                                   |
 | `i2f-extension-filesystem-minio`      | MinIO 控制台                                                                                                                                                                                                       |
 | `i2f-extension-filesystem-oss-aws-s3` | AWS S3 控制台                                                                                                                                                                                                      |
@@ -59,23 +59,23 @@ ANT 路径」三层令牌桶判定，任一层取不到令牌即统一 429；每
 
 ### 外部依赖（provided，按需自装）
 
-| 依赖                                                                                        | 版本              | 用途                                                         |
-|-------------------------------------------------------------------------------------------|-----------------|------------------------------------------------------------|
-| `com.antherd:sm-crypto`                                                                   | 0.3.2.1-RELEASE | **已注释停用**（原前端一致 SM 实现，现由 `i2f-sm-crypto` 取代）               |
-| `org.openjdk.nashorn:nashorn-core`                                                        | 15.4            | **已注释停用**（webjs 工具随之降级为空壳，见瑕疵）                             |
-| `com.github.jsqlparser:jsqlparser`                                                        | 4.9             | SQL 校验（`OpsSqlParserAstSqlValidator`），注释注明 4.9 为 JDK8 最后版本 |
-| `com.baomidou:dynamic-datasource-spring-boot-starter`                                     | 3.5.2           | 动态多数据源探测（BaomidouDynamicDatasourceCollector）               |
-| `spring-boot-starter-data-redis` / `redis.clients:jedis` / `redisson-spring-boot-starter` | - / - / 3.20.1  | Redis 控制台三种客户端解析                                           |
-| `com.xuxueli:xxl-job-core`                                                                | 2.4.1           | xxl-job 控制台                                                |
-| `com.h2database:h2`                                                                       | 2.2.224         | sample 内嵌库                                                 |
-| `com.jcraft:jsch`                                                                         | 0.1.55          | SFTP/SSH 底层（provided，未 optional）                           |
-| `org.apache.groovy:groovy`                                                                | 4.0.18          | 求值/技能脚本（provided+optional）                                 |
-| `io.minio:minio`                                                                          | 7.1.0           | MinIO 控制台                                                  |
-| `software.amazon.awssdk:s3 / kms / s3control`                                             | BOM 2.17.100    | AWS S3 控制台                                                 |
-| `org.elasticsearch[.client]:*`                                                            | 7.6.2           | ES 控制台（含 `RestHighLevelClient`）                            |
-| `cn.6tail:lunar`                                                                          | 1.3.14          | 农历/干支工具（LunarTools）                                        |
-| `org.apache.pdfbox:pdfbox`                                                                | 2.0.29          | PDF 处理                                                     |
-| `org.java-websocket:Java-WebSocket`                                                       | 1.5.3           | Qwen TTS WebSocket                                         |
+| 依赖                                                                                        | 版本              | 用途                                                                                     |
+|-------------------------------------------------------------------------------------------|-----------------|----------------------------------------------------------------------------------------|
+| `com.antherd:sm-crypto`                                                                   | 0.3.2.1-RELEASE | **已注释停用**（原前端一致 SM 实现，现由 `i2f-sm-crypto` 取代）                                           |
+| `org.openjdk.nashorn:nashorn-core`                                                        | 15.4            | **已注释停用**（webjs 工具随之降级为空壳，见瑕疵）                                                         |
+| `com.github.jsqlparser:jsqlparser`                                                        | 4.9             | SQL 校验（`OpsSqlParserAstSqlValidator`），注释注明 4.9 为 JDK8 最后版本                             |
+| `com.baomidou:dynamic-datasource-spring-boot-starter`                                     | 3.5.2           | 动态多数据源探测（BaomidouDynamicDatasourceCollector）                                           |
+| `spring-boot-starter-data-redis` / `redis.clients:jedis` / `redisson-spring-boot-starter` | - / - / 3.20.1  | Redis 控制台三种客户端解析                                                                       |
+| `com.xuxueli:xxl-job-core`                                                                | 2.4.1           | xxl-job 控制台                                                                            |
+| `com.h2database:h2`                                                                       | 2.2.224         | sample 内嵌库                                                                             |
+| `com.jcraft:jsch`                                                                         | 0.1.55          | SFTP/SSH 底层（provided，未 optional），亦是 `SshTools` 的 `@ConditionalOnClass(ChannelSftp)` 依据 |
+| `org.apache.groovy:groovy`                                                                | 4.0.18          | 求值/技能脚本（provided+optional）                                                             |
+| `io.minio:minio`                                                                          | 7.1.0           | MinIO 控制台                                                                              |
+| `software.amazon.awssdk:s3 / kms / s3control`                                             | BOM 2.17.100    | AWS S3 控制台                                                                             |
+| `org.elasticsearch[.client]:*`                                                            | 7.6.2           | ES 控制台（含 `RestHighLevelClient`）                                                        |
+| `cn.6tail:lunar`                                                                          | 1.3.14          | 农历/干支工具（LunarTools）                                                                    |
+| `org.apache.pdfbox:pdfbox`                                                                | 2.0.29          | PDF 处理                                                                                 |
+| `org.java-websocket:Java-WebSocket`                                                       | 1.5.3           | Qwen TTS WebSocket                                                                     |
 
 > 依赖面极广：23 个 i2f 内部 compile + 上述大量 provided。由于内部依赖均为 compile 传递，**引入本 Starter 会把整台「运维 +
 AI」控制台的重资产一次性拉入**（现在还包含整个 ai-starter 及其 embedding 实现）；外部集成库标
@@ -112,7 +112,7 @@ flowchart TD
 
     subgraph AI[openai + dashscope]
         OAI[OpenAiOpsController 默认关\n/stream SSE + /tool/tags + /async/task/query]
-        TOOLS[tool/impl 工具类约 25 个\n@McpServerExpose 控制 MCP 暴露]
+        TOOLS[tool/impl 领域工具 24 个 @Tools\n@McpServerExpose 控制 MCP 暴露]
         MCP1[OpsMcpServerAdditionalToolProvider\nops. 前缀 3 工具]
         MCP2[OpsMcpServerApiToolProvider\n/mcp/api + X-MCP-TOKEN]
         MCP3[DashScopeOpsMcpServerAdditionalToolProvider\nops. 前缀 8 工具]
@@ -150,6 +150,12 @@ flowchart TD
   CSV `import`（按表头匹配列拼 insert）。数据源经 `DatasourceProvider` + 四种 `DatasourceCollector`（Static /
   BaomidouDynamic / Default / **RAG 反桥**）聚合。
 - **SSH/SFTP 控制台**（`SshOpsController`，`ops.ssh.enable:true`）：file-list、mkdirs、delete、upload/download（MD5 校验）、head/tail 日志、`cmd`（远程 shell，可 runAsFile 落 `.sh` 后 `sh -c` 执行）、内置 sftp 命令解释器（cd/ls/rm/rename/symlink…）。
+- **SSH 具名主机工具**（`SshTools`，`ai.tools.ssh.enable:false` 默认关，`@ConditionalOnClass(ChannelSftp)`）：`ssh_hosts`
+  列出启用主机（`ai.tools.ssh.hosts[]` 的 `name` 即工具入参 `host`，逐台 `enable`）；`ssh_command` 一次调用一次短会话，按输出末行
+  `exit status: N` 派生 `completed`/`exitStatus`，`ll` / 交互式 `top` 重写为非交互形式，等待上限
+  3600s；`ssh_upload`/`ssh_download`
+  的本机路径统一经 `LocalFileTools.getFile()` 沙箱（远端路径不限制），下载覆盖前按 `ai.tools.file.backup-file` 备份；结果统一
+  `success/code/hints`（`SshOutcome` 枚举派生），可经 `@McpServerExpose` 对外暴露。
 - **中间件控制台**：Redis（Jedis/Lettuce/Redisson 三解析）、Elasticsearch、MinIO、AWS S3、主机本地文件、xproc4j、xxl-job，各带 `ops.{name}.enable:true` 独立开关。
 - **OpenAI 对话 + AI 工具集
   **（`OpenAiOpsController`，`i2f.springboot.ops.open-ai.enable:false` + `@ConditionalOnClass(RestTemplate)`）：`/models`
@@ -238,6 +244,19 @@ ai:
       update: { enable: true }       # 默认 false
     recycle: { enable: true }        # ref:// 上下文瘦身
     skill-manage: { enable: true }   # skill_install/uninstall/extract
+    ssh:                             # ai.tools.ssh.* 具名主机 SSH 工具-默认关，需 jsch
+      enable: false
+      default-wait-seconds: 120
+      max-wait-seconds: 500
+      hosts:
+        - name: dev                  # 工具入参 host
+          enable: true               # 逐台开关
+          host: 192.168.1.10
+          port: 22
+          username: root
+          password: xxx
+          # private-key: /root/.ssh/id_rsa
+          workdir: /opt/app
   rags:
     datasource: { enable: true }     # rag_* 数据源反桥（对应 ${ai.rags.datasource.enable:true}）
     # 注意：RAG 自身总开关是 ai-starter 的 i2f.springboot.ai.rags.enable，不在此前缀下
@@ -261,6 +280,8 @@ ai:
   移植版；兼具机密性、完整性、签名与时效（±12h）校验。
 - **可反向被智能体操作**：三条 `McpServerAdditionalToolProvider` 通道 + `/mcp/api` 文件面，把控制台从「人来点的后台」变成「Agent
   可调的工具集」，且以 `@McpServerExpose(false)` 精确排除 RAG 长耗时与内部工具。
+- **具名主机 SSH 工具**：`ai.tools.ssh.hosts[]` 用 `name` 标识多台主机，模型只能在该清单内选主机；本机路径始终过
+  `LocalFileTools` 沙箱，远端路径不限制，结果以 `SshOutcome` 结果码 + `hints` 引导下一步（默认关闭）。
 - **能力域模块化 + 逐域开关**：app/datasource/ssh/redis/es/minio/aws-s3/host/xproc4j/xxl-job/openai/dashscope 各带 `@ConditionalOnExpression` 独立 enable；AI 工具/技能/RAG 另有 `ai.*` 细粒度开关。
 - **可扩展装配**：`IOpsProvider`（菜单）、`DatasourceProvider`/`DatasourceCollector`（数据源）、`@Tool`（AI
   工具）、`SkillDefinition`/`AsyncTaskResolver`（技能与异步任务）均为可插拔契约，`@ConditionalOnMissingBean` 允许宿主覆盖。
@@ -320,9 +341,9 @@ ai:
   （已修复）**
   ：现已按源码 `@ConditionalOnExpression`/`@Value`/`@ConfigurationProperties` 全量同步，登记 6 个
   groups（`i2f.springboot.ops`、
-  `.secure`、`.datasource`、`.limited`、`ai.openai`、`ai.tts.qwen`）与 105 个 properties，覆盖 `base-url`、13 个域级 `enable`、
+  `.secure`、`.datasource`、`.limited`、`ai.openai`、`ai.tts.qwen`）与 117 个 properties，覆盖 `base-url`、13 个域级 `enable`、
   `datasource.datasource-map.*`（kebab-case，字段仍为 `datasourceMap`）、`ai.tools.*` 全部开关与模型参数（含
-  `skill-manage`/`recycle`/`database.update`/`qwen_tts`/`happyhorse-t2v` 等）、`ai.rags.datasource.enable`、
+  `skill-manage`/`ssh`/`recycle`/`database.update`/`qwen_tts`/`happyhorse-t2v` 等）、`ai.rags.datasource.enable`、
   `ai.mcp-server.api.enable`、`i2f.springboot.ops.limited.*`（14 项：开关/挂载范围/三层规则）、`ai.tts.qwen.*`、`ai.openai.*`
   ；原两条从别处拷贝的死 `hints`（`server.servlet.jsp.class-name` /
   `server.tomcat.accesslog.encoding`）已删除。本模块不存在 `ai.rags.enable`（RAG 总开关在 ai-starter
@@ -358,6 +379,9 @@ ai:
 - **【一致性】`OpsMcpServerAdditionalToolProvider` 与 `OpsMcpServerApiToolProvider` 的 `getHolderManager()`
   各自 `new ListableAppToolManager()` 并重复 `ToolRawHelper.parseTools` + 手动改 `ops.` 前缀**
   （L85-86、L81-82），同一套「前缀工具清单」逻辑复制两遍，前缀字符串也以字面量散落各处，改名/加前缀需多点同步。
+- **【缺陷·工具面悬空】`SshTools` 的本机侧依赖 `LocalFileTools`**：`ssh_upload`/`ssh_download` 一律经
+  `localFileTools.getFile(...)` 做沙箱，而该字段同为 `@Autowired(required=false)`；宿主关闭 `ai.tools.file.enable`
+  后工具仍在清单内，调用返回 `local_file_disabled`（已由 `SshOutcome` 结构化兜底、不再抛 NPE），但上传/下载能力实际不可用。
 
 ### 请求限流（本轮新增）
 

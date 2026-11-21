@@ -96,7 +96,7 @@
             return {
               boundaryRows: [
                 ['<b>基建层</b>', '<code>i2f-springboot-ai-starter</code>', 'AiCommon / AiModel / AiAgent / AiTools(+GroovyDynamicTool) / AiSkills(+GroovySkillScriptRunner) / AiRags / AiServiceProxy', '<code>i2f.springboot.ai.*</code>（11 组 / 49 项）'],
-                ['<b>控制台层</b>', '<code>i2f-springboot-ops-starter</code>', 'openai 子系统 61 个类：控制器 / SSE 中继 / HITL 审批 / 23 个领域 <code>@Tools</code> / TTS / MCP API', '<code>ai.*</code> 遗留 + <code>i2f.springboot.ops.open-ai.enable</code>'],
+                ['<b>控制台层</b>', '<code>i2f-springboot-ops-starter</code>', 'openai 子系统 63 个类：控制器 / SSE 中继 / HITL 审批 / 24 个领域 <code>@Tools</code> / TTS / MCP API', '<code>ai.*</code> 遗留 + <code>i2f.springboot.ops.open-ai.enable</code>'],
                 ['<b>依赖方向</b>', 'ops-starter → ai-starter（单向）', 'ai-starter 不感知控制台；ops-starter 仅消费其 Bean，也可把 ai-starter 单独引入任意 Spring Boot 应用', '—']
               ],
                 switchRows: [
@@ -137,6 +137,7 @@
                     ['<code>ai.tools.powershell.enable</code>', '<code>PowershellTools</code>', 'PowerShell 命令 / 脚本执行（<b>默认关闭</b>，仅 Windows 平台装配）'],
                     ['<code>ai.tools.nodejs.enable</code>', '<code>NodejsTools</code>', 'Node.js 脚本执行（<b>默认关闭</b>，需探测到 node 运行环境）'],
                     ['<code>ai.tools.python.enable</code>', '<code>PythonTools</code>', 'Python 脚本执行（<b>默认关闭</b>，需探测到 python / python3 运行环境）'],
+                  ['<code>ai.tools.ssh.enable</code>', '<code>SshTools</code>', '具名 SSH 主机工具：<code>ssh_hosts / ssh_command / ssh_upload / ssh_download</code>（<b>默认关闭</b>，<code>@ConditionalOnClass(ChannelSftp)</code>，主机清单为 <code>ai.tools.ssh.hosts[]</code>）'],
                   ['<code>ai.tts.qwen.enable</code>', '<code>QwenTtsOpsController</code>', '千问语音合成代理端点'],
                   ['<code>ai.tts.server-speak.enable</code>', '<code>ServerSpeakTtsOpsController</code>', '服务端系统语音播报端点'],
                   ['<code>i2f.springboot.ops.limited.enable</code>', '<code>OpsLimitedAutoConfiguration</code>', '请求限流过滤器（全局 / 每 IP / ANT 路径三层令牌桶，<b>默认开启</b>，order=1）']

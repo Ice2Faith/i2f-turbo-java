@@ -1622,7 +1622,7 @@
 
 ### i2f-springboot-ops-starter
 
-> 一体化运维/开发/AI 控制台全量装载 Starter（组内最大：183 源 + 内嵌 Vue2 SPA）：挂默认 /ops，覆盖自省/SQL/SSH/Redis/ES +
+> 一体化运维/开发/AI 控制台全量装载 Starter（组内最大：185 源 + 内嵌 Vue2 SPA）：挂默认 /ops，覆盖自省/SQL/SSH/Redis/ES +
 > OpenAI/SSE，
 > RAG/技能/工具下沉 ai-starter；三层令牌桶限流（全局/每IP/ANT 路径，超限 429）；三条 MCP provider + /mcp/api
 > 反暴露工具给智能体。瑕疵含【高危】84 类误登记为自动配置、generateCertPair 私钥泄露、eval RCE、MCP 令牌弱鉴权。

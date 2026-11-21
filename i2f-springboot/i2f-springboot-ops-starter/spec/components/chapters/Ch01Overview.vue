@@ -21,7 +21,7 @@
                     <p>SseEmitter 5 分钟长连接，逐 chunk 中继 LLM 输出；支持 <code>reasoning_content</code> 思考过程独立渲染与流式打字机效果。</p>
                 </Card>
                 <Card color="#0b7285" idx="B" title="工具调用" tagline="Function Calling">
-                  <p>27 个 @Tools 工具类（23 个控制台工具 + 4 个 ai-starter 装配的技能 / RAG / 记忆 / 元工具）经 <code>@Tool</code>
+                  <p>28 个 @Tools 工具类（24 个控制台工具 + 4 个 ai-starter 装配的技能 / RAG / 记忆 / 元工具）经 <code>@Tool</code>
                     注解自动生成 JSON Schema
                     注入对话；工具契约并行执行，HITL 人工审批把关危险操作，支持浏览器端工具委托、异步任务与失败重试；
                     长循环中历史工具结果 / 调用参数可回收为 <code>ref://</code> 占位符，按需再取回以压缩输入 Token。</p>
