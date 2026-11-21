@@ -1704,6 +1704,10 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+            </plugin>
             <!-- 如果要启用checkstyle,先保证install一次，再启用此插件 -->
             <!--<plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -2033,12 +2037,92 @@
                     <artifactId>maven-source-plugin</artifactId>
                     <version>3.3.1</version>
                     <executions>
+                        <!-- 每个模块独立生成 sources.jar -->
+                        <execution>
+                            <id>attach-sources</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jar-no-fork</goal>
+                            </goals>
+                        </execution>
+
+                        <!-- 根 pom 模块生成汇总源码包 -->
                         <execution>
                             <id>aggregate-sources</id>
                             <phase>package</phase>
                             <goals>
                                 <goal>aggregate</goal>
                             </goals>
+                            <!-- 不继承给子模块 -->
+                            <!--<inherited>false</inherited>-->
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- 配置 Shade 插件来生成 Fat JAR -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                            <configuration>
+                                <!-- 关键：开启附加模式，Fat JAR 将作为附属构件安装，不覆盖标准 JAR -->
+                                <shadedArtifactAttached>true</shadedArtifactAttached>
+                                <!-- 为附属的 Fat JAR 指定 classifier -->
+                                <shadedClassifierName>fat</shadedClassifierName>
+
+                                <!--
+                                  关键配置：自动生成 dependency-reduced-pom.xml，
+                                  该 POM 会移除所有已打包进 Fat JAR 的依赖，
+                                  从而实现“不传递依赖”的效果
+                                -->
+                                <createDependencyReducedPom>true</createDependencyReducedPom>
+
+                                <!--
+                                  多模块 Reactor 构建下的关键配置。
+                                  开启后，依赖此模块的其他模块会使用 dependency-reduced-pom.xml，
+                                  避免在全量构建时出现重复打包或编译不一致的问题
+                                -->
+                                <useDependencyReducedPomInJar>true</useDependencyReducedPomInJar>
+                                <dependencyReducedPomLocation>${project.build.directory}/dependency-reduced-pom.xml
+                                </dependencyReducedPomLocation>
+
+                                <!-- 可选：如果你的工具 JAR 需要可执行，在此指定主类 -->
+                                <!-- ... 其他配置（如 shadedClassifierName 等） ... -->
+                                <transformers>
+                                    <!-- 关键部分：使用 ManifestResourceTransformer 添加 Manifest 条目 -->
+                                    <transformer
+                                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                        <manifestEntries>
+                                            <!--                                <Main-Class>i2f.test.TestMain</Main-Class>-->
+                                            <Class-Path>. ./resources/</Class-Path>
+
+                                            <Maven-Group>${project.groupId}</Maven-Group>
+                                            <Maven-Artifact>${project.artifactId}</Maven-Artifact>
+                                            <Maven-Version>${project.version}</Maven-Version>
+                                            <Build-Time>${maven.build.timestamp}</Build-Time>
+
+                                            <Root-Maven-Group>${root.maven.group}</Root-Maven-Group>
+                                            <Root-Maven-Artifact>${root.maven.artifact}</Root-Maven-Artifact>
+                                            <Root-Maven-Version>${root.maven.version}</Root-Maven-Version>
+
+                                            <Root-Project-Author>${root.project.author}</Root-Project-Author>
+                                            <Root-Project-Nature>${root.project.nature}</Root-Project-Nature>
+
+                                            <Root-Link-Email>${root.link.email}</Root-Link-Email>
+                                            <Root-Link-Github>${root.link.github}</Root-Link-Github>
+                                            <Root-Link-Gitee>${root.link.gitee}</Root-Link-Gitee>
+
+                                            <Java-Source-Version>${java.source.version}</Java-Source-Version>
+                                            <Java-Target-Version>${java.target.version}</Java-Target-Version>
+                                        </manifestEntries>
+                                    </transformer>
+                                </transformers>
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>

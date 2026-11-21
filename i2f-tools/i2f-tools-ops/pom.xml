@@ -78,6 +78,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-launcher</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -99,18 +100,21 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ai-starter</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ops-starter</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ssh-tunnel-starter</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -238,6 +242,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-xproc4j-starter</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -291,6 +296,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-browser-selenium</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -302,6 +308,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-extension-browser-playwright</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -327,6 +334,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ai-mcp-client</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
@@ -345,6 +353,7 @@
             <groupId>i2f.turbo</groupId>
             <artifactId>i2f-springboot-ai-mcp-server</artifactId>
             <version>1.0-jdk8</version>
+            <classifier>fat</classifier>
         </dependency>
 
         <dependency>
