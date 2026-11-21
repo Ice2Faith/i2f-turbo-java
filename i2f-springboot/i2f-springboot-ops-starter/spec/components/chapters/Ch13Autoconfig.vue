@@ -101,7 +101,8 @@
                     ['<code>ai.tools.nodejs.enable</code>', '<code>NodejsTools</code>', 'Node.js 脚本执行（<b>默认关闭</b>，需探测到 node 运行环境）'],
                     ['<code>ai.tools.python.enable</code>', '<code>PythonTools</code>', 'Python 脚本执行（<b>默认关闭</b>，需探测到 python / python3 运行环境）'],
                   ['<code>ai.tts.qwen.enable</code>', '<code>QwenTtsOpsController</code>', '千问语音合成代理端点'],
-                  ['<code>ai.tts.server-speak.enable</code>', '<code>ServerSpeakTtsOpsController</code>', '服务端系统语音播报端点']
+                  ['<code>ai.tts.server-speak.enable</code>', '<code>ServerSpeakTtsOpsController</code>', '服务端系统语音播报端点'],
+                  ['<code>i2f.springboot.ops.limited.enable</code>', '<code>OpsLimitedAutoConfiguration</code>', '请求限流过滤器（全局 / 每 IP / ANT 路径三层令牌桶，<b>默认开启</b>，order=1）']
                 ],
                 ragParamRows: [
                     ['<code>baseUrl / apiKey / model</code>', 'Embedding 服务接入点'],

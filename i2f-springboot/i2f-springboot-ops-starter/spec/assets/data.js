@@ -40,7 +40,7 @@ function getSpecData() {
             { id: 'ch08', no: '08', en: 'Skill System', title: '技能系统：懒加载的领域知识包' },
             { id: 'ch09', no: '09', en: 'RAG Pipeline & Memory', title: 'RAG 知识库 · 记忆系统：向量检索与三级记忆' },
             {id: 'ch10', no: '10', en: 'MCP Dynamic Tools', title: 'MCP：动态工具装载 · 能力服务暴露 · 官方协议双版本'},
-            { id: 'ch11', no: '11', en: 'SM Crypto Transfer', title: '安全体系：国密全链路传输' },
+            {id: 'ch11', no: '11', en: 'SM Crypto Transfer', title: '安全体系：国密全链路传输 · 入口限流'},
             { id: 'ch12', no: '12', en: 'Advanced Features', title: '高级特性：让对话长出记忆与手脚' },
             { id: 'ch13', no: '13', en: 'Auto Configuration', title: '自动装配：一个依赖即一个工作台' },
             { id: 'ch14', no: '14', en: 'Fat Client', title: '前端工程：浏览器里的 Agent 状态机' },

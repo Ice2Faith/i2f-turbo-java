@@ -570,16 +570,18 @@ nvl/decode/coalesce)
 - **XProc4J** — 存储过程调用/元数据查看/调试追踪
 - **OpenAI 对话** — OpenAI 兼容协议对话/流式对话/Function Calling（12 种内置工具 + 技能系统）
 - **DashScope** — 通义千问系列（文生图/文生视频/3D 模型/数字人等 10+ 种 AI 能力）
+- **请求限流** — `/ops/**` 入口三层令牌桶（全局 / 每 IP / ANT 路径），超限统一 429，默认开启
 
-**安全特性：** 全链路国密加密（SM2/SM3/SM4），自动证书生成，时间戳防重放，签名验证
+**安全特性：**
+全链路国密加密（SM2/SM3/SM4），自动证书生成，时间戳防重放，签名验证；入口三级令牌桶限流（`i2f.springboot.ops.limited`）兜底流量
 
 **扩展机制：** `IOpsProvider` SPI 接口，新模块只需实现接口即可自动注册菜单到控制台首页
 
 - **模块**: `i2f-springboot/i2f-springboot-ops-starter`
 - **访问入口**: `http://{host}:{port}/ops/`
-- **Java 源码**: 132 文件
+- **Java 源码**: 183 文件
 - **前端页面**: 20+ 个 HTML 页面（含 CodeMirror 代码编辑器）
-- **自动装配**: 55 个自动配置类，全部 `@ConditionalOnClass` 按需激活
+- **自动装配**: 84 个自动配置类，全部 `@ConditionalOnClass` 按需激活
 
 > 详细文档见 [docs/ops-starter.md](docs/ops-starter.md)
 

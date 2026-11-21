@@ -26,6 +26,7 @@ Ops Starter 是项目的**运维/运营一体化控制台**，将项目各核心
 4. **多主机代理** — 支持通过 HostId 机制跨主机代理操作，统一管理多台服务器
 5. **前端内嵌** — Vue 2 + Element UI 前端打包在 JAR 内，无需独立部署
 6. **SPI 扩展** — 通过 `IOpsProvider` 接口，各模块自动注册菜单项到控制台首页
+7. **请求限流** — `/ops/**` 入口三级令牌桶（全局 / 每 IP / ANT 路径），超限直接 429，默认开启
 
 ## 依赖关系
 
@@ -116,6 +117,66 @@ i2f:
       secure:
         cert: # SM2 证书，留空则自动生成
 ```
+
+## 请求限流防护
+
+`OpsLimitedAutoConfiguration`（`@ConditionalOnClass(FilterRegistrationBean.class)` + `@ConditionalOnExpression("${i2f.springboot.ops.limited.enable:true}")`）
+以 `FilterRegistrationBean` order=1 注册 `OpsLimitedRequestFilter`，默认挂在 `i2f.springboot.ops.base-url`（`/ops`
+）下。它与国密信封**正交**：
+加密解决「谁能读」，限流解决「能打多快」，两者互不接管。
+
+### 三级令牌桶
+
+`doFilterInternal` 依次过三道闸，任一层 `tryAcquire(1, TimeUnit.SECONDS)` 取不到令牌即抛 `OpsLimitedException`：
+
+| 层级     | 配置项                                             | 桶 Key                            | 默认值            |
+|--------|-------------------------------------------------|----------------------------------|----------------|
+| 全局     | `all-rule.enable/rate-per-second/capacity`      | `ops:limited:all`                | 100/s · 容量 300 |
+| 每 IP   | `every-ip-rule.rule.*`                          | `ops:limited:ip:{ip}`            | 100/s · 容量 300 |
+| ANT 路径 | `path-rules[].ant-path` + `path-rules[].rule.*` | `ops:limited:ant-path:{pattern}` | 无默认（需显式配置）     |
+
+- 全局与路径桶由 `ConcurrentMapKeyedLimiter` 持有，经 `get(key, producer)`
+  惰性创建 `TokenBucketRateLimiter(ratePerSecond, capacity)`；
+- 每 IP 桶存放在 `LruMap<String, ILimiter>` 中，上限由 `every-ip-rule.lru-max-size`（默认 8192，`accessOrder=true` 按访问序淘汰）
+  控制，自动装配类在 `new OpsLimitedRequestFilter()` 后按 `lru-max-size` 注入 `setMaxSize`，避免 IP 维度无限增长；
+- 路径规则用 `AntMatcher` 逐一比对 `ServletContextUtil.getFullPathWithoutContextPath(request)`，同一 pattern 共用一根桶；
+- 过滤范围由 `filter-url-pattern` 决定，留空时取 `OpsConsts.BASE_URL_PROPERTY`（默认 `/ops`）拼接 `/*`，注册后打印日志。
+
+### 拒绝语义
+
+- 三层判定共用一个 `try`，异常在末尾 `catch (OpsLimitedException)` 统一处理：`reset()` → `setStatus(429)` →
+  `text/html;charset=utf-8`，正文为 `global limited.` / `ip limited.` / `path limited.`；
+- 写回前先判 `response.isCommitted()`：SSE 已提交首帧时直接返回，避免 `reset()` 抛 `IllegalStateException`；
+- `chain.doFilter` 同样在 `try` 内——下游控制器/工具抛出的 `OpsLimitedException` 走同一出口，全链路 429 格式一致。
+
+### 配置
+
+```yaml
+i2f:
+  springboot:
+    ops:
+      limited:
+        # filter-url-pattern: /ops/*   # 留空则取 {base-url}/*
+        all-rule:
+          enable: true
+          rate-per-second: 100
+          capacity: 300
+        every-ip-rule:
+          lru-max-size: 8192
+          rule:
+            enable: true
+            rate-per-second: 100
+            capacity: 300
+        path-rules:
+          - ant-path: /ops/open-ai/*
+            rule:
+              enable: true
+              rate-per-second: 20
+              capacity: 50
+```
+
+> 令牌桶参数在首次取桶时固化，运行期改配置不生效，需重启；`every-ip-rule` 的 `enable/rate-per-second/capacity`
+> 已收拢到 `rule` 子对象，旧的平铺写法会被 Boot 宽松绑定静默忽略。
 
 ## 主机身份与代理
 
@@ -361,12 +422,13 @@ i2f:
 
 ## 自动装配
 
-### AutoConfiguration.imports（55 个自动配置类）
+### AutoConfiguration.imports（84 个自动配置类）
 
 所有自动配置类通过 `META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports` 注册，覆盖：
 
 - 首页与菜单（`OpsHomeController`）
 - 安全传输（`OpsSecureTransfer` / `OpsSecureHelper` / `OpsSecureAutoConfiguration`）
+- 请求限流（`OpsLimitedAutoConfiguration` → `OpsLimitedRequestFilter`，order=1，默认 url-pattern `{base-url}/*`）
 - 主机标识（`HostIdHelper` / `HostIdProxyHelper`）
 - 数据源（`DatasourceAutoConfiguration` + 3 种 Collector + Provider + Helper + 2 个 Controller）
 - 各功能控制器（Redis / SSH / MinIO / AwsS3 / ElasticSearch / XProc4J / OpenAI / DashScope × 12）
@@ -410,25 +472,25 @@ public interface IOpsProvider {
 
 ## 源文件清单
 
-### Java 源码（132 文件）
+### Java 源码（183 文件）
 
-| 包               | 文件数 | 说明                                                     |
-|-----------------|-----|--------------------------------------------------------|
-| `home`          | 3   | 首页控制器 + IOpsProvider 接口 + 菜单 DTO                       |
-| `common`        | 12  | 安全传输/主机标识/异常/计时/JSON 写入器                               |
-| `app`           | 15  | 应用管理（3 控制器 + 10 DTO + 1 工具 + 1 表达式）                    |
-| `host`          | 4   | 主机管理（1 控制器 + 3 DTO）                                    |
-| `ssh`           | 4   | SSH 管理（1 控制器 + 3 DTO）                                  |
-| `datasource`    | 14  | 数据库管理（2 控制器 + 1 配置 + 3 Provider + 1 Helper + 7 DTO）    |
-| `redis`         | 5   | Redis 管理（1 控制器 + 1 动态工具 + 3 DTO）                       |
-| `elasticsearch` | 4   | ES 管理（1 控制器 + 1 Helper + 2 DTO）                        |
-| `minio`         | 3   | MinIO 管理（1 控制器 + 2 DTO）                                |
-| `awss3`         | 2   | AWS S3 管理（1 控制器 + 1 DTO）                               |
-| `xxljob`        | 4   | XXL-JOB 管理（1 控制器 + 3 DTO）                              |
-| `xproc4j`       | 4   | XProc4J 管理（1 控制器 + 1 Helper + 2 DTO）                   |
-| `openai`        | 19  | AI 对话（1 控制器 + 1 Skill 配置 + 1 Provider + 13 工具 + 3 DTO） |
-| `dashscope`     | 24  | DashScope（12 控制器 + 12 DTO）                             |
-| `util`          | 1   | HumanUtil（人类可读文件大小）                                    |
+| 包               | 文件数 | 说明                                                  |
+|-----------------|-----|-----------------------------------------------------|
+| `home`          | 5   | 首页控制器 + IOpsProvider 接口 + 菜单 DTO/分组                 |
+| `common`        | 22  | 安全传输/主机标识/限流（`limit` 子包 4 类）/异常/计时/JSON 写入器         |
+| `app`           | 16  | 应用管理（控制器 + DTO + 工具 + 表达式）                          |
+| `host`          | 3   | 主机管理（1 控制器 + 2 DTO）                                 |
+| `ssh`           | 2   | SSH 管理（1 控制器 + 1 DTO）                               |
+| `datasource`    | 17  | 数据库管理（控制器 + 配置 + Provider/Collector + Helper + DTO） |
+| `redis`         | 7   | Redis 管理（控制器 + 动态工具 + DTO）                          |
+| `elasticsearch` | 3   | ES 管理（1 控制器 + 1 Helper + 1 DTO）                     |
+| `minio`         | 2   | MinIO 管理（1 控制器 + 1 DTO）                             |
+| `awss3`         | 2   | AWS S3 管理（1 控制器 + 1 DTO）                            |
+| `xxljob`        | 3   | XXL-JOB 管理（1 控制器 + 2 DTO/Meta）                      |
+| `xproc4j`       | 3   | XProc4J 管理（1 控制器 + 1 Helper + 1 DTO）                |
+| `openai`        | 61  | AI 对话（控制器 + Skill 配置 + Provider + 工具实现 + DTO）       |
+| `dashscope`     | 36  | DashScope（12 控制器 + 工具实现 + DTO）                      |
+| `util`          | 1   | HumanUtil（人类可读文件大小）                                 |
 
 ## 设计特点
 
@@ -440,6 +502,7 @@ public interface IOpsProvider {
 6. **前端内嵌** — 所有前端资源打包在 JAR 内，引入依赖即可使用
 7. **复用项目生态** — 文件系统操作复用 `IFileSystem` 抽象，数据库操作复用 `JdbcResolver`，AI 复用 `i2f-ai-std`
 8. **AI 工具集成** — 12 种内置 Function Calling 工具 + 技能系统 + SQL 安全验证
+9. **入口限流** — 三层令牌桶（全局 / 每 IP / ANT 路径）+ LRU 上限保护 IP 桶 + 统一 429 出口
 
 ## 相关文档
 

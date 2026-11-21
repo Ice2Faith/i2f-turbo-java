@@ -6,7 +6,7 @@
 
 ## 模块概述
 
-i2f-springboot 组中**体量最大、能力最全**的重型一体化运维 / 开发控制台 Starter（179 个 Java 源文件 + 内嵌完整前端
+i2f-springboot 组中**体量最大、能力最全**的重型一体化运维 / 开发控制台 Starter（183 个 Java 源文件 + 内嵌完整前端
 SPA）。它把「应用自省、多数据源 SQL 控制台、SSH/SFTP 文件与命令、Redis、Elasticsearch、MinIO、AWS
 S3、主机文件、xproc4j、xxl-job、DashScope 图/视频/3D 生成、OpenAI 对话 + AI 工具集 + RAG + Groovy 技能 + TTS」等一整套运维与
 AI 能力，连同 Vue2 前端，封装进单个 jar；仅靠把本 Starter 放入 classpath 即**全自动装载**整套控制台（84
@@ -18,6 +18,11 @@ AI 能力，连同 Vue2 前端，封装进单个 jar；仅靠把本 Starter 放�
 彻底切到自研 `i2f-sm-crypto`，`nashorn` 依赖被注释停用。同时新增**把自身能力反向暴露为 MCP 工具**
 的三条通道（`OpsMcpServerAdditionalToolProvider` / `OpsMcpServerApiToolProvider` / `DashScopeOpsMcpServerAdditionalToolProvider`
 ）与一个 `/mcp/api` 纯 HTTP 文件通道，使外部 MCP 客户端（如 IDE 智能体）可反向操作本控制台。
+
+本轮另新增**入口请求限流**：`common/limit` 下 4 个类（`OpsLimitedAutoConfiguration` / `OpsLimitProperties` /
+`OpsLimitedRequestFilter` / `OpsLimitedException`），以 order=1 的 `FilterRegistrationBean` 挂在 `{base-url}/*`，按「全局 /
+每 IP /
+ANT 路径」三层令牌桶判定，任一层取不到令牌即统一 429；每 IP 桶用 `LruMap`（`lru-max-size` 默认 8192）封顶，避免 IP 维度无限增长。
 
 ## 模块依赖
 
@@ -90,6 +95,7 @@ flowchart TD
         HELPER[OpsSecureHelper / OpsSecureKeyPair\nBase64 JSON 承载含私钥密钥对]
         AUTOCONFIG[OpsSecureAutoConfiguration\n无 cert 时启动生成密钥对并 System.out 打印]
         HOSTID[HostIdHelper / HostIdProxyHelper\nip#nic@port 主机标识 + 定向代理]
+        LIMIT["OpsLimitedRequestFilter\n三层令牌桶 · order=1\n全局 / 每 IP / ANT 路径"]
         STATIC[静态资源与 mjs media-type 配置]
     end
 
@@ -191,6 +197,12 @@ flowchart TD
 - **DashScope 生成**（`DashScopeOps*`）：文生图（wan/kling/vidu）、文/图生视频（happyhorse/kling/pixverse/vidu/wan 数字人/换人）、3D（tripo）、任务与临时文件管理。
 - **菜单聚合**（`OpsHomeController` `/ops/menus`）：遍历所有 `IOpsProvider` Bean
   汇总并按标题排序，驱动前端导航（`OpenAiOpsController` 归属 `OpsHomeMenuGroup.AI`）。
+- **入口限流**（`i2f.springboot.ops.limited.enable:true`，默认开，`common/limit` 4 类）：`OpsLimitedRequestFilter`
+  按「全局 `all-rule`（共享桶 `ops:limited:all`）→ 每 IP `every-ip-rule`（`ops:limited:ip:{ip}`，桶容器 `LruMap`，上限
+  `lru-max-size` 默认 8192）→ ANT 路径 `path-rules[]`（`ops:limited:ant-path:{pattern}`，`AntMatcher` 命中才计数）」逐层
+  `tryAcquire(1, SECONDS)`；任一层失败抛 `OpsLimitedException`，末尾 `catch` 统一 `reset()` 后写 429 +
+  `text/html;charset=utf-8`，写回前先判 `response.isCommitted()`（SSE 已发首帧则直接返回）；`chain.doFilter` 也在 `try`
+  内，下游抛出的同类异常走同一出口。挂载范围 `filter-url-pattern` 留空时取 `OpsConsts.BASE_URL_PROPERTY` 拼 `/*`。
 - **静态资源**：`OpsStaticResourceConfiguration` 映射 `/ops/lib/**`（7 天）与 `/ops/**`（1 天）并恢复默认映射，`StaticResourceMediaTypeAdjustConfiguration` 注册 `mjs→application/javascript`。
 
 ## 主要使用方法
@@ -210,6 +222,15 @@ i2f:
       app: { enable: false }     # 建议显式关闭在线求值面
       ssh: { enable: false }
       open-ai: { enable: true }  # 默认关，开启后 /ops/open-ai/**
+      limited:                   # 绑定前缀 i2f.springboot.ops.limited
+        # filter-url-pattern: /ops/*        # 留空则取 {base-url}/*
+        all-rule: { enable: true, rate-per-second: 100, capacity: 300 }
+        every-ip-rule:
+          lru-max-size: 8192     # 每 IP 桶的 LRU 上限
+          rule: { enable: true, rate-per-second: 100, capacity: 300 }
+        path-rules:
+          - ant-path: /ops/open-ai/*
+            rule: { enable: true, rate-per-second: 20, capacity: 50 }
 ai:
   tools:
     command: { enable: true }        # 按需开启高危工具
@@ -225,6 +246,8 @@ ai:
 ```
 
 - 前端访问 `http://host:port/ops/`，`/ops/index.html` 进入控制台，`/ops/menus` 拉取导航。
+- 限流：`/ops/**` 开箱即限——全局 100/s（容量 300）、每 IP 100/s（容量 300），路径规则按需追加；令牌不足返回 `429` +
+  `global limited.` / `ip limited.` / `path limited.`，SSE 已提交时不再改写响应。
 - 所有业务接口 `POST`，请求体为 `OpsSecureDto`（含 `timestamp/nonce/key/payload/sign/digital`），响应为 `OpsSecureReturn<OpsSecureDto>`；客户端须持有配套密钥对方能加解密与签名。
 - hostId：请求体带 `hostId` 用于集群定向；不带则本机处理（见瑕疵）。
 - **外部 MCP 客户端接入**（纯 HTTP，不需要 SM 信封）：先 `GET /ops/mcp/api/ping` 确认可达，再调用工具 `ops.mcp_api_token`
@@ -243,6 +266,8 @@ ai:
   工具）、`SkillDefinition`/`AsyncTaskResolver`（技能与异步任务）均为可插拔契约，`@ConditionalOnMissingBean` 允许宿主覆盖。
 - **分层清晰**：重型能力（RAG/技能/工具管理器）下沉 ai-starter，ops 只保留「控制台 UI + 运维域 + ops 特有工具 + MCP 桥」。
 - **前后端一体**：内嵌大规模 Vue2 SPA 与渲染库（three.js/mermaid/pdf.js/xlsx/echarts…），零独立前端部署。
+- **入口限流**：`OpsLimitedRequestFilter`（order=1）以「全局 / 每 IP / ANT 路径」三层令牌桶拦在业务之前，每 IP 桶用
+  `LruMap`（默认 8192）封顶、超限统一 429；与 `i2f-springboot-limit-starter` 的分布式限流互补——这里是单机、零外部依赖、开箱即用的兜底。
 
 ## 模块瑕疵或错误（实证）
 
@@ -293,12 +318,12 @@ ai:
 - **【安全面·注入】`DatasourceOpsController.doImport`**：`insert into {table} (列...) values (${列})` 中 `table` 取 `req.getTable()` **原样字符串拼接**（`${}` 值走 `BindSql` 参数绑定，但表名/列名未走标识符白名单或转义），存在标识符注入面。
 - **~~【欠登记·元数据】`additional-spring-configuration-metadata.json` 仅登记 `i2f.springboot.ops.secure.cert` 一个属性~~
   （已修复）**
-  ：现已按源码 `@ConditionalOnExpression`/`@Value`/`@ConfigurationProperties` 全量同步，登记 5 个
+  ：现已按源码 `@ConditionalOnExpression`/`@Value`/`@ConfigurationProperties` 全量同步，登记 6 个
   groups（`i2f.springboot.ops`、
-  `.secure`、`.datasource`、`ai.openai`、`ai.tts.qwen`）与 91 个 properties，覆盖 `base-url`、13 个域级 `enable`、
+  `.secure`、`.datasource`、`.limited`、`ai.openai`、`ai.tts.qwen`）与 105 个 properties，覆盖 `base-url`、13 个域级 `enable`、
   `datasource.datasource-map.*`（kebab-case，字段仍为 `datasourceMap`）、`ai.tools.*` 全部开关与模型参数（含
   `skill-manage`/`recycle`/`database.update`/`qwen_tts`/`happyhorse-t2v` 等）、`ai.rags.datasource.enable`、
-  `ai.mcp-server.api.enable`、`ai.tts.qwen.*`、`ai.openai.*`
+  `ai.mcp-server.api.enable`、`i2f.springboot.ops.limited.*`（14 项：开关/挂载范围/三层规则）、`ai.tts.qwen.*`、`ai.openai.*`
   ；原两条从别处拷贝的死 `hints`（`server.servlet.jsp.class-name` /
   `server.tomcat.accesslog.encoding`）已删除。本模块不存在 `ai.rags.enable`（RAG 总开关在 ai-starter
   的 `i2f.springboot.ai.rags.enable`）。
@@ -333,6 +358,19 @@ ai:
 - **【一致性】`OpsMcpServerAdditionalToolProvider` 与 `OpsMcpServerApiToolProvider` 的 `getHolderManager()`
   各自 `new ListableAppToolManager()` 并重复 `ToolRawHelper.parseTools` + 手动改 `ops.` 前缀**
   （L85-86、L81-82），同一套「前缀工具清单」逻辑复制两遍，前缀字符串也以字面量散落各处，改名/加前缀需多点同步。
+
+### 请求限流（本轮新增）
+
+- **【缺陷·配置漂移】`every-ip-rule` 由平铺结构收拢为 `EveryIpLimitRule{lruMaxSize, rule}`**：旧键
+  `every-ip-rule.enable/rate-per-second/capacity` 在 Boot `ignoreUnknownFields=true` 下被**静默忽略**
+  ，升级后不报错但限流参数静默回落默认值。
+- **【缺陷·默认值双份】`OpsLimitedRequestFilter` 字段初始化写死 `new TokenBucketRateLimiter(100, 300)`
+  与 `new LruMap<>(8192)`**
+  ，与 `OpsLimitProperties` 中的默认值重复；改一处漏一处即出现「配置类改了、过滤器没改」的偏差。
+- **【缺陷·不可热更】令牌桶的 `ratePerSecond`/`capacity` 在首次 `computeIfAbsent` 时固化**，运行期改配置不生效需重启；
+  IP 桶被 `LruMap` 按访问序淘汰后再次访问会拿到满桶，等于给偶发 IP 重置了配额。
+- **【依赖·未直声明】过滤器直接 `import i2f.lru.LruMap` 与 `i2f.match.impl.AntMatcher`**，但 pom 只声明了
+  `i2f-limit`，`i2f-lru-map` / `i2f-match` 靠传递引入；传递链一变即编译失败。
 
 ## 生态位置
 
