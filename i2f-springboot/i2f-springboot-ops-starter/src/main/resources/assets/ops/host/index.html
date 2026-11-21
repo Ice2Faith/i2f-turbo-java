@@ -1612,29 +1612,25 @@
                                 form.append(k,reqData[k])
                             })
 
-                            this.$axios({
+                            return this.$axios({
                                 url: `/upload`,
                                 method: 'post',
                                 headers: {
                                     'Content-Type': 'multipart/form-data'
                                 },
                                 data: form
-                            }).then(res => {
-                                if (res.data.code == 200) {
-                                    //console.log(res.data)
-                                    let resp = this.transferRecv(res.data.data)
-                                    // console.log(resp)
-                                    this.$message.success('操作成功')
-                                    this.dialog.fileEditor.show=false;
-                                    this.onRefreshFiles()
-                                } else {
-                                    this.messageError(res.data.msg,300)
-                                }
-                            }).catch(err => {
-                                this.messageError(err.errorMessage || err.message || '操作失败',300)
-                            }).finally(() => {
-                                this.dialog.fileEditor.saveLoading = false;
                             })
+                        }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            this.$message.success('操作成功')
+                            this.dialog.fileEditor.show = false;
+                            this.onRefreshFiles()
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
                         }).catch(err => {
                             this.messageError(err.errorMessage || err.message || '操作失败',300)
                         }).finally(() => {
@@ -1731,30 +1727,26 @@
                                 form.append(k,reqData[k])
                             })
 
-                            this.$axios({
+                            return this.$axios({
                                 url: `/upload`,
                                 method: 'post',
                                 headers: {
                                     'Content-Type': 'multipart/form-data'
                                 },
                                 data: form
-                            }).then(res => {
-                                if (res.data.code == 200) {
-                                    //console.log(res.data)
-                                    let resp = this.transferRecv(res.data.data)
-                                    // console.log(resp)
-                                    this.$message.success('操作成功')
-                                    this.onRefreshFiles()
-                                } else {
-                                    this.messageError(res.data.msg,300)
-                                }
-                            }).catch(err => {
-                                this.messageError(err.errorMessage || err.message || '操作失败',300)
-                            }).finally(() => {
-                                this.metas.uploadLoading = false;
                             })
+                        }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            // console.log(resp)
+                            this.$message.success('操作成功')
+                            this.onRefreshFiles()
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
                         }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '操作失败',300)
+                        this.messageError(err.errorMessage || err.message || '操作失败', 300)
                     }).finally(() => {
                         this.metas.uploadLoading = false;
                     })

@@ -730,37 +730,29 @@
                                 form.append(k, reqData[k])
                             })
 
-                            this.$axios({
+                            return this.$axios({
                                 url: `../../tmp-file/upload`,
                                 method: 'post',
                                 headers: {
                                     'Content-Type': 'multipart/form-data'
                                 },
                                 data: form
-                            }).then(res => {
-                                if (res.data.code == 200) {
-                                    //console.log(res.data)
-                                    let resp = this.transferRecv(res.data.data)
-                                    file.saveUrl=resp;
-                                    if (type == 'image') {
-                                        this.updateUploadImageUrls()
-                                    } else if (type == 'video') {
-                                        this.form.videoUrl = resp;
-                                    }
-                                    // console.log(resp)
-                                    this.$message.success('操作成功')
-                                } else {
-                                    this.messageError(res.data.msg, 300)
-                                }
-                            }).catch(err => {
-                                this.messageError(err.errorMessage || err.message || '操作失败', 300)
-                            }).finally(() => {
-                                if (type == 'image') {
-                                    this.metas.uploadImageLoading = false;
-                                } else if (type == 'video') {
-                                    this.metas.uploadVideoLoading = false;
-                                }
                             })
+                        }).then(res => {
+                        if (res.data.code == 200) {
+                            //console.log(res.data)
+                            let resp = this.transferRecv(res.data.data)
+                            file.saveUrl = resp;
+                            if (type == 'image') {
+                                this.updateUploadImageUrls()
+                            } else if (type == 'video') {
+                                this.form.videoUrl = resp;
+                            }
+                            // console.log(resp)
+                            this.$message.success('操作成功')
+                        } else {
+                            this.messageError(res.data.msg, 300)
+                        }
                         }).catch(err => {
                         this.messageError(err.errorMessage || err.message || '操作失败', 300)
                     }).finally(() => {

@@ -563,34 +563,27 @@
                             Object.keys(reqData).forEach(k => {
                                 form.append(k, reqData[k]);
                             });
-                            this.$axios({
+                            return this.$axios({
                                 url: `../../tmp-file/upload`,
                                 method: 'post',
                                 headers: {'Content-Type': 'multipart/form-data'},
                                 data: form
-                            }).then(res => {
-                                if (res.data.code == 200) {
-                                    let resp = this.transferRecv(res.data.data);
-                                    if (type == 'image') {
-                                        this.form.imageUrl = resp;
-                                    } else if (type == 'audio') {
-                                        this.form.audioUrl = resp;
-                                    }
-                                    this.$message.success('上传成功');
-                                } else {
-                                    this.messageError(res.data.msg, 300);
-                                }
-                            }).catch(err => {
-                                this.messageError(err.errorMessage || err.message || '上传失败', 300);
-                            }).finally(() => {
-                                if (type == 'image') {
-                                    this.metas.uploadImageLoading = false;
-                                } else if (type == 'audio') {
-                                    this.metas.uploadAudioLoading = false;
-                                }
-                            });
-                        }).catch(err => {
-                        this.messageError(err.errorMessage || err.message || '计算 MD5 失败', 300);
+                            })
+                        }).then(res => {
+                        if (res.data.code == 200) {
+                            let resp = this.transferRecv(res.data.data);
+                            if (type == 'image') {
+                                this.form.imageUrl = resp;
+                            } else if (type == 'audio') {
+                                this.form.audioUrl = resp;
+                            }
+                            this.$message.success('上传成功');
+                        } else {
+                            this.messageError(res.data.msg, 300);
+                        }
+                    }).catch(err => {
+                        this.messageError(err.errorMessage || err.message || '上传失败', 300);
+                    }).finally(() => {
                         if (type == 'image') {
                             this.metas.uploadImageLoading = false;
                         } else if (type == 'audio') {
