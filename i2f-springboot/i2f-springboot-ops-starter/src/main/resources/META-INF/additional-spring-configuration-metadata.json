@@ -230,7 +230,7 @@
     },
     {
       "name": "i2f.springboot.ops.limited.path-rules",
-      "type": "java.util.List<i2f.springboot.ops.common.limit.OpsLimitProperties$PathLimitRule>",
+      "type": "java.util.List<i2f.springboot.ops.common.limit.OpsLimitProperties.PathLimitRule>",
       "description": "limited rules matched by ANT style request path, applied in declaration order.",
       "sourceType": "i2f.springboot.ops.common.limit.OpsLimitProperties"
     },
