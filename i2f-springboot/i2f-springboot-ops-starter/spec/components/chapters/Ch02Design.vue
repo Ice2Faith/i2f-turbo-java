@@ -1,6 +1,8 @@
 <template>
     <div>
-        <LeadText>整个 AI 工具链遵循 i2f-turbo-java 一以贯之的"简练、独立、单一、易用"哲学，并在 AI 领域落地为四条核心原则。</LeadText>
+      <LeadText>整个 AI 工具链遵循 i2f-turbo-java 一以贯之的"简练、独立、单一、易用"哲学，并在 AI 领域落地为四条核心原则（另加一条由
+        <code>i2f-springboot-ai-starter</code> 承担的「扩展即 Bean」原则）。
+      </LeadText>
 
         <CardGrid>
             <Card color="#e8590c" idx="壹" title="平台无关化" tagline="Platform Agnostic">
@@ -14,6 +16,12 @@
             </Card>
             <Card color="#e67700" idx="肆" title="胖客户端 + HITL" tagline="Fat Client · Human In The Loop">
                 <p>需要用户参与（工具授权、危险操作把关）的场景选择<b>胖客户端</b>：状态维护在浏览器，服务端无状态、可水平扩展。全自动化场景（Dify / ComfyUI 式）才需要胖服务器——本框架明确选择了前者。</p>
+            </Card>
+          <Card color="#1971c2" idx="伍" title="扩展即 Bean" tagline="Extension by Bean">
+            <p>通用层 <code>i2f-springboot-ai-starter</code> 把全部可替换点做成 Bean 类型：<code>AiModel</code> / <code>ToolManager</code>
+              / <code>IJsonSerializer</code> / <code>RagEmbeddingModel</code> / <code>RagFileReader</code> / <code>SkillScriptRunner</code>
+              / <code>ToolRawDefinitionsProvider</code>。自己声明一个同类型 Bean 即整体换实现（统一 <code>@ConditionalOnMissingBean</code>
+              让渡），<b>不改一行装配代码</b>。</p>
             </Card>
         </CardGrid>
 
