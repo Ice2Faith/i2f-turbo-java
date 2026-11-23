@@ -8,7 +8,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Arrays;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -87,7 +86,7 @@ public class OsUtil {
             CommandResult ret = CommandResult.of(process, stdout);
 
             ret.setCommandLine(cmd);
-            File workdir=dir!=null?dir:new File(".");
+            File workdir = dir != null ? dir : new File(".");
             ret.setWorkdir(new File(workdir.getAbsolutePath()).getAbsolutePath());
             return ret;
         } catch (Exception e) {
@@ -134,7 +133,7 @@ public class OsUtil {
             CommandResult ret = CommandResult.of(process, stdout);
 
             ret.setCommandArray(Arrays.asList(cmdArr));
-            File workdir=dir!=null?dir:new File(".");
+            File workdir = dir != null ? dir : new File(".");
             ret.setWorkdir(new File(workdir.getAbsolutePath()).getAbsolutePath());
             return ret;
         } catch (Exception e) {

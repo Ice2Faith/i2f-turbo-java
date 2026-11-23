@@ -7,7 +7,6 @@ import i2f.extension.embedding.core.OnnxBertBiEncoder;
 import i2f.extension.embedding.core.PoolingMode;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 

@@ -49,35 +49,35 @@ public abstract class AbstractAppToolManager implements ToolManager {
             }
             if (tool.getName().equals(name)) {
                 Set<String> tags = tool.getTags();
-                int tryCount=1;
-                double sleepTs=300;
-                if(tags!=null && tags.contains(AiTags.RETRYABLE_VALUE)){
-                    tryCount=3;
+                int tryCount = 1;
+                double sleepTs = 300;
+                if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {
+                    tryCount = 3;
                 }
-                Throwable lex=null;
+                Throwable lex = null;
 
-                while(tryCount>0) {
+                while (tryCount > 0) {
                     try {
                         ToolRawDefinition rawTool = (ToolRawDefinition) tool;
                         IJsonSerializer jsonSerializer = getJsonSerializer();
                         IProxyInvocationHandler invocationHandler = getInvocationHandler();
                         Map<String, Object> parameterMap = jsonSerializer.deserializeAsMap(request.getArguments());
                         return ToolRawHelper.invokeTool(rawTool, parameterMap, invocationHandler);
-                    }catch (Throwable e){
-                        lex=e;
+                    } catch (Throwable e) {
+                        lex = e;
                     }
                     tryCount--;
-                    if(tryCount<=0){
+                    if (tryCount <= 0) {
                         break;
                     }
-                    try{
-                        Thread.sleep((long)sleepTs);
-                    }catch(Exception e){
+                    try {
+                        Thread.sleep((long) sleepTs);
+                    } catch (Exception e) {
                         // ignore
                     }
-                    sleepTs+=1200;
+                    sleepTs += 1200;
                 }
-                if(lex!=null){
+                if (lex != null) {
                     throw lex;
                 }
             }

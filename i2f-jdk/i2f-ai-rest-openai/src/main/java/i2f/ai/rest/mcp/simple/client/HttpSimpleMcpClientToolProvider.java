@@ -170,7 +170,7 @@ public class HttpSimpleMcpClientToolProvider implements McpToolProvider, BaseMut
     @Override
     public Object callTool(ToolBaseCallRequest request) throws Throwable {
         ToolDefinition tool = getRequestToolDefinition(request);
-        Set<String> tags = tool==null?null:tool.getTags();
+        Set<String> tags = tool == null ? null : tool.getTags();
         int tryCount = 1;
         double sleepTs = 300;
         if (tags != null && tags.contains(AiTags.RETRYABLE_VALUE)) {

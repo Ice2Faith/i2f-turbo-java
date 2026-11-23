@@ -72,7 +72,7 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
         try (Connection conn = getConnection()) {
             /*language=sql*/
             QueryResult res = JdbcResolver.query(conn, BindSql.of("select id,document_id,separate_no,content")
-                    .add(" from " + tableName)
+                            .add(" from " + tableName)
                             .add(" where id ").in(ids),
                     -1,
                     String::toLowerCase
@@ -136,9 +136,9 @@ public class SqliteRagDocumentsStore implements RagDocumentsStore, BaseMutator<S
         try (Connection conn = getConnection()) {
             /*language=sql*/
             QueryResult res = JdbcResolver.query(conn, BindSql.of("select id,document_id,separate_no,content")
-                    .add(" from " + tableName)
-                    .add(" where document_id= ?", documentId)
-                    .add(" and separate_no >= ?", separateNoStart)
+                            .add(" from " + tableName)
+                            .add(" where document_id= ?", documentId)
+                            .add(" and separate_no >= ?", separateNoStart)
                             .add(" and separate_no <= ?", separateNoEnd),
                     -1, String::toLowerCase
             );

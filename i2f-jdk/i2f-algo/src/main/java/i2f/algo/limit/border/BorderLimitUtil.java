@@ -13,10 +13,6 @@ import i2f.graphics.d2.Point;
 import i2f.graphics.d2.shape.Circle;
 import i2f.graphics.d2.shape.Polygon;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 /**
  * @author Ice2Faith
  * @date 2023/2/6 8:38

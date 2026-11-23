@@ -2,7 +2,6 @@ package i2f.springboot.ops.openai.async;
 
 import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
-import i2f.springboot.ops.openai.tts.qwen.QwenTtsProperties;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -55,7 +55,7 @@ public class StreamSpringWebMcpServerV2026AutoConfiguration {
     public StreamMcpServerAuthFilter streamMcpServerAuthFilter() {
         StaticStreamMcpServerAuthFilter ret = new StaticStreamMcpServerAuthFilter();
         OfficialMcpServerV2026Properties.BearerTokenOptions bearerToken = officialMcpServerV2026Properties.getBearerToken();
-        if(bearerToken!=null) {
+        if (bearerToken != null) {
             ret.setEnable(officialMcpServerV2026Properties.getBearerToken().isEnable());
             List<String> allowTokens = officialMcpServerV2026Properties.getBearerToken().getAllowTokens();
             if (allowTokens != null) {

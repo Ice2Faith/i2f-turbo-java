@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 @NoArgsConstructor
 public class McpServerProperties {
-    public static final String CONFIG_PREFIX="i2f.springboot.ai.mcp.client.creator";
+    public static final String CONFIG_PREFIX = "i2f.springboot.ai.mcp.client.creator";
     protected Map<String, McpServerItemProperties> mcpServers;
     protected Map<String, McpServerItemProperties> servers;
 }

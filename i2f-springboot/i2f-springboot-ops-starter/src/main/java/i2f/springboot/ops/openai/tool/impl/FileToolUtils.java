@@ -69,23 +69,23 @@ public class FileToolUtils {
             ret.put("canWrite", file.canWrite());
             long mtime = file.lastModified();
             ret.put("lastModifiedTimeInMillSeconds", mtime);
-            try{
+            try {
                 BufferedImage img = ImageIO.read(file);
-                if(img!=null){
-                    ret.put("isImageFile",true);
-                    ret.put("imageWidth",img.getWidth());
-                    ret.put("imageHeight",img.getHeight());
+                if (img != null) {
+                    ret.put("isImageFile", true);
+                    ret.put("imageWidth", img.getWidth());
+                    ret.put("imageHeight", img.getHeight());
 
                     int rgb = img.getRGB(0, 0);
                     Rgba argb = Rgba.argb(rgb);
-                    ret.put("posLeftTopArgb",argb.getA()+","+argb.getR()+","+argb.getG()+","+argb.getB());
+                    ret.put("posLeftTopArgb", argb.getA() + "," + argb.getR() + "," + argb.getG() + "," + argb.getB());
 
-                    rgb=img.getRGB(img.getWidth()/2,img.getHeight()/2);
+                    rgb = img.getRGB(img.getWidth() / 2, img.getHeight() / 2);
                     argb = Rgba.argb(rgb);
-                    ret.put("posCenterArgb",argb.getA()+","+argb.getR()+","+argb.getG()+","+argb.getB());
+                    ret.put("posCenterArgb", argb.getA() + "," + argb.getR() + "," + argb.getG() + "," + argb.getB());
                 }
-                img=null;
-            }catch(Exception e){
+                img = null;
+            } catch (Exception e) {
                 // ignore
             }
         }

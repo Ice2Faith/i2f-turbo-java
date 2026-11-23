@@ -37,7 +37,6 @@ public class CherryTree {
     }
 
 
-
     public interface OnStepListener {
         void onStep(BufferedImage img);
     }

@@ -3,6 +3,8 @@ package i2f.springboot.ai.mcp.client;
 import i2f.ai.std.model.message.tool.ToolCallRequest;
 import i2f.ai.std.tool.ToolBaseCallRequest;
 import i2f.ai.std.tool.definition.ToolDefinition;
+import i2f.springboot.ai.mcp.client.official.v2024.stdio.StdioMcpClient;
+import i2f.springboot.ai.mcp.client.official.v2026.stdio.provider.StdioJsonRpcMcpClientV2026ToolProvider;
 
 import java.util.List;
 

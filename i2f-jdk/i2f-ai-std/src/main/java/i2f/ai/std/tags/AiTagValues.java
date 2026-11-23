@@ -9,7 +9,7 @@ public interface AiTagValues {
     // ==========================================
     // 0. 执行控制
     // ==========================================
-    String RETRYABLE_VALUE="retryable";
+    String RETRYABLE_VALUE = "retryable";
 
     // ==========================================
     // 1. 操作敏感度与副作用

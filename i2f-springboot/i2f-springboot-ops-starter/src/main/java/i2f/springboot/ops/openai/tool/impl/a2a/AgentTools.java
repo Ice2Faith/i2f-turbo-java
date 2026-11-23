@@ -1,7 +1,10 @@
 package i2f.springboot.ops.openai.tool.impl.a2a;
 
 import i2f.ai.rest.openai.model.HttpOpenAiAiModel;
-import i2f.ai.rest.openai.model.data.*;
+import i2f.ai.rest.openai.model.data.OpenAiCompletionRespDto;
+import i2f.ai.rest.openai.model.data.OpenAiCompletionUsage;
+import i2f.ai.rest.openai.model.data.OpenAiSystemMessage;
+import i2f.ai.rest.openai.model.data.OpenAiUserMessage;
 import i2f.ai.std.mcp.server.McpServerExpose;
 import i2f.ai.std.tags.AiTags;
 import i2f.ai.std.tool.ToolCallContextHolder;

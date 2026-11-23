@@ -14,7 +14,6 @@ import i2f.springboot.ops.dashscope.controller.DashScopeOpsTmpFileController;
 import i2f.springboot.ops.dashscope.data.DashScopeImageWanText2ImageOperateDto;
 import i2f.springboot.ops.dashscope.data.DashScopeMeta;
 import i2f.springboot.ops.dashscope.data.DashScopeUploadOperateDto;
-import i2f.springboot.ops.openai.data.OpenAiMeta;
 import i2f.springboot.ops.openai.data.OpenAiOperateDto;
 import i2f.springboot.ops.openai.properties.OpenAiOpsProperties;
 import i2f.springboot.ops.openai.tool.impl.TmpFileTools;

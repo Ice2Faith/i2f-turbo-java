@@ -37,7 +37,7 @@ public class HttpSimpleMcpInBoundHandler extends SimpleChannelInboundHandler<Ful
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest request) throws Exception {
-        McpServerRequestContextUtil.fillToolContext(ctx,request);
+        McpServerRequestContextUtil.fillToolContext(ctx, request);
 
         // 1. 获取请求的 URI 和 Method
         String uri = request.uri();

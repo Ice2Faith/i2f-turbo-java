@@ -348,7 +348,7 @@ public class NetworkUtil {
             }
 
             String ip = address.getHostAddress();
-            if(localHostNames.contains(ip)){
+            if (localHostNames.contains(ip)) {
                 return true;
             }
 

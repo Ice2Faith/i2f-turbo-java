@@ -1,5 +1,7 @@
 package i2f.springboot.ai.mcp.client;
 
+import i2f.springboot.ai.mcp.client.official.v2024.stdio.StdioMcpClient;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;

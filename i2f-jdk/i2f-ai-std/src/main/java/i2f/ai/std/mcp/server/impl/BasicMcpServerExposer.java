@@ -61,12 +61,12 @@ public class BasicMcpServerExposer implements McpServerExposer {
 
                 String pattern = rule.getPattern();
                 if (pattern != null && !pattern.isEmpty()) {
-                    if( matcher.matches(name, pattern)) {
+                    if (matcher.matches(name, pattern)) {
                         ret = rule.isExpose();
                     }
                 }
 
-                if(ret!=null){
+                if (ret != null) {
                     break;
                 }
             }

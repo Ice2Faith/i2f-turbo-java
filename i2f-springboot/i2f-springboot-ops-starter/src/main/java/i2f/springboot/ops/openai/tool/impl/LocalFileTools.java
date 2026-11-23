@@ -59,8 +59,8 @@ public class LocalFileTools {
     protected boolean fullAccess = false;
 
 
-    public boolean currentFullAccess(){
-        if(allowChangeFullAccess) {
+    public boolean currentFullAccess() {
+        if (allowChangeFullAccess) {
             OpenAiOperateDto req = (OpenAiOperateDto) ToolCallContextHolder.get("req");
             if (req != null) {
                 return req.isEnableFullAccess();

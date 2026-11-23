@@ -372,7 +372,7 @@ public interface JdbcProcedureExecutor {
 
     int sqlUpdate(String datasource, BindSql bql, Map<String, Object> params);
 
-    Map<String,Object> sqlCall(String datasource, BindSql bql, Map<String, Object> params);
+    Map<String, Object> sqlCall(String datasource, BindSql bql, Map<String, Object> params);
 
     BindSql sqlWrapPage(String datasource, BindSql bql, ApiOffsetSize page, Map<String, Object> params);
 

@@ -1,6 +1,8 @@
 package i2f.codec.bytes.basex;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author Ice2Faith
@@ -164,8 +166,6 @@ public class Base32 {
     public static byte[] decode(String str) {
         return decode(str, BASE32_BASE_MAPPING);
     }
-
-
 
 
 }

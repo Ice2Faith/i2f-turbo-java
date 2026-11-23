@@ -161,9 +161,6 @@ public class SkillsHelper {
         }
 
 
-
-
-
         return builder.toString();
     }
 

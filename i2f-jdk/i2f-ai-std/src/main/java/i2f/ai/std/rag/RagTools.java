@@ -40,12 +40,12 @@ public class RagTools implements BaseMutator<RagTools> {
 
     @Tool(value = RAG_SEARCH,
             tags = {
-            AiTags.READONLY_VALUE
-    }, description = "search relative documents from knowledge(include internal docs, organ info etc.) base by similar query. Note: work on system level.")
+                    AiTags.READONLY_VALUE
+            }, description = "search relative documents from knowledge(include internal docs, organ info etc.) base by similar query. Note: work on system level.")
     public Map<String, Object> rag_search(@ToolParam(value = "text", description = "the query content")
-                                                String text,
-                                                @ToolParam(value = "topN", description = "max returns count, cloud be null, default is 3, suggest lower than 10, for example 3 or 5")
-                                                Integer topN) {
+                                          String text,
+                                          @ToolParam(value = "topN", description = "max returns count, cloud be null, default is 3, suggest lower than 10, for example 3 or 5")
+                                          Integer topN) {
         List<RagSearchResultItem> ret = new ArrayList<>();
         if (topN == null) {
             topN = 3;

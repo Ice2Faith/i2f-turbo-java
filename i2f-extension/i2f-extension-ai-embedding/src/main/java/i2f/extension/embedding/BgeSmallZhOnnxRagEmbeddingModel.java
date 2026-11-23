@@ -29,13 +29,13 @@ public class BgeSmallZhOnnxRagEmbeddingModel extends OnnxRagEmbeddingModel {
             }
             ClassLoader loader = Thread.currentThread().getContextClassLoader();
             InputStream ret = loader.getResourceAsStream("/" + resourceName);
-            if(ret==null){
+            if (ret == null) {
                 // not found, try use lanchain4j path
-                int idx=resourceName.lastIndexOf("/");
-                if(idx>=0){
-                    resourceName=resourceName.substring(idx+1);
+                int idx = resourceName.lastIndexOf("/");
+                if (idx >= 0) {
+                    resourceName = resourceName.substring(idx + 1);
                 }
-                ret=loader.getResourceAsStream("/"+resourceName);
+                ret = loader.getResourceAsStream("/" + resourceName);
             }
             return ret;
         } catch (IOException e) {

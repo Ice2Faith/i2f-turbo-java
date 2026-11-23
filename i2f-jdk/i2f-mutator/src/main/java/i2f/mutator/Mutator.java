@@ -21,7 +21,7 @@ import java.util.function.*;
  * public class RestHttpResponse&lt;T&gt; implements BaseMutator&lt;RestHttpResponse&lt;T&gt;&gt; {
  * }
  * </pre>
- *
+ * <p>
  * ----------------------------------
  * <pre>
  * return new RestHttpResponse&lt;T&gt;().mutate() // 通过 BaseMutator 提供的默认方法转为 mutator

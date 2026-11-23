@@ -4,7 +4,6 @@ import i2f.jdbc.data.QueryColumn;
 import i2f.jdbc.data.ResultSetContext;
 import i2f.reference.Reference;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**

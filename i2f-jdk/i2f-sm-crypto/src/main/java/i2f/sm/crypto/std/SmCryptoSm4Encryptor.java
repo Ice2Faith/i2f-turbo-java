@@ -1,7 +1,5 @@
 package i2f.sm.crypto.std;
 
-import i2f.codec.bytes.charset.CharsetStringByteCodec;
-import i2f.codec.bytes.raw.HexStringByteCodec;
 import i2f.crypto.std.encrypt.symmetric.ISymmetricEncryptor;
 import i2f.crypto.std.encrypt.symmetric.key.BytesKey;
 import i2f.sm.crypto.sm4.Sm4;

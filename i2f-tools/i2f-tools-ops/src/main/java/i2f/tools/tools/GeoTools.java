@@ -27,7 +27,7 @@ import org.springframework.web.client.RestTemplate;
         AiTags.READONLY_VALUE
 })
 public class GeoTools {
-    private RestTemplate restTemplate=new RestTemplate();
+    private RestTemplate restTemplate = new RestTemplate();
 
     @Tool(
             tags = {
@@ -37,9 +37,9 @@ public class GeoTools {
     )
     public String fuzzy_geo_location() {
         String ip = ToolCallContextHolder.get(HttpServletToolContextUtil.HTTP_CLIENT_IP);
-        if(ip==null || ip.isEmpty() || NetworkUtil.isLocalHost(ip) || NetworkUtil.isPrivateIpv4(ip)) {
-            return restTemplate.getForObject("http://ip-api.com/json/?lang=zh-CN",String.class);
+        if (ip == null || ip.isEmpty() || NetworkUtil.isLocalHost(ip) || NetworkUtil.isPrivateIpv4(ip)) {
+            return restTemplate.getForObject("http://ip-api.com/json/?lang=zh-CN", String.class);
         }
-        return restTemplate.getForObject("http://ip-api.com/json/"+ip+"?lang=zh-CN",String.class);
+        return restTemplate.getForObject("http://ip-api.com/json/" + ip + "?lang=zh-CN", String.class);
     }
 }

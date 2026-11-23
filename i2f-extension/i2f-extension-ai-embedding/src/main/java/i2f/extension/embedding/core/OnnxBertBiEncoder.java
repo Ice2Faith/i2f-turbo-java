@@ -103,13 +103,13 @@ public class OnnxBertBiEncoder implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        if(this.tokenizer!=null){
+        if (this.tokenizer != null) {
             this.tokenizer.close();
         }
-        if(this.session!=null){
+        if (this.session != null) {
             this.session.close();
         }
-        if(this.environment!=null){
+        if (this.environment != null) {
             this.environment.close();
         }
     }
@@ -136,7 +136,7 @@ public class OnnxBertBiEncoder implements AutoCloseable {
         OnnxTensor inputIdsTensor = OnnxTensor.createTensor(this.environment, LongBuffer.wrap(inputIds), shape);
         Throwable ex = null;
 
-        OrtSession.Result result=null;
+        OrtSession.Result result = null;
         try {
             OnnxTensor attentionMaskTensor = OnnxTensor.createTensor(this.environment, LongBuffer.wrap(attentionMask), shape);
             Throwable tensorEx = null;
@@ -317,7 +317,7 @@ public class OnnxBertBiEncoder implements AutoCloseable {
                 try {
                     byte[] data = new byte[1024];
 
-                    int len=0;
+                    int len = 0;
                     while ((len = inputStream.read(data, 0, data.length)) != -1) {
                         buffer.write(data, 0, len);
                     }

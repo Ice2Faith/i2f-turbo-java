@@ -11,7 +11,6 @@ import i2f.page.ApiOffsetSize;
 import i2f.page.Page;
 
 import java.io.Serializable;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;

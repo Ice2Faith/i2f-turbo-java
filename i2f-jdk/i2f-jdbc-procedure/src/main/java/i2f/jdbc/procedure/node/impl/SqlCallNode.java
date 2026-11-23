@@ -25,18 +25,18 @@ import java.util.function.Consumer;
 public class SqlCallNode extends AbstractExecutorNode {
     public static final String TAG_NAME = TagConsts.SQL_CALL;
 
-    public static final Map<String,JDBCType> jdbcTypeMapping= Collections.unmodifiableMap(new HashMap<String,JDBCType>(){
+    public static final Map<String, JDBCType> jdbcTypeMapping = Collections.unmodifiableMap(new HashMap<String, JDBCType>() {
         {
-            put(FeatureConsts.STRING,JDBCType.VARCHAR);
-            put(FeatureConsts.INT,JDBCType.INTEGER);
-            put(FeatureConsts.DOUBLE,JDBCType.NUMERIC);
-            put(FeatureConsts.FLOAT,JDBCType.NUMERIC);
-            put(FeatureConsts.LONG,JDBCType.BIGINT);
-            put(FeatureConsts.SHORT,JDBCType.SMALLINT);
-            put(FeatureConsts.CHAR,JDBCType.CHAR);
-            put(FeatureConsts.BYTE,JDBCType.INTEGER);
-            put(FeatureConsts.BOOLEAN,JDBCType.BOOLEAN);
-            put(FeatureConsts.DATE,JDBCType.TIMESTAMP);
+            put(FeatureConsts.STRING, JDBCType.VARCHAR);
+            put(FeatureConsts.INT, JDBCType.INTEGER);
+            put(FeatureConsts.DOUBLE, JDBCType.NUMERIC);
+            put(FeatureConsts.FLOAT, JDBCType.NUMERIC);
+            put(FeatureConsts.LONG, JDBCType.BIGINT);
+            put(FeatureConsts.SHORT, JDBCType.SMALLINT);
+            put(FeatureConsts.CHAR, JDBCType.CHAR);
+            put(FeatureConsts.BYTE, JDBCType.INTEGER);
+            put(FeatureConsts.BOOLEAN, JDBCType.BOOLEAN);
+            put(FeatureConsts.DATE, JDBCType.TIMESTAMP);
         }
     });
 
@@ -59,8 +59,8 @@ public class SqlCallNode extends AbstractExecutorNode {
         String refid = (String) executor.attrValue(AttrConsts.REFID, FeatureConsts.STRING, node, context);
         String result = node.getTagAttrMap().get(AttrConsts.RESULT);
 
-        BindSql bql=BindSql.of(refid+"(");
-        boolean isFirst=true;
+        BindSql bql = BindSql.of(refid + "(");
+        boolean isFirst = true;
 
         for (Map.Entry<String, String> entry : node.getTagAttrMap().entrySet()) {
             String name = entry.getKey();
@@ -79,26 +79,26 @@ public class SqlCallNode extends AbstractExecutorNode {
             String script = entry.getValue();
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
 
-            if(!isFirst){
-                bql=bql.add(",");
+            if (!isFirst) {
+                bql = bql.add(",");
             }
 
             List<String> features = node.getAttrFeatureMap().get(name);
-            boolean isOutput=false;
-            boolean isOutputIn=false;
-            JDBCType sqlType=null;
+            boolean isOutput = false;
+            boolean isOutputIn = false;
+            JDBCType sqlType = null;
 
-            if(features!=null){
-                if(features.contains(FeatureConsts.OUT)){
-                    isOutput=true;
+            if (features != null) {
+                if (features.contains(FeatureConsts.OUT)) {
+                    isOutput = true;
                 }
-                if(features.contains(FeatureConsts.IN)){
-                    isOutputIn=true;
+                if (features.contains(FeatureConsts.IN)) {
+                    isOutputIn = true;
                 }
             }
 
-            if(isOutput){
-                if(sqlType==null) {
+            if (isOutput) {
+                if (sqlType == null) {
                     for (String feature : features) {
                         JDBCType jdbcType = jdbcTypeMapping.get(feature);
                         if (jdbcType != null) {
@@ -107,41 +107,41 @@ public class SqlCallNode extends AbstractExecutorNode {
                         }
                     }
                 }
-                if(sqlType==null){
+                if (sqlType == null) {
                     JDBCType[] values = JDBCType.values();
                     for (String feature : features) {
                         for (JDBCType value : values) {
-                            if(value.name().equalsIgnoreCase(feature)){
-                                sqlType=value;
+                            if (value.name().equalsIgnoreCase(feature)) {
+                                sqlType = value;
                                 break;
                             }
                         }
                     }
                 }
-                if(sqlType==null){
-                    sqlType=JDBCType.VARCHAR;
+                if (sqlType == null) {
+                    sqlType = JDBCType.VARCHAR;
                 }
 
-                if(isOutputIn){
-                    bql=bql.val(NamingOutputParameter.of(name,sqlType,val));
-                }else{
-                    bql=bql.val(NamingOutputParameter.of(name,sqlType));
+                if (isOutputIn) {
+                    bql = bql.val(NamingOutputParameter.of(name, sqlType, val));
+                } else {
+                    bql = bql.val(NamingOutputParameter.of(name, sqlType));
                 }
-            }else{
-                bql=bql.val(val);
+            } else {
+                bql = bql.val(val);
             }
 
-            isFirst=false;
+            isFirst = false;
         }
 
-        bql=bql.add(")");
+        bql = bql.add(")");
 
         bql.setSql(JdbcResolver.callSql(bql.getSql()));
 
         if (executor.isDebug()) {
             bql = bql.concat(getTrackingComment(node));
         }
-        Map<String, Object> map = executor.sqlCall(datasource, bql,context);
+        Map<String, Object> map = executor.sqlCall(datasource, bql, context);
         if (executor.isDebug()) {
             executor.logger().logDebug("sql call is : " + map.size() + "! at " + getNodeLocation(node));
         }

@@ -79,7 +79,7 @@ public class McpServerProviderAutoConfiguration {
         // 当应用同时作为agent，也同时作为mcp-server的时候
         // 部分工具，会存在，只在agent内使用，不暴露给mcp-server，这种使用exposer暴露管理
         // 而一部分工具，是为了专门额外提供给mcp-server使用的桥接的工具，这种旧需要使用 additional 方式暴露
-        McpServerAdditionalToolManager additionalToolManager=new McpServerAdditionalToolManager();
+        McpServerAdditionalToolManager additionalToolManager = new McpServerAdditionalToolManager();
         additionalToolManager.setContext(new SpringContext(applicationContext));
         additionalToolManager.setPrimaryManager(toolManager);
 

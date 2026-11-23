@@ -28,7 +28,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;

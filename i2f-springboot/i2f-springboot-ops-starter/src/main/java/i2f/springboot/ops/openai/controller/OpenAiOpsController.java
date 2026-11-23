@@ -50,7 +50,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.ApplicationContext;
 import org.springframework.http.HttpHeaders;
@@ -634,6 +633,7 @@ public class OpenAiOpsController implements IOpsProvider {
 
     public static final String EMBEDDING_PREFIX_DESCRIPTION = "passage: ";
     public static final String EMBEDDING_PREFIX_QUESTION = "query: ";
+
     @PostMapping("/stream")
     public SseEmitter stream(@RequestBody OpsSecureDto reqDto,
                              HttpServletRequest request) throws Exception {
@@ -751,11 +751,11 @@ public class OpenAiOpsController implements IOpsProvider {
                     // 最大化的利用好LLM的KvCache能力
 
                     // 通过系统注入提示词，强化回话记忆
-                    if(req.isEnableTools()
-                            && req.getSessionRecordsMap()!=null
-                            && !req.getSessionRecordsMap().isEmpty()){
+                    if (req.isEnableTools()
+                            && req.getSessionRecordsMap() != null
+                            && !req.getSessionRecordsMap().isEmpty()) {
                         String content = SessionRecordTools.getSystemPrompt(req.getSessionRecordsMap());
-                        if(content!=null && !content.isEmpty()) {
+                        if (content != null && !content.isEmpty()) {
                             OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                             completion.getMessages().add(0, system);
 
@@ -787,12 +787,12 @@ public class OpenAiOpsController implements IOpsProvider {
                         }
                     }
 
-                    if(req.isEnableAgentsMarkdown() && needInjectSystemPrompt){
+                    if (req.isEnableAgentsMarkdown() && needInjectSystemPrompt) {
                         String content = AgentsPrompt.getAgentsMarkdown();
-                        if(content!=null){
-                            content=content.trim();
+                        if (content != null) {
+                            content = content.trim();
                         }
-                        if(content!=null && !content.isEmpty()) {
+                        if (content != null && !content.isEmpty()) {
                             OpenAiSystemMessage system = new OpenAiSystemMessage(content);
                             completion.getMessages().add(0, system);
 
@@ -1549,15 +1549,15 @@ public class OpenAiOpsController implements IOpsProvider {
                     // 回收较久之前的Tool消息内容，减少输入Token量，因为早起的工具调用结果，对接下来的推理影响已经不大了
                     // 仅保留已被回收，提示如有需要，重新执行工具即可
                     if (req.isEnableRecycleToolMessage() || req.isEnableRecycleToolArgument()) {
-                        int toolCount=0;
+                        int toolCount = 0;
 
                         int recycleToolMessageLastKeepCount = req.getRecycleToolMessageLastKeepCount() == null ? 10 : req.getRecycleToolMessageLastKeepCount();
                         if (recycleToolMessageLastKeepCount <= 0) {
                             recycleToolMessageLastKeepCount = 10;
                         }
-                        int recycleToolMessageMinLength=req.getRecycleToolMessageMinLength()==null?512:req.getRecycleToolMessageMinLength();
-                        if(recycleToolMessageMinLength<=0){
-                            recycleToolMessageMinLength=512;
+                        int recycleToolMessageMinLength = req.getRecycleToolMessageMinLength() == null ? 512 : req.getRecycleToolMessageMinLength();
+                        if (recycleToolMessageMinLength <= 0) {
+                            recycleToolMessageMinLength = 512;
                         }
 
                         int recycleToolArgumentLastKeepCount = req.getRecycleToolArgumentLastKeepCount() == null ? 10 : req.getRecycleToolArgumentLastKeepCount();
@@ -1571,14 +1571,14 @@ public class OpenAiOpsController implements IOpsProvider {
 
                         int size = completion.getMessages().size();
 
-                        for (int i = size-1; i >=0; i--) {
+                        for (int i = size - 1; i >= 0; i--) {
                             OpenAiMessage msg = completion.getMessages().get(i);
-                            if(msg instanceof OpenAiToolMessage){
+                            if (msg instanceof OpenAiToolMessage) {
                                 toolCount++;
                             }
 
                             if (toolCount > recycleToolMessageLastKeepCount) {
-                                if(msg instanceof OpenAiToolMessage){
+                                if (msg instanceof OpenAiToolMessage) {
                                     OpenAiToolMessage toolMsg = (OpenAiToolMessage) msg;
                                     String content = toolMsg.getContent();
                                     if (content.length() > recycleToolMessageMinLength) {

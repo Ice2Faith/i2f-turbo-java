@@ -1,6 +1,8 @@
 package i2f.codec.bytes.basex;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * @author Ice2Faith
@@ -170,7 +172,6 @@ public class Base64 {
     public static byte[] decodeUrl(String str) {
         return decode(str, BASE64_URL_MAPPING);
     }
-
 
 
 }
