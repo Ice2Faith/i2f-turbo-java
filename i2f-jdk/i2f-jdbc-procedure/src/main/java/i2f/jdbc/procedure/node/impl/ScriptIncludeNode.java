@@ -51,7 +51,7 @@ public class ScriptIncludeNode extends AbstractExecutorNode {
             }
             String script = entry.getValue();
             // 备份堆栈
-            bakParams.put(name, executor.visit(script, context));
+            bakParams.put(name, executor.visit(name, context));
             Object val = executor.attrValue(name, FeatureConsts.VISIT, node, context);
             executor.visitSet(context, name, val);
         }
