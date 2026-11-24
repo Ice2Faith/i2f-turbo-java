@@ -181,7 +181,7 @@
                     </el-row>
                     <el-row>
                         <el-divider></el-divider>
-                        <div @contextmenu.prevent="onEditorContextmenu(langEditors?.evalScriptEditor)">
+                        <div @contextmenu="onEditorContextmenu(langEditors?.evalScriptEditor)">
                             <textarea ref="refEvalScriptEditor"></textarea>
                         </div>
                     </el-row>
@@ -203,7 +203,7 @@
                         </el-col>
                     </el-row>
                     <el-divider></el-divider>
-                    <div @contextmenu.prevent="onEditorContextmenu(editor,['json-editor'])">
+                    <div @contextmenu="onEditorContextmenu(editor,['json-editor'])">
                         <textarea ref="refEditor"></textarea>
                     </div>
 
@@ -279,7 +279,7 @@
                 <el-button type="waring" size="small" @click="onViewLogList">查看日志</el-button>
             </el-form-item>
         </el-form>
-        <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor,['json-editor'])">
+        <div @contextmenu="onEditorContextmenu(langEditors?.resultEditor,['json-editor'])">
             <textarea ref="refResultEditor"></textarea>
         </div>
     </el-card>
@@ -309,7 +309,7 @@
                     </el-button>
                 </el-form-item>
             </el-form>
-            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor,['json-editor'])">
+            <div @contextmenu="onEditorContextmenu(langEditors?.textViewerEditor,['json-editor'])">
                 <textarea ref="refTextViewerEditor"></textarea>
             </div>
         </el-card>
@@ -556,6 +556,12 @@
                 return ret;
             },
             onEditorContextmenu(editor, categoryList) {
+                let evt = event;
+                if (window.disabledUserCustomContextMenus) {
+                    return;
+                }
+                evt.preventDefault();
+
                 let _this = this
                 let convertText = function (convertor) {
                     try {
@@ -575,6 +581,16 @@
 
                 let presetMenusMap = {
                     text: [
+                        {
+                            label: `默认菜单(8s)`,
+                            icon: 'el-icon-guide',
+                            onClick: () => {
+                                window.disabledUserCustomContextMenus = true;
+                                setTimeout(() => {
+                                    window.disabledUserCustomContextMenus = false;
+                                }, 8000)
+                            }
+                        },
                         {label: '', divided: true}, // 分割线
                         {
                             label: `upper`,

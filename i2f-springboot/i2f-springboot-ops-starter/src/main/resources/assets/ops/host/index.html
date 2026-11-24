@@ -98,7 +98,7 @@
     </el-input>
     <el-card shadow="never">
         <div :class="'expand-main-editor'+(expandMainEditor?' expand-main-editor__expand':'')"
-             @contextmenu.prevent="onEditorContextmenu(editor)">
+             @contextmenu="onEditorContextmenu(editor)">
             <textarea ref="refEditor"></textarea>
         </div>
         <span class="el-icon-full-screen expand-main-editor__badge" @click="expandMainEditor=!expandMainEditor"></span>
@@ -198,7 +198,7 @@
                 </el-select>
             </el-form-item>
         </el-form>
-        <div @contextmenu.prevent="onEditorContextmenu(langEditors?.resultEditor)">
+        <div @contextmenu="onEditorContextmenu(langEditors?.resultEditor)">
             <textarea ref="refResultEditor"></textarea>
         </div>
 
@@ -300,7 +300,7 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor)">
+            <div @contextmenu="onEditorContextmenu(langEditors?.textViewerEditor)">
                 <textarea ref="refTextViewerEditor"></textarea>
             </div>
         </el-card>
@@ -329,7 +329,7 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.fileEditor)">
+            <div @contextmenu="onEditorContextmenu(langEditors?.fileEditor)">
                 <textarea ref="refFileEditor"></textarea>
             </div>
         </el-card>
@@ -599,6 +599,12 @@
                 return ret;
             },
             onEditorContextmenu(editor, categoryList) {
+                let evt = event;
+                if (window.disabledUserCustomContextMenus) {
+                    return;
+                }
+                evt.preventDefault();
+
                 let _this = this
                 let convertText = function (convertor) {
                     try {
@@ -618,6 +624,16 @@
 
                 let presetMenusMap = {
                     text: [
+                        {
+                            label: `默认菜单(8s)`,
+                            icon: 'el-icon-guide',
+                            onClick: () => {
+                                window.disabledUserCustomContextMenus = true;
+                                setTimeout(() => {
+                                    window.disabledUserCustomContextMenus = false;
+                                }, 8000)
+                            }
+                        },
                         {label: '', divided: true}, // 分割线
                         {
                             label: `upper`,

@@ -203,7 +203,7 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.textViewerEditor)">
+            <div @contextmenu="onEditorContextmenu(langEditors?.textViewerEditor)">
                 <textarea ref="refTextViewerEditor"></textarea>
             </div>
         </el-card>
@@ -232,7 +232,7 @@
                     </el-select>
                 </el-form-item>
             </el-form>
-            <div @contextmenu.prevent="onEditorContextmenu(langEditors?.fileEditor)">
+            <div @contextmenu="onEditorContextmenu(langEditors?.fileEditor)">
                 <textarea ref="refFileEditor"></textarea>
             </div>
         </el-card>
@@ -412,6 +412,12 @@
                 }
             },
             onEditorContextmenu(editor, categoryList) {
+                let evt = event;
+                if (window.disabledUserCustomContextMenus) {
+                    return;
+                }
+                evt.preventDefault();
+
                 let _this = this
                 let convertText = function (convertor) {
                     try {
@@ -431,6 +437,16 @@
 
                 let presetMenusMap = {
                     text: [
+                        {
+                            label: `默认菜单(8s)`,
+                            icon: 'el-icon-guide',
+                            onClick: () => {
+                                window.disabledUserCustomContextMenus = true;
+                                setTimeout(() => {
+                                    window.disabledUserCustomContextMenus = false;
+                                }, 8000)
+                            }
+                        },
                         {label: '', divided: true}, // 分割线
                         {
                             label: `upper`,
