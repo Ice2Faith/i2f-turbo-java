@@ -12,6 +12,8 @@ import i2f.jdbc.procedure.context.ContextHolder;
 import i2f.jdbc.procedure.context.ProcedureMeta;
 import i2f.jdbc.procedure.debugger.JdbcProcedureDebugBridgeReporter;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.procedure.node.impl.tinyscript.ExecContextMethodProvider;
+import i2f.jdbc.procedure.node.impl.tinyscript.ExecMethodProviderHelper;
 import i2f.jdbc.procedure.node.impl.tinyscript.ExecutorMethodProvider;
 import i2f.jdbc.procedure.node.impl.tinyscript.ProcedureTinyScriptResolver;
 import i2f.jdbc.procedure.parser.data.XmlNode;
@@ -133,7 +135,7 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
             ret.addAll(namingMethods);
         }
 
-        CopyOnWriteArrayList<Method> methods = ProcedureTinyScriptResolver.getExecutorMethods(methodName);
+        CopyOnWriteArrayList<Method> methods = ExecMethodProviderHelper.getExecutorMethods(methodName);
         if (methods != null && !methods.isEmpty()) {
             for (Method method : methods) {
                 IMethod item = new JdkInstanceStaticMethod(new ExecutorMethodProvider(executor), method);
@@ -141,10 +143,10 @@ public class ProcedureFunicResolver extends DefaultFunicResolver {
             }
         }
 
-        methods = ProcedureTinyScriptResolver.getExecContextMethods(methodName);
+        methods = ExecMethodProviderHelper.getExecContextMethods(methodName);
         if (methods != null && !methods.isEmpty()) {
             for (Method method : methods) {
-                IMethod item = new JdkInstanceStaticMethod(new ExecutorMethodProvider(executor), method);
+                IMethod item = new JdkInstanceStaticMethod(new ExecContextMethodProvider(executor,visitor.getContext()), method);
                 ret.add(item);
             }
         }

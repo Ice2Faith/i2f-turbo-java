@@ -37,41 +37,6 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
     protected JdbcProcedureExecutor executor;
     protected XmlNode node;
 
-    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> executorMethods = new ConcurrentHashMap<>();
-    private static final ConcurrentHashMap<String, CopyOnWriteArrayList<Method>> execContextMethods = new ConcurrentHashMap<>();
-
-    public static CopyOnWriteArrayList<Method> getExecutorMethods(String naming) {
-        if (executorMethods.isEmpty()) {
-            synchronized (executorMethods) {
-                Method[] list = ExecutorMethodProvider.class.getMethods();
-                for (Method item : list) {
-                    if (Object.class.equals(item.getDeclaringClass())) {
-                        continue;
-                    }
-                    executorMethods.computeIfAbsent(item.getName(), (k) -> new CopyOnWriteArrayList<>())
-                            .add(item);
-                }
-            }
-        }
-        return executorMethods.get(naming);
-    }
-
-    public static CopyOnWriteArrayList<Method> getExecContextMethods(String naming) {
-        if (execContextMethods.isEmpty()) {
-            synchronized (execContextMethods) {
-                Method[] list = ExecContextMethodProvider.class.getMethods();
-                for (Method item : list) {
-                    if (Object.class.equals(item.getDeclaringClass())) {
-                        continue;
-                    }
-                    execContextMethods.computeIfAbsent(item.getName(), (k) -> new CopyOnWriteArrayList<>())
-                            .add(item);
-                }
-            }
-        }
-        return execContextMethods.get(naming);
-    }
-
     public ProcedureTinyScriptResolver(JdbcProcedureExecutor executor) {
         this.executor = executor;
     }
@@ -185,7 +150,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
             }
         }
 
-        CopyOnWriteArrayList<Method> methods = getExecutorMethods(naming);
+        CopyOnWriteArrayList<Method> methods = ExecMethodProviderHelper.getExecutorMethods(naming);
         if (methods != null && !methods.isEmpty()) {
             Method method = ReflectResolver.matchExecutable(methods, args);
             if (method != null) {
@@ -193,7 +158,7 @@ public class ProcedureTinyScriptResolver extends DefaultTinyScriptResolver {
             }
         }
 
-        methods = getExecContextMethods(naming);
+        methods = ExecMethodProviderHelper.getExecContextMethods(naming);
         if (methods != null && !methods.isEmpty()) {
             Method method = ReflectResolver.matchExecutable(methods, args);
             if (method != null) {
