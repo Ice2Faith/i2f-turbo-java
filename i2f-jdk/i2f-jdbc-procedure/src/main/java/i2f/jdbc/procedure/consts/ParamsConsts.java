@@ -69,6 +69,7 @@ public interface ParamsConsts {
     // 连接部分
     String CONNECTIONS = "connections";
     String DEFAULT_DATASOURCE = "primary";
+    String CONNECTIONS_VALIDATED = "connections_validated";
 
     // 返回值
     String RETURN = "return";
@@ -93,6 +94,7 @@ public interface ParamsConsts {
             DATASOURCES_MAPPING,
 
             CONNECTIONS,
+            CONNECTIONS_VALIDATED,
 
             GLOBAL,
             METAS,

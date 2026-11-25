@@ -1958,21 +1958,25 @@ public class BasicJdbcProcedureExecutor implements JdbcProcedureExecutor, EvalSc
     public Map.Entry<Connection, String> getConnectionEntry(String datasource, Map<String, Object> params, boolean require) {
         datasource = getMappingDatasourceName(datasource, params);
 
-        Map<String, Connection> connectionMap = (Map<String, Connection>) params.get(ParamsConsts.CONNECTIONS);
-        if (connectionMap == null) {
-            connectionMap = new LinkedHashMap<>();
-            params.put(ParamsConsts.CONNECTIONS, connectionMap);
-            if (isDebug()) {
-                logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] none connection map");
-            }
-        }
+        Map<String, Connection> connectionMap = (Map<String, Connection>) params.computeIfAbsent(ParamsConsts.CONNECTIONS, k -> new LinkedHashMap<>());
+        Map<String, Long> connectionValidatedMap = (Map<String, Long>) params.computeIfAbsent(ParamsConsts.CONNECTIONS_VALIDATED, (k) -> new LinkedHashMap<>());
         Connection conn = connectionMap.get(datasource);
         if (conn != null) {
             try {
-                if (!conn.isClosed() && conn.isValid(300)) {
-                    if (isDebug()) {
-                        logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] find in map");
+                Long lts = connectionValidatedMap.get(datasource);
+                boolean health = false;
+                if (lts == null || SystemClock.currentTimeMillis() > lts) {
+                    if (!conn.isClosed() && conn.isValid(5)) {
+                        if (isDebug()) {
+                            logger().logDebug("get-connection:datasource=" + datasource + " near [" + ContextHolder.traceLocation() + "] find in map");
+                        }
+                        health = true;
+                        connectionValidatedMap.put(datasource, SystemClock.currentTimeMillis() + TimeUnit.SECONDS.toMillis(30));
                     }
+                } else {
+                    health = true;
+                }
+                if (health) {
                     return new AbstractMap.SimpleEntry<>(conn, datasource);
                 }
             } catch (Exception e) {
