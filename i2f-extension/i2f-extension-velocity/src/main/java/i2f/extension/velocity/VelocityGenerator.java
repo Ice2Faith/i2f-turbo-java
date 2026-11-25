@@ -4,6 +4,7 @@ import i2f.extension.velocity.directives.common.*;
 import i2f.extension.velocity.directives.sql.SqlSetDirective;
 import i2f.extension.velocity.directives.sql.SqlWhereDirective;
 import i2f.io.stream.StreamUtil;
+import i2f.lru.LruMap;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -169,16 +170,24 @@ public class VelocityGenerator {
         return engine;
     }
 
+
+    public static final LruMap<String, Template> cacheTemplate = new LruMap<>(4096);
+
     public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
         VelocityEngine engine = getDefaultStringEngine(config);
 
-        String templateName = useStringResource(engine, template);
-
-        try {
-            return renderAsString(engine, templateName, params);
-        } finally {
-            removeStringResource(engine, templateName);
+        Template tpl = cacheTemplate.get(template);
+        if (tpl == null) {
+            String templateName = useStringResource(engine, template);
+            try {
+                tpl = engine.getTemplate(templateName);
+            } finally {
+                removeStringResource(engine, templateName);
+            }
         }
+        cacheTemplate.put(template, tpl);
+
+        return renderAsString(engine, tpl, params);
     }
 
     public static void removeStringResource(VelocityEngine engine, String templateName) {
@@ -229,6 +238,10 @@ public class VelocityGenerator {
     public static String renderAsString(VelocityEngine engine, String templateName, Map<String, Object> params) {
         //创建模板对象
         Template template = engine.getTemplate(templateName);
+        return renderAsString(engine, template, params);
+    }
+
+    public static String renderAsString(VelocityEngine engine, Template template, Map<String, Object> params) {
 
         //创建绑定对象
         VelocityContext ctx = new VelocityContext(params);
