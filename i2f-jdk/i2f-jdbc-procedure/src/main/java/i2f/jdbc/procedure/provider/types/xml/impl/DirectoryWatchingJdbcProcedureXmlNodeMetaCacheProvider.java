@@ -270,13 +270,13 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                 }
             }
             if (needNotifyChange) {
-                logger.logDebug(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
+                logger.logInfo(XProc4jConsts.NAME + " watching xml-node file change parsed:" + file.getAbsolutePath());
             }
             String id = node.getTagAttrMap().get(AttrConsts.ID);
             if (id != null) {
                 ret.put(id, node);
                 if (needNotifyChange) {
-                    logger.logDebug(XProc4jConsts.NAME + " watching xml-node node:" + id);
+                    logger.logInfo(XProc4jConsts.NAME + " watching xml-node node:" + id);
                 }
                 Map<String, XmlNode> next = new HashMap<>();
                 JdbcProcedureParser.resolveEmbedIdNode(node, next);
@@ -285,7 +285,7 @@ public class DirectoryWatchingJdbcProcedureXmlNodeMetaCacheProvider extends Abst
                     if (!entry.getKey().equals(id)) {
                         String childId = id + "." + entry.getKey();
                         if (needNotifyChange) {
-                            logger.logDebug(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
+                            logger.logInfo(XProc4jConsts.NAME + " watching xml-node node-child:" + childId);
                         }
                         ret.put(childId, entry.getValue());
                     }
