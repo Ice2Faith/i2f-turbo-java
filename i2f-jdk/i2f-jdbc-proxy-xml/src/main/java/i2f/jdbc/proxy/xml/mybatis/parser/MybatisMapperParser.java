@@ -1,6 +1,7 @@
 package i2f.jdbc.proxy.xml.mybatis.parser;
 
 import i2f.jdbc.proxy.xml.mybatis.data.MybatisMapperNode;
+import i2f.lru.LruMap;
 import i2f.match.regex.RegexUtil;
 import i2f.match.regex.data.RegexFindPartMeta;
 import i2f.xml.XmlUtil;
@@ -17,6 +18,8 @@ import java.util.*;
  * @date 2024/10/9 9:31
  */
 public class MybatisMapperParser {
+    public static final LruMap<String,MybatisMapperNode> cacheScriptAst=new LruMap<>(8192);
+
     public static final String[] XML_ELEMENT_TAG_NAME = {
             "resultMap", "sql", "select", "update", "insert", "delete"
     };
@@ -193,6 +196,17 @@ public class MybatisMapperParser {
     }
 
     public static MybatisMapperNode parseScriptNode(String script) throws Exception {
+        MybatisMapperNode ret = cacheScriptAst.get(script);
+        if(ret!=null){
+            return ret;
+        }
+        ret = parseScriptNode0(script);
+        if(ret!=null){
+            cacheScriptAst.put(script,ret);
+        }
+        return ret;
+    }
+    public static MybatisMapperNode parseScriptNode0(String script) throws Exception {
         Document document = null;
         try {
             StringBuilder builder = new StringBuilder();
