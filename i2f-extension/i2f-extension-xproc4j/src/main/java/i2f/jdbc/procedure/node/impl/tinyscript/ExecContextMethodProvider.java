@@ -1,6 +1,8 @@
 package i2f.jdbc.procedure.node.impl.tinyscript;
 
 import i2f.bindsql.BindSql;
+import i2f.bindsql.merge.BindSqlMergeSqlValueConvertor;
+import i2f.bindsql.merge.BindSqlMergeSqlValueConvertors;
 import i2f.database.type.DatabaseType;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
 import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
@@ -144,13 +146,22 @@ public class ExecContextMethodProvider {
             dialectType = DatabaseType.parse(dialectType);
         }
         if (DatabaseType.isValid((DatabaseType) dialectType)) {
-            dialectType = DatabaseType.parse(dialectType);
 
             DatabaseType type = (DatabaseType) dialectType;
-            if (type == DatabaseType.ORACLE
-                    || type == DatabaseType.ORACLE_12C) {
-                return bql.toOracleMergeSql();
+
+            try{
+                List<BindSqlMergeSqlValueConvertor> beans = executor.getNamingContext().getBeans(BindSqlMergeSqlValueConvertor.class);
+                for (BindSqlMergeSqlValueConvertor bean : beans) {
+                    if(bean.support(DatabaseType.stringify(type))){
+                        return bql.toMergeSql(bean);
+                    }
+                }
+            }catch (Exception e){
+                // ignore
             }
+
+            BindSqlMergeSqlValueConvertor convertor = BindSqlMergeSqlValueConvertors.getConvertor(DatabaseType.stringify(type));
+            return bql.toMergeSql(convertor);
         }
         return bql.toMergeSql();
     }

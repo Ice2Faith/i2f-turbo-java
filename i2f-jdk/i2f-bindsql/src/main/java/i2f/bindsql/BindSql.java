@@ -1,5 +1,8 @@
 package i2f.bindsql;
 
+import i2f.bindsql.merge.BindSqlMergeSqlValueConvertor;
+import i2f.bindsql.merge.impl.DefaultMergeSqlValueConvertor;
+import i2f.bindsql.merge.impl.OracleMergeSqlValueConvertor;
 import i2f.lambda.core.Lambda;
 import i2f.lambda.core.func.IGetter;
 import i2f.text.StringUtils;
@@ -8,11 +11,6 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.*;
 import java.util.regex.MatchResult;
@@ -59,7 +57,7 @@ public class BindSql {
                         .andEq(c -> c.get(BindSql::getType), 5)
                         .andEq(c -> c.get("a", BindSql::getArgs), 6)
                 );
-        System.out.println(bql.pretty().toOracleMergeSql());
+        System.out.println(bql.pretty().toMergeSql(OracleMergeSqlValueConvertor.INSTANCE));
         System.out.println("++++++++++++++++++++");
         System.out.println(add);
         System.out.println("======================");
@@ -1231,7 +1229,7 @@ public class BindSql {
     }
 
     public String toMergeSql() {
-        return toMergeSql(DefaultMergeSqlValueConvertor.DEFAULT);
+        return toMergeSql(DefaultMergeSqlValueConvertor.INSTANCE);
     }
 
     public static final Pattern PATTERN_MERGE = Pattern.compile("('[^']*')" + // 字符串，保持不变
@@ -1239,6 +1237,10 @@ public class BindSql {
             "|(/\\*[^*]*\\*/)" + // 多行注释，不变
             "|(\\?)" // 占位符
     );
+
+    public String toMergeSql(BindSqlMergeSqlValueConvertor convertor) {
+        return toMergeSql((Function<Object, String>) convertor);
+    }
 
     public String toMergeSql(Function<Object, String> valueConvertor) {
         String sql = this.sql;
@@ -1275,98 +1277,5 @@ public class BindSql {
         return builder.toString();
     }
 
-    public static class DefaultMergeSqlValueConvertor implements Function<Object, String> {
-        public static final DefaultMergeSqlValueConvertor DEFAULT = new DefaultMergeSqlValueConvertor();
-        public static final DateTimeFormatter FMT_DATE_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        public static final DateTimeFormatter FMT_DATE = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        public static final DateTimeFormatter FMT_TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
-        public static final ThreadLocal<SimpleDateFormat> FMT_S_DATE = ThreadLocal.withInitial(() -> new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-
-        @Override
-        public String apply(Object value) {
-            if (value == null) {
-                return onNull();
-            }
-            if (value instanceof Number) {
-                return onNumber((Number) value);
-            }
-            if (value instanceof CharSequence) {
-                return onCharSequence((CharSequence) value);
-            }
-            if (value instanceof Date) {
-                return onDate((Date) value);
-            }
-            if (value instanceof LocalDateTime) {
-                return onLocalDateTime((LocalDateTime) value);
-            }
-            if (value instanceof LocalDate) {
-                return onLocalDate((LocalDate) value);
-            }
-            if (value instanceof LocalTime) {
-                return onLocalTime((LocalTime) value);
-            }
-            return onObject(value);
-        }
-
-        public String onNull() {
-            return "null";
-        }
-
-        public String onNumber(Number value) {
-            return String.valueOf(value);
-        }
-
-        public String onCharSequence(CharSequence value) {
-            return escapeSqlString(String.valueOf(value));
-        }
-
-        public String onDate(Date value) {
-            return escapeSqlString(FMT_S_DATE.get().format(value));
-        }
-
-        public String onLocalDateTime(LocalDateTime value) {
-            return escapeSqlString(FMT_DATE_TIME.format(value));
-        }
-
-        public String onLocalDate(LocalDate value) {
-            return escapeSqlString(FMT_DATE.format(value));
-        }
-
-        public String onLocalTime(LocalTime value) {
-            return escapeSqlString(FMT_TIME.format(value));
-        }
-
-        public String onObject(Object value) {
-            return escapeSqlString(String.valueOf(value));
-        }
-    }
-
-    public static class OracleMergeSqlValueConvertor extends DefaultMergeSqlValueConvertor {
-        public static final OracleMergeSqlValueConvertor ORACLE = new OracleMergeSqlValueConvertor();
-
-        @Override
-        public String onDate(Date value) {
-            return "to_date(" + escapeSqlString(FMT_S_DATE.get().format(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
-        }
-
-        @Override
-        public String onLocalDateTime(LocalDateTime value) {
-            return "to_date(" + escapeSqlString(FMT_DATE_TIME.format(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
-        }
-
-        @Override
-        public String onLocalDate(LocalDate value) {
-            return "to_date(" + escapeSqlString(FMT_DATE.format(value)) + ",'yyyy-mm-dd')";
-        }
-
-        @Override
-        public String onLocalTime(LocalTime value) {
-            return "to_date(" + escapeSqlString(FMT_TIME.format(value)) + ",'hh24:mi:ss')";
-        }
-    }
-
-    public String toOracleMergeSql() {
-        return toMergeSql(OracleMergeSqlValueConvertor.ORACLE);
-    }
 
 }
