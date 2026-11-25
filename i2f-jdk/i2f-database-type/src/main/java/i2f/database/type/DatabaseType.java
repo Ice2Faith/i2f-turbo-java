@@ -215,12 +215,37 @@ public enum DatabaseType {
         }
     }
 
+    public static String stringify(DatabaseType databaseType) {
+        if (databaseType == null) {
+            databaseType = DatabaseType.OTHER;
+        }
+        return String.valueOf(databaseType.db()).toLowerCase();
+    }
+
+    public static DatabaseType parse(Object databaseType) {
+        if (databaseType instanceof DatabaseType) {
+            return (DatabaseType) databaseType;
+        }
+        String typeName = null;
+        if (databaseType != null) {
+            typeName = String.valueOf(databaseType);
+        }
+        return DatabaseType.typeOfName(typeName);
+    }
+
     /**
      * 获取数据库类型
      *
      * @param dbType 数据库类型字符串
      */
     public static DatabaseType typeOfName(String dbType) {
+        if (dbType == null) {
+            return OTHER;
+        }
+        dbType = dbType.trim();
+        if (dbType.isEmpty()) {
+            return OTHER;
+        }
         for (DatabaseType type : DatabaseType.values()) {
             if (type.name().equalsIgnoreCase(dbType)
                     || type.db.equalsIgnoreCase(dbType)) {
@@ -261,7 +286,9 @@ public enum DatabaseType {
                     break;
                 }
             }
-            type = typeOfJdbcUrl(conn.getMetaData().getURL(), false);
+            if (!isValid(type)) {
+                type = typeOfJdbcUrl(conn.getMetaData().getURL(), false);
+            }
             TYPE_MAP.put(conn, type);
             return type;
         }

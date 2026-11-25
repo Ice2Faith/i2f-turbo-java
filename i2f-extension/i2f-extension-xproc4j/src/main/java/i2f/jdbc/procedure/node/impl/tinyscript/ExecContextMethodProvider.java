@@ -1,7 +1,9 @@
 package i2f.jdbc.procedure.node.impl.tinyscript;
 
 import i2f.bindsql.BindSql;
+import i2f.database.type.DatabaseType;
 import i2f.jdbc.procedure.executor.JdbcProcedureExecutor;
+import i2f.jdbc.proxy.xml.mybatis.inflater.MybatisMapperInflater;
 import i2f.page.ApiOffsetSize;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -129,5 +131,27 @@ public class ExecContextMethodProvider {
     public Object sql_script_update(String datasource, String sql) {
         BindSql bql = executor.sqlScriptString(datasource, Collections.singletonList(new AbstractMap.SimpleEntry<>(null, sql)), (Map<String, Object>) context);
         return executor.sqlUpdate(datasource, bql, (Map<String, Object>) context);
+    }
+
+    public String merge_sql(BindSql bql) {
+        if (bql == null) {
+            return null;
+        }
+        Object dialectType = executor.visit(MybatisMapperInflater.DIALECT_TYPE, context);
+        dialectType = DatabaseType.parse(dialectType);
+        if (!DatabaseType.isValid((DatabaseType) dialectType)) {
+            dialectType = executor.visit(MybatisMapperInflater.DATABASE_TYPE, context);
+            dialectType = DatabaseType.parse(dialectType);
+        }
+        if (DatabaseType.isValid((DatabaseType) dialectType)) {
+            dialectType = DatabaseType.parse(dialectType);
+
+            DatabaseType type = (DatabaseType) dialectType;
+            if (type == DatabaseType.ORACLE
+                    || type == DatabaseType.ORACLE_12C) {
+                return bql.toOracleMergeSql();
+            }
+        }
+        return bql.toMergeSql();
     }
 }

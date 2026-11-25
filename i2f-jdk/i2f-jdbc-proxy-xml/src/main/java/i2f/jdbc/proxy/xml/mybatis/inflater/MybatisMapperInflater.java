@@ -87,14 +87,14 @@ public class MybatisMapperInflater {
 
     public BindSql inflateSql(Connection conn, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-        params.put(DATABASE_TYPE, databaseType);
+        params.put(DATABASE_TYPE, DatabaseType.stringify(databaseType));
         DatabaseType dialectType = DatabaseType.dialectOfConnection(conn);
-        params.put(DIALECT_TYPE, dialectType);
+        params.put(DIALECT_TYPE, DatabaseType.stringify(dialectType));
         return inflateSql(unqId, params, nodeMap);
     }
 
     public BindSql inflateSql(DatabaseType databaseType, String unqId, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
-        params.put(DATABASE_TYPE, databaseType);
+        params.put(DATABASE_TYPE, DatabaseType.stringify(databaseType));
         return inflateSql(unqId, params, nodeMap);
     }
 
@@ -108,14 +108,14 @@ public class MybatisMapperInflater {
 
     public BindSql inflateSqlNode(Connection conn, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) throws SQLException {
         DatabaseType databaseType = DatabaseType.typeOfConnection(conn);
-        params.put(DATABASE_TYPE, databaseType);
+        params.put(DATABASE_TYPE, DatabaseType.stringify(databaseType));
         DatabaseType dialectType = DatabaseType.dialectOfConnection(conn);
-        params.put(DIALECT_TYPE, dialectType);
+        params.put(DIALECT_TYPE, DatabaseType.stringify(dialectType));
         return inflateSqlNode(node, params, nodeMap);
     }
 
     public BindSql inflateSqlNode(DatabaseType databaseType, MybatisMapperNode node, Map<String, Object> params, Map<String, MybatisMapperNode> nodeMap) {
-        params.put(DATABASE_TYPE, databaseType);
+        params.put(DATABASE_TYPE, DatabaseType.stringify(databaseType));
         return inflateSqlNode(node, params, nodeMap);
     }
 
@@ -139,7 +139,7 @@ public class MybatisMapperInflater {
             }
         }
         Object dialect = params.get(DIALECT_TYPE);
-        if (type == null) {
+        if (dialect == null) {
             if (databaseType != null) {
                 params.put(DIALECT_TYPE, databaseType);
             }
@@ -181,8 +181,13 @@ public class MybatisMapperInflater {
             if ("dialect".equalsIgnoreCase(tagName)) {
                 String databases = child.getAttributes().get("databases");
 
-                Object databaseType = params.get(DATABASE_TYPE);
+                Object databaseType = params.get(DIALECT_TYPE);
                 boolean testOk = supportDatabases(databaseType, databases);
+
+                if (!testOk) {
+                    databaseType = params.get(DATABASE_TYPE);
+                    testOk = supportDatabases(databaseType, databases);
+                }
 
                 if (testOk) {
                     BindSql next = inflateSqlNode(child, params, nodeMap);
@@ -221,8 +226,14 @@ public class MybatisMapperInflater {
                     String nextTagName = next.getTagName();
                     if ("dialect-when".equalsIgnoreCase(nextTagName)) {
                         String databases = next.getAttributes().get("databases");
-                        Object databaseType = params.get(DATABASE_TYPE);
+
+                        Object databaseType = params.get(DIALECT_TYPE);
                         boolean testOk = supportDatabases(databaseType, databases);
+
+                        if (!testOk) {
+                            databaseType = params.get(DATABASE_TYPE);
+                            testOk = supportDatabases(databaseType, databases);
+                        }
 
                         if (testOk) {
                             BindSql recur = inflateSqlNode(next, params, nodeMap);
@@ -842,14 +853,15 @@ public class MybatisMapperInflater {
         if (databaseType == null) {
             return false;
         }
-        if (databaseType instanceof DatabaseType) {
-            DatabaseType dt = (DatabaseType) databaseType;
-            List<String> databaseTypes = Arrays.asList(dt.db(), String.valueOf(dt));
-            return supportDatabases(databaseTypes, Arrays.asList(databases.split(",|;")));
-        } else {
-            List<String> databaseTypes = Arrays.asList(String.valueOf(databaseType));
-            return supportDatabases(databaseTypes, Arrays.asList(databases.split(",|;")));
+
+        DatabaseType dbType = DatabaseType.parse(databaseType);
+        List<String> databaseTypes = new ArrayList<>(Collections.singletonList(String.valueOf(databaseType)));
+        if (DatabaseType.isValid(dbType)) {
+            databaseTypes.add(dbType.db());
+            databaseTypes.add(String.valueOf(dbType));
         }
+        return supportDatabases(databaseTypes, Arrays.asList(databases.split(",|;")));
+
     }
 
     public boolean supportDatabases(List<String> databaseTypes, List<String> databases) {
