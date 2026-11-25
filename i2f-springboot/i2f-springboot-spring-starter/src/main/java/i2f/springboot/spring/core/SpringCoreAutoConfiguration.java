@@ -1,5 +1,6 @@
 package i2f.springboot.spring.core;
 
+import i2f.spring.aop.SpringAopUtils;
 import i2f.spring.core.SpringContext;
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;
@@ -20,7 +21,8 @@ import org.springframework.context.annotation.Import;
         EventManager.class,
         SpringEnvironment.class,
         SpringContext.class,
-        SpringTransactionUtilConfigurer.class
+        SpringTransactionUtilConfigurer.class,
+        SpringAopUtils.class
 })
 public class SpringCoreAutoConfiguration {
 

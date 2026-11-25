@@ -393,49 +393,53 @@ public class Slf4jPrintStream extends PrintStream {
     @Override
     public PrintStream printf(String format, Object... args) {
         StringBuilder builder = new StringBuilder();
-        Formatter formatter = new Formatter((Appendable) builder);
-        formatter.format(Locale.getDefault(), format, args);
-        proxy(builder.toString());
-        if (target != null && keepConsole) {
-            target.printf(format, args);
+        try (Formatter formatter = new Formatter((Appendable) builder)) {
+            formatter.format(Locale.getDefault(), format, args);
+            proxy(builder.toString());
+            if (target != null && keepConsole) {
+                target.printf(format, args);
+            }
+            return this;
         }
-        return this;
     }
 
     @Override
     public PrintStream printf(Locale l, String format, Object... args) {
         StringBuilder builder = new StringBuilder();
-        Formatter formatter = new Formatter((Appendable) builder);
-        formatter.format(l, format, args);
-        proxy(builder.toString());
-        if (target != null && keepConsole) {
-            target.printf(l, format, args);
+        try (Formatter formatter = new Formatter((Appendable) builder)) {
+            formatter.format(l, format, args);
+            proxy(builder.toString());
+            if (target != null && keepConsole) {
+                target.printf(l, format, args);
+            }
+            return this;
         }
-        return this;
     }
 
     @Override
     public PrintStream format(String format, Object... args) {
         StringBuilder builder = new StringBuilder();
-        Formatter formatter = new Formatter((Appendable) builder);
-        formatter.format(Locale.getDefault(), format, args);
-        proxy(builder.toString());
-        if (target != null && keepConsole) {
-            target.format(format, args);
+        try (Formatter formatter = new Formatter((Appendable) builder)) {
+            formatter.format(Locale.getDefault(), format, args);
+            proxy(builder.toString());
+            if (target != null && keepConsole) {
+                target.format(format, args);
+            }
+            return this;
         }
-        return this;
     }
 
     @Override
     public PrintStream format(Locale l, String format, Object... args) {
         StringBuilder builder = new StringBuilder();
-        Formatter formatter = new Formatter((Appendable) builder);
-        formatter.format(l, format, args);
-        proxy(builder.toString());
-        if (target != null && keepConsole) {
-            target.format(l, format, args);
+        try (Formatter formatter = new Formatter((Appendable) builder)) {
+            formatter.format(l, format, args);
+            proxy(builder.toString());
+            if (target != null && keepConsole) {
+                target.format(l, format, args);
+            }
+            return this;
         }
-        return this;
     }
 
     @Override

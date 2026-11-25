@@ -1,5 +1,6 @@
 package i2f.springboot.spring.core.holder;
 
+import i2f.spring.aop.SpringAopUtils;
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;
 import i2f.spring.event.EventManager;
@@ -14,6 +15,9 @@ import java.util.concurrent.CountDownLatch;
 public class SpringContextHolder {
     private static SpringUtil springUtil;
     private static CountDownLatch latchSpringUtil = new CountDownLatch(1);
+
+    private static SpringAopUtils springAopUtils;
+    private static CountDownLatch latchSpringAopUtils = new CountDownLatch(1);
 
     private static EnvironmentUtil environmentUtil;
     private static CountDownLatch latchEnvironmentUtil = new CountDownLatch(1);
@@ -33,6 +37,20 @@ public class SpringContextHolder {
     public static void setSpringUtil(SpringUtil springUtil) {
         SpringContextHolder.springUtil = springUtil;
         latchSpringUtil.countDown();
+    }
+
+    public static SpringAopUtils getSpringAopUtils() {
+        try {
+            latchSpringAopUtils.await();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return springAopUtils;
+    }
+
+    public static void setSpringAopUtils(SpringAopUtils springAopUtils) {
+        SpringContextHolder.springAopUtils = springAopUtils;
+        latchSpringAopUtils.countDown();
     }
 
     public static EnvironmentUtil getEnvironmentUtil() {

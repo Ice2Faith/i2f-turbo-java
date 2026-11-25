@@ -1,5 +1,6 @@
 package i2f.springboot.spring.core;
 
+import i2f.spring.aop.SpringAopUtils;
 import i2f.spring.core.SpringUtil;
 import i2f.spring.enviroment.EnvironmentUtil;
 import i2f.spring.event.EventManager;
@@ -24,6 +25,9 @@ public class SpringContextHolderAutoConfiguration implements InitializingBean {
     private SpringUtil springUtil;
 
     @Autowired
+    private SpringAopUtils springAopUtils;
+
+    @Autowired
     private EnvironmentUtil environmentUtil;
 
     @Autowired
@@ -32,6 +36,7 @@ public class SpringContextHolderAutoConfiguration implements InitializingBean {
     @Override
     public void afterPropertiesSet() throws Exception {
         SpringContextHolder.setSpringUtil(springUtil);
+        SpringContextHolder.setSpringAopUtils(springAopUtils);
         SpringContextHolder.setEnvironmentUtil(environmentUtil);
         SpringContextHolder.setEventManager(eventManager);
     }
