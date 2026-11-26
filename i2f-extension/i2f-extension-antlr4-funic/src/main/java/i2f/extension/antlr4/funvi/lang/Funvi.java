@@ -22,8 +22,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @date 2025/1/10 22:07
  */
 public class Funvi {
-
-    public static final LruMap<String, FunviParser.RootContext> TREE_MAP = new LruMap<>(4096);
+    public static final String PROPERTY_CACHE_TREE_SIZE="lru.funvi.cache-tree-size";
+    public static final LruMap<String, FunviParser.RootContext> TREE_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_TREE_SIZE,8192));
 
     public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER = new CopyOnWriteArrayList<>();
 

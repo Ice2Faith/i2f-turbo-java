@@ -31,7 +31,8 @@ import java.util.function.Predicate;
  * @desc
  */
 public class Funic {
-    public static final LruMap<String, FunicParser.RootContext> TREE_MAP = new LruMap<>(4096);
+    public static final String PROPERTY_CACHE_TREE_SIZE="lru.funic.cache-tree-size";
+    public static final LruMap<String, FunicParser.RootContext> TREE_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_TREE_SIZE,8192));
 
     public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER = new CopyOnWriteArrayList<>();
 
