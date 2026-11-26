@@ -33,7 +33,6 @@ public class WeakStackRetrieveCacheProvider<T, U, R> implements BiFunction<T, U,
     protected final AtomicInteger l2CacheSize = new AtomicInteger(30);
     protected final ThreadLocal<WeakEntry<T, R>> localCacheL1 = new ThreadLocal<>();
     protected final ThreadLocal<LinkedList<WeakEntry<T, R>>> localCacheL2 = new ThreadLocal<>();
-    protected final ThreadLocalRandom random = ThreadLocalRandom.current();
     protected BiFunction<T, U, R> wrapper;
 
     public WeakStackRetrieveCacheProvider(BiFunction<T, U, R> wrapper) {
@@ -129,6 +128,7 @@ public class WeakStackRetrieveCacheProvider<T, U, R> implements BiFunction<T, U,
         if (l2Cache.get()) {
             LinkedList<WeakEntry<T, R>> localList = localCacheL2.get();
             if (localList != null) {
+                ThreadLocalRandom random = ThreadLocalRandom.current();
                 Iterator<WeakEntry<T, R>> iterator = localList.iterator();
                 while (iterator.hasNext()) {
                     WeakEntry<T, R> ref = iterator.next();

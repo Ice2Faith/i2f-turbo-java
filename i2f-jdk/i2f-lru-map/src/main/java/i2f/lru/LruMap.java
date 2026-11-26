@@ -114,21 +114,24 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
     }
 
     public static int getSysPropMaxSize(String prop,int defaultValue){
+        if(prop==null){
+            return defaultValue;
+        }
         String str=trimedNotNullString(System.getProperty(prop));
         if(str.isEmpty()){
-            str = trimedNotNullString(System.getenv(prop));
+            str = trimedNotNullString(System.getenv(prop.toUpperCase()));
         }
         if(str.isEmpty()){
             String env=prop;
             env=env.replace("-","");
             env=env.replace(".","_");
-            str = trimedNotNullString(System.getenv(env));
+            str = trimedNotNullString(System.getenv(env.toUpperCase()));
         }
         if(str.isEmpty()){
             String env=prop;
             env=env.replace("-","_");
             env=env.replace(".","_");
-            str = trimedNotNullString(System.getenv(env));
+            str = trimedNotNullString(System.getenv(env.toUpperCase()));
         }
         if(str.isEmpty()){
             str=trimedNotNullString(props.getProperty(prop));

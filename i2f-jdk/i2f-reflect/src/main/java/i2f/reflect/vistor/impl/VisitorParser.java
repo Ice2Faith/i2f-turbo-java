@@ -181,17 +181,17 @@ public class VisitorParser {
                 Object currRet = ret.get();
                 if (currRet instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) currRet;
-                    Function<String, Object> keyConvertor = foundMapKeyConvertor(map);
-                    Object realKey = token;
-                    if (keyConvertor != null) {
+                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
+                    Object realKey=token;
+                    if(keyConvertor!=null){
                         try {
-                            realKey = keyConvertor.apply(token);
+                            realKey=keyConvertor.apply(token);
                         } catch (Exception e) {
 
                         }
                     }
-                    if (map.containsKey(realKey)) {
-                        ret = new MapVisitor(map, realKey);
+                    if(map.containsKey(realKey)){
+                        ret=new MapVisitor(map,realKey);
                         continue;
                     }
                 }
@@ -236,24 +236,32 @@ public class VisitorParser {
                     ret = new ConstVisitor(((Collection) (ret.get())).size());
                 } else if (matches(token, "\\$\\d+\\.\\d+")) {
                     ret = new ConstVisitor(Double.parseDouble(token.substring(1)));
-                } else if (matches(token, "\\$f\\d+\\.\\d+")) {
+                } else if (token.startsWith("$f")
+                        && matches(token, "\\$f\\d+\\.\\d+")) {
                     ret = new ConstVisitor(Float.parseFloat(token.substring(2)));
+                } else if ((token.startsWith("$l0x") || token.startsWith("$l0X"))
+                        && matches(token, "\\$l(0x|0X)[a-fA-F0-9]+")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
+                } else if ((token.startsWith("$l0b") || token.startsWith("$l0B"))
+                        && matches(token, "\\$l(0b|0B)[0-1]+")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
+                } else if (token.startsWith("$l0")
+                        && matches(token, "\\$l0([0-9]+)?")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
+                } else if (token.startsWith("$l")
+                        && matches(token, "\\$l[1-9]([0-9]+)?")) {
+                    ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
                 } else if (matches(token, "\\$[1-9]([0-9]+)?")) {
                     ret = new ConstVisitor(Integer.parseInt(token.substring(1), 10));
-                } else if (matches(token, "\\$(0x|0X)[a-fA-F0-9]+")) {
+                } else if ((token.startsWith("$0x") || token.startsWith("$0X"))
+                        && matches(token, "\\$(0x|0X)[a-fA-F0-9]+")) {
                     ret = new ConstVisitor(Integer.parseInt(token.substring(3), 16));
-                } else if (matches(token, "\\$0([0-9]+)?")) {
-                    ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
-                } else if (matches(token, "\\$(0b|0B)[0-1]+")) {
+                } else if ((token.startsWith("$0b") || token.startsWith("$0B"))
+                        && matches(token, "\\$(0b|0B)[0-1]+")) {
                     ret = new ConstVisitor(Integer.parseInt(token.substring(3), 2));
-                } else if (matches(token, "\\$l[1-9]([0-9]+)?")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(2), 10));
-                } else if (matches(token, "\\$l(0x|0X)[a-fA-F0-9]+")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 16));
-                } else if (matches(token, "\\$l0([0-9]+)?")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(3), 8));
-                } else if (matches(token, "\\$l(0b|0B)[0-1]+")) {
-                    ret = new ConstVisitor(Long.parseLong(token.substring(4), 2));
+                } else if (token.startsWith("$0")
+                        && matches(token, "\\$0([0-9]+)?")) {
+                    ret = new ConstVisitor(Integer.parseInt(token.substring(2), 8));
                 } else {
                     resolved = false;
                 }
@@ -341,11 +349,11 @@ public class VisitorParser {
                 }
                 if (currRet instanceof Map) {
                     Map<?, ?> map = (Map<?, ?>) currRet;
-                    Function<String, Object> keyConvertor = foundMapKeyConvertor(map);
-                    Object realKey = token;
-                    if (keyConvertor != null) {
+                    Function<String,Object> keyConvertor=foundMapKeyConvertor(map);
+                    Object realKey=token;
+                    if(keyConvertor!=null){
                         try {
-                            realKey = keyConvertor.apply(token);
+                            realKey=keyConvertor.apply(token);
                         } catch (Exception e) {
 
                         }
@@ -389,14 +397,14 @@ public class VisitorParser {
         return ret;
     }
 
-    public static Function<String, Object> foundMapKeyConvertor(Map map) {
-        if (map == null) {
+    public static Function<String,Object> foundMapKeyConvertor(Map map){
+        if(map==null){
             return null;
         }
-        Function<String, Object> keyConvertor = null;
+        Function<String,Object> keyConvertor=null;
         // 尝试推断Map的Key类型
         for (Object key : map.keySet()) {
-            if (key == null) {
+            if(key==null){
                 continue;
             }
             try {
@@ -456,44 +464,92 @@ public class VisitorParser {
         if (expression == null) {
             return null;
         }
+        // 纯token字符的输入不含参数分隔符，结果必然为自身单个参数，无需进入缓存
+        if (isPlainToken(expression)) {
+            List<String> ret = new ArrayList<>(1);
+            ret.add(expression);
+            return ret;
+        }
         List<String> ret = CACHE_SPLIT_PARAMETERS.computeIfAbsent(expression, VisitorParser::splitParameters0);
         return new ArrayList<>(ret);
     }
 
     public static List<String> splitParameters0(String expression) {
-        AtomicInteger index = new AtomicInteger(0);
-        Stack<Character> stack = new Stack<>();
+        // 局部int索引+StringBuilder累积，避免逐字符原子操作与字符串反复拼接
+        StringBuilder curr = new StringBuilder();
         List<String> tokens = new ArrayList<>();
-        String curr = "";
-        while (index.get() < expression.length()) {
-            char ch = expression.charAt(index.get());
+        int length = expression.length();
+        // 只以括号层级判定顶层逗号，括号内的逗号属于内层调用的参数分隔符，必须原样保留
+        int depth = 0;
+        for (int index = 0; index < length; index++) {
+            char ch = expression.charAt(index);
             if (ch == '(') {
-                curr += ch;
-                stack.push(ch);
+                curr.append(ch);
+                depth++;
             } else if (ch == ')') {
-                curr += ch;
-                stack.pop();
+                if (depth == 0) {
+                    throw new EmptyStackException();
+                }
+                curr.append(ch);
+                depth--;
             } else if (ch == ',') {
-                if (stack.isEmpty()) {
-                    tokens.add(curr);
-                    curr = "";
+                if (depth == 0) {
+                    tokens.add(curr.toString());
+                    curr.setLength(0);
+                } else {
+                    curr.append(ch);
                 }
             } else {
-                curr += ch;
+                curr.append(ch);
             }
-            index.incrementAndGet();
         }
 
-        if (!curr.isEmpty()) {
-            tokens.add(curr);
+        if (curr.length() > 0) {
+            tokens.add(curr.toString());
         }
 
         return tokens;
     }
 
+    /**
+     * 是否是token内的合法字符，切分逻辑与此判定共用同一份字符集
+     */
+    public static boolean isTokenChar(char ch) {
+        return (ch >= 'a' && ch <= 'z')
+                || (ch >= 'A' && ch <= 'Z')
+                || (ch >= '0' && ch <= '9')
+                || ch == '_'
+                || ch == '$';
+    }
+
+    /**
+     * 是否是一个纯token字符组成的输入，不含[、@、#、.等任何切分引导符
+     */
+    public static boolean isPlainToken(CharSequence expression) {
+        if (expression == null) {
+            return false;
+        }
+        int len = expression.length();
+        if (len == 0) {
+            return false;
+        }
+        for (int i = 0; i < len; i++) {
+            if (!isTokenChar(expression.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static List<String> splitTokens(String expression) {
         if (expression == null) {
             return null;
+        }
+        // 纯token字符的输入必然切分为自身单个token，结果可平凡推导，无需进入缓存
+        if (isPlainToken(expression)) {
+            List<String> ret = new ArrayList<>(1);
+            ret.add(expression);
+            return ret;
         }
         List<String> ret = CACHE_SPLIT_TOKENS.computeIfAbsent(expression, VisitorParser::splitTokens0);
         return new ArrayList<>(ret);
@@ -501,167 +557,179 @@ public class VisitorParser {
 
     public static List<String> splitTokens0(String expression) {
         List<String> tokens = new ArrayList<>();
-        AtomicInteger index = new AtomicInteger(0);
-        String curr = "";
-        while (index.get() < expression.length()) {
-            char ch = expression.charAt(index.get());
-            if ((ch >= 'a' && ch <= 'z')
-                    || (ch >= 'A' && ch <= 'Z'
-                    || (ch >= '0' && ch <= '9')
-                    || ch == '_'
-                    || ch == '$')) {
-                curr += ch;
-                index.incrementAndGet();
+        // 局部int索引+StringBuilder累积，避免逐字符原子操作与字符串反复拼接
+        StringBuilder curr = new StringBuilder();
+        int length = expression.length();
+        int index = 0;
+        while (index < length) {
+            char ch = expression.charAt(index);
+            if (isTokenChar(ch)) {
+                curr.append(ch);
+                index++;
             } else if (ch == '[') {
-                AtomicInteger nextIndex = new AtomicInteger(index.get());
+                AtomicInteger nextIndex = new AtomicInteger(index);
                 String str = nextEnclose(expression, nextIndex, '[', ']');
                 if (str != null && !str.isEmpty()) {
-                    if (!curr.isEmpty()) {
-                        tokens.add(curr);
-                        curr = "";
+                    if (curr.length() > 0) {
+                        tokens.add(curr.toString());
+                        curr.setLength(0);
                     }
 
-                    curr += str;
-                    index.set(nextIndex.get());
+                    curr.append(str);
+                    index = nextIndex.get();
                 } else {
-                    throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index.get());
+                    throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index);
                 }
             } else if (ch == '@') {
-                AtomicInteger nextIndex = new AtomicInteger(index.get() + 1);
+                AtomicInteger nextIndex = new AtomicInteger(index + 1);
                 String str = nextFullNaming(expression, nextIndex);
                 if (str != null && !str.isEmpty()) {
-                    curr += '@';
-                    curr += str;
-                    index.set(nextIndex.get());
-                    if (index.get() >= expression.length()) {
+                    curr.append('@');
+                    curr.append(str);
+                    index = nextIndex.get();
+                    if (index >= length) {
                         continue;
                     }
-                    ch = expression.charAt(index.get());
+                    ch = expression.charAt(index);
                     if (ch == '(') {
-                        nextIndex = new AtomicInteger(index.get());
+                        nextIndex = new AtomicInteger(index);
                         str = nextEnclose(expression, nextIndex, '(', ')');
                         if (str != null && !str.isEmpty()) {
-                            curr += str;
-                            tokens.add(curr);
-                            curr = "";
-                            index.set(nextIndex.get());
+                            curr.append(str);
+                            tokens.add(curr.toString());
+                            curr.setLength(0);
+                            index = nextIndex.get();
                         } else {
-                            throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index.get());
+                            throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index);
                         }
                     } else {
-                        if (!"".equals(curr)) {
-                            tokens.add(curr);
-                            curr = "";
+                        if (curr.length() > 0) {
+                            tokens.add(curr.toString());
+                            curr.setLength(0);
                         }
                     }
                 } else {
-                    throw new IllegalStateException("method naming [" + ch + "] not compared at index is " + index.get());
+                    throw new IllegalStateException("method naming [" + ch + "] not compared at index is " + index);
                 }
             } else if (ch == '#') {
-                index.incrementAndGet();
-                ch = expression.charAt(index.get());
+                index++;
+                ch = expression.charAt(index);
                 if (ch == '{') {
-                    curr += '#';
-                    AtomicInteger nextIndex = new AtomicInteger(index.get());
+                    curr.append('#');
+                    AtomicInteger nextIndex = new AtomicInteger(index);
                     String str = nextEnclose(expression, nextIndex, '{', '}');
                     if (str != null && !str.isEmpty()) {
-                        curr += str;
-                        tokens.add(curr);
-                        curr = "";
-                        index.set(nextIndex.get());
+                        curr.append(str);
+                        tokens.add(curr.toString());
+                        curr.setLength(0);
+                        index = nextIndex.get();
                     } else {
-                        throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index.get());
+                        throw new IllegalStateException("enclose [" + ch + "] not compared at index is " + index);
                     }
                 } else {
-                    throw new IllegalStateException("context argument enclose [" + ch + "] not compared at index is " + index.get());
+                    throw new IllegalStateException("context argument enclose [" + ch + "] not compared at index is " + index);
                 }
             } else if (ch == '.') {
-                String tmp = expression.substring(index.get() - 1, index.get() + 2);
-                if (matches(tmp, "\\d\\.\\d") && !curr.contains(".")) {
-                    curr += ".";
+                String tmp = expression.substring(index - 1, index + 2);
+                if (matches(tmp, "\\d\\.\\d") && curr.indexOf(".") < 0) {
+                    curr.append('.');
                 } else {
-                    if (!curr.isEmpty()) {
-                        tokens.add(curr);
-                        curr = "";
+                    if (curr.length() > 0) {
+                        tokens.add(curr.toString());
+                        curr.setLength(0);
                     }
                 }
-                index.incrementAndGet();
+                index++;
             } else {
-                throw new IllegalStateException("char [" + ch + "] not recognized at index is " + index.get());
+                throw new IllegalStateException("char [" + ch + "] not recognized at index is " + index);
             }
         }
-        if (!curr.isEmpty()) {
-            tokens.add(curr);
+        if (curr.length() > 0) {
+            tokens.add(curr.toString());
         }
         return tokens;
     }
 
     public static String nextFullNaming(String expression, AtomicInteger index) {
-        AtomicInteger tmp = new AtomicInteger(index.get());
-        String ret = "";
-        String str = nextNaming(expression, tmp);
-        if (str != null && !str.isEmpty()) {
-            ret += str;
-            while (tmp.get() < expression.length() && expression.charAt(tmp.get()) == '.') {
-                tmp.incrementAndGet();
-                str = nextNaming(expression, tmp);
-                if (str != null && !str.isEmpty()) {
-                    ret += ".";
-                    ret += str;
-                } else {
+        // 局部int索引+StringBuilder累积，避免逐字符原子操作与字符串反复拼接
+        StringBuilder ret = new StringBuilder();
+        int length = expression.length();
+        int pos = scanNaming(expression, index.get(), ret);
+        if (ret.length() > 0) {
+            while (pos < length && expression.charAt(pos) == '.') {
+                int sepLen = ret.length();
+                pos++;
+                ret.append('.');
+                pos = scanNaming(expression, pos, ret);
+                if (ret.length() == sepLen + 1) {
+                    // 段为空，撤销分隔符（既有行为：游标已越过小数点，且不再继续往后拼接）
+                    ret.setLength(sepLen);
                     break;
                 }
             }
         }
 
-        index.set(tmp.get());
+        index.set(pos);
 
-        return ret;
+        return ret.toString();
+    }
+
+    /**
+     * 从start开始扫描一段命名并追加到out，返回扫描结束后的位置
+     * 注：数字仅当段首时终止扫描，非段首的数字被跳过且不追加（延续既有行为）
+     */
+    protected static int scanNaming(String expression, int start, StringBuilder out) {
+        int index = start;
+        int length = expression.length();
+        int base = out.length();
+        while (index < length) {
+            char ch = expression.charAt(index);
+            if (ch >= '0' && ch <= '9') {
+                if (out.length() == base) {
+                    return index;
+                }
+            } else if (isTokenChar(ch)) {
+                out.append(ch);
+            } else {
+                return index;
+            }
+            index++;
+        }
+        return index;
     }
 
     public static String nextNaming(String expression, AtomicInteger index) {
-        String ret = "";
-        while (index.get() < expression.length()) {
-            char ch = expression.charAt(index.get());
-            if (ch >= '0' && ch <= '9') {
-                if (ret.isEmpty()) {
-                    return ret;
-                }
-            } else if ((ch >= 'a' && ch <= 'z')
-                    || (ch >= 'A' && ch <= 'Z'
-                    || (ch >= '0' && ch <= '9')
-                    || ch == '_'
-                    || ch == '$')) {
-                ret += ch;
-            } else {
-                return ret;
-            }
-            index.incrementAndGet();
-        }
-        return ret;
+        StringBuilder ret = new StringBuilder();
+        index.set(scanNaming(expression, index.get(), ret));
+        return ret.toString();
     }
 
     public static String nextEnclose(String expression, AtomicInteger index, char left, char right) {
-        Stack<Character> stack = new Stack<>();
-        String ret = "";
-        while (index.get() < expression.length()) {
-            char ch = expression.charAt(index.get());
+        // 只关心嵌套深度，用局部int计数代替Stack；局部int索引+StringBuilder累积
+        StringBuilder ret = new StringBuilder();
+        int length = expression.length();
+        int depth = 0;
+        int pos = index.get();
+        while (pos < length) {
+            char ch = expression.charAt(pos);
             if (ch == left) {
-                stack.push(ch);
+                depth++;
             } else if (ch == right) {
-                if (stack.isEmpty()) {
+                if (depth == 0) {
+                    index.set(pos);
                     return "";
                 }
-                stack.pop();
-                if (stack.isEmpty()) {
-                    ret += ch;
-                    index.incrementAndGet();
-                    return ret;
+                depth--;
+                if (depth == 0) {
+                    ret.append(ch);
+                    index.set(pos + 1);
+                    return ret.toString();
                 }
             }
-            ret += ch;
-            index.incrementAndGet();
+            ret.append(ch);
+            pos++;
         }
+        index.set(pos);
         return "";
     }
 

@@ -16,6 +16,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Ice2Faith
@@ -81,9 +82,11 @@ public class Funvi {
     }
 
     public static FunviParser.RootContext parse(String formula) {
-        if (formula != null) {
-            formula = formula.trim();
+        if(formula==null){
+            throw new IllegalArgumentException("formula cannot be null");
         }
+        formula = formula.trim();
+
         try {
             FunviParser.RootContext ret = TREE_MAP.get(formula);
             if (ret != null) {
@@ -103,7 +106,22 @@ public class Funvi {
         }
         FunviParser.RootContext tree = parser.root();
         try {
-            TREE_MAP.put(formula, tree);
+            boolean needCache=true;
+            int keyLen = formula.length();
+            if(keyLen<20){
+                needCache= ThreadLocalRandom.current().nextDouble()<0.05;
+            }else if(keyLen<40){
+                needCache=ThreadLocalRandom.current().nextDouble()<0.15;
+            }else if(keyLen<60){
+                needCache=ThreadLocalRandom.current().nextDouble()<0.25;
+            }else if(keyLen<80){
+                needCache=ThreadLocalRandom.current().nextDouble()<0.5;
+            }else if(keyLen<100){
+                needCache=ThreadLocalRandom.current().nextDouble()<0.8;
+            }
+            if(needCache) {
+                TREE_MAP.put(formula, tree);
+            }
         } catch (Exception e) {
 
         }

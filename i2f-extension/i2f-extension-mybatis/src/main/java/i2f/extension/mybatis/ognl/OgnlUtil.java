@@ -5,6 +5,8 @@ import org.apache.ibatis.ognl.Ognl;
 import org.apache.ibatis.ognl.OgnlContext;
 import org.apache.ibatis.ognl.OgnlException;
 
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author Ice2Faith
  * @date 2024/10/9 13:49
@@ -22,9 +24,11 @@ public class OgnlUtil {
     }
 
     public static Object parseExpressionTreeNode(String expression) throws OgnlException {
-        if (expression != null) {
-            expression = expression.trim();
+        if (expression == null) {
+            throw new OgnlException("expression cannot be null");
         }
+        expression = expression.trim();
+
         try {
             Object ret = EXPRESSION_MAP.get(expression);
             if (ret != null) {
@@ -35,7 +39,22 @@ public class OgnlUtil {
         }
         Object tree = Ognl.parseExpression(expression);
         try {
-            EXPRESSION_MAP.put(expression, tree);
+            boolean needCache = true;
+            int keyLen = expression.length();
+            if (keyLen < 20) {
+                needCache = ThreadLocalRandom.current().nextDouble() < 0.05;
+            } else if (keyLen < 40) {
+                needCache = ThreadLocalRandom.current().nextDouble() < 0.15;
+            } else if (keyLen < 60) {
+                needCache = ThreadLocalRandom.current().nextDouble() < 0.25;
+            } else if (keyLen < 80) {
+                needCache = ThreadLocalRandom.current().nextDouble() < 0.5;
+            } else if (keyLen < 100) {
+                needCache = ThreadLocalRandom.current().nextDouble() < 0.8;
+            }
+            if (needCache) {
+                EXPRESSION_MAP.put(expression, tree);
+            }
         } catch (Exception e) {
 
         }
