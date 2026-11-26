@@ -27,7 +27,8 @@ import java.util.regex.Pattern;
  * @desc
  */
 public class RegexUtil {
-    public static final LruMap<String, Pattern> PATTERN_MAP = new LruMap<>(2048);
+    public static final String PROPERTY_CACHE_EXPRESSION_SIZE="lru.regex.util.cache-pattern-size";
+    public static final LruMap<String, Pattern> PATTERN_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_EXPRESSION_SIZE,2048));
 
     public static Pattern getPattern(String regex) {
         if (regex == null) {

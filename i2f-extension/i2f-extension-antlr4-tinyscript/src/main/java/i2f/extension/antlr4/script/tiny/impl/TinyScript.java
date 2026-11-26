@@ -30,7 +30,9 @@ public class TinyScript {
     public static final ThreadLocal<Object> FUNCTION_CALL_CONTEXT = new ThreadLocal<>();
 
     public static final ConcurrentHashMap<String, CopyOnWriteArrayList<IMethod>> BUILTIN_METHOD = new ConcurrentHashMap<>();
-    public static final LruMap<String, TinyScriptParser.ScriptContext> TREE_MAP = new LruMap<>(4096);
+
+    public static final String PROPERTY_CACHE_TREE_SIZE="lru.tinyscript.cache-tree-size";
+    public static final LruMap<String, TinyScriptParser.ScriptContext> TREE_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_TREE_SIZE,4096));
 
     public static final CopyOnWriteArrayList<ANTLRErrorListener> ERROR_LISTENER = new CopyOnWriteArrayList<>();
 

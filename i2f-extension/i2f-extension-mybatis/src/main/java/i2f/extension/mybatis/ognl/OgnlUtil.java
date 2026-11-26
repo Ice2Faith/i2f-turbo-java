@@ -10,7 +10,8 @@ import org.apache.ibatis.ognl.OgnlException;
  * @date 2024/10/9 13:49
  */
 public class OgnlUtil {
-    public static final LruMap<String, Object> EXPRESSION_MAP = new LruMap<>(4096);
+    public static final String PROPERTY_CACHE_EXPRESSION_SIZE="lru.mybatis.ognl.util.cache-expression-size";
+    public static final LruMap<String, Object> EXPRESSION_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_EXPRESSION_SIZE,4096));
 
     public static Object evaluateExpression(String expression, Object root) throws Exception {
         OgnlContext context = new OgnlContext(null, null, DefaultMemberAccess.INSTANCE);

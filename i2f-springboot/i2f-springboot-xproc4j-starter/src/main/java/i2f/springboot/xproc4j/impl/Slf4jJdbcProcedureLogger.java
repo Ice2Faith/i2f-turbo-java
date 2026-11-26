@@ -22,7 +22,9 @@ import java.util.function.Supplier;
 @NoArgsConstructor
 public class Slf4jJdbcProcedureLogger implements JdbcProcedureLogger {
     private volatile AtomicBoolean debug = new AtomicBoolean(false);
-    private final LruMap<String, Logger> cacheLoggerMap = new LruMap<>(1024);
+
+    public static final String PROPERTY_CACHE_LOGGER_SIZE="lru.slf4j.jdbc.procedure.logger.cache-logger-size";
+    private final LruMap<String, Logger> cacheLoggerMap = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_LOGGER_SIZE,2048));
 
     public Slf4jJdbcProcedureLogger(AtomicBoolean debug) {
         this.debug = debug;

@@ -132,9 +132,12 @@ import java.util.regex.Pattern;
  * ret= 3.14159...
  */
 public class VisitorParser {
-    protected static final LruMap<String, List<String>> CACHE_SPLIT_TOKENS = new LruMap<>(4096);
-    protected static final LruMap<String, List<String>> CACHE_SPLIT_PARAMETERS = new LruMap<>(4096);
-    protected static final LruMap<String, Pattern> CACHE_PATTERN = new LruMap<>(300);
+    public static final String PROPERTY_CACHE_SPLIT_TOKENS_SIZE="lru.visitor.parser.cache-split-tokens-size";
+    protected static final LruMap<String, List<String>> CACHE_SPLIT_TOKENS = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_SPLIT_TOKENS_SIZE,4096));
+    public static final String PROPERTY_CACHE_SPLIT_PARAMETERS_SIZE="lru.visitor.parser.cache-split-parameters-size";
+    protected static final LruMap<String, List<String>> CACHE_SPLIT_PARAMETERS = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_SPLIT_PARAMETERS_SIZE,4096));
+    public static final String PROPERTY_CACHE_PATTERN_SIZE="lru.visitor.parser.cache-pattern-size";
+    protected static final LruMap<String, Pattern> CACHE_PATTERN = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_PATTERN_SIZE,1024));
 
     public static Pattern getPattern(String regex) {
         return CACHE_PATTERN.computeIfAbsent(regex, k -> Pattern.compile(k));

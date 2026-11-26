@@ -3,11 +3,10 @@ package i2f.lru;
 import i2f.clock.SystemClock;
 import lombok.Getter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.Duration;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
@@ -73,6 +72,79 @@ public class LruMap<K, V> extends LinkedHashMap<K, V> {
         }
         long windowCount = SystemClock.currentTimeMillis() / range;
         return String.format("%x", windowCount);
+    }
+
+    public static final String PROPS_RESOURCE_PATH="lrumap.path";
+    public static final String DEFAULT_RESOURCE_PATH ="lrumap.properties";
+    private static final Properties props;
+    static{
+        String classResource = System.getProperty(PROPS_RESOURCE_PATH, DEFAULT_RESOURCE_PATH);
+        if(classResource==null || classResource.isEmpty()){
+            classResource= DEFAULT_RESOURCE_PATH;
+        }
+        Properties properties = new Properties();
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        InputStream is = null;
+        try {
+            is = loader.getResourceAsStream(classResource);
+            if (is != null) {
+                properties.load(is);
+            }
+        } catch (IOException e) {
+            // ignore
+        }finally {
+            if(is!=null){
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    // ignore
+                }
+            }
+        }
+
+        props=properties;
+    }
+
+
+    public static String trimedNotNullString(String str){
+        if(str==null){
+            return "";
+        }
+        return str.trim();
+    }
+
+    public static int getSysPropMaxSize(String prop,int defaultValue){
+        String str=trimedNotNullString(System.getProperty(prop));
+        if(str.isEmpty()){
+            str = trimedNotNullString(System.getenv(prop));
+        }
+        if(str.isEmpty()){
+            String env=prop;
+            env=env.replace("-","");
+            env=env.replace(".","_");
+            str = trimedNotNullString(System.getenv(env));
+        }
+        if(str.isEmpty()){
+            String env=prop;
+            env=env.replace("-","_");
+            env=env.replace(".","_");
+            str = trimedNotNullString(System.getenv(env));
+        }
+        if(str.isEmpty()){
+            str=trimedNotNullString(props.getProperty(prop));
+        }
+
+        if(!str.isEmpty()){
+            try{
+                int num=Integer.parseInt(str);
+                if(num>0){
+                    return num;
+                }
+            }catch(Exception e){
+                // ignore
+            }
+        }
+        return defaultValue;
     }
 
     public void setMaxSize(int maxSize) {

@@ -18,7 +18,8 @@ import java.util.*;
  * @date 2024/10/9 9:31
  */
 public class MybatisMapperParser {
-    public static final LruMap<String,MybatisMapperNode> cacheScriptAst=new LruMap<>(8192);
+    public static final String PROPERTY_CACHE_SCRIPT_SIZE="lru.jdbc.mybatis.parser.cache-script-size";
+    public static final LruMap<String,MybatisMapperNode> cacheScriptAst=new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_SCRIPT_SIZE,8192));
 
     public static final String[] XML_ELEMENT_TAG_NAME = {
             "resultMap", "sql", "select", "update", "insert", "delete"

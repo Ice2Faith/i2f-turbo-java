@@ -168,7 +168,9 @@ public class LangEvalJavaNode extends AbstractExecutorNode implements EvalScript
             .append("import ").append("java.time.temporal.*").append(";").append("\n")
             .append("import ").append("java.time.zone.*").append(";").append("\n")
             .toString();
-    public static final LruMap<String, Map.Entry<String, String>> FULL_JAVA_SOURCE_MAP = new LruMap<>(2048);
+
+    public static final String PROPERTY_CACHE_SCRIPT_SIZE="lru.eval.java.cache-java-source-size";
+    public static final LruMap<String, Map.Entry<String, String>> FULL_JAVA_SOURCE_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_SCRIPT_SIZE,2048));
 
     public static void main(String[] args) {
         /*language=java*/

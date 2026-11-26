@@ -171,7 +171,8 @@ public class VelocityGenerator {
     }
 
 
-    public static final LruMap<String, Template> cacheTemplate = new LruMap<>(4096);
+    public static final String PROPERTY_CACHE_TEMPLATE_SIZE="lru.velocity.generator.cache-template-size";
+    public static final LruMap<String, Template> cacheTemplate = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_TEMPLATE_SIZE,8192));
 
     public static String renderByStringResource(Properties config, String template, Map<String, Object> params) {
         VelocityEngine engine = getDefaultStringEngine(config);

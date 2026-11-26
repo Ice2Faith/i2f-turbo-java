@@ -541,7 +541,8 @@ public class MybatisMapperInflater {
     public static final String CONVERTOR_KEY = "convertor";
     public static final String PROVIDER_KEY = "provider";
 
-    private static final LruMap<String, Map<String, String>> CACHE_EXPRESSION_PARTS = new LruMap<>(500);
+    public static final String PROPERTY_CACHE_EXPRESSION_PARTS_SIZE="lru.mybatis.inflater.cache-expression-parts-size";
+    private static final LruMap<String,Map<String,String>> CACHE_EXPRESSION_PARTS=new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_EXPRESSION_PARTS_SIZE,2048));
 
     /**
      * expression:

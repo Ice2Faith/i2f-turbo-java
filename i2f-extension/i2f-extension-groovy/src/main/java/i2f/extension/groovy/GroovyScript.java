@@ -37,7 +37,9 @@ public class GroovyScript {
     }
 
     public static final GroovyShell DEFAULT_SHELL = new GroovyShell();
-    protected static final LruMap<String, Class> SCRIPT_MAP = new LruMap<>(4096);
+
+    public static final String PROPERTY_CACHE_SCRIPT_SIZE="lru.groovy.script.cache-script-size";
+    protected static final LruMap<String, Class> SCRIPT_MAP = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_SCRIPT_SIZE,4096));
 
     public static Object eval(String script, Map<String, Object> params) {
         Binding binding = new Binding(params == null ? new HashMap<>() : params);

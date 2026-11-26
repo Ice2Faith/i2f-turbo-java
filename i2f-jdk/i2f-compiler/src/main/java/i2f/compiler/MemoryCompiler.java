@@ -122,10 +122,14 @@ public class MemoryCompiler {
     }
 
     public static final Pattern RETURN_PATTERN = Pattern.compile("\\s*return\\s+");
-    private static final LruMap<String, Set<Class<?>>> CACHE_COMPILE_CLASS = new LruMap<>(2048);
-    private static final LruMap<String, Class<?>> CACHE_FIND_COMPILE_CLASS = new LruMap<>(2048);
-    private static final LruMap<String, String> CACHE_RANDOM_CLASS_NAME = new LruMap<>(2048);
-    private static final LruMap<String, String> CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE = new LruMap<>(2048);
+    public static final String PROPERTY_CACHE_COMPILE_CLASS_SIZE ="lru.memory.compiler.cache-compile-class-size";
+    private static final LruMap<String, Set<Class<?>>> CACHE_COMPILE_CLASS = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_COMPILE_CLASS_SIZE,2048));
+    public static final String PROPERTY_CACHE_FIND_COMPILE_CLASS_SIZE ="lru.memory.compiler.cache-find-compile-class-size";
+    private static final LruMap<String, Class<?>> CACHE_FIND_COMPILE_CLASS = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_FIND_COMPILE_CLASS_SIZE,2048));
+    public static final String PROPERTY_CACHE_RANDOM_CLASS_NAMES_SIZE ="lru.memory.compiler.cache-random-class-name-size";
+    private static final LruMap<String, String> CACHE_RANDOM_CLASS_NAME = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_RANDOM_CLASS_NAMES_SIZE,2048));
+    public static final String PROPERTY_CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_SIZE ="lru.memory.compiler.cache-wrap-expression-as-java-source-size";
+    private static final LruMap<String, String> CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_CODE = new LruMap<>(LruMap.getSysPropMaxSize(PROPERTY_CACHE_WRAP_EXPRESSION_AS_JAVA_SOURCE_SIZE,2048));
 
     /**
      * 直接得到源文件编译之后的class

@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
  * @date 2025/9/17 9:56
  */
 public class SpringSlf4jFunctions {
-    protected static final LruMap<String, Logger> LOGGER_MAP = new LruMap<>(512);
+    protected static final LruMap<String, Logger> LOGGER_MAP = new LruMap<>(1024);
 
     public static String log_text(Object... objs) {
         String text = String.join(", ", Arrays.asList(objs).stream().map(e -> String.valueOf(e)).collect(Collectors.toList()));
