@@ -356,6 +356,9 @@ public class ObjectConvertor {
         if (TypeOf.instanceOf(value, sourceClass)) {
             return value;
         }
+        if(targetNumberType instanceof CharSequence){
+            return String.valueOf(value);
+        }
         try {
             // 直接强制转换，这里可能导致精度丢失
             Object ret = ObjectConvertor.tryConvertAsType(value, sourceClass);

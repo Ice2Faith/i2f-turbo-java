@@ -374,6 +374,12 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     BigDecimal ret = lv.negate();
                     return convertNumberType(ret, (Number) ret, (Number) ret);
                 }
+                Object num = ObjectConvertor.tryConvertAsType(value, BigDecimal.class);
+                if (num instanceof BigDecimal) {
+                    BigDecimal lv = (BigDecimal)num;
+                    BigDecimal ret = lv.negate();
+                    return ObjectConvertor.tryConvertAsType(ret,value.getClass());
+                }
             }
         }
         throw new IllegalArgumentException("un-support prefix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
@@ -388,9 +394,15 @@ public class DefaultTinyScriptResolver implements TinyScriptResolver {
                     BigDecimal ret = lv.divide(NUM_100, MATH_CONTEXT);
                     return convertNumberType(ret, (Number) ret, (Number) ret);
                 }
+                Object num = ObjectConvertor.tryConvertAsType(value, BigDecimal.class);
+                if(num instanceof BigDecimal){
+                    BigDecimal lv =(BigDecimal) num;
+                    BigDecimal ret = lv.divide(NUM_100, MATH_CONTEXT);
+                    return ObjectConvertor.tryConvertAsType(ret,value.getClass());
+                }
             }
         }
-        throw new IllegalArgumentException("un-support prefix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
+        throw new IllegalArgumentException("un-support suffix operator :" + operator + " for type(" + (value == null ? "null" : value.getClass()) + ")");
     }
 
     public static Object convertNumberType(BigDecimal num, Number left, Number right) {
